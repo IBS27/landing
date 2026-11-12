@@ -26,7 +26,7 @@ The goal is a faithful, working clone of desktop facebook.com (1440×900, light 
   - Font sizes: text-xs 12, text-sm 13, text-base 15, text-md 17, text-lg 20, text-xl 24, text-2xl 32. Facebook body text is 15px; meta text is 13px.
 - **Feature code** goes in `src/features/<area>/`, with the area's Convex functions in `convex/<area>.ts`. Route files in `src/routes` stay thin and import from features.
 - **Layout.** The root layout renders the fixed 56px TopNav (`pt-14` on content) and the ChatDock. Each page owns its own rails and sidebars.
-  - Home: left rail 360px, center 680px (feed column 590px), right rail 360px.
+  - Home: left rail 360px, center feed column 680px wide (measured on 1440px viewport: rail 0–348, feed 380–1060), right rail 360px (Contacts etc.).
   - Marketplace, Groups, Events, Friends, Watch and Gaming: 360px fixed white left sidebar with a page title and nav rows.
   - Messenger full page: no rails.
 - **Copy.** Use Facebook's real UI labels and copy. Seed content is fictional and set in Seattle; no real people's data.

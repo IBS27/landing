@@ -116,6 +116,8 @@ export default defineSchema({
     privacy,
     createdAt: v.number(),
     editedAt: v.optional(v.number()),
+    /** Page ads rendered with a "Sponsored" label instead of a timestamp. */
+    sponsored: v.optional(v.boolean()),
     reactionCount: v.number(),
     commentCount: v.number(),
     shareCount: v.number(),
@@ -153,6 +155,8 @@ export default defineSchema({
     authorId: v.id("users"),
     media: media,
     text: v.optional(v.string()),
+    /** Text stories: a background key (see posts' `background`) instead of a photo. */
+    background: v.optional(v.string()),
     createdAt: v.number(),
     expiresAt: v.number(),
   })
