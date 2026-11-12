@@ -1,10 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import type { Doc } from "../convex/_generated/dataModel";
 import { withinRadius } from "../convex/lib/listings";
-import { relatedListings } from "../convex/listings";
-import { thumbSource } from "../src/features/posts/thumb";
+import { thumbSource } from "../convex/lib/thumb";
+import { MAX_SCAN, relatedListings } from "../convex/listings";
+import { storyReplyAttachment } from "../convex/stories";
 import { sectionFor } from "../src/landing/shell/sections";
-import { fakeCtx, type Row } from "./fakeDb";
+import { fakeCtx, type ReadStats, type Row } from "./fakeDb";
 
 const id = (s: string) => s as never;
 
@@ -79,10 +80,23 @@ describe("relatedListings", () => {
     ]);
   });
 
-  test("stops at the limit", async () => {
-    const ctx = fakeCtx({ listings: rows() });
+  test("stops at the limit without reading further", async () => {
+    const stats: ReadStats = { docs: 0, ranges: 0 };
+    const ctx = fakeCtx({ listings: rows() }, stats);
     const out = await relatedListings(ctx, id("item"), 1, { ...BERKELEY, radiusMi: 5 });
     expect(ids(out)).toEqual(["berkeley-chair"]);
+    // The listing, then newest first: the sold chair, the Mountain View and SF chairs
+    // (outside the radius) and the Berkeley chair. Nothing after the page fills.
+    expect(stats.docs).toBe(5);
+  });
+
+  test("both scans share one read budget", async () => {
+    const far = Array.from({ length: MAX_SCAN + 1000 }, (_, i) => listing(`sf-${i}`, SF));
+    const stats: ReadStats = { docs: 0, ranges: 0 };
+    const ctx = fakeCtx({ listings: [listing("item", BERKELEY), ...far] }, stats);
+    const out = await relatedListings(ctx, id("item"), 24, { ...BERKELEY, radiusMi: 5 });
+    expect(out).toEqual([]);
+    expect(stats.docs).toBe(1 + MAX_SCAN);
   });
 });
 
@@ -109,6 +123,29 @@ describe("thumbSource", () => {
       kind: "video",
       src: "/seed/videos/ridge-hike-tall.mp4",
     });
+  });
+});
+
+describe("storyReplyAttachment", () => {
+  const story = (media: { url: string; kind: "image" | "video"; poster?: string }) => ({
+    _id: id("story1"),
+    media,
+    background: undefined,
+    text: undefined,
+  });
+  test("a video story saves its poster", () => {
+    const a = storyReplyAttachment(
+      story({ kind: "video", url: "/v/clip.mp4", poster: "/v/clip.jpg" }),
+    );
+    expect(a.url).toBe("/v/clip.jpg");
+  });
+  test("a video story without a poster keeps its video", () => {
+    expect(storyReplyAttachment(story({ kind: "video", url: "/v/clip.mp4" })).url).toBe(
+      "/v/clip.mp4",
+    );
+  });
+  test("a text story saves no media", () => {
+    expect(storyReplyAttachment(story({ kind: "image", url: "" })).url).toBeUndefined();
   });
 });
 

@@ -3,6 +3,7 @@ import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { blockedSet, isBlockedEitherWay } from "./lib/blocks";
 import { viewerMutation, viewerQuery } from "./lib/functions";
+import { thumbSource } from "./lib/thumb";
 import { areFriends, friendIds, getSummaries, type UserSummary, userSummary } from "./lib/users";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -315,16 +316,7 @@ export const reply = viewerMutation({
       author: { kind: "human" },
       status: "sent",
       text: body,
-      attachments: [
-        {
-          kind: "story",
-          storyId,
-          // The snapshot renders as an image, so a video story keeps its poster frame.
-          url: (story.media.kind === "video" ? story.media.poster : story.media.url) || undefined,
-          background: story.background,
-          text: story.text,
-        },
-      ],
+      attachments: [storyReplyAttachment(story)],
       createdAt: now,
     });
     await ctx.db.patch(conversationId, { lastMessageAt: now, lastMessageId: messageId });
@@ -378,3 +370,19 @@ export const setPrivacy = viewerMutation({
     });
   },
 });
+
+/**
+ * The story snapshot saved with a reply. A video story keeps its poster when it
+ * has one, and otherwise its video, which the attachment shows as a first frame.
+ */
+export function storyReplyAttachment(
+  story: Pick<Doc<"stories">, "_id" | "media" | "background" | "text">,
+) {
+  return {
+    kind: "story" as const,
+    storyId: story._id,
+    url: thumbSource(story.media).src || undefined,
+    background: story.background,
+    text: story.text,
+  };
+}

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/format";
-import { type ThumbMedia, thumbSource } from "./thumb";
+import { type ThumbMedia, thumbSource } from "../../../convex/lib/thumb";
 
 /**
  * A cover-fit media thumbnail that fills its box: the image, a video's poster,

@@ -190,7 +190,7 @@ async function pageSellers(ctx: QueryCtx, rows: Doc<"listings">[]) {
   return new Set([...map.values()].filter((u) => u.kind === "page").map((u) => u._id));
 }
 
-const MAX_SCAN = 2000;
+export const MAX_SCAN = 2000;
 
 /**
  * Today's picks, category pages and search: one query with filters, sort and a
@@ -391,13 +391,17 @@ export async function relatedListings(
   const l = await ctx.db.get(listingId);
   const out: Doc<"listings">[] = [];
   const seen = new Set<Id<"listings">>([listingId]);
+  // One read budget across both scans; stop as soon as the page is full.
+  let budget = MAX_SCAN;
   const fill = async (rows: AsyncIterable<Doc<"listings">>) => {
-    let scanned = 0;
+    if (out.length >= max || budget <= 0) return;
     for await (const r of rows) {
-      if (out.length >= max || ++scanned > MAX_SCAN) break;
-      if (seen.has(r._id) || r.status !== "active" || !withinRadius(r, nearBy)) continue;
-      seen.add(r._id);
-      out.push(r);
+      budget--;
+      if (!seen.has(r._id) && r.status === "active" && withinRadius(r, nearBy)) {
+        seen.add(r._id);
+        out.push(r);
+      }
+      if (out.length >= max || budget <= 0) break;
     }
   };
   if (l)
@@ -407,7 +411,7 @@ export async function relatedListings(
         .withIndex("by_category", (q) => q.eq("category", l.category))
         .order("desc"),
     );
-  if (out.length < max) await fill(ctx.db.query("listings").withIndex("by_created").order("desc"));
+  await fill(ctx.db.query("listings").withIndex("by_created").order("desc"));
   return out;
 }
 

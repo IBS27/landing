@@ -1,4 +1,4 @@
-/** Media as the thumbnail helpers need it (posts, stories, comments, messages). */
+/** Media as the thumbnail helpers need it (posts, stories, comments, messages). Pure, shared with the client. */
 export type ThumbMedia = { url: string; kind: "image" | "video"; poster?: string };
 
 /**

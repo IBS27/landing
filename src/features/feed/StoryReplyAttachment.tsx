@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { cn } from "@/lib/format";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { storyBackground, storyTextColor } from "./storyUtils";
@@ -16,6 +17,9 @@ export function StoryReplyAttachment({
   mine: boolean;
   senderFirstName: string;
 }) {
+  // The snapshot has no media kind: a video story without a poster saved its
+  // video URL, which fails as an image, so show its first frame instead.
+  const [asVideo, setAsVideo] = useState(false);
   return (
     <div className={cn("flex flex-col gap-1", mine ? "items-end" : "items-start")}>
       <span className="px-1 text-[12px] text-secondary">
@@ -27,8 +31,22 @@ export function StoryReplyAttachment({
         aria-label="View story"
         className="block h-[178px] w-[100px] overflow-hidden rounded-[18px] border border-[var(--media-inner-border)] bg-black"
       >
-        {story.url ? (
-          <img src={story.url} alt="" className="h-full w-full object-cover" />
+        {story.url && asVideo ? (
+          <video
+            src={story.url}
+            muted
+            playsInline
+            preload="metadata"
+            aria-hidden
+            className="h-full w-full object-cover"
+          />
+        ) : story.url ? (
+          <img
+            src={story.url}
+            alt=""
+            onError={() => setAsVideo(true)}
+            className="h-full w-full object-cover"
+          />
         ) : (
           <span
             className="flex h-full w-full items-center justify-center p-2 text-center font-semibold text-[11px] leading-[14px]"
