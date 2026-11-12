@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { groupParams } from "@/features/feed/links";
 import { CoverWash } from "@/features/posts/CoverWash";
+import { usePageTitle } from "@/layout/DocumentTitle";
 import { cn } from "@/lib/format";
 import {
   Menu,
@@ -46,12 +47,7 @@ export function GroupPage() {
     if (gid && member) void visit({ groupId: gid });
   }, [gid, member, visit]);
 
-  useEffect(() => {
-    if (group) document.title = `${group.name} | Facebook`;
-    return () => {
-      document.title = "Facebook";
-    };
-  }, [group]);
+  usePageTitle(group ? group.name : null);
 
   if (group === undefined) return <HeaderSkeleton />;
   if (group === null) return <GroupNotFound />;
@@ -121,7 +117,8 @@ function GroupHeader({ group }: { group: GroupView }) {
             )}
           </div>
           <div className="px-4 min-[1250px]:px-8">
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-[27px] pb-[25px]">
+            {/* Facebook bottom-aligns the action buttons with the privacy · members line. */}
+            <div className="flex flex-wrap items-end justify-between gap-4 pt-[27px] pb-[25px]">
               <div className="min-w-0">
                 <h1 className="font-bold text-[28px] text-primary leading-8">
                   <Link

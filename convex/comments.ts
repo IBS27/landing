@@ -90,6 +90,12 @@ export const list = viewerQuery({
         const author = users.get(c.authorId);
         if (!author || blockedThread(c)) return null;
         const reactions = await reactionSummary(ctx, "comment", c._id, ctx.viewer._id);
+        const downvote = await ctx.db
+          .query("commentDownvotes")
+          .withIndex("by_comment_user", (q) =>
+            q.eq("commentId", c._id).eq("userId", ctx.viewer._id),
+          )
+          .unique();
         const tag = tagOf(c);
         return {
           _id: c._id,
@@ -100,6 +106,7 @@ export const list = viewerQuery({
           author,
           replyTo: tag ? (users.get(tag) ?? null) : null,
           reactions,
+          viewerDownvoted: downvote !== null,
           canEdit: mine.has(c.authorId),
           canDelete: mine.has(c.authorId) || mine.has(post.authorId),
         };
@@ -300,5 +307,29 @@ export const remove = viewerMutation({
       await ctx.db.patch(post._id, {
         commentCount: Math.max(0, post.commentCount - doomed.length),
       });
+  },
+});
+
+/** Toggle the viewer's private downvote on a comment. */
+export const toggleDownvote = viewerMutation({
+  args: { commentId: v.id("comments") },
+  handler: async (ctx, { commentId }) => {
+    const existing = await ctx.db
+      .query("commentDownvotes")
+      .withIndex("by_comment_user", (q) =>
+        q.eq("commentId", commentId).eq("userId", ctx.viewer._id),
+      )
+      .unique();
+    if (existing) {
+      await ctx.db.delete(existing._id);
+      return false;
+    }
+    if (!(await ctx.db.get(commentId))) throw new ConvexError("Comment not found");
+    await ctx.db.insert("commentDownvotes", {
+      commentId,
+      userId: ctx.viewer._id,
+      createdAt: Date.now(),
+    });
+    return true;
   },
 });

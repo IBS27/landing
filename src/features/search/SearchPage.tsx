@@ -4,6 +4,7 @@ import { Fragment, type ReactNode, useCallback, useEffect, useRef, useState } fr
 import { useQ } from "@/app/viewer";
 import { FollowLink, PostCard, PostSkeleton } from "@/features/posts";
 import { NoMuteHint } from "@/features/posts/VideoPlayer";
+import { usePageTitle } from "@/layout/DocumentTitle";
 import { compactCount } from "@/lib/format";
 import { Card } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -305,12 +306,7 @@ export function SearchPage({ tab, params }: { tab: SearchTab; params: SearchPara
     tab === "top" && q ? { q, limit: 3, media: "video" } : "skip",
   );
 
-  useEffect(() => {
-    document.title = q ? `${q} - Search | Facebook` : "Search | Facebook";
-    return () => {
-      document.title = "Facebook";
-    };
-  }, [q]);
+  usePageTitle(q ? `${q} - Search` : "Search");
 
   const loading = (types && q && !entities) || (posts.enabled && !posts.posts);
   const entityCount = entities

@@ -4,6 +4,7 @@ import { ChatDock } from "@/features/messenger/ChatDock";
 import { PhotoTheaterHost } from "@/features/posts/photoTheater";
 import { VideoTheaterHost } from "@/features/posts/VideoTheater";
 import { FacebookLogo } from "@/icons";
+import { DocumentTitle } from "@/layout/DocumentTitle";
 import { PageUnavailable } from "@/layout/PageUnavailable";
 import { TopNav } from "@/layout/TopNav";
 
@@ -31,9 +32,16 @@ function RootLayout() {
         </p>
       </div>
     );
-  if (bare) return <Outlet />;
+  if (bare)
+    return (
+      <>
+        <DocumentTitle />
+        <Outlet />
+      </>
+    );
   return (
     <>
+      <DocumentTitle />
       <TopNav />
       <div className="min-h-screen pt-14">
         <Outlet />

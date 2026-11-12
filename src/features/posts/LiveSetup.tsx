@@ -78,6 +78,12 @@ type SoftwareStatus = "starting" | "ready" | "ended" | "blocked" | "unsupported"
 /** Device labels that are virtual cameras from streaming software. */
 const VIRTUAL_CAMERA = /virtual|obs|streamlabs|xsplit|ndi|vmix|manycam|camtwist|ecamm|mmhmm/i;
 
+/** Encoder output must not be mirrored; only a real selfie-style webcam is. */
+function isVirtualCamera(stream: MediaStream | null) {
+  const label = stream?.getVideoTracks()[0]?.label ?? "";
+  return VIRTUAL_CAMERA.test(label);
+}
+
 const isNotFound = (e: unknown) =>
   e instanceof DOMException && (e.name === "NotFoundError" || e.name === "OverconstrainedError");
 
@@ -467,7 +473,11 @@ export function LiveProducer() {
             >
               <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-black shadow-base">
                 {status === "ready" && stream ? (
-                  <Preview stream={stream} mirror={source === "webcam"} onPlaying={setPreviewing} />
+                  <Preview
+                    stream={stream}
+                    mirror={source === "webcam" && !isVirtualCamera(stream)}
+                    onPlaying={setPreviewing}
+                  />
                 ) : source === "software" && status !== "blocked" && status !== "unsupported" ? (
                   <SoftwareWaiting />
                 ) : (

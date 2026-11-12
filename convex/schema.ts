@@ -216,6 +216,13 @@ export default defineSchema({
     .index("by_post", ["postId", "createdAt"])
     .index("by_parent", ["parentId", "createdAt"]),
 
+  /** Private comment downvotes (only the voter sees their own). */
+  commentDownvotes: defineTable({
+    commentId: v.id("comments"),
+    userId: v.id("users"),
+    createdAt: v.number(),
+  }).index("by_comment_user", ["commentId", "userId"]),
+
   reactions: defineTable({
     targetType: reactionTarget,
     targetId: v.string(),

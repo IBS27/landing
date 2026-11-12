@@ -386,7 +386,9 @@ function CommentRow({
 }) {
   const rx = useOptimisticReaction("comment", comment._id, comment.reactions);
   const hover = useReactionHover();
-  const [downvoted, setDownvoted] = useState(false);
+  const [downvoted, setDownvoted] = useState(comment.viewerDownvoted);
+  useEffect(() => setDownvoted(comment.viewerDownvoted), [comment.viewerDownvoted]);
+  const toggleDownvote = useM(api.comments.toggleDownvote);
   const [editing, setEditing] = useState(false);
   const remove = useM(api.comments.remove);
   const meta = rx.current ? reactionMeta(rx.current) : null;
@@ -510,7 +512,12 @@ function CommentRow({
           <button
             type="button"
             aria-label="Downvote comment"
-            onClick={() => setDownvoted((d) => !d)}
+            onClick={() => {
+              setDownvoted((d) => !d);
+              void toggleDownvote({ commentId: comment._id }).catch(() =>
+                setDownvoted(comment.viewerDownvoted),
+              );
+            }}
             className={cn(
               "flex h-7 w-7 items-center justify-center rounded-md hover:bg-hover",
               downvoted ? "text-fb" : "text-icon-secondary",
