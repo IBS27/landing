@@ -234,6 +234,7 @@ export const aiFallbackReason = v.union(
   v.literal("invalid_output"),
   v.literal("model_error"),
   v.literal("refusal"),
+  v.literal("timeout"),
 );
 export type AiFallbackReason = Infer<typeof aiFallbackReason>;
 

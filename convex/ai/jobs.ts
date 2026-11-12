@@ -30,21 +30,25 @@ import { aiJobStatus } from "../validators";
  *   });
  */
 
-/** A queued or running job older than this is treated as dead (actions stop at 10 minutes). */
+/**
+ * A job still queued or running this long after it was created has died
+ * (actions stop at 10 minutes, and scheduled actions aren't retried). It is
+ * marked failed so the UI stops waiting, and a new `startJob` replaces it.
+ */
 const STALE_MS = 15 * 60_000;
 
 /**
  * Schedules `action` with `{ ...args, jobId }`, unless a live job with the same
- * kind and key already exists, in which case that job's id is returned.
+ * kind, key and owner already exists, in which case that job's id is returned.
  */
-export async function startJob<Args extends Record<string, unknown>>(
+export async function startJob<A extends { jobId: Id<"aiJobs"> }>(
   ctx: MutationCtx,
   opts: {
     kind: string;
     key: string;
     userId?: Id<"users">;
-    action: FunctionReference<"action", "internal", Args & { jobId: Id<"aiJobs"> }>;
-    args: Args;
+    action: FunctionReference<"action", "internal", A>;
+    args: Omit<A, "jobId">;
   },
 ): Promise<Id<"aiJobs">> {
   const now = Date.now();
@@ -73,9 +77,10 @@ export async function startJob<Args extends Record<string, unknown>>(
     status: "queued",
     createdAt: now,
   });
-  // `opts.action`'s args are checked at the call site; the generic can't be checked here.
+  // The args are type-checked against the action at the call site; the generic can't be here.
   const action = opts.action as FunctionReference<"action", "internal">;
   await ctx.scheduler.runAfter(0, action, { ...opts.args, jobId });
+  await ctx.scheduler.runAfter(STALE_MS, internal.ai.jobs.expire, { jobId });
   return jobId;
 }
 
@@ -116,6 +121,16 @@ export const update = internalMutation({
       ...(progress && { progress }),
       ...(error !== undefined && { error }),
     });
+  },
+});
+
+/** Marks a job failed if it never finished (its action crashed or timed out). */
+export const expire = internalMutation({
+  args: { jobId: v.id("aiJobs") },
+  handler: async (ctx, { jobId }) => {
+    const job = await ctx.db.get(jobId);
+    if (job && (job.status === "queued" || job.status === "running"))
+      await ctx.db.patch(jobId, { status: "failed", error: "Timed out", finishedAt: Date.now() });
   },
 });
 

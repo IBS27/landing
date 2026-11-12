@@ -69,7 +69,7 @@ function literalValue(value: unknown): Json {
  */
 export function checkValue(validator: GenericValidator, value: unknown) {
   const errors: string[] = [];
-  const ids: { path: string; id: string }[] = [];
+  const ids: { path: string; id: string; table: string }[] = [];
 
   const walk = (val: GenericValidator, x: unknown, path: string): boolean => {
     const fail = (expected: string) => {
@@ -81,7 +81,7 @@ export function checkValue(validator: GenericValidator, value: unknown) {
         return typeof x === "string" || fail("a string");
       case "id":
         if (typeof x !== "string") return fail(`a ${val.tableName} ID`);
-        ids.push({ path, id: x });
+        ids.push({ path, id: x, table: val.tableName });
         return true;
       case "float64":
         return (typeof x === "number" && Number.isFinite(x)) || fail("a number");
@@ -130,7 +130,7 @@ export function checkValue(validator: GenericValidator, value: unknown) {
         const rebase = (p: string) => path + p.slice(1);
         const match = tries.find((t) => t.errors.length === 0);
         if (match) {
-          ids.push(...match.ids.map((i) => ({ path: rebase(i.path), id: i.id })));
+          ids.push(...match.ids.map((i) => ({ ...i, path: rebase(i.path) })));
           return true;
         }
         const closest = tries.reduce((a, b) => (b.errors.length < a.errors.length ? b : a));

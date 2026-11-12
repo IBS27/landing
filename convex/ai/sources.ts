@@ -5,7 +5,10 @@
  * `convex/ai/` depends on the shape.
  */
 export type AgentSource = {
-  /** Stable, unique key the model cites, e.g. `post:<id>`. */
+  /**
+   * Stable, unique key the model cites, as `<kind>:<id>` (`post:<id>`). The
+   * part after the colon also counts as an input id, so output may link to it.
+   */
   key: string;
   /** What the source is: "post", "comment", "event", "listing", "url"... */
   kind: string;

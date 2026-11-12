@@ -50,6 +50,8 @@ export type AgentTask<I extends Json, V extends GenericValidator> = {
   cacheTtlMs?: number;
   /** Model attempts before falling back, counting retries after rejected output. Default 3. */
   maxAttempts?: number;
+  /** Bump when `cites`, `check` or `fallback` change in a way that should drop cached results. */
+  version?: number;
 };
 
 export type AgentResult<O> = {
@@ -62,13 +64,14 @@ export type AgentResult<O> = {
 };
 
 const DAY = 24 * 60 * 60_000;
-/** Total model time per run, retries included, so a run ends well inside Convex's 10-minute action limit. */
+/** Default deadline for a run's model calls, retries included, inside Convex's 10-minute action limit. */
 const BUDGET_MS = 8 * 60_000;
 
 /** Declares a task. Throws at load time if the output validator can't be a model schema. */
 export function defineTask<I extends Json, V extends GenericValidator>(
   task: AgentTask<I, V>,
 ): AgentTask<I, V> {
+  if (task.output.kind !== "object") throw new Error(`${task.name}: output must be a v.object()`);
   toJsonSchema(task.output);
   return task;
 }
@@ -97,7 +100,7 @@ function userPrompt(input: Json, sources: AgentSource[]) {
 
 const fingerprints = new WeakMap<object, Promise<string>>();
 
-/** Changes whenever the task's prompt, schema or model changes, so stale cache entries miss. */
+/** Changes whenever the task's prompt, schema, effort, version or model changes, so stale cache entries miss. */
 function fingerprint(task: AgentTask<Json, GenericValidator>) {
   let fp = fingerprints.get(task);
   if (!fp) {
@@ -107,6 +110,8 @@ function fingerprint(task: AgentTask<Json, GenericValidator>) {
         preamble: preamble(task.agent),
         instructions: task.instructions,
         schema: toJsonSchema(task.output),
+        effort: task.effort ?? "medium",
+        version: task.version ?? 0,
       }),
     );
     fingerprints.set(task, fp);
@@ -118,11 +123,18 @@ function fingerprint(task: AgentTask<Json, GenericValidator>) {
 export async function runAgent<I extends Json, V extends GenericValidator>(
   ctx: ActionCtx,
   task: AgentTask<I, V>,
-  args: { input: I; sources: AgentSource[]; jobId?: Id<"aiJobs"> },
+  args: {
+    input: I;
+    sources: AgentSource[];
+    jobId?: Id<"aiJobs">;
+    /** When to stop calling the model (ms since epoch). Default: 8 minutes from now. Pass one shared deadline when an action makes several runs. */
+    deadline?: number;
+  },
 ): Promise<AgentResult<Infer<V>>> {
   type O = Infer<V>;
   const { input, sources, jobId } = args;
   const started = Date.now();
+  const deadline = args.deadline ?? started + BUDGET_MS;
   const generic = task as unknown as AgentTask<Json, GenericValidator>;
   const inputHash = await sha256(
     canonicalJson({ task: task.name, fp: await fingerprint(generic), input, sources }),
@@ -162,7 +174,12 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
 
   const fallback = async (reason: AiFallbackReason): Promise<AgentResult<O>> => {
     const output = task.fallback(input, sources);
-    const cited = resolve(task.cites(output));
+    let cited: AgentSource[] = [];
+    try {
+      cited = resolve(task.cites(output));
+    } catch (error) {
+      errors.push(`cites() threw on the fallback output: ${message(error)}`);
+    }
     const runId = await log("fallback", output, cited.map(sourceKey), reason);
     return { output, via: "fallback", fallbackReason: reason, cited, runId };
   };
@@ -178,8 +195,12 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
       return { output: output as O, via: "cache", cited: resolve(hit.cited), runId: hit._id };
   }
 
-  const allowedIds = collectStrings(input);
-  for (const key of byKey.keys()) allowedIds.add(key);
+  const grounding = {
+    ids: allowedIds(input, sources),
+    sources: byKey,
+    wrongTable: (ids: { id: string; table: string }[]) =>
+      ids.length ? ctx.runQuery(internal.ai.runs.wrongTableIds, { ids }) : Promise.resolve([]),
+  };
   const schema = toJsonSchema(task.output);
   const messages: Anthropic.Beta.BetaMessageParam[] = [
     { role: "user", content: userPrompt(input, sources) },
@@ -187,14 +208,14 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
 
   const maxAttempts = task.maxAttempts ?? 3;
   while (attempts < maxAttempts) {
-    const remaining = started + BUDGET_MS - Date.now();
+    const remaining = deadline - Date.now();
     if (remaining < 30_000) {
       errors.push("Out of time for another attempt");
-      break;
+      return fallback("timeout");
     }
     attempts++;
     let response: Anthropic.Beta.BetaMessage;
-    // Abort covers the SDK's own retries too, keeping the whole run inside the budget.
+    // Abort covers the SDK's own retries too, keeping the whole run inside the deadline.
     const abort = new AbortController();
     const timer = setTimeout(() => abort.abort(), remaining);
     try {
@@ -219,22 +240,18 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
         )
         .finalMessage();
     } catch (error) {
-      errors.push(`Attempt ${attempts}: ${error instanceof Error ? error.message : String(error)}`);
-      return fallback("model_error");
+      errors.push(`Attempt ${attempts}: ${message(error)}`);
+      return fallback(abort.signal.aborted ? "timeout" : "model_error");
     } finally {
       clearTimeout(timer);
     }
 
     model = response.model;
-    const turn: Usage = {
-      inputTokens: response.usage.input_tokens,
-      outputTokens: response.usage.output_tokens,
-      cacheReadTokens: response.usage.cache_read_input_tokens ?? 0,
-      cacheWriteTokens: response.usage.cache_creation_input_tokens ?? 0,
-    };
-    for (const k of Object.keys(usage) as (keyof Usage)[]) usage[k] += turn[k];
-    const turnCost = costUsd(response.model, turn);
-    cost = cost === undefined || turnCost === undefined ? undefined : cost + turnCost;
+    for (const turn of usageByModel(response)) {
+      for (const k of Object.keys(usage) as (keyof Usage)[]) usage[k] += turn.usage[k];
+      const turnCost = costUsd(turn.model, turn.usage);
+      cost = cost === undefined || turnCost === undefined ? undefined : cost + turnCost;
+    }
 
     if (response.stop_reason === "refusal") {
       errors.push(
@@ -244,7 +261,7 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
     }
 
     const text = response.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
-    const verdict = review(task, text, input, allowedIds, byKey, response.stop_reason);
+    const verdict = await review(task, text, input, grounding, response.stop_reason);
     if (verdict.ok) {
       const runId = await log("model", verdict.output, verdict.cited);
       return { output: verdict.output, via: "model", cited: resolve(verdict.cited), runId };
@@ -252,7 +269,7 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
 
     errors.push(`Attempt ${attempts}: ${verdict.problems.join("; ")}`);
     messages.push(
-      { role: "assistant", content: response.content },
+      { role: "assistant", content: replayable(response.content) },
       {
         role: "user",
         content: `Your output was rejected:\n${verdict.problems.map((p) => `- ${p}`).join("\n")}\n\nReply with the whole corrected JSON.`,
@@ -262,15 +279,36 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
   return fallback("invalid_output");
 }
 
-/** Validates one model reply: JSON, schema, grounded IDs, cited sources, task rules. */
-export function review<I extends Json, V extends GenericValidator>(
+/**
+ * Strings an output's `v.id()` fields may hold: anything in the input, plus
+ * source keys and the record id inside a `<kind>:<id>` key.
+ */
+function allowedIds(input: Json, sources: AgentSource[]) {
+  const ids = collectStrings(input);
+  for (const s of sources) {
+    const key = sourceKey(s);
+    ids.add(key);
+    const colon = key.indexOf(":");
+    if (colon > 0) ids.add(key.slice(colon + 1));
+  }
+  return ids;
+}
+
+type Grounding = {
+  ids: Set<string>;
+  sources: Map<string, AgentSource>;
+  /** The ids that aren't ids of the table their field expects. */
+  wrongTable: (ids: { id: string; table: string }[]) => Promise<string[]>;
+};
+
+/** Validates one model reply: JSON, schema, grounded IDs of the right table, cited sources, task rules. */
+export async function review<I extends Json, V extends GenericValidator>(
   task: AgentTask<I, V>,
   text: string,
   input: I,
-  allowedIds: Set<string>,
-  sources: Map<string, AgentSource>,
+  grounding: Grounding,
   stopReason: string | null,
-): { ok: true; output: Infer<V>; cited: string[] } | { ok: false; problems: string[] } {
+): Promise<{ ok: true; output: Infer<V>; cited: string[] } | { ok: false; problems: string[] }> {
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
@@ -290,11 +328,62 @@ export function review<I extends Json, V extends GenericValidator>(
   const output = parsed as Infer<V>;
 
   const problems: string[] = [];
-  for (const { path, id } of ids)
-    if (!allowedIds.has(id)) problems.push(`${path}: ID "${id}" is not in the input`);
-  const cited = task.cites(output);
-  for (const key of new Set(cited))
-    if (!sources.has(key)) problems.push(`cites "${key}", which is not one of the sources`);
-  problems.push(...(task.check?.(output, input) ?? []));
+  const known = ids.filter(({ path, id }) => {
+    if (grounding.ids.has(id)) return true;
+    problems.push(`${path}: ID "${id}" is not in the input`);
+    return false;
+  });
+  const wrong = new Set(await grounding.wrongTable(known.map(({ id, table }) => ({ id, table }))));
+  for (const { path, id, table } of known)
+    if (wrong.has(id)) problems.push(`${path}: "${id}" is not a ${table} ID`);
+
+  // Task code runs on model output; a throw is a rejected answer, not a crash.
+  let cited: string[] = [];
+  try {
+    cited = task.cites(output);
+    for (const key of new Set(cited))
+      if (!grounding.sources.has(key))
+        problems.push(`cites "${key}", which is not one of the sources`);
+    problems.push(...(task.check?.(output, input) ?? []));
+  } catch (error) {
+    problems.push(`The output failed the task's checks: ${message(error)}`);
+  }
   return problems.length ? { ok: false, problems } : { ok: true, output, cited };
+}
+
+/**
+ * The response as it can be sent back for a retry. After a server-side
+ * fallback, only text and the `fallback` marker may be echoed from before the
+ * final `fallback` block; everything after it echoes as-is.
+ */
+function replayable(content: Anthropic.Beta.BetaContentBlock[]) {
+  const boundary = content.findLastIndex((b) => b.type === "fallback");
+  return content.filter((b, i) => i >= boundary || b.type === "text" || b.type === "fallback");
+}
+
+/** Token usage per model for one response. `usage.iterations` covers every attempt, including declined ones. */
+function usageByModel(response: Anthropic.Beta.BetaMessage) {
+  const toUsage = (u: {
+    input_tokens: number;
+    output_tokens: number;
+    cache_read_input_tokens?: number | null;
+    cache_creation_input_tokens?: number | null;
+  }): Usage => ({
+    inputTokens: u.input_tokens,
+    outputTokens: u.output_tokens,
+    cacheReadTokens: u.cache_read_input_tokens ?? 0,
+    cacheWriteTokens: u.cache_creation_input_tokens ?? 0,
+  });
+  const iterations = (response.usage.iterations ?? []).flatMap((it) =>
+    it.type === "message" || it.type === "fallback_message"
+      ? [{ model: it.model ?? MODEL, usage: toUsage(it) }]
+      : [],
+  );
+  return iterations.length
+    ? iterations
+    : [{ model: response.model, usage: toUsage(response.usage) }];
+}
+
+function message(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
 }

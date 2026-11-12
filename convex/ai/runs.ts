@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import type { TableNames } from "../_generated/dataModel";
 import { internalMutation, internalQuery } from "../_generated/server";
 import { aiRun } from "../validators";
 
@@ -19,4 +20,13 @@ export const cached = internalQuery({
 export const log = internalMutation({
   args: aiRun.fields,
   handler: (ctx, run) => ctx.db.insert("aiRuns", run),
+});
+
+/** The ids that aren't ids of the given table (a model can copy an id into the wrong field). */
+export const wrongTableIds = internalQuery({
+  args: { ids: v.array(v.object({ id: v.string(), table: v.string() })) },
+  handler: (ctx, { ids }) =>
+    ids
+      .filter(({ id, table }) => ctx.db.normalizeId(table as TableNames, id) === null)
+      .map(({ id }) => id),
 });
