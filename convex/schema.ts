@@ -82,6 +82,8 @@ export default defineSchema({
     storyAudienceIds: v.optional(v.array(v.id("users"))),
     /** People whose stories the user muted ("Mute <name>" in the story viewer). */
     mutedStoryAuthorIds: v.optional(v.array(v.id("users"))),
+    /** Contacts → Options → "Turn off active status": others see the user as offline. */
+    activeStatusOff: v.optional(v.boolean()),
   })
     .index("by_username", ["username"])
     .index("by_persona", ["isPersona"])
@@ -480,4 +482,34 @@ export default defineSchema({
     reason: v.union(v.literal("hidden"), v.literal("reported")),
     createdAt: v.number(),
   }).index("by_user_post", ["userId", "postId"]),
+
+  /** "Turn on notifications for this post": `userId` hears about new comments on `postId`. */
+  postSubscriptions: defineTable({
+    userId: v.id("users"),
+    postId: v.id("posts"),
+    createdAt: v.number(),
+  })
+    .index("by_post", ["postId"])
+    .index("by_user_post", ["userId", "postId"]),
+
+  /** Content reports (posts, messages) filed by `userId`, with the reason they picked. */
+  reports: defineTable({
+    userId: v.id("users"),
+    targetType: v.union(v.literal("post"), v.literal("message")),
+    targetId: v.string(),
+    reason: v.string(),
+    createdAt: v.number(),
+  }).index("by_user_target", ["userId", "targetType", "targetId"]),
+
+  /** Ads Manager campaigns: drafts until "Review and publish". */
+  adCampaigns: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    objective: v.string(),
+    dailyBudget: v.number(),
+    on: v.boolean(),
+    status: v.union(v.literal("draft"), v.literal("published")),
+    createdAt: v.number(),
+    publishedAt: v.optional(v.number()),
+  }).index("by_user", ["userId", "createdAt"]),
 });

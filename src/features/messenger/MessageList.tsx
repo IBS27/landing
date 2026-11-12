@@ -7,6 +7,7 @@ import { useViewerPaginated } from "@/features/posts";
 import { cn, price } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger, Modal, Tooltip } from "@/ui/overlays";
 import { Avatar, Button, Spinner } from "@/ui/primitives";
+import { MESSAGE_REPORT_REASONS, ReportDialog } from "@/ui/ReportDialog";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { formatCallDuration } from "../../../convex/lib/callFormat";
@@ -713,7 +714,9 @@ function MoreButton({
   onOpenChange: (o: boolean) => void;
 }) {
   const unsend = useM(api.messenger.unsend);
+  const report = useM(api.reports.create);
   const [confirm, setConfirm] = useState(false);
+  const [reporting, setReporting] = useState(false);
   return (
     <>
       <Menu onOpenChange={onOpenChange} modal={false}>
@@ -736,7 +739,7 @@ function MoreButton({
               onSelect={() => void navigator.clipboard?.writeText(m.text ?? "")}
             />
           )}
-          {!mine && !m.text && <MenuItem label="Report" onSelect={() => {}} />}
+          {!mine && <MenuItem label="Report" onSelect={() => setReporting(true)} />}
         </MenuContent>
       </Menu>
       <Modal
@@ -768,6 +771,14 @@ function MoreButton({
           </div>
         </div>
       </Modal>
+      {reporting && (
+        <ReportDialog
+          noun="message"
+          reasons={MESSAGE_REPORT_REASONS}
+          onSubmit={(reason) => report({ targetType: "message", targetId: m._id, reason })}
+          onClose={() => setReporting(false)}
+        />
+      )}
     </>
   );
 }

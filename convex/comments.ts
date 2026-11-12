@@ -222,6 +222,24 @@ export const add = viewerMutation({
       commentId,
       groupId: post.groupId,
     });
+    // Everyone who turned on notifications for this post (and wasn't notified above).
+    const subs = await ctx.db
+      .query("postSubscriptions")
+      .withIndex("by_post", (q) => q.eq("postId", postId))
+      .collect();
+    const postAuthor = subs.length ? await ctx.db.get(post.authorId) : null;
+    for (const s of subs) {
+      if (s.userId === post.authorId || s.userId === answered?.authorId) continue;
+      await notify(ctx, {
+        userId: s.userId,
+        actorId: authorId,
+        kind: "comment",
+        text: `commented on ${postAuthor ? `${postAuthor.name}'s` : "a"} post: "${snippet}"`,
+        postId,
+        commentId,
+        groupId: post.groupId,
+      });
+    }
     return commentId;
   },
 });

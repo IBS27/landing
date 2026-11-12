@@ -10,7 +10,6 @@ import {
   Languages,
   List,
   LockKeyhole,
-  Megaphone,
   Minimize2,
   Moon,
   Newspaper,
@@ -21,9 +20,11 @@ import { type ThemeSetting, useTheme } from "@/app/theme";
 import { useViewerContext } from "@/app/viewer";
 import { AdChoicesGlyph, FOOTER_LINKS } from "@/features/misc/AppRail";
 import { GearFilled } from "@/features/misc/icons";
+import { FooterLink } from "@/features/policies/FooterLink";
 import { cn } from "@/lib/format";
-import { Modal, PopoverPanel } from "@/ui/overlays";
-import { Avatar, Button } from "@/ui/primitives";
+import { PopoverPanel } from "@/ui/overlays";
+import { Avatar } from "@/ui/primitives";
+import { ReportProblemDialog } from "@/ui/ReportDialog";
 import { api } from "../../convex/_generated/api";
 
 type View = "main" | "profiles" | "settings" | "help" | "display";
@@ -173,16 +174,15 @@ function SubHeader({ title, onBack }: { title: string; onBack: () => void }) {
   );
 }
 
-function Footer() {
+function Footer({ onNavigate }: { onNavigate: () => void }) {
   return (
     <p className="mt-3 text-[13px] text-secondary leading-4">
       {FOOTER_LINKS.map((l, i) => (
         <span key={l}>
           {i > 0 && " · "}
-          <button type="button" className="font-semibold hover:underline">
-            {l}
+          <FooterLink label={l} className="font-semibold hover:underline" onNavigate={onNavigate}>
             {l === "Ad Choices" && <AdChoicesGlyph />}
-          </button>
+          </FooterLink>
         </span>
       ))}
     </p>
@@ -299,7 +299,7 @@ export function AccountMenu() {
                 />
                 <Row icon={<LogoutFilled />} label="Log out" onClick={() => setView("profiles")} />
               </div>
-              <Footer />
+              <Footer onNavigate={close} />
             </>
           )}
 
@@ -444,7 +444,7 @@ export function AccountMenu() {
           )}
         </div>
       </PopoverPanel>
-      {reporting && <ReportDialog onClose={() => setReporting(false)} />}
+      {reporting && <ReportProblemDialog onClose={() => setReporting(false)} />}
     </>
   );
 }
@@ -496,72 +496,5 @@ function DisplayGroup({
         </div>
       </div>
     </div>
-  );
-}
-
-function ReportDialog({ onClose }: { onClose: () => void }) {
-  const [kind, setKind] = useState<"improve" | "broken" | null>(null);
-  const [text, setText] = useState("");
-  const [sent, setSent] = useState(false);
-  return (
-    <Modal
-      open
-      onOpenChange={(o) => !o && onClose()}
-      title="Report a problem"
-      width={500}
-      onBack={kind && !sent ? () => setKind(null) : undefined}
-    >
-      {sent ? (
-        <div className="flex flex-col items-center px-6 py-8 text-center">
-          <p className="font-bold text-[20px] text-primary">Thanks for your feedback</p>
-          <p className="mt-1 text-[15px] text-secondary">
-            We use reports like this to help improve Facebook.
-          </p>
-          <Button variant="primary" className="mt-5" onClick={onClose}>
-            Close
-          </Button>
-        </div>
-      ) : kind === null ? (
-        <div className="p-2">
-          <Row
-            icon={<Megaphone size={20} />}
-            label="Help us improve Facebook"
-            sub="Tell us how we can make Facebook better."
-            chevron
-            onClick={() => setKind("improve")}
-          />
-          <Row
-            icon={<CircleAlert size={20} />}
-            label="Something went wrong"
-            sub="Let us know about a broken feature."
-            chevron
-            onClick={() => setKind("broken")}
-          />
-        </div>
-      ) : (
-        <form
-          className="flex flex-col gap-3 p-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (text.trim()) setSent(true);
-          }}
-        >
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={
-              kind === "broken"
-                ? "Briefly explain what happened or what's not working."
-                : "Tell us what you'd like to see improved."
-            }
-            aria-label="Details"
-            className="min-h-[120px] resize-none rounded-md border border-divider bg-card p-3 text-[15px] text-primary outline-none placeholder:text-placeholder focus:border-fb"
-          />
-          <Button type="submit" variant="primary" block disabled={!text.trim()}>
-            Send
-          </Button>
-        </form>
-      )}
-    </Modal>
   );
 }

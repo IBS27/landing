@@ -19,7 +19,9 @@ export function userSummary(u: Doc<"users">) {
 }
 export type UserSummary = ReturnType<typeof userSummary>;
 
+/** Online now; never for someone who turned off active status. */
 export function isOnline(u: Doc<"users">) {
+  if (u.activeStatusOff) return false;
   return Boolean(u.alwaysOnline) || Date.now() - u.lastActiveAt < ONLINE_WINDOW_MS;
 }
 

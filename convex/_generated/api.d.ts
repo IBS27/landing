@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as ads from "../ads.js";
 import type * as calls from "../calls.js";
 import type * as comments from "../comments.js";
 import type * as conversations from "../conversations.js";
@@ -32,6 +33,7 @@ import type * as pages from "../pages.js";
 import type * as posts from "../posts.js";
 import type * as profiles from "../profiles.js";
 import type * as reactions from "../reactions.js";
+import type * as reports from "../reports.js";
 import type * as saved from "../saved.js";
 import type * as search from "../search.js";
 import type * as seed from "../seed.js";
@@ -71,6 +73,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  ads: typeof ads;
   calls: typeof calls;
   comments: typeof comments;
   conversations: typeof conversations;
@@ -95,6 +98,7 @@ declare const fullApi: ApiFromModules<{
   posts: typeof posts;
   profiles: typeof profiles;
   reactions: typeof reactions;
+  reports: typeof reports;
   saved: typeof saved;
   search: typeof search;
   seed: typeof seed;

@@ -63,9 +63,11 @@ import { Route as MarketplaceNotificationsRouteImport } from './routes/marketpla
 import { Route as MarketplaceSavedRouteImport } from './routes/marketplace/saved'
 import { Route as MarketplaceSearchRouteImport } from './routes/marketplace/search'
 import { Route as MarketplaceStatusRouteImport } from './routes/marketplace/status'
+import { Route as MeSplatRouteImport } from './routes/me_.$'
 import { Route as MessagesIndexRouteImport } from './routes/messages/index'
 import { Route as MessagesNewRouteImport } from './routes/messages/new'
 import { Route as PhotoPostIdRouteImport } from './routes/photo/$postId'
+import { Route as PoliciesPageRouteImport } from './routes/policies/$page'
 import { Route as ReelReelIdRouteImport } from './routes/reel_.$reelId'
 import { Route as SearchTabRouteImport } from './routes/search/$tab'
 import { Route as StoriesStoryIdRouteImport } from './routes/stories/$storyId'
@@ -362,6 +364,11 @@ const MarketplaceStatusRoute = MarketplaceStatusRouteImport.update({
   path: '/marketplace/status',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MeSplatRoute = MeSplatRouteImport.update({
+  id: '/me_/$',
+  path: '/me/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MessagesIndexRoute = MessagesIndexRouteImport.update({
   id: '/messages/',
   path: '/messages/',
@@ -375,6 +382,11 @@ const MessagesNewRoute = MessagesNewRouteImport.update({
 const PhotoPostIdRoute = PhotoPostIdRouteImport.update({
   id: '/photo/$postId',
   path: '/photo/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliciesPageRoute = PoliciesPageRouteImport.update({
+  id: '/policies/$page',
+  path: '/policies/$page',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReelReelIdRoute = ReelReelIdRouteImport.update({
@@ -551,8 +563,10 @@ export interface FileRoutesByFullPath {
   '/marketplace/saved': typeof MarketplaceSavedRoute
   '/marketplace/search': typeof MarketplaceSearchRoute
   '/marketplace/status': typeof MarketplaceStatusRoute
+  '/me/$': typeof MeSplatRoute
   '/messages/new': typeof MessagesNewRoute
   '/photo/$postId': typeof PhotoPostIdRoute
+  '/policies/$page': typeof PoliciesPageRoute
   '/reel/$reelId': typeof ReelReelIdRoute
   '/search/$tab': typeof SearchTabRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
@@ -632,8 +646,10 @@ export interface FileRoutesByTo {
   '/marketplace/saved': typeof MarketplaceSavedRoute
   '/marketplace/search': typeof MarketplaceSearchRoute
   '/marketplace/status': typeof MarketplaceStatusRoute
+  '/me/$': typeof MeSplatRoute
   '/messages/new': typeof MessagesNewRoute
   '/photo/$postId': typeof PhotoPostIdRoute
+  '/policies/$page': typeof PoliciesPageRoute
   '/reel/$reelId': typeof ReelReelIdRoute
   '/search/$tab': typeof SearchTabRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
@@ -716,8 +732,10 @@ export interface FileRoutesById {
   '/marketplace/saved': typeof MarketplaceSavedRoute
   '/marketplace/search': typeof MarketplaceSearchRoute
   '/marketplace/status': typeof MarketplaceStatusRoute
+  '/me_/$': typeof MeSplatRoute
   '/messages/new': typeof MessagesNewRoute
   '/photo/$postId': typeof PhotoPostIdRoute
+  '/policies/$page': typeof PoliciesPageRoute
   '/reel_/$reelId': typeof ReelReelIdRoute
   '/search/$tab': typeof SearchTabRoute
   '/stories/$storyId': typeof StoriesStoryIdRoute
@@ -801,8 +819,10 @@ export interface FileRouteTypes {
     | '/marketplace/saved'
     | '/marketplace/search'
     | '/marketplace/status'
+    | '/me/$'
     | '/messages/new'
     | '/photo/$postId'
+    | '/policies/$page'
     | '/reel/$reelId'
     | '/search/$tab'
     | '/stories/$storyId'
@@ -882,8 +902,10 @@ export interface FileRouteTypes {
     | '/marketplace/saved'
     | '/marketplace/search'
     | '/marketplace/status'
+    | '/me/$'
     | '/messages/new'
     | '/photo/$postId'
+    | '/policies/$page'
     | '/reel/$reelId'
     | '/search/$tab'
     | '/stories/$storyId'
@@ -965,8 +987,10 @@ export interface FileRouteTypes {
     | '/marketplace/saved'
     | '/marketplace/search'
     | '/marketplace/status'
+    | '/me_/$'
     | '/messages/new'
     | '/photo/$postId'
+    | '/policies/$page'
     | '/reel_/$reelId'
     | '/search/$tab'
     | '/stories/$storyId'
@@ -1043,8 +1067,10 @@ export interface RootRouteChildren {
   MarketplaceSavedRoute: typeof MarketplaceSavedRoute
   MarketplaceSearchRoute: typeof MarketplaceSearchRoute
   MarketplaceStatusRoute: typeof MarketplaceStatusRoute
+  MeSplatRoute: typeof MeSplatRoute
   MessagesNewRoute: typeof MessagesNewRoute
   PhotoPostIdRoute: typeof PhotoPostIdRoute
+  PoliciesPageRoute: typeof PoliciesPageRoute
   ReelReelIdRoute: typeof ReelReelIdRoute
   SearchTabRoute: typeof SearchTabRoute
   StoriesStoryIdRoute: typeof StoriesStoryIdRoute
@@ -1449,6 +1475,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketplaceStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/me_/$': {
+      id: '/me_/$'
+      path: '/me/$'
+      fullPath: '/me/$'
+      preLoaderRoute: typeof MeSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/messages/': {
       id: '/messages/'
       path: '/messages'
@@ -1468,6 +1501,13 @@ declare module '@tanstack/react-router' {
       path: '/photo/$postId'
       fullPath: '/photo/$postId'
       preLoaderRoute: typeof PhotoPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/policies/$page': {
+      id: '/policies/$page'
+      path: '/policies/$page'
+      fullPath: '/policies/$page'
+      preLoaderRoute: typeof PoliciesPageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reel_/$reelId': {
@@ -1734,8 +1774,10 @@ const rootRouteChildren: RootRouteChildren = {
   MarketplaceSavedRoute: MarketplaceSavedRoute,
   MarketplaceSearchRoute: MarketplaceSearchRoute,
   MarketplaceStatusRoute: MarketplaceStatusRoute,
+  MeSplatRoute: MeSplatRoute,
   MessagesNewRoute: MessagesNewRoute,
   PhotoPostIdRoute: PhotoPostIdRoute,
+  PoliciesPageRoute: PoliciesPageRoute,
   ReelReelIdRoute: ReelReelIdRoute,
   SearchTabRoute: SearchTabRoute,
   StoriesStoryIdRoute: StoriesStoryIdRoute,

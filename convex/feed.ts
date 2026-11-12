@@ -5,7 +5,7 @@ import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { viewerQuery } from "./lib/functions";
 import { type Audience, canView, enrichPosts, groupChip, loadAudience } from "./lib/posts";
-import { getSummaries, type UserSummary, userSummary } from "./lib/users";
+import { getSummaries, isOnline, type UserSummary, userSummary } from "./lib/users";
 import schema from "./schema";
 
 type Source = { authors: Id<"users">[]; groups: Id<"groups">[]; ownWall: boolean };
@@ -149,8 +149,9 @@ export const rails = viewerQuery({
       (u): u is Doc<"users"> => u !== null,
     );
     const people = friendDocs.filter((u) => (u.kind ?? "person") === "person");
+    // With active status off, the viewer doesn't see when contacts are active either.
     const contacts = people
-      .map(userSummary)
+      .map((u) => ({ ...userSummary(u), online: !ctx.viewer.activeStatusOff && isOnline(u) }))
       .sort((x, y) => Number(y.online) - Number(x.online) || x.name.localeCompare(y.name));
     const birthdays = people.filter((u) => u.birthday === today).map(userSummary);
 

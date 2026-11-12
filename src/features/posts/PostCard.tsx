@@ -1,5 +1,15 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Bell, CircleSlash, Clock, Flag, Link2, Pencil, Trash2, Users } from "lucide-react";
+import {
+  Bell,
+  BellOff,
+  CircleSlash,
+  Clock,
+  Flag,
+  Link2,
+  Pencil,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useM } from "@/app/viewer";
 import { cn, fullTimestamp, postTime } from "@/lib/format";
@@ -13,6 +23,7 @@ import {
   Tooltip,
 } from "@/ui/overlays";
 import { Avatar, Button, Card, IconButton, VerifiedBadge } from "@/ui/primitives";
+import { POST_REPORT_REASONS, ReportDialog } from "@/ui/ReportDialog";
 import { api } from "../../../convex/_generated/api";
 import { ActionBar } from "./ActionBar";
 import { AdStrip, AttachmentCard, adCallToAction } from "./Attachments";
@@ -322,7 +333,10 @@ function ViewCount({ post }: { post: PostView }) {
 function PostMenu({ post, onHide }: { post: PostView; onHide?: () => void }) {
   const toggleSave = useM(api.saved.toggle);
   const remove = useM(api.posts.remove);
+  const setSubscribed = useM(api.posts.setSubscribed);
+  const report = useM(api.reports.create);
   const [editing, setEditing] = useState(false);
+  const [reporting, setReporting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const navigate = useNavigate();
 
@@ -370,7 +384,17 @@ function PostMenu({ post, onHide }: { post: PostView; onHide?: () => void }) {
           )}
           {!post.canEdit && (
             <>
-              <MenuItem icon={<Bell size={20} />} label="Turn on notifications for this post" />
+              <MenuItem
+                icon={post.viewerSubscribed ? <BellOff size={20} /> : <Bell size={20} />}
+                label={
+                  post.viewerSubscribed
+                    ? "Turn off notifications for this post"
+                    : "Turn on notifications for this post"
+                }
+                onSelect={() =>
+                  void setSubscribed({ postId: post._id, on: !post.viewerSubscribed })
+                }
+              />
               {onHide && (
                 <MenuItem
                   icon={<CircleSlash size={20} />}
@@ -399,12 +423,33 @@ function PostMenu({ post, onHide }: { post: PostView; onHide?: () => void }) {
                 icon={<Flag size={20} />}
                 label="Report post"
                 sub="We won't let them know who reported this."
+                onSelect={() => setReporting(true)}
               />
             </>
           )}
         </MenuContent>
       </Menu>
       {editing && <CreatePostModal open onOpenChange={setEditing} editing={post} />}
+      {reporting && (
+        <ReportDialog
+          noun="post"
+          reasons={POST_REPORT_REASONS}
+          onSubmit={(reason) => report({ targetType: "post", targetId: post._id, reason })}
+          onClose={() => setReporting(false)}
+          followUps={
+            onHide
+              ? [
+                  {
+                    icon: <CircleSlash size={20} />,
+                    label: "Hide post",
+                    sub: "See fewer posts like this.",
+                    onClick: onHide,
+                  },
+                ]
+              : []
+          }
+        />
+      )}
       {confirmDelete && (
         <Modal open onOpenChange={setConfirmDelete} title="Move to your trash?" width={548}>
           <div className="p-4">

@@ -1,11 +1,11 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
-import { MoreHorizontal, Plus, Search } from "lucide-react";
+import { MessageCircleQuestion, MoreHorizontal, Plus, Search, X } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useChatDock } from "@/app/chat-dock";
-import { useM } from "@/app/viewer";
-import { Tooltip } from "@/ui/overlays";
-import { Avatar, IconButton } from "@/ui/primitives";
+import { useM, useViewer } from "@/app/viewer";
+import { Menu, MenuContent, MenuItem, MenuTrigger, Modal, Tooltip } from "@/ui/overlays";
+import { Avatar, Button, IconButton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 
@@ -58,6 +58,15 @@ export function RightRail({ data }: { data: RailsData | undefined }) {
   };
 
   const birthdays = data?.birthdays ?? [];
+  // Contacts → "Search by name or group" filters contacts and group chats as you type.
+  const [query, setQuery] = useState<string | null>(null);
+  const term = query?.trim().toLowerCase() ?? "";
+  const matches = (name: string) => name.toLowerCase().includes(term);
+  const contacts = (data?.contacts ?? []).filter((c) => matches(c.name));
+  const groupChats = (data?.groupChats ?? []).filter(
+    (g) => matches(g.title) || g.members.some((m) => matches(m.name)),
+  );
+  const noResults = term !== "" && data && contacts.length === 0 && groupChats.length === 0;
 
   return (
     <aside
@@ -118,26 +127,51 @@ export function RightRail({ data }: { data: RailsData | undefined }) {
         </>
       )}
 
-      <Heading
-        actions={
-          <>
-            <Tooltip content="Search by name or group" side="top">
-              <IconButton label="Search by name or group" size={32} variant="ghost">
-                <Search size={16} strokeWidth={2.5} className="text-icon-secondary" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip content="Options" side="top">
-              <IconButton label="Options" size={32} variant="ghost">
-                <MoreHorizontal size={18} strokeWidth={2.5} className="text-icon-secondary" />
-              </IconButton>
-            </Tooltip>
-          </>
-        }
-      >
-        Contacts
-      </Heading>
+      {query === null ? (
+        <Heading
+          actions={
+            <>
+              <Tooltip content="Search by name or group" side="top">
+                <IconButton
+                  label="Search by name or group"
+                  size={32}
+                  variant="ghost"
+                  onClick={() => setQuery("")}
+                >
+                  <Search size={16} strokeWidth={2.5} className="text-icon-secondary" />
+                </IconButton>
+              </Tooltip>
+              <ContactsOptions />
+            </>
+          }
+        >
+          Contacts
+        </Heading>
+      ) : (
+        <div className="flex h-10 items-center gap-1 px-2 pt-1">
+          <label className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-full bg-input px-3">
+            <Search size={16} strokeWidth={2.5} className="shrink-0 text-icon-secondary" />
+            <input
+              // biome-ignore lint/a11y/noAutofocus: opened by the search button
+              autoFocus
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Escape" && setQuery(null)}
+              placeholder="Search by name or group"
+              aria-label="Search by name or group"
+              className="min-w-0 flex-1 bg-transparent text-[15px] text-primary outline-none placeholder:text-placeholder"
+            />
+          </label>
+          <IconButton label="Close search" size={32} variant="ghost" onClick={() => setQuery(null)}>
+            <X size={18} strokeWidth={2.5} className="text-icon-secondary" />
+          </IconButton>
+        </div>
+      )}
+      {noResults && (
+        <p className="px-2 py-6 text-center text-[15px] text-secondary">No results found</p>
+      )}
       <ul className="flex flex-col">
-        {(data?.contacts ?? []).map((c) => (
+        {contacts.map((c) => (
           <li key={c._id}>
             <button
               type="button"
@@ -161,12 +195,12 @@ export function RightRail({ data }: { data: RailsData | undefined }) {
           ))}
       </ul>
 
-      {data && (
+      {data && (term === "" || groupChats.length > 0) && (
         <>
           <SectionDivider />
           <Heading>Group conversations</Heading>
           <ul className="flex flex-col">
-            {data.groupChats.map((g) => (
+            {groupChats.map((g) => (
               <li key={g._id}>
                 <button type="button" onClick={() => openChat(g._id)} className={ROW}>
                   <GroupChatAvatar photo={g.photo} members={g.members} />
@@ -176,7 +210,7 @@ export function RightRail({ data }: { data: RailsData | undefined }) {
                 </button>
               </li>
             ))}
-            <li>
+            <li hidden={term !== ""}>
               <Link to="/messages" className={ROW}>
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-btn text-icon">
                   <Plus size={20} strokeWidth={2.5} />
@@ -190,6 +224,80 @@ export function RightRail({ data }: { data: RailsData | undefined }) {
         </>
       )}
     </aside>
+  );
+}
+
+/** Contacts "…" menu: active status and message requests. */
+function ContactsOptions() {
+  const viewer = useViewer();
+  const setActiveStatus = useM(api.users.setActiveStatus);
+  const navigate = useNavigate();
+  const [confirmOff, setConfirmOff] = useState(false);
+  const off = viewer.activeStatusOff === true;
+  return (
+    <>
+      <Menu modal={false}>
+        <Tooltip content="Options" side="top">
+          <MenuTrigger asChild>
+            <IconButton label="Options" size={32} variant="ghost">
+              <MoreHorizontal size={18} strokeWidth={2.5} className="text-icon-secondary" />
+            </IconButton>
+          </MenuTrigger>
+        </Tooltip>
+        <MenuContent width={300}>
+          <MenuItem
+            icon={<ActiveStatusIcon />}
+            label={off ? "Turn on active status" : "Turn off active status"}
+            onSelect={() => (off ? void setActiveStatus({ on: true }) : setConfirmOff(true))}
+          />
+          <MenuItem
+            icon={<MessageCircleQuestion size={20} />}
+            label="Message requests"
+            onSelect={() => void navigate({ to: "/messages", search: { folder: "requests" } })}
+          />
+        </MenuContent>
+      </Menu>
+      <Modal
+        open={confirmOff}
+        onOpenChange={setConfirmOff}
+        title="Turn off active status"
+        width={548}
+      >
+        <div className="p-4">
+          <p className="text-[15px] text-primary leading-5">
+            Your friends and contacts won't see when you're active or recently active on this
+            profile. You'll still be able to use Messenger, but you won't see when your friends are
+            active or recently active.
+          </p>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="link" className="px-3" onClick={() => setConfirmOff(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              className="px-8"
+              onClick={() => {
+                setConfirmOff(false);
+                void setActiveStatus({ on: false });
+              }}
+            >
+              Turn off
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </>
+  );
+}
+
+/** Messenger's active-status glyph: a person with a green dot. */
+function ActiveStatusIcon() {
+  return (
+    <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor" aria-hidden>
+      <circle cx="8.5" cy="6.5" r="3.5" />
+      <path d="M1.5 17c0-3.6 3.1-6 7-6 1.4 0 2.7.3 3.8.9A4.5 4.5 0 0 0 12 17Z" />
+      <circle cx="15.5" cy="14.5" r="3" className="fill-online" />
+    </svg>
   );
 }
 

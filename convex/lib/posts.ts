@@ -78,6 +78,8 @@ export type PostView = {
   /** A Page ad: the header reads "Ad" and the link strip gets a call-to-action button. */
   sponsored: boolean;
   viewerSaved: boolean;
+  /** "Turn on notifications for this post" is on for the viewer. */
+  viewerSubscribed: boolean;
   /** The viewer follows (is friends with) the author; drives the "· Follow" link. */
   viewerFollowsAuthor: boolean;
   canEdit: boolean;
@@ -209,7 +211,7 @@ export async function enrichPost(
   if (a.blocked.has(post.authorId)) return null;
   const author = await getSummary(ctx, post.authorId);
   if (!author) return null;
-  const [group, timelineUser, taggedMap, attachments, reactions, viewerSaved, shared] =
+  const [group, timelineUser, taggedMap, attachments, reactions, viewerSaved, sub, shared] =
     await Promise.all([
       post.groupId ? groupChip(ctx, post.groupId) : null,
       post.timelineUserId && post.timelineUserId !== post.authorId
@@ -219,6 +221,10 @@ export async function enrichPost(
       Promise.all(post.attachments.map((att) => resolveAttachment(ctx, att))),
       reactionSummary(ctx, "post", post._id, a.viewerId),
       isSaved(ctx, a.viewerId, "post", post._id),
+      ctx.db
+        .query("postSubscriptions")
+        .withIndex("by_user_post", (q) => q.eq("userId", a.viewerId).eq("postId", post._id))
+        .first(),
       resolveShared(ctx, post, a, depth),
     ]);
   const sample = reactions.sampleUserId ? await getSummary(ctx, reactions.sampleUserId) : null;
@@ -250,6 +256,7 @@ export async function enrichPost(
     shareCount: post.shareCount,
     sponsored: post.sponsored === true,
     viewerSaved,
+    viewerSubscribed: sub !== null,
     viewerFollowsAuthor: isAuthor || a.friends.has(post.authorId),
     canEdit: isAuthor,
     canDelete:

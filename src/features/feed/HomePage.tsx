@@ -12,6 +12,8 @@ import { StoriesTray } from "./StoriesTray";
  * post, and another ad after every 6th.
  */
 const REELS_AFTER = 2;
+/** Where the shelf moves after "Show fewer reels". */
+const REELS_FEWER_AFTER = 10;
 const AD_EVERY = 6;
 
 /** Home: left shortcuts rail, 680px feed column, right contacts rail. */
@@ -31,6 +33,7 @@ export function HomePage() {
           <PostFeed
             source={{ kind: "home" }}
             interleave={(i) => {
+              if (i === REELS_FEWER_AFTER) return <ReelsShelf placement="fewer" />;
               if (i === REELS_AFTER)
                 return (
                   <>

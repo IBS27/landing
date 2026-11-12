@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useM, useQ, useViewer } from "@/app/viewer";
+import { FOOTER_LINKS } from "@/features/misc/AppRail";
+import { FooterLink } from "@/features/policies/FooterLink";
 import { PostCard, PostSkeleton } from "@/features/posts";
 import { FriendsAudienceIcon, GlobeIcon } from "@/features/posts/icons";
 import { useDominantColor } from "@/features/posts/PhotoGrid";
@@ -133,7 +135,13 @@ function EventBody({ event, tab }: { event: EventView; tab: Tab }) {
           )}
           <GuestsCard event={event} onSeeAll={(s) => setDialog({ guests: s })} />
           <p className="px-1 text-[13px] text-secondary leading-4">
-            Privacy · Terms · Advertising · Ad Choices · Cookies · More · Meta © 2026
+            {FOOTER_LINKS.map((l) => (
+              <span key={l}>
+                <FooterLink label={l} />
+                {" · "}
+              </span>
+            ))}
+            Meta © 2026
           </p>
         </div>
       </div>

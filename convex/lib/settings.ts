@@ -147,6 +147,8 @@ export const PREFS: Record<string, Pref> = {
   "reels-audience": pref(["Public", "Friends"]),
   "reels-remix": pref(ON_OFF),
   "reels-download": pref(ON_OFF),
+  /** Home's Reels shelf menu ("Show fewer reels" moves it down the Feed, "Hide all reels" removes it). */
+  "reels-in-feed": pref(["Show", "Show fewer", "Hidden"]),
   "who-can-follow": pref(["Public", "Friends"]),
   "public-comments": pref(["Public", "Friends of friends", "Friends"]),
   "public-profile-info": pref(["Public", "Friends of friends", "Friends"]),

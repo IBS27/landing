@@ -36,3 +36,11 @@ export const heartbeat = viewerMutation({
     await ctx.db.patch(ctx.viewer._id, { lastActiveAt: Date.now() });
   },
 });
+
+/** Contacts → Options → "Turn off / on active status". */
+export const setActiveStatus = viewerMutation({
+  args: { on: v.boolean() },
+  handler: async (ctx, { on }) => {
+    await ctx.db.patch(ctx.viewer._id, { activeStatusOff: on ? undefined : true });
+  },
+});

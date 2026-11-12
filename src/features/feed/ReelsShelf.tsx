@@ -1,11 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
-import { ChevronLeft, ChevronRight, EyeOff, Flag } from "lucide-react";
+import { ChevronLeft, ChevronRight, CircleAlert, CircleMinus, EyeOff, Flag } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { DotsIcon } from "@/features/posts/icons";
-import { Menu, MenuContent, MenuItem, MenuTrigger, Modal } from "@/ui/overlays";
+import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger, Modal } from "@/ui/overlays";
 import { Button, Card, IconButton } from "@/ui/primitives";
+import { ReportProblemDialog } from "@/ui/ReportDialog";
 import { api } from "../../../convex/_generated/api";
 
 const TILE = 192;
@@ -20,11 +21,78 @@ function ReelsGlyph({ size = 20 }: { size?: number }) {
   );
 }
 
+type ReelsInFeed = "Show" | "Show fewer" | "Hidden";
+
 /**
  * The "Reels" card Home slots into the feed: a horizontally scrolling row of
  * 9:16 tiles with previous/next arrows. Each tile opens that reel.
+ *
+ * The header menu's "Show fewer reels" moves the shelf to its `fewer` slot
+ * further down the Feed and "Hide all reels" removes it (persisted per viewer);
+ * either leaves an Undo bar where the shelf was.
  */
-export function ReelsShelf() {
+export function ReelsShelf({ placement = "default" }: { placement?: "default" | "fewer" }) {
+  const choice = useQ(api.settings.get, {})?.prefs["reels-in-feed"] as ReelsInFeed | undefined;
+  const setPref = useM(api.settings.setPref);
+  /** Set when the viewer changed the choice from this shelf just now: show the Undo bar. */
+  const [changed, setChanged] = useState<{ to: ReelsInFeed; from: ReelsInFeed } | null>(null);
+  const choose = (value: ReelsInFeed, undo = false) => {
+    setChanged(undo || value === "Show" ? null : { to: value, from: choice ?? "Show" });
+    void setPref({ key: "reels-in-feed", value });
+  };
+  const [reportingProblem, setReportingProblem] = useState(false);
+  const wanted = choice === "Show" ? "default" : choice === "Show fewer" ? "fewer" : null;
+
+  if (changed && choice === changed.to)
+    return <ShelfUndoBar choice={changed.to} onUndo={() => choose(changed.from, true)} />;
+  if (wanted !== placement) return null;
+  return (
+    <>
+      <Shelf
+        onChoose={choose}
+        fewer={choice === "Show fewer"}
+        onReportProblem={() => setReportingProblem(true)}
+      />
+      {reportingProblem && <ReportProblemDialog onClose={() => setReportingProblem(false)} />}
+    </>
+  );
+}
+
+/** What's left of the shelf after "Show fewer reels" / "Hide all reels". */
+function ShelfUndoBar({ choice, onUndo }: { choice: ReelsInFeed; onUndo: () => void }) {
+  return (
+    <Card className="flex items-center gap-3 rounded-xl px-4 py-3">
+      {choice === "Hidden" ? (
+        <EyeOff size={24} className="shrink-0 text-icon" />
+      ) : (
+        <CircleMinus size={24} className="shrink-0 text-icon" />
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold text-[15px] text-primary leading-5">
+          {choice === "Hidden" ? "Reels hidden" : "You'll see fewer reels"}
+        </p>
+        <p className="text-[13px] text-secondary leading-4">
+          {choice === "Hidden"
+            ? "You won't see Reels in your Feed."
+            : "Reels will show up less often in your Feed."}
+        </p>
+      </div>
+      <Button variant="secondary" className="px-4" onClick={onUndo}>
+        Undo
+      </Button>
+    </Card>
+  );
+}
+
+function Shelf({
+  onChoose,
+  fewer,
+  onReportProblem,
+}: {
+  onChoose: (v: ReelsInFeed) => void;
+  fewer: boolean;
+  onReportProblem: () => void;
+}) {
   const live = useQ(api.media.reelsShelf, {});
   const hide = useM(api.media.hideReel);
   /** Reels hidden from this shelf just now: they stay as an "Undo" placeholder in place. */
@@ -70,9 +138,42 @@ export function ReelsShelf() {
           <span className="font-semibold text-[15px] leading-5">Reels</span>
         </Link>
         <span className="flex-1" />
-        <IconButton label="More options for Reels" variant="ghost">
-          <DotsIcon className="text-icon-secondary" />
-        </IconButton>
+        <Menu modal={false}>
+          <MenuTrigger asChild>
+            <IconButton label="More options for Reels" variant="ghost">
+              <DotsIcon className="text-icon-secondary" />
+            </IconButton>
+          </MenuTrigger>
+          <MenuContent width={320}>
+            {fewer ? (
+              <MenuItem
+                icon={<ReelsGlyph />}
+                label="Show more reels"
+                sub="Reels will show up higher in your Feed."
+                onSelect={() => onChoose("Show")}
+              />
+            ) : (
+              <MenuItem
+                icon={<CircleMinus size={20} />}
+                label="Show fewer reels"
+                sub="Reels will show up less often in your Feed."
+                onSelect={() => onChoose("Show fewer")}
+              />
+            )}
+            <MenuItem
+              icon={<EyeOff size={20} />}
+              label="Hide all reels"
+              sub="Stop seeing Reels in your Feed."
+              onSelect={() => onChoose("Hidden")}
+            />
+            <MenuSeparator />
+            <MenuItem
+              icon={<CircleAlert size={20} />}
+              label="Report a problem"
+              onSelect={onReportProblem}
+            />
+          </MenuContent>
+        </Menu>
       </div>
       <div
         ref={row}

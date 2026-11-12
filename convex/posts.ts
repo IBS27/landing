@@ -256,6 +256,11 @@ export const remove = viewerMutation({
       await ctx.db.delete(c._id);
     }
     await deleteReactions(ctx, "post", postId);
+    const subs = await ctx.db
+      .query("postSubscriptions")
+      .withIndex("by_post", (q) => q.eq("postId", postId))
+      .collect();
+    for (const s of subs) await ctx.db.delete(s._id);
     // Saved rows pointing here are skipped by `saved:list` once the post is gone.
     if (post.sharedPostId) {
       const original = await ctx.db.get(post.sharedPostId);
@@ -303,5 +308,24 @@ export const friendPicker = viewerQuery({
       .filter((u) => u !== null && (u.kind ?? "person") === "person")
       .map((u) => ({ _id: u!._id, name: u!.name, avatar: u!.avatar }))
       .sort((a, b) => a.name.localeCompare(b.name));
+  },
+});
+
+/** "Turn on / off notifications for this post". */
+export const setSubscribed = viewerMutation({
+  args: { postId: v.id("posts"), on: v.boolean() },
+  handler: async (ctx, { postId, on }) => {
+    const userId = ctx.viewer._id;
+    const row = await ctx.db
+      .query("postSubscriptions")
+      .withIndex("by_user_post", (q) => q.eq("userId", userId).eq("postId", postId))
+      .first();
+    if (!on) {
+      if (row) await ctx.db.delete(row._id);
+      return;
+    }
+    if (row) return;
+    if (!(await ctx.db.get(postId))) throw new ConvexError("Post not found");
+    await ctx.db.insert("postSubscriptions", { userId, postId, createdAt: Date.now() });
   },
 });

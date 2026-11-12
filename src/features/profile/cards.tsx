@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { type ComponentType, type ReactNode, useEffect, useRef, useState } from "react";
 import { useQ } from "@/app/viewer";
+import { FOOTER_LINKS } from "@/features/misc/AppRail";
+import { FooterLink } from "@/features/policies/FooterLink";
 import { CreateReelDialog } from "@/features/watch/CreateReel";
 import { cn, compactCount, plural } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/ui/overlays";
@@ -581,14 +583,11 @@ export function FriendsPreviewCard({
 }
 
 export function FooterLinks() {
-  const links = ["Privacy", "Terms", "Advertising", "Ad Choices", "Cookies", "More"];
   return (
     <p className="px-0 text-[13px] text-secondary leading-4">
-      {links.map((l) => (
+      {FOOTER_LINKS.map((l) => (
         <span key={l}>
-          <Link to="/settings" className="font-semibold hover:underline">
-            {l}
-          </Link>
+          <FooterLink label={l} className="font-semibold hover:underline" />
           {" · "}
         </span>
       ))}

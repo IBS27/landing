@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { useViewer } from "@/app/viewer";
+import { FooterLink } from "@/features/policies/FooterLink";
 import { PRIMARY_COUNT, SHORTCUTS } from "@/layout/shortcuts";
 import { Avatar } from "@/ui/primitives";
 import { groupParams } from "./links";
@@ -103,9 +104,7 @@ export function LeftRail({ groups }: { groups: RailsData["groups"] | undefined }
       <footer className="mt-auto px-4 pt-6 pb-4 font-semibold text-[13px] text-secondary leading-4">
         {["Privacy", "Terms", "Advertising", "Ad Choices", "Cookies", "More"].map((l) => (
           <span key={l}>
-            <button type="button" className="hover:underline">
-              {l}
-            </button>
+            <FooterLink label={l} />
             {" · "}
           </span>
         ))}

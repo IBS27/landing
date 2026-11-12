@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { useViewer } from "@/app/viewer";
+import { FooterLink } from "@/features/policies/FooterLink";
 import { PRIMARY_COUNT, SHORTCUTS } from "@/layout/shortcuts";
 import { Avatar } from "@/ui/primitives";
 import { AdChoicesGlyph, FOOTER_LINKS } from "./AppRail";
@@ -55,10 +56,9 @@ export function BookmarksPage() {
         {FOOTER_LINKS.map((l, i) => (
           <span key={l}>
             {i > 0 && <span className="px-1">·</span>}
-            <button type="button" className="font-semibold hover:underline">
-              {l}
+            <FooterLink label={l} className="font-semibold hover:underline">
               {l === "Ad Choices" && <AdChoicesGlyph />}
-            </button>
+            </FooterLink>
           </span>
         ))}
       </footer>
