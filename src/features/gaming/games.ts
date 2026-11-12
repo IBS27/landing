@@ -1,10 +1,27 @@
 /**
  * The Gaming catalog. Titles and art are original (no real game trademarks):
  * key art lives in public/seed/games (painted by scripts/game-art), and each
- * game plays one of the small built-in engines.
+ * game plays the engine in ./engines that matches its genre.
  */
 
-export type Engine = "merge" | "memory" | "tap";
+export type Engine =
+  | "klondike"
+  | "tripeaks"
+  | "blackjack"
+  | "match3"
+  | "merge"
+  | "arrows"
+  | "maze"
+  | "jigsaw"
+  | "word"
+  | "snake"
+  | "breakout"
+  | "hockey"
+  | "defense"
+  | "checkers"
+  | "arena"
+  | "bubbles"
+  | "tower";
 
 export type Game = {
   id: string;
@@ -52,7 +69,7 @@ export const GAMES: Game[] = [
     from: "#2f8f4e",
     to: "#9fd36b",
     band: "#bb1708",
-    engine: "memory",
+    engine: "klondike",
   }),
   g({
     id: "orchard-friends",
@@ -64,7 +81,7 @@ export const GAMES: Game[] = [
     from: "#7ac943",
     to: "#ffd25e",
     band: "#7a8a12",
-    engine: "merge",
+    engine: "match3",
   }),
   g({
     id: "tower-legends",
@@ -76,12 +93,12 @@ export const GAMES: Game[] = [
     from: "#3a4a6b",
     to: "#9cc0e8",
     band: "#1e7b1e",
-    engine: "tap",
+    engine: "tower",
   }),
   g({
     id: "harbor-tycoon",
     name: "Harbor Tycoon",
-    tagline: "Build a bustling port on the Sound",
+    tagline: "Merge boats into a bustling port on the Sound",
     category: "Simulation",
     players: 92_000,
     emoji: "⚓",
@@ -94,25 +111,25 @@ export const GAMES: Game[] = [
     id: "brick-burst",
     name: "Brick Burst",
     tagline: "Bounce, break, repeat",
-    category: "Puzzle",
+    category: "Arcade",
     players: 120_000,
     emoji: "🧱",
     from: "#2a1f7a",
     to: "#f2486e",
     band: "#3b2a9e",
-    engine: "tap",
+    engine: "breakout",
   }),
   g({
     id: "gem-cascade",
     name: "Gem Cascade Classic",
     tagline: "Line up three sparkling gems",
-    category: "Puzzle",
+    category: "Match 3",
     players: 210_000,
     emoji: "💎",
     from: "#0d8a8a",
     to: "#f7c948",
     band: "#0d6e6e",
-    engine: "merge",
+    engine: "match3",
   }),
   g({
     id: "manor-makeover",
@@ -136,19 +153,19 @@ export const GAMES: Game[] = [
     from: "#1c2340",
     to: "#4b5c9e",
     band: "#1c2340",
-    engine: "memory",
+    engine: "klondike",
   }),
   g({
     id: "candy-valley",
     name: "Sugar Valley",
     tagline: "Sweet puzzles in a candy-colored land",
-    category: "Puzzle",
+    category: "Match 3",
     players: 180_000,
     emoji: "🍬",
     from: "#f25ca2",
     to: "#ffd1e8",
     band: "#c2367a",
-    engine: "merge",
+    engine: "match3",
   }),
   g({
     id: "maze-slide",
@@ -160,7 +177,7 @@ export const GAMES: Game[] = [
     from: "#2b2b2b",
     to: "#7b61ff",
     band: "#4a3ac2",
-    engine: "merge",
+    engine: "arrows",
   }),
   g({
     id: "island-village",
@@ -184,19 +201,19 @@ export const GAMES: Game[] = [
     from: "#4f9d69",
     to: "#f4e1a1",
     band: "#3a7a50",
-    engine: "memory",
+    engine: "tripeaks",
   }),
   g({
     id: "solitaire-social",
     name: "Solitaire Social",
-    tagline: "Play patience with your friends",
+    tagline: "Classic Klondike, one card at a time",
     category: "Solitaire",
     players: 59_000,
     emoji: "♠️",
     from: "#156b3a",
     to: "#47b36b",
     band: "#0f5a30",
-    engine: "memory",
+    engine: "klondike",
   }),
   g({
     id: "jungle-trek",
@@ -208,12 +225,12 @@ export const GAMES: Game[] = [
     from: "#2e7d32",
     to: "#c5e1a5",
     band: "#1b5e20",
-    engine: "tap",
+    engine: "maze",
   }),
   g({
     id: "rail-city",
     name: "Rail City",
-    tagline: "Lay track and connect the frontier",
+    tagline: "Merge track and trains to connect the frontier",
     category: "Simulation",
     players: 44_000,
     emoji: "🚂",
@@ -232,7 +249,7 @@ export const GAMES: Game[] = [
     from: "#5c7cfa",
     to: "#d0ebff",
     band: "#3b5bdb",
-    engine: "memory",
+    engine: "jigsaw",
   }),
   g({
     id: "word-garden",
@@ -244,7 +261,7 @@ export const GAMES: Game[] = [
     from: "#f59f00",
     to: "#fff3bf",
     band: "#d9480f",
-    engine: "memory",
+    engine: "word",
   }),
   g({
     id: "puck-rush",
@@ -256,7 +273,7 @@ export const GAMES: Game[] = [
     from: "#1864ab",
     to: "#a5d8ff",
     band: "#1864ab",
-    engine: "tap",
+    engine: "hockey",
   }),
   g({
     id: "castle-clash",
@@ -268,19 +285,19 @@ export const GAMES: Game[] = [
     from: "#5f3dc4",
     to: "#b197fc",
     band: "#4527a0",
-    engine: "tap",
+    engine: "defense",
   }),
   g({
     id: "checkers-club",
     name: "Checkers Club",
-    tagline: "Quick matches against friends",
+    tagline: "Quick matches, kings and all",
     category: "Board",
     players: 33_000,
     emoji: "🔴",
     from: "#c92a2a",
     to: "#ffa8a8",
     band: "#a51111",
-    engine: "memory",
+    engine: "checkers",
   }),
   g({
     id: "arena-blitz",
@@ -292,7 +309,7 @@ export const GAMES: Game[] = [
     from: "#343a40",
     to: "#fa5252",
     band: "#862e2e",
-    engine: "tap",
+    engine: "arena",
   }),
   g({
     id: "bubble-pop",
@@ -304,7 +321,7 @@ export const GAMES: Game[] = [
     from: "#4dabf7",
     to: "#e599f7",
     band: "#1c7ed6",
-    engine: "tap",
+    engine: "bubbles",
   }),
   g({
     id: "royal-21",
@@ -316,7 +333,7 @@ export const GAMES: Game[] = [
     from: "#0b7285",
     to: "#ffd43b",
     band: "#0b5f6e",
-    engine: "memory",
+    engine: "blackjack",
   }),
   g({
     id: "snake-trail",
@@ -328,7 +345,7 @@ export const GAMES: Game[] = [
     from: "#2b8a3e",
     to: "#d8f5a2",
     band: "#2b8a3e",
-    engine: "tap",
+    engine: "snake",
   }),
 ];
 

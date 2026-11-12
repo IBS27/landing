@@ -1,7 +1,13 @@
-import { CircleAlert, CircleCheck, Megaphone } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { ConvexError } from "convex/values";
+import { Camera, CircleAlert, CircleCheck, Megaphone } from "lucide-react";
 import { type ReactNode, useState } from "react";
+import { useM } from "@/app/viewer";
+import { ToggleRow } from "@/features/misc/settings/controls";
+import { api } from "../../convex/_generated/api";
+import { PROBLEM_AREAS } from "../../convex/lib/reports";
 import { Modal } from "./overlays";
-import { Button } from "./primitives";
+import { Button, Spinner } from "./primitives";
 
 /* ---------- Shared row ---------- */
 
@@ -97,7 +103,7 @@ export function ReportDialog({
 }: {
   /** "post", "message"... used in the copy. */
   noun: string;
-  reasons: string[];
+  reasons: readonly string[];
   onSubmit: (reason: string) => Promise<unknown>;
   onClose: () => void;
   followUps?: ReportFollowUp[];
@@ -201,25 +207,57 @@ export function ReportDialog({
 
 /* ---------- Report a problem (account menu, Ctrl+B, Reels) ---------- */
 
+type ProblemKind = "Something went wrong" | "Help us improve Facebook";
+
+/** The server's message for a ConvexError, else a generic retry line. */
+function failure(e: unknown) {
+  return e instanceof ConvexError && typeof e.data === "string"
+    ? e.data
+    : "Something went wrong and your report wasn't sent. Please try again.";
+}
+
 export function ReportProblemDialog({ onClose }: { onClose: () => void }) {
-  const [kind, setKind] = useState<"improve" | "broken" | null>(null);
+  const send = useM(api.reports.problem);
+  const [kind, setKind] = useState<ProblemKind | null>(null);
+  const [area, setArea] = useState("");
   const [text, setText] = useState("");
-  const [sent, setSent] = useState(false);
+  const [screenshot, setScreenshot] = useState(true);
+  const [state, setState] = useState<"edit" | "sending" | "sent">("edit");
+  const [error, setError] = useState<string | null>(null);
+  const broken = kind === "Something went wrong";
+  const ready = area !== "" && text.trim().length > 0 && state === "edit";
+
+  const submit = () => {
+    if (!kind || !ready) return;
+    setState("sending");
+    setError(null);
+    send({ kind, area, details: text, screenshot }).then(
+      () => setState("sent"),
+      (e: unknown) => {
+        setError(failure(e));
+        setState("edit");
+      },
+    );
+  };
+
   return (
     <Modal
       open
-      onOpenChange={(o) => !o && onClose()}
-      title="Report a problem"
+      onOpenChange={(o) => !o && state !== "sending" && onClose()}
+      title={state === "sent" ? "Report a problem" : (kind ?? "Report a problem")}
       width={500}
-      onBack={kind && !sent ? () => setKind(null) : undefined}
+      onBack={kind && state === "edit" ? () => setKind(null) : undefined}
     >
-      {sent ? (
+      {state === "sent" ? (
         <div className="flex flex-col items-center px-6 py-8 text-center">
-          <p className="font-bold text-[20px] text-primary">Thanks for your feedback</p>
+          <CircleCheck size={56} strokeWidth={1.6} className="text-[#31a24c]" />
+          <p className="mt-3 font-bold text-[20px] text-primary">Thanks for your feedback</p>
           <p className="mt-1 text-[15px] text-secondary">
-            We use reports like this to help improve Facebook.
+            {broken
+              ? `We'll use your report to look into what went wrong with ${area}.`
+              : "We use feedback like this to help improve Facebook."}
           </p>
-          <Button variant="primary" className="mt-5" onClick={onClose}>
+          <Button variant="primary" className="mt-5 min-w-[120px]" onClick={onClose}>
             Close
           </Button>
         </div>
@@ -229,36 +267,87 @@ export function ReportProblemDialog({ onClose }: { onClose: () => void }) {
             icon={<Megaphone size={20} />}
             label="Help us improve Facebook"
             sub="Tell us how we can make Facebook better."
-            onClick={() => setKind("improve")}
+            onClick={() => setKind("Help us improve Facebook")}
           />
           <StepRow
             icon={<CircleAlert size={20} />}
             label="Something went wrong"
             sub="Let us know about a broken feature."
-            onClick={() => setKind("broken")}
+            onClick={() => setKind("Something went wrong")}
           />
         </div>
       ) : (
         <form
-          className="flex flex-col gap-3 p-4"
+          className="flex flex-col p-4"
           onSubmit={(e) => {
             e.preventDefault();
-            if (text.trim()) setSent(true);
+            submit();
           }}
         >
+          <label htmlFor="problem-area" className="font-semibold text-[15px] text-primary">
+            {broken ? "Where is the problem?" : "What would you like to improve?"}
+          </label>
+          <select
+            id="problem-area"
+            value={area}
+            onChange={(e) => setArea(e.target.value)}
+            className="mt-2 h-10 w-full cursor-pointer rounded-md border border-divider bg-input px-3 text-[15px] text-primary outline-none focus-visible:border-fb"
+          >
+            <option value="" disabled>
+              Choose an area
+            </option>
+            {PROBLEM_AREAS.map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
+          </select>
+          <label htmlFor="problem-details" className="mt-4 font-semibold text-[15px] text-primary">
+            Details
+          </label>
           <textarea
+            id="problem-details"
             value={text}
             onChange={(e) => setText(e.target.value)}
+            maxLength={5000}
             placeholder={
-              kind === "broken"
+              broken
                 ? "Briefly explain what happened or what's not working."
                 : "Tell us what you'd like to see improved."
             }
-            aria-label="Details"
-            className="min-h-[120px] resize-none rounded-md border border-divider bg-card p-3 text-[15px] text-primary outline-none placeholder:text-placeholder focus:border-fb"
+            className="mt-2 min-h-[120px] resize-none rounded-md border border-divider bg-card p-3 text-[15px] text-primary outline-none placeholder:text-placeholder focus:border-fb"
           />
-          <Button type="submit" variant="primary" block disabled={!text.trim()}>
-            Send
+          {broken && (
+            <div className="-mx-2 mt-2">
+              <ToggleRow
+                Icon={Camera}
+                title="Include screenshot"
+                sub="Add a screenshot of this page to help us understand the problem."
+                on={screenshot}
+                onChange={setScreenshot}
+              />
+            </div>
+          )}
+          <p className="mt-3 text-[13px] text-secondary leading-4">
+            Let us know if you have ideas that can help make our products better. If you need help
+            solving a specific problem, please visit the{" "}
+            <Link
+              to="/settings"
+              search={{ tab: "learn" }}
+              onClick={onClose}
+              className="text-link hover:underline"
+            >
+              Help Center
+            </Link>
+            .
+          </p>
+          {error && (
+            <p role="alert" className="mt-3 text-[13px] text-negative">
+              {error}
+            </p>
+          )}
+          <Button type="submit" variant="primary" block className="mt-4" disabled={!ready}>
+            {state === "sending" ? <Spinner size={20} className="text-white" /> : "Send"}
           </Button>
         </form>
       )}

@@ -1,3 +1,4 @@
+import { ConvexError } from "convex/values";
 import { ChevronLeft, Search, X } from "lucide-react";
 import { type DragEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useM, useQ, useViewer } from "@/app/viewer";
@@ -198,8 +199,12 @@ export function CreatePostModal({
       }
       reset();
       onOpenChange(false);
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (e) {
+      setError(
+        e instanceof ConvexError && typeof e.data === "string"
+          ? e.data
+          : "Something went wrong. Please try again.",
+      );
     } finally {
       setBusy(false);
     }

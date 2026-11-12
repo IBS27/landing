@@ -30,6 +30,9 @@ const glyph: Record<string, ReactNode> = {
   clock: (
     <path d="M8 .5a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Zm.75 3.75a.75.75 0 0 0-1.5 0V8c0 .2.08.39.22.53l2.5 2.5a.75.75 0 1 0 1.06-1.06L8.75 7.69V4.25Z" />
   ),
+  video: (
+    <path d="M1 4.75A2.25 2.25 0 0 1 3.25 2.5h6.5A2.25 2.25 0 0 1 12 4.75v6.5a2.25 2.25 0 0 1-2.25 2.25h-6.5A2.25 2.25 0 0 1 1 11.25v-6.5Zm12 1.6 1.9-1.27a.7.7 0 0 1 1.1.58v4.68a.7.7 0 0 1-1.1.58L13 9.65v-3.3Z" />
+  ),
   bell: (
     <path d="M8 .75a4.75 4.75 0 0 0-4.75 4.75v2.7L1.9 10.4A1 1 0 0 0 2.75 12h10.5a1 1 0 0 0 .85-1.6l-1.35-2.2V5.5A4.75 4.75 0 0 0 8 .75ZM6 13.25a2 2 0 0 0 4 0H6Z" />
   ),
@@ -50,6 +53,7 @@ const BADGE: Record<Kind, { bg: string; icon: keyof typeof glyph }> = {
   listing_saved: { bg: "#0866FF", icon: "store" },
   birthday: { bg: "#F3425F", icon: "cake" },
   memory: { bg: "#0866FF", icon: "clock" },
+  live: { bg: "#F3425F", icon: "video" },
 };
 
 /** The 28px badge overlapping a notification avatar's bottom-right corner. */

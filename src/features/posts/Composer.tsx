@@ -1,8 +1,9 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
-import { useViewer } from "@/app/viewer";
+import { useQ, useViewer } from "@/app/viewer";
 import { Tooltip } from "@/ui/overlays";
 import { Avatar, Card } from "@/ui/primitives";
+import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { type ComposerPanel, CreatePostModal } from "./CreatePostModal";
 import { FeelingIcon, LiveVideoIcon, PhotoVideoIcon } from "./icons";
@@ -21,6 +22,11 @@ export function Composer({
   timelineUser?: { _id: Id<"users">; firstName: string };
 }) {
   const viewer = useViewer();
+  const navigate = useNavigate();
+  const wallOpen = useQ(
+    api.settings.canPostOnTimeline,
+    timelineUser ? { userId: timelineUser._id } : "skip",
+  );
   const [open, setOpen] = useState(false);
   const [panel, setPanel] = useState<ComposerPanel | undefined>();
   const openWith = (p?: ComposerPanel) => {
@@ -32,6 +38,8 @@ export function Composer({
     : groupId
       ? "Write something..."
       : `What's on your mind, ${viewer.firstName}?`;
+  // Hidden like Facebook when the person limited who can post on their profile.
+  if (timelineUser && wallOpen !== true) return null;
 
   return (
     <Card className="rounded-xl px-4 py-3" role="region" aria-label="Create a post">
@@ -50,7 +58,7 @@ export function Composer({
         >
           {placeholder}
         </button>
-        <ComposerButton label="Live video" onClick={() => openWith()}>
+        <ComposerButton label="Live video" onClick={() => void navigate({ to: "/live/producer" })}>
           <LiveVideoIcon />
         </ComposerButton>
         <ComposerButton label="Photo/video" onClick={() => openWith("photo")}>

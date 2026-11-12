@@ -398,6 +398,7 @@ export function buildPlan(now: number) {
           : undefined,
         vehicle: l.vehicle,
         originalPrice: l.originalPrice,
+        video: l.video ? videoMedia(l.video, l.title) : undefined,
         badges: [],
         createdAt,
         updatedAt:

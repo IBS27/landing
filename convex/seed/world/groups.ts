@@ -417,7 +417,7 @@ export const groups = [
     createdYearsAgo: 8,
     admins: ["will.foster"],
     moderators: ["erin.mcallister"],
-    members: ["derek.holloway", "marcus.bell", "marco.rossi", "ben.carter", "maddie.collins"],
+    members: ["derek.holloway", "marcus.bell", "marco.rossi", "ben.carter"],
   },
   {
     slug: "seattle-concerts",
@@ -569,7 +569,7 @@ export const groups = [
     externalMembers: 27600,
     createdYearsAgo: 9,
     admins: ["marco.rossi"],
-    members: ["aisha.rahman", "sam.rivera", "nina.petrova", "andre.silva"],
+    members: ["aisha.rahman", "sam.rivera", "andre.silva"],
   },
 ] as const satisfies readonly GroupSeed[];
 

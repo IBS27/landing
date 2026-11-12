@@ -37,14 +37,28 @@ export function usePhotoTheater() {
   );
 }
 
-/** Close a routed theater: back to the page it opened over, or Home for a direct link. */
-function useCloseTheater() {
+/**
+ * Close a routed theater: back to the page it opened over, or `fallback`
+ * (Home) for a direct link.
+ */
+export function useCloseTheater(fallback: "/" | "/watch" = "/") {
   const router = useRouter();
   const navigate = useNavigate();
   return useCallback(() => {
     if (router.history.canGoBack()) router.history.back();
-    else void navigate({ to: "/" });
-  }, [router, navigate]);
+    else void navigate({ to: fallback });
+  }, [router, navigate, fallback]);
+}
+
+/** The page beneath must not scroll while a theater covers it. */
+export function useLockBodyScroll() {
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
 }
 
 /** Mounted once in the root layout: renders the theater opened by `usePhotoTheater`. */
@@ -105,15 +119,7 @@ function Theater({
 }) {
   // The id comes from the URL, so it may be malformed or from another table.
   const post = useQ(api.posts.getFromUrl, { postId });
-
-  // The page beneath must not scroll while the theater covers it.
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, []);
+  useLockBodyScroll();
 
   if (post === undefined) return <PhotoViewerPlaceholder onClose={onClose} />;
   if (post === null || post.media.length === 0)

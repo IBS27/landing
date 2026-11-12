@@ -13,6 +13,7 @@ import { cn } from "@/lib/format";
 import { Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { inlinePlayer, registerInlinePlayer, useVideoTheater } from "./videoTheaterNav";
 
 /* ------------------------------------------------------------------ */
 /* Shared state                                                        */
@@ -234,7 +235,12 @@ const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
  * "Replay" sits over the dimmed last frame. Vertical (Reel-style) clips always
  * loop. Hovering reveals the control bar: play/pause, time, scrubber,
  * settings, fullscreen and volume. The video is letterboxed on black inside
- * whatever box the caller sizes. With `postId`, ≥3s of playback counts as a view.
+ * whatever box the caller sizes. With `postId`, ≥3s of playback counts as a view
+ * and a click on the video itself (not its controls) opens the video theater.
+ *
+ * `theater` is the player inside that theater: it starts at `startTime` with
+ * sound on (the viewer chose to watch), plays to the end and hands its
+ * position back to the inline player when it closes.
  */
 export function VideoPlayer({
   src,
@@ -246,6 +252,8 @@ export function VideoPlayer({
   loop = false,
   fit = "contain",
   postId,
+  theater = false,
+  startTime = 0,
 }: {
   src: string;
   poster?: string;
@@ -256,8 +264,12 @@ export function VideoPlayer({
   autoPlay?: boolean;
   loop?: boolean;
   fit?: "contain" | "cover";
-  /** The post the video belongs to: playing it ≥3s records a view. */
+  /** The post the video belongs to: playing it ≥3s records a view; a click opens the theater. */
   postId?: string;
+  /** The video theater's player (no click-to-open, plays at once with sound). */
+  theater?: boolean;
+  /** Theater: where the inline player was. */
+  startTime?: number;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const ref = useRef<HTMLVideoElement>(null);
@@ -273,9 +285,10 @@ export function VideoPlayer({
   const [fullscreen, setFullscreen] = useState(false);
   const idle = useRef<number | undefined>(undefined);
   const prefs = useVideoPrefs();
-  const autoplayOn = autoPlay && prefs.autoplay === true;
+  const autoplayOn = !theater && autoPlay && prefs.autoplay === true;
   /** The viewer started playback themselves or listened with sound: no more looping. */
-  const [engaged, setEngaged] = useState(false);
+  const [engaged, setEngaged] = useState(theater);
+  const openTheater = useVideoTheater();
   const [vertical, setVertical] = useState(false);
   const loops = loop || vertical || !engaged;
   useRecordView(ref, postId);
@@ -301,6 +314,39 @@ export function VideoPlayer({
     io.observe(box);
     return () => io.disconnect();
   }, [autoplayOn]);
+
+  // Inline: let the theater pick up this player's position and pause it.
+  useEffect(() => {
+    const el = ref.current;
+    if (theater || !postId || !el) return;
+    return registerInlinePlayer(postId, {
+      el,
+      hold: () => {
+        userPaused.current = true;
+        el.pause();
+      },
+    });
+  }, [theater, postId]);
+
+  // Theater: start where the inline player was, with sound, and hand the position back on close.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs once per opened theater.
+  useEffect(() => {
+    const el = ref.current;
+    if (!theater || !el) return;
+    setSoundOn(true);
+    el.muted = false;
+    const start = () => {
+      if (startTime > 0 && startTime < el.duration) el.currentTime = startTime;
+      safePlay(el);
+    };
+    if (el.readyState >= 1) start();
+    else el.addEventListener("loadedmetadata", start, { once: true });
+    return () => {
+      el.removeEventListener("loadedmetadata", start);
+      const back = postId ? inlinePlayer(postId) : undefined;
+      if (back && el.currentTime > 0 && !el.ended) back.el.currentTime = el.currentTime;
+    };
+  }, [theater]);
 
   useEffect(() => {
     if (state.playing) setStarted(true);
@@ -379,13 +425,13 @@ export function VideoPlayer({
         muted={!sound}
         loop={loops}
         playsInline
-        preload="metadata"
+        preload={theater ? "auto" : "metadata"}
         aria-label={label}
         onLoadedMetadata={(e) =>
           setVertical(e.currentTarget.videoHeight > e.currentTarget.videoWidth)
         }
-        onClick={toggle}
-        onDoubleClick={toggleFullscreen}
+        onClick={() => (postId && !theater ? openTheater(postId) : toggle())}
+        onDoubleClick={postId && !theater ? undefined : toggleFullscreen}
         onEnded={() => {
           userPaused.current = true;
         }}

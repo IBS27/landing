@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { PlayGlyph } from "@/features/posts/VideoPlayer";
 import { cn, price } from "@/lib/format";
-import { Skeleton, Spinner } from "@/ui/primitives";
+import { Avatar, Skeleton, Spinner } from "@/ui/primitives";
 import { homeTitle, type ListingCard } from "../../../convex/lib/listings";
+import type { MarketplaceAd } from "../../../convex/listings";
 
 export function priceLabel(n: number) {
   return n === 0 ? "FREE" : price(n);
@@ -39,13 +41,14 @@ export function ListingCardView({ l, footer }: { l: ListingCard; footer?: ReactN
             </span>
           )}
         </div>
-        <div className="mt-3 flex items-baseline gap-1.5 truncate text-[17px] leading-5">
+        <div className="mt-3 flex items-center gap-1.5 truncate text-[17px] leading-5">
           <span className="font-semibold text-primary">{priceLabel(l.price)}</span>
           {l.originalPrice !== null && l.originalPrice > l.price && (
             <span className="font-medium text-secondary line-through">
               {price(l.originalPrice)}
             </span>
           )}
+          {l.hasVideo && <VideoBadge />}
         </div>
         <p className="mt-1 truncate text-[15px] text-primary leading-5 group-hover:underline">
           {title}
@@ -59,6 +62,64 @@ export function ListingCardView({ l, footer }: { l: ListingCard; footer?: ReactN
     </div>
   );
 }
+
+/** The small grey video-camera chip Facebook puts beside the price of listings with a video. */
+function VideoBadge() {
+  return (
+    <span
+      role="img"
+      aria-label="Has video"
+      className="ml-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-btn text-primary"
+    >
+      <svg viewBox="0 0 12 12" width="12" height="12" fill="currentColor" aria-hidden>
+        <rect x="0.5" y="2.5" width="7.5" height="7" rx="1.6" />
+        <path d="M8.8 5.1 11 3.7c.25-.16.5 0 .5.3v4c0 .3-.25.46-.5.3L8.8 6.9Z" />
+      </svg>
+    </span>
+  );
+}
+
+/** A Sponsored tile in the Marketplace grid: a Page's ad creative, its logo, headline and "Ad". */
+export function AdTile({ ad }: { ad: MarketplaceAd }) {
+  return (
+    <div className="pb-3">
+      <Link
+        to="/$username/posts/$postId"
+        params={{ username: ad.page.username, postId: ad.postId }}
+        className="group block rounded-md"
+      >
+        <div className="relative aspect-square overflow-hidden rounded-[6px] border border-black/10 bg-input dark:border-white/10">
+          <img
+            src={ad.image}
+            alt={ad.headline}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+          <span className="pointer-events-none absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/5" />
+          <span className="absolute top-2 left-2 rounded-full bg-white p-0.5 shadow-[0_0_0_1px_rgba(0,0,0,0.08)]">
+            <Avatar src={ad.page.avatar} size={32} />
+          </span>
+          {ad.video && (
+            <span className="absolute top-1/2 left-1/2 flex h-[68px] w-[68px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] border-white bg-black/50 text-white">
+              <PlayGlyph size={34} className="ml-1" />
+            </span>
+          )}
+        </div>
+        <p className="mt-3 truncate font-semibold text-[15px] text-primary leading-5">
+          {ad.page.name}
+        </p>
+        <p className="mt-1 truncate text-[15px] text-primary leading-5 group-hover:underline">
+          {ad.headline}
+        </p>
+        <p className="mt-1 text-[13px] text-secondary leading-4">Ad</p>
+      </Link>
+    </div>
+  );
+}
+
+/** Grid slots for ads: the 10th tile, then every 24 listings after it. */
+const AD_FIRST = 9;
+const AD_EVERY = 24;
 
 export const gridClass = "grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-x-2";
 
@@ -85,10 +146,13 @@ export function ListingGrid({
   data,
   onMore,
   empty,
+  ads,
 }: {
   data: { items: ListingCard[]; hasMore: boolean } | undefined;
   onMore: () => void;
   empty?: ReactNode;
+  /** Sponsored tiles to interleave (Browse all only, like Facebook). */
+  ads?: MarketplaceAd[];
 }) {
   const sentinel = useRef<HTMLDivElement>(null);
   const hasMore = data?.hasMore ?? false;
@@ -122,9 +186,19 @@ export function ListingGrid({
   return (
     <>
       <div className={gridClass}>
-        {data.items.map((l) => (
-          <ListingCardView key={l._id} l={l} />
-        ))}
+        {data.items.map((l, i) => {
+          const slot = i - AD_FIRST;
+          const ad =
+            ads && ads.length > 0 && slot >= 0 && slot % AD_EVERY === 0
+              ? ads[(slot / AD_EVERY) % ads.length]
+              : undefined;
+          return (
+            <Fragment key={l._id}>
+              {ad && <AdTile ad={ad} />}
+              <ListingCardView l={l} />
+            </Fragment>
+          );
+        })}
       </div>
       <div ref={sentinel} className={cn("flex justify-center py-6", !hasMore && "hidden")}>
         <Spinner />

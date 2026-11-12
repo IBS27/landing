@@ -12,7 +12,8 @@ import {
 } from "@/features/misc/AppRail";
 import { LiveGlyph, ReelsGlyph, ShowsGlyph, VideoGlyph } from "@/features/misc/glyphs";
 import { BookmarkFilled, CompassFilled } from "@/features/misc/icons";
-import { PostDialog, PostSkeleton, type PostView, useViewerPaginated } from "@/features/posts";
+import { PostCard, PostSkeleton, type PostView, useViewerPaginated } from "@/features/posts";
+import { useVideoTheater } from "@/features/posts/videoTheaterNav";
 import { compactCount, shortAge } from "@/lib/format";
 import { Avatar, Button, Card, EmptyState, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -171,17 +172,29 @@ function HomeFeed() {
   );
 }
 
+/** Broadcasts in progress from people and Pages the viewer can see, in real time. */
 function Live() {
+  const live = useQ(api.live.active, {});
   return (
     <>
       <h2 className="pt-1 pb-3 font-bold text-[20px] text-primary leading-6">Live</h2>
-      <Card className="rounded-xl">
-        <EmptyState
-          icon={<Radio size={48} strokeWidth={1.5} />}
-          title="No live videos right now"
-          body="When Pages and people you follow go live, you'll see their broadcasts here."
-        />
-      </Card>
+      {live === undefined ? (
+        <PostSkeleton />
+      ) : live.length === 0 ? (
+        <Card className="rounded-xl">
+          <EmptyState
+            icon={<Radio size={48} strokeWidth={1.5} />}
+            title="No live videos right now"
+            body="When Pages and people you follow go live, you'll see their broadcasts here."
+          />
+        </Card>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {live.map((p) => (
+            <PostCard key={p._id} post={p} />
+          ))}
+        </div>
+      )}
     </>
   );
 }
@@ -240,7 +253,7 @@ function Shows() {
 function Explore({ q }: { q?: string }) {
   const { results, status, loadMore } = useViewerPaginated(api.media.videos, {}, 12);
   const sentinel = useInfinite(status, loadMore);
-  const [open, setOpen] = useState<PostView | null>(null);
+  const openVideo = useVideoTheater();
   const posts = useMemo(() => {
     const all = results as PostView[];
     if (!q) return all;
@@ -271,7 +284,7 @@ function Explore({ q }: { q?: string }) {
               <PostVideo post={p} autoPlay={false} />
               <button
                 type="button"
-                onClick={() => setOpen(p)}
+                onClick={() => openVideo(p._id)}
                 className="flex w-full items-start gap-2 p-3 text-left hover:bg-hover"
               >
                 <Avatar src={p.author.avatar} size={36} />
@@ -289,7 +302,6 @@ function Explore({ q }: { q?: string }) {
         </div>
       )}
       <div ref={sentinel} />
-      {open && <PostDialog post={open} onClose={() => setOpen(null)} />}
     </>
   );
 }

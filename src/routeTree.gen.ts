@@ -56,6 +56,7 @@ import { Route as GroupsCreateRouteImport } from './routes/groups/create'
 import { Route as GroupsDiscoverRouteImport } from './routes/groups/discover'
 import { Route as GroupsFeedRouteImport } from './routes/groups/feed'
 import { Route as GroupsJoinsRouteImport } from './routes/groups/joins'
+import { Route as LiveProducerRouteImport } from './routes/live.producer'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace/index'
 import { Route as MarketplaceGroupsRouteImport } from './routes/marketplace/groups'
 import { Route as MarketplaceInboxRouteImport } from './routes/marketplace/inbox'
@@ -329,6 +330,11 @@ const GroupsJoinsRoute = GroupsJoinsRouteImport.update({
   path: '/groups/joins',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LiveProducerRoute = LiveProducerRouteImport.update({
+  id: '/live/producer',
+  path: '/live/producer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketplaceIndexRoute = MarketplaceIndexRouteImport.update({
   id: '/marketplace/',
   path: '/marketplace/',
@@ -563,6 +569,7 @@ export interface FileRoutesByFullPath {
   '/groups/discover': typeof GroupsDiscoverRoute
   '/groups/feed': typeof GroupsFeedRoute
   '/groups/joins': typeof GroupsJoinsRoute
+  '/live/producer': typeof LiveProducerRoute
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
   '/marketplace/notifications': typeof MarketplaceNotificationsRoute
@@ -647,6 +654,7 @@ export interface FileRoutesByTo {
   '/groups/discover': typeof GroupsDiscoverRoute
   '/groups/feed': typeof GroupsFeedRoute
   '/groups/joins': typeof GroupsJoinsRoute
+  '/live/producer': typeof LiveProducerRoute
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
   '/marketplace/notifications': typeof MarketplaceNotificationsRoute
@@ -734,6 +742,7 @@ export interface FileRoutesById {
   '/groups/discover': typeof GroupsDiscoverRoute
   '/groups/feed': typeof GroupsFeedRoute
   '/groups/joins': typeof GroupsJoinsRoute
+  '/live/producer': typeof LiveProducerRoute
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
   '/marketplace/notifications': typeof MarketplaceNotificationsRoute
@@ -822,6 +831,7 @@ export interface FileRouteTypes {
     | '/groups/discover'
     | '/groups/feed'
     | '/groups/joins'
+    | '/live/producer'
     | '/marketplace/groups'
     | '/marketplace/inbox'
     | '/marketplace/notifications'
@@ -906,6 +916,7 @@ export interface FileRouteTypes {
     | '/groups/discover'
     | '/groups/feed'
     | '/groups/joins'
+    | '/live/producer'
     | '/marketplace/groups'
     | '/marketplace/inbox'
     | '/marketplace/notifications'
@@ -992,6 +1003,7 @@ export interface FileRouteTypes {
     | '/groups/discover'
     | '/groups/feed'
     | '/groups/joins'
+    | '/live/producer'
     | '/marketplace/groups'
     | '/marketplace/inbox'
     | '/marketplace/notifications'
@@ -1073,6 +1085,7 @@ export interface RootRouteChildren {
   GroupsDiscoverRoute: typeof GroupsDiscoverRoute
   GroupsFeedRoute: typeof GroupsFeedRoute
   GroupsJoinsRoute: typeof GroupsJoinsRoute
+  LiveProducerRoute: typeof LiveProducerRoute
   MarketplaceGroupsRoute: typeof MarketplaceGroupsRoute
   MarketplaceInboxRoute: typeof MarketplaceInboxRoute
   MarketplaceNotificationsRoute: typeof MarketplaceNotificationsRoute
@@ -1439,6 +1452,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GroupsJoinsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/live/producer': {
+      id: '/live/producer'
+      path: '/live/producer'
+      fullPath: '/live/producer'
+      preLoaderRoute: typeof LiveProducerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marketplace/': {
       id: '/marketplace/'
       path: '/marketplace'
@@ -1788,6 +1808,7 @@ const rootRouteChildren: RootRouteChildren = {
   GroupsDiscoverRoute: GroupsDiscoverRoute,
   GroupsFeedRoute: GroupsFeedRoute,
   GroupsJoinsRoute: GroupsJoinsRoute,
+  LiveProducerRoute: LiveProducerRoute,
   MarketplaceGroupsRoute: MarketplaceGroupsRoute,
   MarketplaceInboxRoute: MarketplaceInboxRoute,
   MarketplaceNotificationsRoute: MarketplaceNotificationsRoute,

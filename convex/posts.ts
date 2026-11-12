@@ -6,6 +6,7 @@ import type { MutationCtx } from "./_generated/server";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { notify } from "./lib/notify";
 import { canView, enrichPost, enrichPosts, loadAudience } from "./lib/posts";
+import { canPostOnProfile } from "./lib/settings";
 import schema from "./schema";
 import { media, postAttachment, privacy } from "./validators";
 
@@ -150,6 +151,12 @@ export const create = viewerMutation({
     }
     const timelineUserId =
       args.timelineUserId && args.timelineUserId !== viewerId ? args.timelineUserId : undefined;
+    if (timelineUserId && !(await canPostOnProfile(ctx, timelineUserId, viewerId))) {
+      const owner = await ctx.db.get(timelineUserId);
+      throw new ConvexError(
+        `${owner?.firstName ?? "This person"} has limited who can post on their profile.`,
+      );
+    }
 
     const now = Date.now();
     const postId = await ctx.db.insert("posts", {
@@ -278,6 +285,12 @@ export const remove = viewerMutation({
       .withIndex("by_post", (q) => q.eq("postId", postId))
       .collect();
     for (const s of subs) await ctx.db.delete(s._id);
+    // Notifications about the post would otherwise link to a deleted page.
+    const notes = await ctx.db
+      .query("notifications")
+      .withIndex("by_post", (q) => q.eq("postId", postId))
+      .collect();
+    for (const n of notes) await ctx.db.delete(n._id);
     // Saved rows pointing here are skipped by `saved:list` once the post is gone.
     if (post.sharedPostId) {
       const original = await ctx.db.get(post.sharedPostId);

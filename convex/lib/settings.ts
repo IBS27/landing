@@ -7,7 +7,8 @@ import type {
   NotificationCategory,
   privacy,
 } from "../validators";
-import { areFriends } from "./users";
+import { isBlockedEitherWay } from "./blocks";
+import { areFriends, mutualFriendIds } from "./users";
 
 /* ---------- Notification categories ---------- */
 
@@ -255,4 +256,36 @@ export async function visibleFriendIds(
 ) {
   const open = await canSeeFriendsList(ctx, ownerId, viewerId);
   return ids.filter((id) => !blocked.has(id) && (open || viewerFriends.has(id)));
+}
+
+/* ---------- Enforced privacy preferences ---------- */
+
+/**
+ * "Who can post on your profile?": the owner always can; others only when the
+ * owner allows Friends and they are friends (never when blocked either way).
+ */
+export async function canPostOnProfile(ctx: QueryCtx, ownerId: Id<"users">, viewerId: Id<"users">) {
+  if (ownerId === viewerId) return true;
+  const owner = await ctx.db.get(ownerId);
+  if (!owner || owner.kind === "page") return false;
+  if (await isBlockedEitherWay(ctx, ownerId, viewerId)) return false;
+  const { prefs } = await getSettings(ctx, ownerId);
+  if (prefs["who-can-post-on-profile"] === "Only me") return false;
+  return areFriends(ctx, ownerId, viewerId);
+}
+
+/**
+ * "Who can comment on your public posts?": applies to a person's public,
+ * non-group posts. The author can always comment. Returns whether the viewer
+ * may comment.
+ */
+export async function canCommentOn(ctx: QueryCtx, post: Doc<"posts">, viewerId: Id<"users">) {
+  if (post.authorId === viewerId || post.privacy !== "public" || post.groupId) return true;
+  const author = await ctx.db.get(post.authorId);
+  if (!author || author.kind === "page" || author.pageOwnerId === viewerId) return true;
+  const audience = (await getSettings(ctx, post.authorId)).prefs["public-comments"];
+  if (audience === "Public") return true;
+  if (await areFriends(ctx, post.authorId, viewerId)) return true;
+  if (audience === "Friends") return false;
+  return (await mutualFriendIds(ctx, post.authorId, viewerId)).length > 0;
 }

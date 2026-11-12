@@ -8,8 +8,11 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  EyeOff,
+  Flag,
   Fuel,
   Gauge,
+  Info,
   Link2,
   MoreHorizontal,
   Palette,
@@ -39,6 +42,7 @@ import {
   Tooltip,
 } from "@/ui/overlays";
 import { Avatar, Button, Skeleton, Spinner } from "@/ui/primitives";
+import { ReportDialog } from "@/ui/ReportDialog";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import {
@@ -48,6 +52,7 @@ import {
   MEETUPS,
   propertyTypeLabel,
 } from "../../../convex/lib/listings";
+import { LISTING_REPORT_REASONS } from "../../../convex/lib/reports";
 import { ListingGrid } from "./grid";
 import { BookmarkFill, BookmarkOutline, MessengerGradient, ShareArrow } from "./icons";
 import { MapTile } from "./MapTile";
@@ -133,6 +138,7 @@ function ItemContainer({ l }: { l: Detail }) {
           <Details l={l} />
           <LocationMap l={l} />
           <SellerInfo l={l} />
+          {!l.isOwner && <SponsoredAd listingId={l._id} toast={toast.show} />}
           <RelatedSearches l={l} />
         </div>
         {!l.isOwner && <MessageBar l={l} />}
@@ -369,7 +375,9 @@ function SaveButton({ l, toast }: { l: Detail; toast: (m: string) => void }) {
 
 function BuyerActions({ l, toast }: { l: Detail; toast: (m: string) => void }) {
   const { openChat } = useChatDock();
+  const report = useM(api.reports.create);
   const [dialog, setDialog] = useState(false);
+  const [reporting, setReporting] = useState(false);
   return (
     <div className="mt-4 flex gap-2">
       <button
@@ -392,7 +400,7 @@ function BuyerActions({ l, toast }: { l: Detail; toast: (m: string) => void }) {
           <MenuItem
             icon={<ShieldCheck size={18} />}
             label="Report listing"
-            onSelect={() => toast("Thanks for letting us know. We'll review this listing.")}
+            onSelect={() => setReporting(true)}
           />
           <MenuItem
             icon={<Link2 size={18} />}
@@ -407,6 +415,14 @@ function BuyerActions({ l, toast }: { l: Detail; toast: (m: string) => void }) {
         </MenuContent>
       </Menu>
       {dialog && <MessageDialog l={l} onClose={() => setDialog(false)} />}
+      {reporting && (
+        <ReportDialog
+          noun="listing"
+          reasons={LISTING_REPORT_REASONS}
+          onSubmit={(reason) => report({ targetType: "listing", targetId: l._id, reason })}
+          onClose={() => setReporting(false)}
+        />
+      )}
     </div>
   );
 }
@@ -657,14 +673,6 @@ function Details({ l }: { l: Detail }) {
   return (
     <>
       <SectionHeading>Details</SectionHeading>
-      <dl className="pt-1 text-[15px] leading-5">
-        {l.condition && (
-          <div className="flex justify-between gap-4 pt-2">
-            <dt className="text-primary">Condition</dt>
-            <dd className="text-secondary">{conditionLabel(l.condition)}</dd>
-          </div>
-        )}
-      </dl>
       <Description text={l.description} />
     </>
   );
@@ -781,6 +789,104 @@ function SellerInfo({ l }: { l: Detail }) {
         </span>
         Joined Facebook in {s.joinedYear}
       </div>
+    </section>
+  );
+}
+
+/* ───────────── Sponsored ───────────── */
+
+/** The "Ad" block under Seller information: one Page ad, picked per listing. */
+function SponsoredAd({
+  listingId,
+  toast,
+}: {
+  listingId: Id<"listings">;
+  toast: (m: string) => void;
+}) {
+  const ads = useQ(api.listings.ads, {});
+  const hide = useM(api.listings.hideAd);
+  const [why, setWhy] = useState(false);
+  if (!ads || ads.length === 0) return null;
+  let h = 0;
+  for (const c of listingId) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const ad = ads[h % ads.length];
+  const remove = (reason: "hidden" | "reported") =>
+    void hide({ postId: ad.postId, reason })
+      .then(() =>
+        toast(
+          reason === "hidden"
+            ? "Ad hidden. You'll see fewer ads like this."
+            : "Thanks for reporting this ad.",
+        ),
+      )
+      .catch(() => toast("Couldn't update this ad"));
+  return (
+    <section className="pt-10">
+      <div className="flex items-center justify-between">
+        <h2 className="font-semibold text-[17px] text-primary leading-5">Ad</h2>
+        <Menu>
+          <MenuTrigger asChild>
+            <button
+              type="button"
+              aria-label="Ad options"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-card text-icon shadow-[0_0_0_1px_var(--color-divider)] hover:bg-hover"
+            >
+              <MoreHorizontal size={20} />
+            </button>
+          </MenuTrigger>
+          <MenuContent align="end" width={300}>
+            <MenuItem
+              icon={<EyeOff size={20} />}
+              label="Hide ad"
+              sub="See fewer ads like this."
+              onSelect={() => remove("hidden")}
+            />
+            <MenuItem
+              icon={<Flag size={20} />}
+              label="Report ad"
+              sub="Tell us about a problem with this ad."
+              onSelect={() => remove("reported")}
+            />
+            <MenuSeparator />
+            <MenuItem
+              icon={<Info size={20} />}
+              label="Why am I seeing this ad?"
+              onSelect={() => setWhy(true)}
+            />
+          </MenuContent>
+        </Menu>
+      </div>
+      <Link
+        to="/$username/posts/$postId"
+        params={{ username: ad.page.username, postId: ad.postId }}
+        className="group mt-4 ml-4 flex gap-3"
+      >
+        <Avatar src={ad.page.avatar} size={36} />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[15px] text-primary leading-5 group-hover:underline">
+            {ad.page.name}
+          </span>
+          <span className="block truncate text-[13px] text-secondary leading-4">{ad.tagline}</span>
+          <span className="relative mt-1 block aspect-square w-[157px] overflow-hidden rounded-lg border border-divider bg-input">
+            <img src={ad.image} alt={ad.headline} className="h-full w-full object-cover" />
+            {ad.video && (
+              <span className="absolute top-1/2 left-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-black/50 text-white">
+                <PlayGlyph size={22} className="ml-0.5" />
+              </span>
+            )}
+          </span>
+        </span>
+      </Link>
+      <Modal open={why} onOpenChange={setWhy} title="Why am I seeing this ad?" width={548}>
+        <div className="flex gap-3 p-4">
+          <Avatar src={ad.page.avatar} size={40} />
+          <p className="text-[15px] text-primary leading-5">
+            <b className="font-semibold">{ad.page.name}</b> wants to reach people who browse
+            Marketplace in the Seattle area. You're seeing this ad based on your location and
+            activity on Facebook.
+          </p>
+        </div>
+      </Modal>
     </section>
   );
 }

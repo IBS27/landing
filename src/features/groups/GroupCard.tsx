@@ -38,7 +38,9 @@ export function GroupCard({ group, onHide }: { group: GroupCardData; onHide?: ()
                 e.stopPropagation();
                 onHide();
               }}
-              className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/50"
+              // A mostly opaque mid-grey: reads like Facebook's 40% black on light
+              // covers and still shows as a grey circle on dark ones.
+              className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-[rgb(96_96_96/0.7)] text-white hover:bg-[rgb(80_80_80/0.8)]"
             >
               <CloseGlyph size={20} />
             </button>

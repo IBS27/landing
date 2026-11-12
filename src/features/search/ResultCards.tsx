@@ -221,17 +221,6 @@ export function PageRow({ page }: { page: PageResult }) {
 
 /* ---------- Groups ---------- */
 
-function activity(n: number) {
-  const perDay = n / 30;
-  if (perDay >= 10) return "10+ posts a day";
-  if (perDay >= 1) return `${Math.floor(perDay)} post${Math.floor(perDay) === 1 ? "" : "s"} a day`;
-  const perWeek = n / 4.3;
-  if (perWeek >= 1)
-    return `${Math.floor(perWeek)} post${Math.floor(perWeek) === 1 ? "" : "s"} a week`;
-  if (n > 0) return `${n} post${n === 1 ? "" : "s"} a month`;
-  return null;
-}
-
 export function GroupRow({ g }: { g: GroupResult }) {
   const join = useM(api.groups.join);
   const navigate = useNavigate();
@@ -251,7 +240,7 @@ export function GroupRow({ g }: { g: GroupResult }) {
         [
           g.privacy === "public" ? "Public" : "Private",
           `${compactCount(g.memberCount)} members`,
-          activity(g.recentPosts),
+          g.activity,
         ]
           .filter(Boolean)
           .join(" · "),

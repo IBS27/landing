@@ -264,9 +264,30 @@ function lookup<K, V>(map: Map<K, V>, key: K, what: string): V {
 
 type ResetSummary = { ms: number; counts: Record<string, number> };
 
+/**
+ * The dev deployment caps write throughput, and the seed writes thousands of
+ * rows in parallel batches. Retry a batch with backoff when it is rate limited.
+ */
+function withWriteRetry<C extends { runMutation: (...a: never[]) => Promise<unknown> }>(ctx: C): C {
+  const run = ctx.runMutation.bind(ctx) as (...a: unknown[]) => Promise<unknown>;
+  const runMutation = async (...args: unknown[]) => {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        return await run(...args);
+      } catch (e) {
+        const limited = e instanceof Error && e.message.includes("Too many writes");
+        if (!limited || attempt >= 6) throw e;
+        await new Promise((r) => setTimeout(r, 500 * 2 ** attempt));
+      }
+    }
+  };
+  return { ...ctx, runMutation } as C;
+}
+
 export const reset = internalAction({
   args: {},
-  handler: async (ctx): Promise<ResetSummary> => {
+  handler: async (rawCtx): Promise<ResetSummary> => {
+    const ctx = withWriteRetry(rawCtx);
     const started = Date.now();
 
     // 1. Wipe every table.

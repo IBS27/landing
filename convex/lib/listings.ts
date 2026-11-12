@@ -174,6 +174,8 @@ export type ListingCard = {
   category: ListingCategory;
   createdAt: number;
   justListed: boolean;
+  /** The seller added a video (grid tiles show a camera badge beside the price). */
+  hasVideo: boolean;
   rental: {
     propertyType: PropertyType;
     bedrooms: number;
@@ -194,7 +196,8 @@ export function toCard(l: Doc<"listings">, now = Date.now()): ListingCard {
     status: l.status,
     category: l.category,
     createdAt: l.createdAt,
-    justListed: now - l.createdAt < DAY / 4,
+    justListed: now - l.createdAt < DAY / 2,
+    hasVideo: l.video !== undefined,
     rental: l.rental
       ? {
           propertyType: l.rental.propertyType,

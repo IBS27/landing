@@ -37,7 +37,6 @@ export function PhotoViewer({
   const n = post.media.length;
   const index = Math.min(Math.max(onIndexChange ? indexProp : localIndex, 0), Math.max(n - 1, 0));
   const setIndex = onIndexChange ?? setLocalIndex;
-  const [focusKey, setFocusKey] = useState(0);
   const item = post.media[index];
 
   const go = (d: number) => setIndex((index + d + n) % n);
@@ -70,46 +69,60 @@ export function PhotoViewer({
           />
         )}
       </Stage>
-      <aside className="flex w-[360px] shrink-0 flex-col bg-card text-primary">
-        <div className="flex h-14 shrink-0 items-center justify-end gap-2 px-4">
-          <HeaderActions />
-        </div>
-        <div className="min-h-0 flex-1 overflow-y-auto border-divider border-t">
-          <div className="pt-1">
-            <PostHeader post={post} />
-          </div>
-          <PostContent
-            post={{ ...post, background: null, media: [], attachments: [], shared: null }}
-            expanded
-            smallText
-          />
-          <ActionBar
-            variant="labelled"
-            post={post}
-            onComment={() => setFocusKey((k) => k + 1)}
-            className="mx-3"
-          />
-          <CommentList postId={post._id} />
-        </div>
-        <div className="border-divider border-t px-3 pt-2 pb-3">
-          <CommentComposer postId={post._id} focusKey={focusKey} />
-        </div>
-      </aside>
+      <TheaterPostPanel post={post} />
     </TheaterShell>
+  );
+}
+
+/**
+ * The theater's 360px right panel: header actions, the post (author, text,
+ * reactions, labelled Like/Comment/Share row), its comments and a pinned
+ * comment composer. Shared by the photo and video theaters.
+ */
+export function TheaterPostPanel({ post }: { post: PostView }) {
+  const [focusKey, setFocusKey] = useState(0);
+  return (
+    <aside className="flex w-[360px] shrink-0 flex-col bg-card text-primary">
+      <div className="flex h-14 shrink-0 items-center justify-end gap-2 px-4">
+        <HeaderActions />
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto border-divider border-t">
+        <div className="pt-1">
+          <PostHeader post={post} />
+        </div>
+        <PostContent
+          post={{ ...post, background: null, media: [], attachments: [], shared: null }}
+          expanded
+          smallText
+        />
+        <ActionBar
+          variant="labelled"
+          post={post}
+          onComment={() => setFocusKey((k) => k + 1)}
+          className="mx-3"
+        />
+        <CommentList postId={post._id} />
+      </div>
+      <div className="border-divider border-t px-3 pt-2 pb-3">
+        <CommentComposer postId={post._id} focusKey={focusKey} />
+      </div>
+    </aside>
   );
 }
 
 /** The theater while its post loads, or when it's gone. */
 export function PhotoViewerPlaceholder({
   unavailable,
+  label = "Photo",
   onClose,
 }: {
   unavailable?: boolean;
+  label?: string;
   onClose: () => void;
 }) {
   return (
-    <TheaterShell label="Photo" onClose={onClose}>
-      <Stage onClose={onClose}>
+    <TheaterShell label={label} onClose={onClose}>
+      <Stage onClose={onClose} tools={false}>
         {unavailable ? (
           <div className="max-w-md px-6 text-center text-white">
             <p className="font-bold text-[20px]">This content isn't available right now</p>
@@ -131,7 +144,7 @@ export function PhotoViewerPlaceholder({
   );
 }
 
-function TheaterShell({
+export function TheaterShell({
   label,
   onClose,
   children,
@@ -159,16 +172,22 @@ function TheaterShell({
   );
 }
 
-/** The black stage: zoom (with drag-to-pan), full screen, and the photo arrows. */
-function Stage({
+/**
+ * The black stage: close + logo, zoom (with drag-to-pan), full screen, and the
+ * photo arrows. Videos bring their own player controls, so they pass `tools={false}`.
+ */
+export function Stage({
   children,
   onClose,
   arrows,
   onStep,
   resetKey,
+  tools = true,
 }: {
   children: ReactNode;
   onClose: () => void;
+  /** Zoom and full screen (photos only). */
+  tools?: boolean;
   /** Zoom resets whenever this changes (the shown photo). */
   resetKey?: number;
   arrows?: boolean;
@@ -251,24 +270,26 @@ function Stage({
         <FacebookLogo size={40} />
       </div>
 
-      <div className="absolute top-2 right-4 flex items-center gap-1">
-        <StageTool
-          label="Zoom in"
-          disabled={zoom === ZOOM_STEPS.length - 1}
-          onClick={() => setStep(zoom + 1)}
-        >
-          <ZoomIn size={22} />
-        </StageTool>
-        <StageTool label="Zoom out" disabled={zoom === 0} onClick={() => setStep(zoom - 1)}>
-          <ZoomOut size={22} />
-        </StageTool>
-        <StageTool
-          label={fullscreen ? "Exit full screen" : "Enter full screen"}
-          onClick={toggleFullscreen}
-        >
-          {fullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
-        </StageTool>
-      </div>
+      {tools && (
+        <div className="absolute top-2 right-4 flex items-center gap-1">
+          <StageTool
+            label="Zoom in"
+            disabled={zoom === ZOOM_STEPS.length - 1}
+            onClick={() => setStep(zoom + 1)}
+          >
+            <ZoomIn size={22} />
+          </StageTool>
+          <StageTool label="Zoom out" disabled={zoom === 0} onClick={() => setStep(zoom - 1)}>
+            <ZoomOut size={22} />
+          </StageTool>
+          <StageTool
+            label={fullscreen ? "Exit full screen" : "Enter full screen"}
+            onClick={toggleFullscreen}
+          >
+            {fullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+          </StageTool>
+        </div>
+      )}
 
       {arrows && onStep && (
         <>

@@ -903,6 +903,7 @@ export const listings: readonly ListingSeed[] = [
     photos: "crash pad",
     hood: "Fremont",
     listed: daysAgo(1, "11:15"),
+    video: "indoor-climbing-tall",
     views: 198,
     groups: ["seattle-climbers"],
   },
@@ -981,6 +982,7 @@ export const listings: readonly ListingSeed[] = [
     hood: "Queen Anne",
     meetup: ["public"],
     listed: daysAgo(3, "21:00"),
+    video: "snowfall-wide",
     views: 233,
   },
   {
@@ -1209,6 +1211,7 @@ export const listings: readonly ListingSeed[] = [
     photos: "espresso machine",
     hood: "Capitol Hill",
     listed: daysAgo(6, "16:40"),
+    video: "espresso-routine-wide",
     views: 301,
   },
   {
@@ -1451,6 +1454,7 @@ export const listings: readonly ListingSeed[] = [
     photos: "stratocaster",
     hood: "Columbia City",
     listed: daysAgo(29, "19:45"),
+    video: "guitar-solo-tall",
     views: 312,
   },
   {
@@ -1465,6 +1469,7 @@ export const listings: readonly ListingSeed[] = [
     photos: "acoustic guitar",
     hood: "U District",
     listed: daysAgo(19, "14:15"),
+    video: "guitar-solo-wide",
     views: 108,
   },
   {
@@ -1600,6 +1605,7 @@ export const listings: readonly ListingSeed[] = [
     photos: "drum kit",
     hood: "Capitol Hill",
     listed: daysAgo(2, "21:10"),
+    video: "concert-wide",
     views: 96,
   },
   {

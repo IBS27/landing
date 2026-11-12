@@ -1,8 +1,8 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Clapperboard } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useM, useViewer } from "@/app/viewer";
-import { GlobeIcon } from "@/features/posts/icons";
+import { useM, useQ, useViewer } from "@/app/viewer";
+import { type Audience, AudienceChip } from "@/features/posts/Audience";
 import { uploadFile } from "@/features/posts/util";
 import { VideoPlayer } from "@/features/posts/VideoPlayer";
 import { captureVideoPoster, type ProbedVideo, probeVideo } from "@/features/posts/videoUpload";
@@ -27,6 +27,10 @@ export function CreateReelDialog({ open, onClose }: { open: boolean; onClose: ()
   const input = useRef<HTMLInputElement>(null);
   const [picked, setPicked] = useState<ProbedVideo | null>(null);
   const [text, setText] = useState("");
+  // Starts at Settings → Reels → "Default audience for reels"; the chip changes it per reel.
+  const reelsAudience = useQ(api.settings.get, open ? {} : "skip")?.prefs["reels-audience"];
+  const [audience, setAudience] = useState<Audience | null>(null);
+  const privacy: Audience = audience ?? (reelsAudience === "Friends" ? "friends" : "public");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [drag, setDrag] = useState(false);
@@ -36,6 +40,7 @@ export function CreateReelDialog({ open, onClose }: { open: boolean; onClose: ()
   const reset = () => {
     setPicked(null);
     setText("");
+    setAudience(null);
     setError(null);
     setBusy(false);
   };
@@ -76,6 +81,7 @@ export function CreateReelDialog({ open, onClose }: { open: boolean; onClose: ()
         height: picked.height,
         duration: Math.round(picked.duration * 10) / 10,
         text: text.trim() || undefined,
+        privacy,
       });
       const tall = picked.height > picked.width;
       reset();
@@ -147,9 +153,9 @@ export function CreateReelDialog({ open, onClose }: { open: boolean; onClose: ()
               <Avatar src={viewer.avatar} size={40} />
               <div>
                 <p className="font-semibold text-[15px] text-primary leading-5">{viewer.name}</p>
-                <p className="flex items-center gap-1 text-[13px] text-secondary">
-                  <GlobeIcon size={12} /> Public
-                </p>
+                <div className="mt-0.5">
+                  <AudienceChip value={privacy} onChange={setAudience} />
+                </div>
               </div>
             </div>
             <textarea

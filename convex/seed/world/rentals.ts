@@ -78,6 +78,7 @@ export const rentals: readonly ListingSeed[] = [
     photos: ["living room", "kitchen", "bedroom", "bathroom", "apartment building"],
     hood: "Fremont",
     listed: daysAgo(10, "11:00"),
+    video: "ship-canal-bridge-wide",
     views: 588,
     groups: ["seattle-apartments"],
     rental: {
@@ -631,6 +632,7 @@ export const rentals: readonly ListingSeed[] = [
     photos: ["living room", "kitchen", "bedroom", "bathroom"],
     hood: "Queen Anne",
     listed: daysAgo(16, "12:00"),
+    video: "rainier-timelapse-wide",
     views: 509,
     groups: ["seattle-apartments"],
     rental: {

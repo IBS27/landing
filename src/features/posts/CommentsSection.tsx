@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
-import { ChevronDown, X } from "lucide-react";
+import { ConvexError } from "convex/values";
+import { ChevronDown, MessageSquareLock, X } from "lucide-react";
 import { DropdownMenu as DM } from "radix-ui";
 import { type ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useM, useQ, useViewer } from "@/app/viewer";
@@ -246,6 +247,7 @@ function tagFor(c: CommentView, viewerId: string): Tag | null {
 
 function Thread({ thread, postId }: { thread: CommentThread; postId: Id<"posts"> }) {
   const viewer = useViewer();
+  const canReply = useCanComment(postId);
   const reveal = useReplyReveal(thread.replies);
   const [target, setTarget] = useState<ReplyTarget | null>(null);
   const answer = (c: CommentView) => {
@@ -255,7 +257,11 @@ function Thread({ thread, postId }: { thread: CommentThread; postId: Id<"posts">
 
   return (
     <div>
-      <CommentRow comment={thread} depth={1} onReply={() => answer(thread)} />
+      <CommentRow
+        comment={thread}
+        depth={1}
+        onReply={canReply ? () => answer(thread) : undefined}
+      />
       {reveal.visible.map((r) => (
         <ReplyBranch key={r._id} reply={r} postId={postId} />
       ))}
@@ -288,6 +294,7 @@ function Thread({ thread, postId }: { thread: CommentThread; postId: Id<"posts">
 /** A reply plus its own replies (third level), joined by the threading line. */
 function ReplyBranch({ reply, postId }: { reply: CommentReply; postId: Id<"posts"> }) {
   const viewer = useViewer();
+  const canReply = useCanComment(postId);
   const reveal = useReplyReveal(reply.replies);
   const [target, setTarget] = useState<ReplyTarget | null>(null);
   const answer = (c: CommentView) => {
@@ -297,7 +304,7 @@ function ReplyBranch({ reply, postId }: { reply: CommentReply; postId: Id<"posts
 
   const nested: { key: string; node: ReactNode }[] = reveal.visible.map((r) => ({
     key: r._id,
-    node: <CommentRow comment={r} depth={3} onReply={() => answer(r)} />,
+    node: <CommentRow comment={r} depth={3} onReply={canReply ? () => answer(r) : undefined} />,
   }));
   if (target)
     nested.push({
@@ -330,7 +337,11 @@ function ReplyBranch({ reply, postId }: { reply: CommentReply; postId: Id<"posts
             style={{ left: LINE_X, top: LINE_TOP }}
           />
         )}
-        <CommentRow comment={reply} depth={2} onReply={() => answer(reply)} />
+        <CommentRow
+          comment={reply}
+          depth={2}
+          onReply={canReply ? () => answer(reply) : undefined}
+        />
       </div>
       {nested.map((n, i) => (
         <div key={n.key} className="relative">
@@ -367,7 +378,8 @@ function CommentRow({
 }: {
   comment: CommentView;
   depth: Depth;
-  onReply: () => void;
+  /** Omitted when the viewer can't comment on the post (no Reply button). */
+  onReply?: () => void;
 }) {
   const rx = useOptimisticReaction("comment", comment._id, comment.reactions);
   const hover = useReactionHover();
@@ -503,13 +515,15 @@ function CommentRow({
           >
             <DislikeOutline size={16} />
           </button>
-          <button
-            type="button"
-            onClick={onReply}
-            className="rounded-md px-2 py-1 font-semibold text-[12px] text-secondary hover:bg-hover"
-          >
-            Reply
-          </button>
+          {onReply && (
+            <button
+              type="button"
+              onClick={onReply}
+              className="rounded-md px-2 py-1 font-semibold text-[12px] text-secondary hover:bg-hover"
+            >
+              Reply
+            </button>
+          )}
           {rx.count > 0 && (
             <span className="ml-1 flex items-center gap-1 text-[13px] text-secondary">
               <ReactionIcons types={rx.top.slice(0, 2)} size={16} ring={false} />
@@ -571,7 +585,29 @@ const QUICK_EMOJI = [
   "😎",
 ];
 
-export function CommentComposer({
+type ComposerProps = Parameters<typeof CommentForm>[0];
+
+/** False once we know the author limited who can comment and the viewer isn't included. */
+function useCanComment(postId: Id<"posts">) {
+  return !useQ(api.settings.commentRestriction, { postId });
+}
+
+/**
+ * "Write a comment…", or Facebook's note in its place when the author limited
+ * who can comment on their public post ("Who can comment on your public posts?").
+ */
+export function CommentComposer(props: ComposerProps) {
+  const limitedBy = useQ(api.settings.commentRestriction, { postId: props.postId });
+  if (!limitedBy) return <CommentForm {...props} />;
+  return (
+    <div role="note" className="flex items-center gap-2 py-2 text-[13px] text-secondary leading-4">
+      <MessageSquareLock size={16} className="shrink-0 text-icon-secondary" aria-hidden />
+      <span>{limitedBy} limited who can comment on this post.</span>
+    </div>
+  );
+}
+
+function CommentForm({
   postId,
   parentId,
   tag: initialTag = null,
@@ -603,6 +639,7 @@ export function CommentComposer({
   const [text, setText] = useState("");
   const [photo, setPhoto] = useState<{ file: File; preview: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [tag, setTag] = useState(initialTag);
   const [tagWidth, setTagWidth] = useState(0);
   const tagRef = useRef<HTMLSpanElement>(null);
@@ -624,6 +661,7 @@ export function CommentComposer({
   const submit = async () => {
     if (!canSend) return;
     setBusy(true);
+    setError(null);
     try {
       let upload: { storageId: Id<"_storage">; width?: number; height?: number } | undefined;
       if (photo) {
@@ -641,6 +679,12 @@ export function CommentComposer({
       setText("");
       setPhoto(null);
       onDone?.();
+    } catch (e) {
+      setError(
+        e instanceof ConvexError && typeof e.data === "string"
+          ? e.data
+          : "Your comment couldn't be posted. Try again.",
+      );
     } finally {
       setBusy(false);
     }
@@ -775,6 +819,11 @@ export function CommentComposer({
             </button>
           </div>
         </div>
+        {error && (
+          <p role="alert" className="px-3 pt-1 text-[13px] text-negative">
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );

@@ -173,6 +173,19 @@ export default defineSchema({
     sponsored: v.optional(v.boolean()),
     /** Short vertical videos shown in Reels (a single 9:16 video). */
     isReel: v.optional(v.boolean()),
+    /**
+     * Live video broadcasts: set while the author is live (`endedAt` unset)
+     * and after it ends. The host's heartbeat refreshes `lastSeenAt`; a
+     * scheduled check ends broadcasts whose host went away.
+     */
+    live: v.optional(
+      v.object({
+        title: v.optional(v.string()),
+        startedAt: v.number(),
+        lastSeenAt: v.number(),
+        endedAt: v.optional(v.number()),
+      }),
+    ),
     reactionCount: v.number(),
     commentCount: v.number(),
     shareCount: v.number(),
@@ -445,7 +458,8 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_user", ["userId", "createdAt"])
-    .index("by_user_unseen", ["userId", "seen"]),
+    .index("by_user_unseen", ["userId", "seen"])
+    .index("by_post", ["postId"]),
 
   /** Settings & privacy choices, one row per user. Missing fields mean Facebook's defaults. */
   userSettings: defineTable({
@@ -499,12 +513,21 @@ export default defineSchema({
     .index("by_post", ["postId"])
     .index("by_user_post", ["userId", "postId"]),
 
-  /** Content reports (posts, messages) and call problem reports filed by `userId`, with the reason they picked. */
+  /** Content reports (posts, messages, listings), "Report a problem" and call problem reports filed by `userId`, with the reason they picked. */
   reports: defineTable({
     userId: v.id("users"),
-    targetType: v.union(v.literal("post"), v.literal("message"), v.literal("call")),
+    targetType: v.union(
+      v.literal("post"),
+      v.literal("message"),
+      v.literal("call"),
+      v.literal("listing"),
+      v.literal("problem"),
+    ),
     targetId: v.string(),
     reason: v.string(),
+    /** "Report a problem": what happened, and whether a screenshot was included. */
+    details: v.optional(v.string()),
+    screenshot: v.optional(v.boolean()),
     createdAt: v.number(),
   }).index("by_user_target", ["userId", "targetType", "targetId"]),
 

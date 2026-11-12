@@ -3,7 +3,6 @@ import type { FunctionReturnType } from "convex/server";
 import {
   ChevronDown,
   CircleCheck,
-  Clock,
   Link2,
   Lock,
   MapPin,
@@ -39,7 +38,7 @@ import {
 import { statsLine } from "./EventCard";
 import { GuestsDialog, InviteDialog } from "./EventDialogs";
 import { EventsLayout, EventsRail } from "./EventsRail";
-import { duration, hideBroken, longDate } from "./format";
+import { hideBroken, longDate } from "./format";
 import { StaticMap } from "./StaticMap";
 
 type EventView = NonNullable<FunctionReturnType<typeof api.events.get>>;
@@ -388,7 +387,6 @@ function DetailsCard({ event, onGuests }: { event: EventView; onGuests: () => vo
   const [expanded, setExpanded] = useState(false);
   const responded = event.goingCount + event.interestedCount;
   const privacy = privacyLine(event);
-  const dur = duration(event.startAt, event.endAt);
   const long = event.description.length > 320;
   const desc = expanded || !long ? event.description : event.description.slice(0, 300).trimEnd();
 
@@ -446,14 +444,13 @@ function DetailsCard({ event, onGuests }: { event: EventView; onGuests: () => vo
             rel="noopener noreferrer"
             className="hover:underline"
           >
-            Tickets{event.tickets.price && ` · ${event.tickets.price}`}
+            Tickets
           </a>
           <span className="block text-[13px] text-secondary leading-4">
             via {event.tickets.provider}
           </span>
         </Row>
       )}
-      {dur && <Row icon={<Clock size={20} />}>Duration: {dur}</Row>}
       <Row icon={privacy.icon}>{privacy.text}</Row>
       {event.description && (
         <p className="mt-3 whitespace-pre-line text-[15px] text-primary leading-5">

@@ -5,6 +5,7 @@ import { isBlockedEitherWay } from "./lib/blocks";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { notify } from "./lib/notify";
 import { canView, loadAudience } from "./lib/posts";
+import { canCommentOn } from "./lib/settings";
 import { getSummaries, userSummary } from "./lib/users";
 import { reactionSummary } from "./reactions";
 
@@ -169,6 +170,12 @@ export const add = viewerMutation({
     if (!post) throw new ConvexError("Post not found");
     if (await isBlockedEitherWay(ctx, ctx.viewer._id, post.authorId))
       throw new ConvexError("You can't comment on this post.");
+    if (!(await canCommentOn(ctx, post, ctx.viewer._id))) {
+      const author = await ctx.db.get(post.authorId);
+      throw new ConvexError(
+        `${author?.name ?? "The author"} limited who can comment on this post.`,
+      );
+    }
     // Replying at the deepest level adds a sibling (tagged with the person answered).
     const answered = replyingTo ? await ctx.db.get(replyingTo) : null;
     if (replyingTo && (!answered || answered.postId !== postId))

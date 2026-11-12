@@ -32,11 +32,13 @@ import { backgroundFor } from "./backgrounds";
 import { CommentsSection, GroupCommentPreview } from "./CommentsSection";
 import { CreatePostModal, FEELINGS } from "./CreatePostModal";
 import { BookmarkOutline, CaretRight, CloseIcon, DotsIcon, GroupAudienceIcon } from "./icons";
+import { LivePostMedia } from "./LivePost";
 import { PhotoGrid } from "./PhotoGrid";
 import { PostDialog } from "./PostDialog";
 import { usePhotoTheater } from "./photoTheater";
 import type { PostView, UserSummary } from "./types";
 import { groupParams, isLargeText, postUrl, truncate } from "./util";
+import { useVideoTheater } from "./videoTheaterNav";
 import { viewsLabel } from "./views";
 
 /**
@@ -128,6 +130,9 @@ export function PostHeader({
   metaSuffix?: ReactNode;
 }) {
   const author = <NameLink user={post.author} />;
+  const openVideo = useVideoTheater();
+  // A video post's timestamp opens the video theater, like Facebook's /watch?v= links.
+  const video = post.media.length === 1 && post.media[0].kind === "video";
   const meta = (
     <span className="flex items-center gap-1 font-semibold text-[13px] text-secondary leading-4">
       {post.sponsored ? (
@@ -140,13 +145,28 @@ export function PostHeader({
         </Link>
       ) : (
         <Tooltip content={fullTimestamp(post.createdAt)} side="bottom">
-          <Link
-            to="/$username/posts/$postId"
-            params={{ username: post.author.username, postId: post._id }}
-            className="hover:underline"
-          >
-            {postTime(post.createdAt)}
-          </Link>
+          {video ? (
+            <Link
+              to="/watch"
+              search={{ v: post._id }}
+              onClick={(e) => {
+                if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                e.preventDefault();
+                openVideo(post._id);
+              }}
+              className="hover:underline"
+            >
+              {postTime(post.createdAt)}
+            </Link>
+          ) : (
+            <Link
+              to="/$username/posts/$postId"
+              params={{ username: post.author.username, postId: post._id }}
+              className="hover:underline"
+            >
+              {postTime(post.createdAt)}
+            </Link>
+          )}
         </Tooltip>
       )}
       <span aria-hidden>·</span>
@@ -319,6 +339,7 @@ function Activity({ post }: { post: PostView }) {
         <span className="font-semibold">{post.place}</span>
       </span>,
     );
+  if (post.live) return <span> {post.live.endedAt === null ? "is live now." : "was live."}</span>;
   if (parts.length === 0) return null;
   return (
     <span className="text-primary">
@@ -508,7 +529,7 @@ export function PostContent({
   const bg = backgroundFor(post.background);
   const text = post.text ?? "";
   const cut = expanded || showAll ? null : truncate(text);
-  const large = !smallText && isLargeText(post);
+  const large = !smallText && !post.live && isLargeText(post);
 
   return (
     <>
@@ -544,6 +565,7 @@ export function PostContent({
           </div>
         )
       )}
+      {post.live && <LivePostMedia post={{ ...post, live: post.live }} />}
       {post.media.length > 0 && (
         <PhotoGrid
           media={post.media}

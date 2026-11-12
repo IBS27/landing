@@ -3,7 +3,14 @@ import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { dmBlockNotice } from "./lib/blocks";
 import { viewerMutation, viewerQuery } from "./lib/functions";
-import { getSettings, LANGUAGES, PREFS, settingsRow } from "./lib/settings";
+import {
+  canCommentOn,
+  canPostOnProfile,
+  getSettings,
+  LANGUAGES,
+  PREFS,
+  settingsRow,
+} from "./lib/settings";
 import { friendIds, userSummary } from "./lib/users";
 import {
   friendRequestAudience,
@@ -64,6 +71,27 @@ export const setPref = viewerMutation({
     if (!p?.options.includes(value)) throw new ConvexError("Unknown setting");
     const prefs = (await settingsRow(ctx, ctx.viewer._id))?.prefs ?? {};
     await save(ctx, ctx.viewer._id, { prefs: { ...prefs, [key]: value } });
+  },
+});
+
+/* ---------------- Enforced privacy ---------------- */
+
+/** Whether the viewer may write on `userId`'s profile ("Who can post on your profile?"). */
+export const canPostOnTimeline = viewerQuery({
+  args: { userId: v.id("users") },
+  handler: (ctx, { userId }) => canPostOnProfile(ctx, userId, ctx.viewer._id),
+});
+
+/**
+ * The author's name when they limited who can comment on this post and the
+ * viewer isn't included ("Who can comment on your public posts?"); else null.
+ */
+export const commentRestriction = viewerQuery({
+  args: { postId: v.id("posts") },
+  handler: async (ctx, { postId }) => {
+    const post = await ctx.db.get(postId);
+    if (!post || (await canCommentOn(ctx, post, ctx.viewer._id))) return null;
+    return (await ctx.db.get(post.authorId))?.name ?? null;
   },
 });
 

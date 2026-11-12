@@ -250,8 +250,32 @@ export function useDominantColor(url: string | undefined) {
   return color;
 }
 
+/**
+ * Facebook's letterbox bars stay dark and muted even behind a bright or foggy
+ * photo (a dark olive behind a sunlit yard, a dark slate behind a pink sky): the
+ * dominant colour with its HSL lightness capped at 27% and saturation at 45%.
+ */
+function letterboxTone(color: string | null | undefined) {
+  const m = color?.match(/\d+/g);
+  if (!m) return color;
+  const [r, g, b] = m.map((v) => Number(v) / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  let h = 0;
+  if (d !== 0) {
+    if (max === r) h = ((g - b) / d + 6) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+  }
+  const pct = (v: number) => `${Math.round(v * 1000) / 10}%`;
+  return `hsl(${Math.round(h * 60)} ${pct(Math.min(s, 0.45))} ${pct(Math.min(l, 0.27))})`;
+}
+
 function LetterboxFill({ url }: { url: string }) {
-  const color = useDominantColor(url);
+  const color = letterboxTone(useDominantColor(url));
   if (!color) return null;
   return <span aria-hidden className="absolute inset-0" style={{ backgroundColor: color }} />;
 }
@@ -273,7 +297,7 @@ function SingleVideo({
   blackFill?: boolean;
   postId?: string;
 }) {
-  const fill = useDominantColor(ratio < 1.2 && !blackFill ? item.poster : undefined);
+  const fill = letterboxTone(useDominantColor(ratio < 1.2 && !blackFill ? item.poster : undefined));
   return (
     <VideoPlayer
       src={item.url}

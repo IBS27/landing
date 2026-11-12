@@ -63,13 +63,14 @@ function PicksHeader({ title = "Today's picks" }: { title?: string }) {
 /** /marketplace — Browse all: Today's picks. */
 export function BrowsePage() {
   const { data, onMore } = useBrowse({ search: {} });
+  const ads = useQ(api.listings.ads, {});
   return (
     <MpShell rail={<MainRail active="browse" />}>
       <div className="pb-3">
         <PicksHeader />
       </div>
       <div>
-        <ListingGrid data={data} onMore={onMore} />
+        <ListingGrid data={data} onMore={onMore} ads={ads} />
       </div>
     </MpShell>
   );

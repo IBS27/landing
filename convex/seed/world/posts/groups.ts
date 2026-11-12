@@ -2227,7 +2227,7 @@ export const groupPosts: readonly PostSeed[] = [
     photos: ["commuter bike"],
     reactions: 6,
     comments: [
-      { by: "maddie.collins", text: "fenders non-negotiable, correct", after: 30 },
+      { by: "marcus.bell", text: "fenders non-negotiable, correct", after: 30 },
       {
         by: "derek.holloway",
         text: "Would you take $300?",

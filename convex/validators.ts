@@ -187,6 +187,7 @@ export const notificationKind = v.union(
   v.literal("listing_saved"),
   v.literal("birthday"),
   v.literal("memory"),
+  v.literal("live"),
 );
 
 /** Settings → Notifications categories (each maps to one or more notification kinds). */

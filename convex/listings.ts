@@ -157,10 +157,23 @@ function matches(
   return true;
 }
 
+/**
+ * "Recommended" ranking: recent listings first, but each listing carries a
+ * stable per-listing offset of up to three days, so the grid mixes fresh and
+ * slightly older items the way Facebook's picks do instead of reading as a
+ * strict newest-first list. Keyed on the title, so it is stable across
+ * reloads, pages and reseeds.
+ */
+function recommendScore(l: Doc<"listings">) {
+  let h = 2166136261;
+  for (let i = 0; i < l.title.length; i++) h = Math.imul(h ^ l.title.charCodeAt(i), 16777619);
+  return l.createdAt - ((h >>> 0) / 0xffffffff) * 3 * DAY;
+}
+
 function sortListings(rows: Doc<"listings">[], sort: SortOrder, nearBy: Near | undefined) {
   const dist = (l: Doc<"listings">) => distanceTo(l, nearBy) ?? 0;
   const by: Record<SortOrder, (a: Doc<"listings">, b: Doc<"listings">) => number> = {
-    recommended: (a, b) => b.createdAt - a.createdAt,
+    recommended: (a, b) => recommendScore(b) - recommendScore(a),
     newest: (a, b) => b.createdAt - a.createdAt,
     price_asc: (a, b) => a.price - b.price || b.createdAt - a.createdAt,
     price_desc: (a, b) => b.price - a.price || b.createdAt - a.createdAt,
@@ -215,7 +228,7 @@ export const browse = viewerQuery({
         .take(256);
       rows = rows.filter(accept);
       if (sort !== "recommended") rows = sortListings(rows, sort, args.near);
-    } else if (sort === "recommended" || sort === "newest") {
+    } else if (sort === "newest") {
       // Newest first straight off the index; stop as soon as the page is full.
       const source = single
         ? ctx.db
@@ -883,5 +896,104 @@ export const photoUrl = viewerMutation({
     const url = await ctx.storage.getUrl(storageId);
     if (!url) throw new ConvexError("Upload failed");
     return url;
+  },
+});
+
+/* ───────────────────────── Sponsored (ads in Marketplace) ───────────────────────── */
+
+export type MarketplaceAd = {
+  postId: Id<"posts">;
+  page: Pick<UserSummary, "_id" | "name" | "username" | "avatar" | "verified">;
+  /** The Page's tagline (falls back to the ad headline). */
+  tagline: string;
+  headline: string;
+  image: string;
+  video: boolean;
+};
+
+/** First sentence of an ad's copy, for a headline when it has no link title. */
+function firstSentence(text: string) {
+  const s = text.split(/(?<=[.!?])\s/)[0] ?? text;
+  return s.length > 90 ? `${s.slice(0, 87).trimEnd()}...` : s;
+}
+
+/**
+ * Sponsored Page posts shown as Marketplace ads (grid tiles and the "Ad" block
+ * on item pages), newest first, minus ads the viewer hid or reported.
+ */
+export const ads = viewerQuery({
+  args: {},
+  handler: async (ctx): Promise<MarketplaceAd[]> => {
+    const viewerId = ctx.viewer._id;
+    const hidden = new Set(
+      (
+        await ctx.db
+          .query("hiddenPosts")
+          .withIndex("by_user_post", (q) => q.eq("userId", viewerId))
+          .collect()
+      ).map((r) => r.postId),
+    );
+    const out: MarketplaceAd[] = [];
+    let scanned = 0;
+    for await (const p of ctx.db.query("posts").withIndex("by_created").order("desc")) {
+      if (++scanned > MAX_SCAN || out.length >= 6) break;
+      if (p.sponsored !== true || p.privacy !== "public" || hidden.has(p._id)) continue;
+      const link = p.attachments.find((a) => a.kind === "link");
+      const m = p.media[0];
+      const image = m ? (m.kind === "video" ? m.poster : m.url) : link?.image;
+      if (!image) continue;
+      const page = await ctx.db.get(p.authorId);
+      if (page?.kind !== "page") continue;
+      if (await isBlockedEitherWay(ctx, viewerId, page._id)) continue;
+      const headline = link?.title ?? firstSentence(p.text ?? page.name);
+      out.push({
+        postId: p._id,
+        page: {
+          _id: page._id,
+          name: page.name,
+          username: page.username,
+          avatar: page.avatar,
+          verified: page.verified,
+        },
+        tagline: page.bio ?? headline,
+        headline,
+        image,
+        video: m?.kind === "video",
+      });
+    }
+    return out;
+  },
+});
+
+/**
+ * "Hide ad" / "Report ad" from a Marketplace ad's menu (hidden for this viewer
+ * only). `hidden: false` undoes it.
+ */
+export const hideAd = viewerMutation({
+  args: {
+    postId: v.id("posts"),
+    reason: v.union(v.literal("hidden"), v.literal("reported")),
+    hidden: v.optional(v.boolean()),
+  },
+  handler: async (ctx, { postId, reason, hidden = true }) => {
+    const viewerId = ctx.viewer._id;
+    const post = await ctx.db.get(postId);
+    if (!post?.sponsored) throw new ConvexError("Ad not found");
+    const row = await ctx.db
+      .query("hiddenPosts")
+      .withIndex("by_user_post", (q) => q.eq("userId", viewerId).eq("postId", postId))
+      .first();
+    if (!hidden) {
+      if (row) await ctx.db.delete(row._id);
+      return;
+    }
+    if (row) await ctx.db.patch(row._id, { reason });
+    else
+      await ctx.db.insert("hiddenPosts", {
+        userId: viewerId,
+        postId,
+        reason,
+        createdAt: Date.now(),
+      });
   },
 });

@@ -38,7 +38,12 @@ export function PostsTab() {
   const sticky = useStickyColumn();
   const [filters, setFilters] = useState<Filters>({ postedBy: "anyone", year: undefined });
   const [view, setView] = useState<"list" | "grid">("list");
-  const canPost = isSelf || relation === "friend";
+  // "Who can post on your profile?" (Friends / Only me) decides whether friends get the composer.
+  const wallOpen = useQ(
+    api.settings.canPostOnTimeline,
+    isSelf || relation !== "friend" ? "skip" : { userId: user._id },
+  );
+  const canPost = isSelf || (relation === "friend" && wallOpen === true);
 
   return (
     <div className="flex items-start gap-4 max-[899px]:flex-col">

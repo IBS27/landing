@@ -2,6 +2,7 @@ import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { viewerMutation, viewerQuery } from "./lib/functions";
+import { activityLabel, externalPostsPerDay } from "./lib/groupActivity";
 import { notify } from "./lib/notify";
 import { enrichPosts, loadAudience } from "./lib/posts";
 import { friendIds, getSummaries, type UserSummary, userSummary } from "./lib/users";
@@ -40,15 +41,6 @@ async function requireGroup(ctx: QueryCtx, groupId: Id<"groups">) {
   return g;
 }
 
-/**
- * Members outside the seeded world post too. Like `externalMemberCount`, their
- * activity is an estimate that scales with group size (about one post a day
- * per 4,000 members); seeded posts are counted exactly on top.
- */
-function externalPostsPerDay(g: Doc<"groups">) {
-  return g.externalMemberCount / 4000;
-}
-
 async function postStats(ctx: QueryCtx, g: Doc<"groups">) {
   const now = Date.now();
   const startOfDay = new Date(now).setHours(0, 0, 0, 0);
@@ -69,15 +61,6 @@ async function postStats(ctx: QueryCtx, g: Doc<"groups">) {
     perDay: month.length / 30 + ext,
     lastActiveAt: Math.max(g.lastActivityAt, latest?.createdAt ?? 0, g.createdAt),
   };
-}
-
-/** "10+ posts a day", "4 posts a day", "8 posts a month". */
-function activityLabel(perDay: number) {
-  if (perDay >= 10) return "10+ posts a day";
-  if (perDay >= 1) return `${Math.round(perDay)} posts a day`;
-  if (perDay * 7 >= 1) return `${Math.round(perDay * 7)} posts a week`;
-  const m = Math.max(1, Math.round(perDay * 30));
-  return `${m} ${m === 1 ? "post" : "posts"} a month`;
 }
 
 async function groupMembers(ctx: QueryCtx, groupId: Id<"groups">) {

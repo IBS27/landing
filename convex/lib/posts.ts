@@ -77,6 +77,8 @@ export type PostView = {
   shareCount: number;
   /** A Page ad: the header reads "Ad" and the link strip gets a call-to-action button. */
   sponsored: boolean;
+  /** A live video broadcast: live while `endedAt` is null. */
+  live: { title: string | null; startedAt: number; endedAt: number | null } | null;
   viewerSaved: boolean;
   /** "Turn on notifications for this post" is on for the viewer. */
   viewerSubscribed: boolean;
@@ -255,6 +257,13 @@ export async function enrichPost(
     commentCount: post.commentCount,
     shareCount: post.shareCount,
     sponsored: post.sponsored === true,
+    live: post.live
+      ? {
+          title: post.live.title ?? null,
+          startedAt: post.live.startedAt,
+          endedAt: post.live.endedAt ?? null,
+        }
+      : null,
     viewerSaved,
     viewerSubscribed: sub !== null,
     viewerFollowsAuthor: isAuthor || a.friends.has(post.authorId),

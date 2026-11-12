@@ -72,16 +72,6 @@ export function longDate(start: number, end: number | null, now = Date.now()) {
   return `${date} at ${clock(start)}`;
 }
 
-/** "Duration: 3 hr", "Duration: 1 hr 30 min", "Duration: 2 days". */
-export function duration(start: number, end: number | null) {
-  if (!end) return null;
-  const min = Math.round((end - start) / 60_000);
-  if (min >= 24 * 60) return `${Math.round(min / (24 * 60))} days`;
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  return [h ? `${h} hr` : "", m ? `${m} min` : ""].filter(Boolean).join(" ");
-}
-
 export function monthShort(ts: number) {
   return fmt(ts, { month: "short" }).toUpperCase();
 }

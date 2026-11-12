@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { viewerQuery } from "./lib/functions";
+import { activityLabel, externalPostsPerDay } from "./lib/groupActivity";
 import { type Audience, canView, enrichPosts, loadAudience } from "./lib/posts";
 import { friendIds } from "./lib/users";
 
@@ -40,8 +41,8 @@ export type GroupResult = {
   cover: string;
   privacy: "public" | "private";
   memberCount: number;
-  /** Posts in the last 30 days, for "10+ posts a day". */
-  recentPosts: number;
+  /** "10+ posts a day" (seeded posts in the last 30 days plus the estimate for outside members). */
+  activity: string;
   joined: boolean;
 };
 
@@ -166,7 +167,7 @@ async function groupResult(ctx: QueryCtx, a: Audience, g: Doc<"groups">): Promis
     cover: g.cover,
     privacy: g.privacy,
     memberCount: g.memberCount,
-    recentPosts: recent.length,
+    activity: activityLabel(recent.length / 30 + externalPostsPerDay(g)),
     joined: a.groups.has(g._id),
   };
 }

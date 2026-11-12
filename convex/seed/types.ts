@@ -255,6 +255,8 @@ export type ListingSeed = {
   readonly vehicle?: Doc<"listings">["vehicle"];
   /** The price before the seller lowered it (shown struck through). */
   readonly originalPrice?: number;
+  /** A short clip the seller added; it leads the item gallery and badges the grid tile. */
+  readonly video?: VideoClip;
 };
 
 // ---------------------------------------------------------------------------

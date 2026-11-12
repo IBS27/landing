@@ -18,7 +18,10 @@ type Person = FunctionReturnType<typeof api.messenger.searchPeople>["people"][nu
 /**
  * "New message": a "To:" field with recipient chips and suggestions. With
  * recipients chosen it shows the existing thread with them, or an empty one
- * that is created on first send (a group when there are several people).
+ * that is created on first send (a group when there are several people). In
+ * the chat dock a new thread's window stays blank, like Facebook's, until the
+ * user moves on to writing (Enter or Tab in the empty "To:" field, or a click
+ * in the window).
  */
 export function NewMessage({
   variant,
@@ -34,6 +37,7 @@ export function NewMessage({
   const navigate = useNavigate();
   const [to, setTo] = useState<Person[]>([]);
   const [q, setQ] = useState("");
+  const [writing, setWriting] = useState(variant === "page");
   const inputRef = useRef<HTMLInputElement>(null);
   const results = useQ(api.messenger.searchPeople, { q });
   const existing = useQ(
@@ -52,6 +56,12 @@ export function NewMessage({
   // Meta AI leads the suggestions, like Facebook's "New message" list.
   const showMetaAI =
     to.length === 0 && (!term || "meta ai".startsWith(term) || term.startsWith("meta"));
+
+  const remove = (id: Id<"users">) => {
+    const next = to.filter((x) => x._id !== id);
+    setTo(next);
+    if (next.length === 0 && variant === "dock") setWriting(false);
+  };
 
   const add = (p: Person) => {
     setTo((t) => [...t, p]);
@@ -83,7 +93,7 @@ export function NewMessage({
             <button
               type="button"
               aria-label={`Remove ${p.name}`}
-              onClick={() => setTo((t) => t.filter((x) => x._id !== p._id))}
+              onClick={() => remove(p._id)}
               className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-hover"
             >
               <X size={16} strokeWidth={2.5} />
@@ -95,11 +105,16 @@ export function NewMessage({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Backspace" && !q && to.length) setTo((t) => t.slice(0, -1));
+            if (e.key === "Backspace" && !q && to.length) remove(to[to.length - 1]._id);
             if (e.key === "Enter") {
               e.preventDefault();
               const first = results?.people.find((p) => !chosen.has(p._id));
               if (first && q.trim()) add(first);
+              else if (!q.trim() && to.length) setWriting(true);
+            }
+            if (e.key === "Tab" && !e.shiftKey && !q.trim() && to.length && !writing) {
+              e.preventDefault();
+              setWriting(true);
             }
           }}
           // biome-ignore lint/a11y/noAutofocus: the To: field is focused when composing, like Facebook
@@ -176,6 +191,8 @@ export function NewMessage({
         <div className="flex-1" />
       ) : existing ? (
         <ExistingThread id={existing} variant={variant} onSent={onConversation} />
+      ) : !writing || existing === undefined ? (
+        <div className="flex-1 cursor-text" onClick={() => existing === null && setWriting(true)} />
       ) : (
         <>
           <div className="flex-1" />
