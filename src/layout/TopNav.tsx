@@ -20,14 +20,17 @@ const TABS: Tab[] = [
   { to: "/", label: "Home", Icon: HomeIcon, match: (p) => p === "/" },
   { to: "/friends", label: "Friends", Icon: FriendsIcon, match: (p) => p.startsWith("/friends") },
   {
-    to: "/watch",
-    label: "Video",
+    to: "/reel",
+    label: "Reels",
     Icon: VideoIcon,
     match: (p) => p.startsWith("/watch") || p.startsWith("/reel"),
   },
   { to: "/groups/feed", label: "Groups", Icon: GroupsIcon, match: (p) => p.startsWith("/groups") },
   { to: "/gaming", label: "Gaming", Icon: GamingIcon, match: (p) => p.startsWith("/gaming") },
 ];
+
+/** Facebook shrinks the header search to an icon on these sections. */
+const COLLAPSED_SEARCH = ["/groups", "/gaming", "/messages"];
 
 export function TopNav() {
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -37,7 +40,7 @@ export function TopNav() {
         <Link to="/" aria-label="Facebook" className="shrink-0">
           <FacebookLogo size={40} />
         </Link>
-        <SearchBox />
+        <SearchBox collapsed={COLLAPSED_SEARCH.some((prefix) => path.startsWith(prefix))} />
       </div>
 
       <nav aria-label="Facebook" className="flex h-full min-w-0 flex-1 justify-center">

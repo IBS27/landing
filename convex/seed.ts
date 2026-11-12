@@ -55,6 +55,14 @@ export const insertFriendships = internalMutation({
   args: { rows: v.array(T.friendships.validator) },
   handler: (ctx, { rows }) => insertAll(ctx, "friendships", rows),
 });
+export const insertFollows = internalMutation({
+  args: {
+    rows: v.array(
+      v.object({ userId: v.id("users"), targetId: v.id("users"), createdAt: v.number() }),
+    ),
+  },
+  handler: (ctx, { rows }) => insertAll(ctx, "follows", rows),
+});
 export const insertFriendRequests = internalMutation({
   args: { rows: v.array(T.friendRequests.validator) },
   handler: (ctx, { rows }) => insertAll(ctx, "friendRequests", rows),
@@ -252,6 +260,21 @@ export const reset = internalAction({
           { userId: uid(f.a), friendId: uid(f.b), createdAt: f.createdAt },
           { userId: uid(f.b), friendId: uid(f.a), createdAt: f.createdAt },
         ]),
+      }),
+      // Page follows: the main persona follows every Page; others follow a stable ~70% subset.
+      ctx.runMutation(internal.seed.insertFollows, {
+        rows: plan.users
+          .filter((u) => u.row.kind !== "page")
+          .flatMap((person, i) =>
+            plan.users
+              .filter((u) => u.row.kind === "page")
+              .filter((_page, j) => i === 0 || (i * 7 + j * 3) % 10 >= 3)
+              .map((page) => ({
+                userId: uid(person.handle),
+                targetId: uid(page.handle),
+                createdAt: person.row.joinedAt,
+              })),
+          ),
       }),
       ctx.runMutation(internal.seed.insertFriendRequests, {
         rows: plan.friendRequests.map((q) => ({

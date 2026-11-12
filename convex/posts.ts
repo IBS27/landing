@@ -46,6 +46,7 @@ export const byTimeline = viewerQuery({
       .filterWith(
         async (p) =>
           !p.groupId &&
+          !p.eventId &&
           (!p.timelineUserId || p.timelineUserId === userId) &&
           (await canView(ctx, p, a)),
       );

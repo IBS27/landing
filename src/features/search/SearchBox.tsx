@@ -34,7 +34,8 @@ function IconCircle({ children, blue }: { children: ReactNode; blue?: boolean })
  * Header search. Focusing it opens Facebook's overlay: the logo turns into a
  * back arrow and a 320px panel shows recent searches, or typeahead results.
  */
-export function SearchBox() {
+/** `collapsed` renders the round icon Facebook shows on Groups, Gaming and Messenger. */
+export function SearchBox({ collapsed = false }: { collapsed?: boolean }) {
   const location = useRouterState({ select: (s) => s.location });
   const searchQ = (location.search as { q?: unknown }).q;
   const routeQ =
@@ -190,16 +191,30 @@ export function SearchBox() {
 
   return (
     <>
-      {/* Resting pill; while open, the overlay below draws its own copy on top. */}
-      <div
-        className={cn(
-          "flex h-10 w-[240px] items-center rounded-full bg-input pl-3",
-          open && "invisible",
-        )}
-      >
-        <Search size={16} strokeWidth={2.4} className="shrink-0 text-icon-secondary" />
-        {!open && input}
-      </div>
+      {/* Resting pill (or icon); while open, the overlay below draws its own copy on top. */}
+      {collapsed ? (
+        <button
+          type="button"
+          aria-label="Search Facebook"
+          onClick={() => setOpen(true)}
+          className={cn(
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-input text-icon-secondary hover:brightness-95",
+            open && "invisible",
+          )}
+        >
+          <Search size={16} strokeWidth={2.4} />
+        </button>
+      ) : (
+        <div
+          className={cn(
+            "flex h-10 w-[240px] items-center rounded-full bg-input pl-3",
+            open && "invisible",
+          )}
+        >
+          <Search size={16} strokeWidth={2.4} className="shrink-0 text-icon-secondary" />
+          {!open && input}
+        </div>
+      )}
 
       {open && (
         <div

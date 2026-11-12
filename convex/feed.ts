@@ -23,7 +23,7 @@ function feedStream(ctx: QueryCtx, a: Audience, src: Source) {
         .query("posts")
         .withIndex("by_author", (q) => q.eq("authorId", authorId))
         .order("desc")
-        .filterWith(async (p) => !p.groupId && (await canView(ctx, p, a))),
+        .filterWith(async (p) => !p.groupId && !p.eventId && (await canView(ctx, p, a))),
     );
   for (const groupId of src.groups)
     streams.push(
@@ -45,16 +45,13 @@ function feedStream(ctx: QueryCtx, a: Audience, src: Source) {
 
 const emptyPage = { page: [], isDone: true, continueCursor: "" };
 
-/**
- * Pages the viewer follows. There is no follows table yet, so every Page in
- * this small world counts as followed (plus any the viewer befriended).
- */
+/** Pages the viewer follows (Follow / Like on a Page). */
 async function followedPages(ctx: QueryCtx, a: Audience) {
-  const users = await ctx.db
-    .query("users")
-    .withIndex("by_persona", (q) => q.eq("isPersona", false))
+  const rows = await ctx.db
+    .query("follows")
+    .withIndex("by_user", (q) => q.eq("userId", a.viewerId))
     .collect();
-  return users.filter((u) => u.kind === "page" && !a.friends.has(u._id)).map((u) => u._id);
+  return rows.map((r) => r.targetId).filter((id) => !a.friends.has(id));
 }
 
 /** Home News Feed: friends, followed Pages, joined groups and the viewer, newest first. */
