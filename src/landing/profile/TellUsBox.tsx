@@ -1,6 +1,7 @@
 import { useAction } from "convex/react";
 import { Check, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { useViewerContext } from "@/app/viewer";
 import { cn } from "@/lib/format";
 import { Button, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -16,6 +17,7 @@ const MAX = 1000;
  */
 export function TellUsBox({ onAdd }: { onAdd: (picked: Proposal[]) => void }) {
   const suggest = useAction(api.cityProfile.suggestFromText);
+  const { viewerId } = useViewerContext();
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +29,8 @@ export function TellUsBox({ onAdd }: { onAdd: (picked: Proposal[]) => void }) {
     setBusy(true);
     setError(null);
     try {
-      const res = await suggest({ text });
+      if (!viewerId) return;
+      const res = await suggest({ viewerId, text });
       setProposals(res.proposals);
       setVia(res.via);
       setPicked(new Set(res.proposals.map((p) => factSlot(p.entry))));

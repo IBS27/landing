@@ -1,4 +1,5 @@
 import { ConvexError, v } from "convex/values";
+import { api } from "./_generated/api";
 import { action } from "./_generated/server";
 import { runAgent } from "./ai/agent";
 import { getProfile, type StatedFact, saveStatedFacts } from "./lib/cityProfile";
@@ -149,12 +150,15 @@ function todayInSF() {
  * fallback when AI is off or the model's answer didn't pass its checks.
  */
 export const suggestFromText = action({
-  args: { text: v.string() },
+  // Viewer-scoped like the rest of the app: the result is for this person only.
+  args: { viewerId: v.id("users"), text: v.string() },
   returns: v.object({
     via: v.union(v.literal("model"), v.literal("cache"), v.literal("fallback")),
     proposals: v.array(proposal),
   }),
-  handler: async (ctx, { text }) => {
+  handler: async (ctx, { viewerId, text }) => {
+    // Throws "Unknown viewer" for a bad id, before any model call.
+    await ctx.runQuery(api.users.me, { viewerId });
     if (text.length > MAX_TEXT_LENGTH) {
       throw new ConvexError(`Keep it under ${MAX_TEXT_LENGTH} characters`);
     }
@@ -162,7 +166,9 @@ export const suggestFromText = action({
     if (!trimmed) return { via: "fallback" as const, proposals: [] };
     const result = await runAgent(ctx, profileFromText, {
       input: { text: trimmed, today: todayInSF() },
+      // The person's own words are the evidence; there are no shared sources to read.
       sources: [],
+      shownTo: viewerId,
     });
     return {
       via: result.via,
