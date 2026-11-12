@@ -11,14 +11,26 @@ import schema from "../convex/schema";
 
 export type Row = { _id: string } & Record<string, unknown>;
 
-export function fakeCtx(tables: Record<string, Row[]>): MutationCtx {
+/** Pass one to `fakeCtx` to count documents read and index ranges queried. */
+export type ReadStats = { docs: number; ranges: number };
+
+export function fakeCtx(tables: Record<string, Row[]>, stats?: ReadStats): MutationCtx {
+  const read = <T>(rows: T[]) => {
+    if (stats) stats.docs += rows.length;
+    return rows;
+  };
   const byId = new Map<string, { table: string; row: Row }>();
   for (const [table, rows] of Object.entries(tables))
     for (const row of rows) byId.set(row._id, { table, row });
   let next = 0;
   const db = {
-    get: async (id: string) => byId.get(id)?.row ?? null,
+    get: async (id: string) => {
+      const row = byId.get(id)?.row ?? null;
+      if (row && stats) stats.docs++;
+      return row;
+    },
     query: (table: string) => {
+      if (stats) stats.ranges++;
       let rows = tables[table] ?? [];
       let fields: string[] = [];
       let desc = false;
@@ -53,13 +65,13 @@ export function fakeCtx(tables: Record<string, Row[]>): MutationCtx {
           desc = dir === "desc";
           return chain;
         },
-        collect: async () => sorted(),
-        first: async () => sorted()[0] ?? null,
+        collect: async () => read(sorted()),
+        first: async () => read(sorted().slice(0, 1))[0] ?? null,
         unique: async () => {
           if (rows.length > 1) throw new Error(`unique: ${rows.length} rows in ${table}`);
-          return rows[0] ?? null;
+          return read(rows.slice(0, 1))[0] ?? null;
         },
-        take: async (n: number) => sorted().slice(0, n),
+        take: async (n: number) => read(sorted().slice(0, n)),
       };
       return chain;
     },

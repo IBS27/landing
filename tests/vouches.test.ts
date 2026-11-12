@@ -1,11 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import type { Doc } from "../convex/_generated/dataModel";
 import {
+  BLOCK_READ_MAX,
   cleanNote,
   FOF_SCAN_MAX,
   FRIEND_LOOKUP_MAX,
   FRIEND_READ_BUDGET,
+  FRIENDS_READ_MAX,
   listerNetwork,
+  PAIR_CHECK_MAX,
   removeVouch,
   saveVouch,
   VOUCH_NOTE_MAX,
@@ -19,7 +22,7 @@ import {
   viaLine,
   vouchesTitle,
 } from "../src/landing/search/vouchCopy";
-import { fakeCtx, type Row } from "./fakeDb";
+import { fakeCtx, type ReadStats, type Row } from "./fakeDb";
 
 const id = (s: string) => s as never;
 const DAY = 86_400_000;
@@ -220,6 +223,61 @@ describe("listerNetwork", () => {
     expect(net?.vouches[0]?.via).toBe("you");
     expect(net?.vouchTotal).toBe(VOUCHES_SHOWN + 5 + 3);
   });
+
+  test("a lister blocked by thousands of accounts: bounded reads, and blocks still void vouches", async () => {
+    const w = world();
+    const haters = Array.from({ length: 3 * BLOCK_READ_MAX }, (_, i) => `H${i}`);
+    w.users.push(...haters.map(user));
+    w.blocks.push(...haters.map((h) => block(h, "L")));
+    // F1 blocked L after vouching; that block is past what the block lists read.
+    w.blocks.push(block("F1", "L"));
+    w.vouches.push(vouch("F1", "L", 0));
+    const stats: ReadStats = { docs: 0, ranges: 0 };
+    const net = await listerNetwork(fakeCtx(w, stats), id("V"), id("L"));
+    expect(net?.vouches.map((v) => v.voucher._id)).toEqual(id(["V", "F2", "P"]));
+    expect(net?.partial).toBe(false);
+    expect(stats.docs).toBeLessThan(2 * BLOCK_READ_MAX + 500);
+    expect(stats.ranges).toBeLessThan(1000);
+  });
+
+  test("a viewer whose block list is too long to read still hides blocked people", async () => {
+    const w = world();
+    const others = Array.from({ length: BLOCK_READ_MAX + 5 }, (_, i) => `Z${i}`);
+    w.users.push(...others.map(user));
+    // V blocked Bk (a mutual friend and voucher) after more blocks than the lists read.
+    w.blocks = [
+      ...others.map((z) => block("V", z)),
+      { ...block("V", "Bk"), createdAt: 1 },
+      block("L", "Q"),
+      block("S", "V"),
+    ];
+    const net = await listerNetwork(fakeCtx(w), id("V"), id("L"));
+    expect(net?.mutualFriends.map((u) => u._id)).toEqual(id(["F1"]));
+    expect(net?.vouches.map((v) => v.voucher._id)).toEqual(id(["V", "F2", "P"]));
+    expect(await listerNetwork(fakeCtx(w), id("V"), id("S"))).toBeNull();
+  });
+
+  test("past the pair-check budget, unchecked people are left out and the result is partial", async () => {
+    const w = world();
+    const others = Array.from({ length: BLOCK_READ_MAX + 5 }, (_, i) => `Z${i}`);
+    const pals = Array.from({ length: PAIR_CHECK_MAX + 20 }, (_, i) => `Pal${i}`);
+    w.users.push(...others.map(user), ...pals.map(user));
+    w.blocks.push(...others.map((z) => block("V", z)));
+    w.friendships.push(...pals.flatMap((x) => [...friends("V", x), ...friends("L", x)]));
+    const net = await listerNetwork(fakeCtx(w), id("V"), id("L"));
+    expect(net?.mutualFriendCount).toBeLessThan(pals.length + 1);
+    expect(net?.partial).toBe(true);
+  });
+
+  test("a friend past the friend-list read cap is still a friend", async () => {
+    const w = world();
+    const pals = Array.from({ length: FRIENDS_READ_MAX }, (_, i) => `Pal${i}`);
+    w.users.push(...pals.map(user), user("Late"));
+    w.friendships.push(...pals.flatMap((x) => friends("V", x)), ...friends("V", "Late"));
+    const net = await listerNetwork(fakeCtx(w), id("V"), id("Late"));
+    expect(net?.relation).toBe("friend");
+    expect(net?.partial).toBe(true);
+  });
 });
 
 describe("saveVouch and removeVouch", () => {
@@ -290,6 +348,7 @@ describe("vouch copy", () => {
       "Derek is your friend · 1 mutual friend",
     );
     expect(relationLine("friend_of_friend", derek, [p("Jordan")], 1)).toBe("Friends with Jordan");
+    expect(relationLine("none", derek, [], 0, true)).toBe("No mutual friends found with Derek");
     expect(relationLine("none", derek, [], 0)).toBe("No one in your network is friends with Derek");
   });
 

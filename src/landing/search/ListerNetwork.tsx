@@ -47,7 +47,13 @@ export function ListerNetwork({ listingId }: { listingId: Id<"listings"> }) {
           <p className="flex items-center gap-1 text-secondary text-sm">
             <Users size={14} aria-hidden className="shrink-0" />
             <span className="truncate">
-              {relationLine(relation, lister, data.mutualFriends, data.mutualFriendCount)}
+              {relationLine(
+                relation,
+                lister,
+                data.mutualFriends,
+                data.mutualFriendCount,
+                data.partial,
+              )}
             </span>
           </p>
         </div>

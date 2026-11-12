@@ -2,9 +2,9 @@ import { ConvexError } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import type { VouchRelationship } from "../validators";
-import { blockedSet, isBlockedEitherWay } from "./blocks";
+import { isBlockedEitherWay } from "./blocks";
 import { notify } from "./notify";
-import { getSummaries, type UserSummary } from "./users";
+import { areFriends, getSummaries, type UserSummary } from "./users";
 
 /**
  * Network vouching: how the viewer is connected to a lister, and who in the
@@ -37,6 +37,11 @@ export const FOF_SCAN_MAX = 100;
 export const FRIEND_READ_BUDGET = 4000;
 /** Friend-list rows read for the viewer and the subject. */
 export const FRIENDS_READ_MAX = 5000;
+/** Block rows read per user, each way; past that, `BlockCheck` checks pairs. */
+export const BLOCK_READ_MAX = 1000;
+/** Pair checks (two lookups each) per query when block lists are too long to read. */
+export const PAIR_CHECK_MAX = 300;
+const PAIR_CHECK_BATCH = 100;
 /** Vouches returned; the rest are counted in `vouchTotal`. */
 export const VOUCHES_SHOWN = 50;
 /** People listed per group (mutual friends, a vouch's bridges); the rest are counted. */
@@ -52,23 +57,14 @@ type UserId = Id<"users">;
 
 /* ---------- Pure graph logic ---------- */
 
-/** Who in `ids` is also in `set`, skipping anyone blocked. Keeps the order of `ids`. */
-export function intersect(
-  ids: readonly UserId[],
-  set: ReadonlySet<UserId>,
-  blocked: ReadonlySet<UserId>,
-): UserId[] {
-  return [...new Set(ids)].filter((id) => set.has(id) && !blocked.has(id));
+/** Who in `ids` is also in `set`, without duplicates. Keeps the order of `ids`. */
+export function intersect(ids: readonly UserId[], set: ReadonlySet<UserId>): UserId[] {
+  return [...new Set(ids)].filter((id) => set.has(id));
 }
 
-export function relationTo(
-  viewerId: UserId,
-  subjectId: UserId,
-  viewerFriends: ReadonlySet<UserId>,
-  mutualCount: number,
-): Relation {
-  if (viewerId === subjectId) return "you";
-  if (viewerFriends.has(subjectId)) return "friend";
+export function relationTo(isSubject: boolean, isFriend: boolean, mutualCount: number): Relation {
+  if (isSubject) return "you";
+  if (isFriend) return "friend";
   return mutualCount > 0 ? "friend_of_friend" : "none";
 }
 
@@ -133,13 +129,77 @@ export type ListerNetwork = {
   partial: boolean;
 };
 
-/** Friend ids, at most `max` (Facebook caps friend lists at 5,000). */
-async function friendsOf(ctx: QueryCtx, userId: UserId, max = FRIENDS_READ_MAX) {
+/** Up to `max` friend ids, and whether that's all of them. */
+async function friendsOf(ctx: QueryCtx, userId: UserId, max: number) {
   const rows = await ctx.db
     .query("friendships")
     .withIndex("by_user", (q) => q.eq("userId", userId))
-    .take(max);
-  return rows.map((r) => r.friendId);
+    .take(max + 1);
+  return { ids: rows.slice(0, max).map((r) => r.friendId), complete: rows.length <= max };
+}
+
+/**
+ * Blocks between one user and others, without unbounded reads. The user's
+ * block lists are read up to BLOCK_READ_MAX each way. When either is longer,
+ * people are checked pair by pair from a budget shared across the query, and
+ * anyone left unchecked counts as blocked (fail closed), setting `missed`.
+ */
+class BlockCheck {
+  private readonly known = new Map<UserId, boolean>();
+  missed = false;
+
+  private constructor(
+    private readonly ctx: QueryCtx,
+    private readonly userId: UserId,
+    private readonly listed: ReadonlySet<UserId>,
+    private readonly complete: boolean,
+    private readonly budget: { left: number },
+  ) {}
+
+  static async load(ctx: QueryCtx, userId: UserId, budget: { left: number }) {
+    const [mine, theirs] = await Promise.all([
+      ctx.db
+        .query("blocks")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .take(BLOCK_READ_MAX + 1),
+      ctx.db
+        .query("blocks")
+        .withIndex("by_blocked", (q) => q.eq("blockedId", userId))
+        .take(BLOCK_READ_MAX + 1),
+    ]);
+    const listed = new Set([...mine.map((r) => r.blockedId), ...theirs.map((r) => r.userId)]);
+    const complete = mine.length <= BLOCK_READ_MAX && theirs.length <= BLOCK_READ_MAX;
+    return new BlockCheck(ctx, userId, listed, complete, budget);
+  }
+
+  /** Pair-check the `ids` the lists can't settle, in order, while the budget lasts. */
+  async check(ids: readonly UserId[]) {
+    if (this.complete) return;
+    const todo = [...new Set(ids)]
+      .filter((id) => id !== this.userId && !this.listed.has(id) && !this.known.has(id))
+      .slice(0, this.budget.left);
+    this.budget.left -= todo.length;
+    for (let i = 0; i < todo.length; i += PAIR_CHECK_BATCH) {
+      const batch = todo.slice(i, i + PAIR_CHECK_BATCH);
+      const hits = await Promise.all(
+        batch.map((id) => isBlockedEitherWay(this.ctx, this.userId, id)),
+      );
+      for (const [j, id] of batch.entries()) this.known.set(id, hits[j] ?? true);
+    }
+  }
+
+  /** Known to be blocked either way. */
+  surely(id: UserId) {
+    return this.listed.has(id) || this.known.get(id) === true;
+  }
+
+  /** Blocked, or not checked: leave them out. */
+  hides(id: UserId) {
+    if (id === this.userId || this.complete || this.known.has(id)) return this.surely(id);
+    if (this.listed.has(id)) return true;
+    this.missed = true;
+    return true;
+  }
 }
 
 type Placed = { row: Doc<"vouches">; via: Via; bridges: UserId[] };
@@ -148,17 +208,20 @@ type Placed = { row: Doc<"vouches">; via: Via; bridges: UserId[] };
  * The subject's connection to the viewer's network, as the viewer may see it.
  * Null when they're blocked either way.
  *
- * Reads are bounded so the query stays inside Convex's limits whatever the
- * graph looks like:
+ * Every read is bounded, so the query stays inside Convex's limits (documents
+ * read, index ranges, concurrency) whatever the graph looks like, and
+ * `partial` says when something wasn't checked:
+ * - Friend lists are read up to FRIENDS_READ_MAX. Past that, the viewer's
+ *   friendship with the subject and with friends-of-friends vouchers is checked
+ *   directly.
  * - The subject's newest VOUCH_SCAN_MAX vouches are read in one range. The
- *   viewer's own vouch and their friends' among them are placed in memory.
- * - If the subject has more vouches than that, the viewer's own vouch is looked
- *   up directly, and so are their friends' when they have at most
- *   FRIEND_LOOKUP_MAX friends, so outsider vouches can't hide them.
+ *   viewer's own vouch and their friends' among them are placed in memory. Past
+ *   the scan, the viewer's own vouch is looked up directly, and so are their
+ *   friends' when they have at most FRIEND_LOOKUP_MAX friends.
  * - Friends of friends' vouches (and, for the subject, everyone else's) are
  *   placed newest first, at most FOF_SCAN_MAX of them within
  *   FRIEND_READ_BUDGET friendship rows.
- * `partial` says when some vouches weren't checked.
+ * - Blocks go through `BlockCheck`, which fails closed.
  */
 export async function listerNetwork(
   ctx: QueryCtx,
@@ -166,31 +229,38 @@ export async function listerNetwork(
   subjectId: UserId,
 ): Promise<ListerNetwork | null> {
   const isSubject = viewerId === subjectId;
-  const [blocked, viewerFriendList, subjectFriends, subjectBlocked, recent] = await Promise.all([
-    blockedSet(ctx, viewerId),
-    friendsOf(ctx, viewerId),
-    isSubject ? [] : friendsOf(ctx, subjectId),
-    isSubject ? null : blockedSet(ctx, subjectId),
-    ctx.db
-      .query("vouches")
-      .withIndex("by_subject", (q) => q.eq("subjectId", subjectId))
-      .order("desc")
-      .take(VOUCH_SCAN_MAX + 1),
-  ]);
-  if (blocked.has(subjectId)) return null;
-  const viewerFriends = new Set(viewerFriendList);
-  const mutual = intersect(subjectFriends, viewerFriends, blocked);
-  // A block between voucher and subject after vouching voids the vouch.
-  const voided = (voucherId: UserId) =>
-    blocked.has(voucherId) || (subjectBlocked ?? blocked).has(voucherId);
-  const isDirect = (id: UserId) => id === viewerId || viewerFriends.has(id);
+  const budget = { left: PAIR_CHECK_MAX };
+  const [viewerBlocks, otherSubjectBlocks, viewerFriendRead, subjectFriendRead, recent] =
+    await Promise.all([
+      BlockCheck.load(ctx, viewerId, budget),
+      isSubject ? null : BlockCheck.load(ctx, subjectId, budget),
+      friendsOf(ctx, viewerId, FRIENDS_READ_MAX),
+      isSubject ? null : friendsOf(ctx, subjectId, FRIENDS_READ_MAX),
+      ctx.db
+        .query("vouches")
+        .withIndex("by_subject", (q) => q.eq("subjectId", subjectId))
+        .order("desc")
+        .take(VOUCH_SCAN_MAX + 1),
+    ]);
+  await viewerBlocks.check([subjectId]);
+  if (viewerBlocks.hides(subjectId)) return null;
+  const subjectBlocks = otherSubjectBlocks ?? viewerBlocks;
 
+  const viewerFriends = new Set(viewerFriendRead.ids);
+  const friendsComplete = viewerFriendRead.complete;
+  /** A friend past the read cap is still a friend. */
+  const isFriend = async (id: UserId) =>
+    viewerFriends.has(id) || (!friendsComplete && (await areFriends(ctx, viewerId, id)));
+  let partial = !friendsComplete || subjectFriendRead?.complete === false;
+  const subjectIsFriend = !isSubject && (await isFriend(subjectId));
+  const mutualCandidates = intersect(subjectFriendRead?.ids ?? [], viewerFriends);
+
+  // 1. The viewer's own vouch and their friends'.
+  const isDirect = (id: UserId) => id === viewerId || viewerFriends.has(id);
   const complete = recent.length <= VOUCH_SCAN_MAX;
   const scanned = recent.slice(0, VOUCH_SCAN_MAX);
   // Past the scan, older friends-of-friends vouches go unchecked.
-  let partial = !complete;
-
-  // 1. The viewer's own vouch and their friends'.
+  if (!complete) partial = true;
   const direct = scanned.filter((row) => isDirect(row.voucherId));
   if (!complete) {
     const seen = new Set(direct.map((row) => row.voucherId));
@@ -201,31 +271,64 @@ export async function listerNetwork(
     );
     for (const row of found) if (row) direct.push(row);
   }
-  const placed: Placed[] = direct
-    .filter((row) => !voided(row.voucherId))
-    .map((row) => ({ row, via: row.voucherId === viewerId ? "you" : "friend", bridges: [] }));
+  const candidates: Placed[] = direct.map((row) => ({
+    row,
+    via: row.voucherId === viewerId ? "you" : "friend",
+    bridges: [],
+  }));
 
   // 2. Everyone else, newest first, within the scan and read budgets.
-  const others = scanned.filter((row) => !isDirect(row.voucherId) && !voided(row.voucherId));
+  const knownVoid = (id: UserId) => viewerBlocks.surely(id) || subjectBlocks.surely(id);
+  const others = scanned.filter((row) => !isDirect(row.voucherId) && !knownVoid(row.voucherId));
   if (others.length > FOF_SCAN_MAX) partial = true;
-  let budget = FRIEND_READ_BUDGET;
+  let friendBudget = FRIEND_READ_BUDGET;
   for (const row of others.slice(0, FOF_SCAN_MAX)) {
-    const friendRows = await friendsOf(ctx, row.voucherId, budget + 1);
-    if (friendRows.length > budget) {
+    if (await isFriend(row.voucherId)) {
+      candidates.push({ row, via: "friend", bridges: [] });
+      continue;
+    }
+    const theirs = await friendsOf(ctx, row.voucherId, friendBudget);
+    if (!theirs.complete) {
       partial = true;
       break;
     }
-    budget -= friendRows.length;
-    const bridges = intersect(friendRows, viewerFriends, blocked);
-    const via = voucherVia(viewerId, row.voucherId, viewerFriends, bridges);
-    if (via !== "other" || isSubject) placed.push({ row, via, bridges });
+    friendBudget -= theirs.ids.length;
+    const bridges = intersect(theirs.ids, viewerFriends);
+    candidates.push({
+      row,
+      via: voucherVia(viewerId, row.voucherId, viewerFriends, bridges),
+      bridges,
+    });
   }
-  placed.sort((a, b) =>
-    byCloseness(
-      { via: a.via, updatedAt: a.row.updatedAt },
-      { via: b.via, updatedAt: b.row.updatedAt },
-    ),
+
+  // 3. Blocks, closest first: a block either way with the viewer hides a person,
+  // and one between voucher and subject voids the vouch.
+  const closest = (list: Placed[]) =>
+    list.sort((a, b) =>
+      byCloseness(
+        { via: a.via, updatedAt: a.row.updatedAt },
+        { via: b.via, updatedAt: b.row.updatedAt },
+      ),
+    );
+  closest(candidates);
+  const voucherIds = candidates.map((c) => c.row.voucherId);
+  await viewerBlocks.check(voucherIds);
+  await subjectBlocks.check(voucherIds);
+  const valid = candidates.filter(
+    (c) => !viewerBlocks.hides(c.row.voucherId) && !subjectBlocks.hides(c.row.voucherId),
   );
+  await viewerBlocks.check([...valid.flatMap((c) => c.bridges), ...mutualCandidates]);
+  const placed = closest(
+    valid.flatMap((c): Placed[] => {
+      if (c.via !== "friend_of_friend") return [c];
+      const bridges = c.bridges.filter((id) => !viewerBlocks.hides(id));
+      // Connected only through people hidden from the viewer: not in their network.
+      const via = bridges.length ? c.via : "other";
+      return via === "other" && !isSubject ? [] : [{ ...c, via, bridges }];
+    }),
+  ).filter((c) => c.via !== "other" || isSubject);
+  const mutual = mutualCandidates.filter((id) => !viewerBlocks.hides(id));
+  if (viewerBlocks.missed || subjectBlocks.missed) partial = true;
   const shown = placed.slice(0, VOUCHES_SHOWN);
 
   const people = await getSummaries(ctx, [
@@ -256,7 +359,7 @@ export async function listerNetwork(
   });
 
   return {
-    relation: relationTo(viewerId, subjectId, viewerFriends, mutual.length),
+    relation: relationTo(isSubject, subjectIsFriend, mutual.length),
     mutualFriends: summaries(mutual.slice(0, MUTUALS_SHOWN)),
     mutualFriendCount: mutual.length,
     vouches,

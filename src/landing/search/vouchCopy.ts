@@ -47,6 +47,8 @@ export function relationLine(
   lister: Person,
   mutual: readonly { firstName: string }[],
   mutualCount: number,
+  /** Not every friendship or block could be checked. */
+  partial = false,
 ) {
   switch (relation) {
     case "you":
@@ -58,7 +60,9 @@ export function relationLine(
     case "friend_of_friend":
       return `Friends with ${nameList(mutual, mutualCount)}`;
     case "none":
-      return `No one in your network is friends with ${lister.firstName}`;
+      return partial
+        ? `No mutual friends found with ${lister.firstName}`
+        : `No one in your network is friends with ${lister.firstName}`;
   }
 }
 
