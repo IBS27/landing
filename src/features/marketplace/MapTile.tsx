@@ -17,7 +17,8 @@ export function MapTile({
   src: string;
   alt: string;
   height: number;
-  radius: number;
+  /** Radius of the "approximate area" circle; omit for a plain strip. */
+  radius?: number;
   className?: string;
   /** Show the "i" map-info badge (as on Facebook's map strip). */
   info?: boolean;
@@ -31,10 +32,12 @@ export function MapTile({
       style={{ height }}
     >
       <MapImg src={src} alt={alt} className="absolute inset-0 h-full w-full object-cover" />
-      <span
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#0866FF] bg-[#0866FF]/15"
-        style={{ width: radius * 2, height: radius * 2 }}
-      />
+      {radius ? (
+        <span
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#0866FF] bg-[#0866FF]/15"
+          style={{ width: radius * 2, height: radius * 2 }}
+        />
+      ) : null}
       {info && (
         <span
           title="© OpenStreetMap contributors © OpenMapTiles"

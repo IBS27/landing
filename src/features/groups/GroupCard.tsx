@@ -19,8 +19,9 @@ export function GroupCard({ group, onHide }: { group: GroupCardData; onHide?: ()
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
   const to = { to: "/groups/$groupId", params: groupParams(group) } as const;
-  // The friends line borrows part of the gap above the button, as on Facebook.
-  const gap = group.friendCount > 0 ? "mt-3" : "mt-6";
+  // The friends line sits inside the 24px gap above the button, so every card
+  // in a row keeps Facebook's plain-card height (2 + 16 + 6 = 24).
+  const gap = group.friendCount > 0 ? "mt-1.5" : "mt-6";
 
   return (
     <div
@@ -59,7 +60,7 @@ export function GroupCard({ group, onHide }: { group: GroupCardData; onHide?: ()
           {membersLabel(group.memberCount)} • {group.activity}
         </p>
         {group.friendCount > 0 && (
-          <div className="mt-1 flex h-5 items-center gap-1.5">
+          <div className="mt-0.5 flex h-4 items-center gap-1.5">
             <span className="flex shrink-0">
               {group.friends.map((f, i) => (
                 <Avatar

@@ -394,9 +394,10 @@ function ReelTile({
           <button
             type="button"
             aria-label="More options for this reel"
-            className="absolute top-[6px] right-[6px] flex h-8 w-8 items-center justify-center rounded-full text-white drop-shadow hover:bg-white/20 data-[state=open]:bg-white/20"
+            className="absolute top-[6px] right-[10px] flex h-8 w-8 items-center justify-center rounded-full text-white drop-shadow hover:bg-white/20 data-[state=open]:bg-white/20"
           >
-            <DotsIcon size={16} className="rotate-90" />
+            {/* FB: 4px dots on a 7px pitch, centred 22px from the top and 26px from the right. */}
+            <DotsIcon size={23} className="rotate-90" />
           </button>
         </MenuTrigger>
         <MenuContent width={300} align="end">

@@ -680,7 +680,7 @@ function Details({ l }: { l: Detail }) {
 
 /* ───────────── Location ───────────── */
 
-/** The map tile under the details; opens a larger map of the approximate area. */
+/** The short map strip under the details; opens a larger map of the approximate area. */
 function LocationMap({ l }: { l: Detail }) {
   const [open, setOpen] = useState(false);
   const place = l.location.neighborhood ?? l.location.city.split(",")[0] ?? l.location.city;
@@ -701,9 +701,10 @@ function LocationMap({ l }: { l: Detail }) {
         onClick={() => setOpen(true)}
         className="mt-4 block w-full overflow-hidden rounded-lg"
       >
-        <MapTile src={area.tile} alt={`Map of ${place}`} height={162} radius={36} info />
+        {/* FB's item map is a short 51px strip (no area circle); the dialog shows the area. */}
+        <MapTile src={area.tile} alt={`Map of ${place}`} height={51} info />
       </button>
-      <p className="mt-3 text-[13px] leading-4">
+      <p className="mt-5 text-[13px] leading-4">
         <span className="text-primary">{l.location.city}</span>
         <span className="text-secondary"> · Location is approximate</span>
       </p>

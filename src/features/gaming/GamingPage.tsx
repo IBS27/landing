@@ -326,7 +326,9 @@ function PlayHome({ onPlay, recent }: { onPlay: (g: Game) => void; recent: Game[
               <span className="w-6 text-center font-bold text-[17px] text-secondary">{i + 1}</span>
               <GameIcon game={x} size={56} />
               <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold text-[15px] text-primary">{x.name}</p>
+                <p className="line-clamp-2 font-semibold text-[15px] text-primary leading-5">
+                  {x.name}
+                </p>
                 <p className="truncate text-[13px] text-secondary">
                   {x.category} · {playersLabel(x.players)}
                 </p>
@@ -356,8 +358,10 @@ function FriendsPlaySection({ onPlay }: { onPlay: (g: Game) => void }) {
   const friends = useQ(api.friends.list, { userId: viewer._id });
   const rows = useMemo(() => {
     if (!friends?.length) return [];
-    // Recently released sits right above: keep the two shelves distinct.
-    return GAMES.filter((game) => !RECENTLY_RELEASED.includes(game.id))
+    // Top picks and Recently released are on the same page: keep the shelves distinct.
+    return GAMES.filter(
+      (game) => !TOP_PICKS.includes(game.id) && !RECENTLY_RELEASED.includes(game.id),
+    )
       .map((game) => ({
         game,
         players: friends.filter((f) => friendPlays(game.id, f._id)),
@@ -661,7 +665,7 @@ function GamePlayer({
             e.preventDefault();
             panel.current?.focus();
           }}
-          className="dark fixed top-1/2 left-1/2 z-[61] flex h-[90vh] w-[min(1200px,calc(100vw-48px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg bg-[#18191a] text-primary shadow-elevated outline-none [&:fullscreen]:rounded-none"
+          className="dark fixed top-1/2 left-1/2 z-[61] flex min-w-[min(640px,calc(100vw-48px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg bg-[#18191a] text-primary shadow-elevated outline-none [&:fullscreen]:rounded-none"
         >
           <div className="flex h-14 shrink-0 items-center gap-3 border-white/10 border-b bg-[#242526] px-3">
             <GameIcon game={game} size={36} />
@@ -700,7 +704,7 @@ function GamePlayer({
               </IconButton>
             </D.Close>
           </div>
-          <GameStage>
+          <GameStage fullscreen={fullscreen}>
             <MiniGame game={game} onScore={stable} />
           </GameStage>
         </D.Content>
@@ -709,34 +713,56 @@ function GamePlayer({
   );
 }
 
+/** Stage padding around the scaled game frame, and the player header height. */
+const PAD_X = 32;
+const PAD_Y = 24;
+const HEADER = 56;
+
 /**
- * Scales the game's fixed-size frame to fit the stage (engines read the scale
- * from `data-game-scale` for pointer math).
+ * Scales the game's fixed-size frame to the largest size the window allows
+ * (up to 1200px wide and 90vh tall) and sizes the stage to it, so the panel
+ * hugs the game instead of letterboxing it. Full screen fills the screen.
+ * Engines read the scale from `data-game-scale` for pointer math.
  */
-function GameStage({ children }: { children: ReactNode }) {
-  const box = useRef<HTMLDivElement>(null);
+function GameStage({ children, fullscreen }: { children: ReactNode; fullscreen: boolean }) {
   const inner = useRef<HTMLDivElement>(null);
   const [fit, setFit] = useState<{ k: number; w: number; h: number } | null>(null);
   useLayoutEffect(() => {
-    const b = box.current;
     const i = inner.current;
-    if (!b || !i) return;
+    if (!i) return;
     const measure = () => {
       const w = i.offsetWidth;
       const h = i.offsetHeight;
       if (!w || !h) return;
-      const k = Math.min((b.clientWidth - 48) / w, (b.clientHeight - 32) / h, 2.5);
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const maxW = (fullscreen ? vw : Math.min(1200, vw - 48)) - PAD_X * 2;
+      const maxH = (fullscreen ? vh : vh * 0.9) - HEADER - PAD_Y * 2;
+      const k = Math.min(maxW / w, maxH / h, 2.5);
       setFit({ k: Math.max(0.5, k), w, h });
     };
     const ro = new ResizeObserver(measure);
-    ro.observe(b);
     ro.observe(i);
+    window.addEventListener("resize", measure);
     measure();
-    return () => ro.disconnect();
-  }, []);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [fullscreen]);
   const k = fit?.k ?? 1;
   return (
-    <div ref={box} className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
+    <div
+      className={cn(
+        "flex items-center justify-center overflow-hidden",
+        fullscreen ? "min-h-0 flex-1" : "shrink-0",
+      )}
+      style={
+        fit && !fullscreen
+          ? { width: "100%", minWidth: fit.w * k + PAD_X * 2, height: fit.h * k + PAD_Y * 2 }
+          : undefined
+      }
+    >
       <div className="relative" style={fit ? { width: fit.w * k, height: fit.h * k } : undefined}>
         <div
           ref={inner}
