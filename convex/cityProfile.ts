@@ -166,7 +166,8 @@ export const suggestFromText = action({
     if (!trimmed) return { via: "fallback" as const, proposals: [] };
     const result = await runAgent(ctx, profileFromText, {
       input: { text: trimmed, today: todayInSF() },
-      // The person's own words are the evidence; there are no shared sources to read.
+      // No sources: the model reads only the caller's own text, and the result goes
+      // back to that viewer alone (the cache key doesn't include shownTo).
       sources: [],
       shownTo: viewerId,
     });
