@@ -11,6 +11,7 @@ import {
 } from "../convex/lib/cityProfile";
 import {
   type FactEntry,
+  factSlot,
   isCalendarDate,
   moveInLabel,
   moveInProblem,
@@ -34,6 +35,7 @@ const TODAY = "2026-11-12";
 const facts = (text: string) => extractFacts(text, TODAY);
 const labels = (text: string) => facts(text).map((p) => `${p.entry.key}:${p.label}`);
 const entries = (text: string) => facts(text).map((p) => p.entry);
+const factSlotOf = (e: FactEntry) => factSlot(e);
 
 /** Muse's checks on a model answer for `text` (as the model would see it). */
 function modelProblems(text: string, proposals: { entry: FactEntry; quote: string }[]) {
@@ -58,19 +60,19 @@ describe("protected traits", () => {
   test("the rules keep only the activity wording as evidence", () => {
     const out = facts(MUSLIM);
     expect(out.map((p) => p.entry)).toEqual([{ key: "interest", value: { id: "hiking" } }]);
-    expect(out[0].quote).toBe("loves hiking.");
+    expect(out[0].quote).toBe("hiking");
     for (const p of out) expect(hasProtected(p.quote)).toBe(false);
   });
 
   test("disclosures are removed whatever country or condition they name", () => {
     const R = REDACTED;
     for (const [text, redacted, quote] of [
-      ["I was born in Mexico and love hiking.", `${R} and love hiking.`, "love hiking."],
-      ["I have multiple sclerosis and like coffee.", `${R} and like coffee.`, "like coffee."],
-      ["I have lupus, love climbing", `${R}, love climbing`, "love climbing"],
-      ["My family is from Lagos and I love trivia.", `${R} and I love trivia.`, "I love trivia."],
-      ["Originally from Oaxaca, I love surfing.", `${R}, I love surfing.`, "I love surfing."],
-      ["I identify as nonbinary and love trivia.", `${R} and love trivia.`, "love trivia."],
+      ["I was born in Mexico and love hiking.", `${R} and love hiking.`, "hiking"],
+      ["I have multiple sclerosis and like coffee.", `${R} and like coffee.`, "coffee"],
+      ["I have lupus, love climbing", `${R}, love climbing`, "climbing"],
+      ["My family is from Lagos and I love trivia.", `${R} and I love trivia.`, "trivia"],
+      ["Originally from Oaxaca, I love surfing.", `${R}, I love surfing.`, "surfing"],
+      ["I identify as nonbinary and love trivia.", `${R} and love trivia.`, "trivia"],
     ]) {
       expect(profileInput(text).text).toBe(redacted);
       const out = facts(text);
@@ -88,7 +90,7 @@ describe("protected traits", () => {
       "We are single and love hiking.",
     ]) {
       expect(profileInput(text).text).toBe(`${REDACTED} and love hiking.`);
-      expect(facts(text).map((p) => p.quote)).toEqual(["love hiking."]);
+      expect(facts(text).map((p) => p.quote)).toEqual(["hiking"]);
     }
   });
 
@@ -97,7 +99,7 @@ describe("protected traits", () => {
     expect(profileInput(text).text).toBe(`${REDACTED} looking for roommates.`);
     const out = facts(text);
     expect(out.map((p) => [p.entry, p.quote])).toEqual([
-      [{ key: "goal", value: { id: "find_roommates" } }, "looking for roommates."],
+      [{ key: "goal", value: { id: "find_roommates" } }, "looking for roommates"],
     ]);
     // Even a full-sentence quote from a tampered client never reaches the profile.
     const saved = briefFacts([out[0].entry], [{ slot: "goal:find_roommates", quote: text }]);
@@ -110,18 +112,39 @@ describe("protected traits", () => {
     expect(redactProtected("We're a community of colour")).not.toMatch(/colou?r/);
   });
 
-  test("a model quote is cut down to the phrase naming its fact", () => {
+  test("a model quote is cut down to the fact's own words", () => {
     const hiking: FactEntry = { key: "interest", value: { id: "hiking" } };
-    expect(narrowQuote(hiking, "I've got MS and love hiking.")).toBe("love hiking.");
+    expect(narrowQuote(hiking, "I've got MS and love hiking.")).toBe("hiking");
     expect(
       tidyProposals([{ entry: hiking, quote: "I really like work and love hiking" }])[0].quote,
-    ).toBe("love hiking");
+    ).toBe("hiking");
+    // No words for the fact: the proposal is dropped.
+    expect(tidyProposals([{ entry: hiking, quote: "I'm outdoorsy" }])).toEqual([]);
     const budget: FactEntry = { key: "budget", value: { min: 1800, max: 2400 } };
-    expect(narrowQuote(budget, "I'm new here, budget $1,800 to $2,400")).toBe(
-      "budget $1,800 to $2,400",
-    );
+    expect(narrowQuote(budget, "I'm new here, budget $1,800 to $2,400")).toBe("$1,800 to $2,400");
     const moveIn: FactEntry = { key: "moveIn", value: { month: "2027-03" } };
-    expect(narrowQuote(moveIn, "I love tacos and I'm moving in March")).toBe("I'm moving in March");
+    expect(narrowQuote(moveIn, "I love tacos and I'm moving in March")).toBe("March");
+    const transport: FactEntry = { key: "transport", value: { modes: ["bike", "bart"] } };
+    expect(narrowQuote(transport, "I don't have a car, I bike and take BART", true)).toBe(
+      "don't have a car … bike … BART",
+    );
+  });
+
+  test("saved evidence holds only the fact's words, whatever else the sentence says", () => {
+    const roommates: FactEntry = { key: "goal", value: { id: "find_roommates" } };
+    const bart: FactEntry = { key: "transport", value: { modes: ["bart"] } };
+    for (const [entry, text, quote] of [
+      [roommates, "I'm a single professional looking for roommates.", "looking for roommates"],
+      [roommates, "25F looking for roommates.", "looking for roommates"],
+      [roommates, "We're a couple looking for roommates.", "looking for roommates"],
+      [bart, "I take BART to dialysis.", "BART"],
+      [bart, "I'm partially sighted taking BART.", "BART"],
+    ] as const) {
+      const [fact] = briefFacts([entry], [{ slot: factSlotOf(entry), quote: text }]);
+      expect(fact.evidence.quote).toBe(quote);
+      expect(narrowQuote(entry, text)).toBe(quote);
+      expect(hasProtected(text)).toBe(true);
+    }
   });
 
   test("a protected quote never survives save and read", async () => {
@@ -132,13 +155,13 @@ describe("protected traits", () => {
       [
         // A tampered or unredacted whole-sentence quote is narrowed to the activity.
         { slot: "interest:hiking", quote: "I've got MS and love hiking." },
-        // One that can't be narrowed away from the trait is dropped.
+        // Only the activity's own word is kept from this one.
         { slot: "interest:coffee", quote: "As a Muslim coffee lover" },
       ],
     );
     expect(facts.map((f) => f.evidence)).toEqual([
-      { kind: "free_text", summary: "From what you wrote about yourself", quote: "love hiking." },
-      { kind: "brief", summary: "You said so in your brief" },
+      { kind: "free_text", summary: "From what you wrote about yourself", quote: "hiking" },
+      { kind: "free_text", summary: "From what you wrote about yourself", quote: "coffee" },
     ]);
     const tables: Record<string, Row[]> = { cityProfiles: [], cityProfileFacts: [] };
     const ctx = writableCtx(tables);
@@ -223,7 +246,7 @@ describe("protected traits", () => {
 
   test("the fallback reads the redacted text the model would have", () => {
     const out = profileFromText.fallback(profileInput(MUSLIM, Date.UTC(2026, 10, 12, 20)), []);
-    expect(out.facts.map((f) => f.quote)).toEqual(["loves hiking."]);
+    expect(out.facts.map((f) => f.quote)).toEqual(["hiking"]);
   });
 });
 
@@ -342,13 +365,20 @@ describe("move-in dates", () => {
 
   test("the model check uses the same rules", () => {
     const at = (value: { month: string; date?: string }) => [
-      { entry: { key: "moveIn" as const, value }, quote: "Moving" },
+      { entry: { key: "moveIn" as const, value }, quote: "Feb" },
     ];
-    expect(modelProblems("Moving soon", at({ month: "2027-02", date: "2027-02-31" }))).not.toEqual(
-      [],
-    );
-    expect(modelProblems("Moving soon", at({ month: "2026-09" }))).not.toEqual([]);
-    expect(modelProblems("Moving soon", at({ month: "2027-02", date: "2027-02-28" }))).toEqual([]);
+    const text = "Moving Feb 28";
+    expect(modelProblems(text, at({ month: "2027-02", date: "2027-02-31" }))).not.toEqual([]);
+    expect(modelProblems(text, at({ month: "2026-09" }))).not.toEqual([]);
+    expect(modelProblems(text, at({ month: "2027-02" }))).toEqual([]);
+    expect(
+      modelProblems(text, [
+        {
+          entry: { key: "moveIn", value: { month: "2027-02", date: "2027-02-28" } },
+          quote: "Feb 28",
+        },
+      ]),
+    ).toEqual([]);
   });
 
   test("the form uses the same rules", () => {
@@ -711,5 +741,112 @@ describe("stated and inferred facts", () => {
     );
     const [f] = (await getProfile(ctx, USER)).interests;
     expect(f.evidence).toEqual({ kind: "free_text", summary: "From what you wrote" });
+  });
+});
+
+/* ---------------- Round 4: value-matched checks and common phrasings ---------------- */
+
+describe("the model check reads the proposed value", () => {
+  test("a negated amount or month is rejected even when the quote has both", () => {
+    const budget = (max: number, quote: string) => [
+      { entry: { key: "budget" as const, value: { max } }, quote },
+    ];
+    const text = "My budget is $2000, not $3000.";
+    expect(modelProblems(text, budget(3000, text.slice(0, -1)))).not.toEqual([]);
+    expect(modelProblems(text, budget(2000, "My budget is $2000"))).toEqual([]);
+    // Narrowing keeps the proposed amount, not the first one.
+    expect(narrowQuote({ key: "budget", value: { max: 2000 } }, text)).toBe("$2000");
+
+    const moveIn = (month: string, quote: string) => [
+      { entry: { key: "moveIn" as const, value: { month } }, quote },
+    ];
+    const when = "I will move in April, not March.";
+    expect(modelProblems(when, moveIn("2027-03", when.slice(0, -1)))).not.toEqual([]);
+    expect(modelProblems(when, moveIn("2027-04", "move in April"))).toEqual([]);
+    expect(narrowQuote({ key: "moveIn", value: { month: "2027-04" } }, when)).toBe("April");
+  });
+
+  test("a quote without the fact's words is rejected", () => {
+    const hiking: FactEntry = { key: "interest", value: { id: "hiking" } };
+    expect(
+      modelProblems("I love the outdoors.", [{ entry: hiking, quote: "the outdoors" }]),
+    ).not.toEqual([]);
+    const bike: FactEntry = { key: "transport", value: { modes: ["bike", "bart"] } };
+    expect(modelProblems("I take BART.", [{ entry: bike, quote: "I take BART" }])).not.toEqual([]);
+  });
+});
+
+describe("common phrasings", () => {
+  const budget = (text: string) => entries(text).find((e) => e.key === "budget")?.value ?? null;
+  const moveIn = (text: string) => entries(text).find((e) => e.key === "moveIn")?.value ?? null;
+  const modes = (text: string) =>
+    entries(text).flatMap((e) => (e.key === "transport" ? e.value.modes : []));
+  const slugs = (text: string) =>
+    entries(text).flatMap((e) => (e.key === "neighborhood" ? [e.value.slug] : []));
+  const goals = (text: string) =>
+    entries(text).flatMap((e) => (e.key === "goal" ? [e.value.id] : []));
+  const schedule = (text: string) => entries(text).find((e) => e.key === "schedule")?.value ?? null;
+
+  test("can't and cannot negate", () => {
+    expect(budget("I can't afford $3000, but I can do $2000.")).toEqual({ max: 2000 });
+    expect(moveIn("I can't move in March. I'm moving in April.")).toEqual({ month: "2027-04" });
+    expect(modes("I can't bike. I take BART.")).toEqual(["bart"]);
+    expect(modes("I cannot bike. I take BART.")).toEqual(["bart"]);
+    expect(facts("I can't wait to try climbing!").map((p) => p.entry.key)).toEqual(["interest"]);
+    expect(modes("I have no car and take BART.")).toEqual(["bart"]);
+  });
+
+  test("the rent they want beats other money", () => {
+    expect(budget("My furniture budget is $500 and my rent budget is $2000.")).toEqual({
+      max: 2000,
+    });
+    expect(budget("I can spend $800 a month on groceries. My rent budget is $2400.")).toEqual({
+      max: 2400,
+    });
+    expect(budget("My current rent is $3000. My budget is $2000.")).toEqual({ max: 2000 });
+    expect(budget("I currently pay $3000 in rent but my new budget is $2000.")).toEqual({
+      max: 2000,
+    });
+    expect(budget("Rent is $2000 plus a $2000 deposit.")).toEqual({ max: 2000 });
+    expect(budget("I can pay $2,200 a month.")).toEqual({ max: 2200 });
+  });
+
+  test("workplaces and past homes aren't places to live", () => {
+    expect(slugs("I work at Google in SoMa and want to live in Noe Valley.")).toEqual([
+      "noe-valley",
+    ]);
+    expect(slugs("My office will be in the Mission. I want to live in SoMa.")).toEqual([
+      "south-of-market",
+    ]);
+    expect(slugs("I work in the Mission and SoMa. I want to live in Noe Valley.")).toEqual([
+      "noe-valley",
+    ]);
+    expect(slugs("I used to live in the Mission but want to live in SoMa.")).toEqual([
+      "south-of-market",
+    ]);
+    expect(slugs("I want to live near my office in SoMa.")).toEqual(["south-of-market"]);
+    const mission: FactEntry = { key: "neighborhood", value: { slug: "mission" } };
+    const text = "My office will be in the Mission. I want to live in SoMa.";
+    expect(modelProblems(text, [{ entry: mission, quote: "the Mission" }])).not.toEqual([]);
+  });
+
+  test("the move date beats a job start", () => {
+    expect(moveIn("I start work in March, but move in April.")).toEqual({ month: "2027-04" });
+    expect(moveIn("My lease starts in March but I'm moving in April.")).toEqual({
+      month: "2027-04",
+    });
+    expect(moveIn("Starting at Figma in March.")).toEqual({ month: "2027-03" });
+  });
+
+  test("having roommates isn't looking for them", () => {
+    expect(goals("I already have roommates but need a new apartment.")).toEqual(["find_place"]);
+    expect(goals("Looking for roommates in the Mission.")).toEqual(["find_roommates"]);
+    expect(goals("I'm not looking for roommates.")).toEqual([]);
+  });
+
+  test("Saturday and Sunday shifts are weekend work", () => {
+    expect(schedule("I work from home and work Saturdays and Sundays.")?.weekendsFree).toBe(false);
+    expect(schedule("I work from home. I'm on call every weekend.")?.weekendsFree).toBe(false);
+    expect(schedule("I work remote, never on Sundays.")?.weekendsFree).toBe(true);
   });
 });

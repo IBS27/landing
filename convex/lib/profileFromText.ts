@@ -13,7 +13,7 @@ import {
   WORKPLACES,
 } from "./cityProfileFacts";
 import { INTEREST_SECTIONS, INTERESTS } from "./interests";
-import { extractFacts, mentionsInterest, narrowQuote, quoteProblem } from "./profileText";
+import { extractFacts, narrowQuote, quoteProblem } from "./profileText";
 import { hasProtected, REDACTED, redactProtected } from "./protectedText";
 
 /**
@@ -70,7 +70,7 @@ const neighborhoodList = SF_NEIGHBORHOODS.filter((n) => !("park" in n && n.park)
 const INSTRUCTIONS = `The person is setting up their Landing City Profile before moving to San Francisco. <input> has what they wrote about themselves ("text") and today's date ("today"). Turn it into profile facts they can confirm. They will see every fact with your quote and untick anything wrong, so propose only what the text says or clearly means. Fewer, accurate facts beat many guesses.
 
 Each fact is { entry: { key, value }, quote, carFree? }. At most one fact per key, except interest, neighborhood and goal, which get one fact per item.
-- quote: the shortest phrase from the text that supports the fact, copied character for character (same spelling, no added words, no ellipses).
+- quote: the shortest phrase from the text that supports the fact and contains its own words (the activity, the place, the amount, the month, each transport mode), copied character for character (same spelling, no added words, no ellipses). Only those words are kept as evidence.
 - budget: monthly rent in whole US dollars. "$2k" = 2000, "1.8–2.4k" = min 1800 and max 2400. A single number or "under X" is max only.
 - moveIn: month "YYYY-MM", the next such month on or after today unless they give a year. Add date "YYYY-MM-DD" only when they give a day.
 - neighborhood: only San Francisco neighborhoods they name as places they'd consider living, using these slugs: ${neighborhoodList}. Map everyday names: "the Mission" = mission, "Outer Sunset" or "the Sunset" = sunset-parkside, "SoMa" = south-of-market, "Dogpatch" = potrero-hill, "NoPa" = western-addition, "the Haight" = haight-ashbury. Skip places outside these, and places they only work in or visit.
@@ -96,10 +96,17 @@ function loose(s: string) {
 
 /**
  * Muse's (or the rules') proposals as the person sees and saves them: each
- * quote cut down to the phrase naming its fact (`narrowQuote`).
+ * quote cut down to the fact's own words (`narrowQuote`), so nothing else
+ * they wrote can become evidence. A proposal whose quote doesn't contain them
+ * is dropped.
  */
-export function tidyProposals<T extends { entry: FactEntry; quote: string }>(facts: T[]): T[] {
-  return facts.map((f) => ({ ...f, quote: narrowQuote(f.entry, f.quote) }));
+export function tidyProposals<T extends { entry: FactEntry; quote: string; carFree?: boolean }>(
+  facts: T[],
+): T[] {
+  return facts.flatMap((f) => {
+    const quote = narrowQuote(f.entry, f.quote, f.carFree);
+    return quote ? [{ ...f, quote }] : [];
+  });
 }
 
 export const profileFromText = defineTask({
@@ -125,7 +132,7 @@ export const profileFromText = defineTask({
       else if (!text.includes(quote))
         problems.push(`${at}.quote "${f.quote}" isn't copied exactly from the text`);
       else {
-        const problem = quoteProblem(input.text, f.entry, f.quote);
+        const problem = quoteProblem(input.text, f.entry, f.quote, f.carFree);
         if (problem) problems.push(`${at}: ${problem}; drop it`);
       }
       const slot = factSlot(f.entry);
@@ -149,13 +156,6 @@ export const profileFromText = defineTask({
             );
           break;
         }
-        case "interest":
-          // Named in the quote, and not only in a negated clause of the text ("don't like climbing").
-          if (!mentionsInterest(f.quote, e.value.id) || !mentionsInterest(input.text, e.value.id))
-            problems.push(
-              `${at}: the quote "${f.quote}" doesn't say they do or like ${e.value.id}; quote the words naming the activity, or drop it`,
-            );
-          break;
         case "transport":
           if (e.value.modes.length === 0 && !f.carFree)
             problems.push(`${at}: transport needs at least one mode`);
@@ -163,7 +163,7 @@ export const profileFromText = defineTask({
             problems.push(`${at}: carFree but modes include car`);
           break;
         case "employer":
-          if (!text.includes(loose(e.value.name)))
+          if (!text.includes(loose(e.value.name)) || hasProtected(e.value.name))
             problems.push(`${at}: employer "${e.value.name}" isn't named in the text`);
           break;
         default:
@@ -182,6 +182,6 @@ export const profileFromText = defineTask({
   // Short text in, short JSON out: keep it quick for an onboarding form.
   effort: "low",
   maxAttempts: 2,
-  // 2: protected traits redacted, interests must be named in their quote, one move-in policy.
-  version: 2,
+  // 3: quotes must contain the fact's own words, which are all that's kept as evidence.
+  version: 3,
 });

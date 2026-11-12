@@ -281,8 +281,35 @@ const TERMS: string[] = [
   "mixed[\\s-]race|biracial|multiracial|desi|chican[aoxe]|pinoy|pinay|daca|dreamers?|citizens?",
   "(?:go|going|goes|attend|attending) (?:to )?mass",
   // Veteran status and politics
-  "veterans?|military|army|marines?",
-  "democrats?|republicans?|conservative|liberal|progressive|libertarian|socialist|maga",
+  "veterans?|military|army|marines?|(?<!old )navy|air force|coast guard|national guard|active[\\s-]duty|reservists?|served in the",
+  "democrats?|republicans?|conservative|liberal|progressive|libertarian|socialist|maga|tor(?:y|ies)",
+  "(?:left|right)[\\s-]wing|green party|politically \\w+|independent voter",
+  // Relationship and family status, said other ways
+  "single(?![\\s-]+(?:room|bed\\w*|famil\\w*|stor\\w*|occupancy|units?|studio|apartment|level|home|house|day|month|week))",
+  "(?:i['’]?m|i am|we['’]?re|we are|as|part of)\\s+(?:an?\\s+)?(?:\\w+\\s+)?couple(?!\\s+of)",
+  "(?:married|gay|lesbian|same[\\s-]sex|young|unmarried|engaged|older) couple",
+  "in a (?:relationship|civil partnership|domestic partnership)|civil partnership|domestic partnership",
+  "unmarried|unwed|separated|bachelor(?:ette)?|family of (?:\\d+|two|three|four|five|six)",
+  "foster(?:ing| carer| parent)?|caregiver|carer|breastfeeding|nursing mother|maternity|paternity|parental leave",
+  // Age, said other ways
+  "\\d{1,2}\\s?[mf]\\b|\\b[mf]\\s?\\d{2}",
+  "\\d0['’]?s?[\\s-]*something|(?:twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)(?:[\\s-]\\w+)?[\\s-]years?[\\s-]old",
+  "middle[\\s-]aged|pensioners?|an adult|eighties|nineties|turning (?:\\d+|twenty|thirty|forty|fifty|sixty|seventy|eighty)",
+  // Health and disability, said other ways
+  "(?:use|using|with) (?:a )?(?:walker|crutches|cane)|crutches|hearing[\\s-]impair\\w*|(?:vision|visually|mobility)[\\s-]impair\\w*",
+  "partially sighted|low vision|dialysis|chemo\\w*|radiation|aa meetings|na meetings|alcoholics anonymous|narcotics anonymous",
+  "fibromyalgia|endometriosis|long covid|covid|(?:with|have|has|due to) ms|asthmatic|dyspraxi\\w*|dyscalculi\\w*",
+  "neuro\\s?(?:a)?typical|neuroatypical|bedbound|homebound|bed-bound|anaemic|anemic|immunosuppressed|disabled",
+  // Religion, said other ways
+  "lent|sunday school|(?:attend|go to|going to)\\s+(?:religious\\s+)?services|worship|shabbos|observant",
+  "jehovah['’]?s?\\s+witness(?:es)?|pentecostal|episcopalian|presbyterian|(?:seventh[\\s-]day\\s+)?adventist",
+  "unitarian(?: universalist)?|universalist|rastafarian|nonreligious|irreligious|secular",
+  // Gender and orientation, said other ways
+  "two[\\s-]spirit|intersex|demisexual|aromantic|agender|bigender|cishet|hetero",
+  // Ethnicity, national origin and immigration, said other ways
+  "kiwis?|m[aā]ori|new zealanders?|guamanian|chamorro|hmong|oromo|yoruba|igbo|uyghur|inuit|romani|navajo|cherokee|nepalese",
+  "dual (?:national|citizen)|permanent resident|asylum(?: seekers?)?|naturali[sz]ed|expat(?:riate)?s?",
+  "on (?:an? )?(?:f-?1|opt|h-?4|h-?1b|j-?1|l-?1|tn|o-?1)\\b(?: status| visa)?",
 ];
 
 /**
@@ -313,7 +340,7 @@ const DISCLOSURE = new RegExp(`\\b(?:${DISCLOSURE_CUES.join("|")})${CLAUSE_END}`
 
 /** "I'm black", "a white woman": color words only when they describe a person. */
 const CONTEXTUAL =
-  "(?:(?:i['’]?m|i am|as an?|being)\\s+(?:an?\\s+)?(?:black|white|brown)\\b)|(?:\\b(?:black|white|brown)\\s+(?=(?:wom[ae]n|m[ae]n|person|people|folks?|family|community)\\b))|\\bm[ae]n\\b";
+  "(?:(?:i['’]?m|i am|as an?|being)\\s+(?:an?\\s+)?(?:black|white|brown)\\b)|(?:\\b(?:black|white|brown)\\s+(?=(?:wom[ae]n|m[ae]n|person|people|folks?|family|community)\\b))|\\bm[ae]n\\b|\\bbah[aá]['’]?[ií]s?(?![a-z])";
 
 const PROTECTED = new RegExp(`(?:\\b(?:${TERMS.join("|")})\\b)|${CONTEXTUAL}`, "gi");
 
