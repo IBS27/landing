@@ -46,12 +46,12 @@ export const cityProfileSeeds: CityProfileSeed[] = [
     briefDaysAgo: 6,
   },
   {
-    // SoMa tech worker on Caltrain.
+    // SoMa tech worker on Caltrain: commutes down the Peninsula, just landed in the Mission.
     username: "marcus.bell",
     budget: { min: 3000, max: 3800 },
-    moveInMonthsFromNow: 1,
-    neighborhoods: ["south-of-market", "mission-bay"],
-    transport: ["walk", "caltrain", "muni"],
+    moveInMonthsFromNow: 0,
+    neighborhoods: ["south-of-market", "mission"],
+    transport: ["walk", "caltrain", "bart", "muni"],
     schedule: { workHours: "day", workplace: "office", weekendsFree: true },
     employerFromWork: true,
     interests: ["tech_meetups", "hackathons", "video_games", "restaurants", "watching_sports"],
@@ -72,11 +72,11 @@ export const cityProfileSeeds: CityProfileSeed[] = [
     briefDaysAgo: 3,
   },
   {
-    // Night-shift nurse who climbs and keeps a car for the commute home.
+    // Night-shift nurse at SF General who climbs and keeps a car for the commute home.
     username: "sofia.alvarez",
     budget: { min: 2200, max: 2900 },
     moveInMonthsFromNow: 2,
-    neighborhoods: ["inner-sunset", "noe-valley"],
+    neighborhoods: ["potrero-hill", "bernal-heights"],
     transport: ["car", "muni"],
     schedule: { workHours: "night", workplace: "office", weekendsFree: false },
     employerFromWork: true,
