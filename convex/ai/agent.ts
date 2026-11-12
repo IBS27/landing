@@ -3,7 +3,8 @@ import type { GenericValidator, Infer } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import type { ActionCtx } from "../_generated/server";
-import type { AiAgent, AiFallbackReason } from "../validators";
+import { sourceKey, sourcesOf, tryCite } from "../lib/citations";
+import type { AiAgent, AiFallbackReason, Citations, Source } from "../validators";
 import { anthropic, costUsd, FALLBACK_BETA, MODEL, type Usage } from "./model";
 import {
   canonicalJson,
@@ -13,7 +14,7 @@ import {
   sha256,
   toJsonSchema,
 } from "./outputSchema";
-import { type AgentSource, describeSource, sourceKey } from "./sources";
+import { type AgentSource, describeSource, type ShownTo } from "./sources";
 import { aiEnabled } from "./status";
 
 /**
@@ -21,11 +22,12 @@ import { aiEnabled } from "./status";
  * feature, and run with `runAgent` inside a Convex action:
  *
  *   const weekendRoute = defineTask({ agent: "ember", name: "ember.weekendRoute", ... });
- *   const result = await runAgent(ctx, weekendRoute, { input, sources });
+ *   const result = await runAgent(ctx, weekendRoute, { input, sources, shownTo: "everyone" });
  *
  * The model gets no tools and `runAgent` writes only its `aiRuns` log row. The
  * caller decides where the output goes: #6's `propose()` for anything sent or
- * created for a user, or a computed-table mutation.
+ * created for a user, or a computed-table mutation. Either way, store
+ * `result.cited` after `assertCitable()` with the same audience.
  */
 
 type Effort = "low" | "medium" | "high" | "xhigh" | "max";
@@ -38,7 +40,7 @@ export type AgentTask<I extends Json, V extends GenericValidator> = {
   instructions: string;
   /** The output's shape, as a Convex validator. Sent to the model as a JSON schema. */
   output: V;
-  /** Every source key the output cites. Each one must be in the run's `sources`. */
+  /** Every source key the output cites (`AgentSource.key`). Each one must be one of the run's sources. */
   cites: (output: Infer<V>) => string[];
   /** Task rules a schema can't express (math adds up, each item cites a source). Return errors. */
   check?: (output: Infer<V>, input: I) => string[];
@@ -58,8 +60,11 @@ export type AgentResult<O> = {
   output: O;
   via: "model" | "cache" | "fallback";
   fallbackReason?: AiFallbackReason;
-  /** The sources the output cites, in citation order, all taken from the run's `sources`. */
-  cited: AgentSource[];
+  /**
+   * What the output cites: the run's own `Source` values, in citation order,
+   * ready to store after `assertCitable()`. Null when it cites nothing.
+   */
+  cited: Citations | null;
   runId: Id<"aiRuns">;
 };
 
@@ -94,8 +99,8 @@ Rules:
 - Reply with JSON only, matching the schema.`;
 }
 
-function userPrompt(input: Json, sources: AgentSource[]) {
-  return `<input>\n${JSON.stringify(input, null, 2)}\n</input>\n<sources>\n${JSON.stringify(sources.map(describeSource), null, 2)}\n</sources>`;
+function userPrompt(input: Json, sources: Json[]) {
+  return `<input>\n${JSON.stringify(input, null, 2)}\n</input>\n<sources>\n${JSON.stringify(sources, null, 2)}\n</sources>`;
 }
 
 const fingerprints = new WeakMap<object, Promise<string>>();
@@ -125,22 +130,44 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
   task: AgentTask<I, V>,
   args: {
     input: I;
-    sources: AgentSource[];
+    /**
+     * What the model may read and cite. Sources `shownTo` can't see are dropped
+     * before the model sees them (see `agentSources`).
+     */
+    sources: readonly Source[];
+    /**
+     * Who will see the result: `"everyone"` for a result cached once for every
+     * viewer (only public sources are read), or the one user it's for.
+     */
+    shownTo: ShownTo;
     jobId?: Id<"aiJobs">;
     /** When to stop calling the model (ms since epoch). Default: 8 minutes from now. Pass one shared deadline when an action makes several runs. */
     deadline?: number;
   },
 ): Promise<AgentResult<Infer<V>>> {
   type O = Infer<V>;
-  const { input, sources, jobId } = args;
+  const { input, jobId } = args;
   const started = Date.now();
   const deadline = args.deadline ?? started + BUDGET_MS;
   const generic = task as unknown as AgentTask<Json, GenericValidator>;
-  const inputHash = await sha256(
-    canonicalJson({ task: task.name, fp: await fingerprint(generic), input, sources }),
+
+  const sources = await ctx.runQuery(internal.ai.sources.resolve, {
+    sources: [...args.sources],
+    shownTo: args.shownTo,
+  });
+  const given = new Map(args.sources.map((s) => [sourceKey(s), s]));
+  // Readable sources by key, as the caller's own `Source` values.
+  const byKey = new Map(
+    sources.flatMap((s) => {
+      const source = given.get(s.key);
+      return source ? [[s.key, source] as const] : [];
+    }),
   );
-  const byKey = new Map(sources.map((s) => [sourceKey(s), s]));
-  const resolve = (keys: string[]) => [...new Set(keys)].flatMap((k) => byKey.get(k) ?? []);
+  const described = sources.map(describeSource);
+  const inputHash = await sha256(
+    canonicalJson({ task: task.name, fp: await fingerprint(generic), input, sources: described }),
+  );
+  const toCitations = (keys: string[]) => tryCite(keys.flatMap((k) => byKey.get(k) ?? []));
 
   const errors: string[] = [];
   const usage: Usage = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 };
@@ -174,13 +201,22 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
 
   const fallback = async (reason: AiFallbackReason): Promise<AgentResult<O>> => {
     const output = task.fallback(input, sources);
-    let cited: AgentSource[] = [];
+    let keys: string[] = [];
     try {
-      cited = resolve(task.cites(output));
+      keys = task.cites(output);
     } catch (error) {
       errors.push(`cites() threw on the fallback output: ${message(error)}`);
     }
-    const runId = await log("fallback", output, cited.map(sourceKey), reason);
+    const unknown = keys.filter((k) => !byKey.has(k));
+    if (unknown.length)
+      errors.push(`The fallback cited sources it can't read, dropped: ${unknown.join(", ")}`);
+    const cited = toCitations(keys);
+    const runId = await log(
+      "fallback",
+      output,
+      cited ? sourcesOf(cited).map(sourceKey) : [],
+      reason,
+    );
     return { output, via: "fallback", fallbackReason: reason, cited, runId };
   };
 
@@ -192,18 +228,18 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
     // The hash covers the schema, but re-check so a cached row can never return the wrong type.
     const output: unknown = hit ? JSON.parse(hit.output) : undefined;
     if (hit && checkValue(task.output, output).errors.length === 0)
-      return { output: output as O, via: "cache", cited: resolve(hit.cited), runId: hit._id };
+      return { output: output as O, via: "cache", cited: toCitations(hit.cited), runId: hit._id };
   }
 
   const grounding = {
-    ids: allowedIds(input, sources),
+    ids: allowedIds(input, byKey.keys()),
     sources: byKey,
     wrongTable: (ids: { id: string; table: string }[]) =>
       ids.length ? ctx.runQuery(internal.ai.runs.wrongTableIds, { ids }) : Promise.resolve([]),
   };
   const schema = toJsonSchema(task.output);
   const messages: Anthropic.Beta.BetaMessageParam[] = [
-    { role: "user", content: userPrompt(input, sources) },
+    { role: "user", content: userPrompt(input, described) },
   ];
 
   const maxAttempts = task.maxAttempts ?? 3;
@@ -268,8 +304,13 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
       response.stop_reason,
     );
     if (verdict.ok) {
-      const runId = await log("model", verdict.output, verdict.cited);
-      return { output: verdict.output, via: "model", cited: resolve(verdict.cited), runId };
+      const cited = toCitations(verdict.cited);
+      const runId = await log(
+        "model",
+        verdict.output,
+        cited ? sourcesOf(cited).map(sourceKey) : [],
+      );
+      return { output: verdict.output, via: "model", cited, runId };
     }
 
     errors.push(`Attempt ${attempts}: ${verdict.problems.join("; ")}`);
@@ -288,10 +329,9 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
  * Strings an output's `v.id()` fields may hold: anything in the input, plus
  * source keys and the record id inside a `<kind>:<id>` key.
  */
-function allowedIds(input: Json, sources: AgentSource[]) {
+function allowedIds(input: Json, keys: Iterable<string>) {
   const ids = collectStrings(input);
-  for (const s of sources) {
-    const key = sourceKey(s);
+  for (const key of keys) {
     ids.add(key);
     const colon = key.indexOf(":");
     if (colon > 0) ids.add(key.slice(colon + 1));
@@ -301,7 +341,8 @@ function allowedIds(input: Json, sources: AgentSource[]) {
 
 type Grounding = {
   ids: Set<string>;
-  sources: Map<string, AgentSource>;
+  /** The readable sources, by key. */
+  sources: ReadonlyMap<string, unknown>;
   /** The ids that aren't ids of the table their field expects. */
   wrongTable: (ids: { id: string; table: string }[]) => Promise<string[]>;
 };
