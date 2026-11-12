@@ -1,6 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import type { Folder } from "@/features/messenger/InboxMenu";
+import { MessagesIndexPage } from "@/features/messenger/MessagesPage";
+
+const FOLDERS: Folder[] = ["archived", "requests", "restricted"];
 
 export const Route = createFileRoute("/messages/")({
-  component: () => <Placeholder title="Chats" />,
+  validateSearch: (s: Record<string, unknown>): { folder?: Folder } =>
+    FOLDERS.includes(s.folder as Folder) ? { folder: s.folder as Folder } : {},
+  component: function MessagesIndex() {
+    const { folder } = Route.useSearch();
+    return <MessagesIndexPage key={folder ?? "inbox"} folder={folder} />;
+  },
 });

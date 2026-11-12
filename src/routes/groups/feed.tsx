@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { GroupsFeedPage } from "@/features/groups/GroupsFeedPage";
 
 export const Route = createFileRoute("/groups/feed")({
-  component: () => <Placeholder title="Your feed" />,
+  component: GroupsFeedPage,
 });

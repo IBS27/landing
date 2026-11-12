@@ -15,6 +15,7 @@ import {
   reactionTarget,
   reactionType,
   rentalDetails,
+  vehicleDetails,
 } from "./validators";
 
 export default defineSchema({
@@ -44,6 +45,8 @@ export default defineSchema({
     kind: v.optional(v.union(v.literal("person"), v.literal("page"))),
     pageCategory: v.optional(v.string()),
     followerCount: v.optional(v.number()),
+    /** Pages created in the app: the person who manages the Page. */
+    pageOwnerId: v.optional(v.id("users")),
   })
     .index("by_username", ["username"])
     .index("by_persona", ["isPersona"])
@@ -66,6 +69,16 @@ export default defineSchema({
     .index("by_to", ["toId", "createdAt"])
     .index("by_from", ["fromId", "createdAt"])
     .index("by_pair", ["fromId", "toId"]),
+
+  /** Follows of Pages (Follow / Like buttons). Added on top of a Page's seeded `followerCount`. */
+  follows: defineTable({
+    userId: v.id("users"),
+    targetId: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId", "createdAt"])
+    .index("by_target", ["targetId", "createdAt"])
+    .index("by_pair", ["userId", "targetId"]),
 
   groups: defineTable({
     name: v.string(),
@@ -105,6 +118,8 @@ export default defineSchema({
     /** Where the post lives: a profile timeline (the author's or a friend's) or a group. */
     groupId: v.optional(v.id("groups")),
     timelineUserId: v.optional(v.id("users")),
+    /** Posts written in an event's Discussion tab. */
+    eventId: v.optional(v.id("events")),
     text: v.optional(v.string()),
     background: v.optional(v.string()),
     media: v.array(media),
@@ -126,6 +141,7 @@ export default defineSchema({
     .index("by_author", ["authorId", "createdAt"])
     .index("by_group", ["groupId", "createdAt"])
     .index("by_timeline", ["timelineUserId", "createdAt"])
+    .index("by_event", ["eventId", "createdAt"])
     .searchIndex("search_text", { searchField: "text", filterFields: ["groupId"] }),
 
   comments: defineTable({
@@ -171,7 +187,8 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_user", ["userId", "createdAt"])
-    .index("by_user_ref", ["userId", "kind", "refId"]),
+    .index("by_user_ref", ["userId", "kind", "refId"])
+    .index("by_ref", ["kind", "refId"]),
 
   listings: defineTable({
     sellerId: v.id("users"),
@@ -185,6 +202,13 @@ export default defineSchema({
     location,
     status: v.union(v.literal("active"), v.literal("pending"), v.literal("sold")),
     rental: v.optional(rentalDetails),
+    vehicle: v.optional(vehicleDetails),
+    /** Set when the seller lowered the price; shown struck through. */
+    originalPrice: v.optional(v.number()),
+    /** Meetup preferences chosen by the seller. */
+    meetup: v.optional(
+      v.array(v.union(v.literal("public"), v.literal("door_pickup"), v.literal("door_dropoff"))),
+    ),
     badges: v.array(badge),
     groupIds: v.optional(v.array(v.id("groups"))),
     createdAt: v.number(),
@@ -205,7 +229,9 @@ export default defineSchema({
     createdAt: v.number(),
     lastMessageAt: v.number(),
     lastMessageId: v.optional(v.id("messages")),
-  }),
+    /** Quick-reaction emoji sent by the composer's like button (default 👍). */
+    emoji: v.optional(v.string()),
+  }).index("by_listing", ["listingId"]),
 
   conversationMembers: defineTable({
     conversationId: v.id("conversations"),

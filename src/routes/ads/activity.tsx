@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { AdActivityPage } from "@/features/misc/AdActivityPage";
 
 export const Route = createFileRoute("/ads/activity")({
-  component: () => <Placeholder title="Recent ad activity" />,
+  component: AdActivityPage,
 });

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { EventsHome } from "@/features/events/EventsHome";
 
 export const Route = createFileRoute("/events/")({
-  component: () => <Placeholder title="Events" />,
+  component: EventsHome,
 });

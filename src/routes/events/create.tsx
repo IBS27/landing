@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { CreateEvent } from "@/features/events/CreateEvent";
 
 export const Route = createFileRoute("/events/create")({
-  component: () => <Placeholder title="Create event" />,
+  validateSearch: (s: Record<string, unknown>): { edit?: string } =>
+    typeof s.edit === "string" && s.edit ? { edit: s.edit } : {},
+  component: function CreateRoute() {
+    const { edit } = Route.useSearch();
+    return <CreateEvent key={edit ?? "new"} editId={edit} />;
+  },
 });

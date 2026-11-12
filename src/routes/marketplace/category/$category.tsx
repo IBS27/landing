@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { CategoryPage } from "@/features/marketplace/BrowsePages";
+import { parseMpSearch } from "@/features/marketplace/filters";
 
 export const Route = createFileRoute("/marketplace/category/$category")({
-  component: () => <Placeholder title="Category" />,
+  validateSearch: parseMpSearch,
+  component: function CategoryRoute() {
+    const { category } = Route.useParams();
+    const search = Route.useSearch();
+    return <CategoryPage key={category} slug={category} search={search} />;
+  },
 });

@@ -41,6 +41,7 @@ export function PopoverPanel({
   open,
   onOpenChange,
   align = "end",
+  alignOffset,
   width = 360,
   className,
 }: {
@@ -49,6 +50,8 @@ export function PopoverPanel({
   open?: boolean;
   onOpenChange?: (o: boolean) => void;
   align?: "start" | "center" | "end";
+  /** Shift along the alignment axis (header panels line up with the right edge). */
+  alignOffset?: number;
   width?: number;
   className?: string;
 }) {
@@ -58,6 +61,7 @@ export function PopoverPanel({
       <P.Portal>
         <P.Content
           align={align}
+          alignOffset={alignOffset}
           sideOffset={4}
           collisionPadding={8}
           className={cn(

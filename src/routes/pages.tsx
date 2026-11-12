@@ -1,6 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { PAGES_VIEWS, PagesPage, type PagesView } from "@/features/misc/PagesPage";
 
 export const Route = createFileRoute("/pages")({
-  component: () => <Placeholder title="Pages" />,
+  validateSearch: (s: Record<string, unknown>): { view?: PagesView } => ({
+    view: PAGES_VIEWS.includes(s.view as PagesView) ? (s.view as PagesView) : undefined,
+  }),
+  component: PagesRoute,
 });
+
+function PagesRoute() {
+  const { view } = Route.useSearch();
+  return <PagesPage view={view ?? "discover"} />;
+}

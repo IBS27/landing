@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { JoinsPage } from "@/features/groups/JoinsPage";
 
 export const Route = createFileRoute("/groups/joins")({
-  component: () => <Placeholder title="Your groups" />,
+  component: JoinsPage,
 });

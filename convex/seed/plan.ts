@@ -373,6 +373,8 @@ export function buildPlan(now: number) {
               address: l.rental.address,
             }
           : undefined,
+        vehicle: l.vehicle,
+        originalPrice: l.originalPrice,
         badges: [],
         createdAt,
         updatedAt:

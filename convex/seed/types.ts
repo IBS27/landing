@@ -10,6 +10,7 @@
  * - Cross references use natural keys: usernames, page handles, group slugs, and the `key`
  *   fields of listings / events / posts / conversations.
  */
+import type { Doc } from "../_generated/dataModel";
 import type { ListingCategory, ReactionType } from "../validators";
 import type { BackgroundName } from "./lib/backgrounds";
 import type { Neighborhood } from "./lib/places";
@@ -179,7 +180,7 @@ export type ListingCondition = "new" | "used_like_new" | "used_good" | "used_fai
 
 export type RentalSeed = {
   readonly propertyType: "apartment" | "house" | "room" | "townhouse" | "studio";
-  readonly listingType: "rent" | "sublet";
+  readonly listingType: "rent" | "sublet" | "sale";
   readonly bedrooms: number;
   readonly bathrooms: number;
   readonly sqft?: number;
@@ -214,6 +215,10 @@ export type ListingSeed = {
   /** Groups the listing was also posted to. */
   readonly groups?: readonly GroupSlug[];
   readonly rental?: RentalSeed;
+  /** Vehicles: make/model/year/mileage etc. */
+  readonly vehicle?: Doc<"listings">["vehicle"];
+  /** The price before the seller lowered it (shown struck through). */
+  readonly originalPrice?: number;
 };
 
 // ---------------------------------------------------------------------------

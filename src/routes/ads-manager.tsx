@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { AdsManagerPage } from "@/features/misc/AdsManagerPage";
 
 export const Route = createFileRoute("/ads-manager")({
-  component: () => <Placeholder title="Ads Manager" />,
+  component: AdsManagerPage,
 });

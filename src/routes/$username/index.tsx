@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { PostsTab } from "@/features/profile";
 
 export const Route = createFileRoute("/$username/")({
-  component: () => <Placeholder title="Profile" />,
+  component: PostsTab,
 });

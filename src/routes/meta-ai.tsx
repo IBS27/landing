@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { MetaAIPage } from "@/features/misc/MetaAIPage";
 
 export const Route = createFileRoute("/meta-ai")({
-  component: () => <Placeholder title="Meta AI" />,
+  component: MetaAIPage,
 });

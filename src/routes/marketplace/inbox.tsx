@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { InboxPage } from "@/features/marketplace/YouPages";
 
 export const Route = createFileRoute("/marketplace/inbox")({
-  component: () => <Placeholder title="Marketplace inbox" />,
+  validateSearch: (s: Record<string, unknown>): { tab?: "buying" } =>
+    s.tab === "buying" ? { tab: "buying" } : {},
+  component: function InboxRoute() {
+    const { tab } = Route.useSearch();
+    return <InboxPage role={tab ?? "selling"} />;
+  },
 });

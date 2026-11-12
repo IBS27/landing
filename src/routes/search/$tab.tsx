@@ -1,7 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { asTab, validateSearchParams } from "@/features/search/params";
+import { SearchPage } from "@/features/search/SearchPage";
 
 export const Route = createFileRoute("/search/$tab")({
-  validateSearch: (s: Record<string, unknown>) => ({ q: typeof s.q === "string" ? s.q : "" }),
-  component: () => <Placeholder title="Search results" />,
+  validateSearch: validateSearchParams,
+  component: SearchRoute,
 });
+
+function SearchRoute() {
+  const { tab } = Route.useParams();
+  const params = Route.useSearch();
+  return <SearchPage tab={asTab(tab)} params={params} />;
+}

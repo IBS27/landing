@@ -6,3 +6,4 @@ dist
 .DS_Store
 # Real Facebook screenshots contain real people's data. Never commit.
 design/reference/
+design/compare/

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { GamingPage } from "@/features/gaming/GamingPage";
 
 export const Route = createFileRoute("/gaming/")({
-  component: () => <Placeholder title="Gaming" />,
+  component: GamingPage,
 });

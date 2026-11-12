@@ -1,11 +1,37 @@
+import { useRouterState } from "@tanstack/react-router";
+import { useState } from "react";
+import { useQ } from "@/app/viewer";
 import { BellIcon } from "@/icons";
 import { HeaderButton } from "@/layout/HeaderButton";
+import { PopoverPanel } from "@/ui/overlays";
+import { api } from "../../../convex/_generated/api";
+import { NotificationList } from "./NotificationList";
 
-/** Stub: replaced by the Notifications feature. */
+/** Header bell: red badge with the unseen count and a 360px Notifications panel. */
 export function NotificationsDropdown() {
+  const [open, setOpen] = useState(false);
+  const count = useQ(api.notifications.unseenCount, {}) ?? 0;
+  const onPage = useRouterState({ select: (s) => s.location.pathname === "/notifications" });
   return (
-    <HeaderButton label="Notifications">
-      <BellIcon size={20} />
-    </HeaderButton>
+    <PopoverPanel
+      open={open}
+      onOpenChange={setOpen}
+      width={360}
+      alignOffset={-48}
+      trigger={
+        <HeaderButton
+          label="Notifications"
+          active={open || onPage}
+          count={count}
+          aria-expanded={open}
+        >
+          <BellIcon size={20} />
+        </HeaderButton>
+      }
+    >
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <NotificationList variant="dropdown" onNavigate={() => setOpen(false)} />
+      </div>
+    </PopoverPanel>
   );
 }

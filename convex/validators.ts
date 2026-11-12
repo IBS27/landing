@@ -92,6 +92,7 @@ export const listingCategory = v.union(
   v.literal("pets"),
   v.literal("sporting"),
   v.literal("toys"),
+  v.literal("homesales"),
 );
 export type ListingCategory = Infer<typeof listingCategory>;
 
@@ -110,7 +111,7 @@ export const rentalDetails = v.object({
     v.literal("townhouse"),
     v.literal("studio"),
   ),
-  listingType: v.union(v.literal("rent"), v.literal("sublet")),
+  listingType: v.union(v.literal("rent"), v.literal("sublet"), v.literal("sale")),
   bedrooms: v.number(),
   bathrooms: v.number(),
   sqft: v.optional(v.number()),
@@ -121,6 +122,20 @@ export const rentalDetails = v.object({
   laundry: v.optional(v.string()),
   parking: v.optional(v.string()),
   address: v.optional(v.string()),
+});
+
+/** Vehicles for sale (Marketplace category "vehicles"). */
+export const vehicleDetails = v.object({
+  vehicleType: v.optional(v.string()), // "Car/Truck", "Motorcycle", ...
+  make: v.string(),
+  model: v.string(),
+  year: v.number(),
+  mileage: v.optional(v.number()),
+  bodyStyle: v.optional(v.string()),
+  transmission: v.optional(v.string()),
+  fuelType: v.optional(v.string()),
+  exteriorColor: v.optional(v.string()),
+  titleStatus: v.optional(v.string()),
 });
 
 export const location = v.object({

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { CreateChooserPage } from "@/features/marketplace/CreatePages";
 
 export const Route = createFileRoute("/marketplace/create/")({
-  component: () => <Placeholder title="Create new listing" />,
+  component: CreateChooserPage,
 });

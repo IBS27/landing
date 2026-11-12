@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { SearchPage } from "@/features/marketplace/BrowsePages";
+import { parseMpSearch } from "@/features/marketplace/filters";
 
 export const Route = createFileRoute("/marketplace/search")({
-  validateSearch: (s: Record<string, unknown>) => ({ q: typeof s.q === "string" ? s.q : "" }),
-  component: () => <Placeholder title="Search Marketplace" />,
+  validateSearch: parseMpSearch,
+  component: function SearchRoute() {
+    return <SearchPage search={Route.useSearch()} />;
+  },
 });

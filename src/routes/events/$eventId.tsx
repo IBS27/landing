@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { EventPage } from "@/features/events/EventPage";
 
 export const Route = createFileRoute("/events/$eventId")({
-  component: () => <Placeholder title="Event" />,
+  validateSearch: (s: Record<string, unknown>): { tab?: "discussion" } =>
+    s.tab === "discussion" ? { tab: "discussion" } : {},
+  component: function EventRoute() {
+    const { eventId } = Route.useParams();
+    const { tab } = Route.useSearch();
+    return <EventPage key={eventId} eventId={eventId} tab={tab ?? "about"} />;
+  },
 });

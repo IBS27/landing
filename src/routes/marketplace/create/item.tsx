@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { ListingComposer } from "@/features/marketplace/Composer";
 
 export const Route = createFileRoute("/marketplace/create/item")({
-  component: () => <Placeholder title="Item for sale" />,
+  component: () => <ListingComposer kind="item" />,
 });
