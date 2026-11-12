@@ -3,11 +3,14 @@ import type { Doc } from "../convex/_generated/dataModel";
 import {
   cleanNote,
   FOF_SCAN_MAX,
+  FRIEND_LOOKUP_MAX,
   FRIEND_READ_BUDGET,
   listerNetwork,
   removeVouch,
   saveVouch,
   VOUCH_NOTE_MAX,
+  VOUCH_SCAN_MAX,
+  VOUCHES_SHOWN,
 } from "../convex/lib/vouches";
 import {
   nameList,
@@ -109,6 +112,7 @@ describe("listerNetwork", () => {
       mutualFriends: [],
       mutualFriendCount: 0,
       vouches: [],
+      vouchTotal: 0,
       partial: false,
     });
   });
@@ -164,6 +168,57 @@ describe("listerNetwork", () => {
     const net = await listerNetwork(fakeCtx(w), id("V"), id("L"));
     expect(net?.vouches.map((v) => v.voucher._id)).toEqual(id(["V", "F2"]));
     expect(net?.partial).toBe(true);
+  });
+
+  test("past the scan, the viewer's own and friends' vouches are looked up directly", async () => {
+    const w = world();
+    const crowd = Array.from({ length: VOUCH_SCAN_MAX + 5 }, (_, i) => `X${i}`);
+    w.users.push(...crowd.map(user));
+    w.vouches.push(...crowd.map((x) => vouch(x, "L", 0)));
+    const net = await listerNetwork(fakeCtx(w), id("V"), id("L"));
+    expect(net?.vouches.map((v) => [v.voucher._id, v.via])).toEqual([
+      ["V", "you"],
+      ["F2", "friend"],
+    ]);
+    expect(net?.partial).toBe(true);
+  });
+
+  test("past the scan with too many friends to look up, the viewer's own vouch still shows", async () => {
+    const w = world();
+    const pals = Array.from({ length: FRIEND_LOOKUP_MAX }, (_, i) => `Pal${i}`);
+    const crowd = Array.from({ length: VOUCH_SCAN_MAX + 5 }, (_, i) => `X${i}`);
+    w.users.push(...pals.map(user), ...crowd.map(user));
+    w.friendships.push(...pals.flatMap((x) => friends("V", x)));
+    w.vouches.push(...crowd.map((x) => vouch(x, "L", 0)));
+    const net = await listerNetwork(fakeCtx(w), id("V"), id("L"));
+    expect(net?.vouches.map((v) => v.voucher._id)).toEqual(id(["V"]));
+    expect(net?.partial).toBe(true);
+  });
+
+  test("a voided friend vouch doesn't mask unchecked friends-of-friends vouches", async () => {
+    const w = world();
+    w.blocks.push(block("L", "F2"));
+    const fv = w.vouches.find((v) => v.voucherId === "F2");
+    if (fv) fv.updatedAt = 10;
+    const crowd = Array.from({ length: FOF_SCAN_MAX }, (_, i) => `X${i}`);
+    w.users.push(...crowd.map(user));
+    w.vouches.push(...crowd.map((x) => vouch(x, "L", 0)));
+    w.vouches = w.vouches.filter((v) => v.voucherId !== "V");
+    const net = await listerNetwork(fakeCtx(w), id("V"), id("L"));
+    expect(net?.vouches).toEqual([]);
+    expect(net?.partial).toBe(true);
+  });
+
+  test("returns at most VOUCHES_SHOWN vouches and counts the rest", async () => {
+    const w = world();
+    const pals = Array.from({ length: VOUCHES_SHOWN + 5 }, (_, i) => `Pal${i}`);
+    w.users.push(...pals.map(user));
+    w.friendships.push(...pals.flatMap((x) => friends("V", x)));
+    w.vouches.push(...pals.map((x) => vouch(x, "L", 1)));
+    const net = await listerNetwork(fakeCtx(w), id("V"), id("L"));
+    expect(net?.vouches).toHaveLength(VOUCHES_SHOWN);
+    expect(net?.vouches[0]?.via).toBe("you");
+    expect(net?.vouchTotal).toBe(VOUCHES_SHOWN + 5 + 3);
   });
 });
 

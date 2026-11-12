@@ -3,7 +3,7 @@ import { BadgeCheck, Users } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useQ } from "@/app/viewer";
 import { timeAgo } from "@/lib/citations";
-import { cn } from "@/lib/format";
+import { cn, plural } from "@/lib/format";
 import { Avatar, Button, Card, Divider, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -59,29 +59,29 @@ export function ListerNetwork({ listingId }: { listingId: Id<"listings"> }) {
       <Divider className="my-3" />
 
       <h3 className="font-semibold text-base text-primary">
-        {vouchesTitle(relation, vouches.length)}
+        {vouchesTitle(relation, data.vouchTotal)}
       </h3>
-      {vouches.length > 0 ? (
+      {vouches.length > 0 && (
         <ul className="mt-2 flex flex-col gap-3">
           {vouches.map((v) => (
             <VouchRow key={v.voucher._id} vouch={v} lister={lister} />
           ))}
         </ul>
-      ) : (
-        relation !== "you" && (
-          <p className="mt-1 text-secondary text-sm">
-            {data.partial
-              ? `None of your friends have vouched for ${lister.firstName}.`
-              : `None of your friends or friends of friends have vouched for ${lister.firstName}.`}
-          </p>
-        )
+      )}
+      {data.vouchTotal > vouches.length && (
+        <p className="mt-2 text-secondary text-xs">
+          And {plural(data.vouchTotal - vouches.length, "more vouch", "more vouches")}
+        </p>
+      )}
+      {vouches.length === 0 && relation !== "you" && (
+        <p className="mt-1 text-secondary text-sm">
+          {data.partial
+            ? `No vouches for ${lister.firstName} found in your network.`
+            : `None of your friends or friends of friends have vouched for ${lister.firstName}.`}
+        </p>
       )}
       {data.partial && (
-        <p className="mt-2 text-secondary text-xs">
-          {relation === "you"
-            ? "Showing your friends' vouches and the most recent others."
-            : "Showing your friends' vouches and the most recent ones from friends of friends."}
-        </p>
+        <p className="mt-2 text-secondary text-xs">Only the most recent vouches were checked.</p>
       )}
 
       {data.canVouch && (
