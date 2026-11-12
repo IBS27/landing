@@ -74,7 +74,3 @@ export function sectionFor(path: string): LandingSection | undefined {
     (a, b) => b.to.length - a.to.length,
   )[0];
 }
-
-export function isLandingPath(path: string) {
-  return path === "/landing" || path.startsWith("/landing/");
-}

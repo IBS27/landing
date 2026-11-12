@@ -1,19 +1,19 @@
 # Landing
 
-Landing is a standalone app at `/landing`, built on the Facebook clone's users and data. It has its own layout and navigation, and links out to Facebook's own pages for Groups, Events, people, listings and chats.
+Landing is part of the Facebook clone: a section at `/landing`, like Marketplace or Gaming, built on the clone's users and data. Its pages keep Facebook's TopNav and ChatDock and add Landing's left sidebar, and they link to Facebook's own pages for Groups, Events, people, listings and chats.
 
 ## Where things go
 
 - **Routes:** `src/routes/landing/`. Keep route files thin and import from `src/landing/<area>/`. Sections live in `<section>/index.tsx`, so add sub-pages as siblings (`find/apartments.tsx`, `find/$neighborhood.tsx`).
 - **Feature code:** `src/landing/<area>/` (folders below), with Convex functions in `convex/<area>.ts` as usual.
 - **Shell:** `src/landing/shell/`
-  - `LandingLayout.tsx`: header (logo, back to Facebook, the viewer's account menu) and section nav. `src/routes/__root.tsx` renders `/landing*` without Facebook's TopNav and ChatDock.
+  - `LandingLayout.tsx`: Landing's 360px sidebar (the clone's `AppRail`) with the page beside it. Facebook's TopNav and ChatDock come from the root layout, as on every other page.
   - `sections.ts`: the nav. Add a section here.
   - `LandingPage.tsx`: `LandingPage` (title, description, actions, centered column) and the `ComingSoon` stub card.
   - `HomePage.tsx`: Landing Home (`/landing`).
   - `icons.tsx`: `BmLanding`, the app's mark.
 - **Links to Facebook objects:** always use `src/landing/links.ts`: `<Link {...toGroup(group)}>`, `toEvent`, `toProfile`, `toListing`, `toConversation`.
-- **Viewer:** `useViewer()`, `useQ` and `useM` from `src/app/viewer.tsx`, the same as the rest of the app. Persona switching and dark mode come from the account menu in the header.
+- **Viewer:** `useViewer()`, `useQ` and `useM` from `src/app/viewer.tsx`, the same as the rest of the app. Persona switching and dark mode come from the account menu in Facebook's TopNav.
 
 ## Sections
 

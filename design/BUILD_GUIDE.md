@@ -29,6 +29,7 @@ The goal is a faithful, working clone of desktop facebook.com (1440×900, light 
   - Home: left rail 360px, center feed column 680px wide (measured on 1440px viewport: rail 0–348, feed 380–1060), right rail 360px (Contacts etc.).
   - Marketplace, Groups, Events, Friends, Watch and Gaming: 360px fixed white left sidebar with a page title and nav rows.
   - Messenger full page: no rails.
+  - Landing (`/landing/*`): the same root layout as everything else, with Landing's 360px sidebar (`AppRail`, from `src/landing/shell/LandingLayout.tsx`) and the page beside it.
 - **Copy.** Use Facebook's real UI labels and copy. Seed content is fictional and set in San Francisco; no real people's data.
 
 ## References

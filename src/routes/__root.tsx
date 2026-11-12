@@ -4,7 +4,6 @@ import { ChatDock } from "@/features/messenger/ChatDock";
 import { PhotoTheaterHost } from "@/features/posts/photoTheater";
 import { VideoTheaterHost } from "@/features/posts/VideoTheater";
 import { FacebookLogo } from "@/icons";
-import { isLandingPath } from "@/landing/shell/sections";
 import { DocumentTitle } from "@/layout/DocumentTitle";
 import { PageUnavailable } from "@/layout/PageUnavailable";
 import { TopNav } from "@/layout/TopNav";
@@ -16,12 +15,12 @@ export const Route = createRootRoute({
 
 function RootLayout() {
   const { viewer } = useViewerContext();
-  const path = useRouterState({ select: (s) => s.location.pathname });
   // Messenger call pop-up windows and the Live Producer (its own slim header)
-  // render bare, without Facebook's chrome. So does Landing, a standalone app
-  // with its own layout and tab title (src/routes/landing/route.tsx).
-  const landing = isLandingPath(path);
-  const bare = landing || path.startsWith("/call/") || path === "/live/producer";
+  // render bare, without Facebook's chrome.
+  const bare = useRouterState({
+    select: (s) =>
+      s.location.pathname.startsWith("/call/") || s.location.pathname === "/live/producer",
+  });
   if (viewer === undefined) return <Splash />;
   if (viewer === null)
     return (
@@ -36,7 +35,7 @@ function RootLayout() {
   if (bare)
     return (
       <>
-        {!landing && <DocumentTitle />}
+        <DocumentTitle />
         <Outlet />
       </>
     );
