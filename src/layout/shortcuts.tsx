@@ -19,6 +19,7 @@ import {
   BmSaved,
   BmVideo,
 } from "@/icons";
+import { BmLanding } from "@/landing/shell/icons";
 
 export type Shortcut = {
   label: string;
@@ -30,6 +31,12 @@ export type Shortcut = {
 /** Home left rail, in Facebook's order. The first `PRIMARY_COUNT` show before "See more". */
 export const SHORTCUTS: Shortcut[] = [
   { label: "Meta AI", to: "/meta-ai", Icon: BmMetaAI, description: "Ask Meta AI anything." },
+  {
+    label: "Landing",
+    to: "/landing",
+    Icon: BmLanding,
+    description: "Find a place, meet people and settle into San Francisco.",
+  },
   {
     label: "Friends",
     to: "/friends",

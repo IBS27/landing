@@ -43,6 +43,7 @@ const SECTIONS: [prefix: string, title: string][] = [
   ["/bookmarks", "Menu"],
   ["/live", "Live Producer"],
   ["/meta-ai", "Meta AI"],
+  ["/landing", "Landing"],
   ["/ads-manager", "Ads Manager"],
   ["/stories", "Stories"],
 ];
