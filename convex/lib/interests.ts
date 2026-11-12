@@ -537,7 +537,8 @@ export function interestsForGroup(group: {
 }): InterestId[] {
   if (EXCLUDED_CATEGORIES.some((c) => normalize(c) === normalize(group.category))) return [];
   const specific = unique([
-    ...(group.tags ?? []).flatMap(interestsForTag),
+    // Tags are matched as phrases, so "Women Who Climb" counts as climbing.
+    ...(group.tags ?? []).flatMap((tag) => interestsInText(tag)),
     ...interestsInText(group.name),
   ]);
   return specific.length > 0 ? specific : interestsForCategory(group.category);
