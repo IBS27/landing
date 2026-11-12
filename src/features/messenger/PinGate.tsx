@@ -265,8 +265,17 @@ function PinEntry({ onBack, onDone }: { onBack: () => void; onDone: () => void }
 /** Full-height gate that replaces the Chats panel in the header dropdown. */
 export function PinGatePanel() {
   const [step, setStep] = useState<"intro" | "entry">("intro");
+  // Facebook opens the gate with nothing focused-looking: take focus onto the panel itself
+  // (this runs before the popover's auto-focus, which then leaves it alone), so the
+  // Create PIN ring only shows once the keyboard Tabs onto it.
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => ref.current?.focus({ preventScroll: true }), []);
   return (
-    <div className="flex h-[calc(100vh-72px)] max-h-[828px] flex-col justify-center px-4 pb-2.5">
+    <div
+      ref={ref}
+      tabIndex={-1}
+      className="flex h-[calc(100vh-72px)] max-h-[828px] flex-col justify-center px-4 pb-2.5 outline-none"
+    >
       {step === "intro" ? (
         <PinIntro variant="panel" onCreate={() => setStep("entry")} />
       ) : (

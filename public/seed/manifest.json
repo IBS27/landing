@@ -11604,6 +11604,62 @@
     "width": 1024,
     "height": 683
   },
+  "covers/ballard-01.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Ballard_Ave_05.jpg",
+    "creator": "Joe Mabel",
+    "creator_url": null,
+    "license": "CC BY-SA 3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "title": "Ballard Ave 05",
+    "tags": [
+      "ballard",
+      "ballard avenue",
+      "seattle",
+      "historic district",
+      "brick building",
+      "neighborhood"
+    ],
+    "provider": "wikimedia",
+    "width": 1024,
+    "height": 768
+  },
+  "covers/capitol-hill-01.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Rainbow_crosswalk_Capitol_Hill,_Seattle.jpg",
+    "creator": "Ntowle98",
+    "creator_url": null,
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Rainbow crosswalk Capitol Hill, Seattle",
+    "tags": [
+      "capitol hill",
+      "rainbow crosswalk",
+      "seattle",
+      "neighborhood",
+      "street"
+    ],
+    "provider": "wikimedia",
+    "width": 1024,
+    "height": 768
+  },
+  "covers/give-box-01.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Givebox_%22Schatzkistl%22_in_Munich_03.jpg",
+    "creator": "Kritzolina",
+    "creator_url": null,
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Givebox \"Schatzkistl\" in Munich 03",
+    "tags": [
+      "give box",
+      "free stuff",
+      "giveaway",
+      "books",
+      "toys",
+      "sharing"
+    ],
+    "provider": "wikimedia",
+    "width": 1024,
+    "height": 682
+  },
   "events/art-show-01.jpg": {
     "source_url": "https://www.flickr.com/photos/95413346@N00/14375871059",
     "creator": "Elvert Barnes",

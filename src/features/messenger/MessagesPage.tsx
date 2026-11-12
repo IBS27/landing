@@ -98,7 +98,7 @@ function MessagesLayout({
             activeId={activeId}
             leading={
               draft ? (
-                <div className="flex h-[72px] items-center gap-3 rounded-lg bg-highlight p-2">
+                <div className="group flex h-[72px] items-center gap-3 rounded-lg bg-highlight p-2">
                   <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-btn">
                     <svg viewBox="0 0 56 56" width="56" height="56" aria-hidden>
                       <circle cx="28" cy="22" r="10" fill="var(--disabled-icon)" />
@@ -111,7 +111,8 @@ function MessagesLayout({
                       type="button"
                       aria-label="Delete message draft"
                       onClick={() => void navigate({ to: "/messages" })}
-                      className="mr-1 flex h-6 w-6 items-center justify-center rounded-full bg-btn text-icon"
+                      // Facebook only reveals the draft's delete button on hover.
+                      className="mr-1 flex h-6 w-6 items-center justify-center rounded-full bg-btn text-icon opacity-0 focus-visible:opacity-100 group-hover:opacity-100"
                     >
                       <X size={12} strokeWidth={3} />
                     </button>

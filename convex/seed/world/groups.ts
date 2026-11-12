@@ -13,7 +13,7 @@ export const groups = [
       "For UW students, staff and alumni looking for housing near campus: rooms, sublets, roommates, and leases. U District, Wallingford, Roosevelt, Ravenna, Eastlake and beyond. Please include price, dates, and location in every post. Scams get you banned instantly.",
     category: "Housing",
     location: "Seattle, WA",
-    cover: "covers/university district",
+    cover: "posts/uw-campus-02.jpg",
     rules: [
       {
         title: "Include price, dates and location",
@@ -64,7 +64,7 @@ export const groups = [
       "Rentals, rooms, and roommate searches anywhere in Seattle. Landlords and tenants welcome. Put the rent and neighborhood in the first line of your post.",
     category: "Housing",
     location: "Seattle, WA",
-    cover: "covers/apartment building",
+    cover: "rooms/apartment-building-04.jpg",
     rules: [
       {
         title: "Rent and neighborhood first",
@@ -106,7 +106,7 @@ export const groups = [
       "A place for people who live, work, and hang out on Capitol Hill. Lost cats, construction noise, restaurant openings, street closures, and the occasional neighborly rant.",
     category: "Neighborhood",
     location: "Capitol Hill, Seattle",
-    cover: "covers/capitol hill street",
+    cover: "covers/capitol-hill-01.jpg",
     rules: [
       { title: "Neighbors only", body: "Answer the membership questions honestly. We check." },
       {
@@ -141,7 +141,7 @@ export const groups = [
       "Give freely, ask freely, gratitude always. Everything posted here is free. No selling, no trading, no holds longer than 24 hours.",
     category: "Buy and Sell",
     location: "Seattle, WA",
-    cover: "covers/free stuff",
+    cover: "covers/give-box-01.jpg",
     rules: [
       { title: "Everything is free", body: "No sales, no 'make an offer', no trades." },
       {
@@ -178,7 +178,7 @@ export const groups = [
       "Partner finding, beta, gear swaps, trip reports and gym meetups for climbers around Puget Sound. All levels welcome: first-time boulderers to Index trad dads.",
     category: "Sports",
     location: "Seattle, WA",
-    cover: "covers/rock climbing",
+    cover: "posts/climbing-holds-01.jpg",
     rules: [
       { title: "Be respectful", body: "Everyone started somewhere. No gatekeeping." },
       {
@@ -215,7 +215,7 @@ export const groups = [
       "Trip reports, trail conditions, carpool requests, and photos from Washington and Oregon trails. Snow is real until July, bring your microspikes.",
     category: "Outdoors",
     location: "Pacific Northwest",
-    cover: "covers/mountain lake",
+    cover: "posts/mount-rainier-05.jpg",
     rules: [
       {
         title: "Include trail conditions",
@@ -252,7 +252,7 @@ export const groups = [
       "The unofficial group for Huskies graduating in 2027. Housing, classes, internships, memes, and countdowns to graduation.",
     category: "School and Education",
     location: "Seattle, WA",
-    cover: "covers/university campus",
+    cover: "posts/uw-campus-09.jpg",
     rules: [
       { title: "2027 grads only", body: "Or close to it. Transfer students welcome." },
       { title: "No selling essays or homework", body: "Instant ban." },
@@ -283,7 +283,7 @@ export const groups = [
       "Interns and early-career folks in Seattle tech. Housing for internships, offer advice, team matching, meetups, and 'is this normal' questions. No recruiter spam.",
     category: "Work",
     location: "Seattle, WA",
-    cover: "covers/office tech",
+    cover: "events/hackathon-02.jpg",
     rules: [
       { title: "No recruiter spam", body: "Recruiters may post once a month in the jobs thread." },
       {
@@ -320,7 +320,7 @@ export const groups = [
       "Weekly board game nights at Moonrise Coffee on Capitol Hill (Thursdays, 7pm) plus pop-ups around town. Newcomers very welcome: we'll teach you anything.",
     category: "Games",
     location: "Capitol Hill, Seattle",
-    cover: "covers/board games",
+    cover: "posts/wingspan-01.jpg",
     rules: [
       { title: "Newbies welcome", body: "Ask for a teach. Nobody's judging." },
       { title: "Buy a drink", body: "Moonrise gives us the space for free. Support them." },
@@ -349,7 +349,7 @@ export const groups = [
       "Free group runs every Saturday at 8am from Gas Works Park, plus Tuesday night track. All paces, no runner left behind. Coffee after, always.",
     category: "Fitness",
     location: "Seattle, WA",
-    cover: "covers/running",
+    cover: "posts/runners-03.jpg",
     rules: [
       { title: "No-drop runs", body: "Pace groups wait at every turn." },
       { title: "Post your race results!", body: "We love a PR." },
@@ -377,7 +377,7 @@ export const groups = [
       "Where to eat in Seattle, from teriyaki to tasting menus. Post your meals, ask for recs, report new openings. Photos encouraged.",
     category: "Food & Drink",
     location: "Seattle, WA",
-    cover: "covers/food",
+    cover: "posts/ramen-06.jpg",
     rules: [
       { title: "Photos or it didn't happen", body: "Reviews with photos get pinned." },
       { title: "No self-promo without flair", body: "Restaurant owners: say you're the owner." },
@@ -406,7 +406,7 @@ export const groups = [
       "Buy, sell and swap with your Ballard neighbors. Furniture, tools, bikes, baby gear. Local pickup only.",
     category: "Buy and Sell",
     location: "Ballard, Seattle",
-    cover: "covers/ballard",
+    cover: "covers/ballard-01.jpg",
     rules: [
       { title: "Price in the post", body: "No 'DM for price'." },
       { title: "Local pickup", body: "Ballard and nearby only. No shipping." },
@@ -427,7 +427,7 @@ export const groups = [
       "Upcoming shows, ticket swaps (face value only), and who's playing where. Neumos, the Showbox, the Crocodile, basements, all of it.",
     category: "Music",
     location: "Seattle, WA",
-    cover: "covers/concert crowd",
+    cover: "covers/concert-03.jpg",
     rules: [
       { title: "Face value only", body: "Ticket resale above face value gets removed." },
       { title: "Local bands welcome", body: "Self-promo is fine, just tell us when and where." },
@@ -454,7 +454,7 @@ export const groups = [
       "For fans of Seattle baseball. Game threads, ticket swaps, tailgates, and coping mechanisms.",
     category: "Sports",
     location: "Seattle, WA",
-    cover: "covers/baseball stadium",
+    cover: "posts/baseball-stadium-01.jpg",
     rules: [
       { title: "No hate", body: "Trash talk the other team, not other fans." },
       { title: "Tickets at face value", body: "Scalpers get banned." },
@@ -475,7 +475,7 @@ export const groups = [
       "Off-leash park reports, trainer and vet recs, lost & found pets, and way too many photos of good dogs. Seattle and the Eastside.",
     category: "Pets",
     location: "Seattle, WA",
-    cover: "posts/dog",
+    cover: "posts/dog-park-02.jpg",
     rules: [
       { title: "Lost & found first", body: "Lost pet posts get pinned. Include area and a photo." },
       { title: "No selling animals", body: "Rehoming is fine. Selling puppies is not." },
@@ -495,7 +495,7 @@ export const groups = [
       "Cafes, roasters, home espresso setups and latte art. From Capitol Hill to Columbia City, tell us where the good cup is.",
     category: "Food & Drink",
     location: "Seattle, WA",
-    cover: "posts/coffee",
+    cover: "posts/coffee-03.jpg",
     rules: [{ title: "Be nice to baristas", body: "Reviews are fine. Naming staff is not." }],
     tags: ["Coffee", "Cafes", "Seattle"],
     externalMembers: 19800,
@@ -511,7 +511,7 @@ export const groups = [
       "Share your shots of the Emerald City and the PNW. Photo walks every month, critique threads on Sundays. All cameras welcome, phones included.",
     category: "Photography",
     location: "Seattle, WA",
-    cover: "posts/seattle-skyline",
+    cover: "posts/kerry-park-02.jpg",
     rules: [
       { title: "Your own photos only", body: "Credit anyone else involved." },
       { title: "Constructive critique", body: "Say what works, then what could be better." },
@@ -531,7 +531,7 @@ export const groups = [
       "Real-time boat delays, sailing swaps, and commiseration for everyone who commutes on the Bainbridge, Bremerton, Kingston and Vashon runs.",
     category: "Travel",
     location: "Puget Sound, WA",
-    cover: "posts/ferry",
+    cover: "posts/ferry-04.jpg",
     rules: [{ title: "Delays first", body: "Start the post with the route and the sailing time." }],
     tags: ["Ferries", "Commuting", "Puget Sound"],
     externalMembers: 8700,
@@ -547,7 +547,7 @@ export const groups = [
       "PC, console and handheld gamers in the Seattle area. LAN nights, tournaments, setup photos, and finding people to squad up with.",
     category: "Gaming",
     location: "Seattle, WA",
-    cover: "posts/gaming-setup",
+    cover: "posts/gaming-setup-01.jpg",
     rules: [{ title: "No piracy", body: "Don't ask for or share cracked games." }],
     tags: ["Gaming", "Esports", "LAN"],
     externalMembers: 14300,
@@ -563,7 +563,7 @@ export const groups = [
       "For people who love the Market: vendor news, seasonal produce, the best chowder line strategy, and events in and around Pike Place.",
     category: "Local",
     location: "Pike Place Market, Seattle",
-    cover: "posts/pike-place",
+    cover: "posts/pike-place-04.jpg",
     rules: [{ title: "Support local", body: "Vendors may post once a week about their stall." }],
     tags: ["Pike Place", "Local", "Food"],
     externalMembers: 27600,

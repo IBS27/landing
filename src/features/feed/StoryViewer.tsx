@@ -575,7 +575,7 @@ function StoryMedia({
         </>
       )}
       {story.text && (
-        <p className="absolute inset-x-6 bottom-20 rounded-lg bg-black/50 p-3 text-center font-semibold text-[17px] text-white">
+        <p className="-translate-y-1/2 pointer-events-none absolute inset-x-6 top-[62%] whitespace-pre-wrap break-words text-center font-bold text-[24px] text-white leading-[30px] [text-shadow:0_1px_3px_rgba(0,0,0,0.45)]">
           {story.text}
         </p>
       )}

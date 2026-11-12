@@ -744,11 +744,13 @@ Machine-readable data lives in `manifest.json`.
 - `rooms/townhouse-03.jpg`: ["Seattle - Lakeview Blvd E - townhouses 01"](https://commons.wikimedia.org/wiki/File:Seattle_-_Lakeview_Blvd_E_-_townhouses_01.jpg) by Joe Mabel, [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0)
 - `rooms/townhouse-04.jpg`: ["Seattle - Mallard Cove Townhomes 01"](https://commons.wikimedia.org/wiki/File:Seattle_-_Mallard_Cove_Townhomes_01.jpg) by Joe Mabel, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0)
 
-## covers (30)
+## covers (33)
 
+- `covers/ballard-01.jpg`: ["Ballard Ave 05"](https://commons.wikimedia.org/wiki/File:Ballard_Ave_05.jpg) by Joe Mabel, [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0)
 - `covers/campus-01.jpg`: ["George Washington University campus"](https://www.flickr.com/photos/34517103@N00/52003539614) by [angela n.](https://www.flickr.com/photos/34517103@N00), [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/)
 - `covers/campus-02.jpg`: ["Freret Street through Tulane University Campus"](https://www.flickr.com/photos/29350288@N06/52104507330) by [Infrogmation](https://www.flickr.com/photos/29350288@N06), [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/)
 - `covers/campus-03.jpg`: ["National Taiwan University campus."](https://www.flickr.com/photos/22251936@N00/19206806336) by [ironypoisoning](https://www.flickr.com/photos/22251936@N00), [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/)
+- `covers/capitol-hill-01.jpg`: ["Rainbow crosswalk Capitol Hill, Seattle"](https://commons.wikimedia.org/wiki/File:Rainbow_crosswalk_Capitol_Hill,_Seattle.jpg) by Ntowle98, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0)
 - `covers/city-night-01.jpg`: ["Frohe Weihnachten. Merry Christmas. Joyeux noël"](https://www.flickr.com/photos/21617436@N00/52581488802) by [abbilder](https://www.flickr.com/photos/21617436@N00), [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/)
 - `covers/city-night-02.jpg`: ["Berliner Türme - Towers of Berlin"](https://www.flickr.com/photos/21617436@N00/52308848548) by [abbilder](https://www.flickr.com/photos/21617436@N00), [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/)
 - `covers/city-night-03.jpg`: ["Berliner Dom hinter der Schlossbrücke"](https://www.flickr.com/photos/21617436@N00/51284879885) by [abbilder](https://www.flickr.com/photos/21617436@N00), [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/)
@@ -758,6 +760,7 @@ Machine-readable data lives in `manifest.json`.
 - `covers/concert-02.jpg`: ["Lightshow."](https://www.flickr.com/photos/45409431@N00/52314613157) by [marfis75](https://www.flickr.com/photos/45409431@N00), [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/)
 - `covers/concert-03.jpg`: ["Beautiful shot of a live concert performance with a yellow light show and a big crowd cheering"](https://www.flickr.com/photos/31667440@N04/52422449509) by [pockethifi](https://www.flickr.com/photos/31667440@N04), [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/)
 - `covers/concert-04.jpg`: ["Genesis - Live in London - 25th March 2022 - The Final Domino tour"](https://www.flickr.com/photos/58415659@N00/51962759101) by [kitmasterbloke](https://www.flickr.com/photos/58415659@N00), [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/)
+- `covers/give-box-01.jpg`: ["Givebox "Schatzkistl" in Munich 03"](https://commons.wikimedia.org/wiki/File:Givebox_%22Schatzkistl%22_in_Munich_03.jpg) by Kritzolina, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0)
 - `covers/mountains-01.jpg`: ["Lush west side of mountains on this day in June 2022. Climate is dryer east of the Cascade Mountains."](https://www.flickr.com/photos/90536753@N00/52192039470) by [theslowlane](https://www.flickr.com/photos/90536753@N00), [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/)
 - `covers/mountains-02.jpg`: ["In the dry rain shadow of the Cascade Mountains around Vantage, WA."](https://www.flickr.com/photos/90536753@N00/52191905985) by [theslowlane](https://www.flickr.com/photos/90536753@N00), [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/)
 - `covers/mountains-03.jpg`: ["The view east from the bench, toward the Cascade Mountain Range"](https://www.flickr.com/photos/28435100@N00/51831433782) by [nordique](https://www.flickr.com/photos/28435100@N00), [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/)

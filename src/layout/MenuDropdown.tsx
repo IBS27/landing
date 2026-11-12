@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Search } from "lucide-react";
-import { type ComponentType, type ReactNode, useId, useState } from "react";
+import { type ComponentType, type ReactNode, useCallback, useId, useState } from "react";
 import {
   BmGamingVideo,
   BmInstagram,
@@ -395,6 +395,11 @@ export function MenuDropdown() {
     setOpen(false);
     setQ("");
   };
+  // Facebook opens the menu without a caret in "Search menu": focus the panel itself on mount
+  // (ahead of the popover's first-control auto-focus); Tab still reaches the search field.
+  const focusPanel = useCallback((el: HTMLDivElement | null) => {
+    el?.focus({ preventScroll: true });
+  }, []);
 
   return (
     <>
@@ -410,7 +415,11 @@ export function MenuDropdown() {
           </HeaderButton>
         }
       >
-        <div className="flex h-[calc(100vh-72px)] max-h-[828px] min-h-0 flex-col bg-wash">
+        <div
+          ref={focusPanel}
+          tabIndex={-1}
+          className="flex h-[calc(100vh-72px)] max-h-[828px] min-h-0 flex-col bg-wash outline-none"
+        >
           <h2 className="px-4 pt-3 pb-2.5 font-bold text-[24px] text-primary leading-7">Menu</h2>
           <div className="flex min-h-0 flex-1 items-start gap-4 overflow-y-auto px-4 pb-4">
             <div className="w-[360px] shrink-0 rounded-xl bg-card px-2 pt-4 pb-2 shadow-base">

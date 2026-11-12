@@ -74,20 +74,10 @@ function Single({
   className?: string;
 }) {
   const ratio = item.width && item.height ? item.width / item.height : 4 / 3;
-  // Videos play inline, letterboxed on black when taller than the capped box.
-  if (item.kind === "video")
-    return (
-      <VideoPlayer
-        src={item.url}
-        poster={item.poster}
-        label={item.alt}
-        className={cn("w-full", className)}
-        style={{ aspectRatio: ratio, maxHeight: MAX_MEDIA_HEIGHT }}
-      />
-    );
-  // Wider than the capped box (680×575) fills edge to edge; narrower photos sit
-  // centred on a flat fill of the photo's dominant colour, like Facebook.
+  // Wider than the capped box (680×575) fills edge to edge; narrower media sit
+  // centred on a flat fill of the photo's (or video poster's) dominant colour.
   const letterboxed = ratio < 1.2;
+  if (item.kind === "video") return <SingleVideo item={item} ratio={ratio} className={className} />;
   return (
     <button
       type="button"
@@ -151,14 +141,17 @@ function dominantFill(url: string): Promise<string | null> {
   });
 }
 
-function LetterboxFill({ url }: { url: string }) {
-  const [color, setColor] = useState(() => fillCache.get(url));
+/**
+ * The letterbox colour for `url` (cached per URL): undefined while sampling,
+ * null when it can't be read (keep the caller's neutral fill).
+ */
+export function useDominantColor(url: string | undefined) {
+  const [color, setColor] = useState(() => (url ? fillCache.get(url) : null));
   useEffect(() => {
-    if (fillCache.has(url)) {
-      setColor(fillCache.get(url));
-      return;
-    }
+    if (!url) return setColor(null);
+    if (fillCache.has(url)) return setColor(fillCache.get(url));
     let live = true;
+    setColor(undefined);
     dominantFill(url).then((c) => {
       fillCache.set(url, c);
       if (live) setColor(c);
@@ -167,8 +160,39 @@ function LetterboxFill({ url }: { url: string }) {
       live = false;
     };
   }, [url]);
+  return color;
+}
+
+function LetterboxFill({ url }: { url: string }) {
+  const color = useDominantColor(url);
   if (!color) return null;
   return <span aria-hidden className="absolute inset-0" style={{ backgroundColor: color }} />;
+}
+
+/** A single inline video; tall ones sit on their poster's dominant colour (black in full screen). */
+function SingleVideo({
+  item,
+  ratio,
+  className,
+}: {
+  item: PostMedia;
+  ratio: number;
+  className?: string;
+}) {
+  const fill = useDominantColor(ratio < 1.2 ? item.poster : undefined);
+  return (
+    <VideoPlayer
+      src={item.url}
+      poster={item.poster}
+      label={item.alt}
+      className={cn("w-full [&:fullscreen]:bg-black!", className)}
+      style={{
+        aspectRatio: ratio,
+        maxHeight: MAX_MEDIA_HEIGHT,
+        backgroundColor: fill ?? undefined,
+      }}
+    />
+  );
 }
 
 function Tile({

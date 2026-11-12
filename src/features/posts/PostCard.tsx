@@ -26,6 +26,7 @@ import { PostDialog } from "./PostDialog";
 import { usePhotoTheater } from "./photoTheater";
 import type { PostView, UserSummary } from "./types";
 import { groupParams, isLargeText, postUrl, truncate } from "./util";
+import { viewsLabel } from "./views";
 
 /**
  * A Facebook feed post. `expanded` (permalink) shows the full text and the
@@ -70,6 +71,7 @@ export function PostCard({
       <ActionBar
         post={post}
         onComment={() => (expanded ? setFocusKey((k) => k + 1) : setDialogOpen(true))}
+        trailing={<ViewCount post={post} />}
       />
       {expanded && (
         <div className="border-divider border-t">
@@ -94,12 +96,18 @@ export function PostHeader({
   post,
   onHide,
   compact,
+  nameSuffix,
+  metaSuffix,
 }: {
   post: PostView;
   /** Shows the X "Hide post" button. */
   onHide?: () => void;
   /** Shared-post header inside another post: no menu. */
   compact?: boolean;
+  /** After the author's name (Watch: "· Follow"). */
+  nameSuffix?: ReactNode;
+  /** After the time and audience (Watch: "· 1.2K views"). */
+  metaSuffix?: ReactNode;
 }) {
   const author = <NameLink user={post.author} />;
   const meta = (
@@ -151,6 +159,7 @@ export function PostHeader({
           <span>Edited</span>
         </>
       )}
+      {metaSuffix}
     </span>
   );
 
@@ -207,6 +216,7 @@ export function PostHeader({
           <>
             <p className="text-[15px] leading-5">
               {author}
+              {nameSuffix}
               {post.timelineUser && (
                 <>
                   <CaretRight size={10} className="mx-1 inline text-secondary" />
@@ -298,6 +308,13 @@ function Activity({ post }: { post: PostView }) {
       {post.place || post.feeling || tagged.length ? "." : ""}
     </span>
   );
+}
+
+/** "1.2K views" on the right of a video post's action bar, like Facebook's stats row. */
+function ViewCount({ post }: { post: PostView }) {
+  const label = viewsLabel(post);
+  if (!label) return null;
+  return <span className="mr-1 px-1 text-[15px] text-secondary leading-5">{label}</span>;
 }
 
 /* ---------- "…" menu ---------- */

@@ -7,7 +7,10 @@ import { ReelsShelf } from "./ReelsShelf";
 import { RightRail } from "./RightRail";
 import { StoriesTray } from "./StoriesTray";
 
-/** Feed slots, as on Facebook: the Reels shelf after the 3rd post, an ad after every 6th. */
+/**
+ * Feed slots, as on Facebook: a link ad then the Reels shelf after the 3rd
+ * post, and another ad after every 6th.
+ */
 const REELS_AFTER = 2;
 const AD_EVERY = 6;
 
@@ -15,6 +18,9 @@ const AD_EVERY = 6;
 export function HomePage() {
   const rails = useQ(api.feed.rails, { today: todayKey() });
   const ads = useQ(api.feed.ads, {});
+  // Facebook leads into the Reels shelf with a link ad (domain, headline, Learn more).
+  const shelfAd = ads?.find((a) => a.attachments.some((x) => x.kind === "link"));
+  const slotAds = ads?.filter((a) => a !== shelfAd);
   return (
     <div className="flex min-h-[calc(100vh-56px)] items-start justify-between">
       <LeftRail groups={rails?.groups} />
@@ -25,8 +31,14 @@ export function HomePage() {
           <PostFeed
             source={{ kind: "home" }}
             interleave={(i) => {
-              if (i === REELS_AFTER) return <ReelsShelf />;
-              const ad = (i + 1) % AD_EVERY === 0 ? ads?.[(i + 1) / AD_EVERY - 1] : undefined;
+              if (i === REELS_AFTER)
+                return (
+                  <>
+                    {shelfAd && <PostCard post={shelfAd} />}
+                    <ReelsShelf />
+                  </>
+                );
+              const ad = (i + 1) % AD_EVERY === 0 ? slotAds?.[(i + 1) / AD_EVERY - 1] : undefined;
               return ad ? <PostCard post={ad} /> : null;
             }}
           />

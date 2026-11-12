@@ -332,33 +332,34 @@ export const GAMES: Game[] = [
   }),
 ];
 
-export const FEATURED = [
-  "solitaire-grove",
-  "orchard-friends",
-  "tower-legends",
-  "harbor-tycoon",
-  "arena-blitz",
-];
+/**
+ * The Play home splits the catalog into disjoint sections (Featured, Top picks,
+ * Most played) so no game shows twice on one screen.
+ */
+export const FEATURED = ["solitaire-grove", "orchard-friends", "tower-legends", "harbor-tycoon"];
 export const TOP_PICKS = [
-  "brick-burst",
-  "gem-cascade",
   "manor-makeover",
   "night-solitaire",
-  "candy-valley",
   "maze-slide",
-  "island-village",
   "home-story",
-  "solitaire-social",
   "jungle-trek",
+  "word-garden",
   "rail-city",
   "jigsaw-calm",
-  "word-garden",
-  "puck-rush",
   "castle-clash",
+  "solitaire-social",
+  "puck-rush",
   "checkers-club",
+  "royal-21",
+  "snake-trail",
 ];
 
 export const byId = new Map(GAMES.map((x) => [x.id, x]));
+
+/** Everything not featured or picked, ranked by players. */
+export const MOST_PLAYED = GAMES.filter(
+  (x) => !FEATURED.includes(x.id) && !TOP_PICKS.includes(x.id),
+).sort((a, b) => b.players - a.players);
 
 export function playersLabel(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M players`;

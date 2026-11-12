@@ -6368,6 +6368,21 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
   ],
   covers: [
     {
+      path: "/seed/covers/ballard-01.jpg",
+      topic: "ballard",
+      tags: [
+        "ballard",
+        "ballard avenue",
+        "seattle",
+        "historic district",
+        "brick building",
+        "neighborhood",
+        "ballard ave 05",
+      ],
+      h: 768,
+      w: 1024,
+    },
+    {
       path: "/seed/covers/campus-01.jpg",
       topic: "campus",
       tags: ["campus", "george washington university campus"],
@@ -6393,6 +6408,20 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
         "national taiwan university campus.",
       ],
       h: 683,
+      w: 1024,
+    },
+    {
+      path: "/seed/covers/capitol-hill-01.jpg",
+      topic: "capitol hill",
+      tags: [
+        "capitol hill",
+        "rainbow crosswalk",
+        "seattle",
+        "neighborhood",
+        "street",
+        "rainbow crosswalk capitol hill, seattle",
+      ],
+      h: 768,
       w: 1024,
     },
     {
@@ -6556,6 +6585,21 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
         "genesis - live in london - 25th march 2022 - the final domino tour",
       ],
       h: 653,
+      w: 1024,
+    },
+    {
+      path: "/seed/covers/give-box-01.jpg",
+      topic: "give box",
+      tags: [
+        "give box",
+        "free stuff",
+        "giveaway",
+        "books",
+        "toys",
+        "sharing",
+        'givebox "schatzkistl" in munich 03',
+      ],
+      h: 682,
       w: 1024,
     },
     {

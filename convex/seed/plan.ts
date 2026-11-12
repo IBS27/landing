@@ -107,6 +107,7 @@ export function buildPlan(now: number) {
   const lateRefs: string[] = [];
   const late = (msg: string) => lateRefs.push(msg);
   const pics = new ImagePicker();
+  pics.reserve(groupSeeds.map((g) => g.cover));
   const latest = now - MINUTE;
 
   // ── Users ───────────────────────────────────────────────────────────────

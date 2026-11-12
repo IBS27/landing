@@ -15,7 +15,16 @@ import { cn } from "@/lib/format";
 import { Modal } from "@/ui/overlays";
 import { Button, Card, EmptyState } from "@/ui/primitives";
 import { GameCover } from "./GameCover";
-import { byId, CATEGORIES, FEATURED, GAMES, type Game, playersLabel, TOP_PICKS } from "./games";
+import {
+  byId,
+  CATEGORIES,
+  FEATURED,
+  GAMES,
+  type Game,
+  MOST_PLAYED,
+  playersLabel,
+  TOP_PICKS,
+} from "./games";
 import { MiniGame } from "./MiniGames";
 
 type View =
@@ -212,7 +221,6 @@ export function GamingPage() {
 function PlayHome({ onPlay, best }: { onPlay: (g: Game) => void; best: Record<string, number> }) {
   const featured = FEATURED.map((id) => byId.get(id)).filter((x): x is Game => !!x);
   const picks = TOP_PICKS.map((id) => byId.get(id)).filter((x): x is Game => !!x);
-  const mostPlayed = [...GAMES].sort((a, b) => b.players - a.players).slice(0, 6);
   const recent = GAMES.filter((x) => best[x.id] !== undefined);
   return (
     <>
@@ -241,7 +249,7 @@ function PlayHome({ onPlay, best }: { onPlay: (g: Game) => void; best: Record<st
       </Section>
       <Section title="Most played games">
         <div className="grid grid-cols-2 gap-3 min-[1200px]:grid-cols-3">
-          {mostPlayed.map((x, i) => (
+          {MOST_PLAYED.map((x, i) => (
             <Card key={x.id} className="flex items-center gap-3 rounded-xl p-3">
               <span className="w-6 text-center font-bold text-[17px] text-secondary">{i + 1}</span>
               <GameIcon game={x} size={56} />
@@ -257,9 +265,6 @@ function PlayHome({ onPlay, best }: { onPlay: (g: Game) => void; best: Record<st
             </Card>
           ))}
         </div>
-      </Section>
-      <Section title="Instant games">
-        <TileGrid games={GAMES} onPlay={onPlay} />
       </Section>
     </>
   );

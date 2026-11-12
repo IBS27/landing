@@ -27,7 +27,9 @@ export function PostDialog({ post, onClose }: { post: PostView; onClose: () => v
     <D.Root open onOpenChange={(o) => !o && onClose()}>
       <D.Portal>
         <ModalScrim />
-        <div className="pointer-events-auto fixed top-0 left-0 z-[61] flex h-14 w-[320px] items-center gap-2 bg-nav pl-4">
+        {/* Covers the whole search pill too: the wide (280px) pill runs past the
+            320px cluster to x=344, so a 320px cover left its tail peeking out. */}
+        <div className="pointer-events-auto fixed top-0 left-0 z-[61] flex h-14 w-[344px] items-center gap-2 bg-nav pl-4">
           <span aria-hidden className={`absolute inset-0 ${VEIL}`} />
           <D.Close asChild>
             <IconButton label="Close" size={40}>

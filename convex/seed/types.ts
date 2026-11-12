@@ -25,7 +25,10 @@ export type { BackgroundName, GroupSlug, Neighborhood, PageHandle, TimeSpec, Use
 /** A person or a Page. */
 export type Handle = Username | PageHandle;
 
-/** A photo slot: `"topic words"` (folder implied by context) or `"folder/topic words"`. */
+/**
+ * A photo slot: `"topic words"` (folder implied by context), `"folder/topic words"`, or one
+ * exact file, `"folder/name-01.jpg"`.
+ */
 export type PhotoSlot = string;
 
 // ---------------------------------------------------------------------------

@@ -34,7 +34,7 @@ import {
   Users,
   UsersRound,
 } from "lucide-react";
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/format";
 import { Card } from "@/ui/primitives";
 import { MetaInfinity } from "./icons";
@@ -291,6 +291,20 @@ export function SettingsPage({ tab }: { tab?: string }) {
     );
   }, [railQ]);
 
+  // Keep the selected row in view inside the rail's own scroller (never the window), like
+  // Facebook does when a setting is opened from a link further down the list.
+  const rail = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const box = rail.current;
+    if (!box || !tab || filtered) return;
+    const row = box.querySelector<HTMLElement>("[aria-current=page]");
+    if (!row) return;
+    const top = row.offsetTop;
+    const bottom = top + row.offsetHeight;
+    if (top >= box.scrollTop && bottom <= box.scrollTop + box.clientHeight) return;
+    box.scrollTop = top - (box.clientHeight - row.offsetHeight) / 2;
+  }, [tab, filtered]);
+
   return (
     <div className="flex min-h-[calc(100vh-56px)] items-start">
       <nav
@@ -310,7 +324,7 @@ export function SettingsPage({ tab }: { tab?: string }) {
             className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-primary outline-none placeholder:text-placeholder"
           />
         </label>
-        <div className="min-h-0 flex-1 overflow-y-auto px-2 pt-[39px] pb-6">
+        <div ref={rail} className="relative min-h-0 flex-1 overflow-y-auto px-2 pt-[39px] pb-6">
           {filtered ? (
             filtered.length === 0 ? (
               <p className="px-3 py-6 text-center text-[15px] text-secondary">No results found</p>
@@ -328,6 +342,7 @@ export function SettingsPage({ tab }: { tab?: string }) {
               <button
                 type="button"
                 onClick={() => open("accounts-center")}
+                aria-current={tab === "accounts-center" ? "page" : undefined}
                 className={cn(
                   "mb-[15px] flex w-full gap-3 rounded-lg px-3 pt-[7px] pb-2 text-left",
                   tab === "accounts-center" ? "bg-wash dark:bg-hover" : "hover:bg-hover",
@@ -361,7 +376,8 @@ export function SettingsPage({ tab }: { tab?: string }) {
       </nav>
 
       <main className="flex min-w-0 flex-1 justify-center px-4 pt-4 pb-10">
-        <div className="w-full max-w-[930px]">
+        {/* The landing spans 930px; individual settings sit in Facebook's narrower 700px card. */}
+        <div className={cn("w-full", current ? "max-w-[700px]" : "max-w-[930px]")}>
           {current ? (
             <Pane item={current} onBack={() => open(undefined)} onOpen={open} />
           ) : (

@@ -3,6 +3,8 @@ import type { PhotoSlot } from "../types";
 import { hash } from "./prng";
 
 const FOLDERS = new Set<string>(Object.keys(seedImages));
+/** A slot topic that names one file ("ballard-01.jpg") rather than topic words. */
+const FILE_NAME = /\.(jpe?g|png|webp|gif|avif)$/i;
 const STOP = new Set(
   "a an the of and with in on for to at my is it this that i you we so just free photo image".split(
     " ",
@@ -286,6 +288,20 @@ export class ImagePicker {
     return { folder: borrowed ?? fallback, topic };
   }
 
+  /**
+   * Marks exact-file slots ("covers/ballard-01.jpg") as taken up front, so picks made earlier
+   * in the plan (profile covers, say) never land on a file another row names.
+   */
+  reserve(slots: readonly PhotoSlot[]): void {
+    for (const slot of slots) {
+      const { folder, topic } = ImagePicker.split(slot);
+      if (!folder || !FILE_NAME.test(topic)) continue;
+      const used = this.used.get(folder) ?? new Set<string>();
+      this.used.set(folder, used);
+      used.add(`/seed/${folder}/${topic}`);
+    }
+  }
+
   /** How many images in the slot's folder have exactly the slot's topic as their file-name topic. */
   exactCount(slot: PhotoSlot, fallback: ImageFolder): number {
     const { folder, topic } = this.parse(slot, fallback);
@@ -320,11 +336,26 @@ export class ImagePicker {
         strong: false,
       }));
     }
+    const used = this.used.get(folder) ?? new Set<string>();
+    this.used.set(folder, used);
+    // "covers/ballard-01.jpg" names one exact file: hand it out as-is.
+    if (FILE_NAME.test(topic)) {
+      const file = pool.find(({ img }) => img.path === `/seed/${folder}/${topic}`)?.img;
+      if (file) {
+        used.add(file.path);
+        const one = {
+          url: file.path,
+          width: file.w,
+          height: file.h,
+          alt: file.topic,
+          strong: true,
+        };
+        return Array.from({ length: n }, () => one);
+      }
+    }
     const want = expand(tokens(topic));
     const wantPhrase = phrase(topic);
     const ctx = expand(tokens(context));
-    const used = this.used.get(folder) ?? new Set<string>();
-    this.used.set(folder, used);
     const ranked: Ranked[] = pool
       .map(({ img, topic: tt, tags }) => {
         let score = 0;

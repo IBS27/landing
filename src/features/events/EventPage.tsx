@@ -16,6 +16,7 @@ import { type ReactNode, useState } from "react";
 import { useM, useQ, useViewer } from "@/app/viewer";
 import { PostCard, PostSkeleton } from "@/features/posts";
 import { FriendsAudienceIcon, GlobeIcon } from "@/features/posts/icons";
+import { useDominantColor } from "@/features/posts/PhotoGrid";
 import { PageUnavailable } from "@/layout/PageUnavailable";
 import { cn, compactCount } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from "@/ui/overlays";
@@ -183,16 +184,7 @@ function EventHeader({
 
   return (
     <div className="relative overflow-hidden bg-card shadow-[0_1px_2px_var(--shadow-1)]">
-      {/* Blurred cover backdrop fading into the card. */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[608px]">
-        <img
-          src={event.cover}
-          onError={hideBroken}
-          alt=""
-          className="h-full w-full scale-110 object-cover opacity-90 blur-[40px]"
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(to_top,var(--card)_0%,var(--card)_42%,color-mix(in_srgb,var(--card)_70%,transparent)_58%,transparent_100%)]" />
-      </div>
+      <CoverWash cover={event.cover} />
       <div className="relative mx-auto max-w-[1080px] px-4">
         <div className="mx-auto aspect-[1.9] w-full max-w-[665px] overflow-hidden rounded-b-lg bg-btn">
           <img
@@ -774,5 +766,34 @@ function Discussion({ event }: { event: EventView }) {
         posts.map((p) => <PostCard key={p._id} post={p} />)
       )}
     </>
+  );
+}
+
+/**
+ * Facebook's side wash behind an event cover: the cover's dominant colour at
+ * the top fading to the card ~265px down. Falls back to a blurred copy of the
+ * cover when the image can't be sampled.
+ */
+function CoverWash({ cover }: { cover: string }) {
+  const color = useDominantColor(cover);
+  if (color)
+    return (
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[265px]"
+        style={{ backgroundImage: `linear-gradient(${color}, var(--card))` }}
+      />
+    );
+  if (color === undefined) return null;
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[608px]">
+      <img
+        src={cover}
+        onError={hideBroken}
+        alt=""
+        className="h-full w-full scale-110 object-cover opacity-90 blur-[40px]"
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(to_top,var(--card)_0%,var(--card)_42%,color-mix(in_srgb,var(--card)_70%,transparent)_58%,transparent_100%)]" />
+    </div>
   );
 }

@@ -44,8 +44,11 @@ export function NewMessage({
   const createGroup = useM(api.messenger.createGroup);
 
   const chosen = new Set(to.map((p) => p._id));
-  const showSuggestions = q.trim().length > 0 || to.length === 0;
   const term = q.trim().toLowerCase();
+  // The chat-dock window suggests Meta AI and contacts before anything is typed; the full
+  // page's "To:" pane stays blank until there's a query, like Facebook's.
+  const idle = !term && to.length === 0;
+  const showSuggestions = !!term || (idle && variant === "dock");
   // Meta AI leads the suggestions, like Facebook's "New message" list.
   const showMetaAI =
     to.length === 0 && (!term || "meta ai".startsWith(term) || term.startsWith("meta"));
@@ -169,6 +172,8 @@ export function NewMessage({
             <li className="px-4 py-6 text-center text-[15px] text-secondary">No results</li>
           )}
         </ul>
+      ) : idle ? (
+        <div className="flex-1" />
       ) : existing ? (
         <ExistingThread id={existing} variant={variant} onSent={onConversation} />
       ) : (

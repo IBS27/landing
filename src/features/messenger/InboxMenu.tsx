@@ -11,7 +11,7 @@ import {
 import { DropdownMenu as DM } from "radix-ui";
 import { type ReactNode, useState } from "react";
 import { cn } from "@/lib/format";
-import { Modal, Tooltip } from "@/ui/overlays";
+import { MenuContent, Modal, Tooltip } from "@/ui/overlays";
 import { DotsIcon } from "./icons";
 
 export type Folder = "archived" | "requests" | "restricted";
@@ -77,53 +77,46 @@ export function InboxMenu({
             </button>
           </DM.Trigger>
         </Tooltip>
-        <DM.Portal>
-          <DM.Content
-            aria-label="Inbox settings menu"
-            align="start"
-            sideOffset={8}
-            collisionPadding={8}
-            className="z-50 w-[344px] rounded-[0_12px_12px_12px] bg-popover p-2 shadow-elevated outline-none"
-          >
-            <Item
-              icon={<Settings size={20} />}
-              label="Preferences"
-              onSelect={() => setPrefs("preferences")}
-            />
-            <Sep />
-            <Item
-              icon={<MessageCircleMore size={20} />}
-              label="Message requests"
-              onSelect={() => go("requests")}
-            />
-            <Item
-              icon={<Archive size={20} />}
-              label="Archived chats"
-              onSelect={() => go("archived")}
-            />
-            <Item
-              icon={<MessageSquareOff size={20} />}
-              label="Restricted accounts"
-              onSelect={() => go("restricted")}
-            />
-            <Sep />
-            <Item
-              icon={<ShieldCheck size={20} />}
-              label="Privacy & safety"
-              chevron
-              onSelect={() => setPrefs("privacy")}
-            />
-            <Sep />
-            <Item
-              icon={<CircleHelp size={20} />}
-              label="Help"
-              onSelect={() => {
-                onNavigate?.();
-                void navigate({ to: "/settings" });
-              }}
-            />
-          </DM.Content>
-        </DM.Portal>
+        {/* Facebook's notch points up at the "…" button from the panel's square corner. */}
+        <MenuContent align="start" arrow>
+          <Item
+            icon={<Settings size={20} />}
+            label="Preferences"
+            onSelect={() => setPrefs("preferences")}
+          />
+          <Sep />
+          <Item
+            icon={<MessageCircleMore size={20} />}
+            label="Message requests"
+            onSelect={() => go("requests")}
+          />
+          <Item
+            icon={<Archive size={20} />}
+            label="Archived chats"
+            onSelect={() => go("archived")}
+          />
+          <Item
+            icon={<MessageSquareOff size={20} />}
+            label="Restricted accounts"
+            onSelect={() => go("restricted")}
+          />
+          <Sep />
+          <Item
+            icon={<ShieldCheck size={20} />}
+            label="Privacy & safety"
+            chevron
+            onSelect={() => setPrefs("privacy")}
+          />
+          <Sep />
+          <Item
+            icon={<CircleHelp size={20} />}
+            label="Help"
+            onSelect={() => {
+              onNavigate?.();
+              void navigate({ to: "/settings" });
+            }}
+          />
+        </MenuContent>
       </DM.Root>
       <PreferencesModal kind={prefs} onClose={() => setPrefs(null)} />
     </>

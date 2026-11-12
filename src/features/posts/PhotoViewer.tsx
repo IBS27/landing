@@ -83,9 +83,12 @@ export function PhotoViewer({
             expanded
             smallText
           />
-          <div className="mx-3 border-divider border-y">
-            <ActionBar post={post} onComment={() => setFocusKey((k) => k + 1)} />
-          </div>
+          <ActionBar
+            variant="labelled"
+            post={post}
+            onComment={() => setFocusKey((k) => k + 1)}
+            className="mx-3"
+          />
           <CommentList postId={post._id} />
         </div>
         <div className="border-divider border-t px-3 pt-2 pb-3">

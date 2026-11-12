@@ -74,17 +74,25 @@ export function reactionSummaryText(
 }
 
 /**
- * Facebook's 2026 compact post action bar: Like / Comment / Share with inline
- * counts on the left, the stacked reaction icons on the right.
+ * Facebook's post action bar. `compact` (the 2026 feed style): Like / Comment
+ * / Share with inline counts on the left, the stacked reaction icons on the
+ * right. `labelled` (photo theater): a stats row (reactions + "You and 6
+ * others" left, "2 comments · 1 share" right) above three equal labelled
+ * Like / Comment / Share buttons between divider lines.
  */
 export function ActionBar({
   post,
   onComment,
   className,
+  trailing,
+  variant = "compact",
 }: {
   post: PostView;
   onComment: () => void;
   className?: string;
+  /** Extra stats on the right, before the reaction icons (video view count). */
+  trailing?: React.ReactNode;
+  variant?: "compact" | "labelled";
 }) {
   const rx = useOptimisticReaction("post", post._id, post.reactions);
   const hover = useReactionHover();
@@ -97,58 +105,120 @@ export function ActionBar({
   const summary = hideCount
     ? "See who reacted to this"
     : reactionSummaryText(rx.count, !!rx.current, post.reactions.sampleName);
+  const labelled = variant === "labelled";
+
+  const likeIcon =
+    rx.current && rx.current !== "like" ? (
+      <ReactionIcon type={rx.current} size={labelled ? 18 : 20} />
+    ) : rx.current === "like" ? (
+      <LikeFilled />
+    ) : (
+      <LikeOutline />
+    );
+  const like = (
+    <div className={cn("relative flex items-center", labelled && "flex-1")} {...hover.bind}>
+      {hover.open && (
+        <div className="absolute bottom-full left-0 z-20 pb-2">
+          <ReactionPicker
+            onPick={(t) => {
+              rx.pick(t);
+              hover.close();
+            }}
+          />
+        </div>
+      )}
+      <BarButton
+        labelled={labelled}
+        label={
+          rx.current
+            ? `Remove ${meta?.label}`
+            : `React with Like to ${name}'s post${rx.count && !hideCount ? `, ${plural(rx.count, "reaction")}` : ""}`
+        }
+        onClick={() => {
+          rx.toggle();
+          hover.close();
+        }}
+        style={meta ? { color: meta.color } : undefined}
+      >
+        {likeIcon}
+        {labelled ? (
+          <Label>{meta?.label ?? "Like"}</Label>
+        ) : (
+          rx.count > 0 && !hideCount && <Count>{compactCount(rx.count)}</Count>
+        )}
+      </BarButton>
+    </div>
+  );
+  const commentLabel = `Comment on ${name}'s post${post.commentCount ? `, ${plural(post.commentCount, "comment")}` : ""}`;
+  const shareLabel = `Share ${name}'s post${post.shareCount ? `, ${plural(post.shareCount, "share")}` : ""}`;
+  const dialogs = (
+    <>
+      {whoOpen && (
+        <ReactionsDialog targetType="post" targetId={post._id} onClose={() => setWhoOpen(false)} />
+      )}
+      {shareOpen && <ShareDialog post={post} onClose={() => setShareOpen(false)} />}
+    </>
+  );
+
+  if (labelled) {
+    const hasStats = rx.count > 0 || post.commentCount > 0 || post.shareCount > 0 || !!trailing;
+    return (
+      <div className={className}>
+        {hasStats && (
+          <div className="flex items-center gap-2 py-2.5 text-[15px] text-secondary leading-5">
+            {rx.count > 0 && (
+              <button
+                type="button"
+                aria-label="See who reacted to this"
+                onClick={() => setWhoOpen(true)}
+                className="flex min-w-0 items-center gap-1.5 hover:underline"
+              >
+                <ReactionIcons types={rx.top} />
+                {!hideCount && <span className="truncate">{summary}</span>}
+              </button>
+            )}
+            <div className="flex-1" />
+            {post.commentCount > 0 && (
+              <button type="button" onClick={onComment} className="shrink-0 hover:underline">
+                {plural(post.commentCount, "comment")}
+              </button>
+            )}
+            {post.shareCount > 0 && (
+              <span className="shrink-0">{plural(post.shareCount, "share")}</span>
+            )}
+            {trailing}
+          </div>
+        )}
+        <div className="flex gap-1 border-divider border-y py-1">
+          {like}
+          <BarButton labelled label={commentLabel} onClick={onComment}>
+            <CommentOutline />
+            <Label>Comment</Label>
+          </BarButton>
+          <BarButton labelled label={shareLabel} onClick={() => setShareOpen(true)}>
+            <ShareOutline />
+            <Label>Share</Label>
+          </BarButton>
+        </div>
+        {dialogs}
+      </div>
+    );
+  }
 
   return (
     <div className={cn("flex h-11 items-center px-1", className)}>
-      <div className="relative flex items-center" {...hover.bind}>
-        {hover.open && (
-          <div className="absolute bottom-full left-0 z-20 pb-2">
-            <ReactionPicker
-              onPick={(t) => {
-                rx.pick(t);
-                hover.close();
-              }}
-            />
-          </div>
-        )}
-        <BarButton
-          label={
-            rx.current
-              ? `Remove ${meta?.label}`
-              : `React with Like to ${name}'s post${rx.count && !hideCount ? `, ${plural(rx.count, "reaction")}` : ""}`
-          }
-          onClick={() => {
-            rx.toggle();
-            hover.close();
-          }}
-          style={meta ? { color: meta.color } : undefined}
-        >
-          {rx.current && rx.current !== "like" ? (
-            <ReactionIcon type={rx.current} size={20} />
-          ) : rx.current === "like" ? (
-            <LikeFilled />
-          ) : (
-            <LikeOutline />
-          )}
-          {rx.count > 0 && !hideCount && <Count>{compactCount(rx.count)}</Count>}
-        </BarButton>
-      </div>
-      <BarButton
-        label={`Comment on ${name}'s post${post.commentCount ? `, ${plural(post.commentCount, "comment")}` : ""}`}
-        onClick={onComment}
-      >
+      {like}
+      <BarButton label={commentLabel} onClick={onComment}>
         <CommentOutline />
         {post.commentCount > 0 && <Count>{compactCount(post.commentCount)}</Count>}
       </BarButton>
-      <BarButton
-        label={`Share ${name}'s post${post.shareCount ? `, ${plural(post.shareCount, "share")}` : ""}`}
-        onClick={() => setShareOpen(true)}
-      >
+      <BarButton label={shareLabel} onClick={() => setShareOpen(true)}>
         <ShareOutline />
         {post.shareCount > 0 && <Count>{compactCount(post.shareCount)}</Count>}
       </BarButton>
 
       <div className="flex-1" />
+      {trailing}
       {rx.count > 0 && (
         <Tooltip content={summary} side="top">
           <button
@@ -161,10 +231,7 @@ export function ActionBar({
           </button>
         </Tooltip>
       )}
-      {whoOpen && (
-        <ReactionsDialog targetType="post" targetId={post._id} onClose={() => setWhoOpen(false)} />
-      )}
-      {shareOpen && <ShareDialog post={post} onClose={() => setShareOpen(false)} />}
+      {dialogs}
     </div>
   );
 }
@@ -174,11 +241,14 @@ function BarButton({
   onClick,
   children,
   style,
+  labelled,
 }: {
   label: string;
   onClick: () => void;
   children: React.ReactNode;
   style?: React.CSSProperties;
+  /** Full-width labelled button (theater): equal thirds, icon + label. */
+  labelled?: boolean;
 }) {
   return (
     <button
@@ -186,7 +256,10 @@ function BarButton({
       aria-label={label}
       onClick={onClick}
       style={style}
-      className="flex h-8 items-center gap-2 rounded-md px-3 text-icon-secondary transition-colors hover:bg-hover active:bg-pressed"
+      className={cn(
+        "flex items-center gap-2 rounded-md text-icon-secondary transition-colors hover:bg-hover active:bg-pressed",
+        labelled ? "h-9 flex-1 justify-center px-2" : "h-8 px-3",
+      )}
     >
       {children}
     </button>
@@ -195,4 +268,8 @@ function BarButton({
 
 function Count({ children }: { children: React.ReactNode }) {
   return <span className="font-semibold text-[13px] leading-4">{children}</span>;
+}
+
+function Label({ children }: { children: React.ReactNode }) {
+  return <span className="font-semibold text-[15px] leading-5">{children}</span>;
 }
