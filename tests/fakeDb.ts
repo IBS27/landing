@@ -1,13 +1,20 @@
-import type { QueryCtx } from "../convex/_generated/server";
+import type { MutationCtx } from "../convex/_generated/server";
 
-/** A tiny in-memory stand-in for `ctx.db`: `get` and indexed equality queries. */
+/**
+ * A tiny in-memory stand-in for `ctx.db`: get, indexed equality queries, and
+ * insert / patch / delete. Index order and ranges other than `eq` are ignored.
+ * Writes go to `tables`, so tests can inspect them.
+ */
+
 export type Row = { _id: string } & Record<string, unknown>;
 
-export function fakeCtx(tables: Record<string, Row[]>): QueryCtx {
-  const byId = new Map<string, Row>();
-  for (const rows of Object.values(tables)) for (const r of rows) byId.set(r._id, r);
+export function fakeCtx(tables: Record<string, Row[]>): MutationCtx {
+  const byId = new Map<string, { table: string; row: Row }>();
+  for (const [table, rows] of Object.entries(tables))
+    for (const row of rows) byId.set(row._id, { table, row });
+  let next = 0;
   const db = {
-    get: async (id: string) => byId.get(id) ?? null,
+    get: async (id: string) => byId.get(id)?.row ?? null,
     query: (table: string) => {
       let rows = tables[table] ?? [];
       const chain = {
@@ -31,6 +38,26 @@ export function fakeCtx(tables: Record<string, Row[]>): QueryCtx {
       };
       return chain;
     },
+    insert: async (table: string, doc: Record<string, unknown>) => {
+      const row = { ...doc, _id: `${table}:${++next}` };
+      tables[table] = [...(tables[table] ?? []), row];
+      byId.set(row._id, { table, row });
+      return row._id;
+    },
+    patch: async (id: string, fields: Record<string, unknown>) => {
+      const hit = byId.get(id);
+      if (!hit) throw new Error(`patch: no ${id}`);
+      for (const [k, val] of Object.entries(fields)) {
+        if (val === undefined) delete hit.row[k];
+        else hit.row[k] = val;
+      }
+    },
+    delete: async (id: string) => {
+      const hit = byId.get(id);
+      if (!hit) throw new Error(`delete: no ${id}`);
+      tables[hit.table] = (tables[hit.table] ?? []).filter((r) => r._id !== id);
+      byId.delete(id);
+    },
   };
-  return { db } as unknown as QueryCtx;
+  return { db } as unknown as MutationCtx;
 }

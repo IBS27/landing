@@ -46,6 +46,7 @@ import { threadsFor } from "./world/posts/threads";
 import { rentals as rentalSeeds } from "./world/rentals";
 import { stories as storySeeds } from "./world/stories";
 import { videoPosts, videoStories } from "./world/videos";
+import { vouches as vouchSeeds } from "./world/vouches";
 
 type Row<T extends keyof TableRows> = TableRows[T];
 type TableRows = {
@@ -246,6 +247,15 @@ export function buildPlan(now: number) {
   const friendRequests = requestSeeds.map((q) => {
     if (areFriends(q.from, q.to)) fail(`friend request between friends ${q.from} → ${q.to}`);
     return { from: q.from as Username, to: q.to as Username, createdAt: clock.at(q.at) };
+  });
+  const vouchPairs = new Set<string>();
+  const vouches = vouchSeeds.map((s) => {
+    if (s.voucher === s.subject) fail(`${s.voucher} vouches for themselves`);
+    const pair = `${s.voucher}>${s.subject}`;
+    if (vouchPairs.has(pair)) fail(`duplicate vouch ${pair}`);
+    vouchPairs.add(pair);
+    const createdAt = Math.min(clock.at(s.at), latest);
+    return { ...s, createdAt };
   });
 
   // ── Groups ─────────────────────────────────────────────────────────────
@@ -1236,6 +1246,7 @@ export function buildPlan(now: number) {
     users,
     friendships: [...friendPairs.values()],
     friendRequests,
+    vouches,
     groups,
     groupMembers,
     listings,

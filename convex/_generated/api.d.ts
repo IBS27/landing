@@ -37,6 +37,7 @@ import type * as lib_posts from "../lib/posts.js";
 import type * as lib_reports from "../lib/reports.js";
 import type * as lib_settings from "../lib/settings.js";
 import type * as lib_users from "../lib/users.js";
+import type * as lib_vouches from "../lib/vouches.js";
 import type * as listings from "../listings.js";
 import type * as live from "../live.js";
 import type * as liveReplay from "../liveReplay.js";
@@ -76,10 +77,12 @@ import type * as seed_world_posts_threads from "../seed/world/posts/threads.js";
 import type * as seed_world_rentals from "../seed/world/rentals.js";
 import type * as seed_world_stories from "../seed/world/stories.js";
 import type * as seed_world_videos from "../seed/world/videos.js";
+import type * as seed_world_vouches from "../seed/world/vouches.js";
 import type * as settings from "../settings.js";
 import type * as stories from "../stories.js";
 import type * as users from "../users.js";
 import type * as validators from "../validators.js";
+import type * as vouches from "../vouches.js";
 
 import type {
   ApiFromModules,
@@ -117,6 +120,7 @@ declare const fullApi: ApiFromModules<{
   "lib/reports": typeof lib_reports;
   "lib/settings": typeof lib_settings;
   "lib/users": typeof lib_users;
+  "lib/vouches": typeof lib_vouches;
   listings: typeof listings;
   live: typeof live;
   liveReplay: typeof liveReplay;
@@ -156,10 +160,12 @@ declare const fullApi: ApiFromModules<{
   "seed/world/rentals": typeof seed_world_rentals;
   "seed/world/stories": typeof seed_world_stories;
   "seed/world/videos": typeof seed_world_videos;
+  "seed/world/vouches": typeof seed_world_vouches;
   settings: typeof settings;
   stories: typeof stories;
   users: typeof users;
   validators: typeof validators;
+  vouches: typeof vouches;
 }>;
 
 /**
