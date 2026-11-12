@@ -166,6 +166,28 @@ async function inBlockedThread(ctx: QueryCtx, c: Doc<"comments">, a: Audience) {
   return false;
 }
 
+/**
+ * `canView`, plus everything the post carries: the post it shares and any Event
+ * it attaches. A result built from the post may repeat what those said, so it
+ * is hidden when any of them is, even if they were public when it was built.
+ */
+async function canViewWithContent(
+  ctx: QueryCtx,
+  p: Doc<"posts">,
+  a: Audience,
+  depth = 0,
+): Promise<boolean> {
+  if (depth > 3 || !(await canView(ctx, p, a))) return false;
+  for (const x of p.attachments) {
+    if (x.kind !== "event") continue;
+    const e = await ctx.db.get(x.eventId);
+    if (e && (a.blocked.has(e.hostId) || !(await canSeeEvent(ctx, e, a)))) return false;
+  }
+  // A deleted original shows as "unavailable" on the post itself, so it hides nothing.
+  const shared = p.sharedPostId ? await ctx.db.get(p.sharedPostId) : null;
+  return !shared || canViewWithContent(ctx, shared, a, depth + 1);
+}
+
 async function goingCount(ctx: QueryCtx, e: Doc<"events">) {
   const going = await ctx.db
     .query("eventResponses")
@@ -191,7 +213,7 @@ async function resolveSource(
     case "post": {
       const p = await ctx.db.get(s.postId);
       if (!p) return "gone";
-      if (!(await canView(ctx, p, a))) return "hidden";
+      if (!(await canViewWithContent(ctx, p, a))) return "hidden";
       const [author, group] = await Promise.all([
         getSummary(ctx, p.authorId),
         p.groupId ? groupChip(ctx, p.groupId) : null,
@@ -215,7 +237,7 @@ async function resolveSource(
       if (await inBlockedThread(ctx, c, a)) return "hidden";
       const p = await ctx.db.get(c.postId);
       if (!p) return "gone";
-      if (!(await canView(ctx, p, a))) return "hidden";
+      if (!(await canViewWithContent(ctx, p, a))) return "hidden";
       const [author, postAuthor, group] = await Promise.all([
         getSummary(ctx, c.authorId),
         getSummary(ctx, p.authorId),
@@ -355,7 +377,8 @@ export async function isPublicSource(ctx: QueryCtx, s: Source): Promise<boolean>
       return isPublicPost(ctx, await ctx.db.get(s.postId));
     case "comment": {
       const c = await ctx.db.get(s.commentId);
-      return c !== null && isPublicPost(ctx, await ctx.db.get(c.postId));
+      if (!c || !(await ctx.db.get(c.authorId))) return false;
+      return isPublicPost(ctx, await ctx.db.get(c.postId));
     }
     case "event": {
       const e = await ctx.db.get(s.eventId);

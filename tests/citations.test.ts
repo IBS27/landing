@@ -141,6 +141,8 @@ const world = {
     // Public posts that share or attach something restricted.
     post("pSharesFriendsPost", "S", "public", { sharedPostId: "pFriendOfViewer" }),
     post("pSharesPublicPost", "S", "public", { sharedPostId: "pPublic" }),
+    post("pSharesOnlyMe", "S", "public", { sharedPostId: "pOnlyMe" }),
+    post("pSharesDeleted", "S", "public", { sharedPostId: "pDeleted" }),
     post("pAttachesPrivateEvent", "S", "public", {
       attachments: [{ kind: "event", eventId: "ePrivate" }],
     }),
@@ -150,6 +152,8 @@ const world = {
     comment("cPrivateGroup", "pPrivateGroup", "S"),
     comment("cByBlocker", "pPublic", "B"),
     { ...comment("cReplyToBlocker", "pPublic", "S"), parentId: "cByBlocker" },
+    comment("cOnSharesOnlyMe", "pSharesOnlyMe", "S"),
+    comment("cNoAuthor", "pPublic", "Deleted"),
   ],
   events: [
     event("ePublic", "S", "public"),
@@ -243,6 +247,22 @@ describe("per-viewer filtering", () => {
         P("pDeleted"),
       ]),
     ).toEqual(["post:pPublic", "post:pFriendOfViewer", "post:pPublicGroup", "post:pMyGroup"]);
+  });
+
+  test("posts are hidden when what they share or attach is hidden", async () => {
+    expect(
+      await visibleKeys([
+        P("pSharesFriendsPost"),
+        P("pSharesOnlyMe"),
+        P("pSharesDeleted"),
+        P("pAttachesPrivateEvent"),
+        C("cOnSharesOnlyMe"),
+      ]),
+    ).toEqual(["post:pSharesFriendsPost", "post:pSharesDeleted"]);
+    // A result citing a public post whose shared original later turned only-me is withheld.
+    const ctx = fakeCtx(world);
+    const a = await loadAudience(ctx, id("V"));
+    expect(await resolveCitations(ctx, cite([P("pPublic"), P("pSharesOnlyMe")]), a)).toBeNull();
   });
 
   test("wall posts follow the timeline owner's setting", async () => {
@@ -344,6 +364,7 @@ describe("public sources (for results shared by every viewer)", () => {
       [P("pAttachesPrivateEvent"), false],
       [C("cPublic"), true],
       [C("cPrivateGroup"), false],
+      [C("cNoAuthor"), false],
       [E("ePublic"), true],
       [E("eInvited"), false],
       [E("eMyGroup"), false],
