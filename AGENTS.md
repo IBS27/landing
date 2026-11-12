@@ -4,6 +4,7 @@ Four people build Landing, each working with coding agents. GitHub Issues is the
 
 Read first:
 - `design/PRODUCT_BRIEF.md`: what we're building.
+- `design/ROADMAP.md`: build order. Pick tasks from the earliest open wave, and skip the "not a priority" list.
 - `design/BUILD_GUIDE.md`: stack, code conventions and browser verification.
 
 ## Task board
@@ -19,7 +20,7 @@ Read first:
   | Closed | Merged |
 
 ## Workflow
-1. **Pick a task.** Use the issue your human gave you, or find one: `gh issue list --no-assignee --label area:<x>`. Check its "Depends on" issues are closed.
+1. **Pick a task.** Use the issue your human gave you, or find one from the earliest open wave in `design/ROADMAP.md`: `gh issue list --no-assignee --label area:<x>`. Check its "Depends on" issues are closed.
 2. **Check for overlap.** Run `gh issue list --assignee "*"` and `gh pr list`. Read the plan comments on claimed issues in the same area or with the `schema` label. If another task touches the same files or tables, comment on that issue before you start.
 3. **Claim it:** `gh issue edit <N> --add-assignee @me`. Never take an issue assigned to someone else.
 4. **Post a plan comment** on the issue: approach, files you'll touch, and exact schema or API changes (tables, fields, Convex functions). This is how other agents learn what you're doing. Edit it if the plan changes.
