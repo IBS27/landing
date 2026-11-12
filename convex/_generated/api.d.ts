@@ -9,6 +9,13 @@
  */
 
 import type * as ads from "../ads.js";
+import type * as ai_agent from "../ai/agent.js";
+import type * as ai_jobs from "../ai/jobs.js";
+import type * as ai_model from "../ai/model.js";
+import type * as ai_outputSchema from "../ai/outputSchema.js";
+import type * as ai_runs from "../ai/runs.js";
+import type * as ai_sources from "../ai/sources.js";
+import type * as ai_status from "../ai/status.js";
 import type * as calls from "../calls.js";
 import type * as comments from "../comments.js";
 import type * as conversations from "../conversations.js";
@@ -80,6 +87,13 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   ads: typeof ads;
+  "ai/agent": typeof ai_agent;
+  "ai/jobs": typeof ai_jobs;
+  "ai/model": typeof ai_model;
+  "ai/outputSchema": typeof ai_outputSchema;
+  "ai/runs": typeof ai_runs;
+  "ai/sources": typeof ai_sources;
+  "ai/status": typeof ai_status;
   calls: typeof calls;
   comments: typeof comments;
   conversations: typeof conversations;
