@@ -18,6 +18,7 @@ import {
   type MutationCtx,
 } from "./_generated/server";
 import schema from "./schema";
+import { seedCityProfiles } from "./seed/cityProfiles";
 import { buildPlan } from "./seed/plan";
 import { reactionType } from "./validators";
 
@@ -36,6 +37,12 @@ async function insertAll<N extends TableNames>(
 }
 
 // ── Mutations ────────────────────────────────────────────────────────────────
+
+/** Landing City Profiles (#3), after users, Groups and Events exist. */
+export const insertCityProfiles = internalMutation({
+  args: { now: v.number() },
+  handler: (ctx, { now }) => seedCityProfiles(ctx, now),
+});
 
 /** Deletes up to one batch of a table; returns how many were deleted. */
 export const clearTable = internalMutation({
@@ -542,6 +549,11 @@ export const reset = internalAction({
       }),
     ]);
 
+    // 9. Landing City Profiles for the personas.
+    const cityProfileFacts: number = await ctx.runMutation(internal.seed.insertCityProfiles, {
+      now: Date.now(),
+    });
+
     const reactionRows =
       plan.posts.reduce((s, p) => s + p.reactions.length + p.commentReactions.length, 0) +
       plan.conversations.reduce(
@@ -558,6 +570,7 @@ export const reset = internalAction({
         groupMembers: plan.groupMembers.length,
         listings: plan.listings.length,
         events: plan.events.length,
+        cityProfileFacts,
         eventResponses: plan.eventResponses.length,
         posts: plan.posts.length,
         comments: plan.posts.reduce((s, p) => s + p.comments.length, 0),
