@@ -7,7 +7,7 @@ import { Modal } from "@/ui/overlays";
 import { Button } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-import { VOUCH_NOTE_MAX } from "../../../convex/lib/vouches";
+import { normalizeNote, VOUCH_NOTE_MAX } from "../../../convex/lib/vouchNote";
 import type { VouchRelationship } from "../../../convex/validators";
 import { RELATIONSHIP_OPTIONS } from "./vouchCopy";
 
@@ -28,7 +28,8 @@ export function VouchDialog({
   const [note, setNote] = useState(current?.note ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const tooLong = note.trim().length > VOUCH_NOTE_MAX;
+  const clean = normalizeNote(note);
+  const tooLong = clean.length > VOUCH_NOTE_MAX;
 
   const run = async (action: () => Promise<unknown>) => {
     setBusy(true);
@@ -72,7 +73,7 @@ export function VouchDialog({
           <span
             className={cn("block text-right text-xs", tooLong ? "text-negative" : "text-secondary")}
           >
-            {note.trim().length}/{VOUCH_NOTE_MAX}
+            {clean.length}/{VOUCH_NOTE_MAX}
           </span>
         </label>
         {error && (
@@ -99,9 +100,7 @@ export function VouchDialog({
             disabled={busy || !relationship || tooLong}
             onClick={() =>
               relationship &&
-              run(() =>
-                vouch({ userId: subject._id, relationship, note: note.trim() || undefined }),
-              )
+              run(() => vouch({ userId: subject._id, relationship, note: clean || undefined }))
             }
           >
             {current ? "Save" : "Vouch"}

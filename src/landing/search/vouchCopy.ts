@@ -80,11 +80,16 @@ export function viaLine(v: Pick<NetworkVouch, "via" | "bridges" | "bridgeCount">
   }
 }
 
-/** Header for the vouch list. */
-export function vouchesTitle(relation: Relation, count: number) {
-  if (relation === "you")
-    return count ? `${plural(count, "person vouches", "people vouch")} for you` : "No vouches yet";
-  return count
-    ? `${plural(count, "vouch", "vouches")} from your network`
-    : "No vouches from your network";
+/** Header for the vouch list. When `partial`, an empty list isn't proof there are none. */
+export function vouchesTitle(relation: Relation, count: number, partial = false) {
+  if (relation === "you") {
+    if (count) return `${plural(count, "person vouches", "people vouch")} for you`;
+    return partial ? "No vouches found" : "No vouches yet";
+  }
+  if (count) return `${plural(count, "vouch", "vouches")} from your network`;
+  return partial ? "No vouches found in your network" : "No vouches from your network";
 }
+
+/** Shown under the card when not everything could be checked. */
+export const PARTIAL_NOTICE =
+  "Not everyone could be checked, so some vouches or connections may be missing.";

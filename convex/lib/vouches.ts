@@ -5,6 +5,7 @@ import type { VouchRelationship } from "../validators";
 import { isBlockedEitherWay } from "./blocks";
 import { notify } from "./notify";
 import { areFriends, getSummaries, type UserSummary } from "./users";
+import { normalizeNote, VOUCH_NOTE_MAX } from "./vouchNote";
 
 /**
  * Network vouching: how the viewer is connected to a lister, and who in the
@@ -22,7 +23,6 @@ import { areFriends, getSummaries, type UserSummary } from "./users";
  * `saveVouch` and `removeVouch`, never the table directly.
  */
 
-export const VOUCH_NOTE_MAX = 280;
 /*
  * Read limits for `listerNetwork`, chosen so one query stays well inside
  * Convex's per-transaction limits (documents read, index ranges, concurrency).
@@ -93,12 +93,12 @@ export function byCloseness(
   return VIA_ORDER[a.via] - VIA_ORDER[b.via] || b.updatedAt - a.updatedAt;
 }
 
-/** Trimmed note with whitespace collapsed, or undefined when empty. Throws when too long. */
+/** Normalized note, or undefined when empty. Throws when too long. */
 export function cleanNote(note: string | undefined): string | undefined {
-  const text = note?.replace(/\s+/g, " ").trim();
+  const text = note === undefined ? undefined : normalizeNote(note);
   if (!text) return undefined;
   if (text.length > VOUCH_NOTE_MAX)
-    throw new ConvexError(`Keep your note under ${VOUCH_NOTE_MAX} characters`);
+    throw new ConvexError(`Keep your note to ${VOUCH_NOTE_MAX} characters or fewer`);
   return text;
 }
 

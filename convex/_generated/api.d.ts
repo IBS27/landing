@@ -37,6 +37,7 @@ import type * as lib_posts from "../lib/posts.js";
 import type * as lib_reports from "../lib/reports.js";
 import type * as lib_settings from "../lib/settings.js";
 import type * as lib_users from "../lib/users.js";
+import type * as lib_vouchNote from "../lib/vouchNote.js";
 import type * as lib_vouches from "../lib/vouches.js";
 import type * as listings from "../listings.js";
 import type * as live from "../live.js";
@@ -120,6 +121,7 @@ declare const fullApi: ApiFromModules<{
   "lib/reports": typeof lib_reports;
   "lib/settings": typeof lib_settings;
   "lib/users": typeof lib_users;
+  "lib/vouchNote": typeof lib_vouchNote;
   "lib/vouches": typeof lib_vouches;
   listings: typeof listings;
   live: typeof live;

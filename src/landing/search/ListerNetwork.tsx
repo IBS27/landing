@@ -10,7 +10,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import type { UserSummary } from "../../../convex/lib/users";
 import type { NetworkVouch } from "../../../convex/lib/vouches";
 import { VouchDialog } from "./VouchDialog";
-import { relationLine, relationshipLine, viaLine, vouchesTitle } from "./vouchCopy";
+import { PARTIAL_NOTICE, relationLine, relationshipLine, viaLine, vouchesTitle } from "./vouchCopy";
 
 /**
  * "Your network" card for a Landing listing view: how the viewer is connected
@@ -65,7 +65,7 @@ export function ListerNetwork({ listingId }: { listingId: Id<"listings"> }) {
       <Divider className="my-3" />
 
       <h3 className="font-semibold text-base text-primary">
-        {vouchesTitle(relation, data.vouchTotal)}
+        {vouchesTitle(relation, data.vouchTotal, data.partial)}
       </h3>
       {vouches.length > 0 && (
         <ul className="mt-2 flex flex-col gap-3">
@@ -79,16 +79,12 @@ export function ListerNetwork({ listingId }: { listingId: Id<"listings"> }) {
           And {plural(data.vouchTotal - vouches.length, "more vouch", "more vouches")}
         </p>
       )}
-      {vouches.length === 0 && relation !== "you" && (
+      {vouches.length === 0 && relation !== "you" && !data.partial && (
         <p className="mt-1 text-secondary text-sm">
-          {data.partial
-            ? `No vouches for ${lister.firstName} found in your network.`
-            : `None of your friends or friends of friends have vouched for ${lister.firstName}.`}
+          None of your friends or friends of friends have vouched for {lister.firstName}.
         </p>
       )}
-      {data.partial && (
-        <p className="mt-2 text-secondary text-xs">Only the most recent vouches were checked.</p>
-      )}
+      {data.partial && <p className="mt-2 text-secondary text-xs">{PARTIAL_NOTICE}</p>}
 
       {data.canVouch && (
         <Button

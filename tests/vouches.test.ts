@@ -11,10 +11,10 @@ import {
   PAIR_CHECK_MAX,
   removeVouch,
   saveVouch,
-  VOUCH_NOTE_MAX,
   VOUCH_SCAN_MAX,
   VOUCHES_SHOWN,
 } from "../convex/lib/vouches";
+import { VOUCH_NOTE_MAX } from "../convex/lib/vouchNote";
 import {
   nameList,
   relationLine,
@@ -361,6 +361,8 @@ describe("vouch copy", () => {
     expect(viaLine({ via: "other", bridges: [], bridgeCount: 0 })).toBe("Not in your network");
     expect(relationshipLine("rented_from", derek)).toBe("Rented from Derek");
     expect(vouchesTitle("friend_of_friend", 0)).toBe("No vouches from your network");
+    expect(vouchesTitle("friend_of_friend", 0, true)).toBe("No vouches found in your network");
+    expect(vouchesTitle("you", 0, true)).toBe("No vouches found");
     expect(vouchesTitle("none", 2)).toBe("2 vouches from your network");
     expect(vouchesTitle("you", 1)).toBe("1 person vouches for you");
     expect(vouchesTitle("you", 3)).toBe("3 people vouch for you");
