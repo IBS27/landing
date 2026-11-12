@@ -11,14 +11,24 @@ export function PhotoGrid({
   media,
   onOpen,
   className,
+  sponsored,
 }: {
   media: PostMedia[];
   onOpen?: (index: number) => void;
   className?: string;
+  /** Ads letterbox their video on pure black instead of the dominant colour. */
+  sponsored?: boolean;
 }) {
   if (media.length === 0) return null;
   if (media.length === 1)
-    return <Single item={media[0]} onOpen={() => onOpen?.(0)} className={className} />;
+    return (
+      <Single
+        item={media[0]}
+        onOpen={() => onOpen?.(0)}
+        className={className}
+        sponsored={sponsored}
+      />
+    );
   return <Collage media={media} onOpen={onOpen} className={className} />;
 }
 
@@ -120,16 +130,19 @@ function Single({
   item,
   onOpen,
   className,
+  sponsored,
 }: {
   item: PostMedia;
   onOpen: () => void;
   className?: string;
+  sponsored?: boolean;
 }) {
   const ratio = item.width && item.height ? item.width / item.height : 4 / 3;
   // Wider than the capped box (680×575) fills edge to edge; narrower media sit
   // centred on a flat fill of the photo's (or video poster's) dominant colour.
   const letterboxed = ratio < 1.2;
-  if (item.kind === "video") return <SingleVideo item={item} ratio={ratio} className={className} />;
+  if (item.kind === "video")
+    return <SingleVideo item={item} ratio={ratio} className={className} blackFill={sponsored} />;
   return (
     <button
       type="button"
@@ -221,17 +234,22 @@ function LetterboxFill({ url }: { url: string }) {
   return <span aria-hidden className="absolute inset-0" style={{ backgroundColor: color }} />;
 }
 
-/** A single inline video; tall ones sit on their poster's dominant colour (black in full screen). */
+/**
+ * A single inline video; tall ones sit on their poster's dominant colour
+ * (black in full screen, and always black for ads, like Facebook).
+ */
 function SingleVideo({
   item,
   ratio,
   className,
+  blackFill,
 }: {
   item: PostMedia;
   ratio: number;
   className?: string;
+  blackFill?: boolean;
 }) {
-  const fill = useDominantColor(ratio < 1.2 ? item.poster : undefined);
+  const fill = useDominantColor(ratio < 1.2 && !blackFill ? item.poster : undefined);
   return (
     <VideoPlayer
       src={item.url}

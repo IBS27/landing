@@ -8,6 +8,8 @@ import {
   MoreHorizontal,
   Music2,
   Star,
+  Volume2,
+  VolumeX,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -28,13 +30,7 @@ import {
   ShareOutline,
 } from "@/features/posts/icons";
 import { reactionMeta, useReactionHover } from "@/features/posts/reactions";
-import {
-  PlayGlyph,
-  safePlay,
-  setSoundOn,
-  useSoundOn,
-  VolumeGlyph,
-} from "@/features/posts/VideoPlayer";
+import { PlayGlyph, safePlay, setSoundOn, useSoundOn } from "@/features/posts/VideoPlayer";
 import { cn, compactCount } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/ui/overlays";
 import { Avatar, Spinner } from "@/ui/primitives";
@@ -234,7 +230,7 @@ function NavArrow({
       aria-label={label}
       disabled={disabled}
       onClick={onClick}
-      className="flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#a8abaf] bg-[#1c1c1d] text-[#e2e5e9] transition-colors hover:bg-[#2a2a2b] disabled:cursor-not-allowed disabled:border-[#4b4c4f] disabled:text-[#65686c] disabled:hover:bg-[#1c1c1d]"
+      className="flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#999] bg-[#161616] text-[#999] transition-colors hover:bg-[#2a2a2b] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-[#161616]"
     >
       {children}
     </button>
@@ -325,9 +321,13 @@ function ReelSlide({ post, active, offset }: { post: Reel; active: boolean; offs
               type="button"
               aria-label={sound ? "Mute" : "Unmute"}
               onClick={() => setSoundOn(!sound)}
-              className="flex h-11 w-11 items-center justify-center rounded-full text-white hover:bg-white/10"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-[rgba(50,52,54,0.65)] text-white backdrop-blur-sm transition-colors hover:bg-[rgba(70,72,74,0.7)]"
             >
-              <VolumeGlyph muted={!sound} size={22} />
+              {sound ? (
+                <Volume2 size={20} strokeWidth={2} />
+              ) : (
+                <VolumeX size={20} strokeWidth={2} />
+              )}
             </button>
           </div>
 

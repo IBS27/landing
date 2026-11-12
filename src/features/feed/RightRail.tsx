@@ -61,7 +61,11 @@ export function RightRail({ data }: { data: RailsData | undefined }) {
   // Contacts → "Search by name or group" filters contacts and group chats as you type.
   const [query, setQuery] = useState<string | null>(null);
   const term = query?.trim().toLowerCase() ?? "";
-  const matches = (name: string) => name.toLowerCase().includes(term);
+  // Like Facebook, match the start of the full name or of any later name (first/last), not mid-word.
+  const matches = (name: string) => {
+    const lower = name.toLowerCase();
+    return lower.startsWith(term) || lower.split(/\s+/).some((w) => w.startsWith(term));
+  };
   const contacts = (data?.contacts ?? []).filter((c) => matches(c.name));
   const groupChats = (data?.groupChats ?? []).filter(
     (g) => matches(g.title) || g.members.some((m) => matches(m.name)),

@@ -542,6 +542,7 @@ export function PostContent({
           media={post.media}
           onOpen={(i) => openPhoto(post._id, i)}
           className={nested ? "" : undefined}
+          sponsored={post.sponsored}
         />
       )}
       {post.attachments.map((att, i) => (

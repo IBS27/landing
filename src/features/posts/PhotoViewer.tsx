@@ -60,13 +60,13 @@ export function PhotoViewer({
       <Stage resetKey={index} onClose={onClose} arrows={n > 1} onStep={go}>
         {item?.kind === "video" ? (
           // biome-ignore lint/a11y/useMediaCaption: user videos have no caption track
-          <video src={item.url} controls autoPlay className="max-h-full max-w-full" />
+          <video src={item.url} controls autoPlay className="h-full w-full object-contain" />
         ) : (
           <img
             src={item?.url}
             alt={item?.alt ?? ""}
             draggable={false}
-            className="max-h-full max-w-full select-none object-contain"
+            className="h-full w-full select-none object-contain"
           />
         )}
       </Stage>

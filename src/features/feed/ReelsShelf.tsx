@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
-import { ChevronLeft, ChevronRight, CircleAlert, CircleMinus, EyeOff, Flag } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, CircleMinus, EyeOff, Flag } from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { DotsIcon } from "@/features/posts/icons";
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger, Modal } from "@/ui/overlays";
@@ -17,6 +17,57 @@ function ReelsGlyph({ size = 20 }: { size?: number }) {
   return (
     <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden>
       <path d="M5 2h14a3 3 0 0 1 3 3v2H2V5a3 3 0 0 1 3-3Zm2.2 1.6L8.9 6h2.4L9.6 3.6H7.2Zm5 0L13.9 6h2.4l-1.7-2.4h-2.4Zm5 0L18.9 6h1.5V5c0-.7-.5-1.3-1.1-1.4h-2.1ZM2 8.5h20V19a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V8.5Zm8 3.3v6.4c0 .5.5.8 1 .6l5-3.2a.7.7 0 0 0 0-1.2l-5-3.2c-.5-.2-1 .1-1 .6Z" />
+    </svg>
+  );
+}
+
+type GlyphProps = { size?: number };
+
+/** Facebook's filled menu glyphs (20px, currentColor). */
+function MinusCircleGlyph({ size = 20 }: GlyphProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden>
+      <path
+        fillRule="evenodd"
+        d="M12 1a11 11 0 1 0 0 22 11 11 0 0 0 0-22ZM7 10.75a1.25 1.25 0 1 0 0 2.5h10a1.25 1.25 0 1 0 0-2.5H7Z"
+      />
+    </svg>
+  );
+}
+
+function EyeOffGlyph({ size = 20 }: GlyphProps) {
+  const mask = useId();
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden>
+      <mask id={mask}>
+        <rect width="24" height="24" fill="white" />
+        <path d="M3 3 21 21" stroke="black" strokeWidth="5" strokeLinecap="round" />
+      </mask>
+      <path
+        mask={`url(#${mask})`}
+        fillRule="evenodd"
+        d="M12 4.5c-5.3 0-9 4.2-10.6 6.6a1.6 1.6 0 0 0 0 1.8C3 15.3 6.7 19.5 12 19.5s9-4.2 10.6-6.6a1.6 1.6 0 0 0 0-1.8C21 8.7 17.3 4.5 12 4.5Zm0 3.75a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5Z"
+      />
+      <path d="M3.5 3.5 20.5 20.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function AlertGlyph({ size = 20 }: GlyphProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden>
+      <path
+        fillRule="evenodd"
+        d="M12 1a11 11 0 1 0 0 22 11 11 0 0 0 0-22Zm0 5a1.25 1.25 0 0 1 1.25 1.25v5.5a1.25 1.25 0 1 1-2.5 0v-5.5C10.75 6.56 11.31 6 12 6Zm0 9.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z"
+      />
+    </svg>
+  );
+}
+
+function FlagGlyph({ size = 20 }: GlyphProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden>
+      <path d="M5 2a1 1 0 0 1 1 1v.5h12.3c.8 0 1.3.9.9 1.6L16.6 9l2.6 3.9c.4.7-.1 1.6-.9 1.6H6V21a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Z" />
     </svg>
   );
 }
@@ -144,7 +195,7 @@ function Shelf({
               <DotsIcon className="text-icon-secondary" />
             </IconButton>
           </MenuTrigger>
-          <MenuContent width={320}>
+          <MenuContent width={320} arrow>
             {fewer ? (
               <MenuItem
                 icon={<ReelsGlyph />}
@@ -154,24 +205,20 @@ function Shelf({
               />
             ) : (
               <MenuItem
-                icon={<CircleMinus size={20} />}
+                icon={<MinusCircleGlyph />}
                 label="Show fewer reels"
                 sub="Reels will show up less often in your Feed."
                 onSelect={() => onChoose("Show fewer")}
               />
             )}
             <MenuItem
-              icon={<EyeOff size={20} />}
+              icon={<EyeOffGlyph />}
               label="Hide all reels"
               sub="Stop seeing Reels in your Feed."
               onSelect={() => onChoose("Hidden")}
             />
             <MenuSeparator />
-            <MenuItem
-              icon={<CircleAlert size={20} />}
-              label="Report a problem"
-              onSelect={onReportProblem}
-            />
+            <MenuItem icon={<AlertGlyph />} label="Report a problem" onSelect={onReportProblem} />
           </MenuContent>
         </Menu>
       </div>
@@ -288,7 +335,7 @@ function HiddenTile({ reported, onUndo }: { reported: boolean; onUndo?: () => vo
   );
 }
 
-/** A 9:16 tile: the poster, a muted looping preview while hovered, caption bottom-left. */
+/** A 9:16 tile: the poster and a muted looping preview while hovered; no caption, like Facebook. */
 function ReelTile({
   reel: r,
   onHide,
@@ -341,14 +388,6 @@ function ReelTile({
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ${hover ? "opacity-100" : "opacity-0"}`}
         />
         <span className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/5" />
-        {r.caption && (
-          <>
-            <span className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent" />
-            <span className="absolute inset-x-3 bottom-3 line-clamp-2 break-words font-semibold text-[15px] text-white leading-5 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
-              {r.caption}
-            </span>
-          </>
-        )}
       </Link>
       <Menu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
         <MenuTrigger asChild>
@@ -362,13 +401,13 @@ function ReelTile({
         </MenuTrigger>
         <MenuContent width={300} align="end">
           <MenuItem
-            icon={<EyeOff size={20} />}
+            icon={<EyeOffGlyph />}
             label="Hide reel"
             sub="See fewer reels like this."
             onSelect={onHide}
           />
           <MenuItem
-            icon={<Flag size={20} />}
+            icon={<FlagGlyph />}
             label="Report"
             sub="We won't let them know who reported this."
             onSelect={onReport}

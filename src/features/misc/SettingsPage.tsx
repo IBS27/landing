@@ -314,17 +314,20 @@ export function SettingsPage({ tab }: { tab?: string }) {
         <div className="px-4 pt-[15px] pb-[19px]">
           <h1 className="font-bold text-[24px] text-primary leading-7">Settings &amp; privacy</h1>
         </div>
-        <label className="mx-4 flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-input pr-2 pl-2.5">
-          <Search size={16} strokeWidth={2.5} className="text-icon-secondary" />
-          <input
-            value={railQ}
-            onChange={(e) => setRailQ(e.target.value)}
-            placeholder="Search settings"
-            aria-label="Search settings"
-            className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-primary outline-none placeholder:text-placeholder"
-          />
-        </label>
-        <div ref={rail} className="relative min-h-0 flex-1 overflow-y-auto px-2 pt-[39px] pb-6">
+        {/* Opaque strip below the box so scrolled rail rows never butt against or peek under it. */}
+        <div className="relative z-[1] shrink-0 bg-card px-4 pb-2">
+          <label className="flex h-9 items-center gap-1.5 rounded-full bg-input pr-2 pl-2.5">
+            <Search size={16} strokeWidth={2.5} className="text-icon-secondary" />
+            <input
+              value={railQ}
+              onChange={(e) => setRailQ(e.target.value)}
+              placeholder="Search settings"
+              aria-label="Search settings"
+              className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-primary outline-none placeholder:text-placeholder"
+            />
+          </label>
+        </div>
+        <div ref={rail} className="relative min-h-0 flex-1 overflow-y-auto px-2 pt-[31px] pb-6">
           {filtered ? (
             filtered.length === 0 ? (
               <p className="px-3 py-6 text-center text-[15px] text-secondary">No results found</p>

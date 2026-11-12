@@ -227,11 +227,10 @@ export const discover = viewerQuery({
     const popular = byMembers
       .filter((c) => c.location?.includes(city) && !shown.has(c._id))
       .slice(0, 4);
-    for (const c of popular) shown.add(c._id);
-    const rest = byMembers.filter((c) => !shown.has(c._id));
-    // A small catalog still fills the grid, skipping what the carousels open with.
+    // The grid keeps going through every other candidate, skipping only the
+    // cards the carousels open with (their off-screen cards repeat here, as on Facebook).
     const opening = new Set([...suggested.slice(0, 3), ...popular.slice(0, 3)].map((c) => c._id));
-    const more = rest.length >= 3 ? rest : byMembers.filter((c) => !opening.has(c._id));
+    const more = byMembers.filter((c) => !opening.has(c._id));
     return { suggested, popular, more, city };
   },
 });

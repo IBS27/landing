@@ -1,11 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useLayoutEffect, useRef, useState } from "react";
 import { useM } from "@/app/viewer";
 import { groupParams } from "@/features/feed/links";
+import { cn } from "@/lib/format";
 import { Avatar, Button, Card } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import { type GroupView, useGroup } from "./context";
-import { Description, InfoRow, PrivacyRows } from "./DiscussionTab";
+import { InfoRow, PrivacyRows } from "./DiscussionTab";
 import { ChatGlyph, ClockGlyph, PeopleGlyph, PinGlyph } from "./icons";
 import { ageLabel, formatLongDate, memberCount } from "./util";
 
@@ -25,11 +26,11 @@ export function AboutTab() {
 export function SectionCard({ title, children }: { title: ReactNode; children: ReactNode }) {
   return (
     <Card className="rounded-xl px-4 pb-4">
-      <h2 className="flex h-[60px] items-center font-semibold text-[17px] text-primary">
+      <h2 className="flex h-[57px] items-center font-semibold text-[17px] text-primary">
         <span>{title}</span>
       </h2>
       <div className="h-px bg-divider" />
-      <div className="pt-4">{children}</div>
+      <div className="pt-3">{children}</div>
     </Card>
   );
 }
@@ -38,11 +39,11 @@ function AboutCard({ group }: { group: GroupView }) {
   const [editing, setEditing] = useState(false);
   return (
     <SectionCard title="About this group">
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2.5">
         {editing ? (
           <EditDescription group={group} onDone={() => setEditing(false)} />
         ) : group.description ? (
-          <Description text={group.description} limit={300} />
+          <ClampedDescription key={group.description} text={group.description} />
         ) : (
           group.viewerRole === "admin" && (
             <p className="text-[15px] text-secondary">
@@ -55,16 +56,58 @@ function AboutCard({ group }: { group: GroupView }) {
             {group.description ? "Edit description" : "Add description"}
           </Button>
         )}
-        <PrivacyRows group={group} />
-        <InfoRow
-          muted
-          icon={<ClockGlyph />}
-          title="History"
-          sub={`Group created on ${formatLongDate(group.createdAt)}`}
-        />
-        {group.location && <InfoRow muted icon={<PinGlyph />} title={group.location} />}
+        {/* Facebook stacks these rows tighter than the card's 12px rhythm. */}
+        <div className="flex flex-col gap-[5px]">
+          <PrivacyRows group={group} />
+          <InfoRow
+            muted
+            icon={<ClockGlyph />}
+            title="History"
+            sub={`Group created on ${formatLongDate(group.createdAt)}`}
+          />
+          {group.location && <InfoRow muted icon={<PinGlyph />} title={group.location} />}
+        </div>
       </div>
     </SectionCard>
+  );
+}
+
+/** Description clamped to two lines with an inline "See more" at the clamp, as on Facebook. */
+function ClampedDescription({ text }: { text: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [open, setOpen] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || open) return;
+    const check = () => setOverflows(el.scrollHeight > el.clientHeight + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [open]);
+
+  const toggle = (label: string) => (
+    <button
+      type="button"
+      onClick={() => setOpen((o) => !o)}
+      className="font-semibold text-primary hover:underline"
+    >
+      {label}
+    </button>
+  );
+  return (
+    <div className="relative text-[15px] text-primary leading-5">
+      <p ref={ref} className={cn("whitespace-pre-line break-words", !open && "line-clamp-2")}>
+        {text}
+        {open && overflows && <> {toggle("See less")}</>}
+      </p>
+      {!open && overflows && (
+        <span className="absolute right-0 bottom-0 bg-[linear-gradient(to_right,transparent,var(--card)_24px)] pl-8">
+          … {toggle("See more")}
+        </span>
+      )}
+    </div>
   );
 }
 
