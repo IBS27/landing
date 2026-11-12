@@ -1,13 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import {
-  Camera,
-  ChevronDown,
-  MapPin,
-  Pencil,
-  Plus,
-  Search,
-  Tag,
-} from "lucide-react";
+import { Camera, ChevronDown, MapPin, Pencil, Plus, Search, Tag } from "lucide-react";
 import { useState } from "react";
 import { useChatDock } from "@/app/chat-dock";
 import { useM } from "@/app/viewer";
