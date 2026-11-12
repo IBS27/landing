@@ -16,6 +16,11 @@ The goal is a faithful, working clone of desktop facebook.com (1440×900, light 
 - **Notifications.** Call `notify(ctx, {...})` from `convex/lib/notify.ts` whenever a real Facebook action would notify someone (reaction, comment, friend request, group post, event invite, Marketplace message).
 - **Reactions.** Shared module `convex/reactions.ts`: `react` mutation and `reactionSummary(ctx, type, id, viewerId)` helper, for posts, comments and messages.
 - **Schema.** `convex/schema.ts` and `convex/validators.ts` are shared. The `attachments` unions on posts and messages, `author`/`status` on messages, and `badges` on listings are extension points; keep them. If you need a schema change, make a minimal, additive Edit (re-read the file first, never rewrite it). Prefer optional fields.
+- **Neighborhoods.**
+  - **Data:** the `neighborhoods` table holds San Francisco's 41 DataSF Analysis Neighborhoods. Its slugs match City Profile facts. Listings, Events and Groups carry an optional `neighborhoodId`, and each of those tables has a `by_neighborhood` index.
+  - **Assigning one:** set `neighborhoodId` from coordinates with `neighborhoodIdAt(ctx, point)` from `convex/lib/neighborhoods.ts`. Never derive it from a typed name such as a listing's `location.neighborhood`, which is a display string only.
+  - **Facts:** cited transit, nightlife and campus facts are in `neighborhoodFacts`, read through `api.neighborhoods.get`.
+  - **Refreshing:** `bun scripts/neighborhoods/build.ts` rebuilds the boundaries, transit data and geocoded seed addresses from the live sources.
 - **Data is real.** Every Tier-1 surface reads from and writes to Convex, and updates in real time. Nothing on a page should be hardcoded except static chrome (labels, menus). Images are paths under `/seed/...` (public folder) or Convex storage URLs.
 - **UI kit** (reuse it; don't fork it):
   - `src/ui/primitives.tsx`: Card, CardHeader, Divider, Button (primary, secondary, soft, ghost, floating, link), IconButton, Avatar (online dot, ring, square), VerifiedBadge, CountBadge, Spinner, Skeleton, NavRow, SectionTitle, EmptyState.
