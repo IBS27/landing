@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { BadgeCheck, Users } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useQ } from "@/app/viewer";
+import { toProfile } from "@/landing/links";
 import { timeAgo } from "@/lib/citations";
 import { cn, plural } from "@/lib/format";
 import { Avatar, Button, Card, Divider, Skeleton } from "@/ui/primitives";
@@ -142,7 +143,7 @@ function AvatarStack({ people, total }: { people: UserSummary[]; total: number }
   );
 }
 
-/** A person's profile. Switch to `toProfile` from `src/landing/links.ts` once #55 merges. */
+/** A person's profile. */
 function PersonLink({
   person,
   className,
@@ -153,12 +154,7 @@ function PersonLink({
   children: ReactNode;
 }) {
   return (
-    <Link
-      to="/$username"
-      params={{ username: person.username }}
-      className={cn("hover:underline", className)}
-      title={person.name}
-    >
+    <Link {...toProfile(person)} className={cn("hover:underline", className)} title={person.name}>
       {children}
     </Link>
   );
