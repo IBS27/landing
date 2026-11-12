@@ -2,11 +2,12 @@ import { describe, expect, test } from "bun:test";
 import type { Doc } from "../convex/_generated/dataModel";
 import {
   cleanNote,
+  FOF_SCAN_MAX,
+  FRIEND_READ_BUDGET,
   listerNetwork,
   removeVouch,
   saveVouch,
   VOUCH_NOTE_MAX,
-  vouchCount,
 } from "../convex/lib/vouches";
 import {
   nameList,
@@ -108,6 +109,7 @@ describe("listerNetwork", () => {
       mutualFriends: [],
       mutualFriendCount: 0,
       vouches: [],
+      partial: false,
     });
   });
 
@@ -129,9 +131,39 @@ describe("listerNetwork", () => {
     expect(await listerNetwork(fakeCtx(world()), id("S"), id("V"))).toBeNull();
   });
 
-  test("vouchCount counts every vouch", async () => {
-    expect(await vouchCount(fakeCtx(world()), id("L"))).toBe(6);
-    expect(await vouchCount(fakeCtx(world()), id("V"))).toBe(0);
+  test("many newer outsider vouches never hide the viewer's or a friend's", async () => {
+    const w = world();
+    const crowd = Array.from({ length: FOF_SCAN_MAX + 20 }, (_, i) => `X${i}`);
+    w.users.push(...crowd.map(user));
+    w.vouches.push(...crowd.map((x) => vouch(x, "L", 0)));
+    const net = await listerNetwork(fakeCtx(w), id("V"), id("L"));
+    expect(net?.vouches.map((v) => [v.voucher._id, v.via])).toEqual([
+      ["V", "you"],
+      ["F2", "friend"],
+    ]);
+    expect(net?.partial).toBe(true);
+  });
+
+  test("an edited vouch counts as recent", async () => {
+    const w = world();
+    const p = w.vouches.find((v) => v.voucherId === "P");
+    if (p) p.updatedAt = 1;
+    const crowd = Array.from({ length: FOF_SCAN_MAX }, (_, i) => `X${i}`);
+    w.users.push(...crowd.map(user));
+    w.vouches.push(...crowd.map((x) => vouch(x, "L", 0)));
+    const net = await listerNetwork(fakeCtx(w), id("V"), id("L"));
+    expect(net?.vouches.map((v) => v.voucher._id)).toEqual(id(["V", "F2", "P"]));
+  });
+
+  test("stops checking friends of friends once the friendship read budget is spent", async () => {
+    const w = world();
+    const many = Array.from({ length: FRIEND_READ_BUDGET + 1 }, (_, i) => `Y${i}`);
+    w.users.push(user("Hub"), ...many.map(user));
+    w.friendships.push(...many.flatMap((y) => friends("Hub", y)), ...friends("Hub", "F1"));
+    w.vouches.push(vouch("Hub", "L", 0));
+    const net = await listerNetwork(fakeCtx(w), id("V"), id("L"));
+    expect(net?.vouches.map((v) => v.voucher._id)).toEqual(id(["V", "F2"]));
+    expect(net?.partial).toBe(true);
   });
 });
 

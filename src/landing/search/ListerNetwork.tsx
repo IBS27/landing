@@ -70,9 +70,18 @@ export function ListerNetwork({ listingId }: { listingId: Id<"listings"> }) {
       ) : (
         relation !== "you" && (
           <p className="mt-1 text-secondary text-sm">
-            None of your friends or friends of friends have vouched for {lister.firstName}.
+            {data.partial
+              ? `None of your friends have vouched for ${lister.firstName}.`
+              : `None of your friends or friends of friends have vouched for ${lister.firstName}.`}
           </p>
         )
+      )}
+      {data.partial && (
+        <p className="mt-2 text-secondary text-xs">
+          {relation === "you"
+            ? "Showing your friends' vouches and the most recent others."
+            : "Showing your friends' vouches and the most recent ones from friends of friends."}
+        </p>
       )}
 
       {data.canVouch && (

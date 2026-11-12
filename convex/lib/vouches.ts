@@ -17,13 +17,15 @@ import { friendIds, getSummaries, type UserSummary } from "./users";
  *   already shows. Anyone blocked either way with the viewer is left out.
  * - No score, so nothing to cite: each signal names the people behind it.
  *
- * Read vouches through `listerNetwork` and `vouchCount`, and write them through
+ * Read vouches through `listerNetwork`, and write them through
  * `saveVouch` and `removeVouch`, never the table directly.
  */
 
 export const VOUCH_NOTE_MAX = 280;
-/** Vouches read per subject, newest first. */
-export const VOUCH_READ_MAX = 500;
+/** Vouches from beyond the viewer's friends checked per read, newest first. */
+export const FOF_SCAN_MAX = 100;
+/** Friendship rows read to place those vouchers, so the query stays well under Convex's read limits. */
+export const FRIEND_READ_BUDGET = 8000;
 /** People listed per group (mutual friends, a vouch's bridges); the rest are counted. */
 export const MUTUALS_SHOWN = 10;
 export const BRIDGES_SHOWN = 3;
@@ -112,19 +114,19 @@ export type ListerNetwork = {
   mutualFriendCount: number;
   /** Vouches the viewer may see, closest first. */
   vouches: NetworkVouch[];
+  /** Older vouches from friends of friends (or, for the subject, anyone) weren't checked. */
+  partial: boolean;
 };
-
-function vouchRows(ctx: QueryCtx, subjectId: UserId) {
-  return ctx.db
-    .query("vouches")
-    .withIndex("by_subject", (q) => q.eq("subjectId", subjectId))
-    .order("desc")
-    .take(VOUCH_READ_MAX);
-}
 
 /**
  * The subject's connection to the viewer's network, as the viewer may see it.
  * Null when they're blocked either way.
+ *
+ * The viewer's own vouch and their friends' are found exactly, one lookup each,
+ * however many other vouches the subject has. Friends of friends' vouches (and,
+ * for the subject, everyone else's) are checked newest first within
+ * FOF_SCAN_MAX vouches and FRIEND_READ_BUDGET friendship rows; `partial` says
+ * when older ones weren't checked.
  */
 export async function listerNetwork(
   ctx: QueryCtx,
@@ -132,36 +134,63 @@ export async function listerNetwork(
   subjectId: UserId,
 ): Promise<ListerNetwork | null> {
   const isSubject = viewerId === subjectId;
-  const [blocked, viewerFriendList, subjectFriends, rows] = await Promise.all([
+  const [blocked, viewerFriendList, subjectFriends, subjectBlocked] = await Promise.all([
     blockedSet(ctx, viewerId),
     friendIds(ctx, viewerId),
     isSubject ? [] : friendIds(ctx, subjectId),
-    vouchRows(ctx, subjectId),
+    isSubject ? null : blockedSet(ctx, subjectId),
   ]);
   if (blocked.has(subjectId)) return null;
   const viewerFriends = new Set(viewerFriendList);
   const mutual = intersect(subjectFriends, viewerFriends, blocked);
+  // A block between voucher and subject after vouching voids the vouch.
+  const voided = (voucherId: UserId) =>
+    blocked.has(voucherId) || (subjectBlocked ?? blocked).has(voucherId);
 
-  const placed = await Promise.all(
-    rows.map(async (row) => {
-      const { voucherId } = row;
-      if (blocked.has(voucherId)) return null;
-      const direct = voucherId === viewerId || viewerFriends.has(voucherId);
-      const bridges = direct
-        ? []
-        : intersect(await friendIds(ctx, voucherId), viewerFriends, blocked);
-      const via = voucherVia(viewerId, voucherId, viewerFriends, bridges);
-      if (via === "other" && !isSubject) return null;
-      // A block between voucher and subject after vouching voids the vouch.
-      if (await isBlockedEitherWay(ctx, voucherId, subjectId)) return null;
-      return { row, via, bridges };
-    }),
+  // 1. The viewer's own vouch and their friends'.
+  const directIds = [viewerId, ...viewerFriends].filter((id) => id !== subjectId);
+  const direct = (await Promise.all(directIds.map((id) => vouchBy(ctx, id, subjectId)))).filter(
+    (row): row is Doc<"vouches"> => row !== null && !voided(row.voucherId),
   );
-  const shown = placed.filter((p) => p !== null);
+  const placed: { row: Doc<"vouches">; via: Via; bridges: UserId[] }[] = direct.map((row) => ({
+    row,
+    via: row.voucherId === viewerId ? "you" : "friend",
+    bridges: [],
+  }));
+
+  // 2. Everyone else, newest first, within the read budget.
+  const isDirect = (id: UserId) => id === viewerId || viewerFriends.has(id);
+  const recent = await ctx.db
+    .query("vouches")
+    .withIndex("by_subject", (q) => q.eq("subjectId", subjectId))
+    .order("desc")
+    .take(FOF_SCAN_MAX + direct.length + 1);
+  const others = recent.filter((row) => !isDirect(row.voucherId));
+  let partial = others.length > FOF_SCAN_MAX;
+  let budget = FRIEND_READ_BUDGET;
+  for (const row of others.slice(0, FOF_SCAN_MAX)) {
+    if (voided(row.voucherId)) continue;
+    const friendRows = await ctx.db
+      .query("friendships")
+      .withIndex("by_user", (q) => q.eq("userId", row.voucherId))
+      .take(budget + 1);
+    if (friendRows.length > budget) {
+      partial = true;
+      break;
+    }
+    budget -= friendRows.length;
+    const bridges = intersect(
+      friendRows.map((f) => f.friendId),
+      viewerFriends,
+      blocked,
+    );
+    const via = voucherVia(viewerId, row.voucherId, viewerFriends, bridges);
+    if (via !== "other" || isSubject) placed.push({ row, via, bridges });
+  }
 
   const people = await getSummaries(ctx, [
     ...mutual.slice(0, MUTUALS_SHOWN),
-    ...shown.flatMap((p) => [p.row.voucherId, ...p.bridges.slice(0, BRIDGES_SHOWN)]),
+    ...placed.flatMap((p) => [p.row.voucherId, ...p.bridges.slice(0, BRIDGES_SHOWN)]),
   ]);
   const summaries = (ids: readonly UserId[]) =>
     ids.flatMap((id) => {
@@ -169,7 +198,7 @@ export async function listerNetwork(
       return s ? [s] : [];
     });
 
-  const vouches = shown
+  const vouches = placed
     .flatMap(({ row, via, bridges }): NetworkVouch[] => {
       const voucher = people.get(row.voucherId);
       if (!voucher) return [];
@@ -193,16 +222,8 @@ export async function listerNetwork(
     mutualFriends: summaries(mutual.slice(0, MUTUALS_SHOWN)),
     mutualFriendCount: mutual.length,
     vouches,
+    partial,
   };
-}
-
-/**
- * Every vouch for the subject, from anyone (capped at VOUCH_READ_MAX). For
- * signals such as "new account with no vouches"; a count from outside the
- * viewer's network is not evidence of trust, so never show it as such.
- */
-export async function vouchCount(ctx: QueryCtx, subjectId: UserId): Promise<number> {
-  return (await vouchRows(ctx, subjectId)).length;
 }
 
 export function vouchBy(ctx: QueryCtx, voucherId: UserId, subjectId: UserId) {

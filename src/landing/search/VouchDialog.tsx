@@ -51,7 +51,7 @@ export function VouchDialog({
     >
       <div className="px-4 pt-3 pb-4">
         <p className="px-2 pb-2 text-secondary text-sm">
-          Your friends and friends of friends will see that you vouch for {subject.firstName} when
+          {subject.firstName}, your friends and friends of friends will see your vouch and note when
           they look at {subject.firstName}'s listings.
         </p>
         <RadioList

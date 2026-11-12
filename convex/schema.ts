@@ -687,7 +687,7 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   })
-    .index("by_subject", ["subjectId", "createdAt"])
-    .index("by_voucher", ["voucherId", "createdAt"])
+    .index("by_subject", ["subjectId", "updatedAt"])
+    .index("by_voucher", ["voucherId", "updatedAt"])
     .index("by_pair", ["voucherId", "subjectId"]),
 });
