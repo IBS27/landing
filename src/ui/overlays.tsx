@@ -180,7 +180,7 @@ export function Modal({
           ) : (
             <div className="relative flex h-[60px] shrink-0 items-center justify-center border-divider border-b px-16">
               {onBack && (
-                <IconButton label="Back" className="absolute left-4" onClick={onBack}>
+                <IconButton label="Back" className="absolute! left-4" onClick={onBack}>
                   <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">
                     <path d="M12.7 3.3a1 1 0 0 1 0 1.4L7.4 10l5.3 5.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z" />
                   </svg>
@@ -188,7 +188,7 @@ export function Modal({
               )}
               <D.Title className="truncate font-bold text-lg text-primary">{title}</D.Title>
               <D.Close asChild>
-                <IconButton label="Close" className="absolute right-4">
+                <IconButton label="Close" className="absolute! right-4">
                   <X size={20} strokeWidth={2.4} className="text-secondary" />
                 </IconButton>
               </D.Close>

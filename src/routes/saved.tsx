@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { SavedPage } from "@/features/saved/SavedPage";
 
 export const Route = createFileRoute("/saved")({
-  component: () => <Placeholder title="Saved" />,
+  component: SavedPage,
 });

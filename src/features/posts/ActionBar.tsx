@@ -1,0 +1,194 @@
+import { useEffect, useState } from "react";
+import { useM } from "@/app/viewer";
+import { cn, compactCount, plural } from "@/lib/format";
+import { Tooltip } from "@/ui/overlays";
+import { api } from "../../../convex/_generated/api";
+import { CommentOutline, LikeFilled, LikeOutline, ShareOutline } from "./icons";
+import { ReactionsDialog } from "./ReactionsDialog";
+import {
+  ReactionIcon,
+  ReactionIcons,
+  ReactionPicker,
+  type ReactionType,
+  reactionMeta,
+  useReactionHover,
+} from "./reactions";
+import { ShareDialog } from "./ShareDialog";
+import type { PostView } from "./types";
+
+/**
+ * Optimistic reaction state: shows the viewer's pick immediately and falls
+ * back to the server value once it changes.
+ */
+export function useOptimisticReaction(
+  targetType: "post" | "comment",
+  targetId: string,
+  server: { count: number; viewerReaction: ReactionType | null; top: ReactionType[] },
+) {
+  const react = useM(api.reactions.react);
+  const [pending, setPending] = useState<{ value: ReactionType | null } | null>(null);
+  // Drop the optimistic value as soon as the server catches up.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset whenever the server snapshot changes
+  useEffect(() => setPending(null), [server.viewerReaction, server.count]);
+
+  const current = pending ? pending.value : server.viewerReaction;
+  let count = server.count;
+  if (pending) {
+    if (server.viewerReaction && !pending.value) count -= 1;
+    if (!server.viewerReaction && pending.value) count += 1;
+  }
+  let top = server.top;
+  if (current && !top.includes(current)) top = [current, ...top].slice(0, 3);
+  if (!current && server.viewerReaction && server.count === 1) top = [];
+
+  const set = (type: ReactionType | null) => {
+    setPending({ value: type });
+    react({ targetType, targetId, type }).catch(() => setPending(null));
+  };
+  return {
+    current,
+    count,
+    top,
+    /** Like button click: toggles Like, or clears any other reaction. */
+    toggle: () => set(current ? null : "like"),
+    pick: (t: ReactionType) => set(current === t ? null : t),
+  };
+}
+
+/** "You and 23 others" / "Maya Chen and 4 others" / "Maya Chen". */
+export function reactionSummaryText(
+  count: number,
+  viewerReacted: boolean,
+  sampleName: string | null,
+) {
+  if (count === 0) return "";
+  if (viewerReacted)
+    return count === 1
+      ? "You"
+      : `You and ${compactCount(count - 1)} ${count - 1 === 1 ? "other" : "others"}`;
+  if (sampleName)
+    return count === 1
+      ? sampleName
+      : `${sampleName} and ${compactCount(count - 1)} ${count - 1 === 1 ? "other" : "others"}`;
+  return compactCount(count);
+}
+
+/**
+ * Facebook's 2026 compact post action bar: Like / Comment / Share with inline
+ * counts on the left, the stacked reaction icons on the right.
+ */
+export function ActionBar({
+  post,
+  onComment,
+  className,
+}: {
+  post: PostView;
+  onComment: () => void;
+  className?: string;
+}) {
+  const rx = useOptimisticReaction("post", post._id, post.reactions);
+  const hover = useReactionHover();
+  const [whoOpen, setWhoOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const meta = rx.current ? reactionMeta(rx.current) : null;
+  const name = post.author.name;
+  const summary = reactionSummaryText(rx.count, !!rx.current, post.reactions.sampleName);
+
+  return (
+    <div className={cn("flex h-11 items-center px-1", className)}>
+      <div className="relative flex items-center" {...hover.bind}>
+        {hover.open && (
+          <div className="absolute bottom-full left-0 z-20 pb-2">
+            <ReactionPicker
+              onPick={(t) => {
+                rx.pick(t);
+                hover.close();
+              }}
+            />
+          </div>
+        )}
+        <BarButton
+          label={
+            rx.current
+              ? `Remove ${meta?.label}`
+              : `React with Like to ${name}'s post${rx.count ? `, ${plural(rx.count, "reaction")}` : ""}`
+          }
+          onClick={() => {
+            rx.toggle();
+            hover.close();
+          }}
+          style={meta ? { color: meta.color } : undefined}
+        >
+          {rx.current && rx.current !== "like" ? (
+            <ReactionIcon type={rx.current} size={20} />
+          ) : rx.current === "like" ? (
+            <LikeFilled />
+          ) : (
+            <LikeOutline />
+          )}
+          {rx.count > 0 && <Count>{compactCount(rx.count)}</Count>}
+        </BarButton>
+      </div>
+      <BarButton
+        label={`Comment on ${name}'s post${post.commentCount ? `, ${plural(post.commentCount, "comment")}` : ""}`}
+        onClick={onComment}
+      >
+        <CommentOutline />
+        {post.commentCount > 0 && <Count>{compactCount(post.commentCount)}</Count>}
+      </BarButton>
+      <BarButton
+        label={`Share ${name}'s post${post.shareCount ? `, ${plural(post.shareCount, "share")}` : ""}`}
+        onClick={() => setShareOpen(true)}
+      >
+        <ShareOutline />
+        {post.shareCount > 0 && <Count>{compactCount(post.shareCount)}</Count>}
+      </BarButton>
+
+      <div className="flex-1" />
+      {rx.count > 0 && (
+        <Tooltip content={summary} side="top">
+          <button
+            type="button"
+            aria-label="See who reacted to this"
+            onClick={() => setWhoOpen(true)}
+            className="mr-2 flex h-8 items-center rounded-md px-1"
+          >
+            <ReactionIcons types={rx.top} />
+          </button>
+        </Tooltip>
+      )}
+      {whoOpen && (
+        <ReactionsDialog targetType="post" targetId={post._id} onClose={() => setWhoOpen(false)} />
+      )}
+      {shareOpen && <ShareDialog post={post} onClose={() => setShareOpen(false)} />}
+    </div>
+  );
+}
+
+function BarButton({
+  label,
+  onClick,
+  children,
+  style,
+}: {
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      style={style}
+      className="flex h-8 items-center gap-1.5 rounded-md px-2 text-icon-secondary transition-colors hover:bg-hover active:bg-pressed"
+    >
+      {children}
+    </button>
+  );
+}
+
+function Count({ children }: { children: React.ReactNode }) {
+  return <span className="font-semibold text-[13px] leading-4">{children}</span>;
+}

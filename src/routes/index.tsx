@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { HomePage } from "@/features/feed/HomePage";
 
 export const Route = createFileRoute("/")({
-  component: () => <Placeholder title="Home" />,
+  component: HomePage,
 });

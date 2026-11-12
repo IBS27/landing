@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Placeholder } from "@/ui/Placeholder";
+import { PostPermalink } from "@/features/posts";
 
 export const Route = createFileRoute("/$username/posts/$postId")({
-  component: () => <Placeholder title="Post" />,
+  component: PermalinkRoute,
 });
+
+function PermalinkRoute() {
+  const { postId } = Route.useParams();
+  return <PostPermalink postId={postId} />;
+}
