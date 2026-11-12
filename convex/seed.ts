@@ -83,6 +83,10 @@ export const insertFriendRequests = internalMutation({
   args: { rows: v.array(T.friendRequests.validator) },
   handler: (ctx, { rows }) => insertAll(ctx, "friendRequests", rows),
 });
+export const insertVouches = internalMutation({
+  args: { rows: v.array(T.vouches.validator) },
+  handler: (ctx, { rows }) => insertAll(ctx, "vouches", rows),
+});
 export const insertGroups = internalMutation({
   args: { rows: v.array(T.groups.validator) },
   handler: (ctx, { rows }) => insertAll(ctx, "groups", rows),
@@ -357,6 +361,16 @@ export const reset = internalAction({
           createdAt: q.createdAt,
         })),
       }),
+      ctx.runMutation(internal.seed.insertVouches, {
+        rows: plan.vouches.map((x) => ({
+          voucherId: uid(x.voucher),
+          subjectId: uid(x.subject),
+          relationship: x.relationship,
+          note: x.note,
+          createdAt: x.createdAt,
+          updatedAt: x.createdAt,
+        })),
+      }),
       (async () => {
         const ids: Id<"groups">[] = await ctx.runMutation(internal.seed.insertGroups, {
           rows: plan.groups.map((g) => ({ ...g.row, createdBy: uid(g.createdBy) })),
@@ -566,6 +580,7 @@ export const reset = internalAction({
         users: plan.users.length,
         friendships: plan.friendships.length * 2,
         friendRequests: plan.friendRequests.length,
+        vouches: plan.vouches.length,
         groups: plan.groups.length,
         groupMembers: plan.groupMembers.length,
         listings: plan.listings.length,

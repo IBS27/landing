@@ -106,6 +106,7 @@ const CATEGORY_OF: Partial<Record<Doc<"notifications">["kind"], NotificationCate
   event_reminder: "events",
   listing_message: "marketplace",
   listing_saved: "marketplace",
+  vouch: "marketplace",
   birthday: "birthdays",
   memory: "reminders",
 };

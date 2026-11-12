@@ -18,7 +18,9 @@
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
     "isolatedModules": true,
-    "noEmit": true
+    "noEmit": true,
+    /* `process.env` for environment variables (Convex provides it in every runtime). */
+    "types": ["node"]
   },
   "include": ["./**/*"],
   "exclude": ["./_generated"]
