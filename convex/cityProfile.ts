@@ -162,7 +162,10 @@ export const suggestFromText = action({
     if (!trimmed) return { via: "fallback" as const, proposals: [] };
     const result = await runAgent(ctx, profileFromText, {
       input: { text: trimmed, today: todayInSF() },
+      // No sources: the model reads only the caller's own text, and the result
+      // goes back to the caller alone, so there's nothing to filter per viewer.
       sources: [],
+      shownTo: "everyone",
     });
     return {
       via: result.via,
