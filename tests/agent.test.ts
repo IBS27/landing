@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { type FunctionReference, getFunctionName } from "convex/server";
 import { v } from "convex/values";
 import type { ActionCtx } from "../convex/_generated/server";
@@ -7,35 +7,33 @@ import { cite, SNIPPET_MAX } from "../convex/lib/citations";
 import type { Source } from "../convex/validators";
 import { fakeCtx, type Row } from "./fakeDb";
 
-/* ---------- A stubbed model: replies are queued, requests recorded ---------- */
+/* ---------- A stubbed Meta Model API: replies are queued, requests recorded ---------- */
 
-type Request = { messages: { role: string; content: unknown }[] };
+type Request = { messages: { role: string; content: string }[] };
 const replies: string[] = [];
 const requests: Request[] = [];
 
-const realModel = { ...(await import("../convex/ai/model")) };
-mock.module("../convex/ai/model", () => ({
-  ...realModel,
-  anthropic: () => ({
-    beta: {
-      messages: {
-        stream: (body: Request) => {
-          requests.push(structuredClone(body));
-          const text = replies.shift() ?? "not json";
-          return {
-            finalMessage: async () => ({
-              model: realModel.MODEL,
-              content: [{ type: "text", text }],
-              stop_reason: "end_turn",
-              usage: { input_tokens: 10, output_tokens: 10 },
-            }),
-          };
-        },
-      },
-    },
-  }),
-}));
-const { defineTask, review, runAgent } = await import("../convex/ai/agent");
+/** One streamed chat completion carrying `text`, as Meta's API sends it. */
+function completion(text: string) {
+  const sse = [
+    { model: MODEL, choices: [{ index: 0, delta: { content: text } }] },
+    { model: MODEL, choices: [{ index: 0, delta: {}, finish_reason: "stop" }] },
+    { model: MODEL, choices: [], usage: { prompt_tokens: 10, completion_tokens: 10 } },
+  ]
+    .map((chunk) => `data: ${JSON.stringify(chunk)}\n\n`)
+    .concat("data: [DONE]\n\n")
+    .join("");
+  return new Response(sse, { headers: { "content-type": "text/event-stream" } });
+}
+
+const realFetch = globalThis.fetch;
+const stubFetch = (async (_url: string, init?: RequestInit) => {
+  requests.push(JSON.parse(String(init?.body)));
+  return completion(replies.shift() ?? "not json");
+}) as unknown as typeof fetch;
+
+import { defineTask, review, runAgent } from "../convex/ai/agent";
+import { MODEL } from "../convex/ai/model";
 
 /* ---------- World ---------- */
 
@@ -197,11 +195,13 @@ const env = { ...process.env };
 beforeEach(() => {
   replies.length = 0;
   requests.length = 0;
-  process.env.ANTHROPIC_API_KEY = "test";
+  process.env.MODEL_API_KEY = "test";
   delete process.env.AI_ENABLED;
+  globalThis.fetch = stubFetch;
 });
 afterEach(() => {
   process.env = { ...env };
+  globalThis.fetch = realFetch;
 });
 
 /* ---------- Tests ---------- */

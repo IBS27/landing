@@ -1,11 +1,19 @@
-import type Anthropic from "@anthropic-ai/sdk";
 import type { GenericValidator, Infer } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import type { ActionCtx } from "../_generated/server";
 import { sourceKey, sourcesOf, tryCite } from "../lib/citations";
 import type { AiAgent, AiFallbackReason, Citations, Source } from "../validators";
-import { anthropic, costUsd, FALLBACK_BETA, MODEL, type Usage } from "./model";
+import {
+  complete,
+  type Effort,
+  type Message,
+  MODEL,
+  ModelError,
+  type Reply,
+  type Spent,
+  type Usage,
+} from "./model";
 import {
   canonicalJson,
   checkValue,
@@ -29,8 +37,6 @@ import { aiEnabled } from "./status";
  * created for a user, or a computed-table mutation. Either way, store
  * `result.cited` after `assertCitable()` with the same audience.
  */
-
-type Effort = "low" | "medium" | "high" | "xhigh" | "max";
 
 export type AgentTask<I extends Json, V extends GenericValidator> = {
   agent: AiAgent;
@@ -178,6 +184,12 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
   let cost: number | undefined = 0;
   let model: string | undefined;
   let attempts = 0;
+  /** Adds one `complete()` call's tokens and cost, failed HTTP attempts included. */
+  const charge = (spent: Spent) => {
+    model = spent.model;
+    for (const k of Object.keys(usage) as (keyof Usage)[]) usage[k] += spent.usage[k];
+    cost = cost === undefined || spent.costUsd === undefined ? undefined : cost + spent.costUsd;
+  };
 
   const log = (
     outcome: "model" | "fallback",
@@ -242,9 +254,8 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
       ids.length ? ctx.runQuery(internal.ai.runs.wrongTableIds, { ids }) : Promise.resolve([]),
   };
   const schema = toJsonSchema(task.output);
-  const messages: Anthropic.Beta.BetaMessageParam[] = [
-    { role: "user", content: userPrompt(input, described) },
-  ];
+  const system = [preamble(task.agent), task.instructions];
+  const messages: Message[] = [{ role: "user", content: userPrompt(input, described) }];
 
   const maxAttempts = task.maxAttempts ?? 3;
   while (attempts < maxAttempts) {
@@ -254,59 +265,34 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
       return fallback("timeout");
     }
     attempts++;
-    let response: Anthropic.Beta.BetaMessage;
-    // Abort covers the SDK's own retries too, keeping the whole run inside the deadline.
+    let reply: Reply;
+    // Abort covers the client's own retries too, keeping the whole run inside the deadline.
     const abort = new AbortController();
     const timer = setTimeout(() => abort.abort(), remaining);
     try {
-      response = await anthropic()
-        .beta.messages.stream(
-          {
-            model: MODEL,
-            max_tokens: 32_000,
-            betas: [FALLBACK_BETA],
-            fallbacks: "default",
-            system: [
-              { type: "text", text: preamble(task.agent) },
-              { type: "text", text: task.instructions, cache_control: { type: "ephemeral" } },
-            ],
-            messages,
-            output_config: {
-              effort: task.effort ?? "medium",
-              format: { type: "json_schema", schema },
-            },
-          },
-          { signal: abort.signal },
-        )
-        .finalMessage();
+      reply = await complete({
+        system,
+        messages,
+        schema,
+        effort: task.effort ?? "medium",
+        signal: abort.signal,
+      });
     } catch (error) {
+      if (error instanceof ModelError && error.spent) charge(error.spent);
       errors.push(`Attempt ${attempts}: ${message(error)}`);
       return fallback(abort.signal.aborted ? "timeout" : "model_error");
     } finally {
       clearTimeout(timer);
     }
 
-    model = response.model;
-    for (const turn of usageByModel(response)) {
-      for (const k of Object.keys(usage) as (keyof Usage)[]) usage[k] += turn.usage[k];
-      const turnCost = costUsd(turn.model, turn.usage);
-      cost = cost === undefined || turnCost === undefined ? undefined : cost + turnCost;
-    }
+    charge(reply);
 
-    if (response.stop_reason === "refusal") {
-      errors.push(
-        `Attempt ${attempts}: refused (${response.stop_details?.category ?? "no category"})`,
-      );
+    if (reply.refusal !== undefined || reply.finishReason === "content_filter") {
+      errors.push(`Attempt ${attempts}: refused (${reply.refusal ?? reply.finishReason})`);
       return fallback("refusal");
     }
 
-    const verdict = await review(
-      task,
-      answerTexts(response.content),
-      input,
-      grounding,
-      response.stop_reason,
-    );
+    const verdict = await review(task, [reply.text], input, grounding, reply.finishReason);
     if (verdict.ok) {
       const cited = toCitations(verdict.cited);
       const runId = await log(
@@ -319,7 +305,7 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
 
     errors.push(`Attempt ${attempts}: ${verdict.problems.join("; ")}`);
     messages.push(
-      { role: "assistant", content: replayable(response.content) },
+      { role: "assistant", content: reply.text },
       {
         role: "user",
         content: `Your output was rejected:\n${verdict.problems.map((p) => `- ${p}`).join("\n")}\n\nReply with the whole corrected JSON.`,
@@ -365,7 +351,7 @@ export async function review<I extends Json, V extends GenericValidator>(
     return {
       ok: false,
       problems: [
-        stopReason === "max_tokens"
+        stopReason === "length"
           ? "The output was cut off at the length limit. Keep it shorter."
           : "The output was not valid JSON.",
       ],
@@ -400,19 +386,6 @@ export async function review<I extends Json, V extends GenericValidator>(
   return problems.length ? { ok: false, problems } : { ok: true, output, cited };
 }
 
-/**
- * The answer text of a response. After a streamed mid-output fallback, the
- * fallback model continues the declined model's partial text, so the answer is
- * all text joined. The text after the last `fallback` block alone is a second
- * candidate in case the fallback model started over.
- */
-export function answerTexts(content: Anthropic.Beta.BetaContentBlock[]) {
-  const join = (blocks: Anthropic.Beta.BetaContentBlock[]) =>
-    blocks.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
-  const boundary = content.findLastIndex((b) => b.type === "fallback");
-  return boundary < 0 ? [join(content)] : [join(content), join(content.slice(boundary + 1))];
-}
-
 const NOT_JSON = Symbol("not JSON");
 
 function firstJson(texts: string[]): unknown {
@@ -422,39 +395,6 @@ function firstJson(texts: string[]): unknown {
     } catch {}
   }
   return NOT_JSON;
-}
-
-/**
- * The response as it can be sent back for a retry. After a server-side
- * fallback, only text and the `fallback` marker may be echoed from before the
- * final `fallback` block; everything after it echoes as-is.
- */
-function replayable(content: Anthropic.Beta.BetaContentBlock[]) {
-  const boundary = content.findLastIndex((b) => b.type === "fallback");
-  return content.filter((b, i) => i >= boundary || b.type === "text" || b.type === "fallback");
-}
-
-/** Token usage per model for one response. `usage.iterations` covers every attempt, including declined ones. */
-function usageByModel(response: Anthropic.Beta.BetaMessage) {
-  const toUsage = (u: {
-    input_tokens: number;
-    output_tokens: number;
-    cache_read_input_tokens?: number | null;
-    cache_creation_input_tokens?: number | null;
-  }): Usage => ({
-    inputTokens: u.input_tokens,
-    outputTokens: u.output_tokens,
-    cacheReadTokens: u.cache_read_input_tokens ?? 0,
-    cacheWriteTokens: u.cache_creation_input_tokens ?? 0,
-  });
-  const iterations = (response.usage.iterations ?? []).flatMap((it) =>
-    it.type === "message" || it.type === "fallback_message"
-      ? [{ model: it.model ?? MODEL, usage: toUsage(it) }]
-      : [],
-  );
-  return iterations.length
-    ? iterations
-    : [{ model: response.model, usage: toUsage(response.usage) }];
 }
 
 function message(error: unknown) {
