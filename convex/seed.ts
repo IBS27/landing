@@ -558,6 +558,8 @@ export const reset = internalAction({
 
     // Demo rentals for "Things to check" (#11).
     await ctx.runMutation(internal.trust.seedDemo, {});
+    // Muse proposals for the demo inbox (#6).
+    await ctx.runMutation(internal.proposals.seedDemo, {});
 
     const reactionRows =
       plan.posts.reduce((s, p) => s + p.reactions.length + p.commentReactions.length, 0) +
