@@ -1,21 +1,44 @@
 import { useNavigate } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
-import { Lock, Mic, MicOff, Video, VideoOff, X } from "lucide-react";
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Flag,
+  Lock,
+  Mic,
+  MicOff,
+  MonitorUp,
+  MoreHorizontal,
+  ScreenShareOff,
+  Settings,
+  Video,
+  VideoOff,
+  X,
+} from "lucide-react";
+import {
+  type ComponentPropsWithRef,
+  type ReactNode,
+  type PointerEvent as ReactPointerEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useM, useQ, useViewer } from "@/app/viewer";
 import { cn } from "@/lib/format";
-import { Tooltip } from "@/ui/overlays";
+import { Menu, MenuContent, MenuItem, MenuTrigger, Tooltip } from "@/ui/overlays";
 import { Avatar, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { formatCallClock, formatCallDuration } from "../../../convex/lib/callFormat";
+import { CallSettingsDialog, ReportCallDialog } from "./CallDialogs";
 import { ConversationAvatar } from "./ConversationAvatar";
 import { RINGBACK, useTone } from "./callTones";
 import { PhoneIcon, VideoCallIcon } from "./icons";
-import { type RemotePeer, useCallPeers, useLocalMedia } from "./useCallPeers";
+import { useCallMedia } from "./useCallMedia";
+import { type RemotePeer, useCallPeers } from "./useCallPeers";
 
 type CallView = NonNullable<FunctionReturnType<typeof api.calls.get>>;
 type Person = CallView["others"][number];
+type Net = "connecting" | "connected" | "reconnecting" | "failed";
 
 /**
  * The Messenger call screen. Rendered full-window in the /call/<id> pop-up,
@@ -74,6 +97,14 @@ export function CallScreen({
   );
 }
 
+/** One state for the whole call from every peer connection's state. */
+function overallNet(states: RTCPeerConnectionState[]): Net {
+  if (states.includes("connected")) return "connected";
+  if (states.includes("disconnected")) return "reconnecting";
+  if (states.length > 0 && states.every((s) => s === "failed" || s === "closed")) return "failed";
+  return "connecting";
+}
+
 function ActiveCall({
   call,
   variant,
@@ -91,25 +122,32 @@ function ActiveCall({
   const decline = useM(api.calls.decline);
   const leave = useM(api.calls.leave);
 
-  const live = call.status === "ringing" || call.status === "active";
+  // The connection gave up: this side has left and shows "Call failed".
+  const [failed, setFailed] = useState(false);
+  const live = !failed && (call.status === "ringing" || call.status === "active");
   const joined = live && call.joinedIds.includes(me);
-  const connected = joined && call.status === "active";
+  const inCall = joined && call.status === "active";
   const ringingOut = joined && call.status === "ringing";
   const isVideo = call.kind === "video";
 
   const [mic, setMic] = useState(true);
-  const [cam, setCam] = useState(isVideo);
-  const local = useLocalMedia(call.kind, joined);
-  const hasCam = !!local.stream?.getVideoTracks().length;
-  const hasMic = !!local.stream?.getAudioTracks().length;
+  const local = useCallMedia(call.kind, joined);
   const media = useMemo(
-    () => ({ mic: mic && hasMic, cam: cam && hasCam }),
-    [mic, cam, hasMic, hasCam],
+    () => ({
+      mic: mic && !!local.audio,
+      cam: local.source === "camera" && !!local.video,
+      screen: local.source === "screen" && !!local.video,
+    }),
+    [mic, local.audio, local.video, local.source],
+  );
+  const localStream = useMemo(
+    () => (local.video ? new MediaStream([local.video]) : null),
+    [local.video],
   );
 
   const peerIds = useMemo(
-    () => (connected ? call.joinedIds.filter((id) => id !== me) : []),
-    [connected, call.joinedIds, me],
+    () => (inCall ? call.joinedIds.filter((id) => id !== me) : []),
+    [inCall, call.joinedIds, me],
   );
   const remote = useCallPeers({
     callId: call._id,
@@ -117,13 +155,28 @@ function ActiveCall({
     callerId: call.callerId,
     kind: call.kind,
     peers: peerIds,
-    active: connected,
-    local: local.stream,
+    active: inCall,
+    audio: local.audio,
+    video: local.video,
     localSettled: local.settled,
     media,
   });
 
   useTone(RINGBACK, ringingOut);
+
+  // Honest connection state: the timer starts when media actually connects.
+  const remotePeople = call.others.filter((o) => peerIds.includes(o._id));
+  const peerStates = remotePeople.map((p) => remote[p._id]?.state ?? "new");
+  const net: Net | null = inCall ? overallNet(peerStates) : null;
+  const [connectedAt, setConnectedAt] = useState<number | null>(null);
+  useEffect(() => {
+    if (net === "connected") setConnectedAt((t) => t ?? Date.now());
+  }, [net]);
+  useEffect(() => {
+    if (net !== "failed") return;
+    setFailed(true);
+    void leave({ callId: call._id }).catch(() => {});
+  }, [net, leave, call._id]);
 
   // Best effort: closing or reloading the pop-up hangs up (the opener also notices).
   const joinedRef = useRef(joined);
@@ -137,6 +190,11 @@ function ActiveCall({
     return () => window.removeEventListener("pagehide", onHide);
   }, [variant, leave, call._id]);
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [dialog, setDialog] = useState<"settings" | "report" | null>(null);
+  const overlayOpen = useRef(false);
+  overlayOpen.current = menuOpen || dialog !== null;
+
   const hangUp = () => {
     void leave({ callId: call._id }).catch(() => {});
     onClose();
@@ -146,7 +204,8 @@ function ActiveCall({
   useEffect(() => {
     if (variant !== "modal") return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") hangUpRef.current();
+      // Escape closes an open menu or dialog first.
+      if (e.key === "Escape" && !overlayOpen.current && !e.defaultPrevented) hangUpRef.current();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -154,11 +213,17 @@ function ActiveCall({
 
   const firstOther = call.others[0];
   const isGroup = call.thread.kind === "group";
-  const now = useNow(connected || call.status === "ringing");
-  const durationMs = call.answeredAt ? (call.endedAt ?? now) - call.answeredAt : 0;
+  const now = useNow(net === "connected" || call.status === "ringing");
+  const endedAt = call.endedAt ?? now;
+  const durationMs = connectedAt
+    ? endedAt - connectedAt
+    : call.answeredAt
+      ? endedAt - call.answeredAt
+      : 0;
 
   let status: ReactNode;
-  if (!live) {
+  if (failed) status = "Call failed — check your connection";
+  else if (!live) {
     if (call.status === "ended") status = `Call ended · ${formatCallDuration(durationMs)}`;
     else if (call.status === "declined")
       status = isGroup ? "No one answered" : `${firstOther?.firstName ?? "They"} declined`;
@@ -169,23 +234,26 @@ function ActiveCall({
       call.status === "ringing"
         ? `${call.caller?.firstName ?? "Someone"} is calling you…`
         : "Call in progress";
-  else if (ringingOut) status = <CallingLabel />;
-  else status = <span className="tabular-nums">{formatCallClock(Math.max(0, durationMs))}</span>;
+  else if (ringingOut) status = <Dots label="Calling" />;
+  else if (net === "connected" && connectedAt)
+    status = <span className="tabular-nums">{formatCallClock(now - connectedAt)}</span>;
+  else if (net === "reconnecting") status = <Dots label="Reconnecting" />;
+  else status = <Dots label="Connecting" />;
 
   // 1:1 shows the other person full-bleed; group calls tile everyone in.
-  const remotePeople = call.others.filter((o) => peerIds.includes(o._id));
   const solo = remotePeople.length <= 1;
   const soloPeer = solo ? remotePeople[0] : undefined;
   const soloRemote = soloPeer ? remote[soloPeer._id] : undefined;
   const soloVideo = !!soloRemote && showsVideo(soloRemote);
-  const localVideoFull = ringingOut && media.cam;
+  const localVideoFull = ringingOut && !!localStream;
+  const selfView = joined && !ringingOut && !!localStream;
   const backdrop = call.thread.photo ?? firstOther?.avatar ?? null;
 
   return (
     <Shell
       label={`${isVideo ? "Video" : "Audio"} call with ${call.thread.name}`}
       variant={variant}
-      rtc={connected ? remotePeople.map((p) => remote[p._id]?.state ?? "new").join(" ") : undefined}
+      rtc={inCall ? peerStates.join(" ") : undefined}
     >
       {/* Blurred, darkened avatar fills the window behind everything else. */}
       {backdrop && !soloVideo && !localVideoFull && (
@@ -197,20 +265,26 @@ function ActiveCall({
         />
       )}
       {localVideoFull && (
-        <StreamVideo stream={local.stream} mirrored className="absolute inset-0" />
+        <StreamVideo
+          stream={localStream}
+          mirrored={media.cam}
+          fit={media.screen ? "contain" : "cover"}
+          className="absolute inset-0"
+        />
       )}
-      {connected && solo && soloVideo && soloRemote && (
+      {inCall && solo && soloVideo && soloRemote && (
         <StreamVideo
           stream={soloRemote.stream}
           version={soloRemote.version}
+          fit={soloRemote.media?.screen ? "contain" : "cover"}
           className="absolute inset-0"
         />
       )}
       {/* Remote audio plays even while their camera is off. */}
-      {connected &&
+      {inCall &&
         remotePeople.map((p) => {
           const r = remote[p._id];
-          return r ? <RemoteAudio key={p._id} peer={r} /> : null;
+          return r ? <RemoteAudio key={p._id} peer={r} sinkId={local.prefs.audiooutput} /> : null;
         })}
       <div
         className={cn(
@@ -227,11 +301,16 @@ function ActiveCall({
         End-to-end encrypted
       </div>
 
-      {connected && !solo ? (
-        <div className="relative grid flex-1 auto-rows-fr grid-cols-2 gap-2 p-3">
-          {remotePeople.map((p) => (
-            <PeerTile key={p._id} person={p} peer={remote[p._id]} />
-          ))}
+      {inCall && !solo ? (
+        <div className="relative flex min-h-0 flex-1 flex-col px-3">
+          <p className="pb-2 text-center text-[13px] text-white/80" aria-live="polite">
+            {status}
+          </p>
+          <div className="grid min-h-0 flex-1 auto-rows-fr grid-cols-2 gap-2 pb-2">
+            {remotePeople.map((p) => (
+              <PeerTile key={p._id} person={p} peer={remote[p._id]} />
+            ))}
+          </div>
         </div>
       ) : soloVideo ? (
         <div className="relative flex flex-1 flex-col px-4">
@@ -245,7 +324,9 @@ function ActiveCall({
             className="text-[13px] text-white/85 [text-shadow:0_1px_2px_rgba(0,0,0,.5)]"
             aria-live="polite"
           >
-            {status}
+            {soloRemote?.media?.screen
+              ? `${soloPeer?.firstName ?? "They"} is sharing their screen`
+              : status}
           </span>
         </div>
       ) : (
@@ -262,7 +343,7 @@ function ActiveCall({
                 size={96}
               />
             )}
-            {connected && soloRemote?.media && !soloRemote.media.mic && (
+            {inCall && soloRemote?.media && !soloRemote.media.mic && (
               <span
                 className="absolute right-0 bottom-0 flex h-7 w-7 items-center justify-center rounded-full bg-[#3a3b3c] ring-2 ring-[#1c1c1d]"
                 role="img"
@@ -276,49 +357,75 @@ function ActiveCall({
           <p className="mt-1 text-[15px] text-white/75 leading-5" aria-live="polite">
             {status}
           </p>
-          {joined && local.settled && !hasMic && (
-            <p className="mt-3 rounded-full bg-black/40 px-3 py-1 text-[13px] text-white/85">
-              {isVideo && !hasCam
+          {joined && local.settled && local.micBlocked && (
+            <Pill>
+              {local.camBlocked && !media.cam
                 ? "Facebook can't access your camera or microphone"
                 : "Facebook can't access your microphone"}
-            </p>
+            </Pill>
           )}
-          {joined && local.settled && hasMic && isVideo && !hasCam && (
-            <p className="mt-3 rounded-full bg-black/40 px-3 py-1 text-[13px] text-white/85">
-              Facebook can't access your camera
-            </p>
+          {joined && local.settled && !local.micBlocked && local.camBlocked && !media.cam && (
+            <Pill>Facebook can't access your camera</Pill>
           )}
         </div>
       )}
 
-      {/* Your own camera as a picture-in-picture once connected. */}
-      {connected && media.cam && (
-        <div className="absolute right-3 bottom-[96px] h-[132px] w-[96px] overflow-hidden rounded-lg bg-black shadow-[0_2px_8px_rgba(0,0,0,.5)]">
-          <StreamVideo stream={local.stream} mirrored className="h-full w-full" />
-        </div>
+      {/* Your own camera (or shared screen) as a corner preview you can drag. */}
+      {selfView && localStream && (
+        <SelfView stream={localStream} mirrored={media.cam} screen={media.screen} />
       )}
 
       <Controls>
         {joined ? (
           <>
-            {isVideo && (
+            <Control
+              label={media.cam ? "Turn off camera" : "Turn on camera"}
+              active={!media.cam}
+              disabled={local.busy}
+              onClick={() => void local.setCamera(!media.cam)}
+            >
+              {media.cam ? <Video size={22} /> : <VideoOff size={22} />}
+            </Control>
+            {local.canShare && (
               <Control
-                label={media.cam ? "Turn off camera" : "Turn on camera"}
-                active={!media.cam}
-                disabled={!hasCam}
-                onClick={() => setCam((v) => !v)}
+                label={media.screen ? "Stop sharing" : "Share screen"}
+                active={media.screen}
+                pressed={media.screen}
+                disabled={local.busy}
+                onClick={() => (media.screen ? local.stopScreen() : void local.shareScreen())}
               >
-                {media.cam ? <Video size={22} /> : <VideoOff size={22} />}
+                {media.screen ? <ScreenShareOff size={22} /> : <MonitorUp size={22} />}
               </Control>
             )}
             <Control
               label={media.mic ? "Mute" : "Unmute"}
               active={!media.mic}
-              disabled={!hasMic}
+              disabled={!local.audio}
               onClick={() => setMic((v) => !v)}
             >
               {media.mic ? <Mic size={22} /> : <MicOff size={22} />}
             </Control>
+            <Menu open={menuOpen} onOpenChange={setMenuOpen}>
+              <Tooltip content="More options" side="top">
+                <MenuTrigger asChild>
+                  <CallButton aria-label="More options">
+                    <MoreHorizontal size={24} />
+                  </CallButton>
+                </MenuTrigger>
+              </Tooltip>
+              <MenuContent align="center" width={248} className="dark z-[90]! text-primary">
+                <MenuItem
+                  icon={<Settings size={20} />}
+                  label="Settings"
+                  onSelect={() => setDialog("settings")}
+                />
+                <MenuItem
+                  icon={<Flag size={20} />}
+                  label="Report a problem"
+                  onSelect={() => setDialog("report")}
+                />
+              </MenuContent>
+            </Menu>
             <Control label="End call" tone="danger" onClick={hangUp}>
               <PhoneIcon size={24} className="rotate-[135deg]" />
             </Control>
@@ -351,7 +458,7 @@ function ActiveCall({
               <X size={24} strokeWidth={2.4} />
             </Control>
             <Control
-              label={call.role === "caller" ? "Call again" : "Call back"}
+              label={call.role === "caller" && !failed ? "Call again" : "Call back"}
               caption
               tone="positive"
               onClick={() => onCallAgain(call.conversationId, call.kind)}
@@ -361,26 +468,133 @@ function ActiveCall({
           </>
         )}
       </Controls>
+
+      <CallSettingsDialog
+        open={dialog === "settings"}
+        onOpenChange={(o) => setDialog(o ? "settings" : null)}
+        media={local}
+      />
+      <ReportCallDialog
+        open={dialog === "report"}
+        onOpenChange={(o) => setDialog(o ? "report" : null)}
+        callId={call._id}
+      />
     </Shell>
   );
 }
 
 const showsVideo = (p: RemotePeer) =>
-  !!p.media?.cam && !!p.stream?.getVideoTracks().some((t) => t.readyState === "live");
+  !!(p.media?.cam || p.media?.screen) &&
+  !!p.stream?.getVideoTracks().some((t) => t.readyState === "live" && !t.muted);
+
+function Pill({ children }: { children: ReactNode }) {
+  return (
+    <p className="mt-3 rounded-full bg-black/40 px-3 py-1 text-[13px] text-white/85">{children}</p>
+  );
+}
 
 function PeerTile({ person, peer }: { person: Person; peer: RemotePeer | undefined }) {
   const video = !!peer && showsVideo(peer);
+  const state = peer?.state;
   return (
     <div className="relative flex items-center justify-center overflow-hidden rounded-lg bg-[#3a3b3c]">
       {video && peer ? (
-        <StreamVideo stream={peer.stream} version={peer.version} className="absolute inset-0" />
+        <StreamVideo
+          stream={peer.stream}
+          version={peer.version}
+          fit={peer.media?.screen ? "contain" : "cover"}
+          className="absolute inset-0"
+        />
       ) : (
         <Avatar src={person.avatar} size={64} />
       )}
       <span className="absolute bottom-1.5 left-2 flex items-center gap-1 font-semibold text-[13px] [text-shadow:0_1px_2px_rgba(0,0,0,.6)]">
-        {person.firstName}
+        {person.name}
         {peer?.media && !peer.media.mic && <MicOff size={12} aria-label="Muted" />}
       </span>
+      {state && state !== "connected" && (
+        <span className="absolute top-1.5 right-2 rounded-full bg-black/50 px-2 py-0.5 text-[12px] text-white/85">
+          {state === "disconnected" ? "Reconnecting…" : state === "failed" ? "Lost" : "Connecting…"}
+        </span>
+      )}
+    </div>
+  );
+}
+
+type Corner = "tl" | "tr" | "bl" | "br";
+const CORNER_CLASS: Record<Corner, string> = {
+  tl: "top-24 left-3",
+  tr: "top-24 right-3",
+  bl: "bottom-[104px] left-3",
+  br: "bottom-[104px] right-3",
+};
+
+/** Self-view preview: drag it anywhere and it snaps to the nearest corner. */
+function SelfView({
+  stream,
+  mirrored,
+  screen,
+}: {
+  stream: MediaStream;
+  mirrored: boolean;
+  screen: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [corner, setCorner] = useState<Corner>("br");
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  const drag = useRef<{ x: number; y: number; left: number; top: number } | null>(null);
+
+  const onDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el || e.button !== 0) return;
+    el.setPointerCapture(e.pointerId);
+    drag.current = { x: e.clientX, y: e.clientY, left: el.offsetLeft, top: el.offsetTop };
+  };
+  const onMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    const el = ref.current;
+    const parent = el?.offsetParent as HTMLElement | null;
+    if (!d || !el || !parent) return;
+    const maxLeft = parent.clientWidth - el.offsetWidth - 8;
+    const maxTop = parent.clientHeight - el.offsetHeight - 8;
+    setPos({
+      left: Math.min(Math.max(8, d.left + e.clientX - d.x), maxLeft),
+      top: Math.min(Math.max(8, d.top + e.clientY - d.y), maxTop),
+    });
+  };
+  const onUp = () => {
+    const el = ref.current;
+    const parent = el?.offsetParent as HTMLElement | null;
+    drag.current = null;
+    if (!el || !parent || !pos) return;
+    const right = pos.left + el.offsetWidth / 2 > parent.clientWidth / 2;
+    const bottom = pos.top + el.offsetHeight / 2 > parent.clientHeight / 2;
+    setCorner(`${bottom ? "b" : "t"}${right ? "r" : "l"}` as Corner);
+    setPos(null);
+  };
+
+  return (
+    <div
+      ref={ref}
+      role="img"
+      aria-label={screen ? "Your shared screen" : "Your camera"}
+      onPointerDown={onDown}
+      onPointerMove={onMove}
+      onPointerUp={onUp}
+      onPointerCancel={onUp}
+      style={pos ?? undefined}
+      className={cn(
+        "absolute z-10 cursor-grab touch-none select-none overflow-hidden rounded-lg bg-black shadow-[0_2px_8px_rgba(0,0,0,.5)] ring-1 ring-white/10 active:cursor-grabbing",
+        screen ? "h-[100px] w-[160px]" : "h-[132px] w-[96px]",
+        !pos && CORNER_CLASS[corner],
+      )}
+    >
+      <StreamVideo
+        stream={stream}
+        mirrored={mirrored}
+        fit={screen ? "contain" : "cover"}
+        className="pointer-events-none h-full w-full"
+      />
     </div>
   );
 }
@@ -389,11 +603,13 @@ function StreamVideo({
   stream,
   version,
   mirrored,
+  fit = "cover",
   className,
 }: {
   stream: MediaStream | null;
   version?: number;
   mirrored?: boolean;
+  fit?: "cover" | "contain";
   className?: string;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -410,12 +626,17 @@ function StreamVideo({
       autoPlay
       playsInline
       muted
-      className={cn("h-full w-full object-cover", mirrored && "-scale-x-100", className)}
+      className={cn(
+        "h-full w-full",
+        fit === "cover" ? "object-cover" : "object-contain",
+        mirrored && "-scale-x-100",
+        className,
+      )}
     />
   );
 }
 
-function RemoteAudio({ peer }: { peer: RemotePeer }) {
+function RemoteAudio({ peer, sinkId }: { peer: RemotePeer; sinkId?: string }) {
   const ref = useRef<HTMLAudioElement>(null);
   const { stream, version } = peer;
   // biome-ignore lint/correctness/useExhaustiveDependencies: version re-attaches after new tracks
@@ -425,6 +646,11 @@ function RemoteAudio({ peer }: { peer: RemotePeer }) {
     el.srcObject = stream;
     if (stream) void el.play().catch(() => {});
   }, [stream, version]);
+  // The speaker picked in Settings, where the browser supports choosing one.
+  useEffect(() => {
+    const el = ref.current;
+    if (el && sinkId && "setSinkId" in el) void el.setSinkId(sinkId).catch(() => {});
+  }, [sinkId]);
   // biome-ignore lint/a11y/useMediaCaption: live call audio has no captions
   return <audio ref={ref} autoPlay className="hidden" />;
 }
@@ -452,8 +678,9 @@ function Shell({
   /** Peer connection states, exposed for debugging ("connected", "failed"…). */
   rtc?: string;
 }) {
+  // The call window always uses Facebook's dark theme.
   const className = cn(
-    "relative flex flex-col overflow-hidden bg-[#1c1c1d] text-white",
+    "dark relative flex flex-col overflow-hidden bg-[#1c1c1d] text-white",
     variant === "window"
       ? "h-dvh w-full"
       : "h-[min(640px,calc(100vh-48px))] w-[min(420px,calc(100vw-32px))] rounded-xl shadow-[0_12px_28px_rgba(0,0,0,.5),0_2px_4px_rgba(0,0,0,.3)]",
@@ -474,7 +701,7 @@ function Shell({
 
 function Controls({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex shrink-0 items-start justify-center gap-6 pt-4 pb-8">
+    <div className="relative flex shrink-0 items-start justify-center gap-4 pt-4 pb-8">
       {children}
     </div>
   );
@@ -490,8 +717,8 @@ function RingPulse() {
   );
 }
 
-/** "Calling" with the trailing dots cycling. */
-function CallingLabel() {
+/** "Calling…" / "Connecting…" with the trailing dots cycling. */
+function Dots({ label }: { label: string }) {
   const [n, setN] = useState(0);
   useEffect(() => {
     const t = setInterval(() => setN((v) => (v + 1) % 4), 500);
@@ -499,9 +726,37 @@ function CallingLabel() {
   }, []);
   return (
     <>
-      Calling
-      <span className="inline-block w-3 text-left">{".".repeat(n)}</span>
+      {label}
+      <span className="inline-block w-3 text-left" aria-hidden>
+        {".".repeat(n)}
+      </span>
     </>
+  );
+}
+
+const TONE_CLASS = {
+  danger: "bg-[#e41e3f] text-white",
+  positive: "bg-[#31a24c] text-white",
+  active: "bg-white text-[#1c1c1d]",
+  idle: "bg-white/20 text-white backdrop-blur-sm",
+};
+
+/** Round call-control button; forwards props so Radix triggers can wrap it. */
+function CallButton({
+  tone = "idle",
+  className,
+  ...props
+}: ComponentPropsWithRef<"button"> & { tone?: keyof typeof TONE_CLASS }) {
+  return (
+    <button
+      type="button"
+      {...props}
+      className={cn(
+        "flex h-12 w-12 items-center justify-center rounded-full transition-[filter,background-color] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:brightness-100 aria-expanded:bg-white aria-expanded:text-[#1c1c1d]",
+        TONE_CLASS[tone],
+        className,
+      )}
+    />
   );
 }
 
@@ -510,6 +765,7 @@ export function Control({
   onClick,
   tone,
   active,
+  pressed,
   caption,
   disabled,
   children,
@@ -517,31 +773,23 @@ export function Control({
   label: string;
   onClick: () => void;
   tone?: "danger" | "positive";
+  /** Highlighted: a camera or mic that's off, or a screen being shared. */
   active?: boolean;
+  pressed?: boolean;
   caption?: boolean;
   disabled?: boolean;
   children: ReactNode;
 }) {
   const button = (
-    <button
-      type="button"
+    <CallButton
       aria-label={label}
-      aria-pressed={tone || caption ? undefined : active}
+      aria-pressed={pressed}
       onClick={onClick}
       disabled={disabled}
-      className={cn(
-        "flex h-12 w-12 items-center justify-center rounded-full transition-[filter,background-color] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:brightness-100",
-        tone === "danger"
-          ? "bg-[#e41e3f] text-white"
-          : tone === "positive"
-            ? "bg-[#31a24c] text-white"
-            : active
-              ? "bg-white text-[#1c1c1d]"
-              : "bg-white/20 text-white backdrop-blur-sm",
-      )}
+      tone={tone ?? (active ? "active" : "idle")}
     >
       {children}
-    </button>
+    </CallButton>
   );
   if (caption)
     return (

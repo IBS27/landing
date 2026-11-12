@@ -15,7 +15,7 @@ export const pagePosts: readonly PostSeed[] = [
       domain: "emeraldledger.news",
       description:
         "Our twice-yearly rent survey of 3,400 listings finds one-bedrooms up sharply in Capitol Hill, SLU and Ballard, while studios in the U District flattened for the first time since 2021.",
-      image: "rooms/apartment building",
+      image: "covers/capitol-hill-01.jpg",
     },
     reactions: 55,
     mood: "sad",
@@ -245,7 +245,7 @@ export const pagePosts: readonly PostSeed[] = [
     by: "montlakecampuslife",
     at: daysAgo(9, "08:10"),
     text: "frost on the quad this morning. coldest day of the quarter so far. stay warm out there",
-    photos: ["uw campus", "uw campus"],
+    photos: ["posts/uw-campus-08.jpg", "posts/uw-campus-05.jpg"],
     reactions: 46,
     mood: "love",
     comments: [
@@ -378,7 +378,7 @@ export const pagePosts: readonly PostSeed[] = [
     by: "cascadeboulders",
     at: daysAgo(17, "16:30"),
     text: "Thank you to all 150 climbers who came out for the fall comp! Results are up at the front desk. Congrats to Andre Silva for taking the open men's category and to everyone who sent the cursed purple V2.",
-    photos: ["bouldering gym", "bouldering gym"],
+    photos: ["posts/bouldering-gym-03.jpg", "bouldering gym"],
     reactions: 39,
     comments: [
       { by: "andre.silva", text: "still can't feel my forearms" },

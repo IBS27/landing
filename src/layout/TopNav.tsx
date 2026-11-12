@@ -9,6 +9,7 @@ import {
   GamingIcon,
   GroupsIcon,
   HomeIcon,
+  MarketplaceIcon,
   ReelsIcon,
   VideoIcon,
 } from "@/icons";
@@ -27,9 +28,23 @@ type Tab = {
 /** Groups' own section pages (a single group page leaves the Groups tab idle). */
 const GROUPS_SECTION = /^\/groups(\/(feed|discover|joins|create))?\/?$/;
 
+const HOME: Tab = { to: "/", label: "Home", Icon: HomeIcon, match: (p) => p === "/" };
+const FRIENDS: Tab = {
+  to: "/friends",
+  label: "Friends",
+  Icon: FriendsIcon,
+  match: (p) => p.startsWith("/friends"),
+};
+const GROUPS: Tab = {
+  to: "/groups/feed",
+  label: "Groups",
+  Icon: GroupsIcon,
+  match: (p) => GROUPS_SECTION.test(p),
+};
+
 const TABS: Tab[] = [
-  { to: "/", label: "Home", Icon: HomeIcon, match: (p) => p === "/" },
-  { to: "/friends", label: "Friends", Icon: FriendsIcon, match: (p) => p.startsWith("/friends") },
+  HOME,
+  FRIENDS,
   {
     to: "/reel",
     label: "Reels",
@@ -37,7 +52,7 @@ const TABS: Tab[] = [
     // The single-reel viewer (/reel/<id>) leaves every tab idle.
     match: (p) => /^\/reel\/?$/.test(p),
   },
-  { to: "/groups/feed", label: "Groups", Icon: GroupsIcon, match: (p) => GROUPS_SECTION.test(p) },
+  GROUPS,
   { to: "/gaming", label: "Gaming", Icon: GamingIcon, match: (p) => p.startsWith("/gaming") },
 ];
 
@@ -49,8 +64,25 @@ const VIDEO_TAB: Tab = {
   match: (p) => p.startsWith("/watch"),
 };
 
-const tabsFor = (path: string) =>
-  VIDEO_TAB.match(path) ? TABS.map((t) => (t.to === "/reel" ? VIDEO_TAB : t)) : TABS;
+/** On Settings & privacy Facebook swaps in its own set (none of them active there). */
+const SETTINGS_TABS: Tab[] = [
+  HOME,
+  FRIENDS,
+  VIDEO_TAB,
+  {
+    to: "/marketplace",
+    label: "Marketplace",
+    Icon: MarketplaceIcon,
+    match: (p) => p.startsWith("/marketplace"),
+  },
+  GROUPS,
+];
+
+const tabsFor = (path: string) => {
+  if (path.startsWith("/settings")) return SETTINGS_TABS;
+  if (VIDEO_TAB.match(path)) return TABS.map((t) => (t.to === "/reel" ? VIDEO_TAB : t));
+  return TABS;
+};
 
 /** Facebook shrinks the header search to a round icon on these sections. */
 const collapsedSearch = (p: string) =>

@@ -231,7 +231,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "uw-housing",
     at: daysAgo(1, "12:30"),
     text: "Taking over my lease in Capitol Hill, $1,950 1BR, Jan 1\n\nFinished my MS early and got a job in Portland. Summit Ave near Olive, 4th floor, huge windows, dishwasher, laundry in the building. Lease runs through Aug 31. Landlord is fine with a takeover, you just apply normally ($45 screening fee).",
-    photos: ["rooms/living room", "rooms/bedroom", "rooms/kitchen"],
+    photos: ["rooms/living-room-16.jpg", "rooms/kitchen-23.jpg"],
     reactions: 11,
     comments: [
       {
@@ -751,7 +751,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-apartments",
     at: daysAgo(1, "11:15"),
     text: "$1,175 | room in 2BR, Greenwood, Jan 1\n\nmy roommate's moving in with her boyfriend so I need a new one! I work at a startup in Fremont, I cook too much, and I have a very large monstera. 15 min to Fremont on the 5.",
-    photos: ["rooms/bedroom", "rooms/living room"],
+    photos: ["rooms/bedroom-12.jpg", "rooms/living-room-21.jpg"],
     reactions: 6,
     comments: [
       {
@@ -925,7 +925,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "capitol-hill-neighbors",
     at: daysAgo(2, "18:10"),
     text: "Pike/Pine at 5pm. it's November, it's pitch black, and honestly it's beautiful",
-    photos: ["neon rain", "neon sign"],
+    photos: ["neon sign"],
     reactions: 24,
     mood: "love",
     comments: [
@@ -1068,7 +1068,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "theo.grant",
     in: "free-stuff-seattle",
     at: hoursAgo(3),
-    text: "free couch on the curb in Wallingford (N 43rd near Burke), come get it before the rain does. cream loveseat, no rips",
+    text: "free couch on the curb in Wallingford (N 43rd near Burke). put it out last night and my roommate is already test driving it lol. cream loveseat, no rips, come get it before the rain does",
     photos: ["couch on curb"],
     reactions: 5,
     comments: [
@@ -1593,7 +1593,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "pnw-hikers",
     at: daysAgo(7, "15:30"),
     text: "ran Mt Si up and down in 1:52 this morning. trail is wet but no snow below the haystack. headlamp needed by 4:30",
-    photos: ["mount rainier"],
+    photos: ["posts/forest-trail-03.jpg"],
     reactions: 15,
     comments: [
       { by: "luis.hernandez", text: "1:52 is wild", after: 30 },
@@ -1750,7 +1750,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "uw-class-of-2027",
     at: daysAgo(1, "19:00"),
     text: "who's staying in seattle for thanksgiving? thinking friendsgiving potluck at our place",
-    photos: ["thanksgiving table"],
+    photos: ["posts/thanksgiving-table-01.jpg"],
     reactions: 13,
     comments: [
       { by: "hannah.lee", text: "WE are hosting apparently", after: 30 },

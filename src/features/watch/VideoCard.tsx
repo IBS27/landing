@@ -53,6 +53,7 @@ export function PostVideo({
       poster={item.poster}
       label={post.text ?? `Video from ${post.author.name}`}
       autoPlay={autoPlay}
+      postId={post._id}
       className={cn("aspect-video w-full", className)}
     />
   );

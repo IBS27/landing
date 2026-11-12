@@ -1,8 +1,8 @@
 import { useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { useCallback, useEffect } from "react";
 import { useQ } from "@/app/viewer";
+import { PageUnavailable } from "@/layout/PageUnavailable";
 import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
 import { PhotoViewer, PhotoViewerPlaceholder } from "./PhotoViewer";
 
 /** The open theater rides in history state so the page beneath stays mounted. */
@@ -75,6 +75,7 @@ export function PhotoTheaterPage({ postId, index }: { postId: string; index: num
     <Theater
       postId={postId}
       index={index}
+      direct
       onIndexChange={(i) =>
         void navigate({
           to: "/photo/$postId",
@@ -91,15 +92,19 @@ export function PhotoTheaterPage({ postId, index }: { postId: string; index: num
 function Theater({
   postId,
   index,
+  direct,
   onIndexChange,
   onClose,
 }: {
   postId: string;
   index: number;
+  /** Opened from its URL: a missing photo is Facebook's "This Page Isn't Available". */
+  direct?: boolean;
   onIndexChange: (i: number) => void;
   onClose: () => void;
 }) {
-  const post = useQ(api.posts.get, { postId: postId as Id<"posts"> });
+  // The id comes from the URL, so it may be malformed or from another table.
+  const post = useQ(api.posts.getFromUrl, { postId });
 
   // The page beneath must not scroll while the theater covers it.
   useEffect(() => {
@@ -112,6 +117,6 @@ function Theater({
 
   if (post === undefined) return <PhotoViewerPlaceholder onClose={onClose} />;
   if (post === null || post.media.length === 0)
-    return <PhotoViewerPlaceholder unavailable onClose={onClose} />;
+    return direct ? <PageUnavailable /> : <PhotoViewerPlaceholder unavailable onClose={onClose} />;
   return <PhotoViewer post={post} index={index} onIndexChange={onIndexChange} onClose={onClose} />;
 }

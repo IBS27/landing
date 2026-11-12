@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Play } from "lucide-react";
 import { Fragment, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useQ } from "@/app/viewer";
-import { PostCard, PostSkeleton } from "@/features/posts";
+import { FollowLink, PostCard, PostSkeleton } from "@/features/posts";
 import { compactCount } from "@/lib/format";
 import { Card } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -244,7 +244,9 @@ function TopResults({
   const out: ReactNode[] = [];
   if (lead) out.push(<Fragment key={lead.key}>{lead.node}</Fragment>);
   posts.forEach((p, i) => {
-    out.push(<PostCard key={p._id} post={p} hideable={false} />);
+    out.push(
+      <PostCard key={p._id} post={p} hideable={false} nameSuffix={<FollowLink post={p} />} />,
+    );
     const m = i % 2 === 1 ? rest[(i - 1) / 2] : undefined;
     if (m) out.push(<Fragment key={m.key}>{m.node}</Fragment>);
   });

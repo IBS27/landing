@@ -116,7 +116,7 @@ export function buildPlan(now: number) {
   const isPage = new Set<string>(pages.map((p) => p.username));
   const nameOf = new Map<string, string>();
   const genderIndex = { m: 0, w: 0 };
-  const coverTopics = ["mountains", "city skyline", "forest", "city night", "trail", "texture"];
+  const coverTopics = ["mountains", "seattle skyline", "forest", "trail", "texture"];
 
   const users: { handle: Handle; row: Row<"users"> }[] = [];
   for (const p of people) {
@@ -673,9 +673,10 @@ export function buildPlan(now: number) {
       if (h !== s.by && isPerson.has(h) && !reactors.includes(h as Username))
         reactors.push(h as Username);
     }
+    for (const h of s.notLikedBy ?? []) checkHandle(h, `${where} notLikedBy`);
     for (const u of pool) {
       if (reactors.length >= wanted) break;
-      if (!reactors.includes(u)) reactors.push(u);
+      if (!reactors.includes(u) && !s.notLikedBy?.includes(u)) reactors.push(u);
     }
     const mix = MIXES[s.mood ?? "default"];
     const span = Math.max(MINUTE, Math.min(2 * DAY, latest - createdAt));

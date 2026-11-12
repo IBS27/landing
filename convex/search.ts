@@ -419,6 +419,8 @@ export const results = viewerQuery({
       ).filter((g) => g.visible || a.groups.has(g._id));
       if (f.publicGroups) groups = groups.filter((g) => g.privacy === "public");
       if (f.myGroups) groups = groups.filter((g) => a.groups.has(g._id));
+      // Biggest communities first, like Facebook's Groups results.
+      groups.sort((x, y) => y.memberCount - x.memberCount);
       out.groups = await Promise.all(groups.slice(0, limit).map((g) => groupResult(ctx, a, g)));
     }
 
@@ -589,6 +591,19 @@ export const posts = viewerQuery({
       keep.push(p);
     }
     if (args.recent) keep.sort((x, y) => y.createdAt - x.createdAt);
+    else {
+      // Top results lead with public posts from Pages and creators the viewer isn't friends
+      // with (the "· Follow" posts), then friends' and groups' posts; relevance order within.
+      const tier = (p: Doc<"posts">) =>
+        p.privacy === "public" &&
+        !p.groupId &&
+        !p.sponsored &&
+        p.authorId !== a.viewerId &&
+        !a.friends.has(p.authorId)
+          ? 0
+          : 1;
+      keep.sort((x, y) => tier(x) - tier(y));
+    }
     return {
       posts: await enrichPosts(ctx, keep.slice(0, limit), a),
       hasMore: keep.length > limit,

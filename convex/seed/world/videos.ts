@@ -1,6 +1,7 @@
 import { daysAgo, hoursAgo, type TimeSpec } from "../lib/time";
 import { isTallClip, type VideoClip } from "../lib/videos";
 import type { CommentSeed, Handle, PostSeed, ReplySeed, StorySeed } from "../types";
+import { MAIN } from "./people";
 
 /**
  * Video posts: 16:9 clips for the feed and Watch, 9:16 clips that become
@@ -253,6 +254,7 @@ const baseVideoPosts: readonly PostSeed[] = [
     privacy: "public",
     text: "Myrtle Falls with the mountain peeking through 🏔️ 0.8 miles from the Paradise lot, no excuses #pnw #rainier",
     reactions: 34,
+    likedBy: ["maya.chen"],
   },
   {
     by: "luis.hernandez",
@@ -303,6 +305,7 @@ const baseVideoPosts: readonly PostSeed[] = [
     text: "foster update: they've discovered the bed and they've chosen violence 🐶🐶",
     reactions: 38,
     mood: "love",
+    likedBy: ["maya.chen"],
   },
   {
     by: "yuki.sato",
@@ -312,6 +315,7 @@ const baseVideoPosts: readonly PostSeed[] = [
     text: "she plays rough. the straw never stood a chance 🐱",
     reactions: 29,
     mood: "haha",
+    likedBy: ["maya.chen"],
   },
   {
     by: "sam.rivera",
@@ -710,10 +714,12 @@ export const videoPosts: readonly PostSeed[] = [
   ...baseVideoPosts.map((p) => {
     const extra = p.video ? threads[p.video] : undefined;
     const shared = p.video && shares.some((s) => s.clip === p.video);
-    // Reels travel further than feed posts: more people react to them.
+    // Reels travel further than feed posts: more people react to them. Maya
+    // has reacted to only the few Reels marked `likedBy` (about one in five).
     const reel = p.video && !p.sponsored && isTallClip(p.video);
     return {
       ...p,
+      notLikedBy: reel && !p.likedBy?.includes(MAIN) ? [MAIN] : p.notLikedBy,
       key: p.key ?? (shared ? `video-${p.video}` : undefined),
       reactions: reel && p.reactions ? Math.min(120, Math.round(p.reactions * 2.5)) : p.reactions,
       comments: extra ? [...(p.comments ?? []), ...extra] : p.comments,

@@ -47,12 +47,15 @@ export function PostCard({
   post,
   expanded = false,
   hideable = true,
+  nameSuffix,
   className,
 }: {
   post: PostView;
   expanded?: boolean;
   /** Feeds show the X "Hide post" button; search results don't. */
   hideable?: boolean;
+  /** After the author's name (search: "· Follow"). */
+  nameSuffix?: ReactNode;
   className?: string;
 }) {
   const [hidden, setHidden] = useState(false);
@@ -77,7 +80,11 @@ export function PostCard({
 
   return (
     <Card className={cn("overflow-hidden rounded-xl", className)}>
-      <PostHeader post={post} onHide={expanded || !hideable ? undefined : () => setHidden(true)} />
+      <PostHeader
+        post={post}
+        onHide={expanded || !hideable ? undefined : () => setHidden(true)}
+        nameSuffix={nameSuffix}
+      />
       <PostContent post={post} expanded={expanded} onSeeMore={() => setDialogOpen(true)} />
       <ActionBar
         post={post}
@@ -540,6 +547,7 @@ export function PostContent({
       {post.media.length > 0 && (
         <PhotoGrid
           media={post.media}
+          postId={post._id}
           onOpen={(i) => openPhoto(post._id, i)}
           className={nested ? "" : undefined}
           sponsored={post.sponsored}

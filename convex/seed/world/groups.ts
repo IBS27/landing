@@ -13,7 +13,7 @@ export const groups = [
       "For UW students, staff and alumni looking for housing near campus: rooms, sublets, roommates, and leases. U District, Wallingford, Roosevelt, Ravenna, Eastlake and beyond. Please include price, dates, and location in every post. Scams get you banned instantly.",
     category: "Housing",
     location: "Seattle, WA",
-    cover: "posts/uw-campus-02.jpg",
+    cover: "posts/uw-campus-07.jpg",
     rules: [
       {
         title: "Include price, dates and location",

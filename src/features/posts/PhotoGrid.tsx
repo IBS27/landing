@@ -12,12 +12,15 @@ export function PhotoGrid({
   onOpen,
   className,
   sponsored,
+  postId,
 }: {
   media: PostMedia[];
   onOpen?: (index: number) => void;
   className?: string;
   /** Ads letterbox their video on pure black instead of the dominant colour. */
   sponsored?: boolean;
+  /** The post shown: watching its video records a view (Watchlist "new videos"). */
+  postId?: string;
 }) {
   if (media.length === 0) return null;
   if (media.length === 1)
@@ -27,6 +30,7 @@ export function PhotoGrid({
         onOpen={() => onOpen?.(0)}
         className={className}
         sponsored={sponsored}
+        postId={postId}
       />
     );
   return <Collage media={media} onOpen={onOpen} className={className} />;
@@ -83,7 +87,14 @@ function Collage({
     ratio === undefined || ratio > 1.1 ? "landscape" : ratio < 0.9 ? "portrait" : "square";
   const portrait = orientation === "portrait";
   const tile = (i: number, cls = "", overlay?: number) => (
-    <Tile key={i} item={media[i]} onOpen={() => onOpen?.(i)} className={cls} overlay={overlay} />
+    <Tile
+      key={i}
+      item={media[i]}
+      onOpen={() => onOpen?.(i)}
+      className={cls}
+      overlay={overlay}
+      label={`Open ${media[i].kind === "video" ? "video" : "photo"} ${i + 1} of ${media.length}`}
+    />
   );
   const n = media.length;
   let grid: string;
@@ -131,21 +142,32 @@ function Single({
   onOpen,
   className,
   sponsored,
+  postId,
 }: {
   item: PostMedia;
   onOpen: () => void;
   className?: string;
   sponsored?: boolean;
+  postId?: string;
 }) {
   const ratio = item.width && item.height ? item.width / item.height : 4 / 3;
   // Wider than the capped box (680×575) fills edge to edge; narrower media sit
   // centred on a flat fill of the photo's (or video poster's) dominant colour.
   const letterboxed = ratio < 1.2;
   if (item.kind === "video")
-    return <SingleVideo item={item} ratio={ratio} className={className} blackFill={sponsored} />;
+    return (
+      <SingleVideo
+        item={item}
+        ratio={ratio}
+        className={className}
+        blackFill={sponsored}
+        postId={postId}
+      />
+    );
   return (
     <button
       type="button"
+      aria-label="Open photo"
       onClick={onOpen}
       className={cn("relative block w-full overflow-hidden bg-[#1c1e21]", className)}
       style={{ aspectRatio: ratio, maxHeight: MAX_MEDIA_HEIGHT }}
@@ -243,11 +265,13 @@ function SingleVideo({
   ratio,
   className,
   blackFill,
+  postId,
 }: {
   item: PostMedia;
   ratio: number;
   className?: string;
   blackFill?: boolean;
+  postId?: string;
 }) {
   const fill = useDominantColor(ratio < 1.2 && !blackFill ? item.poster : undefined);
   return (
@@ -255,6 +279,7 @@ function SingleVideo({
       src={item.url}
       poster={item.poster}
       label={item.alt}
+      postId={postId}
       className={cn("w-full [&:fullscreen]:bg-black!", className)}
       style={{
         aspectRatio: ratio,
@@ -270,15 +295,19 @@ function Tile({
   onOpen,
   className,
   overlay,
+  label,
 }: {
   item: PostMedia;
   onOpen: () => void;
   className?: string;
   overlay?: number;
+  /** "Open photo N of M". */
+  label: string;
 }) {
   return (
     <button
       type="button"
+      aria-label={label}
       onClick={onOpen}
       className={cn("group relative min-h-0 overflow-hidden bg-btn", className)}
     >

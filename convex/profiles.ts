@@ -41,6 +41,7 @@ function timelineStream(
           async (p) =>
             !p.groupId &&
             !p.eventId &&
+            !p.sponsored &&
             (!p.timelineUserId || p.timelineUserId === userId) &&
             (await canView(ctx, p, a)),
         ),
@@ -70,6 +71,7 @@ async function visibleTimelinePosts(ctx: QueryCtx, a: Audience, userId: Id<"user
     if (
       !p.groupId &&
       !p.eventId &&
+      !p.sponsored &&
       (!p.timelineUserId || p.timelineUserId === userId) &&
       (await canView(ctx, p, a))
     )
@@ -454,7 +456,8 @@ export const search = viewerQuery({
       if (out.length >= 20) break;
       const onTimeline =
         p.timelineUserId === userId || (p.authorId === userId && !p.timelineUserId);
-      if (onTimeline && !p.groupId && !p.eventId && (await canView(ctx, p, a))) out.push(p);
+      if (onTimeline && !p.groupId && !p.eventId && !p.sponsored && (await canView(ctx, p, a)))
+        out.push(p);
     }
     return enrichPosts(ctx, out, a);
   },

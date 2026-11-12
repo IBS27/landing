@@ -1494,7 +1494,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "arjun.mehta",
     at: daysAgo(4, "13:30"),
     text: "summit selfie with zero view. classic november",
-    photos: ["foggy hills", "alpine meadow"],
+    photos: ["foggy hills", "posts/forest-trail-05.jpg"],
     place: "Rattlesnake Ledge",
     reactions: 25,
     mood: "haha",
@@ -1573,7 +1573,7 @@ export const friendPosts: readonly PostSeed[] = [
     at: daysAgo(9, "17:30"),
     privacy: "friends",
     text: "mt si in the fog with the pnw hikers crew. 20 people, 0 views, 100% good vibes. leave no trace or i will find you",
-    photos: ["forest trail", "alpine meadow", "forest trail"],
+    photos: ["forest trail", "posts/alpine-meadow-01.jpg", "forest trail"],
     place: "Mount Si",
     reactions: 28,
     comments: [
@@ -1849,7 +1849,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "tyler.jensen",
     at: daysAgo(2, "20:00"),
     text: "black friday came early. my shelf is at capacity. i've ordered another shelf",
-    photos: ["board games", "wingspan"],
+    photos: ["wingspan"],
     reactions: 15,
     comments: [
       { by: "tasha.okafor", after: 20, text: "bring the green one thursday" },

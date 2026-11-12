@@ -1,4 +1,4 @@
-import { Bookmark, BookmarkMinus, CircleCheck, Link2, Star, X } from "lucide-react";
+import { Bookmark, BookmarkMinus, ChevronDown, CircleCheck, Link2, Star, X } from "lucide-react";
 import { createContext, type ReactNode, useCallback, useContext, useState } from "react";
 import { createPortal } from "react-dom";
 import { useM, useQ, useViewer } from "@/app/viewer";
@@ -142,21 +142,38 @@ export function InterestedButton({
   );
 }
 
-/** "✓ Going" quick response (invitations). */
-export function GoingButton({ eventId }: { eventId: Id<"events"> }) {
-  const respond = useM(api.events.respond);
+/**
+ * Card response control for invitations: one grey "☆ Interested ▾" button
+ * whose menu offers Going / Interested / Can't go. Responded cards fall back
+ * to InterestedButton (blue Interested toggle, or "✓ Going" with the menu).
+ */
+export function CardResponseButton({
+  eventId,
+  status,
+  className,
+}: {
+  eventId: Id<"events">;
+  status: Response;
+  className?: string;
+}) {
+  if (status !== "invited")
+    return <InterestedButton eventId={eventId} status={status} className={className} />;
   return (
-    <button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        void respond({ eventId, status: "going" });
-      }}
-      className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg bg-btn px-3 font-semibold text-[15px] text-btn-text hover:brightness-95 dark:hover:brightness-125"
-    >
-      <CircleCheck size={16} strokeWidth={2.4} />
-      Going
-    </button>
+    <ResponseMenu eventId={eventId} status={status}>
+      <button
+        type="button"
+        aria-label="Respond to invitation"
+        onClick={(e) => e.stopPropagation()}
+        className={cn(
+          "flex h-9 items-center justify-center gap-1.5 rounded-lg bg-btn px-3 font-semibold text-[15px] text-btn-text hover:brightness-95 dark:hover:brightness-125",
+          className,
+        )}
+      >
+        <StarIcon />
+        Interested
+        <ChevronDown size={16} strokeWidth={2.6} />
+      </button>
+    </ResponseMenu>
   );
 }
 

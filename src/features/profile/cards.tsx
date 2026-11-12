@@ -233,35 +233,52 @@ function IntroSection({
   );
 }
 
-const TILE_COLORS = ["#0866ff", "#e41e3f", "#31a24c", "#f7b928", "#9360f7", "#f5533d", "#2abba7"];
+export type OrgKind = "work" | "school";
 
-/** A logo-style 40px tile for a company or school: brand-coloured initial in a ringed circle. */
-export function OrgTile({ name, size = 40 }: { name: string; size?: number }) {
-  let h = 0;
-  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  const color = TILE_COLORS[h % TILE_COLORS.length];
-  const initial = name
-    .replace(/^the\s+/i, "")
-    .trim()
-    .charAt(0)
-    .toUpperCase();
+/**
+ * Facebook's tile for a workplace or school without a Page logo: a grey circle
+ * with a briefcase (work) or graduation cap (school) glyph.
+ */
+export function OrgTile({ kind, size = 40 }: { kind: OrgKind; size?: number }) {
   return (
     <span
       aria-hidden
-      className="flex shrink-0 items-center justify-center rounded-full border border-divider bg-card font-bold"
-      style={{ width: size, height: size, color, fontSize: size * 0.45 }}
+      className="flex shrink-0 items-center justify-center rounded-full bg-btn text-icon-secondary"
+      style={{ width: size, height: size }}
     >
-      {initial}
+      <svg viewBox="0 0 20 20" width={size / 2} height={size / 2} fill="currentColor">
+        {kind === "school" ? (
+          <>
+            <path d="M10 3 19 7.5 10 12 1 7.5Z" />
+            <path d="M5 10.3 10 12.8 15 10.3v3.3c0 1.6-2.2 2.9-5 2.9s-5-1.3-5-2.9Z" />
+            <rect x="16.9" y="8.2" width="1.2" height="5.6" rx=".6" />
+          </>
+        ) : (
+          <>
+            <path d="M7 5.5V4a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 13 4v1.5h-1.6V4.3a.2.2 0 0 0-.2-.2H8.8a.2.2 0 0 0-.2.2v1.2Z" />
+            <path d="M4 5.5h12a2 2 0 0 1 2 2V10H2V7.5a2 2 0 0 1 2-2Z" />
+            <path d="M2 11.2h6.6v.6c0 .5.4.9.9.9h1c.5 0 .9-.4.9-.9v-.6H18V15a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Z" />
+          </>
+        )}
+      </svg>
     </span>
   );
 }
 
 /** Company / school row: tile, bold name, role or detail, dates. */
-export function OrgEntry({ name, lines }: { name: string; lines: (string | null | undefined)[] }) {
+export function OrgEntry({
+  kind,
+  name,
+  lines,
+}: {
+  kind: OrgKind;
+  name: string;
+  lines: (string | null | undefined)[];
+}) {
   const [first, ...rest] = lines.filter(Boolean);
   return (
     <div className="flex gap-3">
-      <OrgTile name={name} />
+      <OrgTile kind={kind} />
       <div className="min-w-0 pt-[3px]">
         <div className="font-semibold text-[15px] text-primary leading-5">{name}</div>
         {first && <div className="mt-[2px] text-[13px] text-primary leading-4">{first}</div>}
@@ -359,17 +376,24 @@ export function LinkRow({ url }: { url: string }) {
   );
 }
 
-/** Pages: "Intro" (bio, category, location) and "Links" in one card, like Facebook. */
-function PageIntroCard() {
+/** Pages: a "Links" card (website, social links) leads the column, then "Intro", like Facebook. */
+function PageIntroCards() {
   const { profile } = useProfile();
   const { user } = profile;
   const hasIntro = !!(user.bio || user.pageCategory || user.city);
-  const links = user.links.map((u) => <LinkRow key={u} url={u} />);
-  if (!hasIntro && links.length === 0) return null;
   return (
-    <ProfileCard title={hasIntro ? "Intro" : "Links"}>
-      {hasIntro ? (
-        <>
+    <>
+      {user.links.length > 0 && (
+        <ProfileCard title="Links" className="pt-[10px]">
+          <div className="pt-1">
+            {user.links.map((u) => (
+              <LinkRow key={u} url={u} />
+            ))}
+          </div>
+        </ProfileCard>
+      )}
+      {hasIntro && (
+        <ProfileCard title="Intro">
           {user.bio && (
             <p className="pt-2 pb-3 text-center text-[15px] text-primary leading-5">{user.bio}</p>
           )}
@@ -387,17 +411,9 @@ function PageIntroCard() {
             )}
             {user.city && <DetailRow icon={MapPin} text={user.city} />}
           </div>
-          {links.length > 0 && (
-            <section className="mt-5">
-              <h3 className="font-bold text-[20px] text-primary leading-6">Links</h3>
-              <div className="pt-2">{links}</div>
-            </section>
-          )}
-        </>
-      ) : (
-        <div className="pt-2">{links}</div>
+        </ProfileCard>
       )}
-    </ProfileCard>
+    </>
   );
 }
 
@@ -410,7 +426,7 @@ export function IntroCard() {
   const { user, isSelf, isPage } = profile;
 
   const communities = useCommunities(user._id, isPage);
-  if (isPage) return <PageIntroCard />;
+  if (isPage) return <PageIntroCards />;
 
   const rows: Row[] = [];
   if (user.city) rows.push({ icon: MapPin, text: `Lives in ${user.city}` });
@@ -470,7 +486,7 @@ export function IntroCard() {
       )}
       {job && (
         <IntroSection title="Work" more={{ label: "See more work", section: "work" }}>
-          <OrgEntry name={job.company} lines={[job.title, workDates(job)]} />
+          <OrgEntry kind="work" name={job.company} lines={[job.title, workDates(job)]} />
         </IntroSection>
       )}
       {school && (
@@ -478,7 +494,11 @@ export function IntroCard() {
           title="Education"
           more={{ label: "See more education", section: "education" }}
         >
-          <OrgEntry name={school.school} lines={[school.detail, schoolDates(school)]} />
+          <OrgEntry
+            kind="school"
+            name={school.school}
+            lines={[school.detail, schoolDates(school)]}
+          />
         </IntroSection>
       )}
     </ProfileCard>

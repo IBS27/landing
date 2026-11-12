@@ -127,12 +127,11 @@ function ItemContainer({ l }: { l: Detail }) {
     <div className="flex h-[calc(100vh-132px)] min-h-[560px] overflow-hidden bg-card">
       <Gallery photos={l.photos} video={l.video} title={l.title} />
       <aside className="flex w-[356px] shrink-0 flex-col">
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-4 pb-5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-[11px] pb-5">
           <Header l={l} toast={toast.show} />
           {l.isOwner && l.stats && <Insights stats={l.stats} />}
           <Details l={l} />
           <LocationMap l={l} />
-          <div className="mt-4 h-px bg-divider" />
           <SellerInfo l={l} />
           <RelatedSearches l={l} />
         </div>
@@ -263,7 +262,7 @@ function Header({ l, toast }: { l: Detail; toast: (m: string) => void }) {
   return (
     <>
       <h1 className="break-words font-bold text-[24px] text-primary leading-7">{l.title}</h1>
-      <div className="mt-1 flex flex-wrap items-center gap-x-1.5 text-[17px] leading-[22px]">
+      <div className="flex flex-wrap items-center gap-x-1.5 text-[17px] leading-[22px]">
         <span className="font-medium text-primary">{priceLine(l)}</span>
         {l.originalPrice !== null && l.originalPrice > l.price && (
           <span className="font-medium text-secondary line-through">{price(l.originalPrice)}</span>
@@ -279,7 +278,7 @@ function Header({ l, toast }: { l: Detail; toast: (m: string) => void }) {
           </span>
         )}
       </div>
-      <p className="mt-1 text-[13px] text-secondary leading-4">
+      <p className="mt-0.5 text-[13px] text-secondary leading-4">
         Listed {listedAgo(l.createdAt)} in {l.location.city}
       </p>
       {l.meetup.length > 0 && (
@@ -544,7 +543,9 @@ function Insights({ stats }: { stats: NonNullable<Detail["stats"]> }) {
 /* ───────────── Details ───────────── */
 
 function SectionHeading({ children }: { children: ReactNode }) {
-  return <h2 className="pt-5 pb-1 font-semibold text-[17px] text-primary leading-5">{children}</h2>;
+  return (
+    <h2 className="pt-[21px] pb-1 font-semibold text-[17px] text-primary leading-5">{children}</h2>
+  );
 }
 
 function IconLine({ icon, children }: { icon: ReactNode; children: ReactNode }) {
@@ -560,7 +561,7 @@ function Description({ text }: { text: string }) {
   const [open, setOpen] = useState(false);
   const long = text.length > 420;
   return (
-    <p className="whitespace-pre-wrap break-words pt-2 text-[15px] text-primary leading-5">
+    <p className="whitespace-pre-wrap break-words pt-3 text-[15px] text-primary leading-5">
       {long && !open ? `${text.slice(0, 380).trimEnd()}... ` : text}
       {long && (
         <button
@@ -658,7 +659,7 @@ function Details({ l }: { l: Detail }) {
       <SectionHeading>Details</SectionHeading>
       <dl className="pt-1 text-[15px] leading-5">
         {l.condition && (
-          <div className="flex justify-between gap-4 py-1.5">
+          <div className="flex justify-between gap-4 pt-2">
             <dt className="text-primary">Condition</dt>
             <dd className="text-secondary">{conditionLabel(l.condition)}</dd>
           </div>
@@ -682,11 +683,11 @@ function LocationMap({ l }: { l: Detail }) {
         type="button"
         aria-label={`View ${place} on map`}
         onClick={() => setOpen(true)}
-        className="mt-4 block w-full overflow-hidden rounded-lg"
+        className="mt-[19px] block w-full overflow-hidden rounded-lg"
       >
-        <MapTile label={place} seed={seed} height={52} radius={20} info />
+        <MapTile label={place} seed={seed} height={51} radius={20} info />
       </button>
-      <p className="mt-2 text-[13px] leading-4">
+      <p className="mt-[21px] text-[13px] leading-4">
         <span className="text-primary">{l.location.city}</span>
         <span className="text-secondary"> · Location is approximate</span>
       </p>
@@ -746,7 +747,7 @@ function Stars({ stars, count }: { stars: number; count: number }) {
 function SellerInfo({ l }: { l: Detail }) {
   const s = l.seller;
   return (
-    <section className="pt-4">
+    <section className="pt-[13px]">
       <div className="flex items-center justify-between">
         <h2 className="font-semibold text-[17px] text-primary leading-5">Seller information</h2>
         <Link
@@ -757,8 +758,12 @@ function SellerInfo({ l }: { l: Detail }) {
           Seller details
         </Link>
       </div>
-      <div className="mt-3 flex items-center gap-3">
-        <Link to="/$username" params={{ username: s.username }} className="shrink-0 rounded-full">
+      <div className="mt-4 flex items-center gap-3">
+        <Link
+          to="/$username"
+          params={{ username: s.username }}
+          className="flex shrink-0 rounded-full"
+        >
           <Avatar src={s.avatar} size={48} />
         </Link>
         <Link
@@ -770,7 +775,7 @@ function SellerInfo({ l }: { l: Detail }) {
         </Link>
         {s.rating && <Stars stars={s.rating.stars} count={s.rating.count} />}
       </div>
-      <div className="mt-3 flex items-center gap-3 text-[15px] text-primary">
+      <div className="mt-4 flex items-center gap-3 text-[15px] text-primary leading-5">
         <span className="flex h-5 w-5 items-center justify-center grayscale">
           <FacebookLogo size={20} />
         </span>

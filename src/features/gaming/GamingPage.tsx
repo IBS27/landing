@@ -443,9 +443,13 @@ function PickTile({ game, onPlay }: { game: Game; onPlay: () => void }) {
       onClick={onPlay}
       className="group relative h-[208px] w-[164px] shrink-0 overflow-hidden rounded-xl text-left shadow-base"
     >
-      <GameCover game={game} className="absolute inset-0 h-full w-full scale-150 blur-xl" />
+      <GameCover
+        game={game}
+        variant="thumb"
+        className="absolute inset-0 h-full w-full scale-150 blur-xl"
+      />
       <span className="absolute inset-0 bg-[rgba(44,44,44,0.6)]" />
-      <GameCover game={game} className="relative block h-[95px] w-full" />
+      <GameCover game={game} variant="thumb" className="relative block h-[95px] w-full" />
       <div className="relative flex h-[113px] flex-col justify-between p-2">
         <p className="line-clamp-2 font-semibold text-[17px] text-white leading-5">{game.name}</p>
         <span className="self-start rounded-2xl bg-black/80 px-2 py-1.5 font-semibold text-[13px] text-white/80 leading-4">

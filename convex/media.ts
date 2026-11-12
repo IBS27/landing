@@ -68,8 +68,9 @@ async function hiddenSet(ctx: QueryCtx, viewerId: Id<"users">) {
 /**
  * Reels: vertical video posts, newest first, each with whether the viewer
  * follows its author. When `startId` is given that reel leads the list
- * (direct /reel/<id> links). Reels the viewer hid are left out, except one
- * opened by its direct link.
+ * (direct /reel/<id> links), or the result is null when it isn't a reel the
+ * viewer can see. Reels the viewer hid are left out, except one opened by its
+ * direct link.
  */
 export const reels = viewerQuery({
   args: { startId: v.optional(v.string()), limit: v.optional(v.number()) },
@@ -82,13 +83,16 @@ export const reels = viewerQuery({
       .order("desc")
       .filterWith(async (p) => isReelPost(p) && !hidden.has(p._id) && (await canView(ctx, p, a)))
       .take(limit);
-    const start = startId ? ctx.db.normalizeId("posts", startId) : null;
-    if (start && !picked.some((p) => p._id === start)) {
-      const doc = await ctx.db.get(start);
-      if (doc && isReelPost(doc) && (await canView(ctx, doc, a))) picked.unshift(doc);
-    } else if (start) {
-      const i = picked.findIndex((p) => p._id === start);
-      picked.unshift(...picked.splice(i, 1));
+    if (startId !== undefined) {
+      // A direct link must name a visible reel; anything else is unavailable.
+      const start = ctx.db.normalizeId("posts", startId);
+      const i = start ? picked.findIndex((p) => p._id === start) : -1;
+      if (i >= 0) picked.unshift(...picked.splice(i, 1));
+      else {
+        const doc = start ? await ctx.db.get(start) : null;
+        if (!doc || !isReelPost(doc) || !(await canView(ctx, doc, a))) return null;
+        picked.unshift(doc);
+      }
     }
     const following = await followedSet(ctx, a);
     const views = await enrichPosts(ctx, picked, a);
@@ -244,31 +248,65 @@ export const savedVideos = viewerQuery({
   },
 });
 
-/** "Your Watchlist": Pages with their newest video post time. */
+const WEEK = 7 * 86_400_000;
+
+/**
+ * "Your Watchlist": the Pages and people the viewer follows, newest video
+ * first, each with how many of its videos from the last 7 days the viewer
+ * hasn't watched yet ("N new videos"). Followed people only appear once
+ * they've posted a video; followed Pages always do.
+ */
 export const watchlist = viewerQuery({
   args: {},
   handler: async (ctx) => {
-    const users = await ctx.db
-      .query("users")
-      .withIndex("by_persona", (q) => q.eq("isPersona", false))
+    const viewerId = ctx.viewer._id;
+    const a = await loadAudience(ctx, viewerId);
+    const follows = await ctx.db
+      .query("follows")
+      .withIndex("by_user", (q) => q.eq("userId", viewerId))
       .collect();
-    const pages = users.filter((u) => u.kind === "page");
-    const out = await Promise.all(
-      pages.map(async (u) => {
+    const now = Date.now();
+    const rows = await Promise.all(
+      follows.map(async ({ targetId }) => {
+        const u = await ctx.db.get(targetId);
+        if (!u) return null;
         const recent = await ctx.db
           .query("posts")
           .withIndex("by_author", (q) => q.eq("authorId", u._id))
           .order("desc")
-          .take(20);
-        const withMedia = recent.filter((p) => !!videoOf(p));
-        return {
-          ...userSummary(u),
-          latestAt: withMedia[0]?.createdAt ?? null,
-          newCount: withMedia.filter((p) => Date.now() - p.createdAt < 7 * 86_400_000).length,
-        };
+          .take(30);
+        const videos = [];
+        for (const p of recent)
+          if (videoOf(p) && !p.sponsored && (await canView(ctx, p, a))) videos.push(p);
+        if (videos.length === 0 && u.kind !== "page") return null;
+        let newCount = 0;
+        for (const p of videos) {
+          if (now - p.createdAt >= WEEK) break;
+          const seen = await ctx.db
+            .query("videoViews")
+            .withIndex("by_user_post", (q) => q.eq("userId", viewerId).eq("postId", p._id))
+            .first();
+          if (!seen) newCount++;
+        }
+        return { ...userSummary(u), latestAt: videos[0]?.createdAt ?? null, newCount };
       }),
     );
-    return out.sort((x, y) => (y.latestAt ?? 0) - (x.latestAt ?? 0));
+    return rows.filter((r) => r !== null).sort((x, y) => (y.latestAt ?? 0) - (x.latestAt ?? 0));
+  },
+});
+
+/** Count a video as watched (it played for ≥3s). Clears it from the Watchlist's "new". */
+export const recordView = viewerMutation({
+  args: { postId: v.id("posts") },
+  handler: async (ctx, { postId }) => {
+    const userId = ctx.viewer._id;
+    const post = await ctx.db.get(postId);
+    if (!post || !videoOf(post)) return;
+    const row = await ctx.db
+      .query("videoViews")
+      .withIndex("by_user_post", (q) => q.eq("userId", userId).eq("postId", postId))
+      .first();
+    if (!row) await ctx.db.insert("videoViews", { userId, postId, viewedAt: Date.now() });
   },
 });
 

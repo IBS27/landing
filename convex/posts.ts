@@ -31,6 +31,23 @@ export const get = viewerQuery({
 });
 
 /**
+ * A post by an id taken from a URL (`/photo/<id>`, permalinks). Any string is
+ * accepted: ids that are malformed or belong to another table resolve to null
+ * instead of failing argument validation.
+ */
+export const getFromUrl = viewerQuery({
+  args: { postId: v.string() },
+  handler: async (ctx, { postId }) => {
+    const id = ctx.db.normalizeId("posts", postId);
+    const post = id ? await ctx.db.get(id) : null;
+    if (!post) return null;
+    const a = await loadAudience(ctx, ctx.viewer._id);
+    if (!(await canView(ctx, post, a))) return null;
+    return enrichPost(ctx, post, a);
+  },
+});
+
+/**
  * A profile timeline: the person's own non-group posts plus posts others
  * wrote on their wall, newest first.
  */

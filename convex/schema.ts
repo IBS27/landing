@@ -483,6 +483,13 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_user_post", ["userId", "postId"]),
 
+  /** Videos `userId` watched (played ≥3s); drives the Watchlist's "N new videos". */
+  videoViews: defineTable({
+    userId: v.id("users"),
+    postId: v.id("posts"),
+    viewedAt: v.number(),
+  }).index("by_user_post", ["userId", "postId"]),
+
   /** "Turn on notifications for this post": `userId` hears about new comments on `postId`. */
   postSubscriptions: defineTable({
     userId: v.id("users"),
@@ -492,10 +499,10 @@ export default defineSchema({
     .index("by_post", ["postId"])
     .index("by_user_post", ["userId", "postId"]),
 
-  /** Content reports (posts, messages) filed by `userId`, with the reason they picked. */
+  /** Content reports (posts, messages) and call problem reports filed by `userId`, with the reason they picked. */
   reports: defineTable({
     userId: v.id("users"),
-    targetType: v.union(v.literal("post"), v.literal("message")),
+    targetType: v.union(v.literal("post"), v.literal("message"), v.literal("call")),
     targetId: v.string(),
     reason: v.string(),
     createdAt: v.number(),

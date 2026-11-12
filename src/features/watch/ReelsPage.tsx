@@ -30,7 +30,14 @@ import {
   ShareOutline,
 } from "@/features/posts/icons";
 import { reactionMeta, useReactionHover } from "@/features/posts/reactions";
-import { PlayGlyph, safePlay, setSoundOn, useSoundOn } from "@/features/posts/VideoPlayer";
+import {
+  PlayGlyph,
+  safePlay,
+  setSoundOn,
+  useRecordView,
+  useSoundOn,
+} from "@/features/posts/VideoPlayer";
+import { PageUnavailable } from "@/layout/PageUnavailable";
 import { cn, compactCount } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/ui/overlays";
 import { Avatar, Spinner } from "@/ui/primitives";
@@ -51,7 +58,7 @@ export function ReelsPage({ startId }: { startId?: string }) {
   const [feed, setFeed] = useState<Feed>("foryou");
   const [creating, setCreating] = useState(false);
   // The list is fixed to the reel the viewer arrived on; the URL then follows scrolling.
-  const [initialId] = useState(startId);
+  const [initialId, setInitialId] = useState(startId);
   const all = useQ(api.media.reels, { startId: initialId });
   const reels = useMemo(() => {
     if (!all) return undefined;
@@ -65,6 +72,17 @@ export function ReelsPage({ startId }: { startId?: string }) {
   const [index, setIndex] = useState(0);
   const count = reels?.length ?? 0;
 
+  // Following another /reel/<id> link (not one the URL reached by scrolling) reloads the list.
+  if (
+    startId !== undefined &&
+    startId !== initialId &&
+    all !== undefined &&
+    !all?.some((p) => p._id === startId)
+  ) {
+    setInitialId(startId);
+    setIndex(0);
+  }
+
   const go = useCallback(
     (i: number) => {
       const el = scroller.current;
@@ -73,15 +91,6 @@ export function ReelsPage({ startId }: { startId?: string }) {
     },
     [count],
   );
-
-  // Track the snapped reel.
-  useEffect(() => {
-    const el = scroller.current;
-    if (!el) return;
-    const onScroll = () => setIndex(Math.round(el.scrollTop / Math.max(1, el.clientHeight)));
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
 
   // Reset to the top when switching feeds.
   // biome-ignore lint/correctness/useExhaustiveDependencies: run on feed change only
@@ -113,6 +122,9 @@ export function ReelsPage({ startId }: { startId?: string }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [go, index]);
+
+  // A direct link to a missing, hidden-from-you or non-reel post.
+  if (all === null) return <PageUnavailable />;
 
   return (
     <div className="dark fixed inset-x-0 top-14 bottom-0 bg-black text-[#e2e5e9]">
@@ -164,6 +176,11 @@ export function ReelsPage({ startId }: { startId?: string }) {
 
       <div
         ref={scroller}
+        onScroll={(e) =>
+          setIndex(
+            Math.round(e.currentTarget.scrollTop / Math.max(1, e.currentTarget.clientHeight)),
+          )
+        }
         className="h-full snap-y snap-mandatory overflow-y-auto [scrollbar-width:none]"
       >
         {reels === undefined ? (
@@ -272,6 +289,8 @@ function ReelSlide({ post, active, offset }: { post: Reel; active: boolean; offs
   useEffect(() => {
     if (ref.current) ref.current.muted = !sound;
   }, [sound]);
+
+  useRecordView(ref, post._id);
 
   const caption = post.text ?? "";
   const longCaption = caption.length > 80 || caption.includes("\n");

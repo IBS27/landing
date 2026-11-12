@@ -23,7 +23,7 @@ export const stories: readonly StorySeed[] = [
   { by: "jasmine.ortiz", photo: "coffee shop", at: hoursAgo(7.5) },
   {
     by: "kai.nakamura",
-    photo: "climbing holds",
+    photo: "posts/climbing-holds-02.jpg",
     text: "new set mon. no spoilers",
     at: hoursAgo(9),
   },
@@ -32,7 +32,12 @@ export const stories: readonly StorySeed[] = [
   { by: "malik.johnson", photo: "band rehearsal", text: "friday at the owl 🦉", at: hoursAgo(14) },
   { by: "emily.chen", photo: "library", text: "midterm #3 survived", at: hoursAgo(16) },
   { by: "ethan.park", photo: "bubble tea", at: hoursAgo(19) },
-  { by: "olivia.brooks", photo: "dog park", text: "met a corgi named waffles", at: hoursAgo(22) },
+  {
+    by: "olivia.brooks",
+    photo: "posts/corgi-01.jpg",
+    text: "met a corgi named waffles",
+    at: hoursAgo(22),
+  },
 
   // Maya's Story archive (expired stories, visible only to her).
   {
@@ -52,14 +57,14 @@ export const stories: readonly StorySeed[] = [
   },
   {
     by: "maya.chen",
-    photo: "rainy street",
+    photo: "posts/rainy-street-04.jpg",
     text: "november in seattle",
     at: daysAgo(24, "17:30"),
     archived: true,
   },
   {
     by: "maya.chen",
-    photo: "library",
+    photo: "posts/uw-campus-05.jpg",
     text: "suzzallo szn",
     at: daysAgo(38, "14:05"),
     archived: true,

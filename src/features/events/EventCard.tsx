@@ -6,7 +6,7 @@ import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/ui/overlays";
 import { Card, Skeleton } from "@/ui/primitives";
 import type { EventCardView } from "../../../convex/events";
 import {
-  GoingButton,
+  CardResponseButton,
   InterestedButton,
   SaveMenuItem,
   ShareArrowIcon,
@@ -72,8 +72,7 @@ export function EventCard({ event }: { event: EventCardView }) {
         <p className="mt-1 text-[13px] text-secondary leading-4">{statsLine(event)}</p>
       </div>
       <div className="relative z-10 mt-auto flex gap-2 px-4 pt-2.5 pb-3">
-        {event.viewerStatus === "invited" && <GoingButton eventId={event._id} />}
-        <InterestedButton eventId={event._id} status={event.viewerStatus} className="flex-1" />
+        <CardResponseButton eventId={event._id} status={event.viewerStatus} className="flex-1" />
         <button
           type="button"
           aria-label="Share"

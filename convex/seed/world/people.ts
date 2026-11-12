@@ -58,7 +58,7 @@ export const people = [
     relationship: "In a relationship",
     birthday: "02-09",
     joined: 2011,
-    cover: "lake union",
+    cover: "ballard-01.jpg",
   },
   {
     username: "priya.raman",

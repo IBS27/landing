@@ -12,7 +12,7 @@ export const events: readonly EventSeed[] = [
     key: "fall-bouldering-comp",
     host: "cascadeboulders",
     title: "Cascade Fall Bouldering Comp",
-    cover: "bouldering competition",
+    cover: "posts/bouldering-gym-03.jpg",
     description:
       "Our fall in-house comp is back! 40 problems from V0 to V10, scored redpoint style, 3 hour session. Categories for beginner, intermediate and open. Registration is $25 for members and $40 for non-members and includes a comp shirt and a day pass for the rest of the weekend.\n\nRaffle at 2pm (crashpad, shoes, a Rainline Outdoor jacket). Kai and the setting crew have been hiding in the back room for two weeks, so expect some weird ones.",
     category: "Fitness",
@@ -70,7 +70,7 @@ export const events: readonly EventSeed[] = [
     key: "montlake-hacks-info-session",
     host: "montlakecampuslife",
     title: "Montlake Hacks Info Session + Team Mixer",
-    cover: "students lecture hall",
+    cover: "events/meetup-01.jpg",
     description:
       "Thinking about Montlake Hacks but don't have a team (or an idea)? Come to the info session. We'll go over tracks, judging, travel reimbursement for students from other schools, and what you can and can't build ahead of time.\n\nSecond half is a team mixer: write what you're good at on a name tag and wander. Pizza at 6. Bring your laptop if you want help setting up your dev environment.",
     category: "Tech",
@@ -136,7 +136,7 @@ export const events: readonly EventSeed[] = [
     host: "malik.johnson",
     in: "seattle-concerts",
     title: "Low Tide Radio w/ Glass Harbor + Pale Kites",
-    cover: "concert",
+    cover: "events/concert-01.jpg",
     description:
       "we're playing the owl again!! last show before we go into the studio in december, so we're doing the whole new record front to back plus the old ones people actually like.\n\nGlass Harbor and Pale Kites open. doors 8, music 8:45. $12 advance / $15 door, 21+. merch table will have the new shirts (the green ones, finally) and a few tapes. come early, it was at capacity last time and Camila had to turn people away in the rain.",
     category: "Music",
@@ -170,7 +170,7 @@ export const events: readonly EventSeed[] = [
     key: "ethan-bday-party",
     host: "ethan.park",
     title: "ethan turns 22 (house party)",
-    cover: "birthday party",
+    cover: "posts/friends-01.jpg",
     description:
       "it's my birthday and noah said if I don't throw a party he'll throw one for me and invite his D&D group. so. saturday night at our place.\n\nbring whatever you're drinking, we'll have food (noah is making his famous dumplings, allegedly). smash bros tournament in the living room, winner gets nothing but respect. no gifts pls, just show up. street parking on 17th is fine after 6. lmk if you need the door code.",
     category: "Party",
@@ -297,7 +297,7 @@ export const events: readonly EventSeed[] = [
     host: "kai.nakamura",
     in: "seattle-climbers",
     title: "Seattle Climbers Meetup Night @ Cascade Boulders",
-    cover: "climbing gym",
+    cover: "posts/bouldering-gym-12.jpg",
     description:
       "Monthly group night! The new overhang set goes up Monday so you'll be some of the first people on it. Meet by the front desk at 6:30, we'll split into groups by grade so nobody's stuck projecting alone or getting sandbagged.\n\nGroup rate is $15 for non-members if you say you're with Seattle Climbers at the desk. Shoe rental $6. First-timers: come at 6:15 and Sofia or I will do a quick intro. Hangout at the brewery benches down the block after if it's not pouring.",
     category: "Fitness",
@@ -458,7 +458,7 @@ export const events: readonly EventSeed[] = [
     host: "tara.singh",
     in: "pnw-hikers",
     title: "Rattlesnake Ledge Sunday Morning Hike (beginner friendly)",
-    cover: "rattlesnake ledge",
+    cover: "posts/forest-trail-08.jpg",
     description:
       "Easy-ish 4 miles round trip, 1,160 ft gain, great views of Rattlesnake Lake if the clouds cooperate (they won't, but the moody fog version is cool too).\n\nCarpool meets at the Northgate Station park & ride at 7:30, we start hiking around 8:30 to beat the crowds. Trail will be muddy and slick near the top, wear real shoes. Bring water, a snack, a rain shell and a warm layer for the ledge. Do NOT go past the railing for photos. Back in Seattle by 1.\n\nDrivers: comment how many seats you have. Discover Pass not needed at the main lot.",
     category: "Outdoors",
@@ -485,7 +485,7 @@ export const events: readonly EventSeed[] = [
     key: "friendsgiving",
     host: "ana.torres",
     title: "friendsgiving at our place 🦃",
-    cover: "friendsgiving dinner",
+    cover: "posts/thanksgiving-table-01.jpg",
     description:
       "since half of us are flying home for the actual thing, friendsgiving is tuesday!! hannah is doing the turkey (pray for her), I've got mac and cheese and my mom's arroz con gandules.\n\nsign up in the comments for what you're bringing so we don't end up with 4 pies and no vegetables (it's happened). bring your own chair if you have a folding one. we have 9 plates total so also bring a plate lol",
     category: "Food & Drink",
@@ -505,7 +505,7 @@ export const events: readonly EventSeed[] = [
     host: "tasha.okafor",
     in: "seattle-run-club",
     title: "Seattle Marathon Cheer Station (Mile 20)",
-    cover: "marathon runners",
+    cover: "events/run-club-01.jpg",
     description:
       "Three of our club members are running the full this year and we are going to be LOUD. Cheer station at mile 20 on the Lake Washington Blvd stretch, which is exactly where everybody hits the wall.\n\nBring signs, cowbells, a speaker if you have one. I'll have coffee from the roastery and a box of orange slices. First runners come through around 9:15, last stragglers around noon. Dress for rain, there's no shelter.",
     category: "Fitness",
@@ -540,7 +540,7 @@ export const events: readonly EventSeed[] = [
     key: "latte-art-throwdown",
     host: "moonrisecoffee",
     title: "Moonrise Latte Art Throwdown",
-    cover: "latte art",
+    cover: "posts/latte-art-04.jpg",
     description:
       "16 baristas from around the city, single elimination, judged on the spot by three people who have opinions about tulips. $10 to enter (sign up at the counter), free to watch.\n\nWinner takes home $300 and a bag of our holiday roast every month for a year. Beer and cider from our neighbors at the bar, hot chocolate for the non-drinkers. Our own Jasmine is defending her title and has been practicing swans on the regulars for weeks.",
     category: "Food & Drink",

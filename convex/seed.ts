@@ -55,6 +55,15 @@ export const insertFriendships = internalMutation({
   args: { rows: v.array(T.friendships.validator) },
   handler: (ctx, { rows }) => insertAll(ctx, "friendships", rows),
 });
+/** Pages Maya follows: her old café, her gym, her campus, the local paper, the ramen spot. */
+const MAIN_PERSONA_PAGES = new Set([
+  "moonrisecoffee",
+  "cascadeboulders",
+  "montlakecampuslife",
+  "emeraldledger",
+  "kumoramen",
+]);
+
 export const insertFollows = internalMutation({
   args: {
     rows: v.array(
@@ -295,14 +304,17 @@ export const reset = internalAction({
           { userId: uid(f.b), friendId: uid(f.a), createdAt: f.createdAt },
         ]),
       }),
-      // Page follows: the main persona follows every Page; others follow a stable ~70% subset.
+      // Page follows: the main persona follows the Pages in her life (5 of 8, so Discover still
+      // has Follow buttons; Rainline reaches her through ads only); others follow a stable ~70%.
       ctx.runMutation(internal.seed.insertFollows, {
         rows: plan.users
           .filter((u) => u.row.kind !== "page")
           .flatMap((person, i) =>
             plan.users
               .filter((u) => u.row.kind === "page")
-              .filter((_page, j) => i === 0 || (i * 7 + j * 3) % 10 >= 3)
+              .filter((page, j) =>
+                i === 0 ? MAIN_PERSONA_PAGES.has(page.handle) : (i * 7 + j * 3) % 10 >= 3,
+              )
               .map((page) => ({
                 userId: uid(person.handle),
                 targetId: uid(page.handle),

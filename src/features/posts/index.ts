@@ -18,6 +18,7 @@ export { BACKGROUNDS, backgroundFor } from "./backgrounds";
 export { CommentComposer, CommentList, CommentsSection } from "./CommentsSection";
 export { Composer } from "./Composer";
 export { CreatePostModal } from "./CreatePostModal";
+export { FollowLink } from "./FollowLink";
 export { PhotoGrid } from "./PhotoGrid";
 export { PhotoViewer } from "./PhotoViewer";
 export { PostCard, PostContent, PostHeader } from "./PostCard";

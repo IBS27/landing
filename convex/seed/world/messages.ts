@@ -233,7 +233,7 @@ export const conversations: readonly ConversationSeed[] = [
       {
         by: "ana.torres",
         text: "the 49 just drove past me. second one.",
-        photo: "rainy street",
+        photo: "posts/rainy-street-02.jpg",
         gap: 1740,
       },
       { by: "maya.chen", text: "nooo", gap: 6 },
@@ -783,7 +783,7 @@ export const conversations: readonly ConversationSeed[] = [
       {
         by: "maya.chen",
         text: "rough draft! colors are placeholder",
-        photo: "board games",
+        photo: "listings/copic markers",
         gap: 2600,
       },
       { by: "tasha.okafor", text: "STOP this is so cute", gap: 12 },

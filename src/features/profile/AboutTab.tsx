@@ -24,6 +24,7 @@ import {
   CommunityList,
   LinkRow,
   OrgEntry,
+  type OrgKind,
   ReelsCard,
   useCommunities,
 } from "./cards";
@@ -519,10 +520,12 @@ function schoolFields(e?: { school: string; detail?: string } & Range) {
 
 /** Work / education row in About: logo tile, name, role and dates, edit pencil. */
 function OrgRow({
+  kind,
   name,
   lines,
   onEdit,
 }: {
+  kind: OrgKind;
   name: string;
   lines: (string | null | undefined)[];
   onEdit?: () => void;
@@ -530,7 +533,7 @@ function OrgRow({
   return (
     <div className="flex items-center gap-3 py-2">
       <div className="min-w-0 flex-1">
-        <OrgEntry name={name} lines={lines} />
+        <OrgEntry kind={kind} name={name} lines={lines} />
       </div>
       {onEdit && (
         <IconButton label="Edit" variant="ghost" onClick={onEdit}>
@@ -575,6 +578,7 @@ function WorkList() {
           />
         ) : (
           <OrgRow
+            kind="work"
             key={`${w.company}-${i}`}
             name={w.company}
             lines={[w.title, workDates(w)]}
@@ -621,6 +625,7 @@ function EducationList() {
           />
         ) : (
           <OrgRow
+            kind="school"
             key={`${e.school}-${i}`}
             name={e.school}
             lines={[e.detail, schoolDates(e)]}

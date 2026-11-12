@@ -710,7 +710,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "3 bed 2.5 bath townhouse a few blocks from Columbia City station and Rainier Ave. 2 car tandem garage, rooftop deck, W/D. We're buying a house after the wedding so we're helping the owner find the next tenant. $3,600/mo, tenant pays utilities. 12 month lease, deposit $3,000. Pets negotiable.",
-    photos: ["townhouse", "living room", "kitchen", "bedroom"],
+    photos: ["rooms/townhouse-04.jpg", "living room", "kitchen", "bedroom"],
     hood: "Columbia City",
     listed: daysAgo(21, "10:45"),
     views: 389,
@@ -793,7 +793,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "homesales",
     description:
       "Selling one of my own units. 2 bed 2.5 bath townhouse built 2017, 1,240 sq ft over three floors plus a private rooftop deck with downtown and Rainier views. Quartz counters, gas range, mini split heat pump, attached one car garage.\n\n6 min walk to Beacon Hill Link station. HOA $120/mo. Open house Sunday 1-3pm, or message me for a private showing. Agents welcome.",
-    photos: ["townhouse", "living room", "kitchen", "bedroom"],
+    photos: ["rooms/townhouse-03.jpg", "living room", "kitchen", "bedroom"],
     hood: "Beacon Hill",
     listed: daysAgo(4, "11:00"),
     views: 655,

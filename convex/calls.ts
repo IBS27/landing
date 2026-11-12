@@ -274,3 +274,29 @@ export const signals = viewerQuery({
     return rows.map((s) => ({ _id: s._id, fromId: s.fromId, type: s.type, payload: s.payload }));
   },
 });
+
+/** "Report a problem" from the call window's menu: one report per person and call. */
+export const reportProblem = viewerMutation({
+  args: { callId: v.id("calls"), reason: v.string() },
+  handler: async (ctx, { callId, reason }) => {
+    const userId = ctx.viewer._id;
+    await requireParty(ctx, callId, userId);
+    const text = reason.trim().slice(0, 1000);
+    if (!text) throw new ConvexError("Tell us what went wrong.");
+    const existing = await ctx.db
+      .query("reports")
+      .withIndex("by_user_target", (q) =>
+        q.eq("userId", userId).eq("targetType", "call").eq("targetId", callId),
+      )
+      .first();
+    if (existing) await ctx.db.patch(existing._id, { reason: text, createdAt: Date.now() });
+    else
+      await ctx.db.insert("reports", {
+        userId,
+        targetType: "call",
+        targetId: callId,
+        reason: text,
+        createdAt: Date.now(),
+      });
+  },
+});

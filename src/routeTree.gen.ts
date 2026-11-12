@@ -60,6 +60,7 @@ import { Route as MarketplaceIndexRouteImport } from './routes/marketplace/index
 import { Route as MarketplaceGroupsRouteImport } from './routes/marketplace/groups'
 import { Route as MarketplaceInboxRouteImport } from './routes/marketplace/inbox'
 import { Route as MarketplaceNotificationsRouteImport } from './routes/marketplace/notifications'
+import { Route as MarketplaceRentalsRouteImport } from './routes/marketplace/rentals'
 import { Route as MarketplaceSavedRouteImport } from './routes/marketplace/saved'
 import { Route as MarketplaceSearchRouteImport } from './routes/marketplace/search'
 import { Route as MarketplaceStatusRouteImport } from './routes/marketplace/status'
@@ -349,6 +350,11 @@ const MarketplaceNotificationsRoute =
     path: '/marketplace/notifications',
     getParentRoute: () => rootRouteImport,
   } as any)
+const MarketplaceRentalsRoute = MarketplaceRentalsRouteImport.update({
+  id: '/marketplace/rentals',
+  path: '/marketplace/rentals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketplaceSavedRoute = MarketplaceSavedRouteImport.update({
   id: '/marketplace/saved',
   path: '/marketplace/saved',
@@ -560,6 +566,7 @@ export interface FileRoutesByFullPath {
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
   '/marketplace/notifications': typeof MarketplaceNotificationsRoute
+  '/marketplace/rentals': typeof MarketplaceRentalsRoute
   '/marketplace/saved': typeof MarketplaceSavedRoute
   '/marketplace/search': typeof MarketplaceSearchRoute
   '/marketplace/status': typeof MarketplaceStatusRoute
@@ -643,6 +650,7 @@ export interface FileRoutesByTo {
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
   '/marketplace/notifications': typeof MarketplaceNotificationsRoute
+  '/marketplace/rentals': typeof MarketplaceRentalsRoute
   '/marketplace/saved': typeof MarketplaceSavedRoute
   '/marketplace/search': typeof MarketplaceSearchRoute
   '/marketplace/status': typeof MarketplaceStatusRoute
@@ -729,6 +737,7 @@ export interface FileRoutesById {
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
   '/marketplace/notifications': typeof MarketplaceNotificationsRoute
+  '/marketplace/rentals': typeof MarketplaceRentalsRoute
   '/marketplace/saved': typeof MarketplaceSavedRoute
   '/marketplace/search': typeof MarketplaceSearchRoute
   '/marketplace/status': typeof MarketplaceStatusRoute
@@ -816,6 +825,7 @@ export interface FileRouteTypes {
     | '/marketplace/groups'
     | '/marketplace/inbox'
     | '/marketplace/notifications'
+    | '/marketplace/rentals'
     | '/marketplace/saved'
     | '/marketplace/search'
     | '/marketplace/status'
@@ -899,6 +909,7 @@ export interface FileRouteTypes {
     | '/marketplace/groups'
     | '/marketplace/inbox'
     | '/marketplace/notifications'
+    | '/marketplace/rentals'
     | '/marketplace/saved'
     | '/marketplace/search'
     | '/marketplace/status'
@@ -984,6 +995,7 @@ export interface FileRouteTypes {
     | '/marketplace/groups'
     | '/marketplace/inbox'
     | '/marketplace/notifications'
+    | '/marketplace/rentals'
     | '/marketplace/saved'
     | '/marketplace/search'
     | '/marketplace/status'
@@ -1064,6 +1076,7 @@ export interface RootRouteChildren {
   MarketplaceGroupsRoute: typeof MarketplaceGroupsRoute
   MarketplaceInboxRoute: typeof MarketplaceInboxRoute
   MarketplaceNotificationsRoute: typeof MarketplaceNotificationsRoute
+  MarketplaceRentalsRoute: typeof MarketplaceRentalsRoute
   MarketplaceSavedRoute: typeof MarketplaceSavedRoute
   MarketplaceSearchRoute: typeof MarketplaceSearchRoute
   MarketplaceStatusRoute: typeof MarketplaceStatusRoute
@@ -1454,6 +1467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketplaceNotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marketplace/rentals': {
+      id: '/marketplace/rentals'
+      path: '/marketplace/rentals'
+      fullPath: '/marketplace/rentals'
+      preLoaderRoute: typeof MarketplaceRentalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marketplace/saved': {
       id: '/marketplace/saved'
       path: '/marketplace/saved'
@@ -1771,6 +1791,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketplaceGroupsRoute: MarketplaceGroupsRoute,
   MarketplaceInboxRoute: MarketplaceInboxRoute,
   MarketplaceNotificationsRoute: MarketplaceNotificationsRoute,
+  MarketplaceRentalsRoute: MarketplaceRentalsRoute,
   MarketplaceSavedRoute: MarketplaceSavedRoute,
   MarketplaceSearchRoute: MarketplaceSearchRoute,
   MarketplaceStatusRoute: MarketplaceStatusRoute,

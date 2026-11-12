@@ -93,29 +93,30 @@ export function StoriesTray() {
 }
 
 function StoryTile({ bucket, label, own }: { bucket: StoryBucket; label: string; own: boolean }) {
-  const latest = bucket.stories[bucket.stories.length - 1];
+  // The tile previews the story it opens: the first unseen one (else the first).
+  const entry = entryStory(bucket);
   // Your own story and people you've caught up on get a grey ring.
   const seen = own || bucket.seen;
   return (
     <Link
       to="/stories/$storyId"
-      params={{ storyId: entryStory(bucket)._id }}
+      params={{ storyId: entry._id }}
       aria-label={own ? "Your story" : `${label}'s story`}
       className="group relative h-[250px] w-[140px] shrink-0 overflow-hidden rounded-lg bg-black text-left shadow-base"
     >
-      {latest.background || !latest.media.url ? (
+      {entry.background || !entry.media.url ? (
         <span
           className="flex h-full w-full items-center justify-center p-3 text-center font-semibold text-[13px] text-white transition-transform duration-300 group-hover:scale-[1.02]"
           style={{
-            background: storyBackground(latest.background),
-            color: storyTextColor(latest.background),
+            background: storyBackground(entry.background),
+            color: storyTextColor(entry.background),
           }}
         >
-          <span className="line-clamp-5">{latest.text}</span>
+          <span className="line-clamp-5">{entry.text}</span>
         </span>
-      ) : latest.media.kind === "video" && !latest.media.poster ? (
+      ) : entry.media.kind === "video" && !entry.media.poster ? (
         <video
-          src={latest.media.url}
+          src={entry.media.url}
           muted
           preload="metadata"
           aria-hidden
@@ -123,7 +124,7 @@ function StoryTile({ bucket, label, own }: { bucket: StoryBucket; label: string;
         />
       ) : (
         <img
-          src={latest.media.kind === "video" ? latest.media.poster : latest.media.url}
+          src={entry.media.kind === "video" ? entry.media.poster : entry.media.url}
           alt=""
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
         />

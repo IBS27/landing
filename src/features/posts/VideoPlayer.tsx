@@ -8,10 +8,11 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { useQ } from "@/app/viewer";
+import { useM, useQ } from "@/app/viewer";
 import { cn } from "@/lib/format";
 import { Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 
 /* ------------------------------------------------------------------ */
 /* Shared state                                                        */
@@ -125,6 +126,43 @@ export function useVideoPrefs() {
   };
 }
 
+/**
+ * Records a view of the post's video once it has actually played for 3
+ * seconds (seeking and looping don't count), which clears it from the
+ * Watchlist's "new videos".
+ */
+export function useRecordView(ref: RefObject<HTMLVideoElement | null>, postId?: string) {
+  const record = useM(api.media.recordView);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !postId) return;
+    let watched = 0;
+    let last = el.currentTime;
+    let done = false;
+    const onTime = () => {
+      const delta = el.currentTime - last;
+      last = el.currentTime;
+      if (done || el.paused || delta <= 0 || delta > 1.5) return;
+      watched += delta;
+      if (watched >= 3) {
+        done = true;
+        record({ postId: postId as Id<"posts"> }).catch(() => {
+          done = false;
+        });
+      }
+    };
+    const onSeeked = () => {
+      last = el.currentTime;
+    };
+    el.addEventListener("timeupdate", onTime);
+    el.addEventListener("seeked", onSeeked);
+    return () => {
+      el.removeEventListener("timeupdate", onTime);
+      el.removeEventListener("seeked", onSeeked);
+    };
+  }, [ref, postId, record]);
+}
+
 /** Plays `el`, falling back to muted playback when the browser blocks sound. */
 export function safePlay(el: HTMLVideoElement) {
   el.play().catch(() => {
@@ -190,10 +228,13 @@ const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 /**
  * Facebook's inline video player (feed, Watch, Marketplace). Autoplays muted
  * once at least half of it is on screen (unless Settings → Media → Autoplay is
- * Off) and pauses when it scrolls away; a click toggles playback. When a clip
- * ends the bar hides and a centred "Replay" sits over the dimmed last frame. Hovering reveals the control bar: play/pause, time,
- * scrubber, settings, fullscreen and volume. The video is letterboxed on black
- * inside whatever box the caller sizes.
+ * Off) and pauses when it scrolls away; a click toggles playback. Muted
+ * autoplay loops; once the viewer starts playback themselves or turns the
+ * sound on, the clip plays to its end, where the bar hides and a centred
+ * "Replay" sits over the dimmed last frame. Vertical (Reel-style) clips always
+ * loop. Hovering reveals the control bar: play/pause, time, scrubber,
+ * settings, fullscreen and volume. The video is letterboxed on black inside
+ * whatever box the caller sizes. With `postId`, ≥3s of playback counts as a view.
  */
 export function VideoPlayer({
   src,
@@ -204,6 +245,7 @@ export function VideoPlayer({
   autoPlay = true,
   loop = false,
   fit = "contain",
+  postId,
 }: {
   src: string;
   poster?: string;
@@ -214,6 +256,8 @@ export function VideoPlayer({
   autoPlay?: boolean;
   loop?: boolean;
   fit?: "contain" | "cover";
+  /** The post the video belongs to: playing it ≥3s records a view. */
+  postId?: string;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const ref = useRef<HTMLVideoElement>(null);
@@ -230,6 +274,11 @@ export function VideoPlayer({
   const idle = useRef<number | undefined>(undefined);
   const prefs = useVideoPrefs();
   const autoplayOn = autoPlay && prefs.autoplay === true;
+  /** The viewer started playback themselves or listened with sound: no more looping. */
+  const [engaged, setEngaged] = useState(false);
+  const [vertical, setVertical] = useState(false);
+  const loops = loop || vertical || !engaged;
+  useRecordView(ref, postId);
 
   useEffect(() => {
     const el = ref.current;
@@ -258,6 +307,10 @@ export function VideoPlayer({
   }, [state.playing]);
 
   useEffect(() => {
+    if (sound && state.playing) setEngaged(true);
+  }, [sound, state.playing]);
+
+  useEffect(() => {
     const onFs = () => setFullscreen(document.fullscreenElement === root.current);
     document.addEventListener("fullscreenchange", onFs);
     return () => document.removeEventListener("fullscreenchange", onFs);
@@ -268,6 +321,7 @@ export function VideoPlayer({
   const replay = useCallback(() => {
     const el = ref.current;
     if (!el) return;
+    setEngaged(true);
     userPaused.current = false;
     el.currentTime = 0;
     safePlay(el);
@@ -277,10 +331,12 @@ export function VideoPlayer({
     const el = ref.current;
     if (!el) return;
     if (el.ended) {
+      setEngaged(true);
       userPaused.current = false;
       el.currentTime = 0;
       safePlay(el);
     } else if (el.paused) {
+      setEngaged(true);
       userPaused.current = false;
       safePlay(el);
     } else {
@@ -321,10 +377,13 @@ export function VideoPlayer({
         src={src}
         poster={poster}
         muted={!sound}
-        loop={loop}
+        loop={loops}
         playsInline
         preload="metadata"
         aria-label={label}
+        onLoadedMetadata={(e) =>
+          setVertical(e.currentTarget.videoHeight > e.currentTarget.videoWidth)
+        }
         onClick={toggle}
         onDoubleClick={toggleFullscreen}
         onEnded={() => {
@@ -389,6 +448,7 @@ export function VideoPlayer({
             time={state.time}
             duration={state.duration}
             onSeek={(t) => {
+              setEngaged(true);
               if (ref.current) ref.current.currentTime = t;
             }}
           />

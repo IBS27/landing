@@ -2,9 +2,10 @@ import { cn } from "@/lib/format";
 import type { Game } from "./games";
 
 /**
- * Key art for a game: `cover` is the 16:9 painting (some with the game's
- * wordmark, as on Facebook), `icon` its square app icon. Both are pre-rendered
- * to public/seed/games by `bun scripts/game-art/build.ts`.
+ * Key art for a game, pre-rendered to public/seed/games by
+ * `bun scripts/game-art/build.ts`: `cover` is the 1280×720 painting with the
+ * game's wordmark, `thumb` the same at 480×270 for small tiles, and `icon` the
+ * square app icon cropped around the hero.
  */
 export function GameCover({
   game,
@@ -12,12 +13,12 @@ export function GameCover({
   className,
 }: {
   game: Game;
-  variant?: "cover" | "icon";
+  variant?: "cover" | "thumb" | "icon";
   className?: string;
 }) {
   return (
     <img
-      src={`/seed/games/${game.id}${variant === "icon" ? "-icon" : ""}.jpg`}
+      src={`/seed/games/${game.id}${variant === "cover" ? "" : `-${variant}`}.webp`}
       alt=""
       loading="lazy"
       decoding="async"

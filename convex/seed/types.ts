@@ -180,6 +180,8 @@ export type PostSeed = {
   readonly mood?: Mood;
   /** People guaranteed among the reactors (e.g. the main persona). */
   readonly likedBy?: readonly Handle[];
+  /** People kept out of the generated reactors (e.g. the main persona on most Reels). */
+  readonly notLikedBy?: readonly Handle[];
   readonly comments?: readonly CommentSeed[];
 };
 
