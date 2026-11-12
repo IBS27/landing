@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useQ, useViewer } from "@/app/viewer";
 import { groupParams } from "@/features/feed/links";
-import { CreatePostModal, PostCard, PostSkeleton } from "@/features/posts";
+import { CreatePostModal, MediaThumb, PostCard, PostSkeleton } from "@/features/posts";
 import { cn } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger, Tooltip } from "@/ui/overlays";
 import { Avatar, Card, Skeleton } from "@/ui/primitives";
@@ -198,7 +198,9 @@ function FeaturedCard({ group }: { group: GroupView }) {
                   className="flex w-[220px] shrink-0 flex-col overflow-hidden rounded-lg border border-divider hover:bg-hover"
                 >
                   {p.media[0] ? (
-                    <img src={p.media[0].url} alt="" className="h-[120px] w-full object-cover" />
+                    <div className="h-[120px]">
+                      <MediaThumb media={p.media[0]} />
+                    </div>
                   ) : (
                     <div className="line-clamp-5 h-[120px] bg-comment p-3 text-[15px] text-primary">
                       {p.text}
@@ -460,11 +462,7 @@ function RecentMediaCard({ group }: { group: GroupView }) {
                 params={{ username: m.username, postId: m.postId }}
                 className="aspect-square overflow-hidden first:rounded-tl-lg [&:nth-child(2)]:rounded-tr-lg [&:nth-child(3)]:rounded-bl-lg [&:nth-child(4)]:rounded-br-lg"
               >
-                <img
-                  src={m.url}
-                  alt=""
-                  className="h-full w-full object-cover hover:brightness-95"
-                />
+                <MediaThumb media={m} className="hover:brightness-95" />
               </Link>
             ))}
       </div>
