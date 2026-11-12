@@ -259,7 +259,7 @@ export const aiRun = v.object({
   output: v.string(),
   /** Keys of the sources the output cites; every one was in the run's input. */
   cited: v.array(v.string()),
-  /** The model that answered (a refusal fallback can switch models). */
+  /** The model that answered. */
   model: v.optional(v.string()),
   attempts: v.number(),
   /** Why earlier attempts were rejected, or the API error. */

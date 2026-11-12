@@ -37,3 +37,4 @@ Read first:
 - Don't edit files another in-progress task owns, except for a minimal fix to a clear break. Call it out in the PR.
 - The brief's principles are hard requirements: never use protected traits for matching, no live location, the user approves before Muse sends anything, every score and recommendation cites its sources, and core flows work without AI.
 - Each person uses their own Convex dev deployment (`bunx convex dev`).
+- AI runs on Meta's Muse models only (Muse Spark for text, the Muse family for media). Never add another provider's models, and upgrade when Meta ships a newer Muse model. See "AI calls" in `design/BUILD_GUIDE.md`.
