@@ -292,8 +292,10 @@ async function messageView(ctx: QueryCtx, m: Doc<"messages">) {
 export type MessageView = Awaited<ReturnType<typeof messageView>>;
 
 /**
- * Messages newest first. Only sent messages are shared; drafts and pending
- * agent messages are visible to their sender alone.
+ * Messages newest first. Only sent messages are shared; drafts are visible to
+ * their sender alone. Muse's `pending_approval` drafts aren't returned: their
+ * owner sees them through `proposals.forConversation`, which also hides them
+ * once a source Muse cited is hidden from the owner (#6).
  */
 export const messages = viewerQuery({
   args: { conversationId: v.id("conversations"), paginationOpts: paginationOptsValidator },
@@ -305,7 +307,12 @@ export const messages = viewerQuery({
       .query("messages")
       .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
       .order("desc")
-      .filter((q) => q.or(q.eq(q.field("status"), "sent"), q.eq(q.field("senderId"), viewerId)))
+      .filter((q) =>
+        q.or(
+          q.eq(q.field("status"), "sent"),
+          q.and(q.eq(q.field("senderId"), viewerId), q.neq(q.field("status"), "pending_approval")),
+        ),
+      )
       .paginate(paginationOpts);
     return { ...result, page: await Promise.all(result.page.map((m) => messageView(ctx, m))) };
   },

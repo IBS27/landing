@@ -151,9 +151,7 @@ export function MessageList({
   const memberMap = new Map(detail.members.map((m) => [m._id, m]));
   // Muse drafts waiting for approval render as ChatDraft cards at the bottom (#6).
   const drafts = useQ(api.proposals.forConversation, { conversationId });
-  const chronological = [...results]
-    .reverse()
-    .filter((m) => !(m.status === "pending_approval" && m.author.kind === "agent"));
+  const chronological = [...results].reverse();
   const items = buildItems(chronological, detail.members, viewer._id);
   const lastMine = [...chronological].reverse().find((m) => m.senderId === viewer._id);
   const isGroup = detail.kind === "group";

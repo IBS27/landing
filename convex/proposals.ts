@@ -7,6 +7,7 @@ import { type Audience, loadAudience } from "./lib/posts";
 import {
   assertPayload,
   assertSameTarget,
+  citationsVisible,
   dropDraft,
   executeProposal,
   isExpired,
@@ -145,11 +146,16 @@ async function conversationChip(
   };
 }
 
+/**
+ * What the owner sees of a proposal, or null when a cited source is now hidden
+ * from them (see `citationsVisible`): then nothing it says is shown.
+ */
 async function proposalView(ctx: QueryCtx, p: Doc<"proposals">, a: Audience, now: number) {
   const pay = p.payload;
   const sources: NonEmpty<CitedSource> | null = p.citations
     ? await resolveCitations(ctx, p.citations, a)
     : null;
+  if (p.citations && !sources) return null;
   const base = {
     _id: p._id,
     status: isExpired(p, now) ? ("expired" as const) : p.status,
@@ -209,7 +215,9 @@ async function proposalView(ctx: QueryCtx, p: Doc<"proposals">, a: Audience, now
     }
   }
 }
-export type ProposalView = Awaited<ReturnType<typeof proposalView>>;
+export type ProposalView = NonNullable<Awaited<ReturnType<typeof proposalView>>>;
+
+const present = <T>(x: T | null): x is T => x !== null;
 
 /**
  * Everything waiting on the viewer: what expires soonest first, then newest.
@@ -231,11 +239,11 @@ export const pending = viewerQuery({
           (x.expiresAt ?? Number.POSITIVE_INFINITY) - (y.expiresAt ?? Number.POSITIVE_INFINITY) ||
           y.createdAt - x.createdAt,
       );
-    return Promise.all(live.map((p) => proposalView(ctx, p, a, now)));
+    return (await Promise.all(live.map((p) => proposalView(ctx, p, a, now)))).filter(present);
   },
 });
 
-/** The count badge on Inbox. */
+/** The count badge on Inbox: the proposals `pending` shows. */
 export const pendingCount = viewerQuery({
   args: {},
   handler: async (ctx) => {
@@ -244,7 +252,10 @@ export const pendingCount = viewerQuery({
       .query("proposals")
       .withIndex("by_owner_status", (q) => q.eq("ownerId", ctx.viewer._id).eq("status", "pending"))
       .collect();
-    return rows.filter((p) => !isExpired(p, now)).length;
+    const a = await loadAudience(ctx, ctx.viewer._id);
+    const live = rows.filter((p) => !isExpired(p, now));
+    const shown = await Promise.all(live.map((p) => citationsVisible(ctx, p, a)));
+    return shown.filter(Boolean).length;
   },
 });
 
@@ -260,17 +271,21 @@ export const history = viewerQuery({
       .take(100);
     const done = rows.filter((p) => p.status !== "pending" || isExpired(p, now)).slice(0, 40);
     const a = await loadAudience(ctx, ctx.viewer._id);
-    return Promise.all(
-      done.map(async (p) => ({
-        ...(await proposalView(ctx, p, a, now)),
-        events: (
-          await ctx.db
-            .query("proposalEvents")
-            .withIndex("by_proposal", (q) => q.eq("proposalId", p._id))
-            .collect()
-        ).map((e) => ({ action: e.action, actor: e.actor, at: e.at })),
-      })),
+    const rowsOut = await Promise.all(
+      done.map(async (p) => {
+        const view = await proposalView(ctx, p, a, now);
+        if (!view) return null;
+        const events = await ctx.db
+          .query("proposalEvents")
+          .withIndex("by_proposal", (q) => q.eq("proposalId", p._id))
+          .collect();
+        return {
+          ...view,
+          events: events.map((e) => ({ action: e.action, actor: e.actor, at: e.at })),
+        };
+      }),
     );
+    return rowsOut.filter(present);
   },
 });
 
@@ -290,7 +305,7 @@ export const forConversation = viewerQuery({
         p.payload.conversationId === conversationId,
     );
     const a = await loadAudience(ctx, ctx.viewer._id);
-    return Promise.all(mine.map((p) => proposalView(ctx, p, a, now)));
+    return (await Promise.all(mine.map((p) => proposalView(ctx, p, a, now)))).filter(present);
   },
 });
 

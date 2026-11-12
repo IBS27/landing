@@ -1,11 +1,12 @@
 import { ConvexError } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
-import type { MutationCtx } from "../_generated/server";
+import type { MutationCtx, QueryCtx } from "../_generated/server";
 import type { Citations, ProposalPayload } from "../validators";
-import { assertCitable } from "./citations";
+import { dmBlockNotice } from "./blocks";
+import { assertCitable, resolveCitations } from "./citations";
 import { notify } from "./notify";
-import { loadAudience } from "./posts";
+import { type Audience, loadAudience } from "./posts";
 import { friendIds } from "./users";
 
 /**
@@ -28,7 +29,7 @@ export type ProposeArgs = {
   payload: ProposalPayload;
   /** One line on why Muse suggests this ("You both climb and start in June"). */
   rationale: string;
-  /** Required for recommendations; optional for plain replies. */
+  /** Required for recommendations (offers, Events, Groups); optional for plain replies. */
   citations?: Citations;
   origin: Doc<"proposals">["origin"];
   /** Defaults to OFFER_TTL_MS for offers and DEFAULT_TTL_MS for the rest. */
@@ -40,6 +41,8 @@ export async function propose(ctx: MutationCtx, a: ProposeArgs): Promise<Id<"pro
   if (!rationale) throw new ConvexError("A proposal needs a rationale");
   await assertPayload(ctx, a.ownerId, a.payload);
   if (a.citations) await assertCitable(ctx, a.citations, await loadAudience(ctx, a.ownerId));
+  else if (a.payload.kind !== "message")
+    throw new ConvexError("Recommendations need citations; only plain replies may skip them");
 
   const now = Date.now();
   const ttl = a.ttlMs ?? (a.payload.kind === "offer" ? OFFER_TTL_MS : DEFAULT_TTL_MS);
@@ -71,24 +74,41 @@ export async function assertPayload(
     case "message":
     case "offer": {
       if (!p.text.trim()) throw new ConvexError("The message is empty");
+      const conv = await ctx.db.get(p.conversationId);
       const member = await ctx.db
         .query("conversationMembers")
         .withIndex("by_conversation_user", (q) =>
           q.eq("conversationId", p.conversationId).eq("userId", ownerId),
         )
         .unique();
-      if (!member) throw new ConvexError("Not in this conversation");
+      if (!conv || !member) throw new ConvexError("Not in this conversation");
+      // Same rule as `messenger.send`: nothing goes across a block.
+      const blocked = await dmBlockNotice(ctx, conv, ownerId);
+      if (blocked) throw new ConvexError(blocked);
       if (p.kind === "offer") {
         if (!Number.isInteger(p.amount) || p.amount < 0)
           throw new ConvexError("Offers are whole dollars");
+        if (conv.kind !== "marketplace" || conv.listingId !== p.listingId)
+          throw new ConvexError("Offers go in the listing's own chat");
         const listing = await ctx.db.get(p.listingId);
         if (!listing || listing.status === "sold") throw new ConvexError("Listing not available");
+        // The sent message carries the amount only in its text, so they must agree.
+        if (!statesAmount(p.text, p.amount))
+          throw new ConvexError(`The message should say the offer amount, $${p.amount}`);
       }
       return;
     }
     case "event": {
       if (!p.title.trim()) throw new ConvexError("Name the event");
       if (p.startAt < Date.now()) throw new ConvexError("The event is in the past");
+      const groupId = p.groupId;
+      if (groupId) {
+        const member = await ctx.db
+          .query("groupMembers")
+          .withIndex("by_group_user", (q) => q.eq("groupId", groupId).eq("userId", ownerId))
+          .unique();
+        if (!member) throw new ConvexError("You're not in this group");
+      }
       return assertFriends(ctx, ownerId, p.inviteIds);
     }
     case "group": {
@@ -98,6 +118,18 @@ export async function assertPayload(
       return assertFriends(ctx, ownerId, p.inviteIds);
     }
   }
+}
+
+/** The ways offer text may write `amount` in whole dollars ("$1200" or "$1,200"). */
+export function amountSpellings(amount: number): string[] {
+  return [...new Set([`$${amount}`, `$${amount.toLocaleString("en-US")}`])];
+}
+
+/** Whether `text` names `amount` in whole dollars ("$80", but not the start of "$800" or "$80.50"). */
+export function statesAmount(text: string, amount: number): boolean {
+  return amountSpellings(amount).some((d) =>
+    new RegExp(`${d.replace(/[$,]/g, "\\$&")}(?!\\d|[.,]\\d)`).test(text),
+  );
 }
 
 async function assertFriends(ctx: MutationCtx, ownerId: Id<"users">, ids: Id<"users">[]) {
@@ -120,6 +152,8 @@ export function assertSameTarget(before: ProposalPayload, after: ProposalPayload
     throw new ConvexError("Can't move a draft to another chat");
   if (before.kind === "offer" && after.kind === "offer" && before.listingId !== after.listingId)
     throw new ConvexError("Can't move an offer to another listing");
+  if (before.kind === "event" && after.kind === "event" && before.groupId !== after.groupId)
+    throw new ConvexError("Can't move an event to another group");
 }
 
 /** Offer drafts carry the listing as an attachment so the chat shows what it's for. */
@@ -177,6 +211,19 @@ export async function logEvent(
   await ctx.db.insert("proposalEvents", { proposalId, ownerId, action, actor, at });
 }
 
+/**
+ * Whether the proposal may still be shown or acted on: its citations, if any,
+ * still resolve for the owner. Once a source is hidden from them, the rationale
+ * and draft may carry what it said, so `resolveCitations`'s contract is to hide it.
+ */
+export async function citationsVisible(
+  ctx: QueryCtx,
+  p: Doc<"proposals">,
+  a: Audience,
+): Promise<boolean> {
+  return !p.citations || (await resolveCitations(ctx, p.citations, a)) !== null;
+}
+
 export function isExpired(p: Doc<"proposals">, now = Date.now()) {
   return p.status === "expired" || (p.status === "pending" && !!p.expiresAt && p.expiresAt <= now);
 }
@@ -192,6 +239,8 @@ export async function executeProposal(
   const ownerId = proposal.ownerId;
   const p = proposal.payload;
   await assertPayload(ctx, ownerId, p);
+  if (!(await citationsVisible(ctx, proposal, await loadAudience(ctx, ownerId))))
+    throw new ConvexError("Muse's sources for this are no longer available to you");
   const now = Date.now();
   switch (p.kind) {
     case "message":

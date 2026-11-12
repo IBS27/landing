@@ -87,6 +87,16 @@ function agentName(agent: string) {
   return agent.charAt(0).toUpperCase() + agent.slice(1);
 }
 
+/**
+ * Keeps the dollar figure in an offer's text in step with its amount: the sent
+ * message carries the amount only in its text (the server checks they agree).
+ */
+function withAmount(text: string, from: number, to: number) {
+  const spellings = [`${from}`, from.toLocaleString("en-US")].map((d) => d.replace(/,/g, "\\,"));
+  const re = new RegExp(`\\$(?:${spellings.join("|")})(?!\\d|[.,]\\d)`, "g");
+  return text.replace(re, () => `$${to.toLocaleString("en-US")}`);
+}
+
 function approveLabel(p: ProposalView, payload: ProposalPayload) {
   switch (payload.kind) {
     case "message":
@@ -406,12 +416,14 @@ function EditForm({
                 step={5}
                 className={cn(field, "w-32 pl-6")}
                 value={draft.amount}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const amount = Math.max(0, Math.round(Number(e.target.value) || 0));
                   onChange({
                     ...draft,
-                    amount: Math.max(0, Math.round(Number(e.target.value) || 0)),
-                  })
-                }
+                    amount,
+                    text: withAmount(draft.text, draft.amount, amount),
+                  });
+                }}
               />
             </span>
           </label>
