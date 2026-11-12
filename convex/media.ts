@@ -25,6 +25,11 @@ export function isReelPost(p: Doc<"posts">) {
   return p.isReel === true || (!!m.width && !!m.height && m.height > m.width);
 }
 
+/** A post the Video feed shows: a non-sponsored, non-Reel, non-event video post. */
+function isFeedVideo(p: Doc<"posts">) {
+  return !!videoOf(p) && !p.sponsored && !isReelPost(p) && !p.eventId;
+}
+
 /** Video feed: visible non-Reel video posts, newest first. */
 export const videos = viewerQuery({
   args: { paginationOpts: paginationOptsValidator },
@@ -34,14 +39,7 @@ export const videos = viewerQuery({
       .query("posts")
       .withIndex("by_created")
       .order("desc")
-      .filterWith(
-        async (p) =>
-          !!videoOf(p) &&
-          !p.sponsored &&
-          !isReelPost(p) &&
-          !p.eventId &&
-          (await canView(ctx, p, a)),
-      )
+      .filterWith(async (p) => isFeedVideo(p) && (await canView(ctx, p, a)))
       .paginate(paginationOpts);
     return { ...result, page: await enrichPosts(ctx, result.page, a) };
   },
@@ -253,7 +251,9 @@ const WEEK = 7 * 86_400_000;
 /**
  * "Your Watchlist": the Pages and people the viewer follows, newest video
  * first, each with how many of its videos from the last 7 days the viewer
- * hasn't watched yet ("N new videos"). Followed people only appear once
+ * hasn't watched yet ("N new videos"). Only videos the Video feed shows
+ * count (Reels live in Reels), so watching them there clears the count.
+ * Followed people only appear once
  * they've posted a video; followed Pages always do.
  */
 export const watchlist = viewerQuery({
@@ -276,8 +276,7 @@ export const watchlist = viewerQuery({
           .order("desc")
           .take(30);
         const videos = [];
-        for (const p of recent)
-          if (videoOf(p) && !p.sponsored && (await canView(ctx, p, a))) videos.push(p);
+        for (const p of recent) if (isFeedVideo(p) && (await canView(ctx, p, a))) videos.push(p);
         if (videos.length === 0 && u.kind !== "page") return null;
         let newCount = 0;
         for (const p of videos) {

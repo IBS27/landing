@@ -565,6 +565,21 @@ export const pagePosts: readonly PostSeed[] = [
     comments: [{ by: "arjun.mehta", text: "Grace Liu the pack you wanted is on sale" }],
   },
   {
+    // Not a product page, so its CTA reads "Learn more" (the ad Facebook leads into the Reels shelf with).
+    by: "rainlineoutdoor",
+    at: daysAgo(2, "17:00"),
+    sponsored: true,
+    text: "Heading into the backcountry this winter? Our free avalanche awareness nights cover reading the NWAC forecast, beacon basics and what to pack. No experience needed.",
+    link: {
+      url: "https://rainline.co/clinics/avalanche-awareness",
+      title: "Free Avalanche Awareness Nights",
+      domain: "rainline.co",
+      description: "Thursdays at 7 PM at our SLU flagship. Reserve a spot online.",
+      image: "ski equipment",
+    },
+    reactions: 12,
+  },
+  {
     by: "rainlineoutdoor",
     at: daysAgo(3, "12:00"),
     text: "The community ski & snowboard swap is this Sunday at our SLU flagship. Drop off gear Saturday 4 to 7. 15% of sales go to trail maintenance.",

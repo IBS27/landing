@@ -6,7 +6,15 @@ import {
   useState,
 } from "react";
 import { cn } from "@/lib/format";
-import { type EngineProps, GameFrame, type Phase, randInt, useKeys, useReport } from "./kit";
+import {
+  type EngineProps,
+  GameFrame,
+  gameScale,
+  type Phase,
+  randInt,
+  useKeys,
+  useReport,
+} from "./kit";
 
 /**
  * Merge board: tap the generator for items, drag two identical items together
@@ -234,10 +242,11 @@ export default function MergeBoard({ game, onScore }: EngineProps) {
     setCursor(null);
     const x0 = e.clientX;
     const y0 = e.clientY;
+    const k = gameScale(e.currentTarget);
     let moved = false;
     const move = (ev: PointerEvent) => {
-      const dx = ev.clientX - x0;
-      const dy = ev.clientY - y0;
+      const dx = (ev.clientX - x0) / k;
+      const dy = (ev.clientY - y0) / k;
       if (!moved && Math.hypot(dx, dy) < 5) return;
       moved = true;
       setDrag({ from, dx, dy });

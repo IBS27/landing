@@ -14,8 +14,12 @@ export const Route = createRootRoute({
 
 function RootLayout() {
   const { viewer } = useViewerContext();
-  // Messenger call pop-up windows render bare, without Facebook's chrome.
-  const bare = useRouterState({ select: (s) => s.location.pathname.startsWith("/call/") });
+  // Messenger call pop-up windows and the Live Producer (its own slim header)
+  // render bare, without Facebook's chrome.
+  const bare = useRouterState({
+    select: (s) =>
+      s.location.pathname.startsWith("/call/") || s.location.pathname === "/live/producer",
+  });
   if (viewer === undefined) return <Splash />;
   if (viewer === null)
     return (

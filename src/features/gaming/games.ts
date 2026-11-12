@@ -350,8 +350,10 @@ export const GAMES: Game[] = [
 ];
 
 /**
- * The Play home splits the catalog into disjoint sections (Featured, Top picks,
- * Most played) so no game shows twice on one screen.
+ * The Play home splits the catalog so no game shows twice on one screen: Top
+ * picks, Most played and Recently released are disjoint, and Most played (the
+ * only shelf that can share the first screen with Featured) leaves out the
+ * Featured games. Recently released sits far below Featured, so it may repeat one.
  */
 export const FEATURED = ["solitaire-grove", "orchard-friends", "tower-legends", "harbor-tycoon"];
 export const TOP_PICKS = [
@@ -367,8 +369,6 @@ export const TOP_PICKS = [
   "solitaire-social",
   "puck-rush",
   "checkers-club",
-  "royal-21",
-  "snake-trail",
 ];
 
 export const byId = new Map(GAMES.map((x) => [x.id, x]));
@@ -377,12 +377,10 @@ export const byId = new Map(GAMES.map((x) => [x.id, x]));
 export const RECENTLY_RELEASED = [
   "snake-trail",
   "royal-21",
-  "checkers-club",
-  "puck-rush",
-  "solitaire-social",
-  "castle-clash",
-  "jigsaw-calm",
-  "rail-city",
+  "harbor-tycoon",
+  "tower-legends",
+  "orchard-friends",
+  "solitaire-grove",
 ];
 
 /**
@@ -403,9 +401,9 @@ function fnv(text: string) {
   return h >>> 0;
 }
 
-/** Everything not featured or picked, ranked by players. */
+/** Everything not featured, picked or recently released, ranked by players. */
 export const MOST_PLAYED = GAMES.filter(
-  (x) => !FEATURED.includes(x.id) && !TOP_PICKS.includes(x.id),
+  (x) => ![...FEATURED, ...TOP_PICKS, ...RECENTLY_RELEASED].includes(x.id),
 ).sort((a, b) => b.players - a.players);
 
 export function playersLabel(n: number) {

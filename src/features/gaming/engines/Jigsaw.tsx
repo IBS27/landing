@@ -2,7 +2,15 @@ import { Eye } from "lucide-react";
 import { type PointerEvent as ReactPointerEvent, useRef, useState } from "react";
 import { cn } from "@/lib/format";
 import { Button } from "@/ui/primitives";
-import { type EngineProps, GameFrame, type Phase, shuffle, useKeys, useReport } from "./kit";
+import {
+  type EngineProps,
+  GameFrame,
+  gameScale,
+  type Phase,
+  shuffle,
+  useKeys,
+  useReport,
+} from "./kit";
 
 /**
  * Jigsaw in swap mode: the picture is cut into pieces and scrambled; drag a
@@ -97,10 +105,11 @@ export default function Jigsaw({ game, onScore }: EngineProps) {
     setCursor(null);
     const x0 = e.clientX;
     const y0 = e.clientY;
+    const k = gameScale(e.currentTarget);
     let moved = false;
     const move = (ev: PointerEvent) => {
-      const dx = ev.clientX - x0;
-      const dy = ev.clientY - y0;
+      const dx = (ev.clientX - x0) / k;
+      const dy = (ev.clientY - y0) / k;
       if (!moved && Math.hypot(dx, dy) < 5) return;
       moved = true;
       setDrag({ from, dx, dy });

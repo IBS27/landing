@@ -32,7 +32,7 @@ export function MiniGame(props: EngineProps) {
   return (
     <Suspense
       fallback={
-        <div className="flex h-[420px] items-center justify-center">
+        <div className="flex h-[420px] w-[388px] items-center justify-center">
           <Spinner />
         </div>
       }

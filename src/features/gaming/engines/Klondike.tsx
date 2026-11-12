@@ -13,7 +13,7 @@ import {
   type PlayingCard,
   SUIT_GLYPH,
 } from "./cards";
-import { type EngineProps, GameFrame, type Phase, useKeys, useReport } from "./kit";
+import { type EngineProps, GameFrame, gameScale, type Phase, useKeys, useReport } from "./kit";
 
 /** Klondike solitaire, draw one, with Windows-style scoring. */
 
@@ -268,10 +268,11 @@ export default function Klondike({ game, onScore }: EngineProps) {
     const ids = new Set(cards.map((c) => c.id));
     const x0 = e.clientX;
     const y0 = e.clientY;
+    const k = gameScale(e.currentTarget);
     let moved = false;
     const move = (ev: PointerEvent) => {
-      const dx = ev.clientX - x0;
-      const dy = ev.clientY - y0;
+      const dx = (ev.clientX - x0) / k;
+      const dy = (ev.clientY - y0) / k;
       if (!moved && Math.hypot(dx, dy) < 5) return;
       moved = true;
       setDrag({ ids, dx, dy });

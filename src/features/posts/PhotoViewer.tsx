@@ -8,9 +8,11 @@ import { Tooltip } from "@/ui/overlays";
 import { Spinner } from "@/ui/primitives";
 import { ActionBar } from "./ActionBar";
 import { CommentComposer, CommentList } from "./CommentsSection";
+import { FollowLink } from "./FollowLink";
 import { PostContent, PostHeader } from "./PostCard";
 import type { PostView } from "./types";
 import { VIEWER_ATTR, ViewerCornerVeils } from "./ViewerVeil";
+import { ViewsMeta } from "./ViewsMeta";
 
 const ZOOM_STEPS = [1, 1.5, 2, 3, 4];
 
@@ -88,7 +90,11 @@ export function TheaterPostPanel({ post }: { post: PostView }) {
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto border-divider border-t">
         <div className="pt-1">
-          <PostHeader post={post} />
+          <PostHeader
+            post={post}
+            nameSuffix={<FollowLink post={post} />}
+            metaSuffix={<ViewsMeta post={post} />}
+          />
         </div>
         <PostContent
           post={{ ...post, background: null, media: [], attachments: [], shared: null }}

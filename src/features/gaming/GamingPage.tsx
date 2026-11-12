@@ -1,5 +1,23 @@
-import { Bookmark, BookmarkCheck, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Bookmark,
+  BookmarkCheck,
+  ChevronLeft,
+  ChevronRight,
+  Maximize,
+  Minimize,
+  Trophy,
+  X,
+} from "lucide-react";
+import { Dialog as D } from "radix-ui";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useQ, useViewer } from "@/app/viewer";
 import {
   AppRail,
@@ -13,8 +31,7 @@ import { CATEGORY_GLYPH_CLASS, GAME_CATEGORY_GLYPHS } from "@/features/misc/glyp
 import { BellFilled, BookmarkFilled, ControllerFilled } from "@/features/misc/icons";
 import { usePref } from "@/features/misc/settings/controls";
 import { cn } from "@/lib/format";
-import { Modal } from "@/ui/overlays";
-import { Avatar, Button, Card, EmptyState } from "@/ui/primitives";
+import { Avatar, Button, Card, EmptyState, IconButton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import { GameCover } from "./GameCover";
 import { GameSettingsDialog } from "./GameSettingsDialog";
@@ -228,7 +245,7 @@ export function GamingPage() {
       </main>
 
       {playing && (
-        <GameModal
+        <GamePlayer
           game={playing}
           saved={saved.includes(playing.id)}
           best={best[playing.id] ?? 0}
@@ -313,10 +330,12 @@ function FriendsPlaySection({ onPlay }: { onPlay: (g: Game) => void }) {
   const friends = useQ(api.friends.list, { userId: viewer._id });
   const rows = useMemo(() => {
     if (!friends?.length) return [];
-    return GAMES.map((game) => ({
-      game,
-      players: friends.filter((f) => friendPlays(game.id, f._id)),
-    }))
+    // Recently released sits right above: keep the two shelves distinct.
+    return GAMES.filter((game) => !RECENTLY_RELEASED.includes(game.id))
+      .map((game) => ({
+        game,
+        players: friends.filter((f) => friendPlays(game.id, f._id)),
+      }))
       .filter((r) => r.players.length > 0)
       .sort((a, b) => b.players.length - a.players.length || b.game.players - a.game.players)
       .slice(0, 10);
@@ -552,7 +571,12 @@ function CategoryGlyph({ name, selected }: { name: string; selected: boolean }) 
 
 /* ---------- Player ---------- */
 
-function GameModal({
+/**
+ * Facebook's instant-game player: a near full-height dark panel over a dark
+ * backdrop, with a slim header (game, score, Save, full screen, close) and
+ * the game scaled to fill the stage.
+ */
+function GamePlayer({
   game,
   saved,
   best,
@@ -580,35 +604,115 @@ function GameModal({
   latest.current = report;
   const stable = useCallback((s: number) => latest.current(s), []);
 
+  const panel = useRef<HTMLDivElement>(null);
+  const [fullscreen, setFullscreen] = useState(false);
+  useEffect(() => {
+    const on = () => setFullscreen(document.fullscreenElement === panel.current);
+    document.addEventListener("fullscreenchange", on);
+    return () => document.removeEventListener("fullscreenchange", on);
+  }, []);
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void panel.current?.requestFullscreen?.();
+  };
+
   return (
-    <Modal open onOpenChange={(o) => !o && onClose()} title="Instant Games" width={420}>
-      <div className="flex items-center gap-3 px-4 pt-4">
-        <GameIcon game={game} size={48} />
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold text-[17px] text-primary">{game.name}</p>
-          <p className="truncate text-[13px] text-secondary">
-            {game.category} · {playersLabel(game.players)}
-          </p>
-        </div>
-        <Button
-          variant={saved ? "secondary" : "soft"}
-          icon={saved ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
-          onClick={onSave}
+    <D.Root open onOpenChange={(o) => !o && onClose()}>
+      <D.Portal>
+        <D.Overlay className="fixed inset-0 z-[60] bg-black/80" />
+        <D.Content
+          ref={panel}
+          aria-describedby={undefined}
+          // Focus the panel, not the first button (no stray focus ring on Save).
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+            panel.current?.focus();
+          }}
+          className="dark fixed top-1/2 left-1/2 z-[61] flex h-[90vh] w-[min(1200px,calc(100vw-48px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg bg-[#18191a] text-primary shadow-elevated outline-none [&:fullscreen]:rounded-none"
         >
-          {saved ? "Saved" : "Save"}
-        </Button>
+          <div className="flex h-14 shrink-0 items-center gap-3 border-white/10 border-b bg-[#242526] px-3">
+            <GameIcon game={game} size={36} />
+            <div className="min-w-0 flex-1">
+              <D.Title className="truncate font-semibold text-[15px] leading-5">
+                {game.name}
+              </D.Title>
+              <p className="truncate text-[12px] text-secondary leading-4">
+                {game.category} · {playersLabel(game.players)}
+              </p>
+            </div>
+            <span className="text-[13px] text-secondary">
+              Score <span className="font-semibold text-primary">{Math.max(0, score)}</span>
+            </span>
+            <span className="mr-1 flex items-center gap-1 text-[13px] text-secondary">
+              <Trophy size={14} /> Best <span className="font-semibold text-primary">{best}</span>
+            </span>
+            <Button
+              variant={saved ? "secondary" : "soft"}
+              icon={saved ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
+              onClick={onSave}
+            >
+              {saved ? "Saved" : "Save"}
+            </Button>
+            <IconButton
+              label={fullscreen ? "Exit full screen" : "Full screen"}
+              variant="ghost"
+              onClick={toggleFullscreen}
+            >
+              {fullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+            </IconButton>
+            <D.Close asChild>
+              <IconButton label="Close" variant="ghost">
+                <X size={22} strokeWidth={2.2} />
+              </IconButton>
+            </D.Close>
+          </div>
+          <GameStage>
+            <MiniGame game={game} onScore={stable} />
+          </GameStage>
+        </D.Content>
+      </D.Portal>
+    </D.Root>
+  );
+}
+
+/**
+ * Scales the game's fixed-size frame to fit the stage (engines read the scale
+ * from `data-game-scale` for pointer math).
+ */
+function GameStage({ children }: { children: ReactNode }) {
+  const box = useRef<HTMLDivElement>(null);
+  const inner = useRef<HTMLDivElement>(null);
+  const [fit, setFit] = useState<{ k: number; w: number; h: number } | null>(null);
+  useLayoutEffect(() => {
+    const b = box.current;
+    const i = inner.current;
+    if (!b || !i) return;
+    const measure = () => {
+      const w = i.offsetWidth;
+      const h = i.offsetHeight;
+      if (!w || !h) return;
+      const k = Math.min((b.clientWidth - 48) / w, (b.clientHeight - 32) / h, 2.5);
+      setFit({ k: Math.max(0.5, k), w, h });
+    };
+    const ro = new ResizeObserver(measure);
+    ro.observe(b);
+    ro.observe(i);
+    measure();
+    return () => ro.disconnect();
+  }, []);
+  const k = fit?.k ?? 1;
+  return (
+    <div ref={box} className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
+      <div className="relative" style={fit ? { width: fit.w * k, height: fit.h * k } : undefined}>
+        <div
+          ref={inner}
+          data-game-scale={k}
+          className="absolute top-0 left-0 w-max origin-top-left"
+          style={{ transform: `scale(${k})`, visibility: fit ? undefined : "hidden" }}
+        >
+          {children}
+        </div>
       </div>
-      <div className="flex items-center justify-between px-4 pt-3 pb-2 text-[13px] text-secondary">
-        <span>
-          Score <span className="font-semibold text-primary">{Math.max(0, score)}</span>
-        </span>
-        <span className="flex items-center gap-1">
-          <Trophy size={14} /> Best <span className="font-semibold text-primary">{best}</span>
-        </span>
-      </div>
-      <div className="px-4 pb-5">
-        <MiniGame game={game} onScore={stable} />
-      </div>
-    </Modal>
+    </div>
   );
 }

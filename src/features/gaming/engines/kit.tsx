@@ -10,8 +10,20 @@ import type { Game } from "../games";
 export type EngineProps = { game: Game; onScore: (score: number) => void };
 export type Phase = "ready" | "playing" | "over";
 
-/** Width of the play area inside the 420px game dialog. */
+/**
+ * Width of the play area. Engines lay out at this natural size; the game
+ * player scales the whole frame to fit its stage (see `GameStage`).
+ */
 export const BOARD = 388;
+
+/**
+ * The scale the game player draws the board at (1 outside it). Pointer math
+ * in board pixels divides screen distances by it.
+ */
+export function gameScale(el: Element) {
+  const v = Number(el.closest<HTMLElement>("[data-game-scale]")?.dataset.gameScale);
+  return v > 0 ? v : 1;
+}
 
 export function shuffle<T>(xs: readonly T[]): T[] {
   const a = [...xs];
@@ -106,7 +118,8 @@ export function useCanvas(width: number, height: number) {
   useEffect(() => {
     const c = ref.current;
     if (!c) return;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    // The player scales boards up (often ~2x), so keep extra backing pixels to stay crisp.
+    const dpr = Math.min(4, (window.devicePixelRatio || 1) * 2);
     c.width = width * dpr;
     c.height = height * dpr;
     const x = c.getContext("2d");
@@ -116,10 +129,11 @@ export function useCanvas(width: number, height: number) {
   return { ref, ctx };
 }
 
-/** Pointer position relative to an element, in CSS pixels. */
+/** Pointer position relative to an element, in the board's (unscaled) CSS pixels. */
 export function localPoint(e: { clientX: number; clientY: number }, el: Element) {
   const r = el.getBoundingClientRect();
-  return { x: e.clientX - r.left, y: e.clientY - r.top };
+  const k = gameScale(el);
+  return { x: (e.clientX - r.left) / k, y: (e.clientY - r.top) / k };
 }
 
 /**
@@ -165,7 +179,8 @@ export function GameFrame({
   return (
     <div className="flex flex-col gap-2">
       {hud && (
-        <div className="flex h-6 items-center justify-between gap-2 text-[13px] text-secondary [&_b]:font-semibold [&_b]:text-primary">
+        // `w-0 min-w-full`: the HUD and footer span the board without widening the frame.
+        <div className="flex h-6 w-0 min-w-full items-center justify-between gap-2 text-[13px] text-secondary [&_b]:font-semibold [&_b]:text-primary">
           {hud}
         </div>
       )}
@@ -196,7 +211,7 @@ export function GameFrame({
           </div>
         )}
       </div>
-      <div className="flex min-h-8 items-center justify-between gap-2">
+      <div className="flex min-h-8 w-0 min-w-full items-center justify-between gap-2">
         <p className="min-w-0 text-[13px] text-secondary leading-4">{hint}</p>
         {phase === "playing" && (
           <div className="flex shrink-0 gap-1">

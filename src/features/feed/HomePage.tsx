@@ -1,5 +1,6 @@
 import { useQ } from "@/app/viewer";
 import { Composer, PostCard, PostFeed } from "@/features/posts";
+import { adCallToAction } from "@/features/posts/Attachments";
 import { api } from "../../../convex/_generated/api";
 import { LeftRail } from "./LeftRail";
 import { todayKey } from "./links";
@@ -20,8 +21,15 @@ const AD_EVERY = 6;
 export function HomePage() {
   const rails = useQ(api.feed.rails, { today: todayKey() });
   const ads = useQ(api.feed.ads, {});
-  // Facebook leads into the Reels shelf with a link ad (domain, headline, Learn more).
-  const shelfAd = ads?.find((a) => a.attachments.some((x) => x.kind === "link"));
+  // Facebook leads into the Reels shelf with a link ad (domain, headline, Learn more):
+  // prefer one whose link isn't a shop page, else any link ad.
+  const linkAds = ads?.filter((a) => a.attachments.some((x) => x.kind === "link"));
+  const shelfAd =
+    linkAds?.find((a) =>
+      a.attachments.some(
+        (x) => x.kind === "link" && adCallToAction(a.text, x.url) === "Learn more",
+      ),
+    ) ?? linkAds?.[0];
   const slotAds = ads?.filter((a) => a !== shelfAd);
   return (
     <div className="flex min-h-[calc(100vh-56px)] items-start justify-between">

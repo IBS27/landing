@@ -134,7 +134,7 @@ export function PostHeader({
   // A video post's timestamp opens the video theater, like Facebook's /watch?v= links.
   const video = post.media.length === 1 && post.media[0].kind === "video";
   const meta = (
-    <span className="flex items-center gap-1 font-semibold text-[13px] text-secondary leading-4">
+    <span className="flex flex-wrap items-center gap-x-1 font-semibold text-[13px] text-secondary leading-4 [&>*]:whitespace-nowrap">
       {post.sponsored ? (
         <Link
           to="/$username/posts/$postId"
