@@ -6,7 +6,7 @@ import {
   Clapperboard,
   Link2,
   MoreHorizontal,
-  Music2,
+  Music,
   Star,
   Volume2,
   VolumeX,
@@ -22,13 +22,7 @@ import {
   ShareDialog,
 } from "@/features/posts";
 import { useOptimisticReaction } from "@/features/posts/ActionBar";
-import {
-  CommentOutline,
-  GlobeIcon,
-  LikeFilled,
-  LikeOutline,
-  ShareOutline,
-} from "@/features/posts/icons";
+import { CommentOutline, LikeFilled, LikeOutline, ShareOutline } from "@/features/posts/icons";
 import { reactionMeta, useReactionHover } from "@/features/posts/reactions";
 import {
   PlayGlyph,
@@ -218,10 +212,10 @@ export function ReelsPage({ startId }: { startId?: string }) {
       {count > 0 && (
         <div className="absolute top-1/2 right-3 z-20 flex -translate-y-1/2 flex-col gap-4">
           <NavArrow label="Previous Card" disabled={index === 0} onClick={() => go(index - 1)}>
-            <ChevronUp size={24} strokeWidth={2.75} />
+            <ChevronUp size={34} strokeWidth={2.4} />
           </NavArrow>
           <NavArrow label="Next Card" disabled={index >= count - 1} onClick={() => go(index + 1)}>
-            <ChevronDown size={24} strokeWidth={2.75} />
+            <ChevronDown size={34} strokeWidth={2.4} />
           </NavArrow>
         </div>
       )}
@@ -369,11 +363,11 @@ function ReelSlide({ post, active, offset }: { post: Reel; active: boolean; offs
                   >
                     {post.author.name}
                   </Link>
-                  <GlobeIcon size={12} aria-label="Shared with Public" />
+                  <ReelGlobe />
                   <ReelFollow author={post.author} following={post.viewerFollowsAuthor} />
                 </div>
                 <p className="flex items-center gap-1 truncate font-semibold text-[13px] text-white/80 leading-4">
-                  <Music2 size={12} /> {post.author.name} · Original audio
+                  <Music size={12} strokeWidth={3} /> {post.author.name} · Original audio
                 </p>
               </div>
             </div>
@@ -435,6 +429,23 @@ function CenterGlyph({ fade, children }: { fade?: boolean; children: React.React
  * follow yet. Follows are separate from friend requests; the link disappears
  * once followed, like Facebook's.
  */
+/** Reels mark a public owner with Facebook's filled earth glyph (not the feed's outline globe). */
+function ReelGlobe() {
+  return (
+    <svg
+      viewBox="2 2 20 20"
+      width={12}
+      height={12}
+      fill="currentColor"
+      role="img"
+      aria-label="Shared with Public"
+      className="mx-[2px] shrink-0"
+    >
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93Zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39Z" />
+    </svg>
+  );
+}
+
 function ReelFollow({ author, following }: { author: PostView["author"]; following: boolean }) {
   const viewer = useViewer();
   const follow = useM(api.media.follow);
@@ -442,7 +453,7 @@ function ReelFollow({ author, following }: { author: PostView["author"]; followi
   if (following || done || author._id === viewer._id) return null;
   return (
     <>
-      <span className="text-[#e2e5e9]">·</span>
+      <span className="ml-[6px] text-[#e2e5e9]">·</span>
       <button
         type="button"
         onClick={() => {

@@ -75,6 +75,8 @@ export type PostView = {
   reactions: ReactionInfo;
   commentCount: number;
   shareCount: number;
+  /** Video posts: seeded baseline plus distinct recorded (≥3s) views; null without a video. */
+  viewCount: number | null;
   /** A Page ad: the header reads "Ad" and the link strip gets a call-to-action button. */
   sponsored: boolean;
   /** A live video broadcast: live while `endedAt` is null. */
@@ -220,6 +222,11 @@ export async function isSaved(
   return row !== null;
 }
 
+/** A video's view count: its seeded baseline plus distinct recorded (≥3s) views. */
+export function viewCountOf(post: Doc<"posts">) {
+  return (post.viewBaseline ?? 0) + (post.recordedViews ?? 0);
+}
+
 /** Enrich a post for the viewer. Shared posts are enriched one level deep. */
 export async function enrichPost(
   ctx: QueryCtx,
@@ -273,6 +280,7 @@ export async function enrichPost(
     },
     commentCount: post.commentCount,
     shareCount: post.shareCount,
+    viewCount: post.media.some((m) => m.kind === "video") ? viewCountOf(post) : null,
     sponsored: post.sponsored === true,
     live: post.live
       ? {

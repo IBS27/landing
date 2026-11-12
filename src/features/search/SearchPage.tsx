@@ -3,6 +3,7 @@ import { Play } from "lucide-react";
 import { Fragment, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useQ } from "@/app/viewer";
 import { FollowLink, PostCard, PostSkeleton } from "@/features/posts";
+import { NoMuteHint } from "@/features/posts/VideoPlayer";
 import { compactCount } from "@/lib/format";
 import { Card } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -123,7 +124,7 @@ function ReelTile({ post }: { post: PostView }) {
         )}
         <span className="flex items-center gap-1 font-semibold text-[13px] leading-4">
           <Play size={12} fill="currentColor" strokeWidth={0} />
-          {compactCount(post.reactions.count * 37 + post.commentCount * 11 + 120)}
+          {compactCount(post.viewCount ?? 0)}
         </span>
       </span>
     </Link>
@@ -245,13 +246,9 @@ function TopResults({
   if (lead) out.push(<Fragment key={lead.key}>{lead.node}</Fragment>);
   posts.forEach((p, i) => {
     out.push(
-      <PostCard
-        key={p._id}
-        post={p}
-        hideable={false}
-        showViews={false}
-        nameSuffix={<FollowLink post={p} />}
-      />,
+      <NoMuteHint key={p._id}>
+        <PostCard post={p} hideable={false} nameSuffix={<FollowLink post={p} />} />
+      </NoMuteHint>,
     );
     const m = i % 2 === 1 ? rest[(i - 1) / 2] : undefined;
     if (m) out.push(<Fragment key={m.key}>{m.node}</Fragment>);

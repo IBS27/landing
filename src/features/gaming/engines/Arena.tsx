@@ -333,7 +333,7 @@ export default function Arena({ game, onScore }: EngineProps) {
           </span>
         </>
       }
-      hint="WASD / arrows move · Mouse aims, click fires · Space auto-aims"
+      hint="WASD move · Click fires · Space auto-aims"
       style={{ width: W }}
     >
       <canvas

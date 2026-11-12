@@ -180,7 +180,7 @@ export default function Jigsaw({ game, onScore }: EngineProps) {
           </span>
         </>
       }
-      hint="Drag a piece onto another to swap · Arrows + Enter · P peek"
+      hint="Drag pieces to swap · P peek"
       extra={
         <Button
           variant="secondary"

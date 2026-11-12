@@ -331,7 +331,7 @@ export default function Match3({ game, onScore }: EngineProps) {
           </span>
         </>
       }
-      hint="Drag a piece, or click two neighbours · Arrows + Enter"
+      hint="Drag or click two neighbours to swap"
       className="p-[10px]"
       style={{ background: skin.board, width: N * CELL + 20 }}
     >

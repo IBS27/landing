@@ -1,6 +1,7 @@
 import { daysAgo, hoursAgo, type TimeSpec } from "../lib/time";
 import { isTallClip, type VideoClip } from "../lib/videos";
 import type { CommentSeed, Handle, PostSeed, ReplySeed, StorySeed } from "../types";
+import { pages } from "./pages";
 import { MAIN } from "./people";
 
 /**
@@ -709,6 +710,32 @@ const shares: readonly { clip: VideoClip; by: Handle; at: TimeSpec; text?: strin
   { clip: "puppies-wide", by: "ana.torres", at: hoursAgo(12.5), text: "the fosters!! 🥹" },
 ];
 
+/** A stable 0–1 fraction per string (FNV-1a), so seeded view counts vary but never change. */
+function unit(key: string) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < key.length; i++) h = Math.imul(h ^ key.charCodeAt(i), 0x01000193);
+  return (h >>> 0) / 0x1_0000_0000;
+}
+
+const pageFollowers = new Map<Handle, number>(pages.map((p) => [p.username, p.followers]));
+
+/**
+ * Views a video had before the seeded history (recorded ≥3s plays add to
+ * it). Reach follows popularity: a person's clip reaches some friends
+ * (a few hundred to a couple thousand), a Page's reaches a share of its
+ * followers, and Reels travel far beyond either.
+ */
+function viewBaseline(p: PostSeed, reel: boolean, reactions: number) {
+  const u = unit(`${p.by}:${p.video}`);
+  const followers = pageFollowers.get(p.by);
+  const views = reel
+    ? (followers ?? 2000) * (0.3 + 0.9 * u) + reactions * (120 + 900 * u)
+    : followers
+      ? followers * (0.08 + 0.35 * u) + reactions * 40
+      : 120 + reactions * (8 + 22 * u);
+  return Math.round(Math.min(250_000, Math.max(300, views)));
+}
+
 /** Every video post, plus friends' shares of the popular ones. */
 export const videoPosts: readonly PostSeed[] = [
   ...baseVideoPosts.map((p) => {
@@ -716,13 +743,16 @@ export const videoPosts: readonly PostSeed[] = [
     const shared = p.video && shares.some((s) => s.clip === p.video);
     // Reels travel further than feed posts: more people react to them. Maya
     // has reacted to only the few Reels marked `likedBy` (about one in five).
-    const reel = p.video && !p.sponsored && isTallClip(p.video);
+    const reel = !!p.video && !p.sponsored && isTallClip(p.video);
+    const reactions =
+      reel && p.reactions ? Math.min(120, Math.round(p.reactions * 2.5)) : p.reactions;
     return {
       ...p,
       notLikedBy: reel && !p.likedBy?.includes(MAIN) ? [MAIN] : p.notLikedBy,
       key: p.key ?? (shared ? `video-${p.video}` : undefined),
-      reactions: reel && p.reactions ? Math.min(120, Math.round(p.reactions * 2.5)) : p.reactions,
+      reactions,
       comments: extra ? [...(p.comments ?? []), ...extra] : p.comments,
+      views: p.video ? viewBaseline(p, reel, reactions ?? 20) : undefined,
     };
   }),
   ...shares.map((s) => ({

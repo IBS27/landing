@@ -1,9 +1,9 @@
 import { Info } from "lucide-react";
-import { cn } from "@/lib/format";
-import { MAP_IMG_CLASS, venueMap } from "../maps/lookup";
+import { venueMap } from "../maps/lookup";
+import { MapImg } from "../maps/MapImg";
 
 /**
- * The event location map: a static OpenStreetMap render of the real streets
+ * The event location map: a static Positron-style render of the real streets
  * around the venue (public/seed/maps), with Facebook's red venue pin. Falls
  * back to the neighborhood or city map for addresses without a venue map, and
  * renders nothing when the place is unknown.
@@ -20,17 +20,13 @@ export function StaticMap({
   const map = venueMap(address, city);
   if (!map) return null;
   return (
-    <div className="relative overflow-hidden bg-[#f2efe9] dark:bg-[#242526]" style={{ height }}>
-      <img
+    <div className="relative overflow-hidden bg-[#f2f2f0] dark:bg-[#1b1b1b]" style={{ height }}>
+      <MapImg
         src={map.src}
         alt={address ? `Map of ${address}` : `Map of ${city}`}
         width={map.width}
         height={map.height}
-        draggable={false}
-        className={cn(
-          "absolute top-1/2 left-1/2 max-w-none -translate-x-1/2 -translate-y-1/2",
-          MAP_IMG_CLASS,
-        )}
+        className="absolute top-1/2 left-1/2 max-w-none -translate-x-1/2 -translate-y-1/2"
       />
       <svg
         width="26"

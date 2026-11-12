@@ -286,7 +286,7 @@ export default function Breakout({ game, onScore }: EngineProps) {
           </span>
         </>
       }
-      hint="Mouse or ←/→ to move · Click or Space to launch"
+      hint="Mouse or ←/→ moves · Click launches"
       style={{ width: W }}
     >
       <canvas

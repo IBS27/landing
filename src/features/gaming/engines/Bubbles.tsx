@@ -384,7 +384,7 @@ export default function Bubbles({ game, onScore }: EngineProps) {
           </span>
         </>
       }
-      hint="Mouse to aim, click to shoot · ←/→ aim, Space shoots"
+      hint="Aim with the mouse, click to shoot · ←/→, Space"
       style={{ width: W }}
     >
       <canvas

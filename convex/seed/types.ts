@@ -183,6 +183,8 @@ export type PostSeed = {
   /** People kept out of the generated reactors (e.g. the main persona on most Reels). */
   readonly notLikedBy?: readonly Handle[];
   readonly comments?: readonly CommentSeed[];
+  /** Video posts: views before the seeded history; recorded plays add to it. */
+  readonly views?: number;
 };
 
 // ---------------------------------------------------------------------------

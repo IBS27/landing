@@ -143,7 +143,7 @@ export default function TriPeaks({ game, onScore }: EngineProps) {
           </span>
         </>
       }
-      hint="Click a card one rank up or down · D or the deck draws"
+      hint="Play a card one rank up or down · D draws"
       className="w-[388px] px-2 pt-4 pb-3"
       style={{ background: felt(game) }}
     >

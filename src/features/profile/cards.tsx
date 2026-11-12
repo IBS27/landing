@@ -9,6 +9,7 @@ import {
   MapPin,
   MoreHorizontal,
   Pencil,
+  Play,
   X,
 } from "lucide-react";
 import { type ComponentType, type ReactNode, useEffect, useRef, useState } from "react";
@@ -722,6 +723,12 @@ export function ReelsCard() {
               className="relative aspect-[9/16] overflow-hidden rounded-lg bg-black"
             >
               <video src={v.url} muted preload="metadata" className="h-full w-full object-cover" />
+              <span className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/50 to-transparent" />
+              <span className="absolute bottom-2 left-2 flex items-center gap-1 font-semibold text-[13px] text-white leading-4">
+                <Play size={14} strokeWidth={2.5} aria-hidden />
+                {compactCount(v.views)}
+                <span className="sr-only"> plays</span>
+              </span>
               <span className="absolute inset-0 transition-colors hover:bg-black/10" />
             </button>
           ))}

@@ -216,7 +216,7 @@ export default function Snake({ game, onScore }: EngineProps) {
           <span>🍎 10 · 🍋 50</span>
         </>
       }
-      hint="Arrow keys / WASD, or click the side to turn toward"
+      hint="Arrow keys / WASD, or click to turn"
       className="border-[6px] border-[#4a752c]"
       style={{ width: PX + 12 }}
     >

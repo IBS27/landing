@@ -1,5 +1,5 @@
-import { Eye } from "lucide-react";
-import { type RefObject, useEffect, useRef, useState } from "react";
+import { Eye, Maximize, Minimize, Settings } from "lucide-react";
+import { type ReactNode, type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { HeaderActions } from "@/layout/HeaderActions";
 import { cn } from "@/lib/format";
@@ -105,6 +105,8 @@ function useInView(ref: RefObject<HTMLElement | null>, linger = 5000) {
  */
 export function LivePostMedia({ post }: { post: LivePost }) {
   const ended = post.live.endedAt !== null;
+  // Once the replay is saved the post is a normal video post (its PhotoGrid plays it).
+  const replay = ended && post.media.length > 0;
   const box = useRef<HTMLDivElement>(null);
   const inView = useInView(box);
   const [open, setOpen] = useState(false);
@@ -120,10 +122,18 @@ export function LivePostMedia({ post }: { post: LivePost }) {
       onClose={() => setOpen(false)}
     />
   );
+  if (replay) return viewer || null;
   return (
     <div ref={box} className="relative aspect-video w-full overflow-hidden bg-black">
       {ended ? (
-        <BroadcasterCard post={post} />
+        <button
+          type="button"
+          aria-label={`Open ${post.author.name}'s live video`}
+          onClick={() => setOpen(true)}
+          className="absolute inset-0 cursor-pointer"
+        >
+          <BroadcasterCard post={post} />
+        </button>
       ) : (
         <>
           <button
@@ -139,6 +149,7 @@ export function LivePostMedia({ post }: { post: LivePost }) {
             <ViewerCount postId={post._id} />
           </div>
           <FloatingReactions postId={post._id} className="right-3 bottom-12" />
+          <LiveCommentsOverlay postId={post._id} since={post.live.startedAt} />
           {stream && state === "connected" && (
             <button
               type="button"
@@ -270,43 +281,205 @@ function LiveViewer({
 }) {
   const [muted, setMuted] = useState(false);
   const elapsed = useElapsed(post.live.startedAt, !ended);
+  const screen = useRef<HTMLDivElement>(null);
+  const fullscreen = useFullscreen(screen);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   return (
     <TheaterShell label={`${post.author.name}'s live video`} onClose={onClose}>
       <Stage onClose={onClose} tools={false}>
-        <div className="relative h-full w-full">
+        <div ref={screen} className="group/live relative h-full w-full bg-black">
           {ended ? (
             <BroadcasterCard post={post} />
           ) : (
             <LiveVideo post={post} stream={stream} state={state} muted={muted} fit="contain" />
           )}
+          {!ended && (
+            <>
+              <div
+                className={cn(
+                  "pointer-events-none absolute left-4 z-10 flex items-center gap-1.5",
+                  fullscreen.on ? "top-4" : "top-[68px]",
+                )}
+              >
+                <LiveBadge />
+                <ViewerCount postId={post._id} />
+                <span className="inline-flex h-6 items-center rounded bg-black/55 px-1.5 font-semibold text-[13px] text-white tabular-nums">
+                  {formatElapsed(elapsed)}
+                </span>
+              </div>
+              <FloatingReactions postId={post._id} className="right-6 bottom-16" />
+              {fullscreen.on && (
+                <LiveCommentsOverlay postId={post._id} since={post.live.startedAt} large />
+              )}
+              <div className="absolute inset-x-4 bottom-4 z-10 flex items-center gap-1">
+                <PlayerButton label={muted ? "Unmute" : "Mute"} onClick={() => setMuted((m) => !m)}>
+                  <VolumeGlyph muted={muted} />
+                </PlayerButton>
+                <div className="flex-1" />
+                <div className="relative">
+                  <PlayerButton
+                    label="Settings"
+                    expanded={settingsOpen}
+                    onClick={() => setSettingsOpen((o) => !o)}
+                  >
+                    <Settings size={20} />
+                  </PlayerButton>
+                  {settingsOpen && (
+                    <LiveSettingsMenu stream={stream} onClose={() => setSettingsOpen(false)} />
+                  )}
+                </div>
+                <PlayerButton
+                  label={fullscreen.on ? "Exit full screen" : "Enter full screen"}
+                  onClick={fullscreen.toggle}
+                >
+                  {fullscreen.on ? <Minimize size={20} /> : <Maximize size={20} />}
+                </PlayerButton>
+              </div>
+            </>
+          )}
         </div>
       </Stage>
-      {!ended && (
-        <>
-          <div className="pointer-events-none absolute top-[68px] left-4 z-10 flex items-center gap-1.5">
-            <LiveBadge />
-            <ViewerCount postId={post._id} />
-            <span className="inline-flex h-6 items-center rounded bg-black/55 px-1.5 font-semibold text-[13px] text-white tabular-nums">
-              {formatElapsed(elapsed)}
-            </span>
-          </div>
-          <FloatingReactions postId={post._id} className="right-[384px] bottom-16" />
-          <div className="absolute bottom-4 left-4 z-10">
-            <Tooltip content={muted ? "Unmute" : "Mute"} side="top">
-              <button
-                type="button"
-                aria-label={muted ? "Unmute" : "Mute"}
-                onClick={() => setMuted((m) => !m)}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-[#3a3b3c]/80 text-white hover:bg-[#4e4f50]"
-              >
-                <VolumeGlyph muted={muted} />
-              </button>
-            </Tooltip>
-          </div>
-        </>
-      )}
       <LivePanel post={post} ended={ended} />
     </TheaterShell>
+  );
+}
+
+/** Full screen for `ref`'s element, and whether it's on. */
+function useFullscreen(ref: RefObject<HTMLElement | null>) {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const sync = () => setOn(!!ref.current && document.fullscreenElement === ref.current);
+    document.addEventListener("fullscreenchange", sync);
+    return () => {
+      document.removeEventListener("fullscreenchange", sync);
+      if (ref.current && document.fullscreenElement === ref.current)
+        void document.exitFullscreen().catch(() => {});
+    };
+  }, [ref]);
+  return {
+    on,
+    toggle: () => {
+      if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
+      else void ref.current?.requestFullscreen().catch(() => {});
+    },
+  };
+}
+
+function PlayerButton({
+  label,
+  onClick,
+  expanded,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  expanded?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <Tooltip content={label} side="top">
+      <button
+        type="button"
+        aria-label={label}
+        aria-expanded={expanded}
+        onClick={onClick}
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-[#3a3b3c]/80 text-white hover:bg-[#4e4f50]"
+      >
+        {children}
+      </button>
+    </Tooltip>
+  );
+}
+
+/** The live player's settings: the quality arriving now (live video adapts on its own). */
+function LiveSettingsMenu({
+  stream,
+  onClose,
+}: {
+  stream: MediaStream | null;
+  onClose: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<number | null>(null);
+  useEffect(() => {
+    const read = () => setHeight(stream?.getVideoTracks()[0]?.getSettings().height ?? null);
+    read();
+    const id = window.setInterval(read, 2000);
+    const onDown = (e: PointerEvent) => {
+      if (ref.current && !ref.current.parentElement?.contains(e.target as Node)) onClose();
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [stream, onClose]);
+  return (
+    <div
+      ref={ref}
+      role="menu"
+      aria-label="Settings"
+      className="absolute right-0 bottom-full mb-2 w-[240px] rounded-lg bg-[#242526] p-2 text-[#e4e6eb] shadow-[0_12px_28px_rgba(0,0,0,0.4)]"
+    >
+      <div className="flex items-center justify-between rounded-md px-2 py-2 text-[15px]">
+        <span className="font-semibold">Quality</span>
+        <span className="text-[13px] text-[#b0b3b8]">{height ? `Auto (${height}p)` : "Auto"}</span>
+      </div>
+      <p className="px-2 pb-1 text-[13px] text-[#b0b3b8] leading-4">
+        Live video quality adjusts automatically to your connection.
+      </p>
+    </div>
+  );
+}
+
+/**
+ * The latest live comments over the bottom of the stream (newest last), like
+ * Facebook's feed player: only comments written since the broadcast began.
+ */
+function LiveCommentsOverlay({
+  postId,
+  since,
+  large,
+}: {
+  postId: Id<"posts">;
+  since: number;
+  large?: boolean;
+}) {
+  const threads = useQ(api.comments.list, { postId });
+  const latest = useMemo(
+    () =>
+      (threads ?? [])
+        .filter((t) => t.createdAt >= since && t.text)
+        .sort((a, b) => a.createdAt - b.createdAt)
+        .slice(-3),
+    [threads, since],
+  );
+  if (latest.length === 0) return null;
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        "pointer-events-none absolute inset-x-0 bottom-0 z-[5] flex flex-col gap-1.5 bg-gradient-to-t from-black/60 to-transparent px-3 pt-10",
+        large ? "right-auto w-[420px] pb-20 pl-4" : "pr-14 pb-3",
+      )}
+    >
+      {latest.map((c) => (
+        <div key={c._id} className="flex min-w-0 items-start gap-2 text-white">
+          <Avatar src={c.author.avatar} size={large ? 32 : 24} className="shrink-0" />
+          <p
+            className={cn(
+              "line-clamp-2 min-w-0 [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]",
+              large ? "text-[15px] leading-5" : "text-[13px] leading-4",
+            )}
+          >
+            <span className="font-semibold">{c.author.name}</span> {c.text}
+          </p>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -339,8 +512,15 @@ function LivePanel({ post, ended }: { post: LivePost; ended: boolean }) {
           post={post}
           onComment={() => setFocusKey((k) => k + 1)}
           className="mx-3"
+          trailing={ended ? undefined : <WatchingCount postId={post._id} />}
         />
-        <CommentList postId={post._id} />
+        {post.commentCount === 0 ? (
+          <p className="px-4 py-8 text-center text-[15px] text-secondary leading-5">
+            {ended ? "No comments yet" : "Comments will appear here"}
+          </p>
+        ) : (
+          <CommentList postId={post._id} />
+        )}
       </div>
       <div className="border-divider border-t px-3 pt-2 pb-3">
         {!ended && <ReactionTray postId={post._id} />}
@@ -348,6 +528,13 @@ function LivePanel({ post, ended }: { post: LivePost; ended: boolean }) {
       </div>
     </aside>
   );
+}
+
+/** "12 watching" in the live viewer's summary row. */
+function WatchingCount({ postId }: { postId: Id<"posts"> }) {
+  const stats = useQ(api.live.stats, { postId });
+  const n = stats?.viewers ?? 0;
+  return <span className="shrink-0">{n.toLocaleString()} watching</span>;
 }
 
 /** Tap-to-send reactions under the live chat (each tap floats one up). */

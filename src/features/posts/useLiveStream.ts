@@ -177,7 +177,71 @@ export function useLiveBroadcast(postId: Id<"posts"> | null, stream: MediaStream
       });
     }
   }, [postId, hasStream, signals, enqueue]);
+
+  // Bytes sent per connection at the last sample, for the bitrate.
+  const lastSent = useRef(new Map<RTCPeerConnection, { bytes: number; at: number }>());
+  /** The outgoing video across every connected viewer (the producer's stream health). */
+  const stats = useCallback(async (): Promise<BroadcastStats | null> => {
+    const out: BroadcastStats[] = [];
+    for (const { pc } of peers.current.values()) {
+      if (pc.connectionState !== "connected") continue;
+      const report = await pc.getStats().catch(() => null);
+      let video: RTCOutboundRtpStreamStats | null = null;
+      let lost = 0;
+      let received = 0;
+      report?.forEach((r: RTCStats) => {
+        if (r.type === "outbound-rtp" && (r as RTCOutboundRtpStreamStats).kind === "video")
+          video = r as RTCOutboundRtpStreamStats;
+        if (r.type === "remote-inbound-rtp") {
+          const ri = r as RTCStats & { packetsLost?: number; packetsReceived?: number };
+          lost += ri.packetsLost ?? 0;
+          received += ri.packetsReceived ?? 0;
+        }
+      });
+      const v = video as (RTCOutboundRtpStreamStats & { qualityLimitationReason?: string }) | null;
+      if (!v) continue;
+      const bytes = v.bytesSent ?? 0;
+      const prev = lastSent.current.get(pc);
+      lastSent.current.set(pc, { bytes, at: v.timestamp });
+      const kbps =
+        prev && v.timestamp > prev.at ? ((bytes - prev.bytes) * 8) / (v.timestamp - prev.at) : null;
+      out.push({
+        kbps,
+        fps: v.framesPerSecond ?? null,
+        width: v.frameWidth ?? null,
+        height: v.frameHeight ?? null,
+        loss: lost + received > 0 ? lost / (lost + received) : 0,
+        limited: !!v.qualityLimitationReason && v.qualityLimitationReason !== "none",
+      });
+    }
+    if (out.length === 0) return null;
+    const avg = (pick: (s: BroadcastStats) => number | null) => {
+      const xs = out.map(pick).filter((x): x is number => x !== null);
+      return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
+    };
+    return {
+      kbps: avg((s) => s.kbps),
+      fps: avg((s) => s.fps),
+      width: out[0].width,
+      height: out[0].height,
+      loss: Math.max(...out.map((s) => s.loss)),
+      limited: out.some((s) => s.limited),
+    };
+  }, []);
+
+  return { stats };
 }
+
+export type BroadcastStats = {
+  kbps: number | null;
+  fps: number | null;
+  width: number | null;
+  height: number | null;
+  /** Packet loss reported by viewers, 0–1. */
+  loss: number;
+  /** The encoder is held back by bandwidth or CPU. */
+  limited: boolean;
+};
 
 /* ------------------------------------------------------------------ */
 /* Viewer                                                              */

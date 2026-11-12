@@ -30,6 +30,7 @@ import type * as lib_settings from "../lib/settings.js";
 import type * as lib_users from "../lib/users.js";
 import type * as listings from "../listings.js";
 import type * as live from "../live.js";
+import type * as liveReplay from "../liveReplay.js";
 import type * as media from "../media.js";
 import type * as memories from "../memories.js";
 import type * as messenger from "../messenger.js";
@@ -100,6 +101,7 @@ declare const fullApi: ApiFromModules<{
   "lib/users": typeof lib_users;
   listings: typeof listings;
   live: typeof live;
+  liveReplay: typeof liveReplay;
   media: typeof media;
   memories: typeof memories;
   messenger: typeof messenger;

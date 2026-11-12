@@ -680,7 +680,7 @@ function Details({ l }: { l: Detail }) {
 
 /* ───────────── Location ───────────── */
 
-/** The map strip under the details; opens a larger map of the approximate area. */
+/** The map tile under the details; opens a larger map of the approximate area. */
 function LocationMap({ l }: { l: Detail }) {
   const [open, setOpen] = useState(false);
   const place = l.location.neighborhood ?? l.location.city.split(",")[0] ?? l.location.city;
@@ -699,11 +699,11 @@ function LocationMap({ l }: { l: Detail }) {
         type="button"
         aria-label={`View ${place} on map`}
         onClick={() => setOpen(true)}
-        className="mt-[19px] block w-full overflow-hidden rounded-lg"
+        className="mt-4 block w-full overflow-hidden rounded-lg"
       >
-        <MapTile src={area.strip} alt={`Map of ${place}`} height={51} radius={20} info />
+        <MapTile src={area.tile} alt={`Map of ${place}`} height={162} radius={36} info />
       </button>
-      <p className="mt-[21px] text-[13px] leading-4">
+      <p className="mt-3 text-[13px] leading-4">
         <span className="text-primary">{l.location.city}</span>
         <span className="text-secondary"> · Location is approximate</span>
       </p>

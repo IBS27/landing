@@ -189,6 +189,10 @@ export default defineSchema({
     reactionCount: v.number(),
     commentCount: v.number(),
     shareCount: v.number(),
+    /** Video posts: views from before the seeded world's history (the shown count starts here). */
+    viewBaseline: v.optional(v.number()),
+    /** Video posts: distinct `videoViews` rows recorded for this post (≥3s plays). */
+    recordedViews: v.optional(v.number()),
   })
     .index("by_created", ["createdAt"])
     .index("by_author", ["authorId", "createdAt"])
@@ -425,6 +429,22 @@ export default defineSchema({
   })
     .index("by_post_dir", ["postId", "toHost", "createdAt"])
     .index("by_session_dir", ["sessionId", "toHost", "createdAt"]),
+
+  /**
+   * A live broadcast's recording, uploaded in parts while on air (one `take`
+   * per producer page) and joined into the replay video once it ends.
+   */
+  liveRecordingParts: defineTable({
+    postId: v.id("posts"),
+    take: v.string(),
+    seq: v.number(),
+    storageId: v.id("_storage"),
+    width: v.optional(v.number()),
+    height: v.optional(v.number()),
+    /** Set on the last part when the host finished the recording. */
+    final: v.optional(v.boolean()),
+    createdAt: v.number(),
+  }).index("by_post_take", ["postId", "take", "seq"]),
 
   /** Reactions sent during a live video; each floats up over the stream once. */
   liveReactions: defineTable({

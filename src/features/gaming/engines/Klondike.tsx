@@ -31,11 +31,16 @@ type Src =
   | { kind: "tab"; i: number; at: number };
 type Dst = { kind: "found"; i: number } | { kind: "tab"; i: number };
 
+// Landscape table (fills the player's wide stage): stock + waste in a left
+// column, the seven tableau piles, and the four foundations stacked on the right.
 const CW = 48;
 const CH = 67;
-const TAB_H = 300;
+const GAP = 6;
+const SIDE_GAP = 14;
+const TAB_H = 4 * CH + 3 * GAP;
 const DOWN_OFF = 7;
 const UP_OFF = 19;
+const TABLE_W = 2 * CW + 2 * SIDE_GAP + 7 * CW + 6 * GAP + 16;
 
 function deal(): K {
   const d = newDeck();
@@ -362,90 +367,98 @@ export default function Klondike({ game, onScore }: EngineProps) {
           Undo
         </Button>
       }
-      className="w-[388px] p-2"
-      style={{ background: felt(game) }}
+      className="p-2"
+      style={{ width: TABLE_W, background: felt(game) }}
     >
       <style>
         {
           "@keyframes k-shake{0%,100%{transform:none}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}"
         }
       </style>
-      <div className="grid grid-cols-7 gap-[6px]">
-        <button
-          type="button"
-          aria-label={
-            s.stock.length ? `Draw a card (${s.stock.length} left)` : "Recycle the waste pile"
-          }
-          onClick={() => phase === "playing" && commit(draw(sRef.current))}
-          className="relative rounded-[5px] outline-offset-1 focus-visible:outline-2 focus-visible:outline-white"
-          style={{ width: CW, height: CH }}
-        >
-          {s.stock.length > 0 ? (
-            <>
-              {s.stock.length > 1 && (
-                <CardBack game={game} w={CW} h={CH} className="absolute top-[2px] left-[2px]" />
-              )}
-              <CardBack game={game} w={CW} h={CH} className="relative" />
-            </>
-          ) : (
-            <EmptySlot w={CW} h={CH} label="↻" />
-          )}
-        </button>
-        <div className="relative" style={{ width: CW, height: CH }}>
-          {prevWaste && <CardFace card={prevWaste} w={CW} h={CH} className="absolute inset-0" />}
-          {wasteTop ? (
-            <div className="absolute inset-0">{cardButton(wasteTop, { kind: "waste" })}</div>
-          ) : (
-            <EmptySlot w={CW} h={CH} />
-          )}
+      <div className="flex" style={{ gap: SIDE_GAP }}>
+        <div className="flex flex-col" style={{ gap: GAP }}>
+          <button
+            type="button"
+            aria-label={
+              s.stock.length ? `Draw a card (${s.stock.length} left)` : "Recycle the waste pile"
+            }
+            onClick={() => phase === "playing" && commit(draw(sRef.current))}
+            className="relative rounded-[5px] outline-offset-1 focus-visible:outline-2 focus-visible:outline-white"
+            style={{ width: CW, height: CH }}
+          >
+            {s.stock.length > 0 ? (
+              <>
+                {s.stock.length > 1 && (
+                  <CardBack game={game} w={CW} h={CH} className="absolute top-[2px] left-[2px]" />
+                )}
+                <CardBack game={game} w={CW} h={CH} className="relative" />
+              </>
+            ) : (
+              <EmptySlot w={CW} h={CH} label="↻" />
+            )}
+          </button>
+          <div className="relative" style={{ width: CW, height: CH }}>
+            {prevWaste && <CardFace card={prevWaste} w={CW} h={CH} className="absolute inset-0" />}
+            {wasteTop ? (
+              <div className="absolute inset-0">{cardButton(wasteTop, { kind: "waste" })}</div>
+            ) : (
+              <EmptySlot w={CW} h={CH} />
+            )}
+          </div>
         </div>
-        <span />
-        {s.found.map((pile, i) => {
-          const t = top(pile);
-          const under = pile[pile.length - 2];
-          return (
-            <div
-              key={i}
-              data-drop={`found:${i}`}
-              className="relative"
-              style={{ width: CW, height: CH }}
-            >
-              {under ? (
-                <CardFace card={under} w={CW} h={CH} className="absolute inset-0" />
-              ) : (
-                <EmptySlot w={CW} h={CH} label={SUIT_GLYPH[(["S", "H", "D", "C"] as const)[i]]} />
-              )}
-              {t && <div className="absolute inset-0">{cardButton(t, { kind: "found", i })}</div>}
-            </div>
-          );
-        })}
-      </div>
-      <div className="mt-3 grid grid-cols-7 gap-[6px]">
-        {s.tab.map((pile, i) => {
-          const downs = pile.filter((c) => !c.up).length;
-          const ups = pile.length - downs;
-          const upOff =
-            ups > 1 ? Math.min(UP_OFF, (TAB_H - CH - downs * DOWN_OFF) / (ups - 1)) : UP_OFF;
-          let y = 0;
-          return (
-            <div key={i} data-drop={`tab:${i}`} className="relative" style={{ height: TAB_H }}>
-              {pile.length === 0 && <EmptySlot w={CW} h={CH} label="K" />}
-              {pile.map((c, j) => {
-                const at = y;
-                y += c.up ? upOff : DOWN_OFF;
-                return (
-                  <div key={c.id} className="absolute left-0" style={{ top: at }}>
-                    {c.up ? (
-                      cardButton(c, { kind: "tab", i, at: j })
-                    ) : (
-                      <CardBack game={game} w={CW} h={CH} />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
+        <div className="grid grid-cols-7" style={{ gap: GAP }}>
+          {s.tab.map((pile, i) => {
+            const downs = pile.filter((c) => !c.up).length;
+            const ups = pile.length - downs;
+            const upOff =
+              ups > 1 ? Math.min(UP_OFF, (TAB_H - CH - downs * DOWN_OFF) / (ups - 1)) : UP_OFF;
+            let y = 0;
+            return (
+              <div
+                key={i}
+                data-drop={`tab:${i}`}
+                className="relative"
+                style={{ width: CW, height: TAB_H }}
+              >
+                {pile.length === 0 && <EmptySlot w={CW} h={CH} label="K" />}
+                {pile.map((c, j) => {
+                  const at = y;
+                  y += c.up ? upOff : DOWN_OFF;
+                  return (
+                    <div key={c.id} className="absolute left-0" style={{ top: at }}>
+                      {c.up ? (
+                        cardButton(c, { kind: "tab", i, at: j })
+                      ) : (
+                        <CardBack game={game} w={CW} h={CH} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex flex-col" style={{ gap: GAP }}>
+          {s.found.map((pile, i) => {
+            const t = top(pile);
+            const under = pile[pile.length - 2];
+            return (
+              <div
+                key={i}
+                data-drop={`found:${i}`}
+                className="relative"
+                style={{ width: CW, height: CH }}
+              >
+                {under ? (
+                  <CardFace card={under} w={CW} h={CH} className="absolute inset-0" />
+                ) : (
+                  <EmptySlot w={CW} h={CH} label={SUIT_GLYPH[(["S", "H", "D", "C"] as const)[i]]} />
+                )}
+                {t && <div className="absolute inset-0">{cardButton(t, { kind: "found", i })}</div>}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </GameFrame>
   );

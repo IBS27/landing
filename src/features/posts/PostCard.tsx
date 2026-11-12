@@ -56,12 +56,9 @@ export function PostCard({
   nameSuffix,
   className,
   inlineComments = false,
-  showViews = true,
 }: {
   post: PostView;
   expanded?: boolean;
-  /** A video's "1.2K views" in the stats row (compact search results leave it out). */
-  showViews?: boolean;
   /** Profile timelines: the top comment and a "Write a comment…" row under the post. */
   inlineComments?: boolean;
   /** Feeds show the X "Hide post" button; search results don't. */
@@ -101,7 +98,7 @@ export function PostCard({
       <ActionBar
         post={post}
         onComment={() => (expanded ? setFocusKey((k) => k + 1) : setDialogOpen(true))}
-        trailing={showViews ? <ViewCount post={post} /> : undefined}
+        trailing={<ViewCount post={post} />}
       />
       {expanded && (
         <div className="border-divider border-t">

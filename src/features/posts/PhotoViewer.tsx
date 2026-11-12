@@ -97,7 +97,7 @@ export function TheaterPostPanel({ post }: { post: PostView }) {
           />
         </div>
         <PostContent
-          post={{ ...post, background: null, media: [], attachments: [], shared: null }}
+          post={{ ...post, background: null, media: [], attachments: [], shared: null, live: null }}
           expanded
           smallText
         />
@@ -217,7 +217,8 @@ export function Stage({
     document.addEventListener("fullscreenchange", sync);
     return () => {
       document.removeEventListener("fullscreenchange", sync);
-      if (document.fullscreenElement === stage.current) void document.exitFullscreen();
+      if (document.fullscreenElement && document.fullscreenElement === stage.current)
+        void document.exitFullscreen().catch(() => {});
     };
   }, []);
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useChatDock } from "@/app/chat-dock";
 import { useM } from "@/app/viewer";
 import { FriendButton } from "@/features/friends";
+import { CoverWash } from "@/features/posts/CoverWash";
 import { MessengerIcon } from "@/icons";
 import { cn, compactCount, plural } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger, Tooltip } from "@/ui/overlays";
@@ -43,7 +44,7 @@ function useRecsOpen(defaultOpen: boolean) {
 /**
  * Facebook's 2026 profile header: full-width cover (1250 max, bottom corners
  * rounded), the 168px picture under it beside the name block, and the action
- * buttons on the right. A blurred copy of the cover tints the page edges.
+ * buttons on the right. The cover's edge colours wash the page sides.
  */
 export function ProfileHeader() {
   const { profile, embedded } = useProfile();
@@ -56,25 +57,7 @@ export function ProfileHeader() {
 
   return (
     <div className="relative overflow-hidden bg-card">
-      {user.cover && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-[533px] overflow-hidden"
-        >
-          <img
-            src={user.cover}
-            alt=""
-            className="h-full w-full scale-110 object-cover opacity-90 blur-[40px]"
-          />
-          <div
-            className="absolute inset-x-0 bottom-0 h-[463px]"
-            style={{
-              background:
-                "linear-gradient(to top, var(--card), var(--card), color-mix(in srgb, var(--card) 70%, transparent), color-mix(in srgb, var(--card) 40%, transparent), transparent)",
-            }}
-          />
-        </div>
-      )}
+      <CoverWash cover={user.cover} />
       <Cover />
       <div className={cn("relative mx-auto w-full max-w-[1186px]", columnPad(embedded))}>
         <div className="flex items-center gap-[18px] pt-6 pr-[2px] pl-[10px]">

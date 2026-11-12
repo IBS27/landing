@@ -754,6 +754,7 @@ export function buildPlan(now: number) {
         reactionCount: reactions.length,
         commentCount: comments.length,
         shareCount: 0,
+        viewBaseline: s.video ? s.views : undefined,
       },
       comments,
       reactions,

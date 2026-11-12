@@ -1,30 +1,39 @@
-"""Build static map images for seeded places from OpenStreetMap raster tiles.
+"""Build static map images for seeded places: Positron-style vector maps.
 
-One-time generator: fetches only the tiles that intersect each crop (cached on
-disk, sequential, generic UA, polite delay), stitches them with Pillow and
-renders the required "© OpenStreetMap contributors" attribution.
+One-time generator. Each map is rendered by MapLibre in headless Chrome
+(render.mjs + render.html) from OpenFreeMap's vector tiles (OpenMapTiles schema,
+OpenStreetMap data) in the light "positron" style and, for dark mode, the "dark"
+style under public/seed/maps/dark/. Images are 2x density; this script then adds
+the required "© OpenStreetMap contributors © OpenMapTiles" credit, saves them as
+WebP and writes src/features/maps/catalog.ts.
 
-Usage: python3 -I scripts/maps/build.py [--dry]   (needs Pillow)
-Tiles are cached in scripts/maps/tiles/ (gitignored); MAP_TILE_CACHE overrides it.
+Usage: python3 -I scripts/maps/build.py [--dry | --finish]
+  needs Pillow, bun, Chrome and playwright-core resolvable from scripts/maps
+  (e.g. `bun add --no-save playwright-core@1.48.2`, or NODE_PATH pointing at one).
+Raw screenshots go to scripts/maps/raw/ (gitignored).
 """
 
 import json
-import math
 import os
+import subprocess
 import sys
-import time
-import urllib.request
 
 from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 DRY = "--dry" in sys.argv
-CACHE = os.environ.get("MAP_TILE_CACHE", os.path.join(HERE, "tiles"))
+FINISH_ONLY = "--finish" in sys.argv  # re-run post-processing on existing raw renders
+RAW = os.path.join(HERE, "raw")
 OUT = os.path.join(ROOT, "public/seed/maps")
 CATALOG = os.path.join(ROOT, "src/features/maps/catalog.ts")
-UA = "seed-fetch/1.0"
 FONT = "/usr/share/fonts/liberation-sans-fonts/LiberationSans-Regular.ttf"
+SCALE = 2  # output pixel density
+STYLES = {"positron": "", "dark": "dark/"}  # OpenFreeMap style -> output prefix
+ATTRIBUTION = "© OpenStreetMap contributors © OpenMapTiles"
+
+# Item page map tile (CSS px).
+TILE_W, TILE_H = 324, 162
 
 # Event venues: exact address string -> (key, lat, lng). Zoom 16, 432x324.
 VENUES = {
@@ -52,7 +61,7 @@ VENUES = {
 }
 
 # Listing neighborhoods (match convex/lib/listings.ts NEIGHBORHOODS) plus the
-# Marketplace browse cities. Zoom 12: a 668x420 dialog map and a 323x51 strip.
+# Marketplace browse cities. Zoom 12: a 668x420 dialog map and a 324x162 item tile.
 HOODS = {
     "Capitol Hill": (47.6253, -122.3222),
     "U District": (47.6615, -122.3138),
@@ -91,106 +100,79 @@ def slug(s):
     return "".join(c if c.isalnum() else "-" for c in s.lower()).strip("-")
 
 
-def world(lat, lng, z):
-    """Global pixel coordinates at zoom z (256px tiles)."""
-    n = 256 * 2**z
-    x = (lng + 180) / 360 * n
-    s = math.sin(math.radians(lat))
-    y = (0.5 - math.log((1 + s) / (1 - s)) / (4 * math.pi)) * n
-    return x, y
-
-
-def tiles_for(lat, lng, z, w, h):
-    cx, cy = world(lat, lng, z)
-    x0, y0 = cx - w / 2, cy - h / 2
-    tx = range(int(x0 // 256), int((x0 + w - 1) // 256) + 1)
-    ty = range(int(y0 // 256), int((y0 + h - 1) // 256) + 1)
-    return x0, y0, [(z, x, y) for x in tx for y in ty]
-
-
-def fetch(z, x, y):
-    path = os.path.join(CACHE, str(z), str(x), f"{y}.png")
-    if os.path.exists(path):
-        return path
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    req = urllib.request.Request(
-        f"https://tile.openstreetmap.org/{z}/{x}/{y}.png", headers={"User-Agent": UA}
-    )
-    with urllib.request.urlopen(req, timeout=30) as r:
-        data = r.read()
-    with open(path, "wb") as f:
-        f.write(data)
-    time.sleep(0.6)
-    return path
-
-
-def render(lat, lng, z, w, h, out):
-    x0, y0, tiles = tiles_for(lat, lng, z, w, h)
-    img = Image.new("RGB", (w, h), "#f2efe9")
-    for tz, tx, ty in tiles:
-        tile = Image.open(fetch(tz, tx, ty)).convert("RGB")
-        img.paste(tile, (int(round(tx * 256 - x0)), int(round(ty * 256 - y0))))
+def finish(style, raw, w, h, out):
+    img = Image.open(raw).convert("RGB")
+    if style == "dark":
+        # Lift the near-black style to Facebook's dark surface tone (#242526 cards).
+        img = img.point(lambda v: round(22 + v * 0.95))
+    k = SCALE
     # Required attribution, small, bottom-left (the "i" badge sits bottom-right).
     draw = ImageDraw.Draw(img, "RGBA")
-    font = ImageFont.truetype(FONT, 9)
-    text = "© OpenStreetMap contributors"
-    l, t, r, b = draw.textbbox((0, 0), text, font=font)
-    pad = 2
+    font = ImageFont.truetype(FONT, 8 * k)
+    l, t, r, b = draw.textbbox((0, 0), ATTRIBUTION, font=font)
+    pad = 2 * k
     bw, bh = r - l + pad * 2, b - t + pad * 2
-    draw.rectangle((0, h - bh, bw, h), fill=(255, 255, 255, 190))
-    draw.text((pad - l, h - bh + pad - t), text, font=font, fill=(60, 60, 60, 255))
+    H = h * k
+    if style == "positron":
+        box, ink = (255, 255, 255, 170), (110, 110, 110, 255)
+    else:
+        box, ink = (0, 0, 0, 120), (160, 160, 160, 255)
+    draw.rectangle((0, H - bh, bw, H), fill=box)
+    draw.text((pad - l, H - bh + pad - t), ATTRIBUTION, font=font, fill=ink)
     os.makedirs(os.path.dirname(out), exist_ok=True)
-    img.quantize(colors=256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).save(out, "PNG", optimize=True)
+    img.save(out, "WEBP", quality=85, method=6)
 
 
 def jobs():
     for _addr, (key, lat, lng) in VENUES.items():
-        yield lat, lng, 16, 432, 324, f"venues/{key}.png"
+        yield lat, lng, 16, 432, 324, f"venues/{key}.webp"
     for name, (lat, lng) in HOODS.items():
-        yield lat, lng, 12, 668, 420, f"areas/{slug(name)}.png"
-        yield lat, lng, 12, 323, 51, f"areas/{slug(name)}-strip.png"
+        yield lat, lng, 12, 668, 420, f"areas/{slug(name)}.webp"
+        yield lat, lng, 12, TILE_W, TILE_H, f"areas/{slug(name)}-tile.webp"
     for name, (lat, lng) in CITIES.items():
-        yield lat, lng, 7, 520, 220, f"regions/{slug(name)}.png"
+        yield lat, lng, 7, 520, 220, f"regions/{slug(name)}.webp"
 
 
 def main():
-    needed = set()
-    for lat, lng, z, w, h, _ in jobs():
-        needed.update(tiles_for(lat, lng, z, w, h)[2])
-    cached = sum(
-        os.path.exists(os.path.join(CACHE, str(z), str(x), f"{y}.png")) for z, x, y in needed
-    )
-    print(f"{len(needed)} distinct tiles ({cached} cached)")
+    work = []
+    for style, prefix in STYLES.items():
+        for lat, lng, z, w, h, out in jobs():
+            raw = os.path.join(RAW, style, out) + ".png"
+            os.makedirs(os.path.dirname(raw), exist_ok=True)
+            work.append(dict(style=style, lat=lat, lng=lng, z=z, w=w, h=h, out=raw, final=os.path.join(OUT, prefix + out)))
+    print(f"{len(work)} maps")
     if DRY:
-        by_z = {}
-        for z, _, _ in needed:
-            by_z[z] = by_z.get(z, 0) + 1
-        print(by_z)
         return
-    for lat, lng, z, w, h, out in jobs():
-        render(lat, lng, z, w, h, os.path.join(OUT, out))
+    spec = os.path.join(RAW, "jobs.json")
+    with open(spec, "w") as f:
+        json.dump(work, f)
+    if not FINISH_ONLY:
+        subprocess.run(["bun", os.path.join(HERE, "render.mjs"), spec], check=True)
+    for j in work:
+        finish(j["style"], j["out"], j["w"], j["h"], j["final"])
     write_catalog()
 
 
 def write_catalog():
-    venues = {addr: f"/seed/maps/venues/{key}.png" for addr, (key, _, _) in VENUES.items()}
+    venues = {addr: f"/seed/maps/venues/{key}.webp" for addr, (key, _, _) in VENUES.items()}
     areas = {
         name: {
-            "map": f"/seed/maps/areas/{slug(name)}.png",
-            "strip": f"/seed/maps/areas/{slug(name)}-strip.png",
+            "map": f"/seed/maps/areas/{slug(name)}.webp",
+            "tile": f"/seed/maps/areas/{slug(name)}-tile.webp",
             "lat": lat,
             "lng": lng,
         }
         for name, (lat, lng) in HOODS.items()
     }
-    regions = {name: f"/seed/maps/regions/{slug(name)}.png" for name in CITIES}
+    regions = {name: f"/seed/maps/regions/{slug(name)}.webp" for name in CITIES}
     body = (
-        "// Generated by scripts/maps/build.py (OpenStreetMap tiles, see public/seed/maps/ATTRIBUTION.md).\n"
-        "// Do not edit by hand.\n\n"
+        "// Generated by scripts/maps/build.py (OpenFreeMap vector tiles, OpenStreetMap data, see\n"
+        "// public/seed/maps/ATTRIBUTION.md). Do not edit by hand. Images are 2x density; every\n"
+        "// path has a Dark Matter twin under /seed/maps/dark/ (see mapSources).\n\n"
         "/** Event venue maps (zoom 16, 432x324), keyed by the seeded address. */\n"
         f"export const VENUE_MAPS: Record<string, string> = {json.dumps(venues, indent=2)};\n\n"
-        "/** Neighborhood/city maps (zoom 12): a 668x420 dialog map and a 323x51 strip. */\n"
-        "export const AREA_MAPS: Record<string, { map: string; strip: string; lat: number; lng: number }> = "
+        f"/** Neighborhood/city maps (zoom 12): a 668x420 dialog map and a {TILE_W}x{TILE_H} item tile. */\n"
+        "export const AREA_MAPS: Record<string, { map: string; tile: string; lat: number; lng: number }> = "
         f"{json.dumps(areas, indent=2)};\n\n"
         "/** Marketplace browse-location maps (zoom 7, 520x220, ~0.82 km per px at 47.6N). */\n"
         f"export const REGION_MAPS: Record<string, string> = {json.dumps(regions, indent=2)};\n"

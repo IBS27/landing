@@ -138,8 +138,8 @@ export function localPoint(e: { clientX: number; clientY: number }, el: Element)
 
 /**
  * The frame every engine renders in: an optional HUD row, the board with the
- * start and game-over screens laid over it, and a footer with the controls
- * hint and Restart.
+ * start and game-over screens laid over it, and a footer with the one-line
+ * controls hint (full text in its tooltip) and Restart.
  */
 export function GameFrame({
   game,
@@ -212,7 +212,9 @@ export function GameFrame({
         )}
       </div>
       <div className="flex min-h-8 w-0 min-w-full items-center justify-between gap-2">
-        <p className="min-w-0 text-[13px] text-secondary leading-4">{hint}</p>
+        <p title={hint} className="min-w-0 truncate text-[13px] text-secondary leading-4">
+          {hint}
+        </p>
         {phase === "playing" && (
           <div className="flex shrink-0 gap-1">
             {extra}

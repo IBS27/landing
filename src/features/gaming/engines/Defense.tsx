@@ -392,7 +392,7 @@ export default function Defense({ game, onScore }: EngineProps) {
           </span>
         </>
       }
-      hint="Click grass to build, a tower to upgrade · Arrows + Enter · N next wave"
+      hint="Click grass to build"
       extra={
         between && phase === "playing" ? (
           <Button variant="primary" size="sm" onClick={sendWave}>

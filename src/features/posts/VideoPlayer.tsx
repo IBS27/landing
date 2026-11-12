@@ -1,8 +1,11 @@
 import { Maximize, Minimize } from "lucide-react";
 import {
   type CSSProperties,
+  createContext,
+  type ReactNode,
   type RefObject,
   useCallback,
+  useContext,
   useEffect,
   useRef,
   useState,
@@ -18,6 +21,12 @@ import { inlinePlayer, registerInlinePlayer, useVideoTheater } from "./videoThea
 /* ------------------------------------------------------------------ */
 /* Shared state                                                        */
 /* ------------------------------------------------------------------ */
+
+/** Search results show no muted-speaker badge on autoplaying videos, like Facebook. */
+const MuteHintContext = createContext(true);
+export function NoMuteHint({ children }: { children: ReactNode }) {
+  return <MuteHintContext.Provider value={false}>{children}</MuteHintContext.Provider>;
+}
 
 /**
  * Facebook keeps one sound preference per session: unmute one video and the
@@ -285,6 +294,7 @@ export function VideoPlayer({
   const [fullscreen, setFullscreen] = useState(false);
   const idle = useRef<number | undefined>(undefined);
   const prefs = useVideoPrefs();
+  const muteHint = useContext(MuteHintContext);
   const autoplayOn = !theater && autoPlay && prefs.autoplay === true;
   /** The viewer started playback themselves or listened with sound: no more looping. */
   const [engaged, setEngaged] = useState(theater);
@@ -546,7 +556,7 @@ export function VideoPlayer({
       </div>
 
       {/* Muted autoplay hint: Facebook keeps the speaker visible while muted. */}
-      {!sound && state.playing && !showControls && !ended && (
+      {muteHint && !sound && state.playing && !showControls && !ended && (
         <button
           type="button"
           aria-label="Unmute"

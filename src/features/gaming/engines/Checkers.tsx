@@ -270,7 +270,7 @@ export default function Checkers({ game, onScore }: EngineProps) {
           </span>
         </>
       }
-      hint="Click a piece, then a highlighted square · Arrows + Enter"
+      hint="Click a piece, then a square · Arrows + Enter"
       className="border-[10px] border-[#6b3a1f]"
       style={{ width: 8 * CELL + 20 }}
     >

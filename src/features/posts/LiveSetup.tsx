@@ -1,16 +1,6 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import {
-  ArrowLeft,
-  Camera,
-  CameraOff,
-  Check,
-  Copy,
-  Info,
-  Mic,
-  MicOff,
-  MonitorUp,
-} from "lucide-react";
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { ArrowLeft, Camera, CameraOff, ChevronDown, Mic, MicOff, MonitorUp } from "lucide-react";
+import { type ReactNode, type RefObject, useCallback, useEffect, useRef, useState } from "react";
 import { useM, useQ, useViewer } from "@/app/viewer";
 import { FacebookLogo } from "@/icons";
 import { cn } from "@/lib/format";
@@ -20,7 +10,9 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { type Audience, AudienceChip } from "./Audience";
 import { CommentComposer, CommentList } from "./CommentsSection";
+import { OnAirDashboard } from "./LiveDashboard";
 import { FloatingReactions, formatElapsed, LiveBadge, useElapsed, ViewerCount } from "./LivePost";
+import { useLiveRecording } from "./useLiveRecording";
 import { useLiveBroadcast } from "./useLiveStream";
 
 /** How often the host's page tells Convex it's still broadcasting. */
@@ -81,19 +73,165 @@ function useCameraPreview(enabled: boolean) {
   return { status, stream, retry: () => setAttempt((n) => n + 1) };
 }
 
+type SoftwareStatus = "starting" | "ready" | "ended" | "blocked" | "unsupported";
+
+/** Device labels that are virtual cameras from streaming software. */
+const VIRTUAL_CAMERA = /virtual|obs|streamlabs|xsplit|ndi|vmix|manycam|camtwist|ecamm|mmhmm/i;
+
+const isNotFound = (e: unknown) =>
+  e instanceof DOMException && (e.name === "NotFoundError" || e.name === "OverconstrainedError");
+
+/**
+ * "Streaming software": the encoder's output reaches the browser as a virtual
+ * camera (OBS Virtual Camera and the like) or a shared screen or window. Lists
+ * the video and audio inputs (refreshed when devices change, so a virtual
+ * camera started later appears), prefers a virtual camera on first use, and
+ * opens the picked input. `video` is a device id, "" for the default, or
+ * "screen" for screen sharing.
+ */
+function useSoftwareSource(enabled: boolean) {
+  const [videoInputs, setVideoInputs] = useState<MediaDeviceInfo[]>([]);
+  const [audioInputs, setAudioInputs] = useState<MediaDeviceInfo[]>([]);
+  const [pick, setPick] = useState({ video: "", audio: "" });
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [status, setStatus] = useState<SoftwareStatus>("starting");
+  const [notice, setNotice] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const autoPicked = useRef(false);
+  const lastDevice = useRef("");
+
+  const refresh = useCallback(async () => {
+    const all = (await navigator.mediaDevices?.enumerateDevices().catch(() => [])) ?? [];
+    const video = all.filter((d) => d.kind === "videoinput" && d.deviceId);
+    setVideoInputs(video);
+    setAudioInputs(all.filter((d) => d.kind === "audioinput" && d.deviceId));
+    return video;
+  }, []);
+
+  useEffect(() => {
+    const md = navigator.mediaDevices;
+    if (!enabled || !md?.addEventListener) return;
+    const onChange = () => void refresh();
+    md.addEventListener("devicechange", onChange);
+    return () => md.removeEventListener("devicechange", onChange);
+  }, [enabled, refresh]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `attempt` re-opens the input.
+  useEffect(() => {
+    const md = navigator.mediaDevices;
+    if (!enabled) return;
+    if (!md?.getUserMedia) {
+      setStatus("unsupported");
+      return;
+    }
+    let live = true;
+    const opened: MediaStream[] = [];
+    setStatus("starting");
+    setStream(null);
+    const audio: MediaTrackConstraints | boolean =
+      pick.audio === "none" ? false : pick.audio ? { deviceId: { exact: pick.audio } } : true;
+    const open = async () => {
+      if (pick.video === "screen") {
+        if (!md.getDisplayMedia) throw new DOMException("", "NotSupportedError");
+        const screen = await md.getDisplayMedia({ video: { frameRate: 30 }, audio: true });
+        opened.push(screen);
+        if (screen.getAudioTracks().length > 0 || !audio) return screen;
+        // Most windows share no sound: the chosen microphone joins the picture.
+        const mic = await md.getUserMedia({ audio }).catch(() => null);
+        if (!mic) return screen;
+        opened.push(mic);
+        return new MediaStream([...screen.getVideoTracks(), ...mic.getAudioTracks()]);
+      }
+      const video: MediaTrackConstraints = {
+        ...(pick.video ? { deviceId: { exact: pick.video } } : {}),
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        frameRate: { ideal: 30 },
+      };
+      const s = await md
+        .getUserMedia({ video, audio })
+        .catch((e: unknown) =>
+          isNotFound(e) && audio ? md.getUserMedia({ video }) : Promise.reject(e),
+        );
+      opened.push(s);
+      return s;
+    };
+    open()
+      .then(async (s) => {
+        if (!live) return;
+        const devices = await refresh();
+        const track = s.getVideoTracks()[0];
+        if (pick.video !== "screen") lastDevice.current = track?.getSettings().deviceId ?? "";
+        // First time here: switch to a virtual camera when there is one.
+        if (!autoPicked.current && pick.video === "") {
+          autoPicked.current = true;
+          const virtual = devices.find((d) => VIRTUAL_CAMERA.test(d.label));
+          if (virtual && virtual.deviceId !== lastDevice.current) {
+            setPick((p) => ({ ...p, video: virtual.deviceId }));
+            return;
+          }
+        }
+        track?.addEventListener("ended", () => live && setStatus("ended"));
+        setStream(s);
+        setStatus("ready");
+      })
+      .catch((e: unknown) => {
+        if (!live) return;
+        if (pick.video === "screen") {
+          // Sharing was cancelled: back to the camera that was on.
+          setNotice("Screen sharing didn't start. Choose a source to continue.");
+          setPick((p) => ({ ...p, video: lastDevice.current }));
+          return;
+        }
+        if (isNotFound(e)) {
+          void refresh();
+          setStatus("ended");
+        } else setStatus("blocked");
+      });
+    return () => {
+      live = false;
+      for (const s of opened) for (const t of s.getTracks()) t.stop();
+      setStream(null);
+    };
+  }, [enabled, pick.video, pick.audio, attempt, refresh]);
+
+  return {
+    status,
+    stream,
+    videoInputs,
+    audioInputs,
+    pick,
+    notice,
+    choose: (next: Partial<typeof pick>) => {
+      setNotice(null);
+      setPick((p) => ({ ...p, ...next }));
+      if (next.video === pick.video) setAttempt((n) => n + 1);
+    },
+    retry: () => setAttempt((n) => n + 1),
+  };
+}
+
+/** What the connected video source sends: "Connected · 1280×720 · 30 fps". */
+function connectionLabel(stream: MediaStream | null) {
+  const s = stream?.getVideoTracks()[0]?.getSettings();
+  if (!s?.width || !s.height) return "Connected";
+  return `Connected · ${s.width}×${s.height}${s.frameRate ? ` · ${Math.round(s.frameRate)} fps` : ""}`;
+}
+
 /**
  * Facebook's Live Producer (/live/producer), reached from the composer's
  * "Live video" button. Left: post details, audience and "Go live" (enabled
- * once the camera preview is running). Centre: the camera preview with a
- * microphone level meter. Going live publishes an "is live now" post that
- * friends see in their feeds, and this page streams the camera and microphone
- * to everyone who opens it (WebRTC, see `useLiveBroadcast`). While live, the
- * preview shows the viewer count and reactions floating up, the right panel
- * shows the post's comments in real time, and "End live video" ends the
- * broadcast and returns to the feed. The page
- * runs full screen under its own slim header (no TopNav). "Streaming software"
- * shows a per-session server URL and stream key, but no encoder can actually
- * connect to the clone, so only the webcam can go live.
+ * once the preview is showing frames). Centre: the preview, sized to the space
+ * available. The source is the webcam (with a microphone level meter) or
+ * streaming software, reaching the browser as a virtual camera or a shared
+ * screen or window. Going live publishes an "is live now" post that friends
+ * see in their feeds; this page streams the source to everyone who opens it
+ * (WebRTC, see `useLiveBroadcast`) and records it for the replay. While live,
+ * the centre shows the stream with the viewer count and floating reactions
+ * above stream health, viewers and duration cards, the right panel shows the
+ * post's comments in real time, and "End live video" ends the broadcast,
+ * saves the replay to the post and returns to the feed. The page runs full
+ * screen under its own slim header (no TopNav).
  */
 export function LiveProducer() {
   const viewer = useViewer();
@@ -103,18 +241,34 @@ export function LiveProducer() {
   const end = useM(api.live.end);
   const heartbeat = useM(api.live.heartbeat);
   const [source, setSource] = useState<"webcam" | "software">("webcam");
-  const { status, stream, retry } = useCameraPreview(source === "webcam");
+  const cam = useCameraPreview(source === "webcam");
+  const software = useSoftwareSource(source === "software");
+  const status: MediaStatus =
+    source === "webcam"
+      ? cam.status
+      : software.status === "ready"
+        ? "ready"
+        : software.status === "unsupported"
+          ? "unsupported"
+          : software.status === "blocked"
+            ? "blocked"
+            : "requesting";
+  const stream = source === "webcam" ? cam.stream : software.stream;
   const [previewing, setPreviewing] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [audience, setAudience] = useState<Audience>("public");
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<false | "start" | "end">(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmEnd, setConfirmEnd] = useState(false);
 
+  const belowRef = useRef<HTMLDivElement>(null);
+  const below = useHeight(belowRef);
+
   const liveId = current?._id ?? null;
-  const ready = source === "webcam" && status === "ready" && previewing;
-  useLiveBroadcast(liveId, source === "webcam" ? stream : null);
+  const ready = status === "ready" && !!stream && previewing;
+  const { stats } = useLiveBroadcast(liveId, stream);
+  const recording = useLiveRecording(liveId, stream);
 
   // Keep the broadcast alive while this page is open.
   useEffect(() => {
@@ -136,7 +290,7 @@ export function LiveProducer() {
   );
 
   const goLive = async () => {
-    setBusy(true);
+    setBusy("start");
     setError(null);
     try {
       await start({ title, description, privacy: audience });
@@ -149,15 +303,20 @@ export function LiveProducer() {
 
   const endLive = async () => {
     if (!liveId) return;
-    setBusy(true);
+    setBusy("end");
+    const rec = recording();
     try {
+      // The last frames are kept, viewers see the end at once, then the replay is saved.
+      await rec?.stop();
       await end({ postId: liveId });
       liveRef.current = null;
-      void navigate({ to: "/" });
     } catch {
       setBusy(false);
       setError("Couldn't end your live video. Try again.");
+      return;
     }
+    await rec?.finish();
+    void navigate({ to: "/" });
   };
 
   return (
@@ -213,9 +372,11 @@ export function LiveProducer() {
                       icon={<MonitorUp size={18} />}
                       title="Streaming software"
                       detail={
-                        source === "software"
-                          ? "Waiting for connection…"
-                          : "Use OBS or another encoder"
+                        source !== "software"
+                          ? "Use OBS or another encoder"
+                          : ready
+                            ? "Connected"
+                            : "Waiting for video…"
                       }
                     />
                   </div>
@@ -257,15 +418,22 @@ export function LiveProducer() {
                 {error}
               </p>
             )}
-            {current ? (
+            {current || busy === "end" ? (
               <Button
                 block
                 size="lg"
-                disabled={busy}
+                disabled={!!busy}
                 onClick={() => setConfirmEnd(true)}
                 className="bg-negative text-white hover:brightness-95"
               >
-                End live video
+                {busy === "end" ? (
+                  <span className="flex items-center gap-2">
+                    <Spinner size={18} className="text-white" />
+                    Saving your live video…
+                  </span>
+                ) : (
+                  "End live video"
+                )}
               </Button>
             ) : (
               <>
@@ -273,7 +441,7 @@ export function LiveProducer() {
                   block
                   size="lg"
                   variant="primary"
-                  disabled={!ready || busy || current === undefined}
+                  disabled={!ready || !!busy || current === undefined}
                   onClick={() => void goLive()}
                 >
                   {busy ? <Spinner size={20} className="text-white" /> : "Go live"}
@@ -281,7 +449,7 @@ export function LiveProducer() {
                 {!ready && (
                   <p className="mt-2 text-center text-[13px] text-secondary leading-4">
                     {source === "software"
-                      ? "Start streaming from your software to go live."
+                      ? "Go live becomes available once video arrives from your software."
                       : "Connect a video source to go live."}
                   </p>
                 )}
@@ -290,34 +458,56 @@ export function LiveProducer() {
           </div>
         </aside>
 
-        <main className="flex min-w-0 flex-1 flex-col items-center justify-center p-6">
-          <div className="w-full max-w-[960px]">
-            <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-black shadow-base">
-              {source === "software" && !current ? (
-                <SoftwareWaiting />
-              ) : status === "ready" && stream ? (
-                <Preview stream={stream} onPlaying={setPreviewing} />
-              ) : (
-                <PreviewMessage status={status} onRetry={retry} />
-              )}
-              {current && (
-                <>
-                  <LiveOverlay
+        <main className="min-w-0 flex-1 p-6">
+          {/* The stage takes the largest 16:9 that leaves room for the panel under it. */}
+          <div className="flex h-full flex-col items-center justify-center [container-type:size]">
+            <div
+              className="flex flex-col gap-3"
+              style={{ width: `min(100cqw, (100cqh - ${below + 12}px) * 16 / 9)` }}
+            >
+              <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-black shadow-base">
+                {status === "ready" && stream ? (
+                  <Preview stream={stream} mirror={source === "webcam"} onPlaying={setPreviewing} />
+                ) : source === "software" && status !== "blocked" && status !== "unsupported" ? (
+                  <SoftwareWaiting />
+                ) : (
+                  <PreviewMessage
+                    status={status}
+                    onRetry={source === "webcam" ? cam.retry : software.retry}
+                  />
+                )}
+                {current && (
+                  <>
+                    <LiveOverlay
+                      postId={current._id}
+                      startedAt={current.live?.startedAt ?? current.createdAt}
+                    />
+                    <FloatingReactions postId={current._id} className="right-3 bottom-3" />
+                  </>
+                )}
+              </div>
+              <div ref={belowRef}>
+                {current ? (
+                  <OnAirDashboard
                     postId={current._id}
                     startedAt={current.live?.startedAt ?? current.createdAt}
+                    stream={stream}
+                    stats={stats}
+                    recording={recording}
                   />
-                  <FloatingReactions postId={current._id} className="right-3 bottom-3" />
-                </>
-              )}
-            </div>
-            {source === "software" && !current ? (
-              <StreamSetup />
-            ) : (
-              <div className="mt-3 flex items-center gap-4 rounded-lg bg-card px-4 py-3 shadow-base">
-                <DeviceState on={status === "ready"} label={stream?.getVideoTracks()[0]?.label} />
-                <MicMeter stream={stream} />
+                ) : source === "software" ? (
+                  <SoftwareSetup source={software} connected={ready} stream={stream} />
+                ) : (
+                  <div className="flex shrink-0 items-center gap-4 rounded-lg bg-card px-4 py-3 shadow-base">
+                    <DeviceState
+                      on={status === "ready"}
+                      label={stream?.getVideoTracks()[0]?.label}
+                    />
+                    <MicMeter stream={stream} />
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </main>
 
@@ -343,7 +533,7 @@ export function LiveProducer() {
         <Modal open={confirmEnd} onOpenChange={setConfirmEnd} title="End live video?" width={548}>
           <p className="px-4 pt-4 text-[15px] text-primary leading-5">
             Are you sure you want to end your live video? Your followers will no longer be able to
-            watch it live.
+            watch it live. Your video will be saved to your profile.
           </p>
           <div className="flex justify-end gap-2 p-4">
             <Button variant="ghost" className="text-link" onClick={() => setConfirmEnd(false)}>
@@ -351,7 +541,7 @@ export function LiveProducer() {
             </Button>
             <Button
               variant="primary"
-              disabled={busy}
+              disabled={!!busy}
               onClick={() => {
                 setConfirmEnd(false);
                 void endLive();
@@ -364,6 +554,19 @@ export function LiveProducer() {
       </div>
     </div>
   );
+}
+
+/** `ref`'s current height, kept in sync as it resizes. */
+function useHeight(ref: RefObject<HTMLElement | null>) {
+  const [height, setHeight] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setHeight(el.offsetHeight));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref]);
+  return height;
 }
 
 /** The producer's own slim header (Facebook hides the TopNav here): back, logo, title. */
@@ -438,100 +641,139 @@ function SoftwareWaiting() {
       <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10">
         <MonitorUp size={30} />
       </span>
-      <p className="mt-4 font-bold text-[20px] leading-6">Connect your streaming software</p>
+      <p className="mt-4 font-bold text-[20px] leading-6">Waiting for video…</p>
       <p className="mt-2 max-w-[440px] text-[15px] text-white/70 leading-5">
-        Copy the server URL and stream key below into your streaming software, then start streaming.
-        A preview appears here once it connects.
+        Start your streaming software's virtual camera, or share a screen or window. Your preview
+        appears here once video arrives.
       </p>
     </div>
   );
 }
 
-/** A random stream key in Facebook's shape, new for each producer session. */
-function newStreamKey() {
-  const digits = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b % 10).join("");
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const token = Array.from(
-    crypto.getRandomValues(new Uint8Array(28)),
-    (b) => alphabet[b % alphabet.length],
-  ).join("");
-  return `FB-${digits}-0-${token}`;
-}
-
-const SERVER_URL = "rtmps://live.clone.local:443/rtmp/";
-
-/** "Stream setup": server URL and a per-session stream key, each with Copy. */
-function StreamSetup() {
-  const [key] = useState(newStreamKey);
-  const [shown, setShown] = useState(false);
+/**
+ * "Streaming software" setup under the preview: the video input (a virtual
+ * camera from OBS and the like), the audio input, "Share screen or window",
+ * and the connection status.
+ */
+function SoftwareSetup({
+  source,
+  connected,
+  stream,
+}: {
+  source: ReturnType<typeof useSoftwareSource>;
+  connected: boolean;
+  stream: MediaStream | null;
+}) {
+  const { videoInputs, audioInputs, pick, choose, notice } = source;
+  const sharing = pick.video === "screen";
+  const currentVideo = sharing
+    ? "screen"
+    : pick.video || stream?.getVideoTracks()[0]?.getSettings().deviceId || "";
+  const currentAudio = pick.audio || stream?.getAudioTracks()[0]?.getSettings().deviceId || "";
   return (
-    <div className="mt-3 rounded-lg bg-card px-4 py-4 shadow-base">
-      <h2 className="font-semibold text-[17px] text-primary leading-5">Stream setup</h2>
-      <div className="mt-3 grid gap-3 min-[1100px]:grid-cols-2">
-        <CopyField label="Server URL" value={SERVER_URL} />
-        <CopyField
-          label="Stream key"
-          value={key}
-          masked={!shown}
-          extra={
-            <Button variant="secondary" onClick={() => setShown((v) => !v)}>
-              {shown ? "Hide" : "Show"}
-            </Button>
-          }
-        />
+    <section className="shrink-0 rounded-lg bg-card px-4 py-3 shadow-base">
+      <div className="flex items-center gap-3">
+        <h2 className="min-w-0 flex-1 font-semibold text-[17px] text-primary leading-5">
+          Streaming software
+        </h2>
+        <span
+          role="status"
+          className={cn(
+            "flex shrink-0 items-center gap-1.5 text-[13px] leading-4",
+            connected ? "font-semibold text-positive" : "text-secondary",
+          )}
+        >
+          <span
+            className={cn(
+              "h-2 w-2 rounded-full",
+              connected ? "bg-positive" : "animate-pulse bg-secondary",
+            )}
+          />
+          {connected ? connectionLabel(stream) : "Waiting for video…"}
+        </span>
       </div>
-      <p className="mt-3 flex items-start gap-2 text-[13px] text-secondary leading-4">
-        <Info size={16} className="mt-px shrink-0" />A new stream key is generated each time you
-        open Live Producer. External encoders can't connect to this Facebook clone, so no preview
-        will appear here; switch to Webcam to go live.
+      <p className="mt-1 text-[13px] text-secondary leading-4">
+        Use streaming software like OBS: start its virtual camera, then choose it here.
       </p>
-    </div>
+      <div className="mt-3 flex flex-wrap items-end gap-2">
+        <DeviceSelect
+          label="Video source"
+          value={currentVideo}
+          onChange={(video) => choose({ video })}
+          options={[
+            ...videoInputs.map((d, i) => ({
+              value: d.deviceId,
+              label: d.label || `Camera ${i + 1}`,
+            })),
+            ...(sharing ? [{ value: "screen", label: "Screen or window" }] : []),
+          ]}
+          empty="No cameras found"
+        />
+        <DeviceSelect
+          label="Audio source"
+          value={currentAudio}
+          onChange={(audio) => choose({ audio })}
+          options={[
+            ...audioInputs.map((d, i) => ({
+              value: d.deviceId,
+              label: d.label || `Microphone ${i + 1}`,
+            })),
+            { value: "none", label: "No audio" },
+          ]}
+        />
+        <Button
+          variant={sharing ? "soft" : "secondary"}
+          icon={<MonitorUp size={16} />}
+          onClick={() => choose({ video: "screen" })}
+          className="h-9"
+        >
+          {sharing ? "Share a different screen" : "Share screen or window"}
+        </Button>
+      </div>
+      {notice && <p className="mt-2 text-[13px] text-negative leading-4">{notice}</p>}
+    </section>
   );
 }
 
-function CopyField({
+function DeviceSelect({
   label,
   value,
-  masked,
-  extra,
+  onChange,
+  options,
+  empty,
 }: {
   label: string;
   value: string;
-  masked?: boolean;
-  extra?: ReactNode;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  empty?: string;
 }) {
-  const [copied, setCopied] = useState(false);
-  useEffect(() => {
-    if (!copied) return;
-    const id = window.setTimeout(() => setCopied(false), 2000);
-    return () => window.clearTimeout(id);
-  }, [copied]);
   return (
-    <div className="min-w-0">
-      <p className="mb-1 font-semibold text-[13px] text-secondary leading-4">{label}</p>
-      <div className="flex items-center gap-2">
-        <input
-          readOnly
-          aria-label={label}
-          value={masked ? "•".repeat(24) : value}
-          onFocus={(e) => !masked && e.currentTarget.select()}
-          className="h-9 min-w-0 flex-1 rounded-md border border-divider bg-input px-3 font-mono text-[13px] text-primary outline-none"
-        />
-        {extra}
-        <Button
-          variant="secondary"
-          icon={copied ? <Check size={16} /> : <Copy size={16} />}
-          onClick={() => {
-            void navigator.clipboard
-              ?.writeText(value)
-              .then(() => setCopied(true))
-              .catch(() => {});
-          }}
+    <label className="min-w-[200px] flex-1">
+      <span className="mb-1 block font-semibold text-[13px] text-secondary leading-4">{label}</span>
+      <span className="relative block">
+        <select
+          value={options.some((o) => o.value === value) ? value : ""}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-9 w-full appearance-none truncate rounded-md border border-divider bg-card pr-8 pl-3 text-[15px] text-primary outline-none focus:border-fb"
         >
-          {copied ? "Copied" : "Copy"}
-        </Button>
-      </div>
-    </div>
+          {!options.some((o) => o.value === value) && (
+            <option value="" disabled>
+              {options.length === 0 ? (empty ?? "None found") : "Choose…"}
+            </option>
+          )}
+          {options.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        <ChevronDown
+          size={16}
+          className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-secondary"
+        />
+      </span>
+    </label>
   );
 }
 
@@ -575,12 +817,15 @@ function LiveDetails({
   );
 }
 
-/** The mirrored camera preview. */
+/** The source's live preview. */
 function Preview({
   stream,
+  mirror,
   onPlaying,
 }: {
   stream: MediaStream;
+  /** The webcam is mirrored, like a mirror; other sources aren't. */
+  mirror: boolean;
   onPlaying: (playing: boolean) => void;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -600,9 +845,9 @@ function Preview({
       muted
       playsInline
       autoPlay
-      aria-label="Camera preview"
+      aria-label="Video preview"
       onPlaying={() => onPlaying(true)}
-      className="h-full w-full -scale-x-100 object-cover"
+      className={cn("h-full w-full", mirror ? "-scale-x-100 object-cover" : "object-contain")}
     />
   );
 }

@@ -294,7 +294,11 @@ export const watchlist = viewerQuery({
   },
 });
 
-/** Count a video as watched (it played for ≥3s). Clears it from the Watchlist's "new". */
+/**
+ * Count a video (or reel) as watched: it played for ≥3s. Each person counts
+ * once, which adds one to the post's view count and clears it from the
+ * Watchlist's "new".
+ */
 export const recordView = viewerMutation({
   args: { postId: v.id("posts") },
   handler: async (ctx, { postId }) => {
@@ -305,7 +309,9 @@ export const recordView = viewerMutation({
       .query("videoViews")
       .withIndex("by_user_post", (q) => q.eq("userId", userId).eq("postId", postId))
       .first();
-    if (!row) await ctx.db.insert("videoViews", { userId, postId, viewedAt: Date.now() });
+    if (row) return;
+    await ctx.db.insert("videoViews", { userId, postId, viewedAt: Date.now() });
+    await ctx.db.patch(postId, { recordedViews: (post.recordedViews ?? 0) + 1 });
   },
 });
 

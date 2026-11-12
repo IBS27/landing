@@ -3,6 +3,7 @@ import { Flag, Link2, Share2 } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { groupParams } from "@/features/feed/links";
+import { CoverWash } from "@/features/posts/CoverWash";
 import { cn } from "@/lib/format";
 import {
   Menu,
@@ -98,18 +99,7 @@ function GroupHeader({ group }: { group: GroupView }) {
   return (
     <>
       <div className="relative bg-card shadow-[0_1px_2px_var(--shadow-1)]">
-        {/* Blurred cover wash that fades to the card color, like Facebook's hero. */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-[420px] overflow-hidden"
-          aria-hidden
-        >
-          <img
-            src={group.cover}
-            alt=""
-            className="h-full w-full scale-110 object-cover blur-[40px]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/70 to-card/0" />
-        </div>
+        <CoverWash cover={group.cover} />
         <div className="relative mx-auto w-full max-w-[1250px]">
           <div className="relative aspect-[1250/463] max-h-[463px] w-full overflow-hidden rounded-b-lg bg-btn">
             <img

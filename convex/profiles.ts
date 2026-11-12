@@ -6,7 +6,7 @@ import type { QueryCtx } from "./_generated/server";
 import { relationTo } from "./friends";
 import { blockedSet, isBlockedEitherWay } from "./lib/blocks";
 import { viewerMutation, viewerQuery } from "./lib/functions";
-import { type Audience, canView, enrichPosts, loadAudience } from "./lib/posts";
+import { type Audience, canView, enrichPosts, loadAudience, viewCountOf } from "./lib/posts";
 import { detailAudiences, visibleDetails, visibleFriendIds } from "./lib/settings";
 import { friendIds, getSummaries, type UserSummary, userSummary } from "./lib/users";
 import { isReelPost } from "./media";
@@ -348,13 +348,14 @@ export const photos = viewerQuery({
   },
 });
 
-/** Reels the person posted (vertical video posts). */
+/** Reels the person posted (vertical video posts), each with its play count. */
 export const videos = viewerQuery({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
     const a = await loadAudience(ctx, ctx.viewer._id);
-    const posts = await visibleTimelinePosts(ctx, a, userId);
-    return mediaOf(posts.filter(isReelPost), "video");
+    const reels = (await visibleTimelinePosts(ctx, a, userId)).filter(isReelPost);
+    const views = new Map(reels.map((p) => [p._id, viewCountOf(p)]));
+    return mediaOf(reels, "video").map((m) => ({ ...m, views: views.get(m.postId) ?? 0 }));
   },
 });
 

@@ -19,9 +19,10 @@ const ALIASES: Record<string, string> = {
   "Pike Place": "Seattle",
 };
 
-/** Map images are light OSM renders; dark mode turns them into a dark map. */
-export const MAP_IMG_CLASS =
-  "pointer-events-none block select-none dark:[filter:invert(0.9)_hue-rotate(180deg)_saturate(0.5)_brightness(0.95)]";
+/** Every generated map has a dark-style twin under /seed/maps/dark/. */
+export function darkMapSrc(src: string) {
+  return src.replace("/seed/maps/", "/seed/maps/dark/");
+}
 
 export type AreaMap = (typeof AREA_MAPS)[string];
 

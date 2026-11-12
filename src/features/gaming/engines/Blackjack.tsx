@@ -229,7 +229,7 @@ export default function Blackjack({ game, onScore }: EngineProps) {
           </span>
         </>
       }
-      hint="H hit · S stand · D double · 1–4 chips · Enter deal"
+      hint="H hit · S stand · D double · Enter deal"
       className="flex h-[400px] w-[388px] flex-col items-center justify-between py-3"
       style={{ background: felt(game) }}
     >

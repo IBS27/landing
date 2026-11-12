@@ -190,7 +190,8 @@ function Single({
 const SAMPLE = 64;
 const fillCache = new Map<string, string | null>();
 
-function dominantFill(url: string): Promise<string | null> {
+/** Draws `url` into a 64×64 canvas and hands its pixels to `read` (null when unreadable). */
+function samplePixels<T>(url: string, read: (data: Uint8ClampedArray) => T): Promise<T | null> {
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -202,25 +203,9 @@ function dominantFill(url: string): Promise<string | null> {
         const ctx = canvas.getContext("2d");
         if (!ctx) return resolve(null);
         ctx.drawImage(img, 0, 0, SAMPLE, SAMPLE);
-        const { data } = ctx.getImageData(0, 0, SAMPLE, SAMPLE);
-        // Per bucket: summed r, g, b and pixel count.
-        const buckets = new Map<number, [number, number, number, number]>();
-        let best: [number, number, number, number] = [0, 0, 0, 0];
-        for (let i = 0; i < data.length; i += 4) {
-          const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
-          const key = ((r >> 5) << 6) | ((g >> 5) << 3) | (b >> 5);
-          const e = buckets.get(key) ?? [0, 0, 0, 0];
-          e[0] += r;
-          e[1] += g;
-          e[2] += b;
-          e[3] += 1;
-          buckets.set(key, e);
-          if (e[3] > best[3]) best = e;
-        }
-        const [r, g, b] = best.slice(0, 3).map((v) => Math.round(v / best[3]));
-        resolve(`rgb(${r}, ${g}, ${b})`);
+        resolve(read(ctx.getImageData(0, 0, SAMPLE, SAMPLE).data));
       } catch {
-        resolve(null); // cross-origin image without CORS: keep the neutral dark fill
+        resolve(null); // cross-origin image without CORS: keep the neutral fill
       }
     };
     img.onerror = () => resolve(null);
@@ -228,26 +213,87 @@ function dominantFill(url: string): Promise<string | null> {
   });
 }
 
+function dominantFill(url: string) {
+  return samplePixels(url, (data) => {
+    // Per bucket: summed r, g, b and pixel count.
+    const buckets = new Map<number, [number, number, number, number]>();
+    let best: [number, number, number, number] = [0, 0, 0, 0];
+    for (let i = 0; i < data.length; i += 4) {
+      const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
+      const key = ((r >> 5) << 6) | ((g >> 5) << 3) | (b >> 5);
+      const e = buckets.get(key) ?? [0, 0, 0, 0];
+      e[0] += r;
+      e[1] += g;
+      e[2] += b;
+      e[3] += 1;
+      buckets.set(key, e);
+      if (e[3] > best[3]) best = e;
+    }
+    const [r, g, b] = best.slice(0, 3).map((v) => Math.round(v / best[3]));
+    return `rgb(${r}, ${g}, ${b})`;
+  });
+}
+
+/**
+ * Facebook's cover side fill extends each edge of the cover outward: the mean
+ * colour of the cover's top-third outer fifth on that side, a touch deeper
+ * (measured against FB: blue sky → slate blue, trees → olive, poster → purple).
+ */
+function coverEdges(url: string) {
+  return samplePixels(url, (data) => {
+    const strip = Math.round(SAMPLE * 0.2);
+    const rows = Math.round(SAMPLE * 0.35);
+    const side = (fromRight: boolean) => {
+      const sum = [0, 0, 0];
+      for (let y = 0; y < rows; y++)
+        for (let i = 0; i < strip; i++) {
+          const x = fromRight ? SAMPLE - 1 - i : i;
+          const o = (y * SAMPLE + x) * 4;
+          for (let c = 0; c < 3; c++) sum[c] += data[o + c];
+        }
+      const [r, g, b] = sum.map((v) => Math.round((v / (strip * rows)) * 0.9));
+      return `rgb(${r}, ${g}, ${b})`;
+    };
+    return { left: side(false), right: side(true) };
+  });
+}
+
+/** A per-URL cached image sample: undefined while sampling, null when unreadable. */
+function useSample<T>(
+  url: string | undefined,
+  cache: Map<string, T | null>,
+  run: (url: string) => Promise<T | null>,
+) {
+  const [value, setValue] = useState(() => (url ? cache.get(url) : null));
+  useEffect(() => {
+    if (!url) return setValue(null);
+    if (cache.has(url)) return setValue(cache.get(url));
+    let live = true;
+    setValue(undefined);
+    run(url).then((v) => {
+      cache.set(url, v);
+      if (live) setValue(v);
+    });
+    return () => {
+      live = false;
+    };
+  }, [url, cache, run]);
+  return value;
+}
+
 /**
  * The letterbox colour for `url` (cached per URL): undefined while sampling,
  * null when it can't be read (keep the caller's neutral fill).
  */
 export function useDominantColor(url: string | undefined) {
-  const [color, setColor] = useState(() => (url ? fillCache.get(url) : null));
-  useEffect(() => {
-    if (!url) return setColor(null);
-    if (fillCache.has(url)) return setColor(fillCache.get(url));
-    let live = true;
-    setColor(undefined);
-    dominantFill(url).then((c) => {
-      fillCache.set(url, c);
-      if (live) setColor(c);
-    });
-    return () => {
-      live = false;
-    };
-  }, [url]);
-  return color;
+  return useSample(url, fillCache, dominantFill);
+}
+
+const edgeCache = new Map<string, { left: string; right: string } | null>();
+
+/** The cover's left/right side-fill colours (see `coverEdges`); same states as `useDominantColor`. */
+export function useCoverEdgeColors(url: string | undefined) {
+  return useSample(url, edgeCache, coverEdges);
 }
 
 /**
@@ -255,7 +301,7 @@ export function useDominantColor(url: string | undefined) {
  * photo (a dark olive behind a sunlit yard, a dark slate behind a pink sky): the
  * dominant colour with its HSL lightness capped at 27% and saturation at 45%.
  */
-function letterboxTone(color: string | null | undefined) {
+export function letterboxTone(color: string | null | undefined) {
   const m = color?.match(/\d+/g);
   if (!m) return color;
   const [r, g, b] = m.map((v) => Number(v) / 255);

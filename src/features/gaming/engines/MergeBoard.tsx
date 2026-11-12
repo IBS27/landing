@@ -336,7 +336,7 @@ export default function MergeBoard({ game, onScore }: EngineProps) {
           </span>
         </>
       }
-      hint={`Drag to merge · Click the ${theme.gen.e} or press G · 1–3 fill orders`}
+      hint={`Drag to merge · Click the ${theme.gen.e} or G for more`}
       className="w-[388px] p-3"
       style={{ background: `linear-gradient(170deg, ${game.from}, ${game.band})` }}
     >

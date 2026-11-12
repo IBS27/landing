@@ -1,7 +1,12 @@
 import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
-import { internalMutation, type MutationCtx, type QueryCtx } from "./_generated/server";
+import {
+  internalMutation,
+  internalQuery,
+  type MutationCtx,
+  type QueryCtx,
+} from "./_generated/server";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { notify } from "./lib/notify";
 import { canView, enrichPost, enrichPosts, loadAudience } from "./lib/posts";
@@ -19,6 +24,10 @@ import { privacy, reactionType } from "./validators";
  * camera and microphone to each session, and offers, answers and ICE
  * candidates travel through `liveSignals`. Viewers ping every 10s; a session
  * that stops pinging is dropped (and its connection closed by the host).
+ *
+ * The host's page also records the broadcast and uploads it in parts while on
+ * air; when it ends, the parts are joined into the replay (`liveReplay.ts`)
+ * and the post becomes a normal video post ("<name> was live.").
  */
 
 /** A broadcast whose host hasn't checked in for this long has ended. */
@@ -201,6 +210,8 @@ export const cleanup = internalMutation({
       .withIndex("by_post", (q) => q.eq("postId", postId))
       .collect();
     for (const r of reactions) await ctx.db.delete(r._id);
+    // A recording the host never finished (tab closed) still becomes the replay.
+    await ctx.scheduler.runAfter(ORPHAN_MS, internal.live.finalizeOrphans, { postId });
   },
 });
 
@@ -409,5 +420,220 @@ export const reactions = viewerQuery({
       .order("desc")
       .take(30);
     return rows.map((r) => ({ _id: r._id, type: r.type }));
+  },
+});
+
+/* ---------------------------------------------------------------- */
+/* Recording and replay                                             */
+/* ---------------------------------------------------------------- */
+
+/** Parts per take: 15 minutes of 30-second parts, with room for short flushes. */
+const MAX_PARTS = 48;
+/** The host may still upload and finish a recording this long after the broadcast ends. */
+const FINISH_WINDOW_MS = 10 * 60_000;
+/** An unfinished recording is joined (or dropped) this long after the broadcast ends. */
+const ORPHAN_MS = 3 * 60_000;
+
+/** The host's broadcast, live or recently ended (for uploading its recording). */
+async function hostBroadcast(ctx: QueryCtx, postId: Id<"posts">, userId: Id<"users">) {
+  const post = await ctx.db.get(postId);
+  if (!post?.live || post.authorId !== userId) return null;
+  const endedAt = post.live.endedAt;
+  if (endedAt !== undefined && Date.now() - endedAt > FINISH_WINDOW_MS) return null;
+  return post;
+}
+
+async function takeParts(ctx: QueryCtx, postId: Id<"posts">, take: string) {
+  return ctx.db
+    .query("liveRecordingParts")
+    .withIndex("by_post_take", (q) => q.eq("postId", postId).eq("take", take))
+    .collect();
+}
+
+async function dropParts(ctx: MutationCtx, parts: Doc<"liveRecordingParts">[], keep?: string) {
+  for (const p of parts) {
+    if (p.storageId !== keep) await ctx.storage.delete(p.storageId).catch(() => {});
+    await ctx.db.delete(p._id);
+  }
+}
+
+/** Where the host uploads the next recording part (or the replay's poster frame). */
+export const recordingUploadUrl = viewerMutation({
+  args: { postId: v.id("posts") },
+  handler: async (ctx, { postId }) => {
+    if (!(await hostBroadcast(ctx, postId, ctx.viewer._id)))
+      throw new ConvexError("Live video not found");
+    return ctx.storage.generateUploadUrl();
+  },
+});
+
+export const addRecordingPart = viewerMutation({
+  args: {
+    postId: v.id("posts"),
+    take: v.string(),
+    seq: v.number(),
+    storageId: v.id("_storage"),
+    width: v.optional(v.number()),
+    height: v.optional(v.number()),
+  },
+  handler: async (ctx, { postId, take, seq, storageId, width, height }) => {
+    const meta = await ctx.db.system.get(storageId);
+    const ok =
+      (await hostBroadcast(ctx, postId, ctx.viewer._id)) &&
+      take.length <= 64 &&
+      Number.isInteger(seq) &&
+      seq >= 0 &&
+      seq < MAX_PARTS &&
+      (!meta?.contentType || meta.contentType.startsWith("video/"));
+    const parts = ok ? await takeParts(ctx, postId, take) : [];
+    if (!ok || parts.some((p) => p.seq === seq)) {
+      await ctx.storage.delete(storageId).catch(() => {});
+      throw new ConvexError("Couldn't save this part of your live video");
+    }
+    await ctx.db.insert("liveRecordingParts", {
+      postId,
+      take,
+      seq,
+      storageId,
+      width,
+      height,
+      createdAt: Date.now(),
+    });
+  },
+});
+
+/**
+ * The host stopped recording and every part is uploaded: end the broadcast
+ * (if it's still on) and join the parts into the replay.
+ */
+export const finishRecording = viewerMutation({
+  args: {
+    postId: v.id("posts"),
+    take: v.string(),
+    parts: v.number(),
+    posterStorageId: v.optional(v.id("_storage")),
+    width: v.number(),
+    height: v.number(),
+    duration: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const post = await hostBroadcast(ctx, args.postId, ctx.viewer._id);
+    if (!post) throw new ConvexError("Live video not found");
+    await endLive(ctx, post, Date.now());
+    const parts = await takeParts(ctx, args.postId, args.take);
+    if (parts.length !== args.parts || parts.some((p, i) => p.seq !== i)) {
+      await dropParts(ctx, parts);
+      throw new ConvexError("Some of your live video didn't upload");
+    }
+    const last = parts.at(-1);
+    if (last) await ctx.db.patch(last._id, { final: true });
+    await ctx.scheduler.runAfter(0, internal.liveReplay.assemble, {
+      postId: args.postId,
+      take: args.take,
+      posterStorageId: args.posterStorageId,
+      width: args.width,
+      height: args.height,
+      duration: args.duration,
+    });
+  },
+});
+
+/** The host's upload failed: its parts go, and the post keeps the "Live video ended" card. */
+export const discardRecording = viewerMutation({
+  args: { postId: v.id("posts"), take: v.string() },
+  handler: async (ctx, { postId, take }) => {
+    const post = await ctx.db.get(postId);
+    if (!post || post.authorId !== ctx.viewer._id) return;
+    await dropParts(ctx, await takeParts(ctx, postId, take));
+  },
+});
+
+export const recordingParts = internalQuery({
+  args: { postId: v.id("posts"), take: v.string() },
+  handler: async (ctx, { postId, take }) =>
+    (await takeParts(ctx, postId, take)).map((p) => ({ seq: p.seq, storageId: p.storageId })),
+});
+
+/** The joined recording becomes the post's video; its parts go. */
+export const attachReplay = internalMutation({
+  args: {
+    postId: v.id("posts"),
+    take: v.string(),
+    storageId: v.id("_storage"),
+    posterStorageId: v.optional(v.id("_storage")),
+    width: v.optional(v.number()),
+    height: v.optional(v.number()),
+    duration: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const parts = await takeParts(ctx, args.postId, args.take);
+    const post = await ctx.db.get(args.postId);
+    const url = await ctx.storage.getUrl(args.storageId);
+    if (!post?.live || post.media.length > 0 || !url) {
+      // Deleted meanwhile, or another take already became the replay.
+      await dropParts(ctx, parts);
+      if (!parts.some((p) => p.storageId === args.storageId))
+        await ctx.storage.delete(args.storageId).catch(() => {});
+      if (args.posterStorageId) await ctx.storage.delete(args.posterStorageId).catch(() => {});
+      return;
+    }
+    const poster = args.posterStorageId
+      ? ((await ctx.storage.getUrl(args.posterStorageId)) ?? undefined)
+      : undefined;
+    await ctx.db.patch(args.postId, {
+      media: [
+        {
+          url,
+          kind: "video",
+          width: args.width,
+          height: args.height,
+          duration: args.duration,
+          poster,
+        },
+      ],
+    });
+    await dropParts(ctx, parts, args.storageId);
+  },
+});
+
+export const discardTake = internalMutation({
+  args: { postId: v.id("posts"), take: v.string() },
+  handler: async (ctx, { postId, take }) => {
+    await dropParts(ctx, await takeParts(ctx, postId, take));
+  },
+});
+
+/**
+ * After a broadcast ends: a recording the host never finished (the tab
+ * closed mid-broadcast) is joined from the parts that arrived, when they run
+ * unbroken from the start; anything else is dropped.
+ */
+export const finalizeOrphans = internalMutation({
+  args: { postId: v.id("posts") },
+  handler: async (ctx, { postId }) => {
+    const rows = await ctx.db
+      .query("liveRecordingParts")
+      .withIndex("by_post_take", (q) => q.eq("postId", postId))
+      .collect();
+    const takes = new Map<string, Doc<"liveRecordingParts">[]>();
+    for (const r of rows) takes.set(r.take, [...(takes.get(r.take) ?? []), r]);
+    const post = await ctx.db.get(postId);
+    let best: Doc<"liveRecordingParts">[] | null = null;
+    for (const parts of takes.values()) {
+      // A finished take is being joined right now.
+      if (parts.some((p) => p.final)) continue;
+      const unbroken = parts.every((p, i) => p.seq === i);
+      if (post && post.media.length === 0 && unbroken && parts.length > (best?.length ?? 0)) {
+        if (best) await dropParts(ctx, best);
+        best = parts;
+      } else await dropParts(ctx, parts);
+    }
+    if (best?.[0])
+      await ctx.scheduler.runAfter(0, internal.liveReplay.assemble, {
+        postId,
+        take: best[0].take,
+        width: best[0].width,
+        height: best[0].height,
+      });
   },
 });

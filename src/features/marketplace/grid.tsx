@@ -15,9 +15,17 @@ export function milesLabel(n: number) {
   return n >= 1000 ? `${Math.round(n / 1000)}K miles` : `${n.toLocaleString("en-US")} miles`;
 }
 
+/**
+ * Facebook's "Just listed" pill marks listings posted in the last several hours
+ * (well under a day), so only a few tiles per screen carry it.
+ */
+const JUST_LISTED_MS = 12 * 60 * 60 * 1000;
+
 /** One Marketplace grid card: square photo, price, title, location. */
 export function ListingCardView({ l, footer }: { l: ListingCard; footer?: ReactNode }) {
   const title = l.rental ? homeTitle(l.rental, l.title) : l.title;
+  // Judged on the viewer's clock: a cached query result must not keep the pill on old listings.
+  const justListed = l.status === "active" && Date.now() - l.createdAt < JUST_LISTED_MS;
   return (
     <div className="pb-3">
       <Link
@@ -30,7 +38,7 @@ export function ListingCardView({ l, footer }: { l: ListingCard; footer?: ReactN
             <img src={l.photo} alt={title} loading="lazy" className="h-full w-full object-cover" />
           )}
           <span className="pointer-events-none absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/5" />
-          {l.justListed && l.status === "active" && (
+          {justListed && (
             <span className="absolute top-2 left-2 rounded bg-white px-1 py-0.5 font-medium text-[#080809] text-[12px] leading-4">
               Just listed
             </span>
