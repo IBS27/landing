@@ -188,6 +188,8 @@ export const notificationKind = v.union(
   v.literal("birthday"),
   v.literal("memory"),
   v.literal("live"),
+  /** Landing: someone vouched for you (convex/vouches.ts). */
+  v.literal("vouch"),
 );
 
 /** Settings → Notifications categories (each maps to one or more notification kinds). */

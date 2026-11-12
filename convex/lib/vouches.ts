@@ -3,6 +3,7 @@ import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import type { VouchRelationship } from "../validators";
 import { blockedSet, isBlockedEitherWay } from "./blocks";
+import { notify } from "./notify";
 import { friendIds, getSummaries, type UserSummary } from "./users";
 
 /**
@@ -235,7 +236,7 @@ export function vouchBy(ctx: QueryCtx, voucherId: UserId, subjectId: UserId) {
 
 /* ---------- Writes ---------- */
 
-/** Vouch for `subjectId`, or update the voucher's existing vouch. */
+/** Vouch for `subjectId` (notifying them), or update the voucher's existing vouch. */
 export async function saveVouch(
   ctx: MutationCtx,
   voucher: Doc<"users">,
@@ -253,7 +254,7 @@ export async function saveVouch(
     await ctx.db.patch(existing._id, { relationship: input.relationship, note, updatedAt: now });
     return existing._id;
   }
-  return ctx.db.insert("vouches", {
+  const vouchId = await ctx.db.insert("vouches", {
     voucherId: voucher._id,
     subjectId,
     relationship: input.relationship,
@@ -261,6 +262,14 @@ export async function saveVouch(
     createdAt: now,
     updatedAt: now,
   });
+  // Only a new vouch notifies; editing one doesn't. Opens the voucher's profile.
+  await notify(ctx, {
+    userId: subjectId,
+    actorId: voucher._id,
+    kind: "vouch",
+    text: "vouched for you.",
+  });
+  return vouchId;
 }
 
 /** Withdraw the voucher's vouch for `subjectId`, if any. */

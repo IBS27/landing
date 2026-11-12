@@ -170,7 +170,7 @@ describe("listerNetwork", () => {
 describe("saveVouch and removeVouch", () => {
   const me = (u: string) => user(u) as unknown as Doc<"users">;
 
-  test("creates, updates and removes one vouch per pair", async () => {
+  test("creates (notifying the lister once), updates and removes one vouch per pair", async () => {
     const w = world();
     const ctx = fakeCtx(w);
     const first = await saveVouch(ctx, me("F1"), id("L"), {
@@ -181,7 +181,12 @@ describe("saveVouch and removeVouch", () => {
     expect(mine).toHaveLength(1);
     expect(mine[0]).toMatchObject({ relationship: "lived_with", note: "Shared a flat for a year" });
 
+    const notes = () => (w as Record<string, Row[]>).notifications ?? [];
+    expect(notes()).toHaveLength(1);
+    expect(notes()[0]).toMatchObject({ userId: "L", actorId: "F1", kind: "vouch" });
+
     const again = await saveVouch(ctx, me("F1"), id("L"), { relationship: "worked_with" });
+    expect(notes()).toHaveLength(1);
     expect(again).toBe(first);
     mine = w.vouches.filter((v) => v.voucherId === "F1");
     expect(mine).toHaveLength(1);
