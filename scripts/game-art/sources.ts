@@ -7,9 +7,9 @@
 /** Photo key → Commons file title. */
 export const PHOTOS = {
   cabin: "File:Valley Forge cabin.jpg",
-  port: "File:Container Cranes - Seattle Harbor (2874285692).jpg",
+  port: "File:Cranes at Oakland's container terminal.jpg",
   milkyway: "File:Kaçkar Mountains Night Sky View.jpg",
-  rainier: "File:Mount Rainier and lake reflection.jpg",
+  lake: "File:Tenaya Lake reflection.jpg",
   temple: "File:Angkor Wat Ta Prohm Temple doorway overgrown with tree roots.jpg",
   steam: "File:Steam locomotive C 62 2.jpg",
   rink: "File:Ice hockey puck on ice 20180112.jpg",

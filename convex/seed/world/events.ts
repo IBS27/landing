@@ -46,7 +46,7 @@ export const events: readonly EventSeed[] = [
     start: daysAgo(12, "21:00"),
     hours: 5,
     venue: "The Purple House",
-    address: "Regent St & Blake St, Berkeley",
+    address: "Regent St & Parker St, Berkeley",
     city: "Berkeley, CA",
     privacy: "friends",
     externalGoing: 0,

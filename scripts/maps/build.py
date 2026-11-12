@@ -37,62 +37,66 @@ TILE_W, TILE_H = 324, 162
 
 # Event venues: exact address string -> (key, lat, lng). Zoom 16, 432x324.
 VENUES = {
-    "N 35th St & Evanston Ave N, Fremont": ("cascade-boulders", 47.65034, -122.35131),
-    "NE 54th St & 20th Ave NE, Ravenna": ("ravenna-54th-20th", 47.66805, -122.30595),
-    "185 E Stevens Way NE, University of Washington": ("uw-allen-center", 47.65345, -122.30585),
-    "E Pike St & 12th Ave, Capitol Hill": ("pike-12th", 47.61405, -122.31684),
-    "NW Market St & 22nd Ave NW, Ballard": ("market-22nd", 47.66862, -122.38458),
-    "E Pine St & 10th Ave, Capitol Hill": ("pine-10th", 47.61540, -122.31952),
-    "NE 47th St & 17th Ave NE, U District": ("ne47th-17th", 47.66305, -122.30964),
-    "2101 N Northlake Way, Wallingford": ("gas-works-park", 47.64560, -122.33440),
-    "Westlake Ave N & Valley St, South Lake Union": ("westlake-valley", 47.62593, -122.33848),
-    "E Olive Way & Summit Ave E, Capitol Hill": ("olive-summit", 47.61847, -122.32575),
-    "Westlake Ave N & Mercer St, South Lake Union": ("westlake-mercer", 47.62460, -122.33853),
-    "University Way NE & NE 45th St, U District": ("ave-45th", 47.66130, -122.31317),
-    "Fremont Ave N & N 36th St, Fremont": ("fremont-36th", 47.65150, -122.35000),
-    "W Green Lake Dr N & N 72nd St, Green Lake": ("green-lake-72nd", 47.68167, -122.34328),
-    "Cedar Falls Rd SE, North Bend": ("rattlesnake-ledge", 47.43460, -121.76870),
-    "NE 50th St & Brooklyn Ave NE, U District": ("ne50th-brooklyn", 47.66493, -122.31415),
-    "Lake Washington Blvd S & S Genesee St, Seward Park": ("lwb-genesee", 47.56326, -122.26835),
-    "Western Ave & Union St, Downtown": ("western-union", 47.60742, -122.34031),
-    "Ballard Ave NW & Vernon Pl NW, Ballard": ("ballard-vernon", 47.66719, -122.38403),
-    "4060 George Washington Ln NE, University of Washington": ("uw-odegaard", 47.65650, -122.31040),
-    "1635 11th Ave, Capitol Hill": ("cal-anderson", 47.61720, -122.31920),
+    "22nd St & Tennessee St, Dogpatch": ("sutro-boulders", 37.75788, -122.38927),
+    "Regent St & Parker St, Berkeley": ("regent-parker", 37.86337, -122.25763),
+    "Hearst Ave & Le Roy Ave, UC Berkeley": ("soda-hall", 37.87533, -122.25832),
+    "Valencia St & 18th St, Mission": ("valencia-18th", 37.76170, -122.42160),
+    "Clement St & 6th Ave, Inner Richmond": ("clement-6th", 37.78295, -122.46444),
+    "Valencia St & 16th St, Mission": ("valencia-16th", 37.76492, -122.42191),
+    "Channing Way & Bowditch St, Berkeley": ("channing-bowditch", 37.86721, -122.25655),
+    "Marina Blvd & Mason St, Marina": ("crissy-field", 37.80502, -122.44787),
+    "4th St & Brannan St, SoMa": ("4th-brannan", 37.77834, -122.39655),
+    "Mission St & 22nd St, Mission": ("mission-22nd", 37.75544, -122.41877),
+    "2nd St & Townsend St, SoMa": ("2nd-townsend", 37.78062, -122.39054),
+    "Telegraph Ave & Durant Ave, Berkeley": ("telegraph-durant", 37.86784, -122.25903),
+    "Haight St & Cole St, Haight-Ashbury": ("haight-cole", 37.76956, -122.45048),
+    "50 Stow Lake Dr E, Golden Gate Park": ("stow-lake-boathouse", 37.77060, -122.47710),
+    "Tennessee Valley Rd, Mill Valley": ("tennessee-valley", 37.86050, -122.53630),
+    "Dwight Way & Ellsworth St, Berkeley": ("dwight-ellsworth", 37.86454, -122.26300),
+    "Great Highway & Lincoln Way, Outer Sunset": ("great-hwy-lincoln", 37.76409, -122.51019),
+    "The Embarcadero & Washington St, Embarcadero": ("embarcadero-washington", 37.79670, -122.39544),
+    "Clement St & 2nd Ave, Inner Richmond": ("clement-2nd", 37.78315, -122.46015),
+    "Moffitt Library, UC Berkeley": ("moffitt-library", 37.87250, -122.26080),
+    "Dolores St & 19th St, Mission": ("dolores-park", 37.75983, -122.42594),
 }
 
 # Listing neighborhoods (match convex/lib/listings.ts NEIGHBORHOODS) plus the
 # Marketplace browse cities. Zoom 12: a 668x420 dialog map and a 324x162 item tile.
 HOODS = {
-    "Capitol Hill": (47.6253, -122.3222),
-    "U District": (47.6615, -122.3138),
-    "Ballard": (47.6687, -122.3847),
-    "Fremont": (47.6505, -122.3509),
-    "Wallingford": (47.6615, -122.3346),
-    "Queen Anne": (47.6374, -122.3571),
-    "Beacon Hill": (47.5668, -122.3087),
-    "Columbia City": (47.5597, -122.2868),
-    "Greenwood": (47.6908, -122.3553),
-    "Roosevelt": (47.6786, -122.3176),
-    "South Lake Union": (47.6256, -122.3344),
-    "West Seattle": (47.5707, -122.3866),
-    "First Hill": (47.6087, -122.3245),
-    "Northgate": (47.7062, -122.3251),
-    "Bellevue": (47.6101, -122.2015),
-    "Redmond": (47.674, -122.1215),
-    "Kirkland": (47.6769, -122.206),
-    "Seattle": (47.6062, -122.3321),
+    "Mission": (37.7599, -122.4148),
+    "Berkeley": (37.867, -122.2584),
+    "Inner Richmond": (37.7786, -122.4642),
+    "Haight-Ashbury": (37.77, -122.447),
+    "Elmwood": (37.8578, -122.2539),
+    "Pacific Heights": (37.7927, -122.4356),
+    "Bernal Heights": (37.741, -122.4142),
+    "Dogpatch": (37.7607, -122.3892),
+    "Inner Sunset": (37.7615, -122.4676),
+    "Rockridge": (37.8448, -122.2513),
+    "SoMa": (37.7809, -122.401),
+    "Outer Sunset": (37.7541, -122.5062),
+    "Nob Hill": (37.793, -122.4161),
+    "Marina": (37.803, -122.4375),
+    "Castro": (37.7626, -122.4353),
+    "North Beach": (37.8012, -122.409),
+    "Hayes Valley": (37.7767, -122.4229),
+    "Noe Valley": (37.7516, -122.4321),
+    "Oakland": (37.8045, -122.2714),
+    "Mountain View": (37.3894, -122.0832),
+    "Daly City": (37.6905, -122.4727),
+    "San Francisco": (37.7749, -122.4194),
 }
 
 # Marketplace browse cities (convex/lib/listings.ts PLACES): zoom 7, 520x220.
 CITIES = {
-    "Seattle": (47.6062, -122.3321),
-    "Bellevue": (47.6101, -122.2015),
-    "Redmond": (47.674, -122.1215),
-    "Kirkland": (47.6769, -122.206),
-    "Renton": (47.4829, -122.2171),
-    "Tacoma": (47.2529, -122.4443),
-    "Everett": (47.979, -122.2021),
-    "Portland": (45.5152, -122.6784),
+    "San Francisco": (37.7749, -122.4194),
+    "Oakland": (37.8045, -122.2714),
+    "Berkeley": (37.8708, -122.2729),
+    "Daly City": (37.6905, -122.4727),
+    "San Mateo": (37.4969, -122.3331),
+    "Mountain View": (37.3894, -122.0832),
+    "San Jose": (37.3362, -121.8906),
+    "Sacramento": (38.5811, -121.4939),
 }
 
 
@@ -174,7 +178,7 @@ def write_catalog():
         f"/** Neighborhood/city maps (zoom 12): a 668x420 dialog map and a {TILE_W}x{TILE_H} item tile. */\n"
         "export const AREA_MAPS: Record<string, { map: string; tile: string; lat: number; lng: number }> = "
         f"{json.dumps(areas, indent=2)};\n\n"
-        "/** Marketplace browse-location maps (zoom 7, 520x220, ~0.82 km per px at 47.6N). */\n"
+        "/** Marketplace browse-location maps (zoom 7, 520x220, ~0.97 km per px at 37.8N). */\n"
         f"export const REGION_MAPS: Record<string, string> = {json.dumps(regions, indent=2)};\n"
     )
     os.makedirs(os.path.dirname(CATALOG), exist_ok=True)

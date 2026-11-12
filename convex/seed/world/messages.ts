@@ -1451,13 +1451,13 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "maya.chen", text: "is the $3,250 including utilities?", gap: 1 },
       {
         by: "derek.holloway",
-        text: "Water/sewer/garbage is a flat $85. Electric and internet are on you.",
+        text: "Water and garbage is a flat $95. PG&E and internet are on you.",
         gap: 10,
       },
       { by: "maya.chen", text: "and would a cat be ok? someday lol", gap: 2 },
       {
         by: "derek.holloway",
-        text: "Cats are fine with a $300 deposit. No dogs, that's a building rule.",
+        text: "Cats are fine with a $500 deposit. No dogs, that's a building rule.",
         gap: 5,
       },
       { by: "maya.chen", text: "ok good to know", gap: 2 },

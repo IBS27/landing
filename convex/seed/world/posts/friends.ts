@@ -181,7 +181,7 @@ export const friendPosts: readonly PostSeed[] = [
     key: "maya-memory-2022",
     by: "maya.chen",
     at: yearsAgo(4, "15:40"),
-    text: "early action apps are IN. celebrating with boba and zero thoughts. CAL please",
+    text: "UC apps are IN. celebrating with boba and zero thoughts. CAL please",
     photos: ["bubble tea"],
     tagged: ["jessica.huang"],
     feeling: "feeling relieved",
