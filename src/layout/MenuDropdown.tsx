@@ -29,6 +29,7 @@ import {
   MenuGridIcon,
   ReelsIcon,
 } from "@/icons";
+import { BmLanding } from "@/landing/shell/icons";
 import { cn } from "@/lib/format";
 import { PopoverPanel } from "@/ui/overlays";
 import { HeaderButton } from "./HeaderButton";
@@ -174,6 +175,12 @@ const SECTIONS: { title: string; items: Entry[] }[] = [
         description: "Ask questions, brainstorm ideas, create any image you can imagine and more.",
         Icon: BmMetaAI,
         to: "/meta-ai",
+      },
+      {
+        title: "Landing",
+        description: "Find a place, meet people and settle into San Francisco.",
+        Icon: BmLanding,
+        to: "/landing",
       },
       {
         title: "Messenger Kids",
