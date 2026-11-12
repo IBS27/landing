@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { QueryCtx } from "../convex/_generated/server";
+import { webUrl } from "../convex/citations";
 import {
   assertCitable,
   type CitedSource,
@@ -156,6 +157,7 @@ const world = {
     event("eInvited", "S", "private"),
     { ...event("eMyGroup", "S", "group"), groupId: "gMine" },
     { ...event("eOtherGroup", "S", "group"), groupId: "gPrivate" },
+    event("eNoHost", "Deleted", "public"),
   ],
   eventResponses: [
     { _id: "er1", eventId: "ePublic", userId: "F", status: "going", createdAt: 0 },
@@ -276,6 +278,7 @@ describe("per-viewer filtering", () => {
         E("eInvited"),
         E("eMyGroup"),
         E("eOtherGroup"),
+        E("eNoHost"),
         L("lS"),
         L("lB"),
         L("lGoneSeller"),
@@ -298,12 +301,15 @@ describe("per-viewer filtering", () => {
     ]);
   });
 
-  test("resolveCitations is null when the viewer can see none of the sources", async () => {
+  test("resolveCitations drops deleted sources but withholds results with a hidden one", async () => {
     const ctx = fakeCtx(world);
     const a = await loadAudience(ctx, id("V"));
-    expect(await resolveCitations(ctx, cite([P("pPrivateGroup"), P("pOnlyMe")]), a)).toBeNull();
-    const shown = await resolveCitations(ctx, cite([P("pOnlyMe"), P("pPublic")]), a);
+    const shown = await resolveCitations(ctx, cite([P("pDeleted"), P("pPublic")]), a);
     expect(shown?.map((s) => s.key)).toEqual(["post:pPublic"]);
+    // A source that is hidden from V (e.g. made friends-only after the result was built).
+    expect(await resolveCitations(ctx, cite([P("pOnlyMe"), P("pPublic")]), a)).toBeNull();
+    expect(await resolveCitations(ctx, cite([P("pPublic"), C("cReplyToBlocker")]), a)).toBeNull();
+    expect(await resolveCitations(ctx, cite([P("pDeleted"), X("xDeleted")]), a)).toBeNull();
   });
 
   test("the author always sees their own only-me post", async () => {
@@ -341,6 +347,8 @@ describe("public sources (for results shared by every viewer)", () => {
       [E("ePublic"), true],
       [E("eInvited"), false],
       [E("eMyGroup"), false],
+      [E("eNoHost"), false],
+      [L("lGoneSeller"), false],
       [G("gPrivate"), true],
       [G("gHidden"), false],
       [L("lS"), true],
@@ -382,6 +390,13 @@ describe("building citations", () => {
     expect(s.length).toBeLessThanOrEqual(40);
     expect(s.endsWith("word…")).toBe(true);
   });
+});
+
+test("external URLs are stored in canonical http(s) form only", () => {
+  expect(webUrl(" https:data.sfgov.org/x ")).toBe("https://data.sfgov.org/x");
+  expect(webUrl("http://sfmta.com")).toBe("http://sfmta.com/");
+  expect(webUrl("javascript:alert(1)")).toBeNull();
+  expect(webUrl("data.sfgov.org")).toBeNull();
 });
 
 describe("formatting", () => {

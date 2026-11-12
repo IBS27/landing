@@ -15,8 +15,8 @@ import { getSummary, type UserSummary } from "./users";
  *   private Group or a friends-only post), or with the viewer's `Audience` for
  *   a personal result such as a Muse proposal.
  * - When showing, call `resolveCitations()` with the viewer's `loadAudience()`.
- *   It drops deleted sources and anything the viewer can't see, and reads
- *   snippets, counts and ages from the records. Send only its result to the
+ *   It drops deleted sources, reads snippets, counts and ages from the records,
+ *   and returns null (hide the result) if any source is hidden from the viewer. Send only its result to the
  *   client, never the raw source ids. Render it with `SourcesChip`
  *   (`src/ui/Citations.tsx`).
  */
@@ -174,18 +174,29 @@ async function goingCount(ctx: QueryCtx, e: Doc<"events">) {
   return e.externalGoingCount + going.length;
 }
 
-/** One source as the viewer may see it, or null when it's gone or hidden from them. */
-async function resolveSource(ctx: QueryCtx, s: Source, a: Audience): Promise<CitedSource | null> {
+/**
+ * Why a source didn't resolve: `gone` when it (or the record it depends on, such
+ * as its author) was deleted, `hidden` when it exists but the viewer can't see it.
+ */
+type Unresolved = "gone" | "hidden";
+
+/** One source as the viewer may see it. */
+async function resolveSource(
+  ctx: QueryCtx,
+  s: Source,
+  a: Audience,
+): Promise<CitedSource | Unresolved> {
   const key = sourceKey(s);
   switch (s.kind) {
     case "post": {
       const p = await ctx.db.get(s.postId);
-      if (!p || !(await canView(ctx, p, a))) return null;
+      if (!p) return "gone";
+      if (!(await canView(ctx, p, a))) return "hidden";
       const [author, group] = await Promise.all([
         getSummary(ctx, p.authorId),
         p.groupId ? groupChip(ctx, p.groupId) : null,
       ]);
-      if (!author) return null;
+      if (!author) return "gone";
       return {
         kind: "post",
         key,
@@ -200,15 +211,17 @@ async function resolveSource(ctx: QueryCtx, s: Source, a: Audience): Promise<Cit
     }
     case "comment": {
       const c = await ctx.db.get(s.commentId);
-      if (!c || (await inBlockedThread(ctx, c, a))) return null;
+      if (!c) return "gone";
+      if (await inBlockedThread(ctx, c, a)) return "hidden";
       const p = await ctx.db.get(c.postId);
-      if (!p || !(await canView(ctx, p, a))) return null;
+      if (!p) return "gone";
+      if (!(await canView(ctx, p, a))) return "hidden";
       const [author, postAuthor, group] = await Promise.all([
         getSummary(ctx, c.authorId),
         getSummary(ctx, p.authorId),
         p.groupId ? groupChip(ctx, p.groupId) : null,
       ]);
-      if (!author || !postAuthor) return null;
+      if (!author || !postAuthor) return "gone";
       return {
         kind: "comment",
         key,
@@ -225,7 +238,9 @@ async function resolveSource(ctx: QueryCtx, s: Source, a: Audience): Promise<Cit
     }
     case "event": {
       const e = await ctx.db.get(s.eventId);
-      if (!e || a.blocked.has(e.hostId) || !(await canSeeEvent(ctx, e, a))) return null;
+      // Like the Event page: no page without its host.
+      if (!e || !(await ctx.db.get(e.hostId))) return "gone";
+      if (a.blocked.has(e.hostId) || !(await canSeeEvent(ctx, e, a))) return "hidden";
       return {
         kind: "event",
         key,
@@ -240,7 +255,8 @@ async function resolveSource(ctx: QueryCtx, s: Source, a: Audience): Promise<Cit
     }
     case "listing": {
       const l = await ctx.db.get(s.listingId);
-      if (!l || a.blocked.has(l.sellerId) || !(await ctx.db.get(l.sellerId))) return null;
+      if (!l || !(await ctx.db.get(l.sellerId))) return "gone";
+      if (a.blocked.has(l.sellerId)) return "hidden";
       return {
         kind: "listing",
         key,
@@ -258,7 +274,8 @@ async function resolveSource(ctx: QueryCtx, s: Source, a: Audience): Promise<Cit
       const g = await ctx.db.get(s.groupId);
       // Hidden Groups don't exist for non-members. Only the name, description
       // and counts are shown, which visible Groups show everyone anyway.
-      if (!g || (!g.visible && !a.groups.has(g._id))) return null;
+      if (!g) return "gone";
+      if (!g.visible && !a.groups.has(g._id)) return "hidden";
       return {
         kind: "group",
         key,
@@ -274,7 +291,7 @@ async function resolveSource(ctx: QueryCtx, s: Source, a: Audience): Promise<Cit
     }
     case "external": {
       const x = await ctx.db.get(s.externalSourceId);
-      if (!x) return null;
+      if (!x) return "gone";
       return {
         kind: "external",
         key,
@@ -288,27 +305,39 @@ async function resolveSource(ctx: QueryCtx, s: Source, a: Audience): Promise<Cit
   }
 }
 
-/** The sources the viewer can see, in order, without duplicates. */
+async function resolveAll(ctx: QueryCtx, sources: readonly Source[], a: Audience) {
+  return Promise.all(dedupe(sources, sourceKey).map((s) => resolveSource(ctx, s, a)));
+}
+
+const isCited = (r: CitedSource | Unresolved): r is CitedSource => typeof r === "object";
+
+/**
+ * A plain list of sources (not backing a stored result), keeping the ones the
+ * viewer can see, in order, without duplicates.
+ */
 export async function resolveSources(
   ctx: QueryCtx,
   sources: readonly Source[],
   a: Audience,
 ): Promise<CitedSource[]> {
-  const out = await Promise.all(dedupe(sources, sourceKey).map((s) => resolveSource(ctx, s, a)));
-  return out.filter((s): s is CitedSource => s !== null);
+  return (await resolveAll(ctx, sources, a)).filter(isCited);
 }
 
 /**
- * Citations as the viewer may see them, or null when none of the sources are
- * visible to them. Then hide the score or recommendation instead of showing it
- * unsourced.
+ * The sources behind a stored score, recommendation or proposal, as the viewer
+ * may see them. Deleted sources drop out. Returns null, so the caller hides the
+ * result, when none are left or when any source is hidden from this viewer:
+ * the result may carry what that source said, even if it was public when the
+ * result was built. Recompute the result rather than show it.
  */
 export async function resolveCitations(
   ctx: QueryCtx,
   c: Citations,
   a: Audience,
 ): Promise<NonEmpty<CitedSource> | null> {
-  const [first, ...rest] = await resolveSources(ctx, sourcesOf(c), a);
+  const all = await resolveAll(ctx, sourcesOf(c), a);
+  if (all.includes("hidden")) return null;
+  const [first, ...rest] = all.filter(isCited);
   return first ? [first, ...rest] : null;
 }
 
@@ -330,10 +359,12 @@ export async function isPublicSource(ctx: QueryCtx, s: Source): Promise<boolean>
     }
     case "event": {
       const e = await ctx.db.get(s.eventId);
-      return e?.privacy === "public";
+      return e?.privacy === "public" && (await ctx.db.get(e.hostId)) !== null;
     }
-    case "listing":
-      return (await ctx.db.get(s.listingId)) !== null;
+    case "listing": {
+      const l = await ctx.db.get(s.listingId);
+      return l !== null && (await ctx.db.get(l.sellerId)) !== null;
+    }
     case "group": {
       const g = await ctx.db.get(s.groupId);
       return g?.visible === true;
@@ -345,7 +376,7 @@ export async function isPublicSource(ctx: QueryCtx, s: Source): Promise<boolean>
 
 /** A public post, with everything it shares or attaches public too. */
 async function isPublicPost(ctx: QueryCtx, p: Doc<"posts"> | null, depth = 0): Promise<boolean> {
-  if (p?.privacy !== "public" || depth > 3) return false;
+  if (p?.privacy !== "public" || depth > 3 || !(await ctx.db.get(p.authorId))) return false;
   if (p.timelineUserId && p.timelineUserId !== p.authorId) return false;
   if (p.groupId) {
     const g = await ctx.db.get(p.groupId);
@@ -377,7 +408,7 @@ export async function assertCitable(
     const ok =
       shownTo === "everyone"
         ? await isPublicSource(ctx, s)
-        : (await resolveSource(ctx, s, shownTo)) !== null;
+        : isCited(await resolveSource(ctx, s, shownTo));
     if (!ok)
       throw new ConvexError(
         `Citation source ${sourceKey(s)} can't be shown to ${shownTo === "everyone" ? "everyone" : "this viewer"}`,

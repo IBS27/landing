@@ -4,13 +4,16 @@ import { snippet } from "./lib/citations";
 
 const EXTERNAL_SNIPPET_MAX = 280;
 
-/** True for absolute http(s) URLs, the only external links a citation may open. */
-export function isWebUrl(url: string) {
+/**
+ * The canonical form of an absolute http(s) URL ("https://..."), the only
+ * external links a citation may open, or null for anything else.
+ */
+export function webUrl(url: string): string | null {
   try {
-    const { protocol } = new URL(url);
-    return protocol === "https:" || protocol === "http:";
+    const u = new URL(url.trim());
+    return u.protocol === "https:" || u.protocol === "http:" ? u.href : null;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -28,8 +31,8 @@ export const recordExternalSource = internalMutation({
     fetchedAt: v.number(),
   },
   handler: async (ctx, a) => {
-    const url = a.url.trim();
-    if (!isWebUrl(url)) throw new ConvexError("External sources need an http(s) URL");
+    const url = webUrl(a.url);
+    if (!url) throw new ConvexError("External sources need an http(s) URL");
     const title = a.title.trim();
     const publisher = a.publisher.trim();
     const text = snippet(a.snippet, EXTERNAL_SNIPPET_MAX);
