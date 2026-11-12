@@ -253,6 +253,23 @@ describe("complete", () => {
     expect(unknown.costUsd).toBeUndefined();
   });
 
+  test("makes the cost unknown when a connection is lost before the response", async () => {
+    mockFetch(new TypeError("Connection reset"), stream({ text: '{"a":"ok"}' }));
+    const reply = await complete(request());
+    expect(reply.text).toBe('{"a":"ok"}');
+    expect(reply.usage.outputTokens).toBe(200);
+    expect(reply.costUsd).toBeUndefined();
+
+    const lost = () => new TypeError("Connection reset");
+    mockFetch(lost(), lost(), lost());
+    const error = (await complete(request()).catch((e: unknown) => e)) as ModelError;
+    expect(error.spent).toEqual({
+      model: MODEL,
+      usage: { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 },
+      costUsd: undefined,
+    });
+  });
+
   test("gives up after two retries", async () => {
     const busy = () => apiError(503, "Service overloaded", { "retry-after": "0" });
     mockFetch(busy, busy, busy, busy);

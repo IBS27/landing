@@ -55,7 +55,11 @@ export type Request = {
   signal: AbortSignal;
 };
 
-/** Tokens and cost across every streamed attempt of one `complete()` call, failed ones included. */
+/**
+ * Tokens and cost across every attempt of one `complete()` call that Meta may
+ * have billed, failed ones included. `costUsd` is undefined when one of them
+ * didn't report usage.
+ */
 export type Spent = { model: string; usage: Usage; costUsd: number | undefined };
 
 /**
@@ -125,7 +129,11 @@ class Retryable extends Error {
 
 const RETRY_STATUSES = new Set([429, 500, 503]);
 
-/** Adds up usage and cost over attempts. A stream that broke before reporting usage makes the cost unknown. */
+/**
+ * Adds up usage and cost over attempts. An attempt that may have been billed
+ * without reporting usage (a stream that broke early, or a connection lost
+ * before the response arrived) makes the cost unknown.
+ */
 class Tally {
   private model = MODEL;
   private usage: Usage = {
@@ -135,11 +143,11 @@ class Tally {
     cacheWriteTokens: 0,
   };
   private cost: number | undefined = 0;
-  private streamed = false;
+  private billable = false;
 
   add(model: string, usage: Usage | undefined) {
     this.model = model;
-    this.streamed = true;
+    this.billable = true;
     if (!usage) {
       this.cost = undefined;
       return;
@@ -150,7 +158,7 @@ class Tally {
   }
 
   total(): Spent | undefined {
-    return this.streamed
+    return this.billable
       ? { model: this.model, usage: { ...this.usage }, costUsd: this.cost }
       : undefined;
   }
@@ -182,6 +190,8 @@ async function attempt(body: string, outer: AbortSignal, tally: Tally): Promise<
         signal: abort.signal,
       });
     } catch (error) {
+      // The request was sent, so Meta may have run and billed it; the usage is unknown.
+      tally.add(MODEL, undefined);
       throw abort.signal.aborted ? abort.signal.reason : new Retryable(errorText(error));
     }
     if (!res.ok) {
