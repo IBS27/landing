@@ -2,6 +2,8 @@
 
 An end-to-end apartment solution: find a place, move in, settle in and move out. Launching in San Francisco.
 
+Landing is a standalone app at `/landing` with its own layout and navigation. It shares users and data with the Facebook base, and whenever it shows a Group, Event, person, listing or chat (on the map or anywhere else), that item links to its own page.
+
 ## Your City Profile (the base for everything)
 - Built from your brief: interests, schedule, budget, no car, "want to meet people".
 - Learns from your activity: what you RSVP'd to, joined, liked, skipped and pinned.

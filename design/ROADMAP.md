@@ -5,18 +5,23 @@ The center of Landing is City Profile → neighborhoods → Move-in Crew → Jou
 Pick tasks from the earliest wave that still has open, unblocked issues. Within a wave, tasks can run in parallel as long as their "Depends on" issues are closed.
 
 ## Wave 1: Foundations
-Nothing else can start until these exist. Apart from #15 waiting on #54, they can all run in parallel.
-- #3 City Profile data model and onboarding brief
-- #6 Muse approval queue for outgoing drafts
-- #7 Citations: shared sources model and UI
-- #8 AI foundation: model calls from Convex actions
-- #54 Move the seed world and app from Seattle to San Francisco (in progress; #15 builds on it)
-- #15 Neighborhood data model and San Francisco seed
-- #11 Verified listings and scam signals (also unblocked; an early win for search)
+Nothing else can start until these exist. GitHub assignees are the source of truth for owners; the table is a snapshot.
+
+| Order | Issue | Owner | Notes |
+|---|---|---|---|
+| First | #55 Landing app shell: `/landing` routes, layout, navigation and link helpers | sanjeevexe | Every Landing UI issue builds inside it. Keep it small and merge it quickly |
+| First | #54 Move the seed world and app from Seattle to San Francisco | IBS27 | In progress. #15's seed work builds on it |
+| First | #7 Citations: shared sources model and UI | IBS27 | Post the `source` type in a plan comment before building: #6 and #8 use it |
+| Parallel | #8 AI foundation: model calls from Convex actions | IBS27 | Sends model output into #6's proposals |
+| Parallel | #3 City Profile data model and onboarding brief | sanjeevexe | Starts after #55. Post the fact and interest types early: most of Wave 2 reads them |
+| Parallel | #6 Muse approval queue for outgoing drafts | Vaibhav100968 | Backend can start right away; the inbox UI needs #55 |
+| Parallel | #11 Verified listings and scam signals | Vaibhav100968 | Shares Messenger chat UI with #6, hence one owner |
+| Parallel | #15 Neighborhood data model and San Francisco seed | jw0968 | Schema, DataSF boundaries and point-in-polygon can start now; seed content waits for #54 |
 
 Most of this wave changes `convex/schema.ts`. Post plan comments early so schema changes don't collide.
 
 ## Wave 2: Find a place
+- #56 Landing map: shared SF map whose pins link to Groups, Events and listings
 - #10 Apartment search tuned to the City Profile
 - #12 Network vouching on listings
 - #4 Learn from activity: RSVPs, joins, likes, skips and pins
