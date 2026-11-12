@@ -79,8 +79,8 @@ export function ProfileHeader() {
       <div className={cn("relative mx-auto w-full max-w-[1186px]", columnPad(embedded))}>
         <div className="flex items-center gap-[18px] pt-6 pr-[2px] pl-[10px]">
           <ProfilePicture />
-          {/* Facebook centres the name block and the buttons on the picture, ~4.5px above its midline. Bio and work live in the Intro card, not here. */}
-          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-4 gap-y-3 pb-[9px]">
+          {/* Facebook centres the name block on the picture (~4.5px above its midline) with the buttons level with the name. Bio and work live in the Intro card. */}
+          <div className="flex min-w-0 flex-1 flex-wrap items-start justify-between gap-x-4 gap-y-3 pb-[9px]">
             <NameBlock />
             <Actions showRecs={showRecs} onToggleRecs={onToggleRecs} />
           </div>
