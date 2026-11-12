@@ -5,7 +5,7 @@ The center of Landing is City Profile → neighborhoods → Move-in Crew → Jou
 Pick tasks from the earliest wave that still has open, unblocked issues. Within a wave, tasks can run in parallel as long as their "Depends on" issues are closed.
 
 ## Wave 1: Foundations
-Nothing else can start until these exist, and none of them depend on each other.
+Nothing else can start until these exist. Apart from #15 waiting on #54, they can all run in parallel.
 - #3 City Profile data model and onboarding brief
 - #6 Muse approval queue for outgoing drafts
 - #7 Citations: shared sources model and UI
