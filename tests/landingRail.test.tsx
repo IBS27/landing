@@ -4,10 +4,29 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  Outlet,
   RouterProvider,
+  useRouterState,
 } from "@tanstack/react-router";
 import { renderToString } from "react-dom/server";
-import { LandingLayout } from "../src/landing/shell/LandingLayout";
+import { AppRailItem } from "../src/features/misc/AppRail";
+import { SECTIONS, sectionFor, YOU_SECTIONS } from "../src/landing/shell/sections";
+
+/**
+ * Landing's sidebar rows as `LandingLayout` renders them (the real `AppRailItem`
+ * and `sectionFor`), without the layout's Convex-backed Inbox badge.
+ */
+function Rail() {
+  const current = sectionFor(useRouterState({ select: (s) => s.location.pathname }));
+  return (
+    <nav>
+      {[...SECTIONS, ...YOU_SECTIONS].map(({ label, to }) => (
+        <AppRailItem key={to} to={to} label={label} icon={null} selected={current?.to === to} />
+      ))}
+      <Outlet />
+    </nav>
+  );
+}
 
 /** Renders Landing's sidebar at `path` and returns the labels marked `aria-current="page"`. */
 async function currentRows(path: string) {
@@ -15,7 +34,7 @@ async function currentRows(path: string) {
   const landing = createRoute({
     getParentRoute: () => root,
     path: "/landing",
-    component: LandingLayout,
+    component: Rail,
   });
   const home = createRoute({ getParentRoute: () => landing, path: "/" });
   const page = createRoute({ getParentRoute: () => landing, path: "$" });
