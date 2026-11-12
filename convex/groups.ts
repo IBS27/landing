@@ -244,7 +244,7 @@ export const discover = viewerQuery({
       )
       .slice(0, 4);
     const shown = new Set(suggested.map((c) => c._id));
-    const city = ctx.viewer.city?.split(",")[0] ?? "Seattle";
+    const city = ctx.viewer.city?.split(",")[0] ?? "San Francisco";
     const popular = byMembers
       .filter((c) => c.location?.includes(city) && !shown.has(c._id))
       .slice(0, 4);
@@ -733,7 +733,7 @@ function slugify(name: string) {
   );
 }
 
-const DEFAULT_COVERS = ["/seed/covers/seattle-01.jpg", "/seed/covers/mountains-02.jpg"];
+const DEFAULT_COVERS = ["/seed/covers/sf-01.jpg", "/seed/covers/mountains-02.jpg"];
 
 export const create = viewerMutation({
   args: {

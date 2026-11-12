@@ -81,7 +81,7 @@ const EMPTY: FormState = {
   condition: "",
   brand: "",
   description: "",
-  neighborhood: "Capitol Hill",
+  neighborhood: "Mission",
   meetup: ["public"],
   groupIds: [],
   boost: false,
@@ -179,7 +179,7 @@ function fromListing(l: Detail): FormState {
     condition: l.condition ?? "",
     brand: l.brand ?? "",
     description: l.description,
-    neighborhood: l.location.neighborhood ?? "Capitol Hill",
+    neighborhood: l.location.neighborhood ?? "Mission",
     meetup: l.meetup,
     vehicleType: l.vehicle?.vehicleType ?? "",
     year: l.vehicle ? String(l.vehicle.year) : "",
@@ -1256,7 +1256,7 @@ function Preview({
             {priceText ?? "Price"}
           </p>
           <p className="mt-1 text-[13px] text-primary leading-4">
-            Listed a few seconds ago in {hood?.city.replace(", WA", "") ?? "Seattle"}
+            Listed a few seconds ago in {hood?.city.replace(/, [A-Z]{2}$/, "") ?? "San Francisco"}
           </p>
           <h3 className={cn("mt-6 font-semibold text-[17px] leading-5", faded)}>Details</h3>
           {kind === "item" && f.condition && (

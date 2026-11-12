@@ -11,7 +11,7 @@ A working clone of desktop facebook.com, built as the base for Landing. It cover
 - Reels, Video and Live
 - Gaming, Pages, Settings, Saved and Memories
 
-All data lives in Convex and updates in real time. The seed world is fictional and set in Seattle.
+All data lives in Convex and updates in real time. The seed world is fictional and set in San Francisco.
 
 ## Run it
 ```bash

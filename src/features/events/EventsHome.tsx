@@ -19,7 +19,7 @@ const PILLS: { value: Pill; label: string }[] = [
 type Loc = "any" | "local" | "online";
 const LOC_LABELS: Record<Loc, string> = {
   any: "My location",
-  local: "Seattle, Washington",
+  local: "San Francisco, California",
   online: "Online events",
 };
 

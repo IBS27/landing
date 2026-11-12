@@ -1,6 +1,6 @@
 /**
  * Deterministic seed world. `bun run seed` (= `convex run seed:reset`) wipes
- * every table and rebuilds the fictional Seattle world from `./seed/world`.
+ * every table and rebuilds the fictional San Francisco world from `./seed/world`.
  * `convex run seed:stats` reports counts and checks invariants.
  *
  * Convex caps the work a single mutation can do, so `reset` is an action that
@@ -58,9 +58,9 @@ export const insertFriendships = internalMutation({
 /** Pages Maya follows: her old café, her gym, her campus, the local paper, the ramen spot. */
 const MAIN_PERSONA_PAGES = new Set([
   "moonrisecoffee",
-  "cascadeboulders",
-  "montlakecampuslife",
-  "emeraldledger",
+  "sutroboulders",
+  "sathergatecampuslife",
+  "fogcityledger",
   "kumoramen",
 ]);
 
@@ -326,7 +326,7 @@ export const reset = internalAction({
         ]),
       }),
       // Page follows: the main persona follows the Pages in her life (5 of 8, so Discover still
-      // has Follow buttons; Rainline reaches her through ads only); others follow a stable ~70%.
+      // has Follow buttons; Fogline reaches her through ads only); others follow a stable ~70%.
       ctx.runMutation(internal.seed.insertFollows, {
         rows: plan.users
           .filter((u) => u.row.kind !== "page")
@@ -830,7 +830,7 @@ export const stats = internalQuery({
           .map((l) => `${l.title} [${l.status}]`),
         saved: saved.filter((s) => s.userId === main._id).length,
         birthdaysToday: users
-          .filter((u) => mainFriends.has(u._id) && u.birthday === monthDaySeattle(now))
+          .filter((u) => mainFriends.has(u._id) && u.birthday === monthDayLocal(now))
           .map((u) => u.name),
       },
       problemCount: problems.length,
@@ -839,7 +839,7 @@ export const stats = internalQuery({
   },
 });
 
-function monthDaySeattle(t: number): string {
+function monthDayLocal(t: number): string {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/Los_Angeles",
     month: "2-digit",

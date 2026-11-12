@@ -11,13 +11,13 @@ export const friendPosts: readonly PostSeed[] = [
     key: "maya-apartment-hunt",
     by: "maya.chen",
     at: daysAgo(2, "20:40"),
-    text: "ok friends, putting this out there. looking for a 1br or studio on capitol hill starting july-ish (post graduation!!). budget is around $1,800, in-unit laundry would be a dream but i'm realistic. needs to be walkable to the light rail bc i'll be commuting to redmond. if your building has something coming up or you know a landlord who isn't evil pls send it my way 🙏",
+    text: "ok friends, putting this out there. looking for a 1br or studio in the mission starting july-ish (post graduation!!). budget is around $2,800, in-unit laundry would be a dream but i'm realistic. needs to be walkable to a google shuttle stop bc i'll be commuting to mountain view. if your building has something coming up or you know a landlord who isn't evil pls send it my way 🙏",
     reactions: 34,
     comments: [
       {
         by: "jordan.kim",
         after: 6,
-        text: "post in UW Housing, Sublets & Roommates! a lot of july leases show up there around march. and read the pinned scam post before you send anyone a deposit 🙃",
+        text: "post in Cal Housing, Sublets & Roommates! a lot of july leases show up there around march. and read the pinned scam post before you send anyone a deposit 🙃",
         replies: [
           { by: "maya.chen", text: "already joined lol, i read the rules i promise" },
           { by: "jordan.kim", text: "a model member" },
@@ -26,11 +26,11 @@ export const friendPosts: readonly PostSeed[] = [
       {
         by: "harper.quinn",
         after: 11,
-        text: "wait my building on bellevue ave has a 1br opening up in june!! old brick, radiators, the landlord is weirdly nice. want me to ask him?",
+        text: "wait my building on 20th st has a 1br opening up in june!! old edwardian, bay windows, the landlord is weirdly nice. want me to ask him?",
         replies: [
           { by: "maya.chen", text: "HARPER. yes please!!" },
           { by: "harper.quinn", text: "texting him rn" },
-          { by: "ana.torres", text: "radiators 😍" },
+          { by: "ana.torres", text: "bay windows 😍" },
         ],
       },
       {
@@ -42,51 +42,55 @@ export const friendPosts: readonly PostSeed[] = [
       {
         by: "tasha.okafor",
         after: 25,
-        text: "the buildings on 12th near Moonrise turn over a lot in summer. also you'd be 2 min from board game night so",
+        text: "the buildings on valencia near Moonrise turn over a lot in summer. also you'd be 2 min from board game night so",
         replies: [{ by: "maya.chen", text: "that's a dealbreaker in the good way" }],
       },
       {
         by: "nina.petrova",
         after: 31,
-        text: "I lived on cap hill my first year. 2 line to redmond is honestly fine, ~40 min door to door",
+        text: "I lived in the mission my first year. the shuttle to mountain view is honestly fine, ~50 min and there's wifi",
       },
       {
         by: "sofia.alvarez",
         after: 38,
-        text: "move to fremont and walk to the gym like a normal person",
+        text: "move to dogpatch and walk to the gym like a normal person",
         replies: [
-          { by: "maya.chen", text: "fremont rent is not real" },
+          { by: "maya.chen", text: "dogpatch rent is not real" },
           { by: "sofia.alvarez", text: "ok fair" },
         ],
       },
       {
         by: "jasmine.ortiz",
         after: 44,
-        text: "avoid anything right above a bar on pike unless you love bass at 1am",
+        text: "avoid anything right above a bar on valencia unless you love bass at 1am",
         replies: [
           { by: "malik.johnson", text: "hey" },
           { by: "jasmine.ortiz", text: "lol not YOUR bass" },
         ],
       },
-      { by: "grace.liu", after: 52, text: "seconding light rail. the 545 is pain" },
+      {
+        by: "grace.liu",
+        after: 52,
+        text: "seconding the shuttle. caltrain plus the last mile is pain",
+      },
       {
         by: "emily.chen",
         after: 60,
         text: "can i visit every weekend",
         replies: [{ by: "maya.chen", text: "no. (yes)" }],
       },
-      { by: "diego.morales", after: 75, text: "kumo cap hill is on broadway. just saying" },
+      { by: "diego.morales", after: 75, text: "kumo mission is on mission and 22nd. just saying" },
       {
         by: "rachel.goldberg",
         after: 96,
-        text: "Happy to be a reference for any landlord. Also ask about heat before you sign, the old buildings up there get cold",
+        text: "Happy to be a reference for any landlord. Also ask about heat before you sign, the old Victorians out there get cold",
         likes: 6,
       },
       {
         by: "jordan.kim",
         after: 120,
         text: "Fatima Hassan didn't you find yours through a friend of a friend?",
-        replies: [{ by: "fatima.hassan", text: "yes but that guy moved to portland 😔" }],
+        replies: [{ by: "fatima.hassan", text: "yes but that guy moved to sacramento 😔" }],
       },
       {
         by: "kai.nakamura",
@@ -101,7 +105,7 @@ export const friendPosts: readonly PostSeed[] = [
       {
         by: "sophie.dubois",
         after: 340,
-        text: "Ask about the windows. Mine leak when it rains sideways. It always rains sideways.",
+        text: "Ask about the windows. Mine are single pane and the fog comes right through. The fog always comes through.",
       },
       { by: "hannah.lee", after: 600, text: "you are not allowed to find a place nicer than ours" },
     ],
@@ -112,7 +116,7 @@ export const friendPosts: readonly PostSeed[] = [
     at: yearsAgo(2, "14:20"),
     text: "FIRST V3!!!! six weeks of falling off the same yellow problem and today it just went?? my forearms are gone",
     photos: ["bouldering gym", "chalk hands"],
-    place: "Cascade Boulders",
+    place: "Sutro Boulders",
     tagged: ["sofia.alvarez"],
     feeling: "feeling proud",
     reactions: 27,
@@ -143,7 +147,7 @@ export const friendPosts: readonly PostSeed[] = [
     key: "maya-memory-2025",
     by: "maya.chen",
     at: yearsAgo(1, "10:05"),
-    text: "I GOT THE MICROSOFT DESIGN INTERNSHIP 😭😭 summer 2026 in redmond, here i come",
+    text: "I GOT THE GOOGLE DESIGN INTERNSHIP 😭😭 summer 2026 in mountain view, here i come",
     bg: "ocean",
     feeling: "feeling thankful",
     reactions: 64,
@@ -156,7 +160,7 @@ export const friendPosts: readonly PostSeed[] = [
         text: "the girl who made a figma file for her dorm room layout. of course",
         replies: [{ by: "maya.chen", text: "and it was a GOOD layout" }],
       },
-      { by: "ethan.park", after: 30, text: "free microsoft swag for the whole apartment right" },
+      { by: "ethan.park", after: 30, text: "free google swag for the whole apartment right" },
       { by: "hannah.lee", after: 95, text: "celebration dinner on me tonight. no arguments" },
     ],
   },
@@ -164,33 +168,33 @@ export const friendPosts: readonly PostSeed[] = [
     key: "maya-memory-2023",
     by: "maya.chen",
     at: yearsAgo(3, "15:10"),
-    text: "first fall quarter at UW and nobody warned me the quad would look like this. walked to my 1:30 the long way just to stare at it 🍂",
-    photos: ["uw quad autumn"],
-    place: "University of Washington",
+    text: "first fall semester at cal and nobody warned me the glade would look like this. walked to my 1:10 the long way just to stare at it 🍂",
+    photos: ["berkeley campus autumn"],
+    place: "UC Berkeley",
     reactions: 41,
     comments: [
-      { by: "jessica.huang", after: 20, text: "ok seattle is winning. san jose has like 2 trees" },
-      { by: "ana.torres", after: 48, text: "wait til it starts raining for 9 months 🙂" },
+      { by: "jessica.huang", after: 20, text: "ok berkeley is winning. san jose has like 2 trees" },
+      { by: "ana.torres", after: 48, text: "wait til the fog eats the campanile every morning 🙂" },
     ],
   },
   {
     key: "maya-memory-2022",
     by: "maya.chen",
     at: yearsAgo(4, "15:40"),
-    text: "early action apps are IN. celebrating with boba and zero thoughts. UW please",
+    text: "UC apps are IN. celebrating with boba and zero thoughts. CAL please",
     photos: ["bubble tea"],
     tagged: ["jessica.huang"],
     feeling: "feeling relieved",
     reactions: 23,
     comments: [
-      { by: "jessica.huang", after: 6, text: "we're gonna be roommates in seattle i can feel it" },
+      { by: "jessica.huang", after: 6, text: "we're gonna be roommates in berkeley i can feel it" },
     ],
   },
   {
     key: "maya-moving-sale",
     by: "maya.chen",
     at: daysAgo(3, "12:30"),
-    text: "selling some stuff before i move, friends get first dibs!! starting with my bike, it got me up the 15th ave hill for 3 years and it deserves someone who'll actually ride it in the rain",
+    text: "selling some stuff before i move, friends get first dibs!! starting with my bike, it got me up hearst ave for 3 years and it deserves someone braver than me on sf hills",
     listing: "maya-bike",
     reactions: 14,
     comments: [
@@ -211,7 +215,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "maya.chen",
     at: daysAgo(26, "16:05"),
     privacy: "friends",
-    text: "signed it 🥲 incoming product designer at Microsoft, starting july 2027. thank you to everyone who sat through my 4am portfolio panic this summer. Rachel, you basically adopted me",
+    text: "signed it 🥲 incoming product designer at Google, starting july 2027. thank you to everyone who sat through my 4am portfolio panic this summer. Rachel, you basically adopted me",
     feeling: "feeling grateful",
     tagged: ["rachel.goldberg"],
     reactions: 54,
@@ -241,7 +245,7 @@ export const friendPosts: readonly PostSeed[] = [
         text: "i knew it since the 8th grade yearbook spread!!!",
         replies: [{ by: "maya.chen", text: "the clip art 😭" }],
       },
-      { by: "chris.adeyemi", after: 55, text: "congrats! Redmond commute crew 🫡" },
+      { by: "chris.adeyemi", after: 55, text: "congrats! shuttle commute crew 🫡" },
       {
         by: "sofia.alvarez",
         after: 80,
@@ -293,7 +297,7 @@ export const friendPosts: readonly PostSeed[] = [
     at: daysAgo(1, "21:50"),
     text: "sent the purple v4 in the cave after like 15 tries. i take back everything i said about it",
     photos: ["bouldering gym"],
-    place: "Cascade Boulders",
+    place: "Sutro Boulders",
     tagged: ["kai.nakamura"],
     reactions: 22,
     comments: [
@@ -305,7 +309,7 @@ export const friendPosts: readonly PostSeed[] = [
       },
       { by: "sofia.alvarez", after: 25, text: "WAIT i do one night shift and you send it??" },
       {
-        by: "cascadeboulders",
+        by: "sutroboulders",
         after: 90,
         text: "big send energy 🟣 Kai is pretending he isn't proud",
       },
@@ -315,9 +319,9 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "maya.chen",
     at: daysAgo(1, "00:45"),
-    text: "capstone team still in odegaard at 12:45am. our usability test is in 9 hours. noah is eating cereal out of a mug",
+    text: "capstone team still in moffitt at 12:45am. our usability test is in 9 hours. noah is eating cereal out of a mug",
     photos: ["library"],
-    place: "Odegaard Library",
+    place: "Moffitt Library",
     tagged: ["ethan.park", "noah.williams", "zoe.nguyen"],
     privacy: "friends",
     reactions: 18,
@@ -336,7 +340,7 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "maya.chen",
     at: daysAgo(5, "22:30"),
-    text: "if one more listing calls a 290 sq ft studio 'cozy' i'm moving into the odegaard 24 hour room",
+    text: "if one more listing calls a 290 sq ft studio 'cozy' i'm moving into the moffitt 24 hour floor",
     bg: "berry",
     reactions: 25,
     mood: "haha",
@@ -362,7 +366,7 @@ export const friendPosts: readonly PostSeed[] = [
       {
         by: "ana.torres",
         after: 15,
-        text: "we're staying in the u district forever. it's decided",
+        text: "we're staying on southside forever. it's decided",
       },
       { by: "kevin.tran", after: 60, text: "come back to san jose. oh wait" },
     ],
@@ -370,19 +374,19 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "maya.chen",
     at: daysAgo(6, "15:40"),
-    text: "the mountain is out!!! nearly walked into a cyclist on the 45th st bridge staring at it",
-    photos: ["mount rainier"],
+    text: "the fog burned off and mount tam is OUT!!! nearly walked into a cyclist on hearst staring at it",
+    photos: ["mount tam"],
     feeling: "feeling happy",
     reactions: 29,
     comments: [
       {
         by: "arjun.mehta",
         after: 20,
-        text: "summit this summer. you're coming",
+        text: "we're doing the dipsea this summer. you're coming",
         replies: [{ by: "grace.liu", text: "i'm in for this" }],
       },
       { by: "daniel.reyes", after: 35, text: "the cyclist was probably me tbh" },
-      { by: "jessica.huang", after: 90, text: "ok seattle that's unfair" },
+      { by: "jessica.huang", after: 90, text: "ok bay area that's unfair" },
     ],
   },
   {
@@ -513,7 +517,7 @@ export const friendPosts: readonly PostSeed[] = [
       {
         by: "ethan.park",
         after: 30,
-        text: "someone has to make sure hannah doesn't fall asleep on the ave",
+        text: "someone has to make sure hannah doesn't fall asleep on telegraph",
         replies: [{ by: "hannah.lee", after: 10, text: "i was resting my eyes" }],
       },
     ],
@@ -572,7 +576,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "isaiah.thompson",
     at: hoursAgo(4.5),
     privacy: "friends",
-    text: "happy bday man. the mariners will win a world series before you learn to parallel park",
+    text: "happy bday man. the giants will win another even year world series before you learn to parallel park on a hill",
     reactions: 24,
     mood: "haha",
     comments: [
@@ -589,8 +593,8 @@ export const friendPosts: readonly PostSeed[] = [
     on: "ethan.park",
     by: "olivia.brooks",
     at: hoursAgo(2.5),
-    text: "happy birthday!!! here's the quad photo i promised you in like may",
-    photos: ["uw campus"],
+    text: "happy birthday!!! here's the glade photo i promised you in like may",
+    photos: ["berkeley campus"],
     tagged: ["ethan.park"],
     reactions: 15,
     comments: [
@@ -636,12 +640,12 @@ export const friendPosts: readonly PostSeed[] = [
 
   // ── Sofia ───────────────────────────────────────────────────────────────
   {
-    key: "sofia-leavenworth",
+    key: "sofia-bishop",
     by: "sofia.alvarez",
     at: daysAgo(4, "21:30"),
-    text: "leavenworth weekend 🍂 two days of granite, one bratwurst, zero rain (somehow). kai flashed the problem i've been projecting since august and i'm choosing to be happy for him",
-    photos: ["bouldering outdoors", "bouldering outdoors", "larches", "camper van"],
-    place: "Leavenworth, Washington",
+    text: "bishop weekend 🍂 two days of buttermilks granite, one schat's sweet roll, zero wind (somehow). kai flashed the problem i've been projecting since august and i'm choosing to be happy for him",
+    photos: ["bouldering outdoors", "bouldering outdoors", "fall leaves", "camper van"],
+    place: "Bishop, California",
     tagged: ["maya.chen", "kai.nakamura"],
     reactions: 39,
     likedBy: ["maya.chen"],
@@ -649,7 +653,7 @@ export const friendPosts: readonly PostSeed[] = [
       {
         by: "maya.chen",
         after: 15,
-        text: "best weekend of the quarter. my fingertips are see-through",
+        text: "best weekend of the semester. my fingertips are see-through",
         replies: [{ by: "lena.fischer", text: "tape them and rest 2 days. i'm serious" }],
       },
       {
@@ -661,7 +665,7 @@ export const friendPosts: readonly PostSeed[] = [
       {
         by: "grace.liu",
         after: 60,
-        text: "the larches!!! jealous",
+        text: "the aspens!!! jealous",
         replies: [{ by: "sofia.alvarez", text: "come next october, they're unreal" }],
       },
       {
@@ -671,7 +675,7 @@ export const friendPosts: readonly PostSeed[] = [
         replies: [{ by: "kai.nakamura", text: "you said that last time" }],
       },
       { by: "andre.silva", after: 140, text: "that van photo goes hard" },
-      { by: "tasha.okafor", after: 300, text: "you look so happy. also who's the bratwurst" },
+      { by: "tasha.okafor", after: 300, text: "you look so happy. also who's the sweet roll" },
     ],
   },
   {
@@ -697,7 +701,7 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "sofia.alvarez",
     at: daysAgo(1, "14:20"),
-    text: "birthday plan for sunday: index if it's dry, cascade boulders if it's not (it won't be dry). come climb with me and then we get tacos",
+    text: "birthday plan for sunday: mickey's beach if it's not foggy, sutro boulders if it is (it will be foggy). come climb with me and then we get tacos",
     reactions: 28,
     likedBy: ["maya.chen"],
     comments: [
@@ -778,7 +782,7 @@ export const friendPosts: readonly PostSeed[] = [
       {
         by: "andre.silva",
         after: 30,
-        text: "the I-5 sunrise hits different at 7am after 12 hours",
+        text: "the sunrise over the bay bridge hits different at 7am after 12 hours",
       },
     ],
   },
@@ -819,14 +823,14 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "jordan.kim",
     at: daysAgo(6, "10:00"),
-    text: "reposting here bc 4 different people DMed me about this exact listing this week. if it's $900 for a 1br on cap hill it is not real. never send money before you see the place in person",
+    text: "reposting here bc 4 different people DMed me about this exact listing this week. if it's $1,400 for a 2br near campus it is not real. never send money before you see the place in person",
     share: "jordan-scam-warning",
     reactions: 44,
     comments: [
       {
         by: "harper.quinn",
         after: 20,
-        text: "the photos were from a hotel in portland lmao",
+        text: "the photos were from a hotel in vegas lmao",
         replies: [{ by: "jordan.kim", text: "you could see the minibar in the 'kitchen' photo" }],
       },
       {
@@ -853,9 +857,9 @@ export const friendPosts: readonly PostSeed[] = [
     at: daysAgo(15, "12:30"),
     text: "good piece, though I'd push back on the last section about parking minimums",
     link: {
-      url: "https://cascadiacurrent.news/2026/10/upzoning-alone-wont-fix-rent",
-      title: "Upzoning alone won't fix Seattle rents. Here's what else has to happen",
-      domain: "cascadiacurrent.news",
+      url: "https://bayareacurrent.news/2026/10/upzoning-alone-wont-fix-rent",
+      title: "Upzoning alone won't fix SF rents. Here's what else has to happen",
+      domain: "bayareacurrent.news",
       description:
         "The city's new zoning map adds capacity on paper. Builders say permits and financing are the real bottleneck.",
       image: "construction",
@@ -874,7 +878,7 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "jordan.kim",
     at: daysAgo(20, "08:15"),
-    text: "the 44 at 8am is a contact sport",
+    text: "BART at 8am is a contact sport",
     bg: "ocean",
     reactions: 19,
     mood: "haha",
@@ -882,13 +886,13 @@ export const friendPosts: readonly PostSeed[] = [
       {
         by: "fatima.hassan",
         after: 15,
-        text: "someone's backpack has been in my face since stone way",
-        replies: [{ by: "jordan.kim", text: "the 44 is a social experiment" }],
+        text: "someone's backpack has been in my face since downtown berkeley",
+        replies: [{ by: "jordan.kim", text: "the red line is a social experiment" }],
       },
       {
         by: "maya.chen",
         after: 30,
-        text: "the 49 is worse and i will die on this hill (capitol hill)",
+        text: "the 14 mission is worse and i will die on this hill (every hill, this is sf)",
       },
     ],
   },
@@ -941,16 +945,16 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "tasha.okafor",
     at: daysAgo(5, "11:30"),
-    text: "6 miles on the burke-gilman in sideways rain and 31 of you showed up?? you're all unwell. coffee's on moonrise",
-    photos: ["runners", "forest trail", "coffee"],
-    place: "Burke-Gilman Trail",
+    text: "6 miles from crissy field to the bridge in sideways rain and 31 of you showed up?? you're all unwell. coffee's on moonrise",
+    photos: ["runners", "beach", "coffee"],
+    place: "Crissy Field",
     reactions: 29,
     comments: [
       {
         by: "daniel.reyes",
         after: 15,
-        text: "the hill by the brewery in that rain was spiritual",
-        replies: [{ by: "lily.anderson", text: "the brewery hill is evil" }],
+        text: "the climb up to the bridge in that rain was spiritual",
+        replies: [{ by: "lily.anderson", text: "the bridge stairs are evil" }],
       },
       { by: "lily.anderson", after: 30, text: "my shoes are still wet" },
       {
@@ -965,7 +969,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "tasha.okafor",
     at: daysAgo(14, "09:15"),
     privacy: "friends",
-    text: "roasting the holiday blend today and the whole block smells like it. sorry to everyone on 12th who now wants a latte",
+    text: "roasting the holiday blend today and the whole block smells like it. sorry to everyone on valencia who now wants a latte",
     photos: ["coffee roaster", "coffee beans"],
     place: "Moonrise Coffee Co.",
     reactions: 21,
@@ -1016,7 +1020,7 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "tasha.okafor",
     at: daysAgo(2, "17:05"),
-    text: "it got dark at 4:44 today. i'm putting up the christmas lights and nobody can stop me",
+    text: "it got dark at 5:02 today. i'm putting up the christmas lights and nobody can stop me",
     reactions: 20,
     comments: [
       { by: "jasmine.ortiz", after: 30, text: "it's november 10th ma'am" },
@@ -1028,7 +1032,7 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "leo.novak",
     at: daysAgo(4, "18:40"),
-    text: "why does nobody honk here. guy in front of me sat through an entire green light on leary and the whole line of cars just. accepted it",
+    text: "why does nobody honk here. guy in front of me sat through an entire green light on divisadero and the whole line of cars just. accepted it",
     reactions: 23,
     mood: "haha",
     comments: [
@@ -1036,14 +1040,14 @@ export const friendPosts: readonly PostSeed[] = [
       {
         by: "owen.murphy",
         after: 20,
-        text: "we express anger through passive aggressive notes on windshields. you'll learn",
-        replies: [{ by: "leo.novak", text: "do i need to buy post its" }],
+        text: "we express anger through passive aggressive posts on nextdoor. you'll learn",
+        replies: [{ by: "leo.novak", text: "do i need to download nextdoor" }],
       },
       {
         by: "nora.kowalski",
         after: 45,
         text: "honking is considered a hate crime here",
-        replies: [{ by: "leo.novak", text: "noted. no honking. post its only" }],
+        replies: [{ by: "leo.novak", text: "noted. no honking. nextdoor only" }],
       },
       { by: "rohan.iyer", after: 90, text: "I honked once in 2024 and I still think about it" },
     ],
@@ -1056,27 +1060,31 @@ export const friendPosts: readonly PostSeed[] = [
     bg: "sunset",
     reactions: 15,
     comments: [
-      { by: "marcus.bell", after: 30, text: "i jaywalked on pine and a guy shook his head at me" },
+      {
+        by: "marcus.bell",
+        after: 30,
+        text: "i jaywalked on valencia and a guy shook his head at me",
+      },
       {
         by: "nora.kowalski",
         after: 600,
-        text: "it's a $68 ticket, Leo. we've all heard the stories",
-        replies: [{ by: "leo.novak", text: "$68?? ok i'm waiting at the light" }],
+        text: "jaywalking's been legal in california since 2023, Leo. we wait because of the waymos",
+        replies: [{ by: "leo.novak", text: "the waymos?? ok i'm waiting at the light" }],
       },
     ],
   },
   {
     by: "leo.novak",
     at: daysAgo(8, "16:10"),
-    text: "it doesn't rain hard here. it just never stops. day 9. my shoes have not been dry since october",
-    photos: ["rainy street"],
+    text: "it's not cold here. it's just never warm. day 9 of fog. i have not seen the sun since october",
+    photos: ["foggy hills"],
     reactions: 18,
     comments: [
-      { by: "owen.murphy", after: 15, text: "get real boots, expense them, I'll approve it" },
+      { by: "owen.murphy", after: 15, text: "get a real jacket, expense it, I'll approve it" },
       {
         by: "marcus.bell",
         after: 45,
-        text: "nobody here uses umbrellas either and i don't understand why",
+        text: "everyone here owns 4 fleeces and i finally understand why",
       },
     ],
   },
@@ -1092,11 +1100,15 @@ export const friendPosts: readonly PostSeed[] = [
       {
         by: "kumoramen",
         after: 40,
-        text: "Welcome to Seattle! Ask for the off-menu chili oil next time 🍜",
+        text: "Welcome to SF! Ask for the off-menu chili oil next time 🍜",
         replies: [{ by: "leo.novak", text: "there's an off menu?? ok see you tomorrow" }],
       },
-      { by: "nora.kowalski", after: 70, text: "pho on jackson street. go this weekend" },
-      { by: "rohan.iyer", after: 110, text: "the teriyaki place by the office, trust" },
+      { by: "nora.kowalski", after: 70, text: "pho on larkin street. go this weekend" },
+      {
+        by: "rohan.iyer",
+        after: 110,
+        text: "any taqueria on 24th st. get the super burrito, trust",
+      },
     ],
   },
   {
@@ -1106,15 +1118,15 @@ export const friendPosts: readonly PostSeed[] = [
     reactions: 27,
     mood: "haha",
     comments: [
-      { by: "marcus.bell", after: 12, text: "lmao i saw that one in cap hill. $1,650" },
+      { by: "marcus.bell", after: 12, text: "lmao i saw that one in the mission. $2,100" },
       { by: "owen.murphy", after: 40, text: "efficient though" },
-      { by: "nora.kowalski", after: 55, text: "try fremont, closer to the office anyway" },
+      { by: "nora.kowalski", after: 55, text: "try the haight, closer to the office anyway" },
     ],
   },
   {
     by: "leo.novak",
     at: daysAgo(7, "23:15"),
-    text: "went to a board game night alone. everyone was nice, a stranger taught me a bird game, nobody froze me out. the seattle freeze might be a myth",
+    text: "went to a board game night alone. everyone was nice, a stranger taught me a bird game, and nobody flaked or asked where i work. sf might not be all tech people after all",
     feeling: "feeling happy",
     reactions: 24,
     comments: [
@@ -1122,7 +1134,7 @@ export const friendPosts: readonly PostSeed[] = [
         by: "tyler.jensen",
         after: 20,
         text: "that was me! welcome to the bird cult",
-        replies: [{ by: "leo.novak", text: "the bird cult is my first seattle friend group" }],
+        replies: [{ by: "leo.novak", text: "the bird cult is my first sf friend group" }],
       },
       { by: "owen.murphy", after: 60, text: "told you. go every week" },
       { by: "sam.rivera", after: 90, text: "see you thursday. i'll bring the cursed card game" },
@@ -1152,8 +1164,8 @@ export const friendPosts: readonly PostSeed[] = [
       {
         by: "nina.petrova",
         after: 40,
-        text: "Marketplace. All of it. Check the Ballard swap group too",
-        replies: [{ by: "marcus.bell", text: "on it. the ballard swap is dangerous" }],
+        text: "Marketplace. All of it. Check the Inner Richmond swap group too",
+        replies: [{ by: "marcus.bell", text: "on it. the richmond swap is dangerous" }],
       },
       {
         by: "camila.santos",
@@ -1161,14 +1173,14 @@ export const friendPosts: readonly PostSeed[] = [
         text: "the lamp is doing a lot of work here",
         replies: [{ by: "marcus.bell", text: "the lamp is my emotional support" }],
       },
-      { by: "grace.liu", after: 140, text: "welcome to cap hill!!" },
+      { by: "grace.liu", after: 140, text: "welcome to the mission!!" },
     ],
   },
   {
     by: "marcus.bell",
     at: daysAgo(3, "20:20"),
     privacy: "friends",
-    text: "FINALLY HAVE A COUCH. borrowed a van, drove to wallingford, carried it up 3 flights with the seller. off the air mattress after 5 weeks",
+    text: "FINALLY HAVE A COUCH. borrowed a van, drove to berkeley, carried it up 3 flights with the seller. off the air mattress after 5 weeks",
     photos: ["listings/velvet loveseat"],
     feeling: "feeling accomplished",
     reactions: 44,
@@ -1194,22 +1206,22 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "marcus.bell",
     at: daysAgo(15, "12:10"),
-    text: "anyone know a barber on cap hill who can actually do a fade. asking urgently",
+    text: "anyone know a barber in the mission who can actually do a fade. asking urgently",
     reactions: 6,
     comments: [
       {
         by: "camila.santos",
         after: 20,
-        text: "the shop on pine above the bakery. ask for dre",
+        text: "the shop on 24th above the bakery. ask for dre",
         replies: [{ by: "marcus.bell", text: "went today. dre is a genius. thank you" }],
       },
-      { by: "chris.adeyemi", after: 55, text: "I drive to the CD for mine, worth it" },
+      { by: "chris.adeyemi", after: 55, text: "I drive up to oakland for mine, worth it" },
     ],
   },
   {
     by: "marcus.bell",
     at: daysAgo(9, "07:50"),
-    text: "it's 38 degrees and wet and the sun sets at 4:50. atlanta did not prepare me for this",
+    text: "it's 52 degrees, the fog is sideways and the sun sets at 5. how am i this cold. atlanta did not prepare me for this",
     bg: "night",
     reactions: 20,
     mood: "care",
@@ -1217,17 +1229,21 @@ export const friendPosts: readonly PostSeed[] = [
       {
         by: "leo.novak",
         after: 30,
-        text: "chicago did and it's still worse somehow",
-        replies: [{ by: "marcus.bell", text: "at least chicago has sun" }],
+        text: "chicago is 30 degrees rn and i'm colder here somehow",
+        replies: [{ by: "marcus.bell", text: "it's the wind off the ocean. nobody warns you" }],
       },
-      { by: "rachel.goldberg", after: 80, text: "Vitamin D and a happy light. Trust me on this" },
+      {
+        by: "rachel.goldberg",
+        after: 80,
+        text: "Layers. Always layers, even in July. Trust me on this",
+      },
     ],
   },
   {
     by: "marcus.bell",
     at: daysAgo(11, "16:30"),
     privacy: "friends",
-    text: "marketplace W: solid oak table for $60 from a guy in ballard who refinished it himself. the apartment is becoming an apartment",
+    text: "marketplace W: solid oak table for $60 from a guy in the richmond who refinished it himself. the apartment is becoming an apartment",
     photos: ["wooden table"],
     reactions: 16,
     comments: [
@@ -1240,7 +1256,7 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "derek.holloway",
     at: daysAgo(5, "15:15"),
-    text: "Wallingford unit update: floors are in, kitchen's done, tile guy finishes Friday. Listing goes up next week. 480 sq ft and an actual closet",
+    text: "Elmwood unit update: floors are in, kitchen's done, tile guy finishes Friday. Listing goes up next week. 480 sq ft and an actual closet",
     photos: ["empty apartment", "renovated kitchen", "bathroom tile"],
     reactions: 22,
     comments: [
@@ -1274,9 +1290,9 @@ export const friendPosts: readonly PostSeed[] = [
     by: "derek.holloway",
     at: daysAgo(2, "08:10"),
     privacy: "friends",
-    text: "Moose at Golden Gardens this morning. 7am, 41 degrees, he went in the water anyway",
+    text: "Moose at Fort Funston this morning. 7am, 48 degrees and blowing, he went in the water anyway",
     photos: ["golden retriever", "dog park"],
-    place: "Golden Gardens Park",
+    place: "Fort Funston",
     reactions: 30,
     comments: [
       {
@@ -1314,7 +1330,7 @@ export const friendPosts: readonly PostSeed[] = [
     comments: [
       { by: "will.foster", after: 30, text: "I'm booked through sunday on gutters alone lol" },
       { by: "jordan.kim", after: 75, text: "how do you know" },
-      { by: "derek.holloway", after: 90, text: "A basement in Fremont. That's all I'll say" },
+      { by: "derek.holloway", after: 90, text: "A basement in the Haight. That's all I'll say" },
     ],
   },
   {
@@ -1395,11 +1411,11 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "priya.raman",
     at: daysAgo(19, "17:20"),
-    text: "last big experiment at the lab before i leave and the protein actually folded. i might cry",
+    text: "last big experiment at the lab before i leave and the edit actually took. i might cry",
     photos: ["lab"],
-    place: "UW Institute for Protein Design",
+    place: "Innovative Genomics Institute",
     reactions: 23,
-    comments: [{ by: "fatima.hassan", after: 30, text: "a protein that cooperates?? frame it" }],
+    comments: [{ by: "fatima.hassan", after: 30, text: "a cell line that cooperates?? frame it" }],
   },
   {
     by: "priya.raman",
@@ -1427,7 +1443,7 @@ export const friendPosts: readonly PostSeed[] = [
       {
         by: "priya.raman",
         after: 20,
-        text: "the mcmahon dorm photo 😭 we were babies",
+        text: "the unit 2 dorm photo 😭 we were babies",
         replies: [{ by: "hannah.lee", text: "babies with 3 rice cookers" }],
       },
       { by: "maya.chen", after: 30, text: "seconding. motion passes" },
@@ -1441,7 +1457,7 @@ export const friendPosts: readonly PostSeed[] = [
     privacy: "friends",
     text: "new set in the cave this friday. the purple v4 is my masterpiece. if you hate it, that's on me",
     photos: ["bouldering gym", "climbing holds"],
-    place: "Cascade Boulders",
+    place: "Sutro Boulders",
     reactions: 26,
     likedBy: ["maya.chen"],
     comments: [
@@ -1452,23 +1468,23 @@ export const friendPosts: readonly PostSeed[] = [
         replies: [{ by: "kai.nakamura", text: "it's legal. it's just mean" }],
       },
       { by: "maya.chen", after: 45, text: "i already hate it and i haven't touched it" },
-      { by: "cascadeboulders", after: 120, text: "New set drops Friday at 4pm. Kai has not slept" },
+      { by: "sutroboulders", after: 120, text: "New set drops Friday at 4pm. Kai has not slept" },
     ],
   },
   {
     by: "kai.nakamura",
     at: daysAgo(4, "22:30"),
     text: "best weekend",
-    share: "sofia-leavenworth",
+    share: "sofia-bishop",
     reactions: 13,
     comments: [{ by: "sofia.alvarez", after: 20, text: "lucky flash guy" }],
   },
   {
     by: "grace.liu",
     at: daysAgo(19, "18:00"),
-    text: "probably the last dry weekend at index. granite szn is over 😔 see you in april",
+    text: "probably the last dry weekend at castle rock. sandstone szn is over (never climb it wet) 😔 see you in april",
     photos: ["granite cliff", "granite cliff", "forest river"],
-    place: "Index Town Walls",
+    place: "Castle Rock State Park",
     tagged: ["arjun.mehta"],
     reactions: 23,
     likedBy: ["maya.chen"],
@@ -1493,9 +1509,9 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "arjun.mehta",
     at: daysAgo(4, "13:30"),
-    text: "summit selfie with zero view. classic november",
+    text: "summit selfie at the mission peak pole with zero view. classic november",
     photos: ["foggy hills", "posts/forest-trail-05.jpg"],
-    place: "Rattlesnake Ledge",
+    place: "Mission Peak",
     reactions: 25,
     mood: "haha",
     comments: [
@@ -1539,19 +1555,19 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "ben.carter",
     at: daysAgo(3, "18:00"),
-    text: "first real snow at snoqualmie pass and the ski tune line is out the door. bring us coffee and we'll move you up",
+    text: "first real snow in tahoe and the ski tune line is out the door. bring us coffee and we'll move you up",
     photos: ["ski shop", "snowy mountains"],
     reactions: 19,
     comments: [
       {
-        by: "rainlineoutdoor",
+        by: "foglineoutdoor",
         after: 60,
         text: "Ben has tuned 40 skis today. Send help (and coffee)",
       },
       {
         by: "andre.silva",
         after: 90,
-        text: "pass opening day when",
+        text: "palisades opening day when",
         replies: [{ by: "ben.carter", text: "saturday if the snow holds" }],
       },
     ],
@@ -1559,7 +1575,7 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "andre.silva",
     at: daysAgo(14, "21:10"),
-    text: "trad rack fully organized. for nothing. it's been raining for 10 days",
+    text: "trad rack fully organized. for nothing. it's rained every weekend since halloween",
     photos: ["climbing gear"],
     reactions: 12,
     mood: "sad",
@@ -1572,16 +1588,16 @@ export const friendPosts: readonly PostSeed[] = [
     by: "tara.singh",
     at: daysAgo(9, "17:30"),
     privacy: "friends",
-    text: "mt si in the fog with the pnw hikers crew. 20 people, 0 views, 100% good vibes. leave no trace or i will find you",
-    photos: ["forest trail", "posts/alpine-meadow-01.jpg", "forest trail"],
-    place: "Mount Si",
+    text: "mt tam in the fog with the bay area hikers crew. 20 people, 0 views, 100% good vibes. leave no trace or i will find you",
+    photos: ["forest trail", "foggy hills", "forest trail"],
+    place: "Mount Tamalpais",
     reactions: 28,
     comments: [
       { by: "maddie.collins", after: 20, text: "Pickles is still asleep from this" },
       { by: "arjun.mehta", after: 60, text: "the fog was honestly kind of beautiful" },
     ],
   },
-  // ── UW friends ──────────────────────────────────────────────────────────
+  // ── Cal friends ─────────────────────────────────────────────────────────
   {
     by: "ana.torres",
     at: daysAgo(1, "10:30"),
@@ -1635,14 +1651,14 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "hannah.lee",
     at: daysAgo(6, "17:40"),
-    text: "took a nap at 2 and woke up at 4:50 and it was pitch black and i genuinely thought it was 3am",
+    text: "took a nap at 2 and woke up at 5:40 and it was pitch black and i genuinely thought it was 3am",
     bg: "night",
     reactions: 30,
     mood: "haha",
     likedBy: ["maya.chen"],
     comments: [
       { by: "maya.chen", after: 4, text: "i heard you yell 'WHAT DAY IS IT' from the kitchen" },
-      { by: "ana.torres", after: 10, text: "the seattle november special" },
+      { by: "ana.torres", after: 10, text: "the daylight savings special" },
       { by: "olivia.brooks", after: 60, text: "this happens to me weekly" },
     ],
   },
@@ -1650,7 +1666,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "noah.williams",
     at: daysAgo(17, "15:00"),
     privacy: "friends",
-    text: "got the return offer from amazon!! back in SLU next summer. thanks to everyone who listened to me stress about my intern project for 12 weeks",
+    text: "got the return offer from salesforce!! back in SoMa next summer. thanks to everyone who listened to me stress about my intern project for 12 weeks",
     feeling: "feeling blessed",
     reactions: 46,
     mood: "love",
@@ -1663,7 +1679,7 @@ export const friendPosts: readonly PostSeed[] = [
         replies: [{ by: "noah.williams", text: "first boba round on me" }],
       },
       { by: "maya.chen", after: 12, text: "NOAH!!! so proud of you" },
-      { by: "ryan.oconnor", after: 40, text: "welcome to the orange badge life" },
+      { by: "ryan.oconnor", after: 40, text: "welcome to the ohana lol" },
       { by: "zoe.nguyen", after: 55, text: "carrying our capstone team into corporate america" },
       { by: "rohan.iyer", after: 120, text: "Congrats! join the new grads group when you sign" },
     ],
@@ -1671,9 +1687,9 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "zoe.nguyen",
     at: daysAgo(11, "20:00"),
-    text: "finally developed my roll from discovery park. portra 400 in the rain is a mood",
+    text: "finally developed my roll from lands end. portra 400 in the fog is a mood",
     photos: ["lighthouse", "beach", "forest trail", "beach", "film camera"],
-    place: "Discovery Park",
+    place: "Lands End Trail",
     reactions: 34,
     likedBy: ["maya.chen"],
     comments: [
@@ -1715,19 +1731,19 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "olivia.brooks",
     at: daysAgo(2, "13:20"),
-    text: "november in seattle, a photo series",
+    text: "november in berkeley, a photo series",
     photos: ["rainy street", "wet leaves"],
     reactions: 25,
     comments: [
       { by: "zoe.nguyen", after: 20, text: "the bus window one 😍" },
-      { by: "isaiah.thompson", after: 60, text: "is that the 70 i can tell by the vibe" },
+      { by: "isaiah.thompson", after: 60, text: "is that the 51B i can tell by the vibe" },
     ],
   },
   {
     by: "isaiah.thompson",
     at: daysAgo(16, "21:30"),
     privacy: "friends",
-    text: "mariners offseason day 40. i'm fine. i'm totally fine",
+    text: "giants offseason day 40. i'm fine. i'm totally fine",
     feeling: "feeling hopeful",
     reactions: 14,
     mood: "sad",
@@ -1743,7 +1759,7 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "amara.diallo",
     at: daysAgo(10, "10:00"),
-    text: "free flu shots at hall health this week, no appointment needed, bring your husky card. finals season is not the time to get sick",
+    text: "free flu shots at the tang center this week, no appointment needed, bring your cal 1 card. finals season is not the time to get sick",
     photos: ["flu shots"],
     reactions: 18,
     comments: [
@@ -1780,7 +1796,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "mei.tanaka",
     at: daysAgo(3, "15:00"),
     text: "i'll have a table at art walk with the new zine!! it's about the 49 bus and it's 24 pages and every page is a different person who rides it",
-    event: "caphill-art-walk",
+    event: "mission-art-walk",
     reactions: 20,
     likedBy: ["maya.chen"],
     comments: [
@@ -1812,9 +1828,9 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "daniel.reyes",
     at: daysAgo(1, "07:15"),
-    text: "6:02am, 39 degrees, burke-gilman all to myself (and one very judgmental heron)",
-    photos: ["burke gilman", "heron"],
-    place: "Burke-Gilman Trail",
+    text: "6:02am, 44 degrees, the bay trail all to myself (and one very judgmental heron)",
+    photos: ["trail", "heron"],
+    place: "Berkeley Marina",
     reactions: 17,
     comments: [
       {
@@ -1828,7 +1844,7 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "fatima.hassan",
     at: daysAgo(4, "20:00"),
-    text: "sharing in case anyone's friend needs a summer place. our 3rd room, june to august, 2 min from the ave",
+    text: "sharing in case anyone's friend needs a summer place. our 3rd room, june to august, 5 min from telegraph",
     share: "fatima-sublet-post",
     reactions: 9,
   },
@@ -1865,13 +1881,13 @@ export const friendPosts: readonly PostSeed[] = [
     by: "chloe.wright",
     at: daysAgo(25, "14:30"),
     privacy: "friends",
-    text: "pike place crawl with jess in town!! 3 kinds of dumplings, 1 piroshky, 0 regrets",
-    photos: ["dumplings", "pike place", "piroshky", "pike place"],
-    place: "Pike Place Market",
+    text: "ferry building crawl with jess in town!! 3 kinds of dumplings, 1 sourdough loaf, 0 regrets",
+    photos: ["dumplings", "ferry building", "sourdough", "ferry building"],
+    place: "Ferry Building Marketplace",
     tagged: ["jessica.huang"],
     reactions: 24,
     comments: [
-      { by: "jessica.huang", after: 15, text: "the soup dumplings ruined me for berkeley" },
+      { by: "jessica.huang", after: 15, text: "the soup dumplings ruined me for westwood" },
       { by: "maya.chen", after: 40, text: "you were in town and didn't tell me??" },
       { by: "jessica.huang", after: 45, text: "Maya Chen it was 30 hours i'm sorry 😭 next time" },
     ],
@@ -1907,23 +1923,23 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "rohan.iyer",
     at: daysAgo(14, "18:00"),
-    text: "new grads deciding where to live, this breakdown is pretty good. tldr: if you're in redmond don't live in ballard",
+    text: "new grads deciding where to live, this breakdown is pretty good. tldr: if you're in mountain view don't live in the richmond",
     link: {
-      url: "https://newgradnotes.dev/rent-vs-commute-seattle-2026",
-      title: "Rent vs. commute for Seattle new grads, 2026 edition",
+      url: "https://newgradnotes.dev/rent-vs-commute-bay-area-2026",
+      title: "Rent vs. commute for Bay Area new grads, 2026 edition",
       domain: "newgradnotes.dev",
       description:
-        "We mapped median 1BR rent against door-to-door commute times to SLU, Bellevue and Redmond.",
-      image: "seattle skyline night",
+        "We mapped median 1BR rent against door-to-door commute times to SoMa, Oakland and Mountain View.",
+      image: "sf skyline night",
     },
     reactions: 14,
     comments: [
       {
         by: "maya.chen",
         after: 25,
-        text: "this is so helpful, cap hill to redmond is actually not bad on the 2 line",
+        text: "this is so helpful, mission to mountain view is actually not bad on the shuttle",
       },
-      { by: "noah.williams", after: 60, text: "SLU people winning again" },
+      { by: "noah.williams", after: 60, text: "SoMa people winning again" },
     ],
   },
   {
@@ -1946,7 +1962,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "emily.chen",
     at: daysAgo(10, "23:30"),
     privacy: "friends",
-    text: "first quarter of college almost done and i've only cried in the library twice",
+    text: "first semester of college almost done and i've only cried in the library twice",
     bg: "peach",
     reactions: 20,
     likedBy: ["maya.chen"],
@@ -1978,7 +1994,7 @@ export const friendPosts: readonly PostSeed[] = [
     comments: [{ by: "chloe.wright", after: 20, text: "the only correct choice" }],
   },
 
-  // ── Microsoft friends ───────────────────────────────────────────────────
+  // ── Google friends ──────────────────────────────────────────────────────
   {
     by: "rachel.goldberg",
     at: daysAgo(2, "19:10"),
@@ -1987,7 +2003,11 @@ export const friendPosts: readonly PostSeed[] = [
     reactions: 24,
     likedBy: ["maya.chen"],
     comments: [
-      { by: "sophie.dubois", after: 30, text: "Finally, real bread in Seattle. Is it for sale" },
+      {
+        by: "sophie.dubois",
+        after: 30,
+        text: "Finally, real bread in San Francisco. Is it for sale",
+      },
       {
         by: "nina.petrova",
         after: 60,
@@ -2021,9 +2041,9 @@ export const friendPosts: readonly PostSeed[] = [
     by: "chris.adeyemi",
     at: daysAgo(4, "16:00"),
     privacy: "friends",
-    text: "sunday league, 3-1 W in the rain at magnuson. my calves are done",
+    text: "sunday league, 3-1 W in the fog at beach chalet. my calves are done",
     photos: ["soccer field"],
-    place: "Magnuson Park",
+    place: "Beach Chalet Soccer Fields",
     reactions: 15,
     comments: [
       {
@@ -2049,17 +2069,17 @@ export const friendPosts: readonly PostSeed[] = [
     ],
   },
 
-  // ── Capitol Hill & around ───────────────────────────────────────────────
+  // ── The Mission & around ────────────────────────────────────────────────
   {
     by: "jasmine.ortiz",
     at: daysAgo(4, "11:00"),
     privacy: "friends",
-    text: "three new paintings going up at moonrise for art walk!! the rainy one is called '4:45pm'",
+    text: "three new paintings going up at moonrise for art walk!! the foggy one is called 'karl'",
     photos: ["art studio", "paint brushes"],
     reactions: 27,
     likedBy: ["maya.chen"],
     comments: [
-      { by: "tasha.okafor", after: 20, text: "they look so good on the brick wall" },
+      { by: "tasha.okafor", after: 20, text: "they look so good on the mural wall" },
       { by: "harper.quinn", after: 80, text: "i want the blue one on my wall" },
     ],
   },
@@ -2139,11 +2159,11 @@ export const friendPosts: readonly PostSeed[] = [
     at: daysAgo(8, "12:00"),
     text: "Our lab's work is in the news! Still don't love the headline",
     link: {
-      url: "https://soundsciencenews.org/2026/11/marine-heat-off-washington-coast",
-      title: "Warm water 'blobs' are back off the Washington coast, researchers say",
-      domain: "soundsciencenews.org",
+      url: "https://baysciencenews.org/2026/11/marine-heat-off-california-coast",
+      title: "Warm water 'blobs' are back off the Northern California coast, researchers say",
+      domain: "baysciencenews.org",
       description:
-        "UW oceanographers spent October tracking unusually warm water about 200 miles offshore.",
+        "Bay Area oceanographers spent October tracking unusually warm water about 200 miles off the Golden Gate.",
       image: "research ship",
     },
     reactions: 19,
@@ -2152,13 +2172,13 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "owen.murphy",
     at: daysAgo(12, "09:00"),
-    text: "Tidewater is hiring 2 backend engineers in Fremont. We work on grid batteries and we have a very good espresso machine",
+    text: "Tidewater is hiring 2 backend engineers in the Haight. We work on grid batteries and we have a very good espresso machine",
     link: {
       url: "https://tidewaterenergy.co/careers",
       title: "Careers at Tidewater Energy",
       domain: "tidewaterenergy.co",
       description:
-        "Help us build software for batteries that keep the lights on. Fremont, Seattle.",
+        "Help us build software for batteries that keep the lights on. Haight-Ashbury, San Francisco.",
       image: "solar panels",
     },
     reactions: 13,
@@ -2171,9 +2191,9 @@ export const friendPosts: readonly PostSeed[] = [
     by: "owen.murphy",
     at: daysAgo(1, "17:30"),
     privacy: "friends",
-    text: "team offsite at gas works. 6 people, one tarp, very cold whiteboard markers",
-    photos: ["gas works park", "gas works park"],
-    place: "Gas Works Park",
+    text: "team offsite at dolores park. 6 people, one blanket, very cold whiteboard markers",
+    photos: ["dolores park", "dolores park"],
+    place: "Dolores Park",
     tagged: ["leo.novak", "nora.kowalski"],
     reactions: 18,
     comments: [
@@ -2181,7 +2201,7 @@ export const friendPosts: readonly PostSeed[] = [
       {
         by: "leo.novak",
         after: 30,
-        text: "first offsite of my life and it's in the rain. very seattle",
+        text: "first offsite of my life and it's 55 degrees and windy. very sf",
       },
     ],
   },
@@ -2190,7 +2210,7 @@ export const friendPosts: readonly PostSeed[] = [
     at: daysAgo(7, "15:30"),
     text: "Pickles got so muddy that a stranger offered to hose him off at the trailhead",
     photos: ["muddy dog", "forest trail"],
-    place: "Twin Falls Trail",
+    place: "Cataract Falls Trail",
     reactions: 25,
     comments: [
       { by: "tara.singh", after: 30, text: "pickles is a free spirit" },
@@ -2211,7 +2231,7 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "will.foster",
     at: daysAgo(2, "13:00"),
-    text: "reupholstered this mid century armchair in green wool. took 3 weekends. it's on marketplace if anyone in ballard wants it",
+    text: "reupholstered this mid century armchair in green wool. took 3 weekends. it's on marketplace if anyone in the richmond wants it",
     listing: "will-armchair",
     reactions: 16,
     comments: [
@@ -2254,7 +2274,7 @@ export const friendPosts: readonly PostSeed[] = [
     feeling: "feeling alive",
     reactions: 14,
     comments: [
-      { by: "marcus.bell", after: 600, text: "take me to one, i've been to zero seattle shows" },
+      { by: "marcus.bell", after: 600, text: "take me to one, i've been to zero sf shows" },
       { by: "malik.johnson", after: 300, text: "and none of them were ours. noted" },
     ],
   },
@@ -2314,9 +2334,9 @@ export const friendPosts: readonly PostSeed[] = [
     by: "jamal.wilson",
     at: daysAgo(23, "20:00"),
     privacy: "friends",
-    text: "she said yes!!! at the ballard locks, in the rain, of course",
+    text: "she said yes!!! at fort point under the bridge, in the fog, of course",
     photos: ["engagement ring", "couple umbrella"],
-    place: "Ballard Locks",
+    place: "Fort Point",
     feeling: "feeling blessed",
     reactions: 55,
     mood: "love",
@@ -2327,13 +2347,13 @@ export const friendPosts: readonly PostSeed[] = [
         text: "FINALLY. congrats brother",
         replies: [{ by: "jamal.wilson", text: "best man duties start now 😤" }],
       },
-      { by: "isaiah.thompson", after: 45, text: "congrats!! the rain is good luck here" },
+      { by: "isaiah.thompson", after: 45, text: "congrats!! the fog is good luck here" },
     ],
   },
   {
     by: "lily.anderson",
     at: daysAgo(1, "10:30"),
-    text: "first sub-25 5k!!! 24:51 on the burke",
+    text: "first sub-25 5k!!! 24:51 on the bay trail",
     photos: ["running watch"],
     feeling: "feeling proud",
     reactions: 22,
@@ -2357,7 +2377,7 @@ export const friendPosts: readonly PostSeed[] = [
         text: "wait till you see costco",
         replies: [{ by: "jiho.choi", text: "what is costco" }],
       },
-      { by: "theo.grant", after: 60, text: "the porch on 17th with the fog machine?? iconic" },
+      { by: "theo.grant", after: 60, text: "the porch on regent st with the fog machine?? iconic" },
     ],
   },
   {

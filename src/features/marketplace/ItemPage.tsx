@@ -891,8 +891,8 @@ function SponsoredAd({
           <Avatar src={ad.page.avatar} size={40} />
           <p className="text-[15px] text-primary leading-5">
             <b className="font-semibold">{ad.page.name}</b> wants to reach people who browse
-            Marketplace in the Seattle area. You're seeing this ad based on your location and
-            activity on Facebook.
+            Marketplace in the San Francisco Bay Area. You're seeing this ad based on your location
+            and activity on Facebook.
           </p>
         </div>
       </Modal>

@@ -640,7 +640,7 @@ export const create = viewerMutation({
       online: a.online,
       venue: a.online ? undefined : a.venue?.trim() || undefined,
       address: a.online ? undefined : a.address?.trim() || undefined,
-      city: a.city?.trim() || ctx.viewer.city || "Seattle, WA",
+      city: a.city?.trim() || ctx.viewer.city || "San Francisco, CA",
       privacy: a.privacy,
       externalGoingCount: 0,
       externalInterestedCount: 0,

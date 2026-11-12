@@ -520,7 +520,7 @@ export const peopleCities = viewerQuery({
 /** Case-insensitive "does this post mention the location" (check-in or text). */
 function atPlace(p: Doc<"posts">, place: string) {
   const needle = place.toLowerCase().trim();
-  // "Leavenworth, Washington" also matches posts that just say "Leavenworth".
+  // "Bishop, California" also matches posts that just say "Bishop".
   const short = needle.split(",")[0].trim();
   const tagged = p.place?.toLowerCase();
   return (

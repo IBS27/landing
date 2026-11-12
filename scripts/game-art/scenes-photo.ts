@@ -162,7 +162,7 @@ function calmJigsaw(): Art {
     const y0 = j * rh;
     return `M${f(x0)} ${f(y0)}${jigsawEdge(x0, y0, x0 + cw, y0, -hs[j][i])}${jigsawEdge(x0 + cw, y0, x0 + cw, y0 + rh, -vs[j][i + 1])}${jigsawEdge(x0 + cw, y0 + rh, x0, y0 + rh, hs[j + 1][i])}${jigsawEdge(x0, y0 + rh, x0, y0, vs[j][i])}Z`;
   };
-  const pic = (filter?: string) => photo(s, "rainier", { box: [-10, -60, 660, 495], filter });
+  const pic = (filter?: string) => photo(s, "lake", { box: [-10, -60, 660, 495], filter });
   const g = grade(s, { sat: 1.3, contrast: 1.06, rgb: [1, 1.02, 1.06] });
   const holeA = piece(5, 3);
   const holeB = piece(2, 4);

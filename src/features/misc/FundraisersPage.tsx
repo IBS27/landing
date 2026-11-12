@@ -35,7 +35,7 @@ const FUNDRAISERS: Fundraiser[] = [
   {
     id: "dog-rescue",
     title: "Medical care for senior rescue dogs",
-    org: "Puget Paws Rescue",
+    org: "Bay Paws Rescue",
     category: "Animals",
     raised: 9150,
     goal: 12000,
@@ -47,7 +47,7 @@ const FUNDRAISERS: Fundraiser[] = [
   {
     id: "trails",
     title: "Rebuild the washed-out ridge trail",
-    org: "Cascade Trail Keepers",
+    org: "Mount Tam Trail Keepers",
     category: "Environment",
     raised: 6300,
     goal: 15000,
@@ -58,8 +58,8 @@ const FUNDRAISERS: Fundraiser[] = [
   },
   {
     id: "library",
-    title: "Books for every kid in the U District",
-    org: "Little Free Library Seattle",
+    title: "Books for every kid in the Mission",
+    org: "Little Free Library SF",
     category: "Education",
     raised: 4210,
     goal: 5000,
@@ -71,7 +71,7 @@ const FUNDRAISERS: Fundraiser[] = [
   {
     id: "shelter",
     title: "Warm beds this winter",
-    org: "Northgate Shelter Network",
+    org: "Tenderloin Shelter Network",
     category: "Housing",
     raised: 31200,
     goal: 40000,
@@ -83,7 +83,7 @@ const FUNDRAISERS: Fundraiser[] = [
   {
     id: "music",
     title: "Instruments for the youth orchestra",
-    org: "Rainier Youth Strings",
+    org: "Golden Gate Youth Strings",
     category: "Arts",
     raised: 2780,
     goal: 8000,
@@ -142,7 +142,7 @@ export function FundraisersPage() {
           {view === "explore" && (
             <>
               <h1 className="pb-3 font-bold text-[24px] text-primary leading-7">
-                Fundraisers near Seattle
+                Fundraisers near San Francisco
               </h1>
               <div className="grid grid-cols-2 gap-3 min-[1200px]:grid-cols-3">
                 {FUNDRAISERS.map((f) => {

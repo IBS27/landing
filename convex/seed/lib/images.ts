@@ -3,7 +3,7 @@ import type { PhotoSlot } from "../types";
 import { hash } from "./prng";
 
 const FOLDERS = new Set<string>(Object.keys(seedImages));
-/** A slot topic that names one file ("ballard-01.jpg") rather than topic words. */
+/** A slot topic that names one file ("mission-01.jpg") rather than topic words. */
 const FILE_NAME = /\.(jpe?g|png|webp|gif|avif)$/i;
 const STOP = new Set(
   "a an the of and with in on for to at my is it this that i you we so just free photo image".split(
@@ -59,8 +59,8 @@ const SYNONYMS: Record<string, string> = {
   apartment: "living room apartment",
   exterior: "house building",
   townhouse: "house",
-  mountain: "mt rainier mountains hiking",
-  rainier: "mt rainier",
+  mountain: "mount tam mountains hiking",
+  tam: "mount tam",
   hike: "hiking trail",
   trail: "hiking trail",
   summit: "hiking mountains",
@@ -77,9 +77,9 @@ const SYNONYMS: Record<string, string> = {
   thanksgiving: "food",
   friendsgiving: "food friends",
   cake: "food",
-  skyline: "seattle skyline city",
-  downtown: "seattle skyline city",
-  waterfront: "seattle waterfront",
+  skyline: "sf skyline city",
+  downtown: "sf skyline city",
+  waterfront: "embarcadero",
   puppy: "dog",
   kitten: "cat",
   show: "concert",
@@ -90,11 +90,11 @@ const SYNONYMS: Record<string, string> = {
   boulder: "climbing",
   crag: "climbing",
   boardgame: "board games",
-  uw: "campus",
+  cal: "berkeley campus",
   university: "campus",
   quad: "campus",
   library: "campus",
-  market: "pike place farmers market",
+  market: "ferry building farmers market",
   running: "run club",
   marathon: "run club",
   laptops: "hackathon laptop",
@@ -138,22 +138,22 @@ const SYNONYMS: Record<string, string> = {
   chalk: "climbing",
   cliff: "climbing",
   granite: "climbing",
-  ski: "mountains mt rainier",
-  snowboard: "mountains mt rainier",
+  ski: "mountains snowy",
+  snowboard: "mountains snowy",
   retriever: "dog",
   corgi: "dog",
-  heron: "seattle waterfront ferry",
-  lighthouse: "seattle waterfront ferry",
-  beach: "seattle waterfront sunset",
-  ocean: "seattle waterfront ferry",
-  wave: "seattle waterfront",
+  heron: "embarcadero ferry",
+  lighthouse: "embarcadero ferry",
+  beach: "ocean sunset",
+  ocean: "beach sunset",
+  wave: "ocean beach",
   ship: "ferry",
   forest: "trail hiking",
   mossy: "trail hiking",
   larche: "hiking trail",
-  rainy: "seattle city",
-  rain: "seattle city",
-  umbrella: "seattle city",
+  rainy: "rainy street",
+  rain: "rainy street",
+  umbrella: "rainy street",
   boba: "food coffee",
   tea: "coffee",
   potatoe: "food",
@@ -289,7 +289,7 @@ export class ImagePicker {
   }
 
   /**
-   * Marks exact-file slots ("covers/ballard-01.jpg") as taken up front, so picks made earlier
+   * Marks exact-file slots ("covers/mission-01.jpg") as taken up front, so picks made earlier
    * in the plan (profile covers, say) never land on a file another row names.
    */
   reserve(slots: readonly PhotoSlot[]): void {
@@ -338,7 +338,7 @@ export class ImagePicker {
     }
     const used = this.used.get(folder) ?? new Set<string>();
     this.used.set(folder, used);
-    // "covers/ballard-01.jpg" names one exact file: hand it out as-is.
+    // "covers/mission-01.jpg" names one exact file: hand it out as-is.
     if (FILE_NAME.test(topic)) {
       const file = pool.find(({ img }) => img.path === `/seed/${folder}/${topic}`)?.img;
       if (file) {

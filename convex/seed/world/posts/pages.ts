@@ -1,21 +1,21 @@
 import { daysAgo, hoursAgo } from "../../lib/time";
 import type { PostSeed } from "../../types";
 
-/** Posts by the 8 fictional Pages. Exactly 4 are sponsored (3 Rainline, 1 Kumo). */
+/** Posts by the 8 fictional Pages. Exactly 4 are sponsored (3 Fogline, 1 Kumo). */
 export const pagePosts: readonly PostSeed[] = [
-  // ── The Emerald Ledger ───────────────────────────────────────────────────
+  // ── The Fog City Ledger ──────────────────────────────────────────────────
   {
     key: "ledger-rent-report",
-    by: "emeraldledger",
+    by: "fogcityledger",
     at: daysAgo(8, "08:15"),
-    text: "Median rent for a Seattle one-bedroom is now $2,180, up 7% from last fall. Capitol Hill and South Lake Union saw the biggest jumps. Renters under 30 are now spending an average of 41% of income on housing.",
+    text: "Median rent for a San Francisco one-bedroom is now $3,350, up 7% from last fall. The Mission and SoMa saw the biggest jumps. Renters under 30 are now spending an average of 41% of income on housing.",
     link: {
-      url: "https://emeraldledger.news/housing/2026/11/seattle-rents-fall-report",
-      title: "Seattle rents climb 7% in a year, with Capitol Hill leading the way",
-      domain: "emeraldledger.news",
+      url: "https://fogcityledger.news/housing/2026/11/sf-rents-fall-report",
+      title: "SF rents climb 7% in a year, with the Mission leading the way",
+      domain: "fogcityledger.news",
       description:
-        "Our twice-yearly rent survey of 3,400 listings finds one-bedrooms up sharply in Capitol Hill, SLU and Ballard, while studios in the U District flattened for the first time since 2021.",
-      image: "covers/capitol-hill-01.jpg",
+        "Our twice-yearly rent survey of 3,400 Bay Area listings finds one-bedrooms up sharply in the Mission, SoMa and the Inner Richmond, while studios near the Berkeley campus flattened for the first time since 2021.",
+      image: "covers/castro-01.jpg",
     },
     reactions: 55,
     mood: "sad",
@@ -23,7 +23,7 @@ export const pagePosts: readonly PostSeed[] = [
     comments: [
       {
         by: "maya.chen",
-        text: "cool cool cool I'm apartment hunting on capitol hill rn so this is great news for me",
+        text: "cool cool cool I'm apartment hunting in the mission rn so this is great news for me",
         likes: 14,
         replies: [
           { by: "harper.quinn", text: "lmk if you need a neighbor reference, I'll lie for you" },
@@ -31,12 +31,12 @@ export const pagePosts: readonly PostSeed[] = [
       },
       {
         by: "derek.holloway",
-        text: "Not defending everything here but people don't see the other side. Property tax on my duplex went up 11% this year and insurance went up 30%. That has to go somewhere.",
+        text: "Not defending everything here but people don't see the other side. Insurance on my duplex went up 40% this year and half the carriers won't even write new policies. That has to go somewhere.",
         likes: 6,
         replies: [
           {
             by: "jordan.kim",
-            text: "Both things are true. Costs are up for small landlords AND the supply problem is the real driver. We zoned 75% of the city for detached houses and then acted surprised.",
+            text: "Both things are true. Costs are up for small landlords AND the supply problem is the real driver. We zoned most of the west side for single family homes and then acted surprised.",
             likes: 9,
           },
           {
@@ -47,7 +47,7 @@ export const pagePosts: readonly PostSeed[] = [
       },
       {
         by: "marcus.bell",
-        text: "paid $2,250 for my 1br in september. guess I'm just ahead of the curve 🙃",
+        text: "paid $3,400 for my 1br in september. guess I'm just ahead of the curve 🙃",
       },
       {
         by: "camila.santos",
@@ -60,18 +60,18 @@ export const pagePosts: readonly PostSeed[] = [
       },
       {
         by: "kevin.tran",
-        text: "ballard up that much?? I thought it was supposed to be the cheaper option",
+        text: "the richmond up that much?? I thought it was supposed to be the cheaper option",
       },
       {
         by: "priya.raman",
-        text: "this is why I'm subletting my wallingford room while I'm abroad instead of giving it up. never getting that rent again",
+        text: "this is why I'm subletting my elmwood room while I'm abroad instead of giving it up. never getting that rent again",
       },
       {
         by: "nora.kowalski",
-        text: "would love to see this broken down by neighborhood. is the U District number real??",
+        text: "would love to see this broken down by neighborhood. is the Berkeley number real??",
         replies: [
           {
-            by: "emeraldledger",
+            by: "fogcityledger",
             text: "Nora Kowalski the full neighborhood table is at the bottom of the article. We only counted listings that actually rented, not asking prices.",
             likes: 4,
           },
@@ -80,34 +80,37 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "emeraldledger",
+    by: "fogcityledger",
     at: daysAgo(5, "10:30"),
-    text: "Starting Dec 5, Link light rail will run trains until 2am on Fridays and Saturdays as a one-year pilot.",
+    text: "Starting Dec 5, BART will run trains until 2am on Fridays and Saturdays as a one-year pilot.",
     link: {
-      url: "https://emeraldledger.news/transit/2026/11/link-late-night-pilot",
-      title: "Sound Transit adds late-night Link service on weekends",
-      domain: "emeraldledger.news",
+      url: "https://fogcityledger.news/transit/2026/11/bart-late-night-pilot",
+      title: "BART adds late-night service on weekends",
+      domain: "fogcityledger.news",
       description:
-        "Trains will run every 15 minutes between midnight and 2am on Friday and Saturday nights through next December.",
+        "Trains will run every 20 minutes between midnight and 2am on Friday and Saturday nights through next December.",
       image: "light rail",
     },
     reactions: 48,
     mood: "love",
     comments: [
-      { by: "malik.johnson", text: "FINALLY. no more $40 uber from the owl to rainier beach" },
-      { by: "isaiah.thompson", text: "every 15 min at 1am is wild. ok seattle i see you" },
+      { by: "malik.johnson", text: "FINALLY. no more $40 uber from the owl to fruitvale" },
+      {
+        by: "isaiah.thompson",
+        text: "bart at 1am on a saturday is gonna be wild. ok bart i see you",
+      },
     ],
   },
   {
-    by: "emeraldledger",
+    by: "fogcityledger",
     at: daysAgo(3, "13:00"),
-    text: "The Lucky Gull Diner in Wallingford will close Nov 29 after 22 years. The owners say their lease renewal came with a 60% rent increase.",
+    text: "The Lucky Gull Diner in Berkeley's Elmwood will close Nov 29 after 22 years. The owners say their lease renewal came with a 60% rent increase.",
     link: {
-      url: "https://emeraldledger.news/food/2026/11/lucky-gull-diner-closing",
-      title: "Lucky Gull Diner to close after 22 years on N 45th",
-      domain: "emeraldledger.news",
+      url: "https://fogcityledger.news/food/2026/11/lucky-gull-diner-closing",
+      title: "Lucky Gull Diner to close after 22 years on College Ave",
+      domain: "fogcityledger.news",
       description:
-        "The 24-seat diner, known for its marionberry pancakes and the hand-painted gull over the door, will serve its last breakfast the Sunday after Thanksgiving.",
+        "The 24-seat diner, known for its olallieberry pancakes and the hand-painted gull over the door, will serve its last breakfast the Sunday after Thanksgiving.",
       image: "diner breakfast",
     },
     reactions: 52,
@@ -115,7 +118,7 @@ export const pagePosts: readonly PostSeed[] = [
     comments: [
       {
         by: "hannah.lee",
-        text: "nooo the marionberry pancakes 😭 we went there after every single finals week",
+        text: "nooo the olallieberry pancakes 😭 we went there after every single finals week",
       },
       {
         by: "ana.torres",
@@ -125,13 +128,13 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "emeraldledger",
+    by: "fogcityledger",
     at: hoursAgo(20),
-    text: "An atmospheric river is headed for Western Washington this weekend. Expect 2 to 4 inches of rain in Seattle and possible urban flooding Saturday night.",
+    text: "An atmospheric river is headed for the Bay Area this weekend. Expect 2 to 4 inches of rain in San Francisco and possible flooding on the Embarcadero and the Great Highway Saturday night.",
     link: {
-      url: "https://emeraldledger.news/weather/2026/11/atmospheric-river-weekend",
-      title: "Atmospheric river could bring 4 inches of rain to Seattle this weekend",
-      domain: "emeraldledger.news",
+      url: "https://fogcityledger.news/weather/2026/11/atmospheric-river-weekend",
+      title: "Atmospheric river could bring 4 inches of rain to SF this weekend",
+      domain: "fogcityledger.news",
       image: "city bus",
     },
     reactions: 24,
@@ -145,13 +148,13 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "emeraldledger",
+    by: "fogcityledger",
     at: daysAgo(12, "09:00"),
-    text: "The empty lot at N 34th and Phinney that's been fenced off since 2019 is officially a park now. Opening day is Saturday.",
+    text: "The empty lot at Page and Shrader that's been fenced off since 2019 is officially a park now. Opening day is Saturday.",
     link: {
-      url: "https://emeraldledger.news/neighborhoods/2026/10/fremont-pocket-park-opens",
-      title: "Fremont's newest pocket park opens on a former parking lot",
-      domain: "emeraldledger.news",
+      url: "https://fogcityledger.news/neighborhoods/2026/10/haight-pocket-park-opens",
+      title: "The Haight's newest pocket park opens on a former parking lot",
+      domain: "fogcityledger.news",
       description: "Benches, a small dog run, native plants and a covered bike corral.",
       image: "city park",
     },
@@ -165,29 +168,29 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "emeraldledger",
+    by: "fogcityledger",
     at: daysAgo(22, "07:45"),
-    text: "Metro is adding red bus lanes to NW Market St for the 44. Construction starts in January.",
+    text: "Muni is extending the red transit lanes on Geary out to 34th Ave for the 38R. Construction starts in January.",
     link: {
-      url: "https://emeraldledger.news/transit/2026/10/route-44-bus-lanes",
-      title: "Route 44 gets bus lanes through Ballard",
-      domain: "emeraldledger.news",
+      url: "https://fogcityledger.news/transit/2026/10/geary-red-lanes",
+      title: "The 38 Geary gets red lanes through the Richmond",
+      domain: "fogcityledger.news",
       image: "city bus",
     },
     reactions: 19,
     comments: [
       {
         by: "theo.grant",
-        text: "the 44 taking 50 minutes to go 4 miles is the true seattle experience",
+        text: "the 38 taking 50 minutes to go 4 miles is the true sf experience",
       },
     ],
   },
 
-  // ── Montlake Campus Life ─────────────────────────────────────────────────
+  // ── Sather Gate Campus Life ──────────────────────────────────────────────
   {
-    by: "montlakecampuslife",
+    by: "sathergatecampuslife",
     at: hoursAgo(5),
-    text: "🍕 FREE FOOD ALERT 🍕 leftover catering from the CSE career fair, Allen Center atrium. Sandwich trays, cookies, a suspicious amount of hummus. Go go go",
+    text: "🍕 FREE FOOD ALERT 🍕 leftover catering from the EECS career fair, Soda Hall lobby. Sandwich trays, cookies, a suspicious amount of hummus. Go go go",
     reactions: 41,
     mood: "haha",
     comments: [
@@ -195,33 +198,33 @@ export const pagePosts: readonly PostSeed[] = [
         by: "noah.williams",
         text: "can confirm. the turkey ones are gone, the hummus is infinite",
       },
-      { by: "isaiah.thompson", text: "sprinting from savery rn" },
+      { by: "isaiah.thompson", text: "sprinting from evans rn" },
       {
-        by: "montlakecampuslife",
+        by: "sathergatecampuslife",
         text: "update: cookies are gone. hummus remains. it will outlive us all",
         likes: 12,
       },
     ],
   },
   {
-    by: "montlakecampuslife",
+    by: "sathergatecampuslife",
     at: daysAgo(2, "12:00"),
-    text: "Finals week library hours are out! Odegaard goes 24 hours starting Sunday Dec 6 through Friday Dec 11. Suzzallo stays open until midnight. The HUB will have free coffee 8 to 10am Monday through Wednesday.",
+    text: "Finals week library hours are out! Moffitt goes 24 hours starting Sunday Dec 6 through Friday Dec 11. Doe stays open until midnight. The MLK Student Union will have free coffee 8 to 10am Monday through Wednesday.",
     photos: ["library"],
     reactions: 37,
     comments: [
       {
         by: "amara.diallo",
-        text: "group study night in odegaard on the 6th, details in the class of 2027 group 📚",
+        text: "group study night in moffitt on the 6th, details in the class of 2027 group 📚",
       },
       { by: "hannah.lee", text: "the free coffee is the only thing getting me through" },
     ],
   },
   {
-    by: "montlakecampuslife",
+    by: "sathergatecampuslife",
     at: daysAgo(4, "16:00"),
-    text: "Montlake Hacks is less than two weeks out and we still have spots! 24 hours, free food, prizes, and the designers-are-welcome track is back. Teams of up to 4, solo signups get matched at check-in.",
-    event: "montlake-hacks",
+    text: "Golden Bear Hacks is less than two weeks out and we still have spots! 24 hours, free food, prizes, and the designers-are-welcome track is back. Teams of up to 4, solo signups get matched at check-in.",
+    event: "golden-bear-hacks",
     reactions: 29,
     comments: [
       {
@@ -234,7 +237,7 @@ export const pagePosts: readonly PostSeed[] = [
         text: "is it ok to come if it's my first hackathon?",
         replies: [
           {
-            by: "montlakecampuslife",
+            by: "sathergatecampuslife",
             text: "100%! about a third of people every year are first timers",
           },
         ],
@@ -242,10 +245,10 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "montlakecampuslife",
+    by: "sathergatecampuslife",
     at: daysAgo(9, "08:10"),
-    text: "frost on the quad this morning. coldest day of the quarter so far. stay warm out there",
-    photos: ["posts/uw-campus-08.jpg", "posts/uw-campus-05.jpg"],
+    text: "frost on memorial glade this morning. coldest day of the semester so far. stay warm out there",
+    photos: ["berkeley campus", "berkeley campus"],
     reactions: 46,
     mood: "love",
     comments: [
@@ -253,14 +256,14 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "montlakecampuslife",
+    by: "sathergatecampuslife",
     at: daysAgo(16, "11:00"),
-    text: "Reminder: winter quarter registration period II opens Monday at 6am. Set an alarm. Check your holds now, not Sunday night.",
+    text: "Reminder: spring semester Phase 2 enrollment opens Monday at 6am. Set an alarm. Check your holds in CalCentral now, not Sunday night.",
     reactions: 22,
     comments: [
       {
         by: "daniel.reyes",
-        text: "every quarter I say I'll check my holds early and every quarter I don't",
+        text: "every semester I say I'll check my holds early and every semester I don't",
       },
     ],
   },
@@ -323,17 +326,17 @@ export const pagePosts: readonly PostSeed[] = [
   {
     by: "moonrisecoffee",
     at: daysAgo(6, "07:05"),
-    text: "Day 9 of rain in a row. Drip coffee is $1 off until it stops. We fully understand this may never end.",
+    text: "Day 9 of Karl the Fog parked over Valencia. Drip coffee is $1 off until the sun comes out. We fully understand this may never happen.",
     bg: "night",
     reactions: 44,
     mood: "haha",
     comments: [{ by: "marcus.bell", text: "so free coffee forever basically" }],
   },
 
-  // ── Cascade Boulders ─────────────────────────────────────────────────────
+  // ── Sutro Boulders ───────────────────────────────────────────────────────
   {
-    key: "cascade-new-set",
-    by: "cascadeboulders",
+    key: "sutro-new-set",
+    by: "sutroboulders",
     at: daysAgo(3, "18:00"),
     text: 'Fresh set on the slab and the comp wall is open! 22 new problems, V0 to V9. Kai says the orange V6 is "totally fair" which means it absolutely is not.',
     photos: ["bouldering gym", "climbing holds", "bouldering gym"],
@@ -356,9 +359,9 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "cascadeboulders",
+    by: "sutroboulders",
     at: daysAgo(5, "17:00"),
-    text: "Seattle Climbers group night is Wednesday the 18th and they'll be some of the first on the new overhang set. Non-members get the $15 group rate at the desk.",
+    text: "Bay Area Climbers group night is Wednesday the 18th and they'll be some of the first on the new overhang set. Non-members get the $15 group rate at the desk.",
     event: "climbing-night",
     reactions: 26,
     comments: [
@@ -367,7 +370,7 @@ export const pagePosts: readonly PostSeed[] = [
         text: "I've been bouldering exactly twice, is this ok for me?",
         replies: [
           {
-            by: "cascadeboulders",
+            by: "sutroboulders",
             text: "Leo Novak absolutely! there are groups for every level, come at 6:15 for the intro",
           },
         ],
@@ -375,7 +378,7 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "cascadeboulders",
+    by: "sutroboulders",
     at: daysAgo(17, "16:30"),
     text: "Thank you to all 150 climbers who came out for the fall comp! Results are up at the front desk. Congrats to Andre Silva for taking the open men's category and to everyone who sent the cursed purple V2.",
     photos: ["posts/bouldering-gym-03.jpg", "bouldering gym"],
@@ -404,7 +407,7 @@ export const pagePosts: readonly PostSeed[] = [
   {
     by: "waxandneedle",
     at: daysAgo(1, "12:30"),
-    text: "New arrivals wall is restocked. Big haul of 70s Japanese city pop, a pile of Sub Pop first pressings from a collection out of Tacoma, and more jazz reissues than we have room for.",
+    text: "New arrivals wall is restocked. Big haul of 70s Japanese city pop, a pile of Lookout! Records first pressings from a collection out of Stockton, and more jazz reissues than we have room for.",
     photos: ["vinyl records", "vinyl records"],
     reactions: 27,
     comments: [
@@ -439,7 +442,7 @@ export const pagePosts: readonly PostSeed[] = [
     reactions: 34,
     comments: [
       { by: "sam.rivera", text: "it IS cozy. there's a lot of soup. also a lot of murder" },
-      { by: "sophie.dubois", text: "I need a rainy day book for the ferry, adding it to the list" },
+      { by: "sophie.dubois", text: "I need a foggy day book for the ferry, adding it to the list" },
     ],
   },
   {
@@ -510,54 +513,54 @@ export const pagePosts: readonly PostSeed[] = [
     by: "kumoramen",
     at: daysAgo(1, "11:00"),
     sponsored: true,
-    text: "Raining sideways? Stay in. Kumo delivers to the U District, Capitol Hill, Eastlake and Fremont, and your first order through our site gets free chashu.",
+    text: "Fog rolling in? Stay in. Kumo delivers to Berkeley, the Mission, Bernal and the Castro, and your first order through our site gets free chashu.",
     photos: ["ramen"],
     reactions: 18,
   },
 
-  // ── Rainline Outdoor Co. ─────────────────────────────────────────────────
+  // ── Fogline Outdoor Co. ──────────────────────────────────────────────────
   {
-    by: "rainlineoutdoor",
+    by: "foglineoutdoor",
     at: daysAgo(3, "10:00"),
     sponsored: true,
-    text: "The Drizzle Shell is back in 6 new colors. 3-layer waterproof, pit zips, and a hood that actually fits over a climbing helmet. Tested on the 99 days of rain we get every winter.",
+    text: "The Drizzle Shell is back in 6 new colors. 3-layer waterproof, pit zips, and a hood that actually fits over a climbing helmet. Tested in Karl the Fog and every Sierra storm we could find.",
     link: {
-      url: "https://rainline.co/products/drizzle-shell",
+      url: "https://fogline.co/products/drizzle-shell",
       title: "Drizzle Shell 3L Rain Jacket",
-      domain: "rainline.co",
-      description: "Packable, fully seam-taped, 2-year warranty. Free shipping in Washington.",
+      domain: "fogline.co",
+      description: "Packable, fully seam-taped, 2-year warranty. Free shipping in California.",
       image: "rain jacket",
     },
     reactions: 22,
     comments: [
       {
         by: "ben.carter",
-        text: "biased since I work there but the pit zips are clutch on the approach to Index",
+        text: "biased since I work there but the pit zips are clutch on Yosemite approaches",
       },
     ],
   },
   {
-    by: "rainlineoutdoor",
+    by: "foglineoutdoor",
     at: daysAgo(8, "10:00"),
     sponsored: true,
     text: "Cold mornings at the trailhead, meet the Ridgeline Puffy. 800-fill down, water-resistant shell, stuffs into its own pocket.",
     link: {
-      url: "https://rainline.co/products/ridgeline-puffy",
+      url: "https://fogline.co/products/ridgeline-puffy",
       title: "Ridgeline Insulated Jacket",
-      domain: "rainline.co",
+      domain: "fogline.co",
       image: "puffy jacket",
     },
     reactions: 16,
   },
   {
-    by: "rainlineoutdoor",
+    by: "foglineoutdoor",
     at: daysAgo(1, "09:00"),
     sponsored: true,
     text: "Early holiday sale: 25% off shells, puffies and packs through Sunday. Members get free returns until January.",
     link: {
-      url: "https://rainline.co/sale/holiday",
+      url: "https://fogline.co/sale/holiday",
       title: "Holiday Sale: 25% Off Outerwear",
-      domain: "rainline.co",
+      domain: "fogline.co",
       description: "Shells, insulation, packs and base layers. Ends Sunday.",
       image: "gear store",
     },
@@ -566,23 +569,23 @@ export const pagePosts: readonly PostSeed[] = [
   },
   {
     // Not a product page, so its CTA reads "Learn more" (the ad Facebook leads into the Reels shelf with).
-    by: "rainlineoutdoor",
+    by: "foglineoutdoor",
     at: daysAgo(2, "17:00"),
     sponsored: true,
-    text: "Heading into the backcountry this winter? Our free avalanche awareness nights cover reading the NWAC forecast, beacon basics and what to pack. No experience needed.",
+    text: "Heading into the backcountry this winter? Our free avalanche awareness nights cover reading the Sierra Avalanche Center forecast, beacon basics and what to pack. No experience needed.",
     link: {
-      url: "https://rainline.co/clinics/avalanche-awareness",
+      url: "https://fogline.co/clinics/avalanche-awareness",
       title: "Free Avalanche Awareness Nights",
-      domain: "rainline.co",
-      description: "Thursdays at 7 PM at our SLU flagship. Reserve a spot online.",
+      domain: "fogline.co",
+      description: "Thursdays at 7 PM at our SoMa flagship. Reserve a spot online.",
       image: "ski equipment",
     },
     reactions: 12,
   },
   {
-    by: "rainlineoutdoor",
+    by: "foglineoutdoor",
     at: daysAgo(3, "12:00"),
-    text: "The community ski & snowboard swap is this Sunday at our SLU flagship. Drop off gear Saturday 4 to 7. 15% of sales go to trail maintenance.",
+    text: "The community ski & snowboard swap is this Sunday at our SoMa flagship. Drop off gear Saturday 4 to 7. 15% of sales go to trail maintenance.",
     event: "ski-swap",
     photos: ["ski equipment"],
     reactions: 37,
@@ -595,7 +598,7 @@ export const pagePosts: readonly PostSeed[] = [
         by: "theo.grant",
         text: "what time does the line start realistically",
         replies: [
-          { by: "rainlineoutdoor", text: "Theo Grant usually around 8, the good boots go fast!" },
+          { by: "foglineoutdoor", text: "Theo Grant usually around 8, the good boots go fast!" },
         ],
       },
     ],

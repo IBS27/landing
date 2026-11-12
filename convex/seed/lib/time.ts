@@ -1,6 +1,6 @@
 /**
  * Seed timestamps are authored relative to "now" so the world always looks
- * fresh. Specs are plain data; `Clock` resolves them at seed time in Seattle
+ * fresh. Specs are plain data; `Clock` resolves them at seed time in San Francisco
  * local time.
  */
 
@@ -23,11 +23,11 @@ export const minutesAgo = (m: number): TimeSpec => ({ kind: "offset", ms: -m * M
 export const hoursAgo = (h: number): TimeSpec => ({ kind: "offset", ms: -h * HOUR });
 export const hoursFromNow = (h: number): TimeSpec => ({ kind: "offset", ms: h * HOUR });
 
-/** `daysAgo(2)` is exactly 48h ago; `daysAgo(2, "14:30")` is 2:30 PM Seattle time two days ago. */
+/** `daysAgo(2)` is exactly 48h ago; `daysAgo(2, "14:30")` is 2:30 PM San Francisco time two days ago. */
 export const daysAgo = (d: number, hm?: string): TimeSpec =>
   hm ? { kind: "clock", days: -d, hm } : { kind: "offset", ms: -d * DAY };
 
-/** Today's Seattle month-day `n` years ago at `hm` (Feb 29 rolls to Mar 1). */
+/** Today's San Francisco month-day `n` years ago at `hm` (Feb 29 rolls to Mar 1). */
 export const yearsAgo = (n: number, hm: string): TimeSpec => ({
   kind: "clock",
   days: 0,
@@ -40,8 +40,8 @@ export const daysFromNow = (d: number, hm?: string): TimeSpec =>
 
 const TZ = "America/Los_Angeles";
 
-/** Offset of Seattle local time from UTC at `t`, in ms (e.g. -8h in winter). */
-function seattleOffset(t: number): number {
+/** Offset of San Francisco (Pacific) local time from UTC at `t`, in ms (e.g. -8h in winter). */
+function pacificOffset(t: number): number {
   try {
     const parts = new Intl.DateTimeFormat("en-US", {
       timeZone: TZ,
@@ -66,7 +66,7 @@ export class Clock {
 
   constructor(now: number) {
     this.now = now;
-    this.offset = seattleOffset(now);
+    this.offset = pacificOffset(now);
   }
 
   /**
@@ -92,12 +92,12 @@ export class Clock {
     return t;
   }
 
-  /** Seattle calendar date `days` from today as "MM-DD". */
+  /** San Francisco calendar date `days` from today as "MM-DD". */
   monthDay(days = 0): string {
     return this.monthDayOf(this.now + days * DAY);
   }
 
-  /** Seattle calendar date of `t` as "MM-DD" (using today's UTC offset). */
+  /** San Francisco calendar date of `t` as "MM-DD" (using today's UTC offset). */
   monthDayOf(t: number): string {
     const d = new Date(t + this.offset);
     const mm = String(d.getUTCMonth() + 1).padStart(2, "0");

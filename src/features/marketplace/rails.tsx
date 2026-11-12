@@ -186,7 +186,7 @@ export function RailSearch({
   );
 }
 
-/** "Seattle, Washington · Within 40 mi" (opens the location dialog). */
+/** "San Francisco, California · Within 40 mi" (opens the location dialog). */
 export function LocationLink({ className }: { className?: string }) {
   const loc = useMarketplaceLocation();
   const [open, setOpen] = useState(false);
@@ -207,7 +207,7 @@ export function LocationLink({ className }: { className?: string }) {
   );
 }
 
-/** "Seattle · 40 mi" header link with a pin. */
+/** "San Francisco · 40 mi" header link with a pin. */
 export function LocationChip() {
   const loc = useMarketplaceLocation();
   const [open, setOpen] = useState(false);

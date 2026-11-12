@@ -4,7 +4,7 @@ import type { Username } from "./people";
 
 /** Maya's 38 friends. Her friendships are exactly this list (circles never add to it). */
 export const mayaFriends = [
-  // UW
+  // Cal
   "ethan.park",
   "ana.torres",
   "hannah.lee",
@@ -28,7 +28,7 @@ export const mayaFriends = [
   "jessica.huang",
   "kevin.tran",
   "emily.chen",
-  // Microsoft internship
+  // Google internship
   "rachel.goldberg",
   "chris.adeyemi",
   "nina.petrova",
@@ -38,7 +38,7 @@ export const mayaFriends = [
   "grace.liu",
   "arjun.mehta",
   "lena.fischer",
-  // Capitol Hill & around
+  // the Mission & around
   "tasha.okafor",
   "jasmine.ortiz",
   "harper.quinn",
@@ -58,6 +58,8 @@ export const mayaRecentFriends = {
 /**
  * Social circles. Pairs inside a circle become friends with probability
  * `density` (seeded). Pairs involving Maya are skipped: see `mayaFriends`.
+ * A circle's `name` seeds that RNG, so names are legacy labels kept stable on purpose:
+ * renaming one reshuffles the friend graph.
  */
 export const circles = [
   {
