@@ -148,12 +148,33 @@ describe("protected traits", () => {
       expect(hasProtected(f.evidence.quote ?? "")).toBe(false);
   });
 
+  test("everyday phrasings of protected traits are caught", () => {
+    for (const text of [
+      "I'm 30.",
+      "I am thirty.",
+      "I'm over 50.",
+      "I'm on the spectrum.",
+      "I'm expecting.",
+      "We're newlyweds.",
+      "I'm biracial.",
+      "I'm a DACA recipient.",
+      "I go to Mass on Sundays.",
+      "I'm a person of color.",
+      "I'm elderly.",
+      "I take antidepressants.",
+    ])
+      expect(hasProtected(text)).toBe(true);
+  });
+
   test("ordinary plans and belongings aren't disclosures", () => {
     for (const text of [
       "I have a car and two cats.",
       "I have always loved hiking.",
       "Moving from Chicago in March, budget $2k.",
       "Living in Chinatown, near Russian Hill.",
+      "I am 5 minutes from BART and 2.5k short.",
+      "We are 2 people looking for a place.",
+      "I am a senior engineer at Stripe.",
     ])
       expect(redactProtected(text)).toBe(text);
   });

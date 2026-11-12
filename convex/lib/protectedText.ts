@@ -226,7 +226,7 @@ const TERMS: string[] = [
   // Age
   "\\d{1,3}[\\s-]*(?:years?|yrs?)[\\s-]*old|\\d{1,3}\\s?(?:yo|y\\/o)",
   // "I'm 30", not "I'm 5 minutes away" or "I'm 2k short".
-  "(?:i['’]?m|i am)\\s+\\d{1,3}(?![\\d,.]|\\s*(?:k\\b|%|minutes?|mins?|blocks?|miles?|hours?|hrs?|days?|weeks?|months?|am\\b|pm\\b))",
+  "(?:i['’]?m|i am)\\s+\\d{1,3}(?!\\d|[.,]\\d|\\s*(?:k\\b|%|minutes?|mins?|blocks?|miles?|hours?|hrs?|days?|weeks?|months?|am\\b|pm\\b))",
   "(?:in (?:my|our) )?(?:early |mid[\\s-]?|late )?(?:teens|twenties|thirties|forties|fifties|sixties|seventies)",
   "(?:in (?:my|our) (?:early |mid[\\s-]?|late )?|early |mid[\\s-]?|late )[1-9]0'?s",
   "(?:twenty|thirty|forty|fifty|sixty|seventy)[\\s-]*something",
@@ -271,6 +271,15 @@ const TERMS: string[] = [
   "married|divorced|widow(?:ed|er)?|husband|wife|spouse|fianc[eé]e?|engaged(?! (?:in|with))",
   "boyfriend|girlfriend|(?:my|our|with (?:a|my)|domestic) partner|(?:my|our|a young|with (?:my|our)) family",
   "family status|(?:i['’]?m|i am|we['’]?re|we are) single|single (?:mom|dad|parent|mother|father)",
+  // More everyday ways people say the same things
+  // "I'm thirty", "I'm over 50"; not "I'm about 20 minutes away" or "we are 2 people".
+  "(?:i['’]?m|i am)\\s+(?:(?:over|under|almost|nearly)\\s+\\d{1,2}|(?:twenty|thirty|forty|fifty|sixty|seventy|eighty)(?:[\\s-](?:one|two|three|four|five|six|seven|eight|nine))?)(?![\\w$%-]|[.,]\\d|\\s*(?:k\\b|%|minutes?|mins?|blocks?|miles?|hours?|hrs?|days?|weeks?|months?))",
+  "(?:i['’]?m|i am|we['’]?re|we are)\\s+(?:a\\s+)?(?:young|old|older|younger|elderly|senior|vet|native)(?=\\s*(?:[,.;!?]|$|and\\b|but\\b))",
+  "elderly|grand(?:mother|father|parents?|ma|pa|kids?|children|son|daughter)",
+  "(?:i['’]?m|i am|we['’]?re|we are) expecting",
+  "newlyweds?|same[\\s-]sex|on the spectrum|hearing impaired|antidepressants?|antipsychotics?|insulin",
+  "mixed[\\s-]race|biracial|multiracial|desi|chican[aoxe]|pinoy|pinay|daca|dreamers?|citizens?",
+  "(?:go|going|goes|attend|attending) (?:to )?mass",
   // Veteran status and politics
   "veterans?|military|army|marines?",
   "democrats?|republicans?|conservative|liberal|progressive|libertarian|socialist|maga",
