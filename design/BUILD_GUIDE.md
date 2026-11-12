@@ -7,7 +7,7 @@ The goal is a faithful, working clone of desktop facebook.com (1440×900, light 
 - Convex backend in `convex/`, cloud dev deployment. Use bun, never npm or yarn.
 - Dev servers are already running. **Do not start or stop them.**
   - Vite: http://127.0.0.1:5173
-  - `convex dev` auto-pushes every change in `convex/`. Its log is at `/tmp/claude-1000/-home-srinivasib--t3-worktrees-landing-t3-593f1235-993b08a3bec8d7b0/8c2d835f-2fb7-461c-9c77-b2f4b74da40f/scratchpad/convex.log`. Check its tail after Convex edits: a type error there blocks everyone's pushes, so fix it immediately.
+  - `bunx convex dev` (`bun run dev:convex`) auto-pushes every change in `convex/`. Watch its output after Convex edits: a type error there blocks pushes for everyone sharing the deployment, so fix it immediately.
 - Checks: `bun run typecheck` and `bun run lint` (Biome; `bun run format` auto-fixes). Leave both clean for your files. Never use `any`.
 
 ## Conventions
