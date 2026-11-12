@@ -1,0 +1,411 @@
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/format";
+import type { PostMedia } from "./types";
+import { PlayGlyph, VideoPlayer } from "./VideoPlayer";
+
+/**
+ * Facebook's feed photo layouts: 1 (natural aspect, letterboxed when tall);
+ * 2+ are a collage shaped by the first item's orientation (see `Collage`).
+ */
+export function PhotoGrid({
+  media,
+  onOpen,
+  className,
+  sponsored,
+  postId,
+}: {
+  media: PostMedia[];
+  onOpen?: (index: number) => void;
+  className?: string;
+  /** Ads letterbox their video on pure black instead of the dominant colour. */
+  sponsored?: boolean;
+  /** The post shown: watching its video records a view (Watchlist "new videos"). */
+  postId?: string;
+}) {
+  if (media.length === 0) return null;
+  if (media.length === 1)
+    return (
+      <Single
+        item={media[0]}
+        onOpen={() => onOpen?.(0)}
+        className={className}
+        sponsored={sponsored}
+        postId={postId}
+      />
+    );
+  return <Collage media={media} onOpen={onOpen} className={className} />;
+}
+
+type Orientation = "portrait" | "square" | "landscape";
+
+const ratioCache = new Map<string, number>();
+
+/** The item's width/height ratio: from its stored size, else measured once the image loads. */
+function useMediaRatio(item: PostMedia): number | undefined {
+  const known = item.width && item.height ? item.width / item.height : undefined;
+  const src = item.kind === "video" ? item.poster : item.url;
+  const [measured, setMeasured] = useState(() => (src ? ratioCache.get(src) : undefined));
+  useEffect(() => {
+    if (known || !src) return;
+    const cached = ratioCache.get(src);
+    if (cached) return setMeasured(cached);
+    let live = true;
+    const img = new Image();
+    img.onload = () => {
+      if (!img.naturalWidth || !img.naturalHeight) return;
+      const r = img.naturalWidth / img.naturalHeight;
+      ratioCache.set(src, r);
+      if (live) setMeasured(r);
+    };
+    img.src = src;
+    return () => {
+      live = false;
+    };
+  }, [known, src]);
+  return known ?? measured;
+}
+
+/**
+ * Multi-photo collages, laid out from the first item's orientation like Facebook:
+ * - 2: side by side (portrait: square box; square: 2:1), stacked when landscape.
+ * - 3/4: portrait → one large on the left (2/3 width) with the rest stacked on
+ *   the right; otherwise one large on top (2/3 height) with the rest in a row.
+ * - 5+: portrait → two stacked on the left, three on the right; otherwise two
+ *   squares on top, three below. The fifth tile carries a "+N" overlay.
+ */
+function Collage({
+  media,
+  onOpen,
+  className,
+}: {
+  media: PostMedia[];
+  onOpen?: (index: number) => void;
+  className?: string;
+}) {
+  const ratio = useMediaRatio(media[0]);
+  const orientation: Orientation =
+    ratio === undefined || ratio > 1.1 ? "landscape" : ratio < 0.9 ? "portrait" : "square";
+  const portrait = orientation === "portrait";
+  const tile = (i: number, cls = "", overlay?: number) => (
+    <Tile
+      key={i}
+      item={media[i]}
+      onOpen={() => onOpen?.(i)}
+      className={cls}
+      overlay={overlay}
+      label={`Open ${media[i].kind === "video" ? "video" : "photo"} ${i + 1} of ${media.length}`}
+    />
+  );
+  const n = media.length;
+  let grid: string;
+  let tiles: React.ReactNode[];
+  if (n === 2) {
+    grid =
+      orientation === "landscape"
+        ? "aspect-square grid-rows-2"
+        : portrait
+          ? "aspect-square grid-cols-2"
+          : "aspect-[2/1] grid-cols-2";
+    tiles = [tile(0), tile(1)];
+  } else if (n <= 4) {
+    // One large tile, the rest stacked beside (portrait) or in a row below it.
+    const [box, lead] = portrait
+      ? n === 3
+        ? ["grid-cols-[2fr_1fr] grid-rows-2", "row-span-2"]
+        : ["grid-cols-[2fr_1fr] grid-rows-3", "row-span-3"]
+      : n === 3
+        ? ["grid-rows-[2fr_1fr] grid-cols-2", "col-span-2"]
+        : ["grid-rows-[2fr_1fr] grid-cols-3", "col-span-3"];
+    grid = `aspect-square ${box}`;
+    tiles = media.map((_, i) => tile(i, i === 0 ? lead : ""));
+  } else {
+    const more = n > 5 ? n - 5 : undefined;
+    grid = portrait
+      ? "aspect-square grid-flow-col grid-cols-[3fr_2fr] grid-rows-6"
+      : "aspect-[6/5] grid-cols-6 grid-rows-[3fr_2fr]";
+    const big = portrait ? "row-span-3" : "col-span-3";
+    const small = portrait ? "row-span-2" : "col-span-2";
+    tiles = [tile(0, big), tile(1, big), tile(2, small), tile(3, small), tile(4, small, more)];
+  }
+  return (
+    <div className={cn("overflow-hidden", className)}>
+      <div className={cn("grid gap-0.5", grid)}>{tiles}</div>
+    </div>
+  );
+}
+
+/** Facebook caps a single photo's height and letterboxes narrower photos. */
+const MAX_MEDIA_HEIGHT = 575;
+
+function Single({
+  item,
+  onOpen,
+  className,
+  sponsored,
+  postId,
+}: {
+  item: PostMedia;
+  onOpen: () => void;
+  className?: string;
+  sponsored?: boolean;
+  postId?: string;
+}) {
+  const ratio = item.width && item.height ? item.width / item.height : 4 / 3;
+  // Wider than the capped box (680×575) fills edge to edge; narrower media sit
+  // centred on a flat fill of the photo's (or video poster's) dominant colour.
+  const letterboxed = ratio < 1.2;
+  if (item.kind === "video")
+    return (
+      <SingleVideo
+        item={item}
+        ratio={ratio}
+        className={className}
+        blackFill={sponsored}
+        postId={postId}
+      />
+    );
+  return (
+    <button
+      type="button"
+      aria-label="Open photo"
+      onClick={onOpen}
+      className={cn("relative block w-full overflow-hidden bg-[#1c1e21]", className)}
+      style={{ aspectRatio: ratio, maxHeight: MAX_MEDIA_HEIGHT }}
+    >
+      {letterboxed && <LetterboxFill url={item.url} />}
+      <img
+        src={item.url}
+        alt={item.alt ?? ""}
+        loading="lazy"
+        className="relative h-full w-full object-contain"
+      />
+    </button>
+  );
+}
+
+/**
+ * Facebook's letterbox colour is the photo's dominant colour: the mean of the
+ * most populated 3-bit-per-channel colour bucket over a 64×64 sample.
+ */
+const SAMPLE = 64;
+const fillCache = new Map<string, string | null>();
+
+/** Draws `url` into a 64×64 canvas and hands its pixels to `read` (null when unreadable). */
+function samplePixels<T>(url: string, read: (data: Uint8ClampedArray) => T): Promise<T | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = SAMPLE;
+        canvas.height = SAMPLE;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(null);
+        ctx.drawImage(img, 0, 0, SAMPLE, SAMPLE);
+        resolve(read(ctx.getImageData(0, 0, SAMPLE, SAMPLE).data));
+      } catch {
+        resolve(null); // cross-origin image without CORS: keep the neutral fill
+      }
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+function dominantFill(url: string) {
+  return samplePixels(url, (data) => {
+    // Per bucket: summed r, g, b and pixel count.
+    const buckets = new Map<number, [number, number, number, number]>();
+    let best: [number, number, number, number] = [0, 0, 0, 0];
+    for (let i = 0; i < data.length; i += 4) {
+      const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
+      const key = ((r >> 5) << 6) | ((g >> 5) << 3) | (b >> 5);
+      const e = buckets.get(key) ?? [0, 0, 0, 0];
+      e[0] += r;
+      e[1] += g;
+      e[2] += b;
+      e[3] += 1;
+      buckets.set(key, e);
+      if (e[3] > best[3]) best = e;
+    }
+    const [r, g, b] = best.slice(0, 3).map((v) => Math.round(v / best[3]));
+    return `rgb(${r}, ${g}, ${b})`;
+  });
+}
+
+/**
+ * Facebook's cover side fill extends each edge of the cover outward: the mean
+ * colour of the cover's top-third outer fifth on that side, a touch deeper
+ * (measured against FB: blue sky → slate blue, trees → olive, poster → purple).
+ */
+function coverEdges(url: string) {
+  return samplePixels(url, (data) => {
+    const strip = Math.round(SAMPLE * 0.2);
+    const rows = Math.round(SAMPLE * 0.35);
+    const side = (fromRight: boolean) => {
+      const sum = [0, 0, 0];
+      for (let y = 0; y < rows; y++)
+        for (let i = 0; i < strip; i++) {
+          const x = fromRight ? SAMPLE - 1 - i : i;
+          const o = (y * SAMPLE + x) * 4;
+          for (let c = 0; c < 3; c++) sum[c] += data[o + c];
+        }
+      const [r, g, b] = sum.map((v) => Math.round((v / (strip * rows)) * 0.9));
+      return `rgb(${r}, ${g}, ${b})`;
+    };
+    return { left: side(false), right: side(true) };
+  });
+}
+
+/** A per-URL cached image sample: undefined while sampling, null when unreadable. */
+function useSample<T>(
+  url: string | undefined,
+  cache: Map<string, T | null>,
+  run: (url: string) => Promise<T | null>,
+) {
+  const [value, setValue] = useState(() => (url ? cache.get(url) : null));
+  useEffect(() => {
+    if (!url) return setValue(null);
+    if (cache.has(url)) return setValue(cache.get(url));
+    let live = true;
+    setValue(undefined);
+    run(url).then((v) => {
+      cache.set(url, v);
+      if (live) setValue(v);
+    });
+    return () => {
+      live = false;
+    };
+  }, [url, cache, run]);
+  return value;
+}
+
+/**
+ * The letterbox colour for `url` (cached per URL): undefined while sampling,
+ * null when it can't be read (keep the caller's neutral fill).
+ */
+export function useDominantColor(url: string | undefined) {
+  return useSample(url, fillCache, dominantFill);
+}
+
+const edgeCache = new Map<string, { left: string; right: string } | null>();
+
+/** The cover's left/right side-fill colours (see `coverEdges`); same states as `useDominantColor`. */
+export function useCoverEdgeColors(url: string | undefined) {
+  return useSample(url, edgeCache, coverEdges);
+}
+
+/**
+ * Facebook's letterbox bars stay dark and muted even behind a bright or foggy
+ * photo (a dark olive behind a sunlit yard, a dark slate behind a pink sky): the
+ * dominant colour with its HSL lightness capped at 27% and saturation at 45%.
+ */
+export function letterboxTone(color: string | null | undefined) {
+  const m = color?.match(/\d+/g);
+  if (!m) return color;
+  const [r, g, b] = m.map((v) => Number(v) / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  let h = 0;
+  if (d !== 0) {
+    if (max === r) h = ((g - b) / d + 6) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+  }
+  const pct = (v: number) => `${Math.round(v * 1000) / 10}%`;
+  return `hsl(${Math.round(h * 60)} ${pct(Math.min(s, 0.45))} ${pct(Math.min(l, 0.27))})`;
+}
+
+function LetterboxFill({ url }: { url: string }) {
+  const color = letterboxTone(useDominantColor(url));
+  if (!color) return null;
+  return <span aria-hidden className="absolute inset-0" style={{ backgroundColor: color }} />;
+}
+
+/**
+ * A single inline video; tall ones sit on their poster's dominant colour
+ * (black in full screen, and always black for ads, like Facebook).
+ */
+function SingleVideo({
+  item,
+  ratio,
+  className,
+  blackFill,
+  postId,
+}: {
+  item: PostMedia;
+  ratio: number;
+  className?: string;
+  blackFill?: boolean;
+  postId?: string;
+}) {
+  const fill = letterboxTone(useDominantColor(ratio < 1.2 && !blackFill ? item.poster : undefined));
+  return (
+    <VideoPlayer
+      src={item.url}
+      poster={item.poster}
+      label={item.alt}
+      postId={postId}
+      className={cn("w-full [&:fullscreen]:bg-black!", className)}
+      style={{
+        aspectRatio: ratio,
+        maxHeight: MAX_MEDIA_HEIGHT,
+        backgroundColor: fill ?? undefined,
+      }}
+    />
+  );
+}
+
+function Tile({
+  item,
+  onOpen,
+  className,
+  overlay,
+  label,
+}: {
+  item: PostMedia;
+  onOpen: () => void;
+  className?: string;
+  overlay?: number;
+  /** "Open photo N of M". */
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onOpen}
+      className={cn("group relative min-h-0 overflow-hidden bg-btn", className)}
+    >
+      {item.kind === "video" ? (
+        <>
+          {item.poster ? (
+            <img src={item.poster} alt="" loading="lazy" className="h-full w-full object-cover" />
+          ) : (
+            <video src={item.url} muted preload="metadata" className="h-full w-full object-cover" />
+          )}
+          <span className="absolute top-1/2 left-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white shadow-[0_0_0_2px_rgba(255,255,255,0.9)_inset]">
+            <PlayGlyph size={24} className="ml-0.5" />
+          </span>
+        </>
+      ) : (
+        <img
+          src={item.url}
+          alt={item.alt ?? ""}
+          loading="lazy"
+          className="h-full w-full object-cover"
+        />
+      )}
+      <span className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/10" />
+      {overlay !== undefined && (
+        <span className="absolute inset-0 flex items-center justify-center bg-black/40 font-normal text-[32px] text-white">
+          +{overlay}
+        </span>
+      )}
+    </button>
+  );
+}
