@@ -97,6 +97,36 @@ function withAmount(text: string, from: number, to: number) {
   return text.replace(re, () => `$${to.toLocaleString("en-US")}`);
 }
 
+/** Who can see an Event once it's created: a Group's members, or the owner's friends. */
+function EventAudience({
+  inGroup,
+  group,
+}: {
+  inGroup: boolean;
+  group: { name: string; slug: string } | null;
+}) {
+  return (
+    <div className="mt-0.5 flex items-center gap-1 text-[13px] text-secondary">
+      <UsersRound size={13} aria-hidden />
+      {inGroup ? (
+        <span className="min-w-0 truncate">
+          Event in{" "}
+          {group ? (
+            <Link {...toGroup(group)} className="font-semibold text-primary hover:underline">
+              {group.name}
+            </Link>
+          ) : (
+            "a group"
+          )}{" "}
+          · visible to its members
+        </span>
+      ) : (
+        "Visible to your friends"
+      )}
+    </div>
+  );
+}
+
 function approveLabel(p: ProposalView, payload: ProposalPayload) {
   switch (payload.kind) {
     case "message":
@@ -302,6 +332,7 @@ function Preview({ p }: { p: ProposalView }) {
                 </span>
               )}
             </div>
+            <EventAudience inGroup={!!pay.groupId} group={p.group} />
             <p className="mt-1.5 text-[13px] text-primary leading-[18px]">{pay.description}</p>
             {p.invitees.length > 0 && (
               <div className="mt-2 flex items-center gap-2">
@@ -469,6 +500,7 @@ function EditForm({
             value={draft.description}
             onChange={(e) => onChange({ ...draft, description: e.target.value })}
           />
+          <EventAudience inGroup={!!draft.groupId} group={p.kind === "event" ? p.group : null} />
           {InviteeChips}
         </div>
       );

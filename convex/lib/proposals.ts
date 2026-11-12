@@ -75,13 +75,8 @@ export async function assertPayload(
     case "offer": {
       if (!p.text.trim()) throw new ConvexError("The message is empty");
       const conv = await ctx.db.get(p.conversationId);
-      const member = await ctx.db
-        .query("conversationMembers")
-        .withIndex("by_conversation_user", (q) =>
-          q.eq("conversationId", p.conversationId).eq("userId", ownerId),
-        )
-        .unique();
-      if (!conv || !member) throw new ConvexError("Not in this conversation");
+      if (!conv || !(await inConversation(ctx, p.conversationId, ownerId)))
+        throw new ConvexError("Not in this conversation");
       // Same rule as `messenger.send`: nothing goes across a block.
       const blocked = await dmBlockNotice(ctx, conv, ownerId);
       if (blocked) throw new ConvexError(blocked);
@@ -101,14 +96,8 @@ export async function assertPayload(
     case "event": {
       if (!p.title.trim()) throw new ConvexError("Name the event");
       if (p.startAt < Date.now()) throw new ConvexError("The event is in the past");
-      const groupId = p.groupId;
-      if (groupId) {
-        const member = await ctx.db
-          .query("groupMembers")
-          .withIndex("by_group_user", (q) => q.eq("groupId", groupId).eq("userId", ownerId))
-          .unique();
-        if (!member) throw new ConvexError("You're not in this group");
-      }
+      if (p.groupId && !(await inGroup(ctx, p.groupId, ownerId)))
+        throw new ConvexError("You're not in this group");
       return assertFriends(ctx, ownerId, p.inviteIds);
     }
     case "group": {
@@ -118,6 +107,45 @@ export async function assertPayload(
       return assertFriends(ctx, ownerId, p.inviteIds);
     }
   }
+}
+
+export async function inConversation(
+  ctx: QueryCtx,
+  conversationId: Id<"conversations">,
+  userId: Id<"users">,
+): Promise<boolean> {
+  const row = await ctx.db
+    .query("conversationMembers")
+    .withIndex("by_conversation_user", (q) =>
+      q.eq("conversationId", conversationId).eq("userId", userId),
+    )
+    .unique();
+  return row !== null;
+}
+
+export async function inGroup(
+  ctx: QueryCtx,
+  groupId: Id<"groups">,
+  userId: Id<"users">,
+): Promise<boolean> {
+  const row = await ctx.db
+    .query("groupMembers")
+    .withIndex("by_group_user", (q) => q.eq("groupId", groupId).eq("userId", userId))
+    .unique();
+  return row !== null;
+}
+
+/**
+ * Whether the owner can still reach where a proposal goes: they're still in its
+ * chat, or in the Group its Event is for. If not, it can't be approved, and the
+ * chat's or Group's details are no longer theirs to see.
+ */
+export async function targetReachable(ctx: QueryCtx, p: Doc<"proposals">): Promise<boolean> {
+  const pay = p.payload;
+  if (pay.kind === "message" || pay.kind === "offer")
+    return inConversation(ctx, pay.conversationId, p.ownerId);
+  if (pay.kind === "event" && pay.groupId) return inGroup(ctx, pay.groupId, p.ownerId);
+  return true;
 }
 
 /** The ways offer text may write `amount` in whole dollars ("$1200" or "$1,200"). */

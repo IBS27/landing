@@ -10,10 +10,13 @@ import {
   citationsVisible,
   dropDraft,
   executeProposal,
+  inConversation,
+  inGroup,
   isExpired,
   logEvent,
   propose as proposeImpl,
   syncDraft,
+  targetReachable,
 } from "./lib/proposals";
 import { friendIds, getSummaries, type UserSummary } from "./lib/users";
 import { citations, proposalOrigin, proposalPayload, type Source } from "./validators";
@@ -134,7 +137,7 @@ async function conversationChip(
   viewerId: Id<"users">,
 ): Promise<ConversationChip | null> {
   const c = await ctx.db.get(conversationId);
-  if (!c) return null;
+  if (!c || !(await inConversation(ctx, conversationId, viewerId))) return null;
   const others = c.memberIds.filter((id) => id !== viewerId);
   const map = await getSummaries(ctx, others);
   const people = others.map((id) => map.get(id)).filter((u): u is UserSummary => !!u);
@@ -197,7 +200,11 @@ async function proposalView(ctx: QueryCtx, p: Doc<"proposals">, a: Audience, now
     }
     case "event": {
       const map = await getSummaries(ctx, pay.inviteIds);
-      const group = pay.groupId ? await ctx.db.get(pay.groupId) : null;
+      // Only while the owner is still in it: a Group they left is no longer theirs to see.
+      const group =
+        pay.groupId && (await inGroup(ctx, pay.groupId, p.ownerId))
+          ? await ctx.db.get(pay.groupId)
+          : null;
       return {
         ...base,
         kind: "event" as const,
@@ -220,6 +227,28 @@ export type ProposalView = NonNullable<Awaited<ReturnType<typeof proposalView>>>
 const present = <T>(x: T | null): x is T => x !== null;
 
 /**
+ * The owner's pending proposals that are still live and actionable: not
+ * expired, every cited source still visible to them, and its chat or Group
+ * still theirs. The inbox, its badge and the chat drafts all show this set.
+ */
+async function waiting(ctx: QueryCtx, ownerId: Id<"users">, now: number) {
+  const rows = await ctx.db
+    .query("proposals")
+    .withIndex("by_owner_status", (q) => q.eq("ownerId", ownerId).eq("status", "pending"))
+    .collect();
+  const a = await loadAudience(ctx, ownerId);
+  const ok = await Promise.all(
+    rows.map(
+      async (p) =>
+        !isExpired(p, now) &&
+        (await citationsVisible(ctx, p, a)) &&
+        (await targetReachable(ctx, p)),
+    ),
+  );
+  return { rows: rows.filter((_, i) => ok[i]), audience: a };
+}
+
+/**
  * Everything waiting on the viewer: what expires soonest first, then newest.
  * Expired ones move to history.
  */
@@ -227,18 +256,12 @@ export const pending = viewerQuery({
   args: {},
   handler: async (ctx) => {
     const now = Date.now();
-    const rows = await ctx.db
-      .query("proposals")
-      .withIndex("by_owner_status", (q) => q.eq("ownerId", ctx.viewer._id).eq("status", "pending"))
-      .collect();
-    const a = await loadAudience(ctx, ctx.viewer._id);
-    const live = rows
-      .filter((p) => !isExpired(p, now))
-      .sort(
-        (x, y) =>
-          (x.expiresAt ?? Number.POSITIVE_INFINITY) - (y.expiresAt ?? Number.POSITIVE_INFINITY) ||
-          y.createdAt - x.createdAt,
-      );
+    const { rows, audience: a } = await waiting(ctx, ctx.viewer._id, now);
+    const live = rows.sort(
+      (x, y) =>
+        (x.expiresAt ?? Number.POSITIVE_INFINITY) - (y.expiresAt ?? Number.POSITIVE_INFINITY) ||
+        y.createdAt - x.createdAt,
+    );
     return (await Promise.all(live.map((p) => proposalView(ctx, p, a, now)))).filter(present);
   },
 });
@@ -247,15 +270,7 @@ export const pending = viewerQuery({
 export const pendingCount = viewerQuery({
   args: {},
   handler: async (ctx) => {
-    const now = Date.now();
-    const rows = await ctx.db
-      .query("proposals")
-      .withIndex("by_owner_status", (q) => q.eq("ownerId", ctx.viewer._id).eq("status", "pending"))
-      .collect();
-    const a = await loadAudience(ctx, ctx.viewer._id);
-    const live = rows.filter((p) => !isExpired(p, now));
-    const shown = await Promise.all(live.map((p) => citationsVisible(ctx, p, a)));
-    return shown.filter(Boolean).length;
+    return (await waiting(ctx, ctx.viewer._id, Date.now())).rows.length;
   },
 });
 
@@ -294,17 +309,12 @@ export const forConversation = viewerQuery({
   args: { conversationId: v.id("conversations") },
   handler: async (ctx, { conversationId }) => {
     const now = Date.now();
-    const rows = await ctx.db
-      .query("proposals")
-      .withIndex("by_owner_status", (q) => q.eq("ownerId", ctx.viewer._id).eq("status", "pending"))
-      .collect();
+    const { rows, audience: a } = await waiting(ctx, ctx.viewer._id, now);
     const mine = rows.filter(
       (p) =>
-        !isExpired(p, now) &&
         (p.payload.kind === "message" || p.payload.kind === "offer") &&
         p.payload.conversationId === conversationId,
     );
-    const a = await loadAudience(ctx, ctx.viewer._id);
     return (await Promise.all(mine.map((p) => proposalView(ctx, p, a, now)))).filter(present);
   },
 });
