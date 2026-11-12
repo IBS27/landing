@@ -10,9 +10,10 @@ import { getSummary, type UserSummary } from "./users";
  *
  * - Store `citations` (from `convex/validators.ts`), built with `cite()` or
  *   `tryCite()`. It can't be empty.
- * - Before storing, call `assertSourcesExist()`. Results cached once and shown
- *   to every viewer must pass `{ publicOnly: true }`, so they can't carry
- *   anything from a private Group or a friends-only post.
+ * - Before storing, call `assertCitable()`: with `"everyone"` for results cached
+ *   once and shown to every viewer (only public sources, so nothing from a
+ *   private Group or a friends-only post), or with the viewer's `Audience` for
+ *   a personal result such as a Muse proposal.
  * - When showing, call `resolveCitations()` with the viewer's `loadAudience()`.
  *   It drops deleted sources and anything the viewer can't see, and reads
  *   snippets, counts and ages from the records. Send only its result to the
@@ -153,6 +154,18 @@ export type CitedSource =
       fetchedAt: number;
     });
 
+/**
+ * Like the comments list: a comment by someone blocked either way is hidden
+ * together with every reply under it.
+ */
+async function inBlockedThread(ctx: QueryCtx, c: Doc<"comments">, a: Audience) {
+  for (let cur: Doc<"comments"> | null = c, depth = 0; cur && depth < 20; depth++) {
+    if (a.blocked.has(cur.authorId)) return true;
+    cur = cur.parentId ? await ctx.db.get(cur.parentId) : null;
+  }
+  return false;
+}
+
 async function goingCount(ctx: QueryCtx, e: Doc<"events">) {
   const going = await ctx.db
     .query("eventResponses")
@@ -187,7 +200,7 @@ async function resolveSource(ctx: QueryCtx, s: Source, a: Audience): Promise<Cit
     }
     case "comment": {
       const c = await ctx.db.get(s.commentId);
-      if (!c || a.blocked.has(c.authorId)) return null;
+      if (!c || (await inBlockedThread(ctx, c, a))) return null;
       const p = await ctx.db.get(c.postId);
       if (!p || !(await canView(ctx, p, a))) return null;
       const [author, postAuthor, group] = await Promise.all([
@@ -227,7 +240,7 @@ async function resolveSource(ctx: QueryCtx, s: Source, a: Audience): Promise<Cit
     }
     case "listing": {
       const l = await ctx.db.get(s.listingId);
-      if (!l || a.blocked.has(l.sellerId)) return null;
+      if (!l || a.blocked.has(l.sellerId) || !(await ctx.db.get(l.sellerId))) return null;
       return {
         kind: "listing",
         key,
@@ -303,8 +316,9 @@ export async function resolveCitations(
 
 /**
  * True when anyone can see the source, so a result built from it can be cached
- * once and shown to every viewer. Wall posts on someone else's timeline count
- * as restricted, because the timeline owner's settings decide who sees them.
+ * once for every viewer. Wall posts on someone else's timeline count as
+ * restricted, because the timeline owner's settings decide who sees them. Blocks
+ * are per viewer, so cached results are still shown through `resolveCitations`.
  */
 export async function isPublicSource(ctx: QueryCtx, s: Source): Promise<boolean> {
   switch (s.kind) {
@@ -329,51 +343,44 @@ export async function isPublicSource(ctx: QueryCtx, s: Source): Promise<boolean>
   }
 }
 
-async function isPublicPost(ctx: QueryCtx, p: Doc<"posts"> | null) {
-  if (p?.privacy !== "public") return false;
+/** A public post, with everything it shares or attaches public too. */
+async function isPublicPost(ctx: QueryCtx, p: Doc<"posts"> | null, depth = 0): Promise<boolean> {
+  if (p?.privacy !== "public" || depth > 3) return false;
   if (p.timelineUserId && p.timelineUserId !== p.authorId) return false;
   if (p.groupId) {
     const g = await ctx.db.get(p.groupId);
     if (g?.privacy !== "public") return false;
   }
-  if (p.eventId) {
-    const e = await ctx.db.get(p.eventId);
-    if (e?.privacy !== "public") return false;
-  }
+  for (const eventId of [p.eventId, ...p.attachments.map((x) => x.kind === "event" && x.eventId)])
+    if (eventId) {
+      const e = await ctx.db.get(eventId);
+      if (e?.privacy !== "public") return false;
+    }
+  if (p.sharedPostId && !(await isPublicPost(ctx, await ctx.db.get(p.sharedPostId), depth + 1)))
+    return false;
   return true;
 }
 
-async function sourceExists(ctx: QueryCtx, s: Source) {
-  switch (s.kind) {
-    case "post":
-      return (await ctx.db.get(s.postId)) !== null;
-    case "comment":
-      return (await ctx.db.get(s.commentId)) !== null;
-    case "event":
-      return (await ctx.db.get(s.eventId)) !== null;
-    case "listing":
-      return (await ctx.db.get(s.listingId)) !== null;
-    case "group":
-      return (await ctx.db.get(s.groupId)) !== null;
-    case "external":
-      return (await ctx.db.get(s.externalSourceId)) !== null;
-  }
-}
-
 /**
- * Throws unless every source exists (and, with `publicOnly`, is public). Call
- * it in the mutation that stores a score, recommendation or proposal.
+ * Throws unless every source can be shown to whoever will see the result:
+ * `"everyone"` for results cached once and shown to every viewer (each source
+ * must be public), or one viewer's `Audience` for a personal result such as a
+ * Muse proposal (each source must be visible to them). Missing sources always
+ * fail. Call it in the mutation that stores a score, recommendation or proposal.
  */
-export async function assertSourcesExist(
+export async function assertCitable(
   ctx: QueryCtx,
   c: Citations,
-  opts: { publicOnly?: boolean } = {},
+  shownTo: "everyone" | Audience,
 ): Promise<void> {
   for (const s of sourcesOf(c)) {
-    const ok = opts.publicOnly ? await isPublicSource(ctx, s) : await sourceExists(ctx, s);
+    const ok =
+      shownTo === "everyone"
+        ? await isPublicSource(ctx, s)
+        : (await resolveSource(ctx, s, shownTo)) !== null;
     if (!ok)
       throw new ConvexError(
-        `Citation source ${sourceKey(s)} ${opts.publicOnly ? "isn't public" : "doesn't exist"}`,
+        `Citation source ${sourceKey(s)} can't be shown to ${shownTo === "everyone" ? "everyone" : "this viewer"}`,
       );
   }
 }

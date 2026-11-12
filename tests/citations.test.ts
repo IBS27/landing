@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { QueryCtx } from "../convex/_generated/server";
 import {
-  assertSourcesExist,
+  assertCitable,
   type CitedSource,
   cite,
   isPublicSource,
@@ -133,17 +133,29 @@ const world = {
     post("pPublicGroup", "S", "public", { groupId: "gPublic" }),
     post("pMyGroup", "S", "public", { groupId: "gMine" }),
     post("pBlocker", "B", "public"),
+    // On F's timeline, by S: F's "who can see posts on your profile" decides.
+    post("pWall", "S", "public", { timelineUserId: "F" }),
+    // In the Discussion tab of a private event V wasn't invited to.
+    post("pPrivateEventTalk", "S", "public", { eventId: "ePrivate" }),
+    // Public posts that share or attach something restricted.
+    post("pSharesFriendsPost", "S", "public", { sharedPostId: "pFriendOfViewer" }),
+    post("pSharesPublicPost", "S", "public", { sharedPostId: "pPublic" }),
+    post("pAttachesPrivateEvent", "S", "public", {
+      attachments: [{ kind: "event", eventId: "ePrivate" }],
+    }),
   ],
   comments: [
     comment("cPublic", "pPublic", "S"),
     comment("cPrivateGroup", "pPrivateGroup", "S"),
     comment("cByBlocker", "pPublic", "B"),
+    { ...comment("cReplyToBlocker", "pPublic", "S"), parentId: "cByBlocker" },
   ],
   events: [
     event("ePublic", "S", "public"),
     event("ePrivate", "S", "private"),
     event("eInvited", "S", "private"),
-    event("eGroup", "S", "group"),
+    { ...event("eMyGroup", "S", "group"), groupId: "gMine" },
+    { ...event("eOtherGroup", "S", "group"), groupId: "gPrivate" },
   ],
   eventResponses: [
     { _id: "er1", eventId: "ePublic", userId: "F", status: "going", createdAt: 0 },
@@ -168,6 +180,17 @@ const world = {
       description: "Blue",
       photos: [],
       price: 100,
+      status: "active",
+      location: { city: "San Francisco" },
+      createdAt: NOW,
+    },
+    {
+      _id: "lGoneSeller",
+      sellerId: "Deleted",
+      title: "Chair",
+      description: "Wood",
+      photos: [],
+      price: 5,
       status: "active",
       location: { city: "San Francisco" },
       createdAt: NOW,
@@ -214,15 +237,35 @@ describe("per-viewer filtering", () => {
         P("pPublicGroup"),
         P("pMyGroup"),
         P("pBlocker"),
+        P("pPrivateEventTalk"),
         P("pDeleted"),
       ]),
     ).toEqual(["post:pPublic", "post:pFriendOfViewer", "post:pPublicGroup", "post:pMyGroup"]);
   });
 
-  test("comments inherit their post's visibility and drop blocked authors", async () => {
-    expect(await visibleKeys([C("cPublic"), C("cPrivateGroup"), C("cByBlocker")])).toEqual([
-      "comment:cPublic",
-    ]);
+  test("wall posts follow the timeline owner's setting", async () => {
+    // V is F's friend, so F's default setting lets V see posts on F's timeline.
+    expect(await visibleKeys([P("pWall")])).toEqual(["post:pWall"]);
+    const onlyMe = {
+      ...world,
+      userSettings: [
+        {
+          _id: "us1",
+          userId: "F",
+          prefs: { "who-can-see-profile-posts": "Only me" },
+          updatedAt: 0,
+        },
+      ],
+    };
+    const ctx = fakeCtx(onlyMe);
+    const a = await loadAudience(ctx, id("V"));
+    expect(await resolveSources(ctx, [P("pWall")], a)).toEqual([]);
+  });
+
+  test("comments inherit their post's visibility and drop blocked threads", async () => {
+    expect(
+      await visibleKeys([C("cPublic"), C("cPrivateGroup"), C("cByBlocker"), C("cReplyToBlocker")]),
+    ).toEqual(["comment:cPublic"]);
   });
 
   test("events, listings, Groups and external sources", async () => {
@@ -231,9 +274,11 @@ describe("per-viewer filtering", () => {
         E("ePublic"),
         E("ePrivate"),
         E("eInvited"),
-        E("eGroup"),
+        E("eMyGroup"),
+        E("eOtherGroup"),
         L("lS"),
         L("lB"),
+        L("lGoneSeller"),
         G("gPublic"),
         G("gPrivate"),
         G("gHidden"),
@@ -244,6 +289,7 @@ describe("per-viewer filtering", () => {
     ).toEqual([
       "event:ePublic",
       "event:eInvited",
+      "event:eMyGroup",
       "listing:lS",
       "group:gPublic",
       "group:gPrivate",
@@ -285,10 +331,16 @@ describe("public sources (for results shared by every viewer)", () => {
       [P("pFriendOfViewer"), false],
       [P("pPrivateGroup"), false],
       [P("pPublicGroup"), true],
+      [P("pWall"), false],
+      [P("pPrivateEventTalk"), false],
+      [P("pSharesFriendsPost"), false],
+      [P("pSharesPublicPost"), true],
+      [P("pAttachesPrivateEvent"), false],
       [C("cPublic"), true],
       [C("cPrivateGroup"), false],
       [E("ePublic"), true],
       [E("eInvited"), false],
+      [E("eMyGroup"), false],
       [G("gPrivate"), true],
       [G("gHidden"), false],
       [L("lS"), true],
@@ -299,15 +351,18 @@ describe("public sources (for results shared by every viewer)", () => {
       expect([s, await isPublicSource(ctx, s)]).toEqual([s, expected]);
   });
 
-  test("assertSourcesExist rejects missing and, with publicOnly, private sources", async () => {
+  test("assertCitable checks sources against who will see the result", async () => {
     const ctx = fakeCtx(world);
-    await assertSourcesExist(ctx, cite([P("pPublic"), P("pOnlyMe")]));
-    await expect(assertSourcesExist(ctx, cite([P("pPublic"), P("pDeleted")]))).rejects.toThrow(
+    const v = await loadAudience(ctx, id("V"));
+    await assertCitable(ctx, cite([P("pPublic"), P("pFriendOfViewer")]), v);
+    await assertCitable(ctx, cite([P("pPublic"), E("ePublic")]), "everyone");
+    await expect(assertCitable(ctx, cite([P("pPublic"), P("pDeleted")]), v)).rejects.toThrow(
       "post:pDeleted",
     );
-    await expect(
-      assertSourcesExist(ctx, cite([P("pOnlyMe")]), { publicOnly: true }),
-    ).rejects.toThrow("isn't public");
+    await expect(assertCitable(ctx, cite([P("pOnlyMe")]), v)).rejects.toThrow("this viewer");
+    await expect(assertCitable(ctx, cite([P("pFriendOfViewer")]), "everyone")).rejects.toThrow(
+      "everyone",
+    );
   });
 });
 
@@ -349,7 +404,8 @@ describe("formatting", () => {
     ];
     expect(sourceMeta(p, NOW)).toBe("15 comments · 2 weeks ago");
     expect(sourceMeta(l, NOW)).toBe("$20 · Mission · listed 3 days ago");
-    expect(sourceMeta(x, NOW)).toBe("DataSF · fetched Nov 11, 2026");
+    // The date is local to the machine: Nov 11 12:00 UTC.
+    expect(sourceMeta(x, NOW)).toMatch(/^DataSF · fetched Nov 1[12], 2026$/);
     expect(chipLabel([p], NOW)).toBe("15 comments · 2 weeks ago");
     expect(chipLabel([p, l, x], NOW)).toBe("3 sources");
   });
