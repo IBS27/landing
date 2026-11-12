@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Facebook design tokens (extracted from facebook.com, light + dark). */
+:root {
+  --web-wash: #f2f4f7;
+  --card: #ffffff;
+  --surface: #ffffff;
+  --popover: #ffffff;
+  --nav-bar: #ffffff;
+  --primary-text: #080809;
+  --secondary-text: #65686c;
+  --placeholder-text: #65686c;
+  --disabled-text: #b0b3b8;
+  --primary-icon: #080809;
+  --secondary-icon: #65686c;
+  --disabled-icon: #b0b3b8;
+  --accent: hsl(214, 89%, 52%);
+  --fb-blue: #0866ff;
+  --blue-link: #0064d1;
+  --divider: #d0d3d7;
+  --divider-soft: #e4e6eb;
+  --hover-overlay: rgba(0, 0, 0, 0.05);
+  --pressed-overlay: rgba(70, 72, 75, 0.15);
+  --comment-bg: #f0f2f5;
+  --input-bg: #f0f2f5;
+  --secondary-button: #e2e5e9;
+  --secondary-button-text: #080809;
+  --secondary-button-floating: #ffffff;
+  --primary-button: #0866ff;
+  --primary-button-hover: #0759e0;
+  --deemphasized-button: #ddedfe;
+  --deemphasized-button-text: #0064d1;
+  --highlight-bg: #e7f3ff;
+  --positive: #24832c;
+  --online: #31a24c;
+  --negative: #dd2334;
+  --badge: #e41e3f;
+  --media-inner-border: rgba(0, 0, 0, 0.1);
+  --chat-incoming: #f0f0f0;
+  --threading-lines: #e2e5e9;
+  --text-highlight: rgba(8, 102, 255, 0.2);
+  --overlay-80: rgba(244, 244, 244, 0.8);
+  --scroll-thumb: rgba(0, 0, 0, 0.3);
+  --shadow-1: rgba(0, 0, 0, 0.1);
+  --shadow-2: rgba(0, 0, 0, 0.2);
+  --shadow-base: 0 1px 2px var(--shadow-2);
+  --shadow-emphasis: 0 2px 12px var(--shadow-2);
+  --shadow-elevated: 0 12px 28px 0 var(--shadow-2), 0 2px 4px 0 var(--shadow-1);
+  --header-height: 56px;
+  color-scheme: light;
+}
+
+.dark {
+  --web-wash: #1c1c1d;
+  --card: #252728;
+  --surface: #252728;
+  --popover: #252728;
+  --nav-bar: #252728;
+  --primary-text: #e2e5e9;
+  --secondary-text: #b0b3b8;
+  --placeholder-text: #b0b3b8;
+  --disabled-text: #6f7276;
+  --primary-icon: #e2e5e9;
+  --secondary-icon: #b0b3b8;
+  --disabled-icon: #6f7276;
+  --accent: hsl(214, 100%, 59%);
+  --blue-link: #5aa7ff;
+  --divider: #3e4042;
+  --divider-soft: #3e4042;
+  --hover-overlay: rgba(255, 255, 255, 0.1);
+  --pressed-overlay: rgba(255, 255, 255, 0.2);
+  --comment-bg: #333334;
+  --input-bg: #333334;
+  --secondary-button: rgba(255, 255, 255, 0.1);
+  --secondary-button-text: #e8eaee;
+  --secondary-button-floating: #46484b;
+  --deemphasized-button: rgba(29, 133, 252, 0.2);
+  --deemphasized-button-text: #75b6ff;
+  --highlight-bg: rgba(24, 119, 242, 0.31);
+  --positive: #3fbb46;
+  --negative: #ff7c74;
+  --media-inner-border: rgba(255, 255, 255, 0.05);
+  --chat-incoming: #303030;
+  --threading-lines: #46484b;
+  --text-highlight: rgba(29, 133, 252, 0.45);
+  --overlay-80: rgba(11, 11, 11, 0.8);
+  --scroll-thumb: rgba(255, 255, 255, 0.3);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: "Segoe UI Historic", "Segoe UI", Helvetica, Arial, sans-serif;
+  --color-wash: var(--web-wash);
+  --color-card: var(--card);
+  --color-surface: var(--surface);
+  --color-popover: var(--popover);
+  --color-nav: var(--nav-bar);
+  --color-primary: var(--primary-text);
+  --color-secondary: var(--secondary-text);
+  --color-placeholder: var(--placeholder-text);
+  --color-disabled: var(--disabled-text);
+  --color-icon: var(--primary-icon);
+  --color-icon-secondary: var(--secondary-icon);
+  --color-accent: var(--accent);
+  --color-fb: var(--fb-blue);
+  --color-link: var(--blue-link);
+  --color-divider: var(--divider);
+  --color-divider-soft: var(--divider-soft);
+  --color-hover: var(--hover-overlay);
+  --color-pressed: var(--pressed-overlay);
+  --color-comment: var(--comment-bg);
+  --color-input: var(--input-bg);
+  --color-btn: var(--secondary-button);
+  --color-btn-text: var(--secondary-button-text);
+  --color-btn-floating: var(--secondary-button-floating);
+  --color-btn-primary: var(--primary-button);
+  --color-btn-primary-hover: var(--primary-button-hover);
+  --color-btn-soft: var(--deemphasized-button);
+  --color-btn-soft-text: var(--deemphasized-button-text);
+  --color-highlight: var(--highlight-bg);
+  --color-positive: var(--positive);
+  --color-online: var(--online);
+  --color-negative: var(--negative);
+  --color-badge: var(--badge);
+  --color-chat-in: var(--chat-incoming);
+  --color-thread: var(--threading-lines);
+  --shadow-base: var(--shadow-base);
+  --shadow-emphasis: var(--shadow-emphasis);
+  --shadow-elevated: var(--shadow-elevated);
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-sm: 13px;
+  --text-sm--line-height: 16px;
+  --text-base: 15px;
+  --text-base--line-height: 20px;
+  --text-md: 17px;
+  --text-md--line-height: 22px;
+  --text-lg: 20px;
+  --text-lg--line-height: 24px;
+  --text-xl: 24px;
+  --text-xl--line-height: 28px;
+  --text-2xl: 32px;
+  --text-2xl--line-height: 38px;
+}
+
+@layer base {
+  html,
+  body {
+    background: var(--web-wash);
+    color: var(--primary-text);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.3333;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: var(--text-highlight);
+  }
+  button {
+    cursor: pointer;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  *:hover {
+    scrollbar-color: var(--scroll-thumb) transparent;
+  }
+  html {
+    scrollbar-color: var(--scroll-thumb) transparent;
+  }
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
