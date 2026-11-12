@@ -92,6 +92,24 @@ describe("protected traits", () => {
     }
   });
 
+  test("race stated in the singular is caught through save and read", async () => {
+    const text = "I am a person of color looking for roommates.";
+    expect(profileInput(text).text).toBe(`${REDACTED} looking for roommates.`);
+    const out = facts(text);
+    expect(out.map((p) => [p.entry, p.quote])).toEqual([
+      [{ key: "goal", value: { id: "find_roommates" } }, "looking for roommates."],
+    ]);
+    // Even a full-sentence quote from a tampered client never reaches the profile.
+    const saved = briefFacts([out[0].entry], [{ slot: "goal:find_roommates", quote: text }]);
+    const tables: Record<string, Row[]> = { cityProfiles: [], cityProfileFacts: [] };
+    const ctx = writableCtx(tables);
+    const user = "users:jordan" as Id<"users">;
+    await saveStatedFacts(ctx, user, ["goal"], saved);
+    const [goal] = (await getProfile(ctx, user)).goals;
+    expect(hasProtected(goal.evidence.quote ?? "")).toBe(false);
+    expect(redactProtected("We're a community of colour")).not.toMatch(/colou?r/);
+  });
+
   test("a model quote is cut down to the phrase naming its fact", () => {
     const hiking: FactEntry = { key: "interest", value: { id: "hiking" } };
     expect(narrowQuote(hiking, "I've got MS and love hiking.")).toBe("love hiking.");
@@ -227,11 +245,20 @@ describe("budget", () => {
     expect(budget("$2,400 for a studio")).toEqual({ max: 2400 });
   });
 
+  test("salary and other money aren't rent", () => {
+    expect(budget("My salary is $6000 and rent is $2000.")).toEqual({ max: 2000 });
+    expect(budget("I make $9000 a month, rent up to $2,500.")).toEqual({ max: 2500 });
+    expect(budget("I saved $5000 for a deposit.")).toBeNull();
+  });
+
   test("the model check rejects a negated amount", () => {
     const text = "My budget is not $3000; it is $2000.";
     const at = (max: number, quote: string) => [
       { entry: { key: "budget" as const, value: { max } }, quote },
     ];
+    expect(modelProblems(text, at(3000, "not $3000"))).not.toEqual([]);
+    expect(modelProblems(text, at(3000, "My budget is not $3000"))).not.toEqual([]);
+    expect(modelProblems("Rent no more than $2,400.", at(2400, "no more than $2,400"))).toEqual([]);
     expect(modelProblems(text, at(3000, "$3000"))).not.toEqual([]);
     expect(modelProblems(text, at(2000, "$2000"))).toEqual([]);
   });
@@ -288,6 +315,7 @@ describe("move-in dates", () => {
       { entry: { key: "moveIn" as const, value: { month } }, quote },
     ];
     expect(modelProblems(text, at("2027-03", "move in March"))).not.toEqual([]);
+    expect(modelProblems(text, at("2027-03", "I do not want to move in March"))).not.toEqual([]);
     expect(modelProblems(text, at("2027-04", "moving in April"))).toEqual([]);
   });
 
@@ -426,6 +454,11 @@ describe("neighborhoods", () => {
     expect(modelProblems(text, [{ entry: mission, quote: "I work in the Mission" }])).not.toEqual(
       [],
     );
+    const soma = "I work in the Mission and want to live in SoMa.";
+    expect(modelProblems(soma, [{ entry: mission, quote: "the Mission" }])).not.toEqual([]);
+    expect(modelProblems(soma, [{ entry: mission, quote: "Mission" }])).not.toEqual([]);
+    const both = "I work in the Mission and want to live in the Mission too.";
+    expect(modelProblems(both, [{ entry: mission, quote: "the Mission" }])).toEqual([]);
     expect(
       modelProblems("Moving to the Mission.", [{ entry: mission, quote: "Moving to the Mission" }]),
     ).toEqual([]);

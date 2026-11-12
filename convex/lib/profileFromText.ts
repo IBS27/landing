@@ -13,13 +13,7 @@ import {
   WORKPLACES,
 } from "./cityProfileFacts";
 import { INTEREST_SECTIONS, INTERESTS } from "./interests";
-import {
-  extractFacts,
-  isWorkplaceQuote,
-  mentionsInterest,
-  narrowQuote,
-  negatedInText,
-} from "./profileText";
+import { extractFacts, mentionsInterest, narrowQuote, quoteProblem } from "./profileText";
 import { hasProtected, REDACTED, redactProtected } from "./protectedText";
 
 /**
@@ -130,8 +124,10 @@ export const profileFromText = defineTask({
         );
       else if (!text.includes(quote))
         problems.push(`${at}.quote "${f.quote}" isn't copied exactly from the text`);
-      else if (negatedInText(input.text, f.quote))
-        problems.push(`${at}: the text says the opposite ("${f.quote}" is negated there); drop it`);
+      else {
+        const problem = quoteProblem(input.text, f.entry, f.quote);
+        if (problem) problems.push(`${at}: ${problem}; drop it`);
+      }
       const slot = factSlot(f.entry);
       if (seen.has(slot)) problems.push(`${at}: more than one fact for ${slot}`);
       seen.add(slot);
@@ -153,12 +149,6 @@ export const profileFromText = defineTask({
             );
           break;
         }
-        case "neighborhood":
-          if (isWorkplaceQuote(f.quote))
-            problems.push(
-              `${at}: "${f.quote}" is about work; propose only places they'd consider living`,
-            );
-          break;
         case "interest":
           // Named in the quote, and not only in a negated clause of the text ("don't like climbing").
           if (!mentionsInterest(f.quote, e.value.id) || !mentionsInterest(input.text, e.value.id))

@@ -246,7 +246,7 @@ const TERMS: string[] = [
   `(?:${DEMONYMS.join("|")})(?:[\\s-]+american)?`,
   "ethnicity|ethnic|racial|my race|nationality|citizenship|immigrants?|immigrated|refugees?|undocumented|green card",
   "h-?1b|(?:work|student) visa|on an? (?:\\w+ )?visa|visa status",
-  "people of colou?r|poc|bipoc",
+  "(?:people|persons?|folks?|wom[ae]n|m[ae]n|communit(?:y|ies)) of colou?r|poc|bipoc",
   // Countries and regions someone may come from (not "Russian Hill" or "Chinatown").
   `(?:${COUNTRIES.join("|")})`,
   // Gender and orientation

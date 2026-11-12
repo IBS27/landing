@@ -296,6 +296,9 @@ const BUDGET_LEAD =
 
 const RENT_CONTEXT =
   /\b(?:budget|rent|a month|per month|monthly|apartment|studio|1br|one[\s-]bed\w*|room)\b|\/\s?mo/i;
+/** Money that isn't rent: "my salary is $6000", "I make $120k", "a $2,400 deposit". */
+const NOT_RENT =
+  /\b(?:salary|income|make|makes|making|earn\w*|paid|paycheck|pay is|savings|saved|deposit|bonus|stipend|loans?|debt)\b/i;
 const OTHER_EXPENSE =
   /^\s*(?:on|for|towards?)\s+(?!rent\b|(?:a|an|my|the)\s+(?:place|room|studio|apartment|1br)\b|housing\b)/i;
 
@@ -339,9 +342,12 @@ function budgetFrom(parts: Part[]): ProposedFact | null {
       if (!value) continue;
       const entry: FactEntry = { key: "budget", value };
       const hit = { part, start: m.index, end: m.index + m[0].length };
+      // Rent or not is decided by the amount's own phrase, not the whole sentence.
+      const phrase = quoteOf(hit);
+      if (NOT_RENT.test(phrase)) continue;
       found.push({
-        fact: { entry, quote: quoteOf(hit), label: factLabel(entry) },
-        rent: RENT_CONTEXT.test(p) || PER_MONTH.test(after),
+        fact: { entry, quote: phrase, label: factLabel(entry) },
+        rent: RENT_CONTEXT.test(phrase) || PER_MONTH.test(after),
       });
     }
   }
@@ -524,32 +530,63 @@ export function extractFacts(text: string, today: string): ProposedFact[] {
 
 /* ---------------- Checks on Muse's proposals ---------------- */
 
-/**
- * Whether every place `quote` appears in `text` is inside a negation ("my
- * budget is not $3000", "I don't want to move in March"): it doesn't support
- * a fact. False when the quote isn't found as-is.
- */
-export function negatedInText(text: string, quote: string): boolean {
-  const q = quote.trim().toLowerCase();
-  if (!q) return false;
-  let seen = false;
-  for (const part of clauses(redactProtected(text))) {
-    const t = part.text.toLowerCase();
-    for (let i = t.indexOf(q); i !== -1; i = t.indexOf(q, i + 1)) {
-      seen = true;
-      if (!isNegated(part, i)) return false;
-    }
-  }
-  return seen;
-}
-
-/** Whether a neighborhood's quote is about work, not where they'd live ("I work in the Mission"). */
-export function isWorkplaceQuote(quote: string): boolean {
-  return /\b(?:work(?:s|ing|ed)?|office|job|commut\w*)\b/i.test(quote);
-}
-
 function escapeRe(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** The words in `parts` that name `entry` ("hiking", "$2,400", "March", "the Mission"), negated or not. */
+function factHit(entry: FactEntry, parts: Part[]): Hit | null {
+  const firstOf = (res: RegExp[]) =>
+    res.map((re) => firstHit(parts, re, false)).find((h) => h !== null) ?? null;
+  switch (entry.key) {
+    case "interest":
+      return firstOf(INTEREST_RES.get(entry.value.id) ?? []);
+    case "neighborhood":
+      return firstOf(
+        NEIGHBORHOOD_PATTERNS.filter((n) => n.slug === entry.value.slug).map((n) => n.re),
+      );
+    case "goal":
+      return firstOf(GOAL_PATTERNS.filter((g) => g.id === entry.value.id).map((g) => g.re));
+    case "budget":
+      return firstOf([AMOUNT]);
+    case "moveIn":
+      return firstOf([MONTH_RE]);
+    case "employer":
+      return firstOf([new RegExp(escapeRe(entry.value.name.trim()), "i")]);
+    default:
+      return null;
+  }
+}
+
+/**
+ * Why `quote` doesn't support `entry` where it sits in `text`, or null. It
+ * looks at the fact's own words inside each place the quote appears: if every
+ * one is negated ("not $3000", "I do not want to move in March"), or, for a
+ * neighborhood, every one names a workplace ("I work in the Mission"), the
+ * quote backs nothing. Limits ("no more than $2,400") and negations that are
+ * the fact ("I don't have a car") still count. Null when the quote isn't
+ * found as-is; the copy check reports that.
+ */
+export function quoteProblem(text: string, entry: FactEntry, quote: string): string | null {
+  const q = quote.trim();
+  if (!q) return null;
+  const hit = factHit(entry, clauses(q));
+  const offset = hit ? Math.max(0, q.indexOf(hit.part.text)) + hit.start : 0;
+  const spots: { part: Part; at: number }[] = [];
+  for (const part of clauses(redactProtected(text))) {
+    const t = part.text.toLowerCase();
+    const lq = q.toLowerCase();
+    for (let i = t.indexOf(lq); i !== -1; i = t.indexOf(lq, i + 1))
+      spots.push({ part, at: i + offset });
+  }
+  if (spots.length === 0) return null;
+  const negated = (s: { part: Part; at: number }) => isNegated(s.part, s.at);
+  if (spots.every(negated)) return `the text says the opposite ("${q}" is negated there)`;
+  const workplace = (s: { part: Part; at: number }) =>
+    WORKPLACE_BEFORE.test(s.part.text.slice(0, s.at));
+  if (entry.key === "neighborhood" && spots.every((s) => negated(s) || workplace(s)))
+    return `"${q}" is where they work, not somewhere they'd live`;
+  return null;
 }
 
 /**
@@ -559,33 +596,6 @@ function escapeRe(s: string): string {
  * quotes, and quotes where the fact's words can't be found, are returned as-is.
  */
 export function narrowQuote(entry: FactEntry, quote: string): string {
-  const parts = clauses(quote);
-  const firstOf = (res: RegExp[]) =>
-    res.map((re) => firstHit(parts, re, false)).find((h) => h !== null) ?? null;
-  let hit: Hit | null = null;
-  switch (entry.key) {
-    case "interest":
-      hit = firstOf(INTEREST_RES.get(entry.value.id) ?? []);
-      break;
-    case "neighborhood":
-      hit = firstOf(
-        NEIGHBORHOOD_PATTERNS.filter((n) => n.slug === entry.value.slug).map((n) => n.re),
-      );
-      break;
-    case "goal":
-      hit = firstOf(GOAL_PATTERNS.filter((g) => g.id === entry.value.id).map((g) => g.re));
-      break;
-    case "budget":
-      hit = firstOf([AMOUNT]);
-      break;
-    case "moveIn":
-      hit = firstOf([MONTH_RE]);
-      break;
-    case "employer":
-      hit = firstOf([new RegExp(escapeRe(entry.value.name.trim()), "i")]);
-      break;
-    default:
-      break;
-  }
+  const hit = factHit(entry, clauses(quote));
   return hit ? quoteOf(hit) : quote.trim();
 }
