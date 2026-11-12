@@ -260,8 +260,13 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
       return fallback("refusal");
     }
 
-    const text = response.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
-    const verdict = await review(task, text, input, grounding, response.stop_reason);
+    const verdict = await review(
+      task,
+      answerTexts(response.content),
+      input,
+      grounding,
+      response.stop_reason,
+    );
     if (verdict.ok) {
       const runId = await log("model", verdict.output, verdict.cited);
       return { output: verdict.output, via: "model", cited: resolve(verdict.cited), runId };
@@ -304,15 +309,14 @@ type Grounding = {
 /** Validates one model reply: JSON, schema, grounded IDs of the right table, cited sources, task rules. */
 export async function review<I extends Json, V extends GenericValidator>(
   task: AgentTask<I, V>,
-  text: string,
+  /** Candidate answer texts, tried in order; the first that parses as JSON is reviewed. */
+  texts: string[],
   input: I,
   grounding: Grounding,
   stopReason: string | null,
 ): Promise<{ ok: true; output: Infer<V>; cited: string[] } | { ok: false; problems: string[] }> {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
+  const parsed = firstJson(texts);
+  if (parsed === NOT_JSON) {
     return {
       ok: false,
       problems: [
@@ -349,6 +353,30 @@ export async function review<I extends Json, V extends GenericValidator>(
     problems.push(`The output failed the task's checks: ${message(error)}`);
   }
   return problems.length ? { ok: false, problems } : { ok: true, output, cited };
+}
+
+/**
+ * The answer text of a response. After a streamed mid-output fallback, the
+ * fallback model continues the declined model's partial text, so the answer is
+ * all text joined. The text after the last `fallback` block alone is a second
+ * candidate in case the fallback model started over.
+ */
+export function answerTexts(content: Anthropic.Beta.BetaContentBlock[]) {
+  const join = (blocks: Anthropic.Beta.BetaContentBlock[]) =>
+    blocks.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
+  const boundary = content.findLastIndex((b) => b.type === "fallback");
+  return boundary < 0 ? [join(content)] : [join(content), join(content.slice(boundary + 1))];
+}
+
+const NOT_JSON = Symbol("not JSON");
+
+function firstJson(texts: string[]): unknown {
+  for (const text of texts) {
+    try {
+      return JSON.parse(text);
+    } catch {}
+  }
+  return NOT_JSON;
 }
 
 /**
