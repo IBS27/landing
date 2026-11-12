@@ -356,6 +356,36 @@ export const TOP_PICKS = [
 
 export const byId = new Map(GAMES.map((x) => [x.id, x]));
 
+/** "Recently released": the newest titles in the catalog, newest first. */
+export const RECENTLY_RELEASED = [
+  "snake-trail",
+  "royal-21",
+  "checkers-club",
+  "puck-rush",
+  "solitaire-social",
+  "castle-clash",
+  "jigsaw-calm",
+  "rail-city",
+];
+
+/**
+ * Which of the viewer's friends play a game. There is no play history in the
+ * clone, so it is derived deterministically from the game and friend ids
+ * (each game gets its own popularity, so the counts vary).
+ */
+export function friendPlays(gameId: string, friendId: string) {
+  return fnv(`${gameId}:${friendId}`) % (4 + (fnv(gameId) % 12)) === 0;
+}
+
+function fnv(text: string) {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
 /** Everything not featured or picked, ranked by players. */
 export const MOST_PLAYED = GAMES.filter(
   (x) => !FEATURED.includes(x.id) && !TOP_PICKS.includes(x.id),

@@ -14,9 +14,12 @@ type Ctx = {
 
 export const ProfileContext = createContext<Ctx | null>(null);
 
-/** Horizontal gutter for the 1186px content column (always padded inside the preview pane). */
+/**
+ * Horizontal gutter for the 1186px content column. Inside the preview pane the
+ * column sits 32px inside the (40px-inset) cover, as on a full profile.
+ */
 export function columnPad(embedded: boolean) {
-  return embedded ? "px-4" : "px-4 min-[1218px]:px-0";
+  return embedded ? "px-[72px]" : "px-4 min-[1218px]:px-0";
 }
 
 export function useProfile() {

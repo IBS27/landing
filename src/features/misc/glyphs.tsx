@@ -1,4 +1,5 @@
 import { type ReactNode, useId } from "react";
+import { ReelsIcon } from "@/icons";
 
 /**
  * Facebook-style filled 20px rail glyphs (Events, Search, Saved, Pages, Video,
@@ -146,15 +147,9 @@ export function CardsGlyph(p: P) {
   );
 }
 
-export function ReelsGlyph(p: P) {
-  return (
-    <Svg {...p}>
-      <path
-        fillRule="evenodd"
-        d="M4.5 4h11A3.5 3.5 0 0 1 19 7.5v5a3.5 3.5 0 0 1-3.5 3.5h-11A3.5 3.5 0 0 1 1 12.5v-5A3.5 3.5 0 0 1 4.5 4Zm3.75 3.1v5.8L13.2 10 8.25 7.1Z"
-      />
-    </Svg>
-  );
+/** Facebook's Reels mark (the solid clapper tile), shared with the top nav. */
+export function ReelsGlyph({ size = 20, className }: P) {
+  return <ReelsIcon active size={size} className={className} />;
 }
 
 export function StoreGlyph(p: P) {

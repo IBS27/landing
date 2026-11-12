@@ -101,26 +101,7 @@ export function PeopleTab() {
               Only members can see who's in this group.
             </p>
           ) : (
-            <>
-              {data.friends.length > 0 && (
-                <Section title="Friends" count={data.friends.length}>
-                  <Expandable items={data.friends} />
-                </Section>
-              )}
-              {data.nearby.length > 0 && (
-                <Section title="Members near you" count={data.nearby.length}>
-                  <Expandable items={data.nearby} />
-                </Section>
-              )}
-              {data.newest.length > 0 && (
-                <Section title="New to the group">
-                  <Expandable items={data.newest} />
-                </Section>
-              )}
-              <Section title="Members" count={data.everyone.length} last>
-                <Expandable items={data.everyone} initial={10} />
-              </Section>
-            </>
+            <BrowseSections data={data} />
           )}
         </>
       )}
@@ -128,20 +109,60 @@ export function PeopleTab() {
   );
 }
 
+/**
+ * Friends, nearby, new and everyone else. Like Facebook, each person is listed
+ * once: whoever already appears in an earlier section (admins first) is skipped.
+ */
+function BrowseSections({ data }: { data: MembersData }) {
+  const seen = new Set(data.staff.map((m) => m._id));
+  const take = (list: Member[]) =>
+    list.filter((m) => {
+      if (seen.has(m._id)) return false;
+      seen.add(m._id);
+      return true;
+    });
+  const friends = take(data.friends);
+  const nearby = take(data.nearby);
+  const newest = take(data.newest);
+  const rest = take(data.everyone);
+  return (
+    <>
+      {friends.length > 0 && (
+        <Section title="Friends" count={friends.length}>
+          <Expandable items={friends} />
+        </Section>
+      )}
+      {nearby.length > 0 && (
+        <Section title="Members near you" count={nearby.length}>
+          <Expandable items={nearby} />
+        </Section>
+      )}
+      {newest.length > 0 && (
+        <Section title="New to the group">
+          <Expandable items={newest} />
+        </Section>
+      )}
+      {rest.length > 0 && (
+        <Section title="Members" count={rest.length}>
+          <Expandable items={rest} initial={10} />
+        </Section>
+      )}
+    </>
+  );
+}
+
 function Section({
   title,
   count,
-  last,
   children,
 }: {
   title: string;
   count?: number;
-  last?: boolean;
   children: ReactNode;
 }) {
   return (
-    <section className={last ? "py-4" : "border-divider border-b py-4"}>
-      <h3 className="mb-2 font-semibold text-[17px] text-primary">
+    <section className="border-divider border-b py-4 last:border-b-0">
+      <h3 className="font-semibold text-[15px] text-primary leading-5">
         {title}
         {count !== undefined && (
           <span className="font-normal text-[15px] text-secondary"> · {count}</span>
@@ -190,16 +211,16 @@ function MemberRow({ m }: { m: Member }) {
         <Link
           to="/$username"
           params={{ username: m.username }}
-          className="block truncate font-medium text-[15px] text-primary hover:underline"
+          className="block truncate font-medium text-[15px] text-primary leading-[18px] hover:underline"
         >
           {m.name}
         </Link>
         {m.role !== "member" && (
-          <span className="mt-0.5 inline-flex h-5 items-center rounded-[4px] bg-btn px-1 text-[13px] text-primary">
+          <span className="ml-1 inline-flex h-5 items-center rounded-[4px] bg-btn px-1 text-[13px] text-primary">
             {m.role === "admin" ? "Admin" : "Moderator"}
           </span>
         )}
-        {sub && <p className="truncate text-[13px] text-secondary">{sub}</p>}
+        {sub && <p className="mt-0.5 truncate text-[13px] text-secondary leading-4">{sub}</p>}
       </div>
       <RelationButton m={m} />
     </div>

@@ -17,7 +17,16 @@ export function Tooltip({
 }) {
   return (
     <T.Root delayDuration={350}>
-      <T.Trigger asChild>{children}</T.Trigger>
+      <T.Trigger
+        asChild
+        // Only keyboard focus shows the tooltip: a menu handing focus back to its
+        // trigger after a mouse pick (e.g. "See all") must not leave it open.
+        onFocus={(e) => {
+          if (!e.currentTarget.matches(":focus-visible")) e.preventDefault();
+        }}
+      >
+        {children}
+      </T.Trigger>
       <T.Portal>
         <T.Content
           side={side}

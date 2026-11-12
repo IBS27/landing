@@ -1,6 +1,6 @@
 import { Bookmark, BookmarkCheck, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useViewer } from "@/app/viewer";
+import { useQ, useViewer } from "@/app/viewer";
 import {
   AppRail,
   AppRailDivider,
@@ -14,17 +14,20 @@ import { BellFilled, BookmarkFilled, ControllerFilled } from "@/features/misc/ic
 import { usePref } from "@/features/misc/settings/controls";
 import { cn } from "@/lib/format";
 import { Modal } from "@/ui/overlays";
-import { Button, Card, EmptyState } from "@/ui/primitives";
+import { Avatar, Button, Card, EmptyState } from "@/ui/primitives";
+import { api } from "../../../convex/_generated/api";
 import { GameCover } from "./GameCover";
 import { GameSettingsDialog } from "./GameSettingsDialog";
 import {
   byId,
   CATEGORIES,
   FEATURED,
+  friendPlays,
   GAMES,
   type Game,
   MOST_PLAYED,
   playersLabel,
+  RECENTLY_RELEASED,
   TOP_PICKS,
 } from "./games";
 import { MiniGame } from "./MiniGames";
@@ -247,6 +250,7 @@ function PlayHome({ onPlay, best }: { onPlay: (g: Game) => void; best: Record<st
   const featured = FEATURED.map((id) => byId.get(id)).filter((x): x is Game => !!x);
   const picks = TOP_PICKS.map((id) => byId.get(id)).filter((x): x is Game => !!x);
   const recent = GAMES.filter((x) => best[x.id] !== undefined);
+  const released = RECENTLY_RELEASED.map((id) => byId.get(id)).filter((x): x is Game => !!x);
   return (
     <>
       <Section title="Featured Games">
@@ -291,7 +295,64 @@ function PlayHome({ onPlay, best }: { onPlay: (g: Game) => void; best: Record<st
           ))}
         </div>
       </Section>
+      <Section title="Recently released">
+        <Carousel step={172}>
+          {released.map((x) => (
+            <PickTile key={x.id} game={x} onPlay={() => onPlay(x)} />
+          ))}
+        </Carousel>
+      </Section>
+      <FriendsPlaySection onPlay={onPlay} />
     </>
+  );
+}
+
+/** "Games your friends play": tiles with a facepile of the viewer's friends who play. */
+function FriendsPlaySection({ onPlay }: { onPlay: (g: Game) => void }) {
+  const viewer = useViewer();
+  const friends = useQ(api.friends.list, { userId: viewer._id });
+  const rows = useMemo(() => {
+    if (!friends?.length) return [];
+    return GAMES.map((game) => ({
+      game,
+      players: friends.filter((f) => friendPlays(game.id, f._id)),
+    }))
+      .filter((r) => r.players.length > 0)
+      .sort((a, b) => b.players.length - a.players.length || b.game.players - a.game.players)
+      .slice(0, 10);
+  }, [friends]);
+  if (rows.length === 0) return null;
+  return (
+    <Section title="Games your friends play">
+      <Carousel step={172}>
+        {rows.map(({ game, players }) => (
+          <PickTile
+            key={game.id}
+            game={game}
+            onPlay={() => onPlay(game)}
+            footer={
+              <span className="flex min-w-0 items-center gap-1.5">
+                <span className="flex shrink-0">
+                  {players.slice(0, 3).map((f, i) => (
+                    <Avatar
+                      key={f._id}
+                      src={f.avatar}
+                      size={20}
+                      className={cn("rounded-full ring-2 ring-[#2c2c2c]", i > 0 && "-ml-1.5")}
+                    />
+                  ))}
+                </span>
+                <span className="truncate text-[13px] text-white/80 leading-4">
+                  {players.length === 1
+                    ? `${players[0]?.name.split(" ")[0]} plays`
+                    : `${players.length} friends play`}
+                </span>
+              </span>
+            }
+          />
+        ))}
+      </Carousel>
+    </Section>
   );
 }
 
@@ -436,7 +497,16 @@ function FeaturedCard({ game, onPlay }: { game: Game; onPlay: () => void }) {
   );
 }
 
-function PickTile({ game, onPlay }: { game: Game; onPlay: () => void }) {
+function PickTile({
+  game,
+  onPlay,
+  footer,
+}: {
+  game: Game;
+  onPlay: () => void;
+  /** Replaces the genre pill (e.g. a friends facepile). */
+  footer?: ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -452,9 +522,11 @@ function PickTile({ game, onPlay }: { game: Game; onPlay: () => void }) {
       <GameCover game={game} variant="thumb" className="relative block h-[95px] w-full" />
       <div className="relative flex h-[113px] flex-col justify-between p-2">
         <p className="line-clamp-2 font-semibold text-[17px] text-white leading-5">{game.name}</p>
-        <span className="self-start rounded-2xl bg-black/80 px-2 py-1.5 font-semibold text-[13px] text-white/80 leading-4">
-          {game.category}
-        </span>
+        {footer ?? (
+          <span className="self-start rounded-2xl bg-black/80 px-2 py-1.5 font-semibold text-[13px] text-white/80 leading-4">
+            {game.category}
+          </span>
+        )}
       </div>
       <span className="absolute inset-0 bg-white/0 transition-colors group-hover:bg-white/5" />
     </button>

@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { type ReactNode, useLayoutEffect, useRef, useState } from "react";
 import { useM } from "@/app/viewer";
 import { groupParams } from "@/features/feed/links";
-import { cn } from "@/lib/format";
 import { Avatar, Button, Card } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import { type GroupView, useGroup } from "./context";
@@ -72,20 +71,43 @@ function AboutCard({ group }: { group: GroupView }) {
   );
 }
 
-/** Description clamped to two lines with an inline "See more" at the clamp, as on Facebook. */
+/**
+ * Description clamped to two lines, with "… See more" set inline right after the
+ * last word that fits (no gap), as on Facebook. A hidden twin measures the cut.
+ */
 function ClampedDescription({ text }: { text: string }) {
-  const ref = useRef<HTMLParagraphElement>(null);
+  const box = useRef<HTMLDivElement>(null);
+  const twin = useRef<HTMLParagraphElement>(null);
   const [open, setOpen] = useState(false);
-  const [overflows, setOverflows] = useState(false);
+  /** Characters kept when clamped; null when the whole text fits in two lines. */
+  const [cut, setCut] = useState<number | null>(null);
   useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el || open) return;
-    const check = () => setOverflows(el.scrollHeight > el.clientHeight + 1);
-    check();
-    const ro = new ResizeObserver(check);
-    ro.observe(el);
+    const el = twin.current;
+    const host = box.current;
+    if (!el || !host) return;
+    const body = el.firstChild as HTMLSpanElement;
+    const tail = el.lastChild as HTMLSpanElement;
+    const fit = () => {
+      const max = 2 * Number.parseFloat(getComputedStyle(el).lineHeight) + 1;
+      body.textContent = text;
+      tail.hidden = true;
+      if (el.offsetHeight <= max) return setCut(null);
+      tail.hidden = false;
+      let lo = 0;
+      let hi = text.length;
+      while (lo < hi) {
+        const mid = Math.ceil((lo + hi) / 2);
+        body.textContent = text.slice(0, mid).trimEnd();
+        if (el.offsetHeight <= max) lo = mid;
+        else hi = mid - 1;
+      }
+      setCut(lo);
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(host);
     return () => ro.disconnect();
-  }, [open]);
+  }, [text]);
 
   const toggle = (label: string) => (
     <button
@@ -97,16 +119,21 @@ function ClampedDescription({ text }: { text: string }) {
     </button>
   );
   return (
-    <div className="relative text-[15px] text-primary leading-5">
-      <p ref={ref} className={cn("whitespace-pre-line break-words", !open && "line-clamp-2")}>
-        {text}
-        {open && overflows && <> {toggle("See less")}</>}
+    <div ref={box} className="relative text-[15px] text-primary leading-5">
+      <p className="whitespace-pre-line break-words">
+        {cut === null || open ? text : `${text.slice(0, cut).trimEnd()}… `}
+        {cut !== null && (open ? <> {toggle("See less")}</> : toggle("See more"))}
       </p>
-      {!open && overflows && (
-        <span className="absolute right-0 bottom-0 bg-[linear-gradient(to_right,transparent,var(--card)_24px)] pl-8">
-          … {toggle("See more")}
+      <p
+        ref={twin}
+        aria-hidden
+        className="invisible absolute inset-x-0 top-0 whitespace-pre-line break-words"
+      >
+        <span />
+        <span>
+          … <span className="font-semibold">See more</span>
         </span>
-      )}
+      </p>
     </div>
   );
 }

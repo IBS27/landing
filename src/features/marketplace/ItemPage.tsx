@@ -773,7 +773,7 @@ function SellerInfo({ l }: { l: Detail }) {
         >
           {s.name}
         </Link>
-        {s.rating && <Stars stars={s.rating.stars} count={s.rating.count} />}
+        <Stars stars={s.rating.stars} count={s.rating.count} />
       </div>
       <div className="mt-4 flex items-center gap-3 text-[15px] text-primary leading-5">
         <span className="flex h-5 w-5 items-center justify-center grayscale">

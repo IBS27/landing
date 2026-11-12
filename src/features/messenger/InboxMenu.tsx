@@ -66,7 +66,7 @@ export function InboxMenu({
               type="button"
               aria-label="Settings, help and more"
               className={cn(
-                "flex items-center justify-center rounded-full data-[state=open]:bg-highlight data-[state=open]:text-fb",
+                "flex items-center justify-center rounded-full aria-expanded:bg-highlight aria-expanded:text-fb aria-expanded:brightness-100",
                 ghost
                   ? "text-icon-secondary hover:bg-hover"
                   : "bg-btn text-icon hover:brightness-95 dark:hover:brightness-125",

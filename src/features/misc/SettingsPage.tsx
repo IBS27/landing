@@ -294,6 +294,7 @@ export function SettingsPage({ tab }: { tab?: string }) {
   // Keep the selected row in view inside the rail's own scroller (never the window), like
   // Facebook does when a setting is opened from a link further down the list.
   const rail = useRef<HTMLDivElement>(null);
+  const [railScrolled, setRailScrolled] = useState(false);
   useEffect(() => {
     const box = rail.current;
     if (!box || !tab || filtered) return;
@@ -327,7 +328,15 @@ export function SettingsPage({ tab }: { tab?: string }) {
             />
           </label>
         </div>
-        <div ref={rail} className="relative min-h-0 flex-1 overflow-y-auto px-2 pt-[31px] pb-6">
+        {/* Once scrolled, a top band masks rows sliding under the search box (no half-cut lines). */}
+        <div
+          ref={rail}
+          onScroll={(e) => setRailScrolled(e.currentTarget.scrollTop > 0)}
+          className={cn(
+            "relative min-h-0 flex-1 overflow-y-auto px-2 pt-[31px] pb-6",
+            railScrolled && "[mask-image:linear-gradient(to_bottom,transparent_28px,black_40px)]",
+          )}
+        >
           {filtered ? (
             filtered.length === 0 ? (
               <p className="px-3 py-6 text-center text-[15px] text-secondary">No results found</p>

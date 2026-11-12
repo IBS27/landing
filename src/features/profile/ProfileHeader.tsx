@@ -100,8 +100,8 @@ function Cover() {
   const [choosing, setChoosing] = useState(false);
 
   return (
-    // In the Friends preview pane the cover keeps the content column's gutters.
-    <div className={cn("relative mx-auto w-full max-w-[1250px]", embedded && "px-4")}>
+    // In the Friends preview pane the cover is inset and centred like a full profile's.
+    <div className={cn("relative mx-auto w-full max-w-[1250px]", embedded && "px-10")}>
       <div className="relative aspect-[1250/463] max-h-[463px] w-full overflow-hidden rounded-b-lg bg-wash">
         {user.cover ? (
           <button

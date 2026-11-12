@@ -250,16 +250,15 @@ export function homeTitle(
 
 /**
  * A seller's Marketplace rating, derived deterministically from their id
- * (there are no buyer reviews in the clone). About one seller in six has none.
+ * (there are no buyer reviews in the clone).
  */
-export function sellerRating(sellerId: string): { stars: number; count: number } | null {
+export function sellerRating(sellerId: string): { stars: number; count: number } {
   let h = 2166136261;
   for (let i = 0; i < sellerId.length; i++) {
     h ^= sellerId.charCodeAt(i);
     h = Math.imul(h, 16777619);
   }
   const u = h >>> 0;
-  if (u % 6 === 0) return null;
   const stars = [5, 5, 5, 4.5, 4.5, 4][(u >>> 3) % 6] ?? 5;
   const count = 1 + ((u >>> 7) % 48);
   return { stars, count };

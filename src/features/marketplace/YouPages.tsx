@@ -755,7 +755,7 @@ export function InboxPage({ role }: { role: "selling" | "buying" }) {
                       <span
                         className={cn(
                           "block truncate text-[15px] text-primary leading-5",
-                          r.unread ? "font-bold" : "font-semibold",
+                          r.unread ? "font-semibold" : "font-medium",
                         )}
                       >
                         {r.other?.name ?? "Facebook user"} · {r.listing?.title ?? "Listing removed"}
