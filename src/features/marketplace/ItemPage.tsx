@@ -56,6 +56,7 @@ import { LISTING_REPORT_REASONS } from "../../../convex/lib/reports";
 import { areaMap } from "../maps/lookup";
 import { ListingGrid } from "./grid";
 import { BookmarkFill, BookmarkOutline, MessengerGradient, ShareArrow } from "./icons";
+import { useNear } from "./location";
 import { MapTile } from "./MapTile";
 import { LocationChip, MainRail, MpShell } from "./rails";
 import { useToast } from "./toast";
@@ -116,7 +117,8 @@ function Unavailable() {
 
 function Related({ listingId }: { listingId: Id<"listings"> }) {
   const [limit, setLimit] = useState(24);
-  const items = useQ(api.listings.related, { listingId, limit });
+  const near = useNear();
+  const items = useQ(api.listings.related, { listingId, limit, near });
   return (
     <div className="pt-1">
       <ListingGrid

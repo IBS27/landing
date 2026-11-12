@@ -14,6 +14,7 @@ import {
   type Near,
   sellerRating,
   toCard,
+  withinRadius,
 } from "./lib/listings";
 import { notify } from "./lib/notify";
 import { isSaved } from "./lib/posts";
@@ -125,10 +126,7 @@ function matches(
   if (f.maxPrice !== undefined && l.price > f.maxPrice) return false;
   if (f.conditions?.length && (!l.condition || !f.conditions.includes(l.condition))) return false;
   if (f.daysSinceListed !== undefined && now - l.createdAt > f.daysSinceListed * DAY) return false;
-  if (nearBy) {
-    const d = distanceTo(l, nearBy);
-    if (d !== null && d > nearBy.radiusMi) return false;
-  }
+  if (!withinRadius(l, nearBy)) return false;
   const vf = [f.make, f.model, f.minYear, f.maxYear, f.minMileage, f.maxMileage, f.vehicleType];
   if (vf.some((x) => x !== undefined) || f.bodyStyle || f.transmission) {
     const veh = l.vehicle;
@@ -369,41 +367,49 @@ export const get = viewerQuery({
   },
 });
 
-/** "Today's picks" under a listing: same category first, then everything else. */
+/** "Today's picks" under a listing. */
 export const related = viewerQuery({
-  args: { listingId: v.id("listings"), limit: v.number() },
-  handler: async (ctx, { listingId, limit }) => {
-    const l = await ctx.db.get(listingId);
+  args: { listingId: v.id("listings"), limit: v.number(), near: v.optional(near) },
+  handler: async (ctx, { listingId, limit, near }) => {
+    const rows = await relatedListings(ctx, listingId, limit, near);
     const now = Date.now();
-    const out: Doc<"listings">[] = [];
-    const seen = new Set<Id<"listings">>([listingId]);
-    const take = (rows: Doc<"listings">[]) => {
-      for (const r of rows) {
-        if (out.length >= limit) break;
-        if (seen.has(r._id) || r.status !== "active") continue;
-        seen.add(r._id);
-        out.push(r);
-      }
-    };
-    if (l)
-      take(
-        await ctx.db
-          .query("listings")
-          .withIndex("by_category", (q) => q.eq("category", l.category))
-          .order("desc")
-          .take(limit + 8),
-      );
-    if (out.length < limit)
-      take(
-        await ctx.db
-          .query("listings")
-          .withIndex("by_created")
-          .order("desc")
-          .take(limit * 2 + 8),
-      );
-    return out.map((r) => toCard(r, now));
+    return rows.map((r) => toCard(r, now));
   },
 });
+
+/**
+ * Active listings near the viewer (the same radius filter as `browse`): same
+ * category first, newest first, then everything else, newest first.
+ */
+export async function relatedListings(
+  ctx: QueryCtx,
+  listingId: Id<"listings">,
+  limit: number,
+  nearBy: Near | undefined,
+) {
+  const max = Math.max(1, Math.min(limit, 240));
+  const l = await ctx.db.get(listingId);
+  const out: Doc<"listings">[] = [];
+  const seen = new Set<Id<"listings">>([listingId]);
+  const fill = async (rows: AsyncIterable<Doc<"listings">>) => {
+    let scanned = 0;
+    for await (const r of rows) {
+      if (out.length >= max || ++scanned > MAX_SCAN) break;
+      if (seen.has(r._id) || r.status !== "active" || !withinRadius(r, nearBy)) continue;
+      seen.add(r._id);
+      out.push(r);
+    }
+  };
+  if (l)
+    await fill(
+      ctx.db
+        .query("listings")
+        .withIndex("by_category", (q) => q.eq("category", l.category))
+        .order("desc"),
+    );
+  if (out.length < max) await fill(ctx.db.query("listings").withIndex("by_created").order("desc"));
+  return out;
+}
 
 /* ───────────────────────── You: selling / buying / saved ───────────────────────── */
 

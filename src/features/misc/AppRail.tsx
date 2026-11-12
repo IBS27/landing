@@ -136,6 +136,9 @@ export function AppRailItem({
       <Link
         to={to}
         search={search}
+        // The router marks prefix matches as current (Home `/landing` matches every
+        // section), so only an exact match may add to `selected`.
+        activeOptions={{ exact: true }}
         className={cls}
         onClick={onClick}
         aria-current={selected ? "page" : undefined}
