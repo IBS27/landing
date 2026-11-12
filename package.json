@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
     "@tanstack/react-router": "^1.170.46",
     "clsx": "^2.1.1",
     "convex": "^1.49.0",

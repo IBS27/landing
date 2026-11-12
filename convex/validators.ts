@@ -221,3 +221,57 @@ export const friendsListAudience = v.union(
   v.literal("friends"),
   v.literal("only_me"),
 );
+
+/* ---------- AI (see convex/ai/) ---------- */
+
+/** Landing's model-backed agents: Muse drafts and acts, Ember reads local threads, Spark finds consensus. */
+export const aiAgent = v.union(v.literal("muse"), v.literal("ember"), v.literal("spark"));
+export type AiAgent = Infer<typeof aiAgent>;
+
+/** Why a run returned its task's non-AI fallback instead of model output. */
+export const aiFallbackReason = v.union(
+  v.literal("disabled"),
+  v.literal("invalid_output"),
+  v.literal("model_error"),
+  v.literal("refusal"),
+  v.literal("timeout"),
+);
+export type AiFallbackReason = Infer<typeof aiFallbackReason>;
+
+export const aiJobStatus = v.union(
+  v.literal("queued"),
+  v.literal("running"),
+  v.literal("succeeded"),
+  v.literal("failed"),
+);
+export type AiJobStatus = Infer<typeof aiJobStatus>;
+
+/** A logged model call (the `aiRuns` table). */
+export const aiRun = v.object({
+  agent: aiAgent,
+  task: v.string(),
+  inputHash: v.string(),
+  outcome: v.union(v.literal("model"), v.literal("fallback")),
+  fallbackReason: v.optional(aiFallbackReason),
+  /** JSON of the validated model output, or of the fallback output. */
+  output: v.string(),
+  /** Keys of the sources the output cites; every one was in the run's input. */
+  cited: v.array(v.string()),
+  /** The model that answered (a refusal fallback can switch models). */
+  model: v.optional(v.string()),
+  attempts: v.number(),
+  /** Why earlier attempts were rejected, or the API error. */
+  errors: v.optional(v.array(v.string())),
+  latencyMs: v.number(),
+  usage: v.optional(
+    v.object({
+      inputTokens: v.number(),
+      outputTokens: v.number(),
+      cacheReadTokens: v.number(),
+      cacheWriteTokens: v.number(),
+    }),
+  ),
+  costUsd: v.optional(v.number()),
+  jobId: v.optional(v.id("aiJobs")),
+  createdAt: v.number(),
+});

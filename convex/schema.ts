@@ -1,6 +1,8 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import {
+  aiJobStatus,
+  aiRun,
   badge,
   friendRequestAudience,
   friendsListAudience,
@@ -630,4 +632,30 @@ export default defineSchema({
   })
     .index("by_user", ["userId", "lastPlayedAt"])
     .index("by_user_game", ["userId", "gameId"]),
+  /**
+   * One row per model call made through `runAgent` (convex/ai/agent.ts), including
+   * calls that ended in the task's non-AI fallback. Model results are reused by
+   * `inputHash` while fresh, so shared outputs are generated once.
+   */
+  aiRuns: defineTable(aiRun)
+    .index("by_hash", ["inputHash", "outcome", "createdAt"])
+    .index("by_task", ["task", "createdAt"]),
+
+  /**
+   * Long AI jobs run on the scheduler (convex/ai/jobs.ts). The UI subscribes to
+   * a row for status and progress; results land in the feature's own tables.
+   */
+  aiJobs: defineTable({
+    kind: v.string(),
+    /** Dedupe key within `kind`, e.g. a neighborhood id. */
+    key: v.string(),
+    /** Who may read the job; unset means any viewer (shared results). */
+    userId: v.optional(v.id("users")),
+    status: aiJobStatus,
+    progress: v.optional(v.object({ label: v.string(), done: v.number(), total: v.number() })),
+    error: v.optional(v.string()),
+    createdAt: v.number(),
+    startedAt: v.optional(v.number()),
+    finishedAt: v.optional(v.number()),
+  }).index("by_kind_key", ["kind", "key", "createdAt"]),
 });
