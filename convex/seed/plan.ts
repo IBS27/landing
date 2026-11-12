@@ -116,7 +116,7 @@ export function buildPlan(now: number) {
   const isPage = new Set<string>(pages.map((p) => p.username));
   const nameOf = new Map<string, string>();
   const genderIndex = { m: 0, w: 0 };
-  const coverTopics = ["mountains", "seattle skyline", "forest", "trail", "texture"];
+  const coverTopics = ["mountains", "sf skyline", "forest", "trail", "texture"];
 
   const users: { handle: Handle; row: Row<"users"> }[] = [];
   for (const p of people) {
@@ -464,7 +464,7 @@ export function buildPlan(now: number) {
         online: e.online ?? false,
         venue: e.venue,
         address: e.address,
-        city: e.city ?? "Seattle, WA",
+        city: e.city ?? "San Francisco, CA",
         privacy: e.privacy,
         externalGoingCount: e.externalGoing,
         externalInterestedCount: e.externalInterested,

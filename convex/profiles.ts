@@ -283,17 +283,21 @@ export const overview = viewerQuery({
   },
 });
 
-/** Places outside Seattle proper that posts check in to, by name. */
+/** Places outside San Francisco proper that posts check in to, by name. */
 const PLACE_REGIONS: Record<string, string> = {
-  "Mount Si": "North Bend, Washington",
-  "Twin Falls Trail": "North Bend, Washington",
-  "Rattlesnake Ledge": "North Bend, Washington",
-  "Index Town Walls": "Index, Washington",
+  "UC Berkeley": "Berkeley, California",
+  "Moffitt Library": "Berkeley, California",
+  "Innovative Genomics Institute": "Berkeley, California",
+  "Berkeley Marina": "Berkeley, California",
+  "Mount Tamalpais": "Mill Valley, California",
+  "Cataract Falls Trail": "Fairfax, California",
+  "Castle Rock State Park": "Los Gatos, California",
+  "Mission Peak": "Fremont, California",
 };
 
 /**
  * The region line under a check-in, like Facebook's place pages: "City, State"
- * places show their state; named venues show their city (the seed is set in Seattle).
+ * places show their state; named venues show their city (the seed is set in San Francisco).
  */
 function placeRegion(place: string) {
   const known = PLACE_REGIONS[place];
@@ -301,9 +305,9 @@ function placeRegion(place: string) {
   const parts = place.split(",").map((s) => s.trim());
   if (parts.length > 1) {
     const last = parts[parts.length - 1];
-    return last === "Seattle" ? "Seattle, Washington" : last;
+    return last === "San Francisco" ? "San Francisco, California" : last;
   }
-  return "Seattle, Washington";
+  return "San Francisco, California";
 }
 
 /** Photos tab: the person's photos, photos they're tagged in, and derived albums. */

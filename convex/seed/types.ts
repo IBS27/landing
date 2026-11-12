@@ -162,7 +162,7 @@ export type PostSeed = {
   readonly bg?: BackgroundName;
   /** e.g. "feeling excited", "feeling grateful". */
   readonly feeling?: string;
-  /** Check-in, e.g. "Cascade Boulders" or "Discovery Park". */
+  /** Check-in, e.g. "Sutro Boulders" or "Lands End Trail". */
   readonly place?: string;
   readonly tagged?: readonly Username[];
   /** Key of the post being shared. */
@@ -281,7 +281,7 @@ export type EventSeed = {
   readonly online?: boolean;
   readonly venue?: string;
   readonly address?: string;
-  /** Defaults to "Seattle, WA". */
+  /** Defaults to "San Francisco, CA". */
   readonly city?: string;
   readonly privacy: "public" | "friends" | "private" | "group";
   /** Going / interested counts from outside the seeded world. */

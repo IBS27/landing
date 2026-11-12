@@ -17,10 +17,10 @@ export type MpLocation = {
 
 const KEY = "fb-clone:marketplace-location";
 const DEFAULT: MpLocation = {
-  name: "Seattle",
-  region: "Washington",
-  lat: 47.6062,
-  lng: -122.3321,
+  name: "San Francisco",
+  region: "California",
+  lat: 37.7749,
+  lng: -122.4194,
   radiusMi: 40,
 };
 
@@ -145,7 +145,7 @@ export function LocationDialog({ open, onClose }: { open: boolean; onClose: () =
         </label>
         <div className="mt-4 overflow-hidden rounded-lg">
           <MapTile
-            src={regionMap(place.name) ?? regionMap("Seattle") ?? ""}
+            src={regionMap(place.name) ?? regionMap("San Francisco") ?? ""}
             alt={`Map of ${place.name}, ${place.region}`}
             height={220}
             radius={Math.max(

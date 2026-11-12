@@ -70,7 +70,7 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "maya.chen", text: "ya i can do 7", gap: 9 },
       {
         by: "maya.chen",
-        text: "do you need anything? i can grab ice from the qfc on the way",
+        text: "do you need anything? i can grab ice from berkeley bowl on the way",
         gap: 1,
       },
       { by: "ethan.park", text: "ice would be clutch", gap: 4 },
@@ -108,7 +108,7 @@ export const conversations: readonly ConversationSeed[] = [
         post: "sofia-bishop",
         gap: 2900,
       },
-      { by: "maya.chen", text: "the larches!!! 😭", gap: 15 },
+      { by: "maya.chen", text: "the buttermilks!!! 😭", gap: 15 },
       { by: "maya.chen", text: "ok i'm coming next time no excuses", gap: 1 },
       { by: "sofia.alvarez", text: "you said that last time", gap: 6 },
       { by: "maya.chen", text: "i had a capstone deadline!!", gap: 1 },
@@ -134,8 +134,8 @@ export const conversations: readonly ConversationSeed[] = [
         gap: 40,
         reactions: [["maya.chen", "angry"]],
       },
-      { by: "sofia.alvarez", text: "jk. maybe brunch? somewhere with good hash browns", gap: 1 },
-      { by: "maya.chen", text: "glo's?? or is the line gonna be insane", gap: 3 },
+      { by: "sofia.alvarez", text: "jk. maybe brunch? somewhere with good potatoes", gap: 1 },
+      { by: "maya.chen", text: "plow?? or is the line gonna be insane", gap: 3 },
       { by: "sofia.alvarez", text: "the line is always insane", gap: 2 },
       { by: "sofia.alvarez", text: "worth it tho", gap: 1 },
       { by: "maya.chen", text: "ok i'll put my name in at 9:30. you just show up", gap: 4 },
@@ -143,16 +143,16 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "sofia.alvarez", text: "also are you climbing friday? andre bailed on me", gap: 300 },
       {
         by: "maya.chen",
-        text: "yes!! after 7. also i'm touring a place on cap hill saturday 👀",
+        text: "yes!! after 7. also i'm touring a place in the mission saturday 👀",
         gap: 6,
       },
       { by: "sofia.alvarez", text: "ooh which one", gap: 2 },
       { by: "maya.chen", listing: "derek-mission-1br", gap: 1 },
       { by: "sofia.alvarez", text: "wait thats actually cute. how much", gap: 3 },
-      { by: "maya.chen", text: "2150 💀", gap: 1 },
+      { by: "maya.chen", text: "3250 💀", gap: 1 },
       {
         by: "sofia.alvarez",
-        text: "for cap hill w/ in-unit laundry that's kinda normal now sadly",
+        text: "for the mission w/ in-unit laundry that's kinda normal now sadly",
         gap: 2,
       },
       {
@@ -173,7 +173,7 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "ana.torres", text: "ok random question" },
       {
         by: "ana.torres",
-        text: "are you gonna tell hannah about the cap hill thing or should i pretend i don't know",
+        text: "are you gonna tell hannah about the mission thing or should i pretend i don't know",
         gap: 1,
       },
       { by: "maya.chen", text: "i'll tell her this week i promise", gap: 14 },
@@ -185,7 +185,7 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "ana.torres", text: "it's gonna be a whole thing", gap: 2 },
       {
         by: "ana.torres",
-        text: "she cried when we moved out of mccarty",
+        text: "she cried when we moved out of unit 2",
         gap: 1,
         reactions: [["maya.chen", "haha"]],
       },
@@ -232,12 +232,12 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "ana.torres", text: "lol ok", gap: 2 },
       {
         by: "ana.torres",
-        text: "the 49 just drove past me. second one.",
+        text: "the 51B just drove past me. second one.",
         photo: "posts/rainy-street-02.jpg",
         gap: 1740,
       },
       { by: "maya.chen", text: "nooo", gap: 6 },
-      { by: "maya.chen", text: "the 49 is a myth honestly", gap: 1 },
+      { by: "maya.chen", text: "the 51B is a myth honestly", gap: 1 },
       {
         by: "ana.torres",
         text: "walking. it's fine. i'm a drowned rat",
@@ -288,17 +288,21 @@ export const conversations: readonly ConversationSeed[] = [
         gap: 4,
         reactions: [["maya.chen", "haha"]],
       },
-      { by: "maya.chen", text: "are you driving down to portland for thanksgiving?", gap: 1500 },
-      { by: "hannah.lee", text: "taking the amtrak wed morning", gap: 20 },
+      { by: "maya.chen", text: "are you flying home to portland for thanksgiving?", gap: 1500 },
+      { by: "hannah.lee", text: "flying out of oak wed morning. $89 southwest 🙏", gap: 20 },
       { by: "hannah.lee", text: "are you going home?", gap: 1 },
-      { by: "maya.chen", text: "flights to sjc are $340 rn. i'm being stubborn about it", gap: 5 },
+      {
+        by: "maya.chen",
+        text: "idk capstone is due the monday after. i'm being stubborn about it",
+        gap: 5,
+      },
       { by: "hannah.lee", text: "friendsgiving with us then!! the saturday before", gap: 2 },
       { by: "maya.chen", text: "obviously i'm coming to friendsgiving", gap: 1 },
       { by: "maya.chen", text: "i call the mashed potatoes", gap: 1 },
       { by: "hannah.lee", text: "ana already called mashed potatoes", gap: 3 },
       { by: "maya.chen", text: "ana can fight me", gap: 1 },
       { by: "hannah.lee", sticker: "😂", gap: 1 },
-      { by: "hannah.lee", text: "ok also 9am study sesh at suzzallo thursday. you in?", gap: 600 },
+      { by: "hannah.lee", text: "ok also 9am study sesh at doe thursday. you in?", gap: 600 },
       {
         by: "maya.chen",
         text: "9am is a war crime but yes",
@@ -333,7 +337,7 @@ export const conversations: readonly ConversationSeed[] = [
       },
       {
         by: "zoe.nguyen",
-        text: "developed the roll from cascade",
+        text: "developed the roll from sutro",
         photo: "bouldering gym",
         gap: 2200,
       },
@@ -381,7 +385,7 @@ export const conversations: readonly ConversationSeed[] = [
     messages: [
       {
         by: "maya.chen",
-        text: "hey! random but have you seen this person? they want a $500 'hold deposit' before showing me a 1br on capitol hill",
+        text: "hey! random but have you seen this person? they want a $500 'hold deposit' before showing me a 1br in the mission",
       },
       { by: "maya.chen", photo: "phone screen", gap: 1 },
       { by: "jordan.kim", text: "oh no. yeah that's the same script", gap: 25 },
@@ -407,7 +411,7 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "maya.chen", text: "done", gap: 5, reactions: [["jordan.kim", "like"]] },
       {
         by: "maya.chen",
-        text: "ok other housing q. is $2150 for a 1br off 15th ave e reasonable or am i getting played",
+        text: "ok other housing q. is $3250 for a 1br off guerrero reasonable or am i getting played",
         gap: 2500,
       },
       {
@@ -550,8 +554,12 @@ export const conversations: readonly ConversationSeed[] = [
         gap: 1,
       },
       { by: "maya.chen", text: "omg", gap: 20 },
-      { by: "maya.chen", text: "tell her flights are $340 and i'm a broke student", gap: 1 },
-      { by: "emily.chen", text: "i'm not telling her that. she'll just buy you a ticket", gap: 2 },
+      { by: "maya.chen", text: "tell her capstone is due that monday and i'm drowning", gap: 1 },
+      {
+        by: "emily.chen",
+        text: "i'm not telling her that. she'll just drive up with tupperware",
+        gap: 2,
+      },
       {
         by: "maya.chen",
         text: "...is that a bad thing",
@@ -561,11 +569,11 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "emily.chen", text: "LOL", gap: 1 },
       {
         by: "emily.chen",
-        text: "are you flying out wed? we could go together, i'm on the 6am flight",
+        text: "are you coming down wed? we could go together, i'm on the 6am caltrain",
         gap: 1,
       },
       { by: "maya.chen", text: "6am is evil. but maybe. let me look", gap: 10 },
-      { by: "maya.chen", text: "ok i caved. booked the tues night flight to sjc", gap: 1440 },
+      { by: "maya.chen", text: "ok i caved. taking bart down to berryessa tues night", gap: 1440 },
       { by: "emily.chen", text: "YAY", gap: 3 },
       {
         by: "emily.chen",
@@ -704,30 +712,30 @@ export const conversations: readonly ConversationSeed[] = [
     messages: [
       {
         by: "jessica.huang",
-        text: "ok i'm landing at 4:10 friday. sea-tac to u district is the light rail right?",
+        text: "ok i'm landing at 4:10 friday. oak to berkeley is bart right?",
       },
       {
         by: "maya.chen",
-        text: "yes!! take the 1 line all the way to u district station, i'll meet you there",
+        text: "yes!! oak airport connector to coliseum, then a richmond train to downtown berkeley, i'll meet you there",
         gap: 6,
       },
-      { by: "jessica.huang", text: "the 1 line. so official", gap: 2 },
-      { by: "jessica.huang", text: "what do i need to pack, is it raining", gap: 1 },
-      { by: "maya.chen", text: "it's seattle in october", gap: 2 },
+      { by: "jessica.huang", text: "the airport connector. so official", gap: 2 },
+      { by: "jessica.huang", text: "what do i need to pack, is it cold", gap: 1 },
+      { by: "maya.chen", text: "it's the bay in october", gap: 2 },
       {
         by: "maya.chen",
-        text: "it's always raining",
+        text: "it'll be 80 at noon and 55 by dinner. bring layers",
         gap: 1,
         reactions: [["jessica.huang", "haha"]],
       },
       { by: "jessica.huang", text: "ok photo dump from the weekend", gap: 3000 },
-      { by: "jessica.huang", photo: "pike place", gap: 1 },
-      { by: "jessica.huang", photo: "gas works park", gap: 1, reactions: [["maya.chen", "love"]] },
+      { by: "jessica.huang", photo: "ferry building", gap: 1 },
+      { by: "jessica.huang", photo: "dolores park", gap: 1, reactions: [["maya.chen", "love"]] },
       { by: "jessica.huang", photo: "ramen", gap: 1 },
-      { by: "maya.chen", text: "the gas works one!!!", gap: 15 },
+      { by: "maya.chen", text: "the dolores one!!!", gap: 15 },
       {
         by: "maya.chen",
-        text: "you have to come back in the summer when it's actually nice",
+        text: "you have to come back in the spring when the hills are actually green",
         gap: 1,
       },
       { by: "jessica.huang", text: "i'm holding you to that", gap: 3 },
@@ -743,7 +751,7 @@ export const conversations: readonly ConversationSeed[] = [
         text: "are you home for thanksgiving?? kevin wants to do a lynbrook reunion boba thing",
         gap: 2000,
       },
-      { by: "maya.chen", text: "probably?? flights are being annoying", gap: 30 },
+      { by: "maya.chen", text: "probably?? capstone is being annoying", gap: 30 },
       {
         by: "jessica.huang",
         text: "come home. also the boba place by lynbrook closed btw",
@@ -830,7 +838,7 @@ export const conversations: readonly ConversationSeed[] = [
     messages: [
       {
         by: "maya.chen",
-        text: "hiii random q, you've lived on cap hill forever. any buildings you'd recommend? or avoid lol",
+        text: "hiii random q, you've lived in the mission forever. any buildings you'd recommend? or avoid lol",
       },
       {
         by: "harper.quinn",
@@ -839,7 +847,7 @@ export const conversations: readonly ConversationSeed[] = [
       },
       {
         by: "harper.quinn",
-        text: "the older brick ones off 12th are the move. radiators, weird closets, actual character",
+        text: "the old victorians off 20th are the move. radiators, weird closets, actual character",
         gap: 1,
       },
       {
@@ -850,7 +858,7 @@ export const conversations: readonly ConversationSeed[] = [
       },
       {
         by: "harper.quinn",
-        text: "also don't live right on pike/pine unless you like 2am karaoke outside your window",
+        text: "also don't live right on valencia unless you like 2am karaoke outside your window",
         gap: 3,
       },
       { by: "maya.chen", text: "noted 📝", gap: 2 },
@@ -865,7 +873,7 @@ export const conversations: readonly ConversationSeed[] = [
       },
       {
         by: "harper.quinn",
-        text: "ok WAIT. my neighbor across the hall just told me she's moving to portland in may",
+        text: "ok WAIT. my neighbor across the hall just told me she's moving to LA in may",
         gap: 3000,
       },
       {
@@ -883,17 +891,17 @@ export const conversations: readonly ConversationSeed[] = [
     last: daysAgo(7, "21:00"),
     messages: [
       { by: "grace.liu", text: "heard you're joining us in july!! which org?" },
-      { by: "maya.chen", text: "teams! well, the design team for teams lol", gap: 20 },
-      { by: "grace.liu", text: "oh nice, i'm in office. we're like 2 buildings apart", gap: 3 },
+      { by: "maya.chen", text: "workspace! well, the design team for meet lol", gap: 20 },
+      { by: "grace.liu", text: "oh nice, i'm on docs. we're like 2 buildings apart", gap: 3 },
       {
         by: "grace.liu",
-        text: "lunch at the commons is gonna be a lot better with you there",
+        text: "lunch at charleston east is gonna be a lot better with you there",
         gap: 1,
         reactions: [["maya.chen", "love"]],
       },
       {
         by: "maya.chen",
-        text: "do i need to know anything before i start? other than 'outlook calendar is your life'",
+        text: "do i need to know anything before i start? other than 'everything is a go/ link'",
         gap: 6,
       },
       {
@@ -910,7 +918,7 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "maya.chen", text: "writing that down", gap: 2 },
       {
         by: "grace.liu",
-        text: "index this weekend if the rain holds off? arjun has the car",
+        text: "castle rock this weekend if the rain holds off? arjun has the car",
         gap: 3000,
       },
       { by: "maya.chen", text: "it's not gonna hold off", gap: 30 },
@@ -918,7 +926,7 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "grace.liu", text: "forecast says 40% saturday", gap: 3 },
       {
         by: "grace.liu",
-        text: "which in seattle means 100%",
+        text: "which in the santa cruz mountains means 100%",
         gap: 1,
         reactions: [["maya.chen", "haha"]],
       },
@@ -968,7 +976,7 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "noah.williams", text: "ok but also. ethan bday. are we going in on a gift", gap: 15 },
       {
         by: "maya.chen",
-        text: "yes. thinking the running vest he keeps staring at every time we're in rainline",
+        text: "yes. thinking the running vest he keeps staring at every time we're in fogline",
         gap: 3,
       },
       { by: "noah.williams", text: "how much", gap: 1 },
@@ -996,7 +1004,7 @@ export const conversations: readonly ConversationSeed[] = [
     unreadFor: ["maya.chen"],
     unreadCount: 3,
     messages: [
-      { by: "arjun.mehta", text: "who's in for leavenworth before snow hits" },
+      { by: "arjun.mehta", text: "who's in for bishop before tioga closes" },
       { by: "sofia.alvarez", text: "me!!! i literally just got back but me", gap: 5 },
       { by: "grace.liu", text: "depends on the weekend", gap: 10 },
       { by: "kai.nakamura", text: "i'm setting every weekend until dec 1 😭", gap: 3 },
@@ -1050,13 +1058,13 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "sofia.alvarez", text: "lena yells at everyone", gap: 1 },
       {
         by: "maya.chen",
-        text: "reminder sofia's bday brunch sunday 9:30 at glo's. kai you're coming even if you set all night",
+        text: "reminder sofia's bday brunch sunday 9:30 at plow. kai you're coming even if you set all night",
         gap: 1300,
       },
       { by: "kai.nakamura", text: "i'll be there. sleepy but there", gap: 30 },
       {
         by: "grace.liu",
-        text: "yesss. i'll bring a candle for the hash browns",
+        text: "yesss. i'll bring a candle for the potatoes",
         gap: 4,
         reactions: [["sofia.alvarez", "love"]],
       },
@@ -1111,7 +1119,7 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "ana.torres", text: "i got home from close at 11 and it was right there", gap: 1 },
       { by: "hannah.lee", text: "i'm venmo requesting you one (1) pad see ew", gap: 2 },
       { by: "ana.torres", text: "fair", gap: 1 },
-      { by: "maya.chen", text: "rent reminder! $1,035 each, due friday", gap: 2000 },
+      { by: "maya.chen", text: "rent reminder! $1,250 each, due friday", gap: 2000 },
       { by: "hannah.lee", text: "sent", gap: 40 },
       { by: "ana.torres", text: "sending after my shift", gap: 60 },
       {
@@ -1169,7 +1177,7 @@ export const conversations: readonly ConversationSeed[] = [
   {
     key: "capstone",
     kind: "group",
-    title: "UW capstone team",
+    title: "Cal capstone team",
     members: ["maya.chen", "ethan.park", "noah.williams", "zoe.nguyen"],
     last: daysAgo(1, "23:40"),
     mutedFor: ["noah.williams"],
@@ -1238,7 +1246,7 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "ethan.park", text: "sunday afternoon? i'll be recovered by then. probably", gap: 6 },
       { by: "zoe.nguyen", text: "sunday after 2 works", gap: 3 },
       { by: "noah.williams", text: "sunday works", gap: 1 },
-      { by: "maya.chen", text: "odegaard 2pm sunday 📚", gap: 2 },
+      { by: "maya.chen", text: "moffitt 2pm sunday 📚", gap: 2 },
       { by: "ethan.park", text: "also everyone's coming saturday right", gap: 60 },
       { by: "zoe.nguyen", text: "obviously", gap: 2 },
       { by: "noah.williams", text: "i'm bringing drinks. don't worry about it", gap: 3 },
@@ -1279,14 +1287,14 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "marcus.bell", text: "Perfect. Where should I come?", gap: 3 },
       {
         by: "maya.chen",
-        text: "u district, near 45th and brooklyn. i'll send the exact address tmrw",
+        text: "southside, near dwight and ellsworth. i'll send the exact address tmrw",
         gap: 2,
       },
       { by: "marcus.bell", text: "Sounds good. 6:30 work?", gap: 1 },
       { by: "maya.chen", text: "6:30 is perfect", gap: 2 },
       {
         by: "marcus.bell",
-        text: "Running about 10 min late, sorry. I-5 is a parking lot",
+        text: "Running about 10 min late, sorry. The Bay Bridge is a parking lot",
         gap: 1380,
       },
       { by: "maya.chen", text: "no worries!", gap: 2 },
@@ -1338,18 +1346,22 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "leo.novak", text: "fair, 150 it is", gap: 3, reactions: [["maya.chen", "like"]] },
       {
         by: "leo.novak",
-        text: "could i grab it tomorrow? i work in fremont so u district is an easy bus",
+        text: "could i grab it tomorrow? i work in the haight so i can bart over on my lunch",
         gap: 1,
       },
       { by: "maya.chen", text: "tomorrow works! noon-ish? i'm home until 2", gap: 6 },
-      { by: "leo.novak", text: "noon is great. which bus from fremont is best, the 31?", gap: 2 },
-      { by: "maya.chen", text: "31 or 32 both work, they drop you a few blocks from me", gap: 3 },
+      { by: "leo.novak", text: "noon is great. which train is best, the richmond one?", gap: 2 },
+      {
+        by: "maya.chen",
+        text: "richmond line to downtown berkeley, i'm like a 10 min walk from there",
+        gap: 3,
+      },
       { by: "maya.chen", text: "i'll mark it pending for you", gap: 1 },
-      { by: "leo.novak", text: "thanks! sorry, still learning the buses lol", gap: 2 },
-      { by: "maya.chen", text: "lol it takes a while. welcome to seattle 🌧️", gap: 2 },
+      { by: "leo.novak", text: "thanks! sorry, still learning bart lol", gap: 2 },
+      { by: "maya.chen", text: "lol it takes a while. welcome to the bay 🌁", gap: 2 },
       {
         by: "leo.novak",
-        text: "people keep saying that while it's raining",
+        text: "people keep saying that while it's foggy",
         gap: 1,
         reactions: [["maya.chen", "haha"]],
       },
@@ -1367,7 +1379,7 @@ export const conversations: readonly ConversationSeed[] = [
     unreadCount: 2,
     messages: [
       { by: "yuki.sato", text: "Hi, is this still available?" },
-      { by: "yuki.sato", text: "I can pick up today if so, I live right by the HUB", gap: 1 },
+      { by: "yuki.sato", text: "I can pick up today if so, I live right by Sproul", gap: 1 },
     ],
   },
   {
@@ -1382,7 +1394,7 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "luis.hernandez", text: "would you do 120 cash tomorrow", gap: 2 },
       {
         by: "maya.chen",
-        text: "ah that's pretty low, it's listed at 280 and i just had it tuned at recycled cycles in september",
+        text: "ah that's pretty low, it's listed at 280 and i just had it tuned at missing link in september",
         gap: 15,
       },
       { by: "maya.chen", text: "i could do 250, and it comes with the u-lock and lights", gap: 1 },
@@ -1405,7 +1417,7 @@ export const conversations: readonly ConversationSeed[] = [
     ],
   },
   {
-    key: "mp-derek-caphill-1br",
+    key: "mp-derek-mission-1br",
     kind: "marketplace",
     listing: "derek-mission-1br",
     members: ["maya.chen", "derek.holloway"],
@@ -1432,11 +1444,11 @@ export const conversations: readonly ConversationSeed[] = [
       },
       {
         by: "derek.holloway",
-        text: "Happy to show it. I have two other units on Capitol Hill that usually turn over in late spring, so if you like the building I can keep you on a list.",
+        text: "Happy to show it. I have two other units in the Mission that usually turn over in late spring, so if you like the building I can keep you on a list.",
         gap: 20,
       },
       { by: "maya.chen", text: "oh that would be amazing", gap: 3 },
-      { by: "maya.chen", text: "is the $2,150 including utilities?", gap: 1 },
+      { by: "maya.chen", text: "is the $3,250 including utilities?", gap: 1 },
       {
         by: "derek.holloway",
         text: "Water/sewer/garbage is a flat $85. Electric and internet are on you.",
@@ -1480,7 +1492,7 @@ export const conversations: readonly ConversationSeed[] = [
       },
       {
         by: "ben.carter",
-        text: "Not at all, good questions. About 30 days of sport climbing on it, mostly Exit 38 and Index. No core shots, no falls on sharp edges, sheath looks good. Never been stepped on.",
+        text: "Not at all, good questions. About 30 days of sport climbing on it, mostly Mickey's Beach and Pinnacles. No core shots, no falls on sharp edges, sheath looks good. Never been stepped on.",
         gap: 10,
       },
       {
@@ -1497,7 +1509,7 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "maya.chen", text: "deal!!", gap: 1, reactions: [["ben.carter", "like"]] },
       {
         by: "ben.carter",
-        text: "I'm at the Rainline shop in Fremont til 6 most days, can you swing by?",
+        text: "I'm at the Fogline shop in SoMa til 6 most days, can you swing by?",
         gap: 4,
       },
       { by: "maya.chen", text: "yes! tmrw around 4?", gap: 2 },
@@ -1569,7 +1581,7 @@ export const conversations: readonly ConversationSeed[] = [
       },
       {
         by: "kai.nakamura",
-        text: "foam's still firm. shell is a little faded from the leavenworth sun",
+        text: "foam's still firm. shell is a little faded from the bishop sun",
         gap: 3,
       },
       { by: "kai.nakamura", text: "friend price $150", gap: 1 },
@@ -1585,7 +1597,7 @@ export const conversations: readonly ConversationSeed[] = [
 
   // ── Other personas ─────────────────────────────────────────────────────────
   {
-    key: "mp-derek-wallingford-studio",
+    key: "mp-derek-elmwood-studio",
     kind: "marketplace",
     listing: "derek-elmwood-studio",
     members: ["leo.novak", "derek.holloway"],
@@ -1595,18 +1607,18 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "derek.holloway", text: "Hi Leo, it is. Are you looking for yourself?", gap: 30 },
       {
         by: "leo.novak",
-        text: "yes just me. i just moved from chicago, working in fremont at tidewater",
+        text: "yes just me. i just moved from chicago, working in the haight at tidewater",
         gap: 4,
       },
-      { by: "leo.novak", text: "the commute from wallingford looks perfect", gap: 1 },
+      { by: "leo.novak", text: "the commute from elmwood looks doable?", gap: 1 },
       {
         by: "derek.holloway",
-        text: "It's a 15 min bike or the 62. Quiet street, lots of folks from the Fremont startups around there.",
+        text: "About 45 min door to door. 15 min walk to Ashby BART, or the 51B down College to Rockridge. Quiet street, plenty of tenants who commute into the city.",
         gap: 10,
       },
       {
         by: "leo.novak",
-        text: "is it ok if i don't have a seattle rental history? i rented in chicago for 6 years",
+        text: "is it ok if i don't have a california rental history? i rented in chicago for 6 years",
         gap: 3,
       },
       {
@@ -1725,7 +1737,7 @@ export const conversations: readonly ConversationSeed[] = [
         text: "fair. i'm still waiting to hear back on an apartment so i might not have anywhere to put it yet lol",
         gap: 3,
       },
-      { by: "priya.raman", text: "ah the classic seattle problem", gap: 2 },
+      { by: "priya.raman", text: "ah the classic bay area problem", gap: 2 },
       { by: "leo.novak", text: "can you hold it until monday? i can venmo a deposit", gap: 1 },
       {
         by: "priya.raman",
@@ -1753,7 +1765,7 @@ export const conversations: readonly ConversationSeed[] = [
     messages: [
       {
         by: "derek.holloway",
-        text: "Morning Jordan. Want to post the Fremont 2BR in the housing group. Still ok to give a rent range or do you need exact?",
+        text: "Morning Jordan. Want to post the Haight 2BR in the housing group. Still ok to give a rent range or do you need exact?",
       },
       {
         by: "jordan.kim",
@@ -1762,7 +1774,7 @@ export const conversations: readonly ConversationSeed[] = [
       },
       {
         by: "derek.holloway",
-        text: "Makes sense. $3,100, available the first week of January.",
+        text: "Makes sense. $4,300, available the first week of January.",
         gap: 5,
       },
       { by: "jordan.kim", text: "perfect, i'll approve it when it comes through", gap: 3 },
@@ -1786,7 +1798,7 @@ export const conversations: readonly ConversationSeed[] = [
         gap: 1,
       },
       { by: "jordan.kim", text: "noted, i'll add that to the pinned post", gap: 3 },
-      { by: "derek.holloway", text: "Coffee's on me next time you're in Wallingford", gap: 2 },
+      { by: "derek.holloway", text: "Coffee's on me next time you're in Elmwood", gap: 2 },
       { by: "jordan.kim", sticker: "☕", gap: 1 },
     ],
   },
@@ -1921,7 +1933,7 @@ export const conversations: readonly ConversationSeed[] = [
       },
       {
         by: "sofia.alvarez",
-        text: "brunch! she's not being secretive, glo's sunday 9:30",
+        text: "brunch! she's not being secretive, plow sunday 9:30",
         gap: 60,
       },
       { by: "kai.nakamura", text: "9:30 after a sat night set 😵", gap: 3 },
@@ -1974,13 +1986,13 @@ export const conversations: readonly ConversationSeed[] = [
       },
       {
         by: "jordan.kim",
-        text: "please do. the 'what's your uw email' one catches most of them",
+        text: "please do. the 'what's your berkeley.edu email' one catches most of them",
         gap: 2,
       },
       { by: "amara.diallo", text: "you're a lifesaver", gap: 2 },
       {
         by: "jordan.kim",
-        text: "we should do a joint scam warning post before winter quarter housing season",
+        text: "we should do a joint scam warning post before spring semester housing season",
         gap: 15,
       },
       {
@@ -2026,7 +2038,7 @@ export const conversations: readonly ConversationSeed[] = [
       },
       { by: "marcus.bell", text: "Desk and couch off marketplace. Bed frame is next", gap: 2 },
       { by: "chris.adeyemi", text: "you've become a marketplace guy", gap: 1 },
-      { by: "marcus.bell", text: "I check it more than Teams honestly", gap: 2 },
+      { by: "marcus.bell", text: "I check it more than Buganizer honestly", gap: 2 },
       { by: "chris.adeyemi", text: "i'm telling your manager", gap: 1 },
     ],
   },
@@ -2040,10 +2052,14 @@ export const conversations: readonly ConversationSeed[] = [
         by: "tasha.okafor",
         text: "can you lead the 5 mile group saturday? i'm doing the sweep for the 3",
       },
-      { by: "daniel.reyes", text: "yep. same route? gas works out and back", gap: 15 },
+      {
+        by: "daniel.reyes",
+        text: "yep. same route? crissy field out to the bridge and back",
+        gap: 15,
+      },
       {
         by: "tasha.okafor",
-        text: "yes but they're doing trail work on the burke near the bridge, use 34th",
+        text: "yes but the path is torn up by the warming hut, turn around at the beach lot",
         gap: 3,
       },
       { by: "daniel.reyes", text: "got it", gap: 1 },
@@ -2061,7 +2077,7 @@ export const conversations: readonly ConversationSeed[] = [
       },
       {
         by: "tasha.okafor",
-        text: "we run in the rain. we are seattle",
+        text: "we run in the rain. we survived karl the fog all summer",
         gap: 10,
         reactions: [["daniel.reyes", "haha"]],
       },
@@ -2074,7 +2090,7 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "tasha.okafor", sticker: "🏃‍♀️", gap: 1 },
       {
         by: "daniel.reyes",
-        text: "ran the burke this morning, there's a tree down by the ave fyi",
+        text: "ran crissy this morning, there's a cypress down by the east beach lot fyi",
         gap: 1300,
       },
       { by: "tasha.okafor", text: "noted!! adding it to the announcement", gap: 20 },
@@ -2090,7 +2106,7 @@ export const conversations: readonly ConversationSeed[] = [
     messages: [
       { by: "nora.kowalski", text: "lunch? kumo or the taco truck" },
       { by: "owen.murphy", text: "taco truck. i have 30 min", gap: 2 },
-      { by: "leo.novak", text: "is this the truck by the canal?", gap: 1 },
+      { by: "leo.novak", text: "is this the truck by the panhandle?", gap: 1 },
       { by: "nora.kowalski", text: "yes leo you'll love it, get the al pastor", gap: 1 },
       { by: "leo.novak", text: "say less", gap: 1 },
       { by: "owen.murphy", text: "who broke the dashboard", gap: 1440 },
@@ -2110,11 +2126,11 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "nora.kowalski", text: "leo how's the apartment search", gap: 1440 },
       {
         by: "leo.novak",
-        text: "applied for a studio in wallingford! waiting on the screening",
+        text: "applied for a studio in elmwood! waiting on the screening",
         gap: 10,
       },
-      { by: "owen.murphy", text: "wallingford is great. you can bike to the office", gap: 2 },
-      { by: "nora.kowalski", text: "and dick's is right there", gap: 1 },
+      { by: "owen.murphy", text: "elmwood is great. college ave is so cute", gap: 2 },
+      { by: "nora.kowalski", text: "and zachary's is right there", gap: 1 },
       { by: "leo.novak", text: "that's honestly a selling point", gap: 2 },
       { by: "nora.kowalski", text: "lunch today? it's pouring", gap: 1300 },
       { by: "owen.murphy", text: "kumo. soup weather", gap: 3 },
@@ -2129,7 +2145,7 @@ export const conversations: readonly ConversationSeed[] = [
     messages: [
       {
         by: "priya.raman",
-        text: "hi fatima! saw your sublet post in the uw group. how many messages did you get lol",
+        text: "hi fatima! saw your sublet post in the cal housing group. how many messages did you get lol",
       },
       { by: "fatima.hassan", text: "47. forty seven.", gap: 40 },
       { by: "fatima.hassan", text: "and like 10 of them were scams", gap: 1 },
@@ -2151,12 +2167,12 @@ export const conversations: readonly ConversationSeed[] = [
       { by: "priya.raman", text: "this is so helpful", gap: 2 },
       {
         by: "priya.raman",
-        text: "how did you price yours? i was thinking 1050 for wallingford",
+        text: "how did you price yours? i was thinking 1350 for elmwood",
         gap: 1,
       },
       {
         by: "fatima.hassan",
-        text: "i'm at 1150 in the u district for summer. wallingford in winter, 1050 + utilities seems right",
+        text: "i'm at 1450 on southside for summer. elmwood for spring semester, 1350 + utilities seems right",
         gap: 5,
       },
       {

@@ -6,13 +6,13 @@ import type { PostSeed } from "../../types";
  * (admin, moderator, or member) of that group.
  */
 export const groupPosts: readonly PostSeed[] = [
-  // ── UW Housing, Sublets & Roommates ────────────────────────────────────────
+  // ── Cal Housing, Sublets & Roommates ───────────────────────────────────────
   {
     key: "jordan-scam-warning",
     by: "jordan.kim",
     in: "cal-housing",
     at: daysAgo(7, "09:40"),
-    text: "PSA because I've removed 6 of these this week: the 'furnished 2BR on Brooklyn Ave for $1,100, owner is out of the country, just wire the deposit and they'll mail you the keys' listing is a SCAM. Same photos have been posted in Portland and Boise groups.\n\nRules of thumb:\n- if you can't see the place in person or on a live video call, walk away\n- nobody legit asks for Zelle, wire, or gift cards before you sign anything\n- reverse image search the photos\n- look up the address on the King County parcel viewer and see who actually owns it\n- if it's way under market for the U District, it's fake. sorry.\n\nIf you already sent money, report it to SPD and call your bank today, not tomorrow. DM me or Amara if you're unsure about a listing. We'll look, no judgment.",
+    text: "PSA because I've removed 6 of these this week: the 'furnished 2BR on Durant Ave for $1,400, owner is out of the country, just wire the deposit and they'll mail you the keys' listing is a SCAM. Same photos have been posted in LA and San Diego groups.\n\nRules of thumb:\n- if you can't see the place in person or on a live video call, walk away\n- nobody legit asks for Zelle, wire, or gift cards before you sign anything\n- reverse image search the photos\n- look up the address on the Alameda County assessor map and see who actually owns it\n- if it's way under market for Southside, it's fake. sorry.\n\nIf you already sent money, report it to Berkeley PD and call your bank today, not tomorrow. DM me or Amara if you're unsure about a listing. We'll look, no judgment.",
     reactions: 44,
     mood: "wow",
     comments: [
@@ -42,7 +42,7 @@ export const groupPosts: readonly PostSeed[] = [
         replies: [
           {
             by: "fatima.hassan",
-            text: "rooms near campus are like $900-1,300 rn, 1BRs $1,600-2,000. a whole 2BR for $1,100 is a fairy tale",
+            text: "rooms near campus are like $1,200-1,600 rn, 1BRs $2,300-2,800. a whole 2BR for $1,400 is a fairy tale",
             after: 12,
             likes: 9,
           },
@@ -50,7 +50,7 @@ export const groupPosts: readonly PostSeed[] = [
       },
       {
         by: "emily.chen",
-        text: "wait someone messaged me about a room on 47th and asked for $400 to 'hold it' before showing it... is that this",
+        text: "wait someone messaged me about a room on Fulton and asked for $400 to 'hold it' before showing it... is that this",
         after: 48,
         replies: [
           {
@@ -68,7 +68,7 @@ export const groupPosts: readonly PostSeed[] = [
       },
       {
         by: "derek.holloway",
-        text: "Speaking as a landlord: I will never ask for money before a showing and an application. WA also caps screening fees at actual cost. If someone's rushing you, that's the tell.",
+        text: "Speaking as a landlord: I will never ask for money before a showing and an application. California also caps screening fees and you're owed a receipt. If someone's rushing you, that's the tell.",
         after: 75,
         likes: 15,
       },
@@ -103,7 +103,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "fatima.hassan",
     in: "cal-housing",
     at: daysAgo(6, "21:00"),
-    text: "Room available in 3BR in U District, $1,150/mo, June-Aug sublet ☀️\n\nI'm doing a summer research thing in Minneapolis so my room on NE 50th is open June 15 to Aug 31. Furnished (bed, desk, dresser, the world's best blackout curtains). Two chill grad student roommates and one cat named Chai who will judge you. 8 min walk to the Ave, 10 to the light rail. Utilities are ~$60. DM me!",
+    text: "Room available in 3BR near campus, $1,450/mo, June-Aug sublet ☀️\n\nI'm doing a summer research thing in Minneapolis so my room on Channing near Ellsworth is open June 15 to Aug 31. Furnished (bed, desk, dresser, the world's best blackout curtains). Two chill grad student roommates and one cat named Chai who will judge you. 5 min walk to Telegraph, 10 to Downtown Berkeley BART. Utilities are ~$70. DM me!",
     listing: "fatima-berkeley-sublet",
     reactions: 14,
     comments: [
@@ -137,7 +137,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "priya.raman",
     in: "cal-housing",
     at: daysAgo(4, "13:05"),
-    text: "Leaving for Copenhagen in January so I'm selling basically everything + subletting my room. Couch first! Wallingford pickup. Room listing coming this week, ask me if you want early details",
+    text: "Leaving for Copenhagen in January so I'm selling basically everything + subletting my room. Couch first! Elmwood pickup. Room listing coming this week, ask me if you want early details",
     listing: "priya-couch",
     reactions: 9,
     comments: [
@@ -161,7 +161,7 @@ export const groupPosts: readonly PostSeed[] = [
         replies: [
           {
             by: "priya.raman",
-            text: "around $1,050, January through June. posting it soon!",
+            text: "$1,350, January through June. posting it soon!",
             after: 15,
           },
         ],
@@ -172,23 +172,23 @@ export const groupPosts: readonly PostSeed[] = [
     by: "leo.novak",
     in: "cal-housing",
     at: daysAgo(6, "21:10"),
-    text: "Hi! Just moved from Chicago, working in Fremont. Not a student, hope it's ok to ask here since this group seems to know everything. Which neighborhoods should I look at? Budget ~$1,800 for a 1BR, no car.",
+    text: "Hi! Just moved from Chicago, working in the Haight. Not a student, hope it's ok to ask here since this group seems to know everything. Which neighborhoods should I look at? Budget ~$2,800 for a 1BR, no car.",
     reactions: 7,
     comments: [
       {
         by: "jordan.kim",
-        text: "you're fine! with no car and a Fremont job: Fremont, Wallingford, or Ballard if you bike. U District works too, the 31/32 goes straight to Fremont",
+        text: "you're fine! with no car and a Haight job: the Haight, Cole Valley, the Inner Sunset, or the Inner Richmond if you bike. the 33 and the 43 get you there from most of those",
         after: 20,
         likes: 6,
       },
       {
         by: "sophie.dubois",
-        text: "Wallingford is quiet and close to Fremont. Ballard is fun but rent keeps creeping up",
+        text: "Inner Sunset is quiet and you can walk through the park to the Haight. Inner Richmond is fun (dim sum!!) but rent keeps creeping up",
         after: 45,
       },
       {
         by: "maya.chen",
-        text: "Capitol Hill if you want things open after 10pm lol. it's a 2 bus commute though",
+        text: "the Mission if you want things open after 10pm lol. the 33 gets you there but it takes forever",
         after: 70,
         replies: [
           {
@@ -200,7 +200,7 @@ export const groupPosts: readonly PostSeed[] = [
       },
       {
         by: "derek.holloway",
-        text: "I have a Fremont 2BR opening Jan 1 if you'd do a roommate situation. Posted it in Seattle Apartments",
+        text: "I have a Haight 2BR opening Jan 1 if you'd do a roommate situation. Posted it in SF Apartments",
         after: 130,
       },
     ],
@@ -209,7 +209,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "lily.anderson",
     in: "cal-housing",
     at: hoursAgo(5),
-    text: "Anyone know if the Roosevelt Lofts allow cats? website says 'pet friendly' but the leasing office keeps dodging the question 🐱",
+    text: "Anyone know if the Rockridge Lofts allow cats? website says 'pet friendly' but the leasing office keeps dodging the question 🐱",
     photos: ["rooms/apartment building"],
     reactions: 3,
     comments: [
@@ -230,7 +230,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "samir.khan",
     in: "cal-housing",
     at: daysAgo(1, "12:30"),
-    text: "Taking over my lease in Capitol Hill, $1,950 1BR, Jan 1\n\nFinished my MS early and got a job in Portland. Summit Ave near Olive, 4th floor, huge windows, dishwasher, laundry in the building. Lease runs through Aug 31. Landlord is fine with a takeover, you just apply normally ($45 screening fee).",
+    text: "Taking over my lease in the Mission, $2,950 1BR, Jan 1\n\nFinished my MS early and got a job in LA. 18th St near Dolores, 3rd floor, huge bay windows, dishwasher, laundry in the building. Lease runs through Aug 31. Landlord is fine with a takeover, you just apply normally ($45 screening fee).",
     photos: ["rooms/living-room-16.jpg", "rooms/kitchen-23.jpg"],
     reactions: 11,
     comments: [
@@ -241,7 +241,7 @@ export const groupPosts: readonly PostSeed[] = [
         replies: [
           {
             by: "samir.khan",
-            text: "the brick one across from the little park. but Maya it starts Jan 1 lol aren't you here till June",
+            text: "the yellow one across from the park. but Maya it starts Jan 1 lol aren't you in Berkeley till June",
             after: 10,
           },
         ],
@@ -269,7 +269,7 @@ export const groupPosts: readonly PostSeed[] = [
     comments: [
       {
         by: "jordan.kim",
-        text: "apply through SDOT online with your lease + registration showing the address. it's like $95 for 2 years",
+        text: "apply for the RPP permit on the city's site with your lease + registration showing the address. it's like $65 a year",
         after: 30,
       },
       {
@@ -280,7 +280,7 @@ export const groupPosts: readonly PostSeed[] = [
       },
       {
         by: "maya.chen",
-        text: "Ana has personally funded the city of Seattle this quarter",
+        text: "Ana has personally funded the city of Berkeley this semester",
         after: 80,
         likes: 9,
       },
@@ -295,7 +295,7 @@ export const groupPosts: readonly PostSeed[] = [
     comments: [
       {
         by: "jordan.kim",
-        text: "In WA they need to give 2 days notice to enter (1 day to show the unit) unless it's an emergency. A smoke detector check is not an emergency.",
+        text: "In CA they need to give 24 hours written notice to enter unless it's an emergency. A smoke detector check is not an emergency.",
         after: 15,
         likes: 8,
       },
@@ -317,7 +317,7 @@ export const groupPosts: readonly PostSeed[] = [
       { by: "fatima.hassan", text: "ours went up 9% and I thought that was bad", after: 12 },
       {
         by: "jordan.kim",
-        text: "Seattle requires 180 days notice for increases, and if it's 10%+ you might qualify for relocation help if you move out. check the city's page",
+        text: "if the building is 15+ years old the state cap is 5% + inflation, max 10%, so 14% is probably illegal. and if it's pre-1980 Berkeley rent control is way stricter. call the Rent Board",
         after: 30,
         likes: 11,
       },
@@ -341,17 +341,17 @@ export const groupPosts: readonly PostSeed[] = [
     by: "lily.anderson",
     in: "cal-housing",
     at: daysAgo(8, "16:00"),
-    text: "Looking for a roommate! F, 20, nursing student, clean, quiet on weeknights, very loud during Husky games. Budget ~$1,000, want to be walkable to campus, Jan or Sept 2027 start",
+    text: "Looking for a roommate! F, 20, nursing student, clean, quiet on weeknights, very loud during Cal games. Budget ~$1,300, want to be walkable to campus, Jan or Aug 2027 start",
     reactions: 6,
     comments: [
       {
         by: "amara.diallo",
-        text: "bump for Lily, she lived on my floor in McMahon and was the best",
+        text: "bump for Lily, she lived on my floor in Unit 2 and was the best",
         after: 75,
       },
       {
         by: "theo.grant",
-        text: "is a guy roommate ok? have a room opening in a 4BR on 52nd",
+        text: "is a guy roommate ok? have a room opening in a 4BR on Dwight",
         after: 180,
       },
     ],
@@ -360,7 +360,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "tyler.jensen",
     in: "cal-housing",
     at: hoursAgo(20),
-    text: "Is this listing legit? $975 for a whole 1BR on University Way, 'fully furnished, utilities included.' Guy says he's a doctor working overseas and his lawyer will send me the keys once I wire first + last. the pictures look really nice which is kinda the problem",
+    text: "Is this listing legit? $1,100 for a whole 1BR on Telegraph, 'fully furnished, utilities included.' Guy says he's a doctor working overseas and his lawyer will send me the keys once I wire first + last. the pictures look really nice which is kinda the problem",
     photos: ["rooms/bedroom"],
     reactions: 8,
     mood: "haha",
@@ -373,19 +373,19 @@ export const groupPosts: readonly PostSeed[] = [
       },
       {
         by: "ethan.park",
-        text: "bro $975 for a 1BR on the Ave in 2026",
+        text: "bro $1,100 for a 1BR on Telegraph in 2026",
         after: 35,
       },
       {
         by: "maya.chen",
-        text: "reverse searched it, those photos are from an airbnb in Vancouver BC lol",
+        text: "reverse searched it, those photos are from an airbnb in Austin lol",
         after: 60,
         likes: 8,
         replies: [{ by: "tyler.jensen", text: "Maya Chen you're a hero. blocked him", after: 7 }],
       },
       {
         by: "derek.holloway",
-        text: "Real units in that building go for about $1,750.",
+        text: "Real units in that building go for about $2,600.",
         after: 140,
       },
     ],
@@ -394,7 +394,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "maya.chen",
     in: "cal-housing",
     at: daysAgo(10, "23:15"),
-    text: "when do people usually start looking for June leases on Capitol Hill? graduating in June and I can't tell if I'm way too early or already behind",
+    text: "when do people usually start looking for June leases in the Mission? graduating this spring and I can't tell if I'm way too early or already behind",
     reactions: 6,
     comments: [
       {
@@ -420,12 +420,12 @@ export const groupPosts: readonly PostSeed[] = [
     by: "jiho.choi",
     in: "cal-housing",
     at: daysAgo(1, "15:40"),
-    text: "ISO room Jan to March (winter quarter only), near campus, under $1,000. my current place ends Dec 31 😭",
+    text: "ISO room Jan to May (spring semester only), near campus, under $1,400. my current place ends Dec 31 😭",
     reactions: 3,
     comments: [
       {
         by: "priya.raman",
-        text: "my room in Wallingford is Jan-June but I might do Jan-March if you're flexible?? DM me",
+        text: "my room in Elmwood is Jan-June but I might do Jan-May if you're flexible?? DM me",
         after: 20,
       },
     ],
@@ -434,12 +434,12 @@ export const groupPosts: readonly PostSeed[] = [
     by: "theo.grant",
     in: "cal-housing",
     at: hoursAgo(2),
-    text: "do any buildings near campus have actual secure bike storage? mine got stolen from the rack outside Odegaard yesterday",
+    text: "do any buildings near campus have actual secure bike storage? mine got stolen from the rack outside Moffitt yesterday",
     photos: ["bike rack"],
     reactions: 2,
     mood: "sad",
     comments: [
-      { by: "ethan.park", text: "rip. the Odegaard rack is cursed", after: 15 },
+      { by: "ethan.park", text: "rip. the Moffitt rack is cursed", after: 15 },
       {
         by: "sophie.dubois",
         text: "u-lock + a cable through the wheel, and keep it inside if you can",
@@ -463,7 +463,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "sophie.dubois",
     in: "cal-housing",
     at: daysAgo(2, "17:30"),
-    text: "Room in 4BR house in Ravenna, $925/mo + utilities, available Jan 1 (lease through Aug). Housemates are 2 grad students and a very old dog. Big backyard, slow wifi, good dinners.",
+    text: "Room in 4BR house in North Berkeley, $1,200/mo + utilities, available Jan 1 (lease through Aug). Housemates are 2 grad students and a very old dog. Big backyard, slow wifi, good dinners.",
     photos: ["rooms/bedroom", "rooms/kitchen"],
     reactions: 7,
     comments: [
@@ -488,19 +488,19 @@ export const groupPosts: readonly PostSeed[] = [
     ],
   },
 
-  // ── Seattle Apartments & Rooms for Rent ────────────────────────────────────
+  // ── SF Apartments & Rooms for Rent ─────────────────────────────────────────
   {
     key: "maya-roommate-search",
     by: "maya.chen",
     in: "sf-apartments",
     at: hoursAgo(14),
-    text: "~$1,700, Capitol Hill, June 2027\n\nLooking for a 1BR, or a room with roommates, starting June (graduating from UW, starting a job in Redmond in July). Clean, quiet-ish, I climb a lot so I'm out most evenings. Would love to be near Capitol Hill station for the light rail. Open to studios if they aren't tiny. Please send leads 🙏",
+    text: "~$2,800, Mission, June 2027\n\nLooking for a 1BR, or a room with roommates, starting June (graduating from Cal, starting at Google in Mountain View in July). Clean, quiet-ish, I climb a lot so I'm out most evenings. Would love to be near 24th St BART or a shuttle stop. Open to studios if they aren't tiny. Please send leads 🙏",
     reactions: 18,
     likedBy: ["leo.novak", "emily.chen"],
     comments: [
       {
         by: "derek.holloway",
-        text: "Hi Maya, I've got a couple Cap Hill units on Harvard Ave that usually turn over in the summer, $1,800-1,900. Bit over budget, but water/sewer/garbage are included. Happy to add you to the list.",
+        text: "Hi Maya, I've got a couple Mission units on Guerrero that usually turn over in late spring, $3,100-3,300. Bit over budget, but they're rent controlled. Happy to add you to the list.",
         after: 25,
         replies: [
           {
@@ -513,19 +513,19 @@ export const groupPosts: readonly PostSeed[] = [
       },
       {
         by: "leo.novak",
-        text: "following because I'm figuring out the same thing. how is $1,700 a 'room' budget here 😭",
+        text: "following because I'm figuring out the same thing. how is $2,800 'a bit under' for a 1BR here 😭",
         after: 40,
         replies: [
           {
             by: "maya.chen",
-            text: "lol welcome to seattle. rooms are like $1,100-1,300, 1BRs start around $1,650 if you get lucky",
+            text: "lol welcome to SF. rooms are like $1,500-2,000, 1BRs start around $2,900 if you get lucky",
             after: 8,
           },
         ],
       },
       {
         by: "marcus.bell",
-        text: "just signed a 1BR on Bellevue Ave for $1,795, took me 3 weeks. tip: go to showings on weekday evenings, way less competition",
+        text: "just signed a 1BR on Shotwell for $2,895, took me 3 weeks. tip: go to showings on weekday evenings, way less competition",
         after: 70,
         likes: 5,
       },
@@ -536,7 +536,7 @@ export const groupPosts: readonly PostSeed[] = [
       },
       {
         by: "kevin.tran",
-        text: "maya you could just live in my closet in SLU for free",
+        text: "maya you could just live in my closet in SoMa for free",
         after: 180,
         replies: [
           { by: "maya.chen", text: "kevin your closet has a rowing machine in it", after: 6 },
@@ -548,7 +548,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "derek.holloway",
     in: "sf-apartments",
     at: daysAgo(4, "10:00"),
-    text: "$1,850 | Capitol Hill 1BR, available Dec 1\n\nHarvard Ave E, 2nd floor, bay window, hardwood floors, laundry in building, cats OK. Water/sewer/garbage included. Showings Saturday 11-1. Screening fee is actual cost ($43), nothing else up front.",
+    text: "$3,250 | Mission 1BR, available Dec 1\n\nGuerrero St near 21st, top floor of an Edwardian, bay windows, hardwood floors, W/D in unit (yes, in the Mission), cats OK. Rent controlled. Showings Saturday afternoon. Screening fee is actual cost ($43), nothing else up front.",
     listing: "derek-mission-1br",
     reactions: 15,
     comments: [
@@ -569,13 +569,13 @@ export const groupPosts: readonly PostSeed[] = [
     by: "derek.holloway",
     in: "sf-apartments",
     at: daysAgo(9, "09:30"),
-    text: "$2,650 | Fremont 2BR/1BA, available Jan 1\n\nTop floor of a fourplex on N 36th, 5 min walk to the Burke-Gilman. Off-street parking spot included, in-unit washer/dryer. Great for roommates.",
+    text: "$4,300 | Haight 2BR/1BA, available Jan 1\n\nVictorian flat on Page near Cole, half a block from the Panhandle. Garage parking spot included (in the Haight, I know), laundry in the building. Great for roommates.",
     listing: "derek-haight-2br",
     reactions: 12,
     comments: [
       {
         by: "leo.novak",
-        text: "Fremont! my office is 4 blocks away. would you take two people applying together? still finding a roommate",
+        text: "the Haight! my office is 4 blocks away. would you take two people applying together? still finding a roommate",
         after: 50,
       },
       {
@@ -589,25 +589,25 @@ export const groupPosts: readonly PostSeed[] = [
     by: "kevin.tran",
     in: "sf-apartments",
     at: daysAgo(2, "08:20"),
-    text: "median 1BR is apparently $1,900 now. my first place here in 2021 was $1,350 💀",
+    text: "median 1BR is apparently over $3k now. my first place here in 2021 was $2,100 💀",
     share: "ledger-rent-report",
     reactions: 17,
     mood: "sad",
     comments: [
       {
         by: "camila.santos",
-        text: "bartending does not pay $1,900 a month energy",
+        text: "bartending does not pay $3k a month energy",
         after: 45,
         likes: 4,
       },
       {
         by: "derek.holloway",
-        text: "The part about new SLU supply softening prices is real. I'm seeing a lot more move-in specials.",
+        text: "The part about new SoMa supply softening prices is real. I'm seeing a lot more move-in specials.",
         after: 90,
         replies: [
           {
             by: "kevin.tran",
-            text: "move-in special = 6 weeks free, rent still $2,400 lol",
+            text: "move-in special = 6 weeks free, rent still $3,600 lol",
             after: 14,
             likes: 6,
           },
@@ -629,12 +629,12 @@ export const groupPosts: readonly PostSeed[] = [
     comments: [
       {
         by: "jordan.kim",
-        text: "lots of older buildings bill back water/sewer/garbage. electric is separate through City Light, usually not bad",
+        text: "lots of older buildings bill back water/garbage. PG&E is separate and that's the one that gets you",
         after: 25,
       },
       {
         by: "will.foster",
-        text: "Electric baseboard heat in winter will hurt. Ask what the heat source is.",
+        text: "An old wall heater on PG&E rates will hurt. Ask what the heat source is.",
         after: 50,
       },
     ],
@@ -643,14 +643,14 @@ export const groupPosts: readonly PostSeed[] = [
     by: "marcus.bell",
     in: "sf-apartments",
     at: daysAgo(11, "20:00"),
-    text: "just moved into a Capitol Hill 1BR with literally zero furniture. sleeping on an air mattress, eating on the floor. if you're moving out and need stuff gone, I'll pick up. I have a borrowed SUV this weekend",
+    text: "just moved into a Mission 1BR with literally zero furniture. sleeping on an air mattress, eating on the floor. if you're moving out and need stuff gone, I'll pick up. I have a borrowed SUV this weekend",
     photos: ["empty apartment"],
     reactions: 13,
     mood: "haha",
     comments: [
       {
         by: "will.foster",
-        text: "I flip furniture in Ballard. Check the Ballard swap group, I've got a dining table + 4 chairs for $120.",
+        text: "I flip furniture in the Inner Richmond. Check the Richmond swap group, I've got a dining table + 4 chairs for $120.",
         after: 30,
       },
       {
@@ -664,13 +664,13 @@ export const groupPosts: readonly PostSeed[] = [
     by: "yuki.sato",
     in: "sf-apartments",
     at: daysAgo(14, "12:10"),
-    text: "$1,395 studio on Boylston (First Hill) but it's above a bar... anyone live near there? I'm at SU nursing so the location is perfect otherwise",
+    text: "$1,995 studio on Polk (Nob Hill) but it's above a bar... anyone live near there? my USF nursing clinicals are at CPMC so the location is perfect otherwise",
     photos: ["rooms/studio"],
     reactions: 3,
     comments: [
       {
         by: "emily.chen",
-        text: "SU person here, that bar is LOUD on fridays",
+        text: "USF person here, that bar is LOUD on fridays",
         after: 35,
       },
       {
@@ -684,13 +684,13 @@ export const groupPosts: readonly PostSeed[] = [
     by: "kevin.tran",
     in: "sf-apartments",
     at: daysAgo(16, "18:30"),
-    text: "moving SLU to Ballard next month, anyone know a reasonable mover for a 1BR? last quote was $900 for 3 hours",
+    text: "moving SoMa to the Inner Richmond next month, anyone know a reasonable mover for a 1BR? last quote was $1,100 for 3 hours",
     photos: ["moving boxes"],
     reactions: 2,
     comments: [
       {
         by: "will.foster",
-        text: "I do small moves. $70/hr for two guys + truck. DM me.",
+        text: "I do small moves. $95/hr for two guys + truck. DM me.",
         after: 20,
       },
       {
@@ -704,14 +704,14 @@ export const groupPosts: readonly PostSeed[] = [
     by: "camila.santos",
     in: "sf-apartments",
     at: daysAgo(3, "23:40"),
-    text: "landlord just sent a 'friendly reminder' that my rent goes from $1,720 to $1,960 in March. friendly??? for a 1BR above a dispensary??",
+    text: "landlord just sent a 'friendly reminder' that my rent goes from $2,600 to $2,965 in March. friendly??? for a 1BR above a dispensary??",
     reactions: 31,
     mood: "sad",
     comments: [
       { by: "marcus.bell", text: "that's a 14% jump, insane", after: 15 },
       {
         by: "jordan.kim",
-        text: "if it's 10%+ you may qualify for economic displacement relocation assistance if you move. look it up on the city site",
+        text: "if your building is pre-1979 that's way over the rent control limit. take the notice to the SF Rent Board, seriously",
         after: 40,
         likes: 9,
       },
@@ -733,12 +733,12 @@ export const groupPosts: readonly PostSeed[] = [
       { by: "derek.holloway", text: "Seconded.", after: 15 },
       {
         by: "leo.novak",
-        text: "what if the neighborhood is 'near the Amazon spheres'",
+        text: "what if the neighborhood is 'near Salesforce Tower'",
         after: 60,
         replies: [
           {
             by: "will.foster",
-            text: "That's South Lake Union and the answer is $2,600",
+            text: "That's SoMa and the answer is $3,800",
             after: 12,
             likes: 8,
           },
@@ -750,7 +750,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "nora.kowalski",
     in: "sf-apartments",
     at: daysAgo(1, "11:15"),
-    text: "$1,175 | room in 2BR, Greenwood, Jan 1\n\nmy roommate's moving in with her boyfriend so I need a new one! I work at a startup in Fremont, I cook too much, and I have a very large monstera. 15 min to Fremont on the 5.",
+    text: "$1,650 | room in 2BR, Inner Sunset, Jan 1\n\nmy roommate's moving in with her boyfriend so I need a new one! I work at a startup in the Haight, I cook too much, and I have a very large monstera. 15 min to the Haight on the 43, or a nice walk through the park.",
     photos: ["rooms/bedroom-12.jpg", "rooms/living-room-21.jpg"],
     reactions: 6,
     comments: [
@@ -761,7 +761,7 @@ export const groupPosts: readonly PostSeed[] = [
         replies: [
           {
             by: "nora.kowalski",
-            text: "it is 👀 you'd never have to bike up the Fremont hill again",
+            text: "it is 👀 you'd never have to bike up Masonic again",
             after: 10,
           },
         ],
@@ -772,24 +772,24 @@ export const groupPosts: readonly PostSeed[] = [
     by: "emily.chen",
     in: "sf-apartments",
     at: daysAgo(6, "22:05"),
-    text: "seattle u freshman here, what do people actually pay for a room on capitol hill? my mom thinks $800 is normal rent lol",
+    text: "usf freshman here, what do people actually pay for a room in the mission? my mom thinks $1,000 is normal rent lol",
     reactions: 5,
     mood: "haha",
     comments: [
       {
         by: "maya.chen",
-        text: "tell your mom it's 2026 😭 rooms are $1,100+",
+        text: "tell your mom it's 2026 😭 rooms are $1,500+",
         after: 15,
         replies: [
           {
             by: "emily.chen",
-            text: "she said 'in san jose that's cheap' and then hung up",
+            text: "she said 'that's what we paid in san jose' and then hung up",
             after: 9,
             likes: 6,
           },
         ],
       },
-      { by: "marcus.bell", text: "$800 gets you a parking spot", after: 50 },
+      { by: "marcus.bell", text: "$1,000 gets you a parking spot", after: 50 },
     ],
   },
   {
@@ -823,12 +823,12 @@ export const groupPosts: readonly PostSeed[] = [
     ],
   },
 
-  // ── Capitol Hill Neighbors ─────────────────────────────────────────────────
+  // ── Mission District Neighbors ─────────────────────────────────────────────
   {
     by: "harper.quinn",
     in: "mission-neighbors",
     at: hoursAgo(9),
-    text: "has anyone seen a big orange cat near 12th & Pine?? Biscuit got out this morning. he's very friendly and very dumb",
+    text: "has anyone seen a big orange cat near 17th & Guerrero?? Biscuit got out this morning. he's very friendly and very dumb",
     photos: ["orange cat"],
     reactions: 22,
     mood: "care",
@@ -836,7 +836,7 @@ export const groupPosts: readonly PostSeed[] = [
       { by: "jasmine.ortiz", text: "sharing on the Moonrise story!", after: 20 },
       {
         by: "marco.rossi",
-        text: "I think I saw an orange cat under a car on 13th like an hour ago",
+        text: "I think I saw an orange cat under a car on Albion like an hour ago",
         after: 140,
       },
       {
@@ -851,7 +851,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "leo.novak",
     in: "mission-neighbors",
     at: daysAgo(3, "19:05"),
-    text: "where's good for a quiet drink on the hill that isn't a club? new here, want somewhere to read on a weeknight",
+    text: "where's good for a quiet drink in the mission that isn't a club? new here, want somewhere to read on a weeknight",
     reactions: 6,
     comments: [
       {
@@ -872,7 +872,7 @@ export const groupPosts: readonly PostSeed[] = [
         replies: [
           {
             by: "leo.novak",
-            text: "you're all so nice. chicago lied to me about the seattle freeze",
+            text: "you're all so nice. chicago told me everyone here would just pitch me their startup",
             after: 20,
             likes: 4,
           },
@@ -884,14 +884,14 @@ export const groupPosts: readonly PostSeed[] = [
     by: "marcus.bell",
     in: "mission-neighbors",
     at: daysAgo(8, "07:40"),
-    text: "is jackhammering on E Olive at 7am legal?? I work from home fridays and I'm losing my mind",
+    text: "is jackhammering on 18th St at 7am legal?? I work from home fridays and I'm losing my mind",
     photos: ["construction"],
     reactions: 9,
     mood: "haha",
     comments: [
       {
         by: "jordan.kim",
-        text: "construction noise is allowed 7am-10pm on weekdays in Seattle. sorry",
+        text: "construction noise is allowed 7am-8pm in SF. sorry",
         after: 20,
       },
       {
@@ -906,7 +906,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "tasha.okafor",
     in: "mission-neighbors",
     at: daysAgo(4, "12:00"),
-    text: "Moonrise is collecting warm socks and gloves through Dec 15! drop them at the counter and we'll bring everything to the shelter on Pine. new or gently used, no judgment on sock patterns",
+    text: "Moonrise is collecting warm socks and gloves through Dec 15! drop them at the counter and we'll bring everything to the shelter on South Van Ness. new or gently used, no judgment on sock patterns",
     photos: ["donation bin"],
     reactions: 27,
     mood: "love",
@@ -924,12 +924,12 @@ export const groupPosts: readonly PostSeed[] = [
     by: "marco.rossi",
     in: "mission-neighbors",
     at: daysAgo(2, "18:10"),
-    text: "Pike/Pine at 5pm. it's November, it's pitch black, and honestly it's beautiful",
+    text: "Valencia at 5pm. it's November, it's pitch black, the fog is rolling in, and honestly it's beautiful",
     photos: ["neon sign"],
     reactions: 24,
     mood: "love",
     comments: [
-      { by: "harper.quinn", text: "the neon on the wet pavement 😮‍💨", after: 30 },
+      { by: "harper.quinn", text: "the neon in the fog 😮‍💨", after: 30 },
       {
         by: "malik.johnson",
         text: "can we use this for the next show poster",
@@ -941,7 +941,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "maya.chen",
     in: "mission-neighbors",
     at: daysAgo(5, "21:45"),
-    text: "future capitol hill resident here (moving in June!). what's one thing you wish you knew before moving to the hill?",
+    text: "future mission resident here (moving in June!). what's one thing you wish you knew before moving to the mission?",
     reactions: 14,
     comments: [
       {
@@ -950,10 +950,10 @@ export const groupPosts: readonly PostSeed[] = [
         after: 10,
         likes: 6,
       },
-      { by: "jasmine.ortiz", text: "never try to park on Broadway on a Friday night", after: 25 },
+      { by: "jasmine.ortiz", text: "never try to park on Valencia on a Friday night", after: 25 },
       {
         by: "jordan.kim",
-        text: "Volunteer Park conservatory is $4 and it's the best rainy day spot in the city",
+        text: "it's sunny here when the rest of the city is socked in. microclimates are real, Dolores Park is your backyard",
         after: 40,
         likes: 5,
       },
@@ -975,7 +975,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "malik.johnson",
     in: "mission-neighbors",
     at: daysAgo(10, "15:00"),
-    text: "Velvet Owl is hiring a weekend door person, $22/hr + tips. message me",
+    text: "Velvet Owl is hiring a weekend door person, $25/hr + tips. message me",
     photos: ["bar"],
     reactions: 8,
     comments: [
@@ -999,7 +999,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "jordan.kim",
     in: "mission-neighbors",
     at: daysAgo(6, "17:50"),
-    text: "The streetlight at Summit & John has been out for 3 weeks and reported 4 times. If you walk there at night, please also report it on Find It Fix It. Squeaky wheel etc.",
+    text: "The streetlight at Florida & 20th has been out for 3 weeks and reported 4 times. If you walk there at night, please also report it on SF311. Squeaky wheel etc.",
     reactions: 16,
     comments: [{ by: "harper.quinn", text: "done", after: 15 }],
   },
@@ -1007,19 +1007,19 @@ export const groupPosts: readonly PostSeed[] = [
     by: "diego.morales",
     in: "mission-neighbors",
     at: daysAgo(1, "16:30"),
-    text: "Kumo Ramen on the hill is doing late night on Fri/Sat now, till 1am. I run the kitchen, not trying to spam, a lot of you asked",
+    text: "Kumo Ramen on Mission St is doing late night on Fri/Sat now, till 1am. I run the kitchen, not trying to spam, a lot of you asked",
     photos: ["ramen"],
     reactions: 19,
     comments: [{ by: "malik.johnson", text: "finally somewhere to eat after a show", after: 30 }],
   },
 
-  // ── Free Stuff Seattle ─────────────────────────────────────────────────────
+  // ── Free Stuff SF ──────────────────────────────────────────────────────────
   {
     key: "priya-free-stuff",
     by: "priya.raman",
     in: "free-stuff-sf",
     at: hoursAgo(19),
-    text: "Leaving for Copenhagen in January so I'm giving away my kitchen + plants 🌿 all free, Wallingford pickup:\n\n- a huge trailing pothos, 2 snake plants, a fiddle leaf fig that's a little dramatic\n- rice cooker (works perfectly)\n- 4 mismatched mugs, a stack of plates, a cast iron pan\n- a whole drawer of spices I will never finish\n\nfirst come first served, pickup by Sunday. comment and I'll DM you!",
+    text: "Leaving for Copenhagen in January so I'm giving away my kitchen + plants 🌿 all free, Elmwood pickup:\n\n- a huge trailing pothos, 2 snake plants, a fiddle leaf fig that's a little dramatic\n- rice cooker (works perfectly)\n- 4 mismatched mugs, a stack of plates, a cast iron pan\n- a whole drawer of spices I will never finish\n\nfirst come first served, pickup by Sunday. comment and I'll DM you!",
     photos: ["houseplants", "cast iron"],
     reactions: 23,
     mood: "love",
@@ -1068,7 +1068,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "theo.grant",
     in: "free-stuff-sf",
     at: hoursAgo(3),
-    text: "free couch on the curb in Wallingford (N 43rd near Burke). red leather chesterfield, no rips, it just doesn't fit up the stairs at the new place. come get it before the rain does",
+    text: "free couch on the curb in Elmwood (Ashby near College). red leather chesterfield, no rips, it just doesn't fit up the stairs at the new place. come get it before the rain does",
     photos: ["listings/sofa-01.jpg"],
     reactions: 5,
     comments: [
@@ -1078,12 +1078,12 @@ export const groupPosts: readonly PostSeed[] = [
         after: 6,
         replies: [
           { by: "theo.grant", text: "yes!", after: 4 },
-          { by: "marcus.bell", text: "on my way, 20 min", after: 3, likes: 3 },
+          { by: "marcus.bell", text: "on my way, 30 min", after: 3, likes: 3 },
         ],
       },
       {
         by: "theo.grant",
-        text: "GONE. Marcus Bell showed up with an SUV and two coworkers in like 18 minutes",
+        text: "GONE. Marcus Bell came over the Bay Bridge with an SUV and two coworkers in like 28 minutes",
         after: 55,
         likes: 9,
       },
@@ -1094,7 +1094,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "jordan.kim",
     in: "free-stuff-sf",
     at: daysAgo(4, "14:20"),
-    text: "ISO moving boxes! moving across Capitol Hill Dec 1, will happily take any size",
+    text: "ISO moving boxes! moving across the Mission Dec 1, will happily take any size",
     reactions: 4,
     comments: [
       {
@@ -1113,7 +1113,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "hannah.lee",
     in: "free-stuff-sf",
     at: daysAgo(2, "10:30"),
-    text: "free: like 40 hangers, a dorm whiteboard, and a shower caddy. U District porch pickup, first to comment gets it",
+    text: "free: like 40 hangers, a dorm whiteboard, and a shower caddy. Southside porch pickup, first to comment gets it",
     reactions: 3,
     comments: [
       {
@@ -1165,7 +1165,7 @@ export const groupPosts: readonly PostSeed[] = [
     comments: [
       {
         by: "erin.mcallister",
-        text: "vet tech here, we have loaner carriers at the clinic in Ballard, message me",
+        text: "vet tech here, we have loaner carriers at the clinic on Clement, message me",
         after: 30,
       },
     ],
@@ -1191,7 +1191,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "emily.chen",
     in: "free-stuff-sf",
     at: daysAgo(7, "20:40"),
-    text: "ISO a shower curtain and a bath mat!! my roommate took hers when she moved out. can pick up on First Hill or anywhere near the streetcar",
+    text: "ISO a shower curtain and a bath mat!! my roommate took hers when she moved out. can pick up near USF or anywhere along the 5 Fulton",
     reactions: 2,
     comments: [
       {
@@ -1199,14 +1199,18 @@ export const groupPosts: readonly PostSeed[] = [
         text: "we have an extra shower curtain, it has ducks on it",
         after: 30,
       },
-      { by: "maddie.collins", text: "I have a bath mat, porch pickup in Greenwood", after: 90 },
+      {
+        by: "maddie.collins",
+        text: "I have a bath mat, porch pickup in the Inner Sunset",
+        after: 90,
+      },
     ],
   },
   {
     by: "will.foster",
     in: "free-stuff-sf",
     at: daysAgo(9, "13:30"),
-    text: "Free: about 15 pallets. Good for raised beds or a very ambitious headboard. Ballard, bring a truck.",
+    text: "Free: about 15 pallets. Good for raised beds or a very ambitious headboard. Inner Richmond, bring a truck.",
     photos: ["pallets"],
     reactions: 7,
     comments: [
@@ -1225,7 +1229,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "erin.mcallister",
     in: "free-stuff-sf",
     at: daysAgo(11, "15:10"),
-    text: "free 5ft cat tree, my cats prefer the box it came in. Ballard",
+    text: "free 5ft cat tree, my cats prefer the box it came in. Inner Richmond",
     photos: ["cat tree"],
     reactions: 9,
     mood: "haha",
@@ -1241,7 +1245,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "sam.rivera",
     in: "free-stuff-sf",
     at: daysAgo(2, "16:45"),
-    text: "free: ~40 advance reader copies from the bookstore. mostly lit fic + a few thrillers. Fremont porch pickup",
+    text: "free: ~40 advance reader copies from the bookstore. mostly lit fic + a few thrillers. Haight porch pickup",
     photos: ["stack of books"],
     reactions: 18,
     comments: [
@@ -1269,7 +1273,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "yuki.sato",
     in: "free-stuff-sf",
     at: daysAgo(15, "11:40"),
-    text: "free plant cuttings! pothos + tradescantia, rooted in little jars. First Hill pickup, take as many as you want",
+    text: "free plant cuttings! pothos + tradescantia, rooted in little jars. Nob Hill pickup, take as many as you want",
     photos: ["plant cuttings"],
     reactions: 11,
     comments: [
@@ -1283,13 +1287,13 @@ export const groupPosts: readonly PostSeed[] = [
     ],
   },
 
-  // ── Seattle Climbers ───────────────────────────────────────────────────────
+  // ── Bay Area Climbers ──────────────────────────────────────────────────────
   {
     key: "kai-climbing-meetup",
     by: "kai.nakamura",
     in: "bay-area-climbers",
     at: daysAgo(4, "12:00"),
-    text: "climbing night at Cascade Boulders! new set in the cave, all levels. quick intro for first timers at 7. loaner shoes for the first 15 people who RSVP so hit going on the event 👟",
+    text: "climbing night at Sutro Boulders! new set in the cave, all levels. quick intro for first timers at 7. loaner shoes for the first 15 people who RSVP so hit going on the event 👟",
     event: "climbing-night",
     reactions: 21,
     comments: [
@@ -1333,13 +1337,13 @@ export const groupPosts: readonly PostSeed[] = [
     by: "andre.silva",
     in: "bay-area-climbers",
     at: daysAgo(4, "20:30"),
-    text: "Index on Sunday: rock was dry until about 2, then the classic PNW betrayal. Lower Town Wall had seepage in the usual spots. Parking lot was empty, which tells you everything about November",
+    text: "Castle Rock on Sunday: rock was dry until about 2, then the fog rolled up the ridge and everything went greasy. Goat Rock had damp streaks in the usual spots. Parking lot was empty, which tells you everything about November",
     photos: ["granite cliff", "climbing gear"],
     reactions: 16,
     comments: [
       {
         by: "ben.carter",
-        text: "isn't the season basically done for Index? or are you a hero",
+        text: "isn't it way too damp for Castle Rock this time of year? or are you a hero",
         after: 40,
         replies: [{ by: "andre.silva", text: "I'm stubborn, not a hero", after: 15, likes: 4 }],
       },
@@ -1364,7 +1368,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "maya.chen",
     in: "bay-area-climbers",
     at: daysAgo(1, "22:30"),
-    text: "anyone have beta for the pink V5 in the cave at Cascade? I can do every move except the heel hook, it just will not stick",
+    text: "anyone have beta for the pink V5 in the cave at Sutro? I can do every move except the heel hook, it just will not stick",
     photos: ["bouldering gym"],
     reactions: 12,
     comments: [
@@ -1401,7 +1405,7 @@ export const groupPosts: readonly PostSeed[] = [
       },
       {
         by: "kai.nakamura",
-        text: "crashpad, one season of Leavenworth on it, $90",
+        text: "crashpad, one season of Bishop on it, $90",
         after: 50,
       },
       { by: "grace.liu", text: "ISO women's size 38 aggressive shoes, any condition", after: 90 },
@@ -1411,8 +1415,8 @@ export const groupPosts: readonly PostSeed[] = [
     by: "arjun.mehta",
     in: "bay-area-climbers",
     at: daysAgo(1, "13:00"),
-    text: "Leavenworth this weekend? forecast says dry Saturday east of the pass. room for 2 in my car, leaving Seattle 6am",
-    photos: ["larches"],
+    text: "Bishop this weekend? forecast says dry and cold in the Buttermilks. room for 2 in my car, leaving SF 5am",
+    photos: ["bouldering outdoors"],
     reactions: 7,
     comments: [
       {
@@ -1423,7 +1427,7 @@ export const groupPosts: readonly PostSeed[] = [
       { by: "grace.liu", text: "in!", after: 90 },
       {
         by: "tara.singh",
-        text: "check Stevens Pass conditions first, chains may be required",
+        text: "check Caltrans for chain controls on 50 first, it's already snowing up there",
         after: 180,
       },
     ],
@@ -1456,7 +1460,7 @@ export const groupPosts: readonly PostSeed[] = [
     comments: [
       {
         by: "ben.carter",
-        text: "come by Rainline and we'll fit you. don't buy aggressive shoes first",
+        text: "come by Fogline and we'll fit you. don't buy aggressive shoes first",
         after: 20,
       },
       {
@@ -1471,7 +1475,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "grace.liu",
     in: "bay-area-climbers",
     at: daysAgo(14, "19:15"),
-    text: "first outdoor V6!!! Leavenworth, 4th session on it, almost cried",
+    text: "first outdoor V6!!! Bishop, 4th session on it, almost cried",
     photos: ["bouldering outdoors", "bouldering outdoors"],
     reactions: 38,
     mood: "love",
@@ -1482,44 +1486,44 @@ export const groupPosts: readonly PostSeed[] = [
     ],
   },
 
-  // ── PNW Hikers ─────────────────────────────────────────────────────────────
+  // ── Bay Area Hikers ────────────────────────────────────────────────────────
   {
     by: "arjun.mehta",
     in: "bay-area-hikers",
     at: daysAgo(4, "19:45"),
-    text: "Snow Lake, Sunday. Snow starts around 3,500 ft, packed but icy on the switchbacks, microspikes absolutely needed. Lake partially frozen. Alpental lot was half full by 9. Upper part crosses avalanche terrain so check NWAC before you go.",
+    text: "Castle Pass + Round Valley, Sunday. Snow from the trailhead, packed but icy on the climb to the pass, microspikes absolutely needed. Frog Lake partially frozen. Castle Peak lot was half full by 9. Anything toward the peak crosses avalanche terrain so check the Sierra Avalanche Center before you go.",
     photos: ["snowy lake", "snowy trail"],
     reactions: 33,
     comments: [
       {
         by: "tara.singh",
-        text: "great report, thank you for the NWAC reminder",
+        text: "great report, thank you for the avy forecast reminder",
         after: 30,
       },
-      { by: "ben.carter", text: "microspikes are 20% off at Rainline this week fyi", after: 70 },
+      { by: "ben.carter", text: "microspikes are 20% off at Fogline this week fyi", after: 70 },
     ],
   },
   {
     by: "leo.novak",
     in: "bay-area-hikers",
     at: daysAgo(1, "10:20"),
-    text: "anyone driving to Rattlesnake Ledge or Mt Si this weekend? new to the area, no car, will pay gas + bring snacks",
+    text: "anyone driving to Mount Tam or Tennessee Valley this weekend? new to the area, no car, will pay gas + bring snacks",
     reactions: 6,
     comments: [
       {
         by: "maddie.collins",
-        text: "doing Rattlesnake Saturday with my dog Pickles, room for 1!",
+        text: "doing Tennessee Valley Saturday, room for 1! Pickles stays home for this one, no dogs on that trail",
         after: 30,
         replies: [{ by: "leo.novak", text: "yes please!!", after: 5 }],
       },
       {
         by: "kevin.tran",
-        text: "Mt Si Sunday if you want a second one, leaving SLU at 8",
+        text: "Mount Tam Sunday if you want a second one, leaving SoMa at 8",
         after: 80,
       },
       {
         by: "maya.chen",
-        text: "Leo you're doing more hiking in a month than I've done all quarter",
+        text: "Leo you're doing more hiking in a month than I've done all semester",
         after: 200,
       },
     ],
@@ -1528,7 +1532,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "maddie.collins",
     in: "bay-area-hikers",
     at: hoursAgo(11),
-    text: "Snoqualmie Pass got 8 inches overnight. If you're heading up: traction tires or chains, check WSDOT before you leave, keep dogs leashed near the plows",
+    text: "Tahoe got 8 inches overnight. If you're heading up 80: chains in the car, check Caltrans before you leave, keep dogs leashed near the plows",
     photos: ["snowy mountains"],
     reactions: 29,
     mood: "wow",
@@ -1541,7 +1545,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "tara.singh",
     in: "bay-area-hikers",
     at: daysAgo(5, "12:30"),
-    text: "Group hike to Rattlesnake Ledge! Easy pace, all welcome, carpools from Capitol Hill and the U District. Bring microspikes in case it's icy up top.",
+    text: "Group hike in Tennessee Valley! Easy pace, all welcome, carpools from the Mission and Berkeley. Bring layers, it's always windier at the beach than you think.",
     event: "tennessee-valley-hike",
     reactions: 20,
     comments: [
@@ -1562,8 +1566,8 @@ export const groupPosts: readonly PostSeed[] = [
     by: "maya.chen",
     in: "bay-area-hikers",
     at: daysAgo(4, "18:30"),
-    text: "Lake 22 on Saturday: muddy, then icy, then gorgeous. Bridge at the bottom is fine, upper switchbacks were slick so bring spikes. Cell service dies right after the parking lot",
-    photos: ["mountain lake", "forest trail", "mountain lake"],
+    text: "Cataract Falls on Saturday: muddy, then slippery, then gorgeous. Falls are finally running after the rain, the stairs near the top were slick so wear real shoes. Cell service dies right after the parking lot",
+    photos: ["forest river", "forest trail", "foggy hills"],
     tagged: ["sofia.alvarez"],
     reactions: 26,
     mood: "love",
@@ -1581,7 +1585,7 @@ export const groupPosts: readonly PostSeed[] = [
         replies: [
           {
             by: "maya.chen",
-            text: "it was 40 degrees and I was SO cold for that photo",
+            text: "it was 45 degrees and windy and I was SO cold for that photo",
             after: 15,
           },
         ],
@@ -1592,7 +1596,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "daniel.reyes",
     in: "bay-area-hikers",
     at: daysAgo(7, "15:30"),
-    text: "ran Mt Si up and down in 1:52 this morning. trail is wet but no snow below the haystack. headlamp needed by 4:30",
+    text: "ran Mount Tam from Mill Valley to East Peak and back in 1:52 this morning. trail is wet, fog sits right on the ridge. headlamp needed by 5",
     photos: ["posts/forest-trail-03.jpg"],
     reactions: 15,
     comments: [
@@ -1609,11 +1613,11 @@ export const groupPosts: readonly PostSeed[] = [
     by: "sophie.dubois",
     in: "bay-area-hikers",
     at: daysAgo(2, "16:00"),
-    text: "Discovery Park in the rain today. 3 herons, zero people",
+    text: "Lands End in the fog today. 3 herons, zero people",
     photos: ["beach", "heron"],
     reactions: 22,
     comments: [
-      { by: "theo.grant", text: "the lighthouse loop is so good in the rain", after: 40 },
+      { by: "theo.grant", text: "the labyrinth is so good in the fog", after: 40 },
       { by: "erin.mcallister", text: "heron count is a valid trail metric", after: 90, likes: 4 },
     ],
   },
@@ -1621,7 +1625,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "kevin.tran",
     in: "bay-area-hikers",
     at: daysAgo(2, "21:10"),
-    text: "saw Arjun's Snow Lake report. would trail runners + microspikes work or do I need real boots right now?",
+    text: "saw Arjun's Castle Pass report. would trail runners + microspikes work or do I need real boots right now?",
     reactions: 3,
     comments: [
       { by: "arjun.mehta", text: "boots. trail runners will be soaked in 10 min", after: 20 },
@@ -1629,19 +1633,19 @@ export const groupPosts: readonly PostSeed[] = [
     ],
   },
 
-  // ── UW Class of 2027 ───────────────────────────────────────────────────────
+  // ── UC Berkeley Class of 2027 ──────────────────────────────────────────────
   {
     by: "amara.diallo",
     in: "cal-class-of-2027",
     at: hoursAgo(6),
-    text: "212 days until commencement. not that anyone's counting 🎓",
+    text: "185 days until commencement. not that anyone's counting 🎓",
     bg: "purple",
     reactions: 34,
     comments: [
       { by: "maya.chen", text: "I'm counting. I have a widget", after: 20, likes: 6 },
       {
         by: "ethan.park",
-        text: "212 days to finish capstone, that's plenty right",
+        text: "185 days to finish capstone, that's plenty right",
         after: 50,
         replies: [{ by: "maya.chen", text: "Ethan Park it is not plenty", after: 5, likes: 8 }],
       },
@@ -1691,11 +1695,15 @@ export const groupPosts: readonly PostSeed[] = [
     by: "isaiah.thompson",
     in: "cal-class-of-2027",
     at: daysAgo(8, "11:30"),
-    text: "cap and gown orders open in Feb through the UW bookstore. ignore the 'early bird' emails from random sites",
-    photos: ["uw campus"],
+    text: "cap and gown orders open in Feb through the Cal Student Store. ignore the 'early bird' emails from random sites",
+    photos: ["berkeley campus"],
     reactions: 19,
     comments: [
-      { by: "amara.diallo", text: "yes. those are scams, only order through UW", after: 20 },
+      {
+        by: "amara.diallo",
+        text: "yes. those are scams, only order through the Student Store",
+        after: 20,
+      },
       {
         by: "chloe.wright",
         text: "wait so the $89 one I already bought...",
@@ -1730,7 +1738,7 @@ export const groupPosts: readonly PostSeed[] = [
     comments: [
       {
         by: "daniel.reyes",
-        text: "no job yet, applying to Boeing and like 40 other things",
+        text: "no job yet, applying to Tesla and like 40 other things",
         after: 20,
       },
       {
@@ -1749,7 +1757,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "ana.torres",
     in: "cal-class-of-2027",
     at: daysAgo(1, "19:00"),
-    text: "who's staying in seattle for thanksgiving? thinking friendsgiving potluck at our place",
+    text: "who's staying in berkeley for thanksgiving? thinking friendsgiving potluck at our place",
     photos: ["posts/thanksgiving-table-01.jpg"],
     reactions: 13,
     comments: [
@@ -1759,7 +1767,7 @@ export const groupPosts: readonly PostSeed[] = [
     ],
   },
 
-  // ── Seattle Tech Interns & New Grads ───────────────────────────────────────
+  // ── SF Tech Interns & New Grads ────────────────────────────────────────────
   {
     by: "rohan.iyer",
     in: "sf-tech-new-grads",
@@ -1789,7 +1797,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "maya.chen",
     in: "sf-tech-new-grads",
     at: daysAgo(5, "15:10"),
-    text: "Microsoft July 2027 new grads, where are you?? would love a cohort group chat before we all show up confused on day 1",
+    text: "Google July 2027 new grads, where are you?? would love a cohort group chat before we all show up confused on day 1",
     reactions: 24,
     comments: [
       {
@@ -1836,12 +1844,13 @@ export const groupPosts: readonly PostSeed[] = [
     by: "fatima.hassan",
     in: "sf-tech-new-grads",
     at: daysAgo(7, "18:00"),
-    text: "for anyone interning in Seattle next summer: I put together everything I learned finding intern housing (sublet timing, which buildings do 3 month leases, scams to avoid). add to it!",
+    text: "for anyone interning in SF next summer: I put together everything I learned finding intern housing (sublet timing, which buildings do 3 month leases, scams to avoid). add to it!",
     link: {
-      url: "https://docs.example.com/seattle-intern-housing-2027",
-      title: "Seattle Intern Housing Guide 2027 (crowdsourced)",
+      url: "https://docs.example.com/sf-intern-housing-2027",
+      title: "SF Bay Area Intern Housing Guide 2027 (crowdsourced)",
       domain: "docs.example.com",
-      description: "Sublet timelines, short-term leases, neighborhoods by commute, and red flags.",
+      description:
+        "Sublet timelines, short-term leases, neighborhoods by BART and Caltrain commute, and red flags.",
     },
     reactions: 41,
     comments: [
@@ -1858,7 +1867,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "ethan.park",
     in: "sf-tech-new-grads",
     at: daysAgo(4, "22:10"),
-    text: "still waiting on my return offer decision but got a new grad offer from a startup in SLU. base is lower, equity is 'significant'. how do you even evaluate that",
+    text: "still waiting on my return offer decision but got a new grad offer from a startup in SoMa. base is lower, equity is 'significant'. how do you even evaluate that",
     reactions: 9,
     comments: [
       {
@@ -1879,7 +1888,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "marcus.bell",
     in: "sf-tech-new-grads",
     at: daysAgo(2, "13:30"),
-    text: "~1 year in as an SWE at Microsoft. happy to do resume reviews for new grads this weekend, drop a comment",
+    text: "~1 year in as an SWE at Google. happy to do resume reviews for new grads this weekend, drop a comment",
     reactions: 29,
     comments: [
       { by: "fatima.hassan", text: "would love one 🙏", after: 15 },
@@ -1898,7 +1907,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "leo.novak",
     in: "sf-tech-new-grads",
     at: daysAgo(9, "20:30"),
-    text: "what do people do on weeknights here that isn't drinking? new to seattle and everyone at my job is a 6am cyclist",
+    text: "what do people do on weeknights here that isn't drinking? new to SF and everyone at my job is a 6am cyclist",
     reactions: 10,
     mood: "haha",
     comments: [
@@ -1908,7 +1917,7 @@ export const groupPosts: readonly PostSeed[] = [
         after: 15,
         replies: [{ by: "leo.novak", text: "ok fair. going thursday", after: 5 }],
       },
-      { by: "grace.liu", text: "climbing!! Cascade Boulders in Fremont", after: 40 },
+      { by: "grace.liu", text: "climbing!! Sutro Boulders in Dogpatch", after: 40 },
     ],
   },
   {
@@ -1924,7 +1933,7 @@ export const groupPosts: readonly PostSeed[] = [
     ],
   },
 
-  // ── Seattle Board Game Night ───────────────────────────────────────────────
+  // ── SF Board Game Night ────────────────────────────────────────────────────
   {
     key: "tasha-game-night-post",
     by: "tasha.okafor",
@@ -2025,12 +2034,12 @@ export const groupPosts: readonly PostSeed[] = [
     ],
   },
 
-  // ── Seattle Run Club ───────────────────────────────────────────────────────
+  // ── SF Run Club ────────────────────────────────────────────────────────────
   {
     by: "daniel.reyes",
     in: "sf-run-club",
     at: daysAgo(1, "17:00"),
-    text: "Saturday 8am from Gas Works. 5k and 10k routes on the Burke-Gilman, rain or shine (it'll be rain). Coffee after, Tasha's bringing the good stuff",
+    text: "Saturday 8am from Crissy Field (East Beach). 5k and 10k routes out toward the bridge, fog or shine (it'll be fog). Coffee after, Tasha's bringing the good stuff",
     event: "run-club-saturday",
     reactions: 16,
     comments: [
@@ -2055,7 +2064,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "tasha.okafor",
     in: "sf-run-club",
     at: daysAgo(5, "11:20"),
-    text: "Saturday recap: 42 runners, 1 rainbow, 0 dry socks. shoutout to everyone tapering for the Seattle Marathon on the 29th 🏃",
+    text: "Saturday recap: 42 runners, 1 rogue wave, 0 dry socks. shoutout to everyone tapering for the SF Marathon on the 29th 🏃",
     photos: ["runners", "runners"],
     reactions: 24,
     comments: [
@@ -2077,7 +2086,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "luis.hernandez",
     in: "sf-run-club",
     at: daysAgo(8, "21:30"),
-    text: "anyone else running the Seattle Marathon on the 29th? first full. tapering is making me insane",
+    text: "anyone else running the SF Marathon on the 29th? first full. tapering is making me insane",
     photos: ["running shoes"],
     reactions: 13,
     comments: [
@@ -2110,24 +2119,28 @@ export const groupPosts: readonly PostSeed[] = [
     ],
   },
 
-  // ── Seattle Foodies ────────────────────────────────────────────────────────
+  // ── SF Foodies ─────────────────────────────────────────────────────────────
   {
     by: "leo.novak",
     in: "sf-foodies",
     at: daysAgo(4, "18:00"),
-    text: "ok Seattle, I've been here 3 weeks. give me your top teriyaki spot, I'm told this is a whole thing",
+    text: "ok SF, I've been here 3 weeks. give me your top Mission burrito spot, I'm told this is a whole thing",
     reactions: 14,
     comments: [
       {
         by: "diego.morales",
-        text: "teriyaki is a religion here. find a strip mall spot with a faded menu board and a cash discount. that's the one",
+        text: "burritos are a religion here. find a taqueria with a faded menu board, a line out the door and a cash only sign. that's the one",
         after: 15,
         likes: 9,
       },
-      { by: "chloe.wright", text: "chicken teriyaki, extra sauce, gyoza. no notes", after: 30 },
+      {
+        by: "chloe.wright",
+        text: "carne asada super, extra salsa verde, chips. no notes",
+        after: 30,
+      },
       {
         by: "camila.santos",
-        text: "do not leave without trying one at 1am on Broadway",
+        text: "do not leave without trying one at 1am on Mission St",
         after: 110,
       },
     ],
@@ -2136,7 +2149,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "chloe.wright",
     in: "sf-foodies",
     at: daysAgo(2, "20:15"),
-    text: "Kumo Ramen's new black garlic tonkotsu 🍜 worth the 40 min line in the rain",
+    text: "Kumo Ramen's new black garlic tonkotsu 🍜 worth the 40 min line in the fog",
     photos: ["ramen", "ramen shop"],
     reactions: 31,
     mood: "love",
@@ -2148,20 +2161,20 @@ export const groupPosts: readonly PostSeed[] = [
         likes: 8,
       },
       { by: "jasmine.ortiz", text: "the egg in the second pic", after: 50 },
-      { by: "jessica.huang", text: "flying up in december, adding to the list", after: 130 },
+      { by: "jessica.huang", text: "adding this to my december list", after: 130 },
     ],
   },
   {
     by: "fatima.hassan",
     in: "sf-foodies",
     at: hoursAgo(8),
-    text: "best pho for a rainy day? not on the Ave pls, I've tried them all",
+    text: "best pho for a rainy day? not on Telegraph pls, I've tried them all",
     reactions: 6,
     comments: [
-      { by: "kevin.tran", text: "little saigon. any of them. you can't miss", after: 25 },
+      { by: "kevin.tran", text: "little saigon on Larkin. any of them. you can't miss", after: 25 },
       {
         by: "ryan.oconnor",
-        text: "the place near the Beacon Hill station, get the brisket",
+        text: "the place on Irving in the Sunset, get the brisket",
         after: 60,
       },
       { by: "camila.santos", text: "pho on a rainy day is literally medicine", after: 140 },
@@ -2176,24 +2189,24 @@ export const groupPosts: readonly PostSeed[] = [
     reactions: 20,
     comments: [
       { by: "chloe.wright", text: "this is not unpopular this is fact", after: 10 },
-      { by: "ryan.oconnor", text: "is this Bellevue slander or praise, I can't tell", after: 40 },
+      { by: "ryan.oconnor", text: "is this San Mateo slander or praise, I can't tell", after: 40 },
     ],
   },
   {
     by: "marcus.bell",
     in: "sf-foodies",
     at: daysAgo(6, "19:30"),
-    text: "new to Capitol Hill, what's the move for a cheap weeknight dinner? I've been eating cereal for a week",
+    text: "new to the Mission, what's the move for a cheap weeknight dinner? I've been eating cereal for a week",
     photos: ["cereal"],
     reactions: 10,
     mood: "haha",
     comments: [
       {
         by: "jasmine.ortiz",
-        text: "Moonrise does a grilled cheese now. not exactly dinner but it's $8",
+        text: "Moonrise does a grilled cheese now. not exactly dinner but it's $9",
         after: 20,
       },
-      { by: "diego.morales", text: "Kumo does $12 shoyu ramen on Tuesdays", after: 45 },
+      { by: "diego.morales", text: "Kumo does $14 shoyu ramen on Tuesdays", after: 45 },
       {
         by: "leo.novak",
         text: "marcus, fellow cereal guy, let's go together",
@@ -2202,12 +2215,12 @@ export const groupPosts: readonly PostSeed[] = [
     ],
   },
 
-  // ── Ballard Marketplace Swap ───────────────────────────────────────────────
+  // ── Inner Richmond Marketplace Swap ────────────────────────────────────────
   {
     by: "will.foster",
     in: "richmond-marketplace-swap",
     at: daysAgo(2, "10:45"),
-    text: "$220: mid-century cane armchair, solid teak, rewove the seat and back myself. Pickup near the Locks.",
+    text: "$220: mid-century cane armchair, solid teak, rewove the seat and back myself. Pickup off Clement.",
     listing: "will-armchair",
     reactions: 12,
     comments: [
@@ -2223,7 +2236,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "ben.carter",
     in: "richmond-marketplace-swap",
     at: daysAgo(5, "17:20"),
-    text: "$350: commuter bike, 56cm, new tires and chain, fenders (non-negotiable in Seattle). selling because I got a cargo bike",
+    text: "$350: commuter bike, 56cm, new tires and chain, fenders (non-negotiable in the Richmond, the fog drips). selling because I got a cargo bike",
     photos: ["commuter bike"],
     reactions: 6,
     comments: [
@@ -2240,7 +2253,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "marco.rossi",
     in: "richmond-marketplace-swap",
     at: daysAgo(8, "12:30"),
-    text: "$40 each: two 4x4 cube shelves, Ballard near Market St. need them gone by Sunday",
+    text: "$40 each: two 4x4 cube shelves, Inner Richmond near Clement & 10th. need them gone by Sunday",
     reactions: 4,
     comments: [
       {
@@ -2255,7 +2268,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "derek.holloway",
     in: "richmond-marketplace-swap",
     at: daysAgo(1, "08:30"),
-    text: "Can anyone recommend a reliable plumber in Ballard? Tenant's kitchen sink backed up for the second time this month.",
+    text: "Can anyone recommend a reliable plumber in the Richmond? Tenant's kitchen sink backed up for the second time this month.",
     reactions: 3,
     comments: [
       {
@@ -2265,18 +2278,18 @@ export const groupPosts: readonly PostSeed[] = [
       },
       {
         by: "erin.mcallister",
-        text: "tree roots in the old Ballard sewer lines are no joke",
+        text: "tree roots in the old Richmond sewer lines are no joke",
         after: 90,
       },
     ],
   },
 
-  // ── Seattle Concerts & Shows ───────────────────────────────────────────────
+  // ── SF Concerts & Shows ────────────────────────────────────────────────────
   {
     by: "malik.johnson",
     in: "sf-concerts",
     at: daysAgo(3, "16:00"),
-    text: "Low Tide Radio at The Velvet Owl! new songs, old songs, and one cover you'll pretend not to know. $12 at the door",
+    text: "Low Tide Radio at The Velvet Owl! new songs, old songs, and one cover you'll pretend not to know. $15 at the door",
     event: "low-tide-radio-show",
     reactions: 27,
     comments: [
@@ -2297,7 +2310,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "olivia.brooks",
     in: "sf-concerts",
     at: daysAgo(1, "14:10"),
-    text: "2 tickets to Moth Static at the Showbox, Dec 4, face value ($38 each). can't go, finals 😭",
+    text: "2 tickets to Moth Static at The Independent, Dec 4, face value ($38 each). can't go, finals 😭",
     reactions: 5,
     comments: [
       { by: "nina.petrova", text: "messaged you!", after: 20 },
@@ -2313,7 +2326,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "jasmine.ortiz",
     in: "sf-concerts",
     at: daysAgo(5, "13:00"),
-    text: "the basement show in the CD last night was the best $5 I've ever spent",
+    text: "the warehouse show in West Oakland last night was the best $10 I've ever spent",
     photos: ["concert", "concert"],
     reactions: 18,
     comments: [
@@ -2337,7 +2350,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "zoe.nguyen",
     in: "sf-concerts",
     at: hoursAgo(12),
-    text: "anyone want to come to the Neumos show on the 20th? my friend bailed, extra ticket at face",
+    text: "anyone want to come to the Bottom of the Hill show on the 20th? my friend bailed, extra ticket at face",
     reactions: 3,
     comments: [
       {
@@ -2356,7 +2369,7 @@ export const groupPosts: readonly PostSeed[] = [
     ],
   },
 
-  // ── Mariners Fans ──────────────────────────────────────────────────────────
+  // ── SF Giants Fans ─────────────────────────────────────────────────────────
   {
     by: "jamal.wilson",
     in: "giants-fans",
@@ -2367,12 +2380,12 @@ export const groupPosts: readonly PostSeed[] = [
     comments: [
       {
         by: "isaiah.thompson",
-        text: "pitching wins in this town. let the front office cook",
+        text: "pitching wins in this park. let the front office cook",
         after: 20,
       },
       {
         by: "luis.hernandez",
-        text: "the front office has been 'cooking' since 2001",
+        text: "the front office has been 'cooking' since 2014",
         after: 45,
         likes: 9,
       },
@@ -2387,10 +2400,14 @@ export const groupPosts: readonly PostSeed[] = [
     by: "isaiah.thompson",
     in: "giants-fans",
     at: daysAgo(6, "12:20"),
-    text: "any word on FanFest dates? late January again?",
+    text: "any word on FanFest dates? early February again?",
     reactions: 7,
     comments: [
-      { by: "jamal.wilson", text: "should be late Jan, tickets go fast", after: 30 },
+      {
+        by: "jamal.wilson",
+        text: "should be early Feb, get there before the gates open",
+        after: 30,
+      },
       { by: "daniel.reyes", text: "going just for the clubhouse tour again", after: 80 },
     ],
   },
@@ -2417,7 +2434,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "nora.kowalski",
     in: "sf-dog-owners",
     at: hoursAgo(5),
-    text: "Magnuson off-leash area is a mud pit this week, bring towels. Also whoever's golden kept stealing everyone's tennis balls: legend.",
+    text: "Fort Funston is a sand-and-mud situation this week, bring towels. Also whoever's golden kept stealing everyone's tennis balls: legend.",
     photos: ["dog park"],
     reactions: 64,
     mood: "love",
@@ -2425,7 +2442,7 @@ export const groupPosts: readonly PostSeed[] = [
       { by: "sam.rivera", text: "that was Biscuit. he has no regrets", after: 22, likes: 11 },
       {
         by: "lena.fischer",
-        text: "Genesee is drier if anyone's looking for an alternative",
+        text: "Bernal Hill is drier if anyone's looking for an alternative",
         after: 50,
       },
     ],
@@ -2439,7 +2456,7 @@ export const groupPosts: readonly PostSeed[] = [
     comments: [
       {
         by: "andre.silva",
-        text: "we did the reactive rover class in Fremont, worth it",
+        text: "we did the reactive rover class in the Mission, worth it",
         after: 35,
       },
     ],
@@ -2448,7 +2465,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "aisha.rahman",
     in: "sf-coffee-lovers",
     at: hoursAgo(9),
-    text: "New roaster opened on Rainier Ave and their Ethiopia pour-over is ridiculous. Blueberry jam in a cup. Go before the line finds out.",
+    text: "New roaster opened on Divisadero and their Ethiopia pour-over is ridiculous. Blueberry jam in a cup. Go before the line finds out.",
     photos: ["coffee"],
     reactions: 38,
     comments: [
@@ -2460,8 +2477,8 @@ export const groupPosts: readonly PostSeed[] = [
     by: "yuki.sato",
     in: "sf-photography",
     at: hoursAgo(3),
-    text: "Last night from Kerry Park. Waited two hours for the clouds to break and got about four minutes of this.",
-    photos: ["kerry park", "sunset"],
+    text: "Last night from Twin Peaks. Waited two hours for the fog to break and got about four minutes of this.",
+    photos: ["twin peaks", "sunset"],
     reactions: 142,
     mood: "love",
     comments: [
@@ -2473,14 +2490,14 @@ export const groupPosts: readonly PostSeed[] = [
     by: "lena.fischer",
     in: "sf-photography",
     at: daysAgo(2, "10:00"),
-    text: "December photo walk: Pioneer Square at blue hour, Saturday the 13th, meet at the pergola at 4pm. Tripods welcome.",
+    text: "December photo walk: Chinatown and North Beach at blue hour, Saturday the 12th, meet at the Dragon Gate at 4pm. Tripods welcome.",
     reactions: 33,
   },
   {
     by: "owen.murphy",
     in: "ferry-commuters",
     at: hoursAgo(2),
-    text: "Bainbridge 7:55 running about 25 late, vessel swap again. Plan accordingly.",
+    text: "Larkspur 7:50 running about 25 late, vessel swap again. Plan accordingly.",
     photos: ["ferry"],
     reactions: 17,
     mood: "sad",
@@ -2490,7 +2507,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "jamal.wilson",
     in: "sf-gamers",
     at: hoursAgo(20),
-    text: "LAN night at the Capitol Hill spot on Friday. 24 seats, bring your own peripherals. Smash bracket at 9.",
+    text: "LAN night at the Mission spot on Friday. 24 seats, bring your own peripherals. Smash bracket at 9.",
     photos: ["gaming setup"],
     reactions: 46,
     comments: [
@@ -2502,8 +2519,8 @@ export const groupPosts: readonly PostSeed[] = [
     by: "marco.rossi",
     in: "ferry-building-regulars",
     at: hoursAgo(7),
-    text: "Dungeness crab is back at the fish stalls and prices are actually reasonable this year. Go early, they sold out by 1 last Saturday.",
-    photos: ["pike place"],
+    text: "Dungeness crab season is open and the fish counter's prices are actually reasonable this year. Go early, they sold out by 1 last Saturday.",
+    photos: ["ferry building"],
     reactions: 58,
     comments: [{ by: "sam.rivera", text: "chowder line was 40 min at noon fyi", after: 25 }],
   },

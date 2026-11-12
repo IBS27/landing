@@ -7,7 +7,7 @@ import type { ListingSeed } from "../types";
  * kai-crashpad, will-armchair, marco-camera, luis-civic.
  */
 export const listings: readonly ListingSeed[] = [
-  // ── Maya Chen (selling dorm-era stuff, U District) ──────────────────────────
+  // ── Maya Chen (selling dorm-era stuff, Southside Berkeley) ──────────────────
   {
     key: "maya-desk",
     seller: "maya.chen",
@@ -17,7 +17,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "IKEA",
     description:
-      "white micke desk, 41x20 in. has the little cable hole in the back and a drawer. a couple of faint marker marks on top but otherwise solid. already disassembled so it fits in a sedan. pickup near 45th & Brooklyn",
+      "white micke desk, 41x20 in. has the little cable hole in the back and a drawer. a couple of faint marker marks on top but otherwise solid. already disassembled so it fits in a sedan. pickup near Channing & Bowditch",
     photos: "white desk",
     hood: "Berkeley",
     status: "sold",
@@ -33,7 +33,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "IKEA",
     description:
-      "tall billy, 6 shelves. no wobble, all the shelf pins are there. you'll need to bring a friend, it's heavy and I'm on the 2nd floor. U District, cash or venmo",
+      "tall billy, 6 shelves. no wobble, all the shelf pins are there. you'll need to bring a friend, it's heavy and I'm on the 2nd floor. Southside Berkeley, cash or venmo",
     photos: "billy bookcase",
     hood: "Berkeley",
     status: "sold",
@@ -67,7 +67,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Galanz",
     description:
-      "retro style red mini fridge, separate freezer door (it actually freezes, ice cream approved). runs quiet. perfect for a dorm. pickup only, U District near the Ave",
+      "retro style red mini fridge, separate freezer door (it actually freezes, ice cream approved). runs quiet. perfect for a dorm. pickup only, Southside near Telegraph",
     photos: "mini fridge",
     hood: "Berkeley",
     meetup: ["door_pickup"],
@@ -83,7 +83,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Trek",
     description:
-      "Trek FX 2, medium frame (I'm 5'5 and it fit great). tuned up at Recycled Cycles in September, new brake pads + chain. comes with a Kryptonite U-lock and front/back lights. rode it up and down the Burke-Gilman for 3 years and it never let me down. selling because I'm moving to Capitol Hill and those hills are not it lol\n\ncan meet on campus or near 45th & 12th",
+      "Trek FX 2, medium frame (I'm 5'5 and it fit great). tuned up at Missing Link in September, new brake pads + chain. comes with a Kryptonite U-lock and front/back lights. rode it up and down the Bay Trail for 3 years and it never let me down. selling because I'm moving to the Mission and everyone says it'll get stolen in a week lol\n\ncan meet on campus or near Telegraph & Durant",
     photos: "hybrid bike",
     hood: "Berkeley",
     meetup: ["public"],
@@ -105,7 +105,7 @@ export const listings: readonly ListingSeed[] = [
     views: 41,
   },
 
-  // ── Priya Raman (selling her whole Wallingford apartment before Copenhagen) ─
+  // ── Priya Raman (selling her whole Elmwood apartment before Copenhagen) ────
   {
     key: "priya-couch",
     seller: "priya.raman",
@@ -115,7 +115,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "West Elm",
     description:
-      "moving to Copenhagen in January so everything in my apartment has to go!! this is a vintage loveseat in deep red velvet with a carved wood frame, about 60 inches. got it from an estate sale 2 years ago and it's honestly the most comfortable thing I own. no stains, no rips, springs are solid. smoke free pet free home.\n\nyou'll need a truck or SUV + 2 people. pickup near N 45th & Meridian in Wallingford. available any time before Dec 20",
+      "moving to Copenhagen in January so everything in my apartment has to go!! this is a vintage loveseat in deep red velvet with a carved wood frame, about 60 inches. got it from an estate sale 2 years ago and it's honestly the most comfortable thing I own. no stains, no rips, springs are solid. smoke free pet free home.\n\nyou'll need a truck or SUV + 2 people. pickup near Webster & College in the Elmwood. available any time before Dec 20",
     photos: "velvet loveseat",
     hood: "Elmwood",
     meetup: ["door_pickup"],
@@ -148,7 +148,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "IKEA",
     description:
-      "old mahogany chest from my landlord's basement, he said take it. all drawers slide fine, original brass pulls. top has a light ring from a candle. Wallingford, ground floor so easy pickup",
+      "old mahogany chest from my landlord's basement, he said take it. all drawers slide fine, original brass pulls. top has a light ring from a candle. Elmwood, ground floor so easy pickup",
     photos: "antique dresser",
     hood: "Elmwood",
     listed: daysAgo(9, "17:41"),
@@ -221,7 +221,7 @@ export const listings: readonly ListingSeed[] = [
     category: "free",
     condition: "used_fair",
     description:
-      "big box of kitchen stuff, free. 2 pots, a nonstick pan that's seen better days, 8 mugs, a colander, mixed utensils, tupperware. on my porch near N 45th & Meridian starting tomorrow morning. first come first served",
+      "big box of kitchen stuff, free. 2 pots, a nonstick pan that's seen better days, 8 mugs, a colander, mixed utensils, tupperware. on my porch near Webster & College starting tomorrow morning. first come first served",
     photos: "kitchen utensils",
     hood: "Elmwood",
     listed: daysAgo(1, "19:30"),
@@ -229,7 +229,7 @@ export const listings: readonly ListingSeed[] = [
     groups: ["free-stuff-sf"],
   },
 
-  // ── Will Foster (furniture flipper, Ballard) ─────────────────────────────────
+  // ── Will Foster (furniture flipper, Inner Richmond) ──────────────────────────
   {
     key: "will-armchair",
     seller: "will.foster",
@@ -238,7 +238,7 @@ export const listings: readonly ListingSeed[] = [
     category: "furniture",
     condition: "used_like_new",
     description:
-      "found this one at an estate sale in Magnolia. Jeanneret style compass legs in solid teak, refinished, and I rewove the cane seat and back myself. joints reglued, solid as anything. 24w x 28d x 31h.\n\nBallard, pickup only near 15th & Market. $220 firm, I've got a lot of hours in this one",
+      "found this one at an estate sale in Sea Cliff. Jeanneret style compass legs in solid teak, refinished, and I rewove the cane seat and back myself. joints reglued, solid as anything. 24w x 28d x 31h.\n\nInner Richmond, pickup only near Clement & 6th. $220 firm, I've got a lot of hours in this one",
     photos: "cane armchair",
     hood: "Inner Richmond",
     meetup: ["door_pickup"],
@@ -254,7 +254,7 @@ export const listings: readonly ListingSeed[] = [
     category: "furniture",
     condition: "used_good",
     description:
-      "heavy carved oak table, 60 x 36, with 4 matching chairs reupholstered in forest green velvet. refinished the top with a matte poly so it'll take a beating. chairs are sturdy, one has a small repair on the back (you can't see it). Ballard pickup",
+      "heavy carved oak table, 60 x 36, with 4 matching chairs reupholstered in forest green velvet. refinished the top with a matte poly so it'll take a beating. chairs are sturdy, one has a small repair on the back (you can't see it). Inner Richmond pickup",
     photos: "oak dining table",
     hood: "Inner Richmond",
     listed: daysAgo(8, "09:40"),
@@ -299,7 +299,7 @@ export const listings: readonly ListingSeed[] = [
     category: "furniture",
     condition: "used_like_new",
     description:
-      "old carved oak settle, the seat lifts up for storage (boots, scarves, the dog's leash collection). 48 in long. cleaned and oiled, hinges replaced. Ballard near the Locks",
+      "old carved oak settle, the seat lifts up for storage (boots, scarves, the dog's leash collection). 48 in long. cleaned and oiled, hinges replaced. Inner Richmond near the park",
     photos: "hall bench",
     hood: "Inner Richmond",
     listed: hoursAgo(20),
@@ -317,7 +317,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Herman Miller",
     description:
-      "remastered Aeron size B. posturefit SL, adjustable arms, tilt limiter. mesh has zero tears. I'm going back to the office 5 days so it's just sitting in my spare room. Redmond near Overlake, can help load",
+      "remastered Aeron size B. posturefit SL, adjustable arms, tilt limiter. mesh has zero tears. I'm going back to the office 5 days so it's just sitting in my spare room. Mountain View near Castro St, can help load",
     photos: "aeron chair",
     hood: "Mountain View",
     meetup: ["public"],
@@ -333,7 +333,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "IKEA",
     description:
-      "white kallax, 2x4. comes with 2 fabric bins. some scuffs on the side. pickup by the 49 stop on University Way",
+      "white kallax, 2x4. comes with 2 fabric bins. some scuffs on the side. pickup by the 51B stop on Telegraph",
     photos: "kallax shelf",
     hood: "Berkeley",
     listed: daysAgo(7, "15:10"),
@@ -347,7 +347,7 @@ export const listings: readonly ListingSeed[] = [
     category: "furniture",
     condition: "used_good",
     description:
-      "light gray sofa with a chaise end, about 90 in wide. cushion covers zip off and I just had them washed. no pets, no smoking. we're getting a smaller couch for the new place. Fremont, need it gone by Nov 30",
+      "light gray sofa with a chaise end, about 90 in wide. cushion covers zip off and I just had them washed. no pets, no smoking. we're getting a smaller couch for the new place. Upper Haight, need it gone by Nov 30",
     photos: "gray sectional",
     hood: "Haight-Ashbury",
     listed: daysAgo(4, "20:40"),
@@ -361,7 +361,7 @@ export const listings: readonly ListingSeed[] = [
     category: "furniture",
     condition: "used_fair",
     description:
-      "cute round coffee table, dark wood. top has some scratches and one cat claw situation (thanks Biscuit). still super cute. Capitol Hill, Pine & Belmont",
+      "cute round coffee table, dark wood. top has some scratches and one cat claw situation (thanks Biscuit). still super cute. Mission, Folsom & 19th",
     photos: "coffee table",
     hood: "Mission",
     listed: daysAgo(11, "13:25"),
@@ -376,7 +376,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Uplift",
     description:
-      "electric sit/stand desk, bamboo top, black frame. memory presets work. paid $750. you have to take it apart yourself (tools provided) or bring a van. Queen Anne",
+      "electric sit/stand desk, bamboo top, black frame. memory presets work. paid $750. you have to take it apart yourself (tools provided) or bring a van. Pac Heights",
     photos: "standing desk",
     hood: "Pacific Heights",
     status: "sold",
@@ -406,7 +406,7 @@ export const listings: readonly ListingSeed[] = [
     category: "furniture",
     condition: "used_good",
     brand: "IKEA",
-    description: "birch frame, beige cushion. comfy. no stains. U District",
+    description: "birch frame, beige cushion. comfy. no stains. Southside Berkeley",
     photos: "poang chair",
     hood: "Berkeley",
     listed: daysAgo(10, "22:15"),
@@ -420,7 +420,7 @@ export const listings: readonly ListingSeed[] = [
     category: "furniture",
     condition: "used_like_new",
     description:
-      "black metal + wood seat, 26 in seat height. like new. SLU near Westlake, can meet in the lobby",
+      "black metal + wood seat, 26 in seat height. like new. SoMa near 2nd & Folsom, can meet in the lobby",
     photos: "bar stools",
     hood: "SoMa",
     status: "sold",
@@ -436,7 +436,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Article",
     description:
-      "3 seat Chesterfield in tan leather, 84 in. leather has worn in nicely, no tears or scratches worth mentioning. paid $1,900. moving in with my partner and we have two couches now, mine lost the vote. Fremont, ground floor, you bring the truck and helpers",
+      "3 seat Chesterfield in tan leather, 84 in. leather has worn in nicely, no tears or scratches worth mentioning. paid $1,900. moving in with my partner and we have two couches now, mine lost the vote. Haight, ground floor, you bring the truck and helpers",
     photos: "chesterfield sofa",
     hood: "Haight-Ashbury",
     status: "pending",
@@ -451,7 +451,7 @@ export const listings: readonly ListingSeed[] = [
     category: "furniture",
     condition: "used_fair",
     description:
-      "big rattan chair, very 70s. a few strands loose on the back (see photos) but structurally fine. cushion not included. Wallingford",
+      "big rattan chair, very 70s. a few strands loose on the back (see photos) but structurally fine. cushion not included. Elmwood",
     photos: "peacock chair",
     hood: "Elmwood",
     listed: daysAgo(26, "16:30"),
@@ -466,7 +466,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "IKEA",
     description:
-      "dark brown, seats 4 comfortably (6 if you like your friends). chairs have padded seats. getting a new one after the wedding. Columbia City near the Link station",
+      "dark brown, seats 4 comfortably (6 if you like your friends). chairs have padded seats. getting a new one after the wedding. Dogpatch near the T Third stop at 20th",
     photos: "round dining table",
     hood: "Dogpatch",
     listed: daysAgo(13, "18:20"),
@@ -483,7 +483,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Fujifilm",
     description:
-      "upgrading my second body so this X-T3 needs a new home. about 38k shutter count, sensor is clean, screen protector on since day one. comes with 2 batteries, charger, strap, and the original box. some wear on the top plate dials, see photos. happy to meet at a coffee shop in Ballard so you can shoot a few frames. no trades",
+      "upgrading my second body so this X-T3 needs a new home. about 38k shutter count, sensor is clean, screen protector on since day one. comes with 2 batteries, charger, strap, and the original box. some wear on the top plate dials, see photos. happy to meet at a coffee shop on Clement so you can shoot a few frames. no trades",
     photos: "fujifilm camera",
     hood: "Inner Richmond",
     meetup: ["public"],
@@ -499,7 +499,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_like_new",
     brand: "Apple",
     description:
-      "space gray, wifi. always had a case and screen protector. battery 94%. pencil included. can meet at Odegaard",
+      "space gray, wifi. always had a case and screen protector. battery 94%. pencil included. can meet at Moffitt",
     photos: "ipad",
     hood: "Berkeley",
     meetup: ["public"],
@@ -547,7 +547,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "LG",
     description:
-      "LG C1 55 in, no burn in, perfect picture. remote + stand included (no wall mount). upgraded to a 65. Queen Anne, you need a car that fits a 55 in box, I still have the box",
+      "LG C1 55 in, no burn in, perfect picture. remote + stand included (no wall mount). upgraded to a 65. Pac Heights, you need a car that fits a 55 in box, I still have the box",
     photos: "oled tv",
     hood: "Pacific Heights",
     meetup: ["door_pickup"],
@@ -625,7 +625,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_like_new",
     brand: "Amazon",
     description:
-      "8gb, no ads. I went back to paper books which, considering where I work, was inevitable. Fremont",
+      "8gb, no ads. I went back to paper books which, considering where I work, was inevitable. Haight",
     photos: "kindle",
     hood: "Haight-Ashbury",
     listed: daysAgo(5, "17:15"),
@@ -640,7 +640,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "new",
     brand: "Apple",
     description:
-      "brand new sealed, got them as a team gift and already have a pair. can meet in SLU after work. cash or zelle",
+      "brand new sealed, got them as a team gift and already have a pair. can meet in SoMa after work. cash or zelle",
     photos: "airpods",
     hood: "SoMa",
     listed: hoursAgo(9),
@@ -671,7 +671,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_like_new",
     brand: "Apple",
     description:
-      "standard glass, tilt stand. we switched the office to a different setup so I have a spare. no scratches, comes with the braided thunderbolt cable and the box. Fremont, can meet at the office near the Troll",
+      "standard glass, tilt stand. we switched the office to a different setup so I have a spare. no scratches, comes with the braided thunderbolt cable and the box. Haight, can meet at the office on Haight St",
     photos: "studio display",
     hood: "Haight-Ashbury",
     meetup: ["public"],
@@ -702,7 +702,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Honda",
     description:
-      "2014 Honda Civic LX, 98k miles, clean title in hand. automatic, silver. one owner (me) since 2017. oil changed every 5k, timing chain so no belt to worry about. new tires last spring (Michelin), new battery in October. small scratch on the rear bumper and a chip in the windshield that doesn't spread.\n\nselling because I got a truck. Beacon Hill, can meet near the Link station. no trades, no payment plans, serious buyers only please",
+      "2014 Honda Civic LX, 98k miles, clean title in hand. automatic, silver. one owner (me) since 2017. oil changed every 5k, timing chain so no belt to worry about. new tires last spring (Michelin), new battery in October. small scratch on the rear bumper and a chip in the windshield that doesn't spread.\n\nselling because I got a truck. Bernal Heights, can meet near 24th St BART. no trades, no payment plans, serious buyers only please",
     photos: "honda civic",
     hood: "Bernal Heights",
     listed: daysAgo(7, "10:20"),
@@ -729,7 +729,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_fair",
     brand: "Toyota",
     description:
-      "2012 Prius Two, 142k miles, REBUILT title (rear end hit in 2019, fully repaired, receipts available). hybrid battery replaced 2023. gets 48 mpg. passenger side mirror is cracked. priced to sell because of the title. Columbia City",
+      "2012 Prius Two, 142k miles, REBUILT title (rear end hit in 2019, fully repaired, receipts available). hybrid battery replaced 2023. gets 48 mpg. passenger side mirror is cracked. priced to sell because of the title. Dogpatch",
     photos: "toyota prius",
     hood: "Dogpatch",
     listed: daysAgo(12, "15:00"),
@@ -756,7 +756,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Subaru",
     description:
-      "2015 Subaru Crosstrek 2.0i Premium, 112k miles, clean title. 5 speed manual. all weather mats, Yakima roof rack crossbars included. head gaskets done at 96k. this car has been to every trailhead between here and Mt Baker. selling because I'm upgrading to something that fits the dog better. Greenwood",
+      "2015 Subaru Crosstrek 2.0i Premium, 112k miles, clean title. 5 speed manual. all weather mats, Yakima roof rack crossbars included. head gaskets done at 96k. this car has been to every trailhead between here and Yosemite. selling because I'm upgrading to something that fits the dog better. Inner Sunset",
     photos: "subaru crosstrek",
     hood: "Inner Sunset",
     listed: daysAgo(10, "09:30"),
@@ -783,7 +783,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Honda",
     description:
-      "2019 Grom, 3,200 miles, clean title. red. new rear tire, stock exhaust (neighbors thank me). great city bike, parks anywhere on the hill. selling to fund the band van. Capitol Hill",
+      "2019 Grom, 3,200 miles, clean title. red. new rear tire, stock exhaust (neighbors thank me). great city bike, parks anywhere in the Mission. selling to fund the band van",
     photos: "honda grom",
     hood: "Mission",
     listed: daysAgo(5, "14:00"),
@@ -809,7 +809,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Genuine",
     description:
-      "2016 Buddy 125, 4,100 miles, clean title. black, windscreen included. 80+ mpg. starts every time even in the rain. I just don't ride it enough since I started working nights. 2 keys",
+      "2016 Buddy 125, 4,100 miles, clean title. black, windscreen included. 80+ mpg. starts every time even in the fog. I just don't ride it enough since I started working nights. 2 keys",
     photos: "genuine buddy",
     hood: "Mission",
     listed: daysAgo(21, "16:10"),
@@ -836,7 +836,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Toyota",
     description:
-      "2018 Tacoma TRD Off-Road double cab 4x4, V6, 96k miles, clean title. bed liner, tow package, new brakes all around, all-terrain tires with 70% left. it's a Tacoma, it'll go another 150k. Ballard",
+      "2018 Tacoma TRD Off-Road double cab 4x4, V6, 96k miles, clean title. bed liner, tow package, new brakes all around, all-terrain tires with 70% left. it's a Tacoma, it'll go another 150k. Inner Richmond",
     photos: "toyota tacoma",
     hood: "Inner Richmond",
     status: "pending",
@@ -865,7 +865,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Mazda",
     description:
-      "2016 Mazda3 hatchback, 74k miles, clean title, automatic. blue. heated seats, backup camera, bluetooth. regularly serviced at the dealer, records available. no accidents. I bike to work now and it mostly just sits there. Fremont",
+      "2016 Mazda3 hatchback, 74k miles, clean title, automatic. blue. heated seats, backup camera, bluetooth. regularly serviced at the dealer, records available. no accidents. I bike to work now and it mostly just sits there. Haight",
     photos: "mazda3 hatchback",
     hood: "Haight-Ashbury",
     listed: daysAgo(3, "18:25"),
@@ -882,7 +882,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Mammut",
     description:
-      "70m 9.5mm dry treated. about 30 days of sport climbing on it, mostly Exit 38 and Index. no core shots, no falls on sharp edges, sheath looks good. middle mark still visible. never stepped on (I'm that guy). comes with a rope bag. can meet at Cascade Boulders or the shop",
+      "70m 9.5mm dry treated. about 30 days of sport climbing on it, mostly Mickey's Beach and Castle Rock. no core shots, no falls on sharp edges, sheath looks good. middle mark still visible. never stepped on (I'm that guy). comes with a rope bag. can meet at Sutro Boulders or the shop",
     photos: "climbing rope",
     hood: "Haight-Ashbury",
     status: "sold",
@@ -899,7 +899,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Black Diamond",
     description:
-      "the big one. 4 seasons of Leavenworth and Gold Bar on it, foam is still firm, no tears in the shell. zipper works. retail is $450ish. selling because the gym gave me a new one, which is the only perk of setting purple v4s. pick up at Cascade Boulders in Fremont",
+      "the big one. 4 seasons of Bishop and Castle Rock on it, foam is still firm, no tears in the shell. zipper works. retail is $450ish. selling because the gym gave me a new one, which is the only perk of setting purple v4s. pick up at Sutro Boulders in Dogpatch",
     photos: "crash pad",
     hood: "Haight-Ashbury",
     listed: daysAgo(1, "11:15"),
@@ -916,7 +916,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "La Sportiva",
     description:
-      "resoled once at Rock and Resole, rubber still has plenty of life. sized down for me but I'm going to a 39 now. they stink a little, they're climbing shoes",
+      "resoled once at the gym's resole drop-off, rubber still has plenty of life. sized down for me but I'm going to a 39 now. they stink a little, they're climbing shoes",
     photos: "red climbing shoes",
     hood: "Nob Hill",
     listed: daysAgo(6, "08:10"),
@@ -962,7 +962,7 @@ export const listings: readonly ListingSeed[] = [
     category: "sporting",
     condition: "used_like_new",
     brand: "Scarpa",
-    description: "climbed in them maybe 8 times. too tight for my bunion (PT knows best). Fremont",
+    description: "climbed in them maybe 8 times. too tight for my bunion (PT knows best). Haight",
     photos: "green climbing shoes",
     hood: "Haight-Ashbury",
     listed: daysAgo(2, "12:35"),
@@ -977,7 +977,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Burton",
     description:
-      "158 with matching bindings (men's L). base waxed last week, edges tuned. a couple of top sheet scratches. ready for Stevens Pass opening",
+      "158 with matching bindings (men's L). base waxed last week, edges tuned. a couple of top sheet scratches. ready for Tahoe opening day",
     photos: "snowboard",
     hood: "Pacific Heights",
     meetup: ["public"],
@@ -994,7 +994,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Salomon",
     description:
-      "QST 92s, 177cm, Warden 11 bindings set for a 305mm boot (can be adjusted). good all mountain ski for Crystal and Snoqualmie. one small core shot on the tail, filled. Redmond",
+      "QST 92s, 177cm, Warden 11 bindings set for a 305mm boot (can be adjusted). good all mountain ski for Palisades and Kirkwood. one small core shot on the tail, filled. Mountain View",
     photos: "skis",
     hood: "Mountain View",
     meetup: ["public"],
@@ -1010,7 +1010,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Trek",
     description:
-      "2021 Domane AL 2, 56cm. Shimano Claris. new bar tape and tires (Conti GP5000). fits ~5'10 to 6'0. a few scuffs on the top tube. upgrading. U District",
+      "2021 Domane AL 2, 56cm. Shimano Claris. new bar tape and tires (Conti GP5000). fits ~5'10 to 6'0. a few scuffs on the top tube. upgrading. Southside Berkeley",
     photos: "road bike",
     hood: "Berkeley",
     listed: daysAgo(14, "07:30"),
@@ -1041,7 +1041,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Specialized",
     description:
-      "2020 Rockhopper Comp 29, large. hydraulic disc brakes, dropper post added. rides great, just needs a wash after Duthie lol. U District",
+      "2020 Rockhopper Comp 29, large. hydraulic disc brakes, dropper post added. rides great, just needs a wash after Joaquin Miller lol. Southside Berkeley",
     photos: "mountain bike",
     hood: "Berkeley",
     listed: daysAgo(30, "15:20"),
@@ -1085,8 +1085,7 @@ export const listings: readonly ListingSeed[] = [
     category: "apparel",
     condition: "used_good",
     brand: "Dr. Martens",
-    description:
-      "already broken in so you don't have to suffer. oxblood smooth leather. Capitol Hill",
+    description: "already broken in so you don't have to suffer. oxblood smooth leather. Mission",
     photos: "dr martens",
     hood: "Mission",
     listed: daysAgo(7, "12:15"),
@@ -1100,7 +1099,7 @@ export const listings: readonly ListingSeed[] = [
     category: "apparel",
     condition: "used_like_new",
     description:
-      "gray, worn one winter. super warm, just too puffy for me. can meet in Roosevelt or on campus",
+      "gray, worn one winter. super warm, just too puffy for me. can meet in Rockridge or on campus",
     photos: "puffer jacket",
     hood: "Rockridge",
     listed: hoursAgo(14),
@@ -1129,8 +1128,7 @@ export const listings: readonly ListingSeed[] = [
     category: "apparel",
     condition: "used_like_new",
     brand: "UGG",
-    description:
-      "gray, worn twice!! wrong size and I missed the return window 😭 can meet at Seattle U",
+    description: "gray, worn twice!! wrong size and I missed the return window 😭 can meet at USF",
     photos: "ugg boots",
     hood: "Nob Hill",
     listed: daysAgo(1, "22:30"),
@@ -1160,7 +1158,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Canada Goose",
     description:
-      "survived 3 Chicago winters with me. moved to Seattle and everyone keeps telling me it doesn't get cold enough here for this and also that I'll look like a tourist. red, fur trim removed. authentic, have the receipt",
+      "survived 3 Chicago winters with me. moved to SF and everyone keeps telling me it never gets cold enough here for this (the fog disagrees) and also that I'll look like a tourist. red, fur trim removed. authentic, have the receipt",
     photos: "canada goose parka",
     hood: "Haight-Ashbury",
     listed: daysAgo(3, "20:20"),
@@ -1177,7 +1175,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Dyson",
     description:
-      "battery still holds about 25 min. comes with the wall mount, crevice tool and soft roller head. U District",
+      "battery still holds about 25 min. comes with the wall mount, crevice tool and soft roller head. Southside Berkeley",
     photos: "dyson vacuum",
     hood: "Berkeley",
     meetup: ["public", "door_dropoff"],
@@ -1207,7 +1205,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "De'Longhi",
     description:
-      "descaled monthly, I'm a barista so trust me it's been loved properly. grinds fresh for every shot, steam wand makes legit microfoam. upgrading to a lever machine because I have a problem. Capitol Hill",
+      "descaled monthly, I'm a barista so trust me it's been loved properly. grinds fresh for every shot, steam wand makes legit microfoam. upgrading to a lever machine because I have a problem. Mission",
     photos: "espresso machine",
     hood: "Mission",
     listed: daysAgo(6, "16:40"),
@@ -1223,7 +1221,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_like_new",
     brand: "Le Creuset",
     description:
-      "duplicate wedding gift, used twice. no chips in the enamel. retail $420. Queen Anne porch pickup",
+      "duplicate wedding gift, used twice. no chips in the enamel. retail $420. Pac Heights porch pickup",
     photos: "dutch oven",
     hood: "Pacific Heights",
     listed: daysAgo(18, "11:20"),
@@ -1239,7 +1237,7 @@ export const listings: readonly ListingSeed[] = [
     category: "free",
     condition: "used_good",
     description:
-      "about 20 boxes, all sizes, broken down. plus a big bag of packing paper. on the porch in Greenwood, just take them",
+      "about 20 boxes, all sizes, broken down. plus a big bag of packing paper. on the stoop in the Inner Sunset, just take them",
     photos: "moving boxes",
     hood: "Inner Sunset",
     listed: daysAgo(2, "09:00"),
@@ -1254,7 +1252,7 @@ export const listings: readonly ListingSeed[] = [
     category: "free",
     condition: "used_fair",
     description:
-      "japanese style futon mattress and 2 floor cushions, clean, no stains. it's on the porch on 19th Ave NE right now. if it rains it's yours at your own risk lol",
+      "japanese style futon mattress and 2 floor cushions, clean, no stains. it's on the porch on Channing right now. if it rains it's yours at your own risk lol",
     photos: "futon",
     hood: "Berkeley",
     listed: hoursAgo(5),
@@ -1269,7 +1267,7 @@ export const listings: readonly ListingSeed[] = [
     category: "free",
     condition: "used_good",
     description:
-      "about 40 books. some Le Guin, Murakami, a bunch of book club picks. come grab them in Fremont, porch pickup",
+      "about 40 books. some Le Guin, Murakami, a bunch of book club picks. come grab them in the Haight, porch pickup",
     photos: "paperback books",
     hood: "Haight-Ashbury",
     listed: daysAgo(4, "15:30"),
@@ -1283,7 +1281,7 @@ export const listings: readonly ListingSeed[] = [
     category: "free",
     condition: "used_good",
     description:
-      "our cat refuses to use it and prefers the couch. maybe yours will be more reasonable. Ballard",
+      "our cat refuses to use it and prefers the couch. maybe yours will be more reasonable. Inner Richmond",
     photos: "scratching post",
     hood: "Inner Richmond",
     listed: daysAgo(8, "18:15"),
@@ -1297,7 +1295,7 @@ export const listings: readonly ListingSeed[] = [
     category: "free",
     condition: "used_good",
     description:
-      "tilting mirror on a carved wood stand, about 2 ft tall. no cracks. need it gone by sunday. Roosevelt",
+      "tilting mirror on a carved wood stand, about 2 ft tall. no cracks. need it gone by sunday. Rockridge",
     photos: "vanity mirror",
     hood: "Rockridge",
     listed: daysAgo(1, "12:45"),
@@ -1311,7 +1309,7 @@ export const listings: readonly ListingSeed[] = [
     category: "free",
     condition: "used_good",
     description:
-      "cleaning out the cabinets. a big box of plates and bowls, nothing chipped. Capitol Hill, 12th & Pike area",
+      "cleaning out the cabinets. a big box of plates and bowls, nothing chipped. Mission, Valencia & 20th area",
     photos: "plates",
     hood: "Mission",
     listed: daysAgo(5, "22:00"),
@@ -1325,7 +1323,7 @@ export const listings: readonly ListingSeed[] = [
     price: 0,
     category: "free",
     condition: "used_fair",
-    description: "it's a lack table. it holds things. U District",
+    description: "it's a lack table. it holds things. Southside Berkeley",
     photos: "lack table",
     hood: "Berkeley",
     listed: daysAgo(3, "10:10"),
@@ -1387,7 +1385,7 @@ export const listings: readonly ListingSeed[] = [
     category: "hobbies",
     condition: "used_good",
     description:
-      "beech H-frame easel, tilts and holds up to a 48 in canvas. a few paint marks, very sturdy. Capitol Hill",
+      "beech H-frame easel, tilts and holds up to a 48 in canvas. a few paint marks, very sturdy. Mission",
     photos: "easel",
     hood: "Mission",
     listed: daysAgo(27, "13:00"),
@@ -1435,7 +1433,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Yamaha",
     description:
-      "88 weighted keys, sounds great. includes the matching wooden stand, sustain pedal and a padded bench. I said I'd practice during the pandemic. I did not. Fremont",
+      "88 weighted keys, sounds great. includes the matching wooden stand, sustain pedal and a padded bench. I said I'd practice during the pandemic. I did not. Haight",
     photos: "digital piano",
     hood: "Haight-Ashbury",
     listed: daysAgo(4, "21:10"),
@@ -1496,7 +1494,7 @@ export const listings: readonly ListingSeed[] = [
     category: "garden",
     condition: "used_good",
     brand: "Weber",
-    description: "has some rust on the legs, grate is fine. comes with a cover. Beacon Hill",
+    description: "has some rust on the legs, grate is fine. comes with a cover. Bernal Heights",
     photos: "weber grill",
     hood: "Bernal Heights",
     meetup: ["door_pickup"],
@@ -1512,7 +1510,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_like_new",
     brand: "LEGO",
     description:
-      "built once, displayed on a shelf. 100% complete with minifigs and the box + manual. U District",
+      "built once, displayed on a shelf. 100% complete with minifigs and the box + manual. Southside Berkeley",
     photos: "lego falcon",
     hood: "Berkeley",
     listed: daysAgo(22, "21:45"),
@@ -1526,7 +1524,7 @@ export const listings: readonly ListingSeed[] = [
     category: "family",
     condition: "used_good",
     description:
-      "walnut legs, white seat with navy cushion and 5 point harness. footrest adjusts as they grow, tray pops off for the dishwasher. normal wear. we're done with the high chair stage. smoke free home, Queen Anne",
+      "walnut legs, white seat with navy cushion and 5 point harness. footrest adjusts as they grow, tray pops off for the dishwasher. normal wear. we're done with the high chair stage. smoke free home, Pac Heights",
     photos: "high chair",
     hood: "Pacific Heights",
     listed: daysAgo(13, "10:00"),
@@ -1541,7 +1539,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "MidWest",
     description:
-      "folding wire crate, double door, divider panel and tray included. Pickles graduated to the couch. Greenwood",
+      "folding wire crate, double door, divider panel and tray included. Pickles graduated to the couch. Inner Sunset",
     photos: "dog crate",
     hood: "Inner Sunset",
     listed: daysAgo(6, "17:50"),
@@ -1571,7 +1569,7 @@ export const listings: readonly ListingSeed[] = [
     condition: "used_good",
     brand: "Nintendo",
     description:
-      "white OLED with dock, Zelda TOTK, Mario Kart 8, Smash, Animal Crossing. going back to Seoul after my exchange ends in December so selling now. can meet at the HUB",
+      "white OLED with dock, Zelda TOTK, Mario Kart 8, Smash, Animal Crossing. going back to Seoul after my exchange ends in December so selling now. can meet at the MLK Student Union",
     photos: "switch oled",
     hood: "Berkeley",
     meetup: ["public"],
@@ -1597,11 +1595,11 @@ export const listings: readonly ListingSeed[] = [
   {
     key: "malik-band-drummer",
     seller: "malik.johnson",
-    title: "Band seeking drummer (indie rock, Capitol Hill practice space)",
+    title: "Band seeking drummer (indie rock, Mission practice space)",
     price: 0,
     category: "classifieds",
     description:
-      "We're a 3 piece indie rock band (guitar, bass, keys) looking for a drummer for weekly practice and a few shows a month. Practice space on Capitol Hill with a kit already set up, just bring sticks and cymbals if you're picky. Influences: Death Cab, Car Seat Headrest, Japanese Breakfast. Message me with a link to anything you've played on.",
+      "We're a 3 piece indie rock band (guitar, bass, keys) looking for a drummer for weekly practice and a few shows a month. Practice space in the Mission with a kit already set up, just bring sticks and cymbals if you're picky. Influences: Thee Oh Sees, Car Seat Headrest, Japanese Breakfast. Message me with a link to anything you've played on.",
     photos: "drum kit",
     hood: "Mission",
     listed: daysAgo(2, "21:10"),
@@ -1615,7 +1613,7 @@ export const listings: readonly ListingSeed[] = [
     price: 45,
     category: "classifieds",
     description:
-      "Mobile bike tune-ups around Fremont, Wallingford and Ballard. Brakes and gears adjusted, chain cleaned and lubed, tires checked, bolts torqued. Usually takes 45 min and I come to you. Parts at cost. Weekday evenings and Saturdays.",
+      "Mobile bike tune-ups around the Haight, Cole Valley and the Inner Richmond. Brakes and gears adjusted, chain cleaned and lubed, tires checked, bolts torqued. Usually takes 45 min and I come to you. Parts at cost. Weekday evenings and Saturdays.",
     photos: "bike repair",
     hood: "Haight-Ashbury",
     listed: daysAgo(6, "08:45"),

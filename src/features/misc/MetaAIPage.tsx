@@ -10,7 +10,7 @@ type Msg = { id: number; from: "you" | "ai"; text: string };
 type Chat = { id: number; title: string; messages: Msg[] };
 
 const SUGGESTIONS = [
-  { title: "Plan a rainy day", body: "in Seattle with indoor things to do" },
+  { title: "Plan a foggy day", body: "in San Francisco with indoor things to do" },
   { title: "Write a caption", body: "for a photo of my dog at the beach" },
   { title: "Suggest a recipe", body: "using salmon, rice and whatever greens I have" },
   { title: "Help me reply", body: "to a friend's birthday post" },
@@ -26,17 +26,18 @@ function reply(prompt: string, firstName: string): string {
     return `Hi ${firstName}! I'm Meta AI. Ask me to plan something, write a post, or explain a topic and I'll take it from there.`;
   if (
     p.includes("rain") ||
+    p.includes("fog") ||
     p.includes("weekend") ||
     p.includes("things to do") ||
-    p.includes("seattle")
+    p.includes("san francisco")
   )
     return [
-      "Here's a cozy rainy-day plan for Seattle:",
+      "Here's a cozy foggy-day plan for San Francisco:",
       "",
-      "1. Morning: coffee and a pastry on Capitol Hill, then browse a bookstore in Fremont.",
-      "2. Midday: Pike Place Market for lunch (go early to beat the crowds).",
-      "3. Afternoon: an indoor climbing session or a museum on the waterfront.",
-      "4. Evening: ramen in the U District and a board game night.",
+      "1. Morning: coffee and a pastry in the Mission, then browse a bookstore in the Haight.",
+      "2. Midday: the Ferry Building for lunch (go early to beat the crowds).",
+      "3. Afternoon: an indoor climbing session or the Exploratorium on the Embarcadero.",
+      "4. Evening: ramen in the Inner Richmond and a board game night.",
       "",
       "Want me to turn this into an event and invite friends?",
     ].join("\n");

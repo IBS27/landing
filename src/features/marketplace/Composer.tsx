@@ -1256,7 +1256,7 @@ function Preview({
             {priceText ?? "Price"}
           </p>
           <p className="mt-1 text-[13px] text-primary leading-4">
-            Listed a few seconds ago in {hood?.city.replace(", WA", "") ?? "Seattle"}
+            Listed a few seconds ago in {hood?.city.replace(/, [A-Z]{2}$/, "") ?? "San Francisco"}
           </p>
           <h3 className={cn("mt-6 font-semibold text-[17px] leading-5", faded)}>Details</h3>
           {kind === "item" && f.condition && (

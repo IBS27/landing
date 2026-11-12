@@ -50,21 +50,21 @@ export const FEELINGS: [string, string][] = [
 ];
 
 const PLACES = [
-  "Seattle, Washington",
-  "Capitol Hill, Seattle",
-  "Pike Place Market",
-  "Space Needle",
-  "Gas Works Park",
-  "Ballard, Seattle",
-  "Fremont, Seattle",
-  "Green Lake Park",
-  "Discovery Park",
-  "University District, Seattle",
-  "Alki Beach",
-  "Kerry Park",
-  "Lumen Field",
-  "Seattle Center",
-  "Mount Rainier National Park",
+  "San Francisco, California",
+  "Mission District, San Francisco",
+  "Ferry Building Marketplace",
+  "Golden Gate Bridge",
+  "Dolores Park",
+  "Inner Richmond, San Francisco",
+  "Haight-Ashbury, San Francisco",
+  "Stow Lake",
+  "Lands End Trail",
+  "Hayes Valley, San Francisco",
+  "Ocean Beach",
+  "Twin Peaks",
+  "Oracle Park",
+  "Golden Gate Park",
+  "Muir Woods National Monument",
 ];
 
 type LocalMedia = { file: File; preview: string; kind: "image" | "video" };
@@ -831,7 +831,7 @@ function PlacePicker({ onPick, onClear }: { onPick: (p: string) => void; onClear
           <PlaceRow name={q.trim()} sub="Add a custom location" onClick={() => onPick(q.trim())} />
         )}
         {list.map((p) => (
-          <PlaceRow key={p} name={p} sub="Seattle, Washington" onClick={() => onPick(p)} />
+          <PlaceRow key={p} name={p} sub="San Francisco, California" onClick={() => onPick(p)} />
         ))}
       </div>
     </div>

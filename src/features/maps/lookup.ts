@@ -11,12 +11,15 @@ export const REGION_ZOOM = 7;
 
 /** Place names used in seeded addresses that map onto a generated area. */
 const ALIASES: Record<string, string> = {
-  "University District": "U District",
-  "University of Washington": "U District",
-  Downtown: "Seattle",
-  Belltown: "Seattle",
-  "Pioneer Square": "Seattle",
-  "Pike Place": "Seattle",
+  "UC Berkeley": "Berkeley",
+  Southside: "Berkeley",
+  "Mission District": "Mission",
+  Haight: "Haight-Ashbury",
+  Panhandle: "Haight-Ashbury",
+  Embarcadero: "San Francisco",
+  "Financial District": "San Francisco",
+  Downtown: "San Francisco",
+  "Ferry Building": "San Francisco",
 };
 
 /** Every generated map has a dark-style twin under /seed/maps/dark/. */
@@ -26,7 +29,7 @@ export function darkMapSrc(src: string) {
 
 export type AreaMap = (typeof AREA_MAPS)[string];
 
-/** The generated map for a neighborhood or city name ("Fremont", "Seattle, WA"). */
+/** The generated map for a neighborhood or city name ("Mission", "San Francisco, CA"). */
 export function areaMap(name: string | null | undefined): AreaMap | null {
   if (!name) return null;
   const key = name.split(",")[0]?.trim() ?? "";

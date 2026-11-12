@@ -15,10 +15,10 @@ export const stories: readonly StorySeed[] = [
   {
     by: "ana.torres",
     photo: "rainy street",
-    text: "the 49 was 20 min late again",
+    text: "the 51B was 20 min late again",
     at: hoursAgo(4),
   },
-  { by: "grace.liu", photo: "mount rainier", text: "the mountain is OUT", at: hoursAgo(5.5) },
+  { by: "grace.liu", photo: "mount tam", text: "zero fog. tam is OUT", at: hoursAgo(5.5) },
   { by: "diego.morales", photo: "ramen", text: "staff meal hits different", at: hoursAgo(6) },
   { by: "jasmine.ortiz", photo: "coffee shop", at: hoursAgo(7.5) },
   {
@@ -47,7 +47,7 @@ export const stories: readonly StorySeed[] = [
     at: daysAgo(3, "21:10"),
     archived: true,
   },
-  { by: "maya.chen", photo: "mount rainier", at: daysAgo(9, "08:40"), archived: true },
+  { by: "maya.chen", photo: "mount tam", at: daysAgo(9, "08:40"), archived: true },
   {
     by: "maya.chen",
     photo: "latte art",
@@ -58,14 +58,14 @@ export const stories: readonly StorySeed[] = [
   {
     by: "maya.chen",
     photo: "posts/rainy-street-04.jpg",
-    text: "november in seattle",
+    text: "november in the bay",
     at: daysAgo(24, "17:30"),
     archived: true,
   },
   {
     by: "maya.chen",
-    photo: "posts/uw-campus-05.jpg",
-    text: "suzzallo szn",
+    photo: "posts/berkeley campus",
+    text: "doe library szn",
     at: daysAgo(38, "14:05"),
     archived: true,
   },

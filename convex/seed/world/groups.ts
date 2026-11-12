@@ -7,13 +7,13 @@ import type { GroupSeed } from "../types";
 export const groups = [
   {
     slug: "cal-housing",
-    name: "UW Housing, Sublets & Roommates",
+    name: "Cal Housing, Sublets & Roommates",
     privacy: "private",
     description:
-      "For UW students, staff and alumni looking for housing near campus: rooms, sublets, roommates, and leases. U District, Wallingford, Roosevelt, Ravenna, Eastlake and beyond. Please include price, dates, and location in every post. Scams get you banned instantly.",
+      "For Cal students, staff and alumni looking for housing near campus: rooms, sublets, roommates, and leases. Southside, Northside, Elmwood, Rockridge, Downtown Berkeley, Albany and beyond. Please include price, dates, and location in every post. Scams get you banned instantly.",
     category: "Housing",
-    location: "Seattle, WA",
-    cover: "posts/uw-campus-07.jpg",
+    location: "Berkeley, CA",
+    cover: "posts/berkeley campus",
     rules: [
       {
         title: "Include price, dates and location",
@@ -32,7 +32,7 @@ export const groups = [
         body: "Bump your existing post in the comments instead of creating a new one.",
       },
     ],
-    tags: ["Housing", "Sublets", "Roommates", "University of Washington"],
+    tags: ["Housing", "Sublets", "Roommates", "UC Berkeley"],
     externalMembers: 18400,
     createdYearsAgo: 9,
     admins: ["jordan.kim"],
@@ -58,12 +58,12 @@ export const groups = [
   },
   {
     slug: "sf-apartments",
-    name: "Seattle Apartments & Rooms for Rent",
+    name: "SF Apartments & Rooms for Rent",
     privacy: "public",
     description:
-      "Rentals, rooms, and roommate searches anywhere in Seattle. Landlords and tenants welcome. Put the rent and neighborhood in the first line of your post.",
+      "Rentals, rooms, and roommate searches anywhere in San Francisco. Landlords and tenants welcome. Put the rent and neighborhood in the first line of your post.",
     category: "Housing",
-    location: "Seattle, WA",
+    location: "San Francisco, CA",
     cover: "rooms/apartment-building-04.jpg",
     rules: [
       {
@@ -72,14 +72,14 @@ export const groups = [
       },
       {
         title: "Fair housing",
-        body: "No discriminatory language. Listings must follow Seattle's fair housing and first-in-time rules.",
+        body: "No discriminatory language. Listings must follow fair housing law, including California's source-of-income protections and SF's Fair Chance Ordinance.",
       },
       {
-        title: "No application fees over $50",
-        body: "Washington caps screening fees at the actual cost. Report landlords asking for more.",
+        title: "No screening fees over the state cap",
+        body: "California caps tenant screening fees (about $65 right now) at the actual cost. Report landlords asking for more.",
       },
     ],
-    tags: ["Apartments", "Rentals", "Seattle"],
+    tags: ["Apartments", "Rentals", "San Francisco"],
     externalMembers: 58300,
     createdYearsAgo: 11,
     admins: ["derek.holloway"],
@@ -100,12 +100,12 @@ export const groups = [
   },
   {
     slug: "mission-neighbors",
-    name: "Capitol Hill Neighbors",
+    name: "Mission District Neighbors",
     privacy: "private",
     description:
-      "A place for people who live, work, and hang out on Capitol Hill. Lost cats, construction noise, restaurant openings, street closures, and the occasional neighborly rant.",
+      "A place for people who live, work, and hang out in the Mission. Lost cats, construction noise, taqueria openings, Valencia street closures, and the occasional neighborly rant.",
     category: "Neighborhood",
-    location: "Capitol Hill, Seattle",
+    location: "Mission District, San Francisco",
     cover: "covers/castro-01.jpg",
     rules: [
       { title: "Neighbors only", body: "Answer the membership questions honestly. We check." },
@@ -115,7 +115,7 @@ export const groups = [
       },
       { title: "Keep it civil", body: "Disagree with the idea, not the person." },
     ],
-    tags: ["Capitol Hill", "Neighborhood", "Local news"],
+    tags: ["Mission District", "Neighborhood", "Local news"],
     externalMembers: 12800,
     createdYearsAgo: 8,
     admins: ["harper.quinn"],
@@ -135,12 +135,12 @@ export const groups = [
   },
   {
     slug: "free-stuff-sf",
-    name: "Free Stuff Seattle (Buy Nothing)",
+    name: "Free Stuff SF (Buy Nothing)",
     privacy: "private",
     description:
       "Give freely, ask freely, gratitude always. Everything posted here is free. No selling, no trading, no holds longer than 24 hours.",
     category: "Buy and Sell",
-    location: "Seattle, WA",
+    location: "San Francisco, CA",
     cover: "covers/give-box-01.jpg",
     rules: [
       { title: "Everything is free", body: "No sales, no 'make an offer', no trades." },
@@ -150,7 +150,7 @@ export const groups = [
       },
       { title: "Mark it GONE", body: "Edit your post or comment GONE once it's picked up." },
     ],
-    tags: ["Free", "Buy Nothing", "Giveaways", "Seattle"],
+    tags: ["Free", "Buy Nothing", "Giveaways", "San Francisco"],
     externalMembers: 34500,
     createdYearsAgo: 7,
     admins: ["maddie.collins"],
@@ -172,12 +172,12 @@ export const groups = [
   },
   {
     slug: "bay-area-climbers",
-    name: "Seattle Climbers",
+    name: "Bay Area Climbers",
     privacy: "public",
     description:
-      "Partner finding, beta, gear swaps, trip reports and gym meetups for climbers around Puget Sound. All levels welcome: first-time boulderers to Index trad dads.",
+      "Partner finding, beta, gear swaps, trip reports and gym meetups for climbers around the Bay. All levels welcome: first-time boulderers to Yosemite trad dads.",
     category: "Sports",
-    location: "Seattle, WA",
+    location: "San Francisco Bay Area",
     cover: "posts/climbing-holds-01.jpg",
     rules: [
       { title: "Be respectful", body: "Everyone started somewhere. No gatekeeping." },
@@ -209,22 +209,22 @@ export const groups = [
   },
   {
     slug: "bay-area-hikers",
-    name: "PNW Hikers",
+    name: "Bay Area Hikers",
     privacy: "public",
     description:
-      "Trip reports, trail conditions, carpool requests, and photos from Washington and Oregon trails. Snow is real until July, bring your microspikes.",
+      "Trip reports, trail conditions, carpool requests, and photos from Marin, the East Bay hills, the Peninsula and the Sierra. Snow is real up high until July, bring traction (and check for poison oak down low).",
     category: "Outdoors",
-    location: "Pacific Northwest",
-    cover: "posts/mount-rainier-05.jpg",
+    location: "San Francisco Bay Area",
+    cover: "posts/mount tam",
     rules: [
       {
         title: "Include trail conditions",
-        body: "Trip reports should mention date, road conditions, snow, and parking.",
+        body: "Trip reports should mention date, road conditions, closures, mud or snow, and parking.",
       },
       { title: "Leave no trace", body: "Pack it in, pack it out. Don't geotag fragile spots." },
       { title: "No selling", body: "Gear swaps go in the monthly thread." },
     ],
-    tags: ["Hiking", "Outdoors", "Washington", "Oregon"],
+    tags: ["Hiking", "Outdoors", "Bay Area", "Sierra Nevada"],
     externalMembers: 48900,
     createdYearsAgo: 12,
     admins: ["tara.singh"],
@@ -246,18 +246,18 @@ export const groups = [
   },
   {
     slug: "cal-class-of-2027",
-    name: "UW Class of 2027",
+    name: "UC Berkeley Class of 2027",
     privacy: "private",
     description:
-      "The unofficial group for Huskies graduating in 2027. Housing, classes, internships, memes, and countdowns to graduation.",
+      "The unofficial group for Golden Bears graduating in 2027. Housing, classes, internships, memes, and countdowns to graduation. Go Bears.",
     category: "School and Education",
-    location: "Seattle, WA",
-    cover: "posts/uw-campus-09.jpg",
+    location: "Berkeley, CA",
+    cover: "posts/berkeley campus",
     rules: [
       { title: "2027 grads only", body: "Or close to it. Transfer students welcome." },
       { title: "No selling essays or homework", body: "Instant ban." },
     ],
-    tags: ["University of Washington", "Class of 2027", "Students"],
+    tags: ["UC Berkeley", "Class of 2027", "Students"],
     externalMembers: 5400,
     createdYearsAgo: 4,
     admins: ["amara.diallo"],
@@ -277,12 +277,12 @@ export const groups = [
   },
   {
     slug: "sf-tech-new-grads",
-    name: "Seattle Tech Interns & New Grads",
+    name: "SF Tech Interns & New Grads",
     privacy: "public",
     description:
-      "Interns and early-career folks in Seattle tech. Housing for internships, offer advice, team matching, meetups, and 'is this normal' questions. No recruiter spam.",
+      "Interns and early-career folks in Bay Area tech, from SoMa to the South Bay. Housing for internships, offer advice, team matching, meetups, and 'is this normal' questions. No recruiter spam.",
     category: "Work",
-    location: "Seattle, WA",
+    location: "San Francisco, CA",
     cover: "events/hackathon-02.jpg",
     rules: [
       { title: "No recruiter spam", body: "Recruiters may post once a month in the jobs thread." },
@@ -314,12 +314,12 @@ export const groups = [
   },
   {
     slug: "sf-board-game-night",
-    name: "Seattle Board Game Night",
+    name: "SF Board Game Night",
     privacy: "public",
     description:
-      "Weekly board game nights at Moonrise Coffee on Capitol Hill (Thursdays, 7pm) plus pop-ups around town. Newcomers very welcome: we'll teach you anything.",
+      "Weekly board game nights at Moonrise Coffee in the Mission (Thursdays, 7pm) plus pop-ups around town. Newcomers very welcome: we'll teach you anything.",
     category: "Games",
-    location: "Capitol Hill, Seattle",
+    location: "Mission District, San Francisco",
     cover: "posts/wingspan-01.jpg",
     rules: [
       { title: "Newbies welcome", body: "Ask for a teach. Nobody's judging." },
@@ -343,12 +343,12 @@ export const groups = [
   },
   {
     slug: "sf-run-club",
-    name: "Seattle Run Club",
+    name: "SF Run Club",
     privacy: "public",
     description:
-      "Free group runs every Saturday at 8am from Gas Works Park, plus Tuesday night track. All paces, no runner left behind. Coffee after, always.",
+      "Free group runs every Saturday at 8am from Crissy Field, plus Tuesday night track at Kezar. All paces, no runner left behind. Coffee after, always.",
     category: "Fitness",
-    location: "Seattle, WA",
+    location: "San Francisco, CA",
     cover: "posts/runners-03.jpg",
     rules: [
       { title: "No-drop runs", body: "Pace groups wait at every turn." },
@@ -371,18 +371,18 @@ export const groups = [
   },
   {
     slug: "sf-foodies",
-    name: "Seattle Foodies",
+    name: "SF Foodies",
     privacy: "public",
     description:
-      "Where to eat in Seattle, from teriyaki to tasting menus. Post your meals, ask for recs, report new openings. Photos encouraged.",
+      "Where to eat in SF, from Mission burritos to tasting menus. Post your meals, ask for recs, report new openings. Photos encouraged.",
     category: "Food & Drink",
-    location: "Seattle, WA",
+    location: "San Francisco, CA",
     cover: "posts/ramen-06.jpg",
     rules: [
       { title: "Photos or it didn't happen", body: "Reviews with photos get pinned." },
       { title: "No self-promo without flair", body: "Restaurant owners: say you're the owner." },
     ],
-    tags: ["Food", "Restaurants", "Seattle"],
+    tags: ["Food", "Restaurants", "San Francisco"],
     externalMembers: 41000,
     createdYearsAgo: 9,
     admins: ["diego.morales"],
@@ -400,19 +400,19 @@ export const groups = [
   },
   {
     slug: "richmond-marketplace-swap",
-    name: "Ballard Marketplace Swap",
+    name: "Inner Richmond Marketplace Swap",
     privacy: "private",
     description:
-      "Buy, sell and swap with your Ballard neighbors. Furniture, tools, bikes, baby gear. Local pickup only.",
+      "Buy, sell and swap with your Inner Richmond neighbors. Furniture, tools, bikes, baby gear. Local pickup only.",
     category: "Buy and Sell",
-    location: "Ballard, Seattle",
+    location: "Inner Richmond, San Francisco",
     cover: "covers/mission-01.jpg",
     rules: [
       { title: "Price in the post", body: "No 'DM for price'." },
-      { title: "Local pickup", body: "Ballard and nearby only. No shipping." },
+      { title: "Local pickup", body: "The Richmond and nearby only. No shipping." },
       { title: "Be on time", body: "No-shows twice = removed." },
     ],
-    tags: ["Buy and Sell", "Ballard", "Local"],
+    tags: ["Buy and Sell", "Inner Richmond", "Local"],
     externalMembers: 11200,
     createdYearsAgo: 8,
     admins: ["will.foster"],
@@ -421,12 +421,12 @@ export const groups = [
   },
   {
     slug: "sf-concerts",
-    name: "Seattle Concerts & Shows",
+    name: "SF Concerts & Shows",
     privacy: "public",
     description:
-      "Upcoming shows, ticket swaps (face value only), and who's playing where. Neumos, the Showbox, the Crocodile, basements, all of it.",
+      "Upcoming shows, ticket swaps (face value only), and who's playing where. The Independent, the Fillmore, Bottom of the Hill, the Chapel, warehouse shows, all of it.",
     category: "Music",
-    location: "Seattle, WA",
+    location: "San Francisco, CA",
     cover: "covers/concert-03.jpg",
     rules: [
       { title: "Face value only", body: "Ticket resale above face value gets removed." },
@@ -448,18 +448,18 @@ export const groups = [
   },
   {
     slug: "giants-fans",
-    name: "Mariners Fans",
+    name: "SF Giants Fans",
     privacy: "public",
     description:
-      "For fans of Seattle baseball. Game threads, ticket swaps, tailgates, and coping mechanisms.",
+      "For fans of San Francisco baseball. Game threads, ticket swaps, Lot A tailgates, McCovey Cove kayak reports, and coping mechanisms.",
     category: "Sports",
-    location: "Seattle, WA",
+    location: "San Francisco, CA",
     cover: "posts/baseball-stadium-01.jpg",
     rules: [
       { title: "No hate", body: "Trash talk the other team, not other fans." },
       { title: "Tickets at face value", body: "Scalpers get banned." },
     ],
-    tags: ["Baseball", "Sports", "Seattle"],
+    tags: ["Baseball", "Sports", "San Francisco"],
     externalMembers: 27000,
     createdYearsAgo: 12,
     admins: ["jamal.wilson"],
@@ -469,18 +469,18 @@ export const groups = [
   // Groups the main persona hasn't joined, so Groups > Discover has suggestions.
   {
     slug: "sf-dog-owners",
-    name: "Seattle Dog Owners",
+    name: "SF Dog Owners",
     privacy: "public",
     description:
-      "Off-leash park reports, trainer and vet recs, lost & found pets, and way too many photos of good dogs. Seattle and the Eastside.",
+      "Off-leash park reports (Fort Funston, Bernal Hill, Crissy Field), trainer and vet recs, lost & found pets, and way too many photos of good dogs. SF and the East Bay.",
     category: "Pets",
-    location: "Seattle, WA",
+    location: "San Francisco, CA",
     cover: "posts/dog-park-02.jpg",
     rules: [
       { title: "Lost & found first", body: "Lost pet posts get pinned. Include area and a photo." },
       { title: "No selling animals", body: "Rehoming is fine. Selling puppies is not." },
     ],
-    tags: ["Dogs", "Pets", "Seattle"],
+    tags: ["Dogs", "Pets", "San Francisco"],
     externalMembers: 36200,
     createdYearsAgo: 7,
     admins: ["nora.kowalski"],
@@ -489,15 +489,15 @@ export const groups = [
   },
   {
     slug: "sf-coffee-lovers",
-    name: "Seattle Coffee Lovers",
+    name: "SF Coffee Lovers",
     privacy: "public",
     description:
-      "Cafes, roasters, home espresso setups and latte art. From Capitol Hill to Columbia City, tell us where the good cup is.",
+      "Cafes, roasters, home espresso setups and latte art. From the Mission to Dogpatch, tell us where the good cup is.",
     category: "Food & Drink",
-    location: "Seattle, WA",
+    location: "San Francisco, CA",
     cover: "posts/coffee-03.jpg",
     rules: [{ title: "Be nice to baristas", body: "Reviews are fine. Naming staff is not." }],
-    tags: ["Coffee", "Cafes", "Seattle"],
+    tags: ["Coffee", "Cafes", "San Francisco"],
     externalMembers: 19800,
     createdYearsAgo: 6,
     admins: ["aisha.rahman"],
@@ -505,18 +505,18 @@ export const groups = [
   },
   {
     slug: "sf-photography",
-    name: "Seattle Photography Club",
+    name: "SF Photography Club",
     privacy: "public",
     description:
-      "Share your shots of the Emerald City and the PNW. Photo walks every month, critique threads on Sundays. All cameras welcome, phones included.",
+      "Share your shots of the city and the Bay, fog included. Photo walks every month, critique threads on Sundays. All cameras welcome, phones included.",
     category: "Photography",
-    location: "Seattle, WA",
-    cover: "posts/kerry-park-02.jpg",
+    location: "San Francisco, CA",
+    cover: "posts/twin peaks",
     rules: [
       { title: "Your own photos only", body: "Credit anyone else involved." },
       { title: "Constructive critique", body: "Say what works, then what could be better." },
     ],
-    tags: ["Photography", "Seattle", "PNW"],
+    tags: ["Photography", "San Francisco", "Bay Area"],
     externalMembers: 52400,
     createdYearsAgo: 11,
     admins: ["yuki.sato"],
@@ -525,15 +525,15 @@ export const groups = [
   },
   {
     slug: "ferry-commuters",
-    name: "Puget Sound Ferry Commuters",
+    name: "SF Bay Ferry Commuters",
     privacy: "public",
     description:
-      "Real-time boat delays, sailing swaps, and commiseration for everyone who commutes on the Bainbridge, Bremerton, Kingston and Vashon runs.",
+      "Real-time boat delays, sailing swaps, and commiseration for everyone who commutes into the Ferry Building on the Larkspur, Sausalito, Vallejo and Alameda/Oakland runs.",
     category: "Travel",
-    location: "Puget Sound, WA",
+    location: "San Francisco Bay",
     cover: "posts/ferry-04.jpg",
     rules: [{ title: "Delays first", body: "Start the post with the route and the sailing time." }],
-    tags: ["Ferries", "Commuting", "Puget Sound"],
+    tags: ["Ferries", "Commuting", "SF Bay"],
     externalMembers: 8700,
     createdYearsAgo: 5,
     admins: ["owen.murphy"],
@@ -541,12 +541,12 @@ export const groups = [
   },
   {
     slug: "sf-gamers",
-    name: "Seattle Gamers",
+    name: "SF Gamers",
     privacy: "public",
     description:
-      "PC, console and handheld gamers in the Seattle area. LAN nights, tournaments, setup photos, and finding people to squad up with.",
+      "PC, console and handheld gamers around the Bay. LAN nights, tournaments, setup photos, and finding people to squad up with.",
     category: "Gaming",
-    location: "Seattle, WA",
+    location: "San Francisco, CA",
     cover: "posts/gaming-setup-01.jpg",
     rules: [{ title: "No piracy", body: "Don't ask for or share cracked games." }],
     tags: ["Gaming", "Esports", "LAN"],
@@ -557,15 +557,15 @@ export const groups = [
   },
   {
     slug: "ferry-building-regulars",
-    name: "Pike Place Market Regulars",
+    name: "Ferry Building Marketplace Regulars",
     privacy: "public",
     description:
-      "For people who love the Market: vendor news, seasonal produce, the best chowder line strategy, and events in and around Pike Place.",
+      "For people who love the Ferry Building: vendor news, seasonal produce at the Saturday farmers market, the best oyster line strategy, and events up and down the Embarcadero.",
     category: "Local",
-    location: "Pike Place Market, Seattle",
-    cover: "posts/pike-place-04.jpg",
+    location: "Ferry Building, San Francisco",
+    cover: "posts/ferry building",
     rules: [{ title: "Support local", body: "Vendors may post once a week about their stall." }],
-    tags: ["Pike Place", "Local", "Food"],
+    tags: ["Ferry Building", "Local", "Food"],
     externalMembers: 27600,
     createdYearsAgo: 9,
     admins: ["marco.rossi"],

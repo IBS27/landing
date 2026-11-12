@@ -209,7 +209,7 @@ export const POLICIES: Policy[] = [
       },
       {
         heading: "Locations",
-        body: "We have offices around the world, including Seattle, Menlo Park, New York, London and Singapore, plus remote roles.",
+        body: "We have offices around the world, including San Francisco, Menlo Park, New York, London and Singapore, plus remote roles.",
       },
       {
         heading: "Life at Meta",

@@ -28,7 +28,7 @@ export function useProfile() {
   return ctx;
 }
 
-/** "Seattle, Washington" → "Seattle, WA"-style short form is not used by FB; keep the full city. */
+/** "San Francisco, California" → "San Francisco, CA"-style short form is not used by FB; keep the full city. */
 export function possessive(name: string) {
   return name.endsWith("s") ? `${name}'` : `${name}'s`;
 }

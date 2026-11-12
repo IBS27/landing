@@ -72,7 +72,7 @@ const THREADS: readonly { by: Handle; text: string; comments: readonly CommentSe
       {
         by: "tara.singh",
         after: 141,
-        text: "rainline has a used shoe bin by the front desk, ask Ben",
+        text: "fogline has a used shoe bin by the front desk, ask Ben",
         replies: [
           { by: "ben.carter", text: "it's real. size 42 and up is well stocked", likes: 2 },
           { by: "leo.novak", text: "used climbing shoes... the smell problem remains" },
@@ -83,7 +83,7 @@ const THREADS: readonly { by: Handle; text: string; comments: readonly CommentSe
   },
   {
     by: "theo.grant",
-    text: "free couch on the curb in Wallingford",
+    text: "free couch on the curb in Elmwood",
     comments: [
       {
         by: "emily.chen",
@@ -137,14 +137,14 @@ const THREADS: readonly { by: Handle; text: string; comments: readonly CommentSe
         by: "fatima.hassan",
         after: 52,
         likes: 8,
-        text: "Nordheim Court has a locked cage with a keycard. still not perfect but way better",
+        text: "Blackwell Hall has a locked cage with a keycard. still not perfect but way better",
         replies: [
           {
             by: "theo.grant",
             text: "is that only for residents or can you rent a spot?",
             replies: [
               { by: "fatima.hassan", text: "residents only, they're strict about it", likes: 1 },
-              { by: "samir.khan", text: "the waitlist is also like a quarter long" },
+              { by: "samir.khan", text: "the waitlist is also like a semester long" },
             ],
           },
           { by: "lily.anderson", text: "the cage in my old building got broken into twice 🙃" },
@@ -154,7 +154,7 @@ const THREADS: readonly { by: Handle; text: string; comments: readonly CommentSe
         by: "noah.williams",
         after: 70,
         likes: 5,
-        text: "register it with UWPD! they actually recovered my friend's bike from a sweep",
+        text: "register it with UCPD! they actually recovered my friend's bike from a sweep",
         replies: [
           { by: "theo.grant", text: "did not know that was a thing, filing tonight" },
           {
@@ -181,7 +181,7 @@ const THREADS: readonly { by: Handle; text: string; comments: readonly CommentSe
         by: "priya.raman",
         after: 52,
         likes: 9,
-        text: "my coworker is leaving a studio on Harvard Ave in july, want me to connect you?",
+        text: "my coworker is leaving a studio on Guerrero in july, want me to connect you?",
         replies: [
           {
             by: "maya.chen",
@@ -201,15 +201,15 @@ const THREADS: readonly { by: Handle; text: string; comments: readonly CommentSe
       {
         by: "derek.holloway",
         after: 65,
-        text: "pro tip, ask about the heating situation in old cap hill buildings before you sign",
+        text: "pro tip, ask about the heating situation in old Mission Victorians before you sign",
         replies: [
           {
             by: "maya.chen",
-            text: "radiator vs baseboard, which one do i want",
+            text: "radiator vs wall heater, which one do i want",
             replies: [
               {
                 by: "derek.holloway",
-                text: "radiator every time, baseboards will eat your paycheck",
+                text: "radiator every time, those old wall heaters will eat your paycheck",
                 likes: 3,
               },
               { by: "ana.torres", text: "radiators 😍 (again)" },

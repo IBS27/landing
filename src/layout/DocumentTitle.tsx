@@ -11,7 +11,7 @@ const emit = () => {
   for (const l of listeners) l();
 };
 
-/** Set the tab title for the current page, e.g. "UW Housing" → "UW Housing | Facebook". */
+/** Set the tab title for the current page, e.g. "Cal Housing" → "Cal Housing | Facebook". */
 export function usePageTitle(title: string | null) {
   useEffect(() => {
     registered = title;
