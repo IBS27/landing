@@ -40,6 +40,7 @@ import type * as lib_notify from "../lib/notify.js";
 import type * as lib_posts from "../lib/posts.js";
 import type * as lib_profileFromText from "../lib/profileFromText.js";
 import type * as lib_profileText from "../lib/profileText.js";
+import type * as lib_protectedText from "../lib/protectedText.js";
 import type * as lib_reports from "../lib/reports.js";
 import type * as lib_settings from "../lib/settings.js";
 import type * as lib_users from "../lib/users.js";
@@ -128,6 +129,7 @@ declare const fullApi: ApiFromModules<{
   "lib/posts": typeof lib_posts;
   "lib/profileFromText": typeof lib_profileFromText;
   "lib/profileText": typeof lib_profileText;
+  "lib/protectedText": typeof lib_protectedText;
   "lib/reports": typeof lib_reports;
   "lib/settings": typeof lib_settings;
   "lib/users": typeof lib_users;

@@ -11,6 +11,7 @@ import {
   GOALS,
   SF_NEIGHBORHOODS,
   TRANSPORT_MODES,
+  todayInSF,
   WORK_HOURS,
   WORKPLACES,
 } from "../../../convex/lib/cityProfileFacts";
@@ -22,6 +23,7 @@ import {
   briefProblems,
   type CityProfile,
   EMPTY_BRIEF,
+  liveQuote,
   toggle,
   toSaveArgs,
 } from "./briefState";
@@ -132,7 +134,7 @@ function BriefEditor({
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const problems = briefProblems(form);
+  const problems = briefProblems(form, todayInSF(), profile.moveIn);
   const set = <K extends keyof BriefForm>(k: K, value: BriefForm[K]) =>
     setForm((f) => ({ ...f, [k]: value }));
 
@@ -162,14 +164,16 @@ function BriefEditor({
     }
   }
 
-  const fromWords = (slot: string) =>
-    form.quotes[slot] ? (
-      <Tooltip content={<span className="italic">“{form.quotes[slot]}”</span>}>
+  const fromWords = (slot: string) => {
+    const quote = liveQuote(form, slot);
+    return quote ? (
+      <Tooltip content={<span className="italic">“{quote}”</span>}>
         <span className="inline-flex text-accent" role="img" aria-label="From your words">
           <Sparkles size={13} />
         </span>
       </Tooltip>
     ) : undefined;
+  };
 
   const suggestedInterests = profile.interests.filter(
     (f) => f.source === "inferred" && !form.interests.includes(f.value.id),

@@ -6,8 +6,10 @@ import {
   type FactKey,
   type FactSource,
   factSlot,
+  valueKey,
 } from "./cityProfileFacts";
 import { getInterest, type InterestId } from "./interests";
+import { hasProtected } from "./protectedText";
 
 /**
  * The City Profile's only read path and its only writers. Features call
@@ -43,13 +45,19 @@ export type CityProfile = {
   facts: Fact[];
 };
 
+/** Evidence as features may see it: a quote that names a protected trait is never passed on. */
+function safeEvidence(e: FactEvidence): FactEvidence {
+  if (e.quote === undefined || !hasProtected(e.quote)) return e;
+  return { kind: e.kind, summary: e.summary };
+}
+
 function toFact(d: FactDoc): Fact {
   return {
     _id: d._id,
     key: d.key,
     value: d.value,
     source: d.source,
-    evidence: d.evidence,
+    evidence: safeEvidence(d.evidence),
     confidence: d.confidence,
     updatedAt: d.updatedAt,
   } as Fact;
@@ -127,20 +135,8 @@ export function interestLabels(profile: CityProfile): string[] {
 
 /* ---------------- Writers ---------------- */
 
-/** Order-insensitive value comparison for small plain objects. */
-function stable(x: unknown): string {
-  if (Array.isArray(x)) return `[${x.map(stable).join(",")}]`;
-  if (x && typeof x === "object") {
-    return `{${Object.keys(x)
-      .filter((k) => (x as Record<string, unknown>)[k] !== undefined)
-      .sort()
-      .map((k) => `${k}:${stable((x as Record<string, unknown>)[k])}`)
-      .join(",")}}`;
-  }
-  return JSON.stringify(x);
-}
 function sameValue(a: unknown, b: unknown) {
-  return stable(a) === stable(b);
+  return valueKey(a) === valueKey(b);
 }
 
 async function rowsFor(ctx: QueryCtx, userId: Id<"users">, key: FactKey) {
