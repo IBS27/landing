@@ -219,7 +219,9 @@ function moveInFrom(parts: string[], now: number): ProposedFact | null {
 function scheduleFrom(parts: string[]): ProposedFact | null {
   const all = parts.join(" ");
   let workHours: WorkHours | null = null;
-  if (/\b(night shifts?|nights|overnight|graveyard)\b/i.test(all)) workHours = "night";
+  // "Work nights", not "board game nights".
+  if (/\b(night shifts?|work(ing|s)? nights|nights? nurse|overnights?|graveyard)\b/i.test(all))
+    workHours = "night";
   else if (/\b(evening shifts?|work evenings|closing shifts?)\b/i.test(all)) workHours = "evening";
   else if (/\b(9\s?(-|to)\s?5|nine to five|day job|office job|work days)\b/i.test(all))
     workHours = "day";
