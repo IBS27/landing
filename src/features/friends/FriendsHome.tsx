@@ -54,8 +54,9 @@ export function FriendsHome() {
               className="min-h-[calc(100vh-56px-80px)]"
             />
           )}
+          {/* Sections sit 8px apart, like Facebook's grid rows (no divider). */}
           {reqs && reqs.length > 0 && (
-            <section aria-label="Friend requests" className="mb-4">
+            <section aria-label="Friend requests" className="mb-2">
               <SectionHeader
                 title="Friend requests"
                 link={{
@@ -102,7 +103,6 @@ export function FriendsHome() {
                   );
                 })}
               </ul>
-              <div className="mx-0 mt-5 h-px bg-divider" />
             </section>
           )}
           {pymk && pymk.length > 0 && (

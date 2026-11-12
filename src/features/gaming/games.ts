@@ -350,13 +350,13 @@ export const GAMES: Game[] = [
 ];
 
 /**
- * The Play home splits the catalog so no game shows twice on one screen: Top
- * picks, Most played and Recently released are disjoint, and Most played (the
- * only shelf that can share the first screen with Featured) leaves out the
- * Featured games. Recently released sits far below Featured, so it may repeat one.
+ * The Play home splits the catalog so no game shows twice on one screen:
+ * Featured, the visible Top picks (two rows of six), Most played and Recently
+ * released are disjoint. Top picks runs past its first page (behind the next
+ * arrow, like Facebook's), where it may surface games from the shelves below.
  */
 export const FEATURED = ["solitaire-grove", "orchard-friends", "tower-legends", "harbor-tycoon"];
-export const TOP_PICKS = [
+const TOP_PICKS_FIRST_PAGE = [
   "manor-makeover",
   "night-solitaire",
   "maze-slide",
@@ -370,6 +370,13 @@ export const TOP_PICKS = [
   "puck-rush",
   "checkers-club",
 ];
+export const TOP_PICKS = [
+  ...TOP_PICKS_FIRST_PAGE,
+  "gem-cascade",
+  "snake-trail",
+  "brick-burst",
+  "royal-21",
+];
 
 export const byId = new Map(GAMES.map((x) => [x.id, x]));
 
@@ -377,10 +384,9 @@ export const byId = new Map(GAMES.map((x) => [x.id, x]));
 export const RECENTLY_RELEASED = [
   "snake-trail",
   "royal-21",
-  "harbor-tycoon",
-  "tower-legends",
-  "orchard-friends",
-  "solitaire-grove",
+  "arena-blitz",
+  "bubble-pop",
+  "island-village",
 ];
 
 /**
@@ -403,7 +409,7 @@ function fnv(text: string) {
 
 /** Everything not featured, picked or recently released, ranked by players. */
 export const MOST_PLAYED = GAMES.filter(
-  (x) => ![...FEATURED, ...TOP_PICKS, ...RECENTLY_RELEASED].includes(x.id),
+  (x) => ![...FEATURED, ...TOP_PICKS_FIRST_PAGE, ...RECENTLY_RELEASED].includes(x.id),
 ).sort((a, b) => b.players - a.players);
 
 export function playersLabel(n: number) {

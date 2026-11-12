@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQ, useViewer } from "@/app/viewer";
+import { LiveBadge } from "@/features/posts/LivePost";
 import { cn } from "@/lib/format";
 import { Card } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -14,6 +15,7 @@ const GAP = 8;
 export function StoriesTray() {
   const viewer = useViewer();
   const buckets = useQ(api.stories.tray, {});
+  const liveIds = useQ(api.live.liveAuthorIds, {});
   const scroller = useRef<HTMLDivElement>(null);
   const [edges, setEdges] = useState({ start: true, end: true });
 
@@ -80,6 +82,7 @@ export function StoriesTray() {
             key={b.author._id}
             bucket={b}
             own={b.author._id === viewer._id}
+            live={!!liveIds?.includes(b.author._id)}
             label={b.author._id === viewer._id ? "Your story" : b.author.name}
           />
         ))}
@@ -92,7 +95,18 @@ export function StoriesTray() {
   );
 }
 
-function StoryTile({ bucket, label, own }: { bucket: StoryBucket; label: string; own: boolean }) {
+function StoryTile({
+  bucket,
+  label,
+  own,
+  live,
+}: {
+  bucket: StoryBucket;
+  label: string;
+  own: boolean;
+  /** The author is broadcasting: red ring and a LIVE label, like Facebook. */
+  live: boolean;
+}) {
   // The tile previews the story it opens: the first unseen one (else the first).
   const entry = entryStory(bucket);
   // Your own story and people you've caught up on get a grey ring.
@@ -133,7 +147,7 @@ function StoryTile({ bucket, label, own }: { bucket: StoryBucket; label: string;
       <span
         className={cn(
           "absolute top-3 left-3 flex h-10 w-10 items-center justify-center rounded-full",
-          seen ? "bg-[#ced0d4]" : "bg-fb",
+          live ? "bg-[#F02849]" : seen ? "bg-[#ced0d4]" : "bg-fb",
         )}
       >
         <img
@@ -141,10 +155,11 @@ function StoryTile({ bucket, label, own }: { bucket: StoryBucket; label: string;
           alt=""
           className={cn(
             "h-9 w-9 rounded-full border-[3px] object-cover",
-            seen ? "border-[#ced0d4]" : "border-fb",
+            live ? "border-[#F02849]" : seen ? "border-[#ced0d4]" : "border-fb",
           )}
         />
       </span>
+      {live && <LiveBadge small className="absolute top-[58px] left-3" />}
       <span className="absolute inset-x-3 bottom-3 line-clamp-2 font-semibold text-[13px] text-white leading-4 [text-shadow:0_1px_2px_rgba(0,0,0,0.4)]">
         {label}
       </span>

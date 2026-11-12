@@ -128,6 +128,7 @@ export function Avatar({
   size = 40,
   online,
   ring,
+  live,
   square,
   className,
 }: {
@@ -137,6 +138,8 @@ export function Avatar({
   online?: boolean;
   /** Blue story ring. */
   ring?: boolean;
+  /** Red ring while the person is broadcasting live. */
+  live?: boolean;
   /** Groups and pages use rounded squares. */
   square?: boolean;
   className?: string;
@@ -157,6 +160,7 @@ export function Avatar({
           "h-full w-full object-cover",
           square ? "rounded-lg" : "rounded-full",
           ring && "outline-[3px] outline-fb outline-offset-0 border-2 border-card",
+          live && "outline-2 outline-[#F02849] outline-offset-0 border-2 border-card",
         )}
       />
       <span

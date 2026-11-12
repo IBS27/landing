@@ -3,7 +3,8 @@ import type { FunctionReturnType } from "convex/server";
 import { MessageCircleQuestion, MoreHorizontal, Plus, Search, X } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useChatDock } from "@/app/chat-dock";
-import { useM, useViewer } from "@/app/viewer";
+import { useM, useQ, useViewer } from "@/app/viewer";
+import { LiveBadge } from "@/features/posts/LivePost";
 import { Menu, MenuContent, MenuItem, MenuTrigger, Modal, Tooltip } from "@/ui/overlays";
 import { Avatar, Button, IconButton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -57,6 +58,7 @@ export function RightRail({ data }: { data: RailsData | undefined }) {
     }
   };
 
+  const liveIds = new Set(useQ(api.live.liveAuthorIds, {}) ?? []);
   const birthdays = data?.birthdays ?? [];
   // Contacts → "Search by name or group" filters contacts and group chats as you type.
   const [query, setQuery] = useState<string | null>(null);
@@ -152,7 +154,9 @@ export function RightRail({ data }: { data: RailsData | undefined }) {
           Contacts
         </Heading>
       ) : (
-        <div className="flex h-10 items-center gap-1 px-2 pt-1">
+        // Same height as the Contacts heading (which shrinks to its 36px content), so opening
+        // search doesn't push the rail down.
+        <div className="flex h-9 shrink-0 items-center gap-1 px-2">
           <label className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-full bg-input px-3">
             <Search size={16} strokeWidth={2.5} className="shrink-0 text-icon-secondary" />
             <input
@@ -183,10 +187,11 @@ export function RightRail({ data }: { data: RailsData | undefined }) {
               onClick={() => void openContact(c._id)}
               className={ROW}
             >
-              <Avatar src={c.avatar} size={36} online={c.online} />
+              <Avatar src={c.avatar} size={36} online={c.online} live={liveIds.has(c._id)} />
               <span className="min-w-0 flex-1 truncate font-medium text-[15px] text-primary leading-5">
                 {c.name}
               </span>
+              {liveIds.has(c._id) && <LiveBadge small />}
             </button>
           </li>
         ))}

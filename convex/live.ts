@@ -94,6 +94,18 @@ export const active = viewerQuery({
   },
 });
 
+/** Authors broadcasting right now that the viewer can see (red live rings in Contacts and Stories). */
+export const liveAuthorIds = viewerQuery({
+  args: {},
+  handler: async (ctx) => {
+    const a = await loadAudience(ctx, ctx.viewer._id);
+    const recent = await ctx.db.query("posts").withIndex("by_created").order("desc").take(300);
+    const ids = new Set<Id<"users">>();
+    for (const p of recent) if (isLive(p) && (await canView(ctx, p, a))) ids.add(p.authorId);
+    return [...ids];
+  },
+});
+
 /** "Go live": publish the live post, tell friends, and start watching the heartbeat. */
 export const start = viewerMutation({
   args: {

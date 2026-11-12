@@ -18,11 +18,12 @@ import { type LiveConnection, useLiveViewer } from "./useLiveStream";
 import { setSoundOn, useSoundOn, VolumeGlyph } from "./VideoPlayer";
 
 /** Facebook's red "LIVE" pill. */
-export function LiveBadge({ className }: { className?: string }) {
+export function LiveBadge({ className, small }: { className?: string; small?: boolean }) {
   return (
     <span
       className={cn(
-        "inline-flex h-6 items-center rounded bg-[#F02849] px-1.5 font-bold text-[13px] text-white uppercase leading-none tracking-wide",
+        "inline-flex items-center bg-[#F02849] font-bold text-white uppercase leading-none tracking-wide",
+        small ? "h-4 rounded-[3px] px-1 text-[11px]" : "h-6 rounded px-1.5 text-[13px]",
         className,
       )}
     >

@@ -137,9 +137,9 @@ async function relation(
 const TOP_VOICES_MIN_MEMBERS = 1000;
 
 /**
- * Top voices: the most active quarter of the group's members by posts and
- * comments in the group (at least 3 contributions, at most 25 people), keyed
- * to their contribution count.
+ * Top voices: the group's most active members by posts and comments in the
+ * group (at least 2 contributions, at most 10 people), keyed to their
+ * contribution count.
  */
 async function topVoices(ctx: QueryCtx, g: Doc<"groups">, memberIds: Id<"users">[]) {
   const out = new Map<Id<"users">, number>();
@@ -162,9 +162,10 @@ async function topVoices(ctx: QueryCtx, g: Doc<"groups">, memberIds: Id<"users">
   for (const list of comments) for (const c of list) bump(c.authorId);
   const ranked = memberIds
     .map((id) => [id, counts.get(id) ?? 0] as const)
-    .filter(([, n]) => n >= 3)
+    .filter(([, n]) => n >= 2)
     .sort((a, b) => b[1] - a[1]);
-  const limit = Math.min(25, Math.max(3, Math.round(memberIds.length / 4)));
+  // Groups this size (1K+) list their ~10 most active contributors.
+  const limit = 10;
   for (const [id, n] of ranked.slice(0, limit)) out.set(id, n);
   return out;
 }
@@ -495,8 +496,9 @@ export const members = viewerQuery({
       total: g.memberCount,
       canSee: true,
       staff,
+      // You aren't listed among your group's Top voices (your badge still shows elsewhere).
       topVoices: all
-        .filter((m) => m.topVoice)
+        .filter((m) => m.topVoice && m.relation !== "self")
         .sort((a, b) => (voices.get(b._id) ?? 0) - (voices.get(a._id) ?? 0)),
       friends: all.filter((m) => m.relation === "friend"),
       nearby: all.filter(

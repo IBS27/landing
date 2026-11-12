@@ -35,7 +35,7 @@ import { backgroundFor } from "./backgrounds";
 import { CommentsSection, GroupCommentPreview } from "./CommentsSection";
 import { CreatePostModal, FEELINGS } from "./CreatePostModal";
 import { BookmarkOutline, CaretRight, CloseIcon, DotsIcon, GroupAudienceIcon } from "./icons";
-import { LivePostMedia } from "./LivePost";
+import { LiveBadge, LivePostMedia } from "./LivePost";
 import { PhotoGrid } from "./PhotoGrid";
 import { PostDialog } from "./PostDialog";
 import { BlockDialog, unfollowSub, WhySeeingDialog } from "./PostMenuDialogs";
@@ -140,7 +140,14 @@ export function PostHeader({
   /** After the time and audience (Watch: "· 1.2K views"). */
   metaSuffix?: ReactNode;
 }) {
-  const author = <NameLink user={post.author} />;
+  // While broadcasting, Facebook rings the author's avatar in red and adds a LIVE label.
+  const liveNow = !!post.live && post.live.endedAt === null;
+  const author = (
+    <>
+      <NameLink user={post.author} />
+      {liveNow && <LiveBadge small className="ml-1.5 align-[1px]" />}
+    </>
+  );
   const openVideo = useVideoTheater();
   // A video post's timestamp opens the video theater, like Facebook's /watch?v= links.
   const video = post.media.length === 1 && post.media[0].kind === "video";
@@ -232,7 +239,7 @@ export function PostHeader({
           params={{ username: post.author.username }}
           className="shrink-0 hover:brightness-95"
         >
-          <Avatar src={post.author.avatar} size={40} />
+          <Avatar src={post.author.avatar} size={40} live={liveNow} />
         </Link>
       )}
       <div className="min-w-0 flex-1">

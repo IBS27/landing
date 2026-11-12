@@ -114,7 +114,8 @@ export function ManageWatchlistDialog({ onClose }: { onClose: () => void }) {
             />
           </label>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
+        {/* The list scrolls inside the dialog with an always-visible scrollbar, like Facebook's. */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3 [scrollbar-color:var(--scroll-thumb)_transparent]">
           {!loaded ? (
             [0, 1, 2, 3].map((i) => (
               <div key={i} className="flex items-center gap-3 px-2 py-2">
