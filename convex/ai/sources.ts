@@ -1,7 +1,13 @@
 import { v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { internalQuery, type QueryCtx } from "../_generated/server";
-import { type CitedSource, isPublicSource, resolveSources, snippet } from "../lib/citations";
+import {
+  type CitedSource,
+  isPublicSource,
+  resolveSources,
+  snippet,
+  sourceKey,
+} from "../lib/citations";
 import { type Audience, loadAudience } from "../lib/posts";
 import { type Source, source } from "../validators";
 
@@ -55,27 +61,31 @@ export async function agentSources(
   } else {
     cited = await resolveSources(ctx, sources, await loadAudience(ctx, shownTo));
   }
+  const byKey = new Map(sources.map((s) => [sourceKey(s), s]));
   return Promise.all(
-    cited.map(async (c) => ({ ...c, text: snippet(await fullText(ctx, c), TEXT_MAX) })),
+    cited.map(async (c) => {
+      const s = byKey.get(c.key);
+      const text = (s && (await fullText(ctx, s))) || c.snippet;
+      return { ...c, text: snippet(text, TEXT_MAX) };
+    }),
   );
 }
 
-/** The record's own text; the snippet when it has none (a photo post) or is gone. */
-async function fullText(ctx: QueryCtx, c: CitedSource): Promise<string> {
-  switch (c.kind) {
+/** The record's own text, untruncated; empty when it has none (a photo post). */
+async function fullText(ctx: QueryCtx, s: Source): Promise<string | undefined> {
+  switch (s.kind) {
     case "post":
-      return (await ctx.db.get(c.postId))?.text?.trim() || c.snippet;
+      return (await ctx.db.get(s.postId))?.text?.trim();
     case "comment":
-      return (await ctx.db.get(c.commentId))?.text.trim() || c.snippet;
+      return (await ctx.db.get(s.commentId))?.text.trim();
     case "event":
-      return (await ctx.db.get(c.eventId))?.description.trim() || c.snippet;
+      return (await ctx.db.get(s.eventId))?.description.trim();
     case "listing":
-      return (await ctx.db.get(c.listingId))?.description.trim() || c.snippet;
+      return (await ctx.db.get(s.listingId))?.description.trim();
     case "group":
-      return (await ctx.db.get(c.groupId))?.description.trim() || c.snippet;
+      return (await ctx.db.get(s.groupId))?.description.trim();
     case "external":
-      // Stored snapshots are already short (≤ 280 characters).
-      return c.snippet;
+      return (await ctx.db.get(s.externalSourceId))?.snippet.trim();
   }
 }
 

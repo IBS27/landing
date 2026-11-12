@@ -118,6 +118,14 @@ function world() {
         snippet: "Streetlight locations",
         fetchedAt: NOW - DAY / 2,
       },
+      {
+        _id: "xLong",
+        url: "https://www.sfmta.com/routes/14",
+        title: "14 Mission",
+        publisher: "SFMTA",
+        snippet: `${"The 14 Mission runs along Mission Street between downtown and Daly City. ".repeat(2)}Last departure from the Ferry Building is at 1:10am.`,
+        fetchedAt: NOW - DAY / 2,
+      },
     ],
     userSettings: [],
   };
@@ -226,6 +234,12 @@ describe("agentSources", () => {
     const [s] = await agentSources(fakeCtx(world()), [P("pPublic")], "everyone");
     expect(s?.snippet.length).toBeLessThanOrEqual(SNIPPET_MAX);
     expect(s?.text).toBe(LONG.trim());
+  });
+
+  test("gives the model the whole external snapshot", async () => {
+    const [s] = await agentSources(fakeCtx(world()), [X("xLong")], "everyone");
+    expect(s?.snippet.length).toBeLessThanOrEqual(SNIPPET_MAX);
+    expect(s?.text).toEndWith("Last departure from the Ferry Building is at 1:10am.");
   });
 
   test("describes a source without live counts", async () => {
@@ -348,6 +362,29 @@ describe("runAgent citations", () => {
     expect(result.output.tips.map((t) => t.source)).toEqual(["comment:cPublic", "post:pPublic"]);
     expect(result.cited).toEqual(cite([C("cPublic"), P("pPublic")]));
     expect(requests).toHaveLength(0);
+  });
+
+  test("a fallback that cites a source it wasn't given throws", async () => {
+    process.env.AI_ENABLED = "false";
+    const { ctx, runs } = actionCtx(world());
+    const leaky = defineTask({
+      ...tips,
+      name: "test.leaky",
+      fallback: (_input: { area: string }, sources: AgentSource[]) => ({
+        tips: [
+          ...sources.map((s) => ({ text: s.text, source: s.key })),
+          { text: "Secret tip", source: "post:pPrivateGroup" },
+        ],
+      }),
+    });
+    await expect(
+      runAgent(ctx, leaky, {
+        input: { area: "Mission" },
+        sources: [X("x1"), P("pPrivateGroup")],
+        shownTo: "everyone",
+      }),
+    ).rejects.toThrow("test.leaky: fallback cites sources it wasn't given: post:pPrivateGroup");
+    expect(runs).toHaveLength(0);
   });
 
   test("a fallback that cites nothing has no citations", async () => {

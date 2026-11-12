@@ -44,7 +44,11 @@ export type AgentTask<I extends Json, V extends GenericValidator> = {
   cites: (output: Infer<V>) => string[];
   /** Task rules a schema can't express (math adds up, each item cites a source). Return errors. */
   check?: (output: Infer<V>, input: I) => string[];
-  /** The non-AI result, used when AI is off or the model can't produce a valid answer. */
+  /**
+   * The non-AI result, used when AI is off or the model can't produce a valid
+   * answer. It gets only the sources the result's audience can read, and may
+   * cite only those: `runAgent` throws otherwise.
+   */
   fallback: (input: I, sources: AgentSource[]) => Infer<V>;
   /** Default "medium". */
   effort?: Effort;
@@ -201,15 +205,15 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
 
   const fallback = async (reason: AiFallbackReason): Promise<AgentResult<O>> => {
     const output = task.fallback(input, sources);
-    let keys: string[] = [];
-    try {
-      keys = task.cites(output);
-    } catch (error) {
-      errors.push(`cites() threw on the fallback output: ${message(error)}`);
-    }
-    const unknown = keys.filter((k) => !byKey.has(k));
+    // The fallback is plain code given only the readable sources, so citing
+    // anything else is a bug in the task. Fail loudly rather than return output
+    // whose citations don't cover it.
+    const keys = task.cites(output);
+    const unknown = [...new Set(keys)].filter((k) => !byKey.has(k));
     if (unknown.length)
-      errors.push(`The fallback cited sources it can't read, dropped: ${unknown.join(", ")}`);
+      throw new Error(
+        `${task.name}: fallback cites sources it wasn't given: ${unknown.join(", ")}`,
+      );
     const cited = toCitations(keys);
     const runId = await log(
       "fallback",
