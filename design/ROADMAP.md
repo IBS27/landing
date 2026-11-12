@@ -10,7 +10,8 @@ Nothing else can start until these exist, and none of them depend on each other.
 - #6 Muse approval queue for outgoing drafts
 - #7 Citations: shared sources model and UI
 - #8 AI foundation: model calls from Convex actions
-- #15 Neighborhood data model and Seattle seed
+- #54 Move the seed world and app from Seattle to San Francisco (in progress; #15 builds on it)
+- #15 Neighborhood data model and San Francisco seed
 - #11 Verified listings and scam signals (also unblocked; an early win for search)
 
 Most of this wave changes `convex/schema.ts`. Post plan comments early so schema changes don't collide.

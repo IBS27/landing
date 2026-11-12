@@ -1,6 +1,6 @@
 # Landing: product brief
 
-An end-to-end apartment solution: find a place, move in, settle in and move out.
+An end-to-end apartment solution: find a place, move in, settle in and move out. Launching in San Francisco.
 
 ## Your City Profile (the base for everything)
 - Built from your brief: interests, schedule, budget, no car, "want to meet people".
@@ -13,7 +13,7 @@ An end-to-end apartment solution: find a place, move in, settle in and move out.
 - Unit details: views (sunrise or sunset, ocean), noise risk (nearby colleges, frats, nightlife).
 
 ## 2. Neighborhood scores and "Try the neighborhood"
-- Ask things like "What's my Saturday like in Fremont vs Capitol Hill?"
+- Ask things like "What's my Saturday like in the Mission vs the Inner Sunset?"
 - Ember reads local Group threads, and Spark finds what locals agree on.
 - Each neighborhood gets a cited Weekend Route on a map ("15 comments, 2 weeks ago").
 - Separate scores for things to do, food, transit and fit with your interests, each with its sources.
@@ -39,7 +39,7 @@ An end-to-end apartment solution: find a place, move in, settle in and move out.
   - Muse creates the Group, writes the intros ("Maya, Dev and Priya all climb") and proposes a first meetup.
   - Starts before move day, so you know people when you land.
 - Journeys (your first 90 days):
-  - A new Weekend Route every week, built from real Events and Group plans ("Run Club, Green Lake, 8am Saturday").
+  - A new Weekend Route every week, built from real Events and Group plans ("Run Club, Golden Gate Park, 8am Saturday").
   - Crew overlap: "Dev and Priya are going. Join?" Muse drafts the message.
   - Weekly check-ins that adapt to what you actually did ("3 weeks in: 2 events, 1 Group, 2 new friends").
   - Levels: Week 1 "Explore", Month 1 "Regular", Month 3 "Local".
@@ -60,7 +60,7 @@ An end-to-end apartment solution: find a place, move in, settle in and move out.
 - Pin places you've been, with photos, videos and notes. Pins are added only after you visit.
 - Spark tags your photos and suggests pins and captions. Muse groups pins into moments ("First climbing night").
 - AI edits: Vista and Muse Image clean up dark or blurry shots, and SAM 3.1 cuts out people and objects for collages.
-- Auto-made recaps and vlogs ("Your first month in Seattle").
+- Auto-made recaps and vlogs ("Your first month in SF").
 - Shared crew pins, but everyone tagged has to approve first.
 - Memories in 3D (from Re:Collection): rebuild a night out from video and walk through it again with friends.
 
