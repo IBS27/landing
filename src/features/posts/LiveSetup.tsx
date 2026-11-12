@@ -139,10 +139,17 @@ function useSoftwareSource(enabled: boolean) {
     const open = async () => {
       if (pick.video === "screen") {
         if (!md.getDisplayMedia) throw new DOMException("", "NotSupportedError");
-        const screen = await md.getDisplayMedia({ video: { frameRate: 30 }, audio: true });
+        // Shared tab/window sound is only used with the default input; "No audio"
+        // and an explicitly chosen microphone are honoured exactly.
+        const wantShared = audio === true;
+        const screen = await md.getDisplayMedia({ video: { frameRate: 30 }, audio: wantShared });
         opened.push(screen);
-        if (screen.getAudioTracks().length > 0 || !audio) return screen;
-        // Most windows share no sound: the chosen microphone joins the picture.
+        if (!audio) {
+          for (const t of screen.getAudioTracks()) t.stop();
+          return new MediaStream(screen.getVideoTracks());
+        }
+        if (wantShared && screen.getAudioTracks().length > 0) return screen;
+        // No shared sound (or a specific microphone was picked): the mic joins the picture.
         const mic = await md.getUserMedia({ audio }).catch(() => null);
         if (!mic) return screen;
         opened.push(mic);
@@ -543,7 +550,7 @@ export function LiveProducer() {
         <Modal open={confirmEnd} onOpenChange={setConfirmEnd} title="End live video?" width={548}>
           <p className="px-4 pt-4 text-[15px] text-primary leading-5">
             Are you sure you want to end your live video? Your followers will no longer be able to
-            watch it live. Your video will be saved to your profile.
+            watch it live. Your video (up to the first 15 minutes) will be saved to your profile.
           </p>
           <div className="flex justify-end gap-2 p-4">
             <Button variant="ghost" className="text-link" onClick={() => setConfirmEnd(false)}>
