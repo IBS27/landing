@@ -15,7 +15,7 @@ export const pages = [
     links: ["https://moonrisecoffee.co", "https://instagram.com/moonrisecoffeeco"],
   },
   {
-    username: "cascadeboulders",
+    username: "sutroboulders",
     name: "Cascade Boulders",
     category: "Climbing Gym",
     bio: "Bouldering gym in Fremont. New sets every week, yoga + fitness included with membership. Climb on 🧗",
@@ -25,7 +25,7 @@ export const pages = [
     avatar: "climbing gym logo",
     cover: "climbing gym wall",
     joined: 2016,
-    links: ["https://cascadeboulders.com"],
+    links: ["https://sutroboulders.com"],
   },
   {
     username: "waxandneedle",
@@ -40,7 +40,7 @@ export const pages = [
     links: ["https://waxandneedle.shop"],
   },
   {
-    username: "montlakecampuslife",
+    username: "sathergatecampuslife",
     name: "Montlake Campus Life",
     category: "College & University",
     bio: "Student-run page for life on the Montlake campus: events, deadlines, free food alerts, and too many photos of the cherry trees.",
@@ -52,7 +52,7 @@ export const pages = [
     joined: 2012,
   },
   {
-    username: "emeraldledger",
+    username: "fogcityledger",
     name: "The Emerald Ledger",
     category: "News & Media Website",
     bio: "Independent local news for Seattle. Housing, transit, food, and the stuff your neighbors are talking about.",
@@ -86,7 +86,7 @@ export const pages = [
     joined: 2017,
   },
   {
-    username: "rainlineoutdoor",
+    username: "foglineoutdoor",
     name: "Rainline Outdoor Co.",
     category: "Outdoor & Sporting Goods Company",
     bio: "Gear built for wet trails and long weekends. Designed in Seattle.",
@@ -96,7 +96,7 @@ export const pages = [
     avatar: "outdoor brand logo",
     cover: "covers/mountains-01.jpg",
     joined: 2011,
-    links: ["https://rainline.co", "https://instagram.com/rainlineoutdoor"],
+    links: ["https://rainline.co", "https://instagram.com/foglineoutdoor"],
   },
 ] as const satisfies readonly PageSeed[];
 

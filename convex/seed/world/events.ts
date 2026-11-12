@@ -10,7 +10,7 @@ export const events: readonly EventSeed[] = [
   // ── Past (last 3 weeks) ──────────────────────────────────────────────────
   {
     key: "fall-bouldering-comp",
-    host: "cascadeboulders",
+    host: "sutroboulders",
     title: "Cascade Fall Bouldering Comp",
     cover: "posts/bouldering-gym-03.jpg",
     description:
@@ -67,8 +67,8 @@ export const events: readonly EventSeed[] = [
     interested: ["tyler.jensen", "theo.grant", "lily.anderson"],
   },
   {
-    key: "montlake-hacks-info-session",
-    host: "montlakecampuslife",
+    key: "golden-bear-hacks-info-session",
+    host: "sathergatecampuslife",
     title: "Montlake Hacks Info Session + Team Mixer",
     cover: "events/meetup-01.jpg",
     description:
@@ -87,7 +87,7 @@ export const events: readonly EventSeed[] = [
   {
     key: "board-game-night-last-week",
     host: "tasha.okafor",
-    in: "seattle-board-game-night",
+    in: "sf-board-game-night",
     title: "Thursday Board Game Night: Spooky Leftovers",
     cover: "board games",
     description:
@@ -134,7 +134,7 @@ export const events: readonly EventSeed[] = [
   {
     key: "low-tide-radio-show",
     host: "malik.johnson",
-    in: "seattle-concerts",
+    in: "sf-concerts",
     title: "Low Tide Radio w/ Glass Harbor + Pale Kites",
     cover: "events/concert-01.jpg",
     description:
@@ -200,7 +200,7 @@ export const events: readonly EventSeed[] = [
   {
     key: "run-club-saturday",
     host: "daniel.reyes",
-    in: "seattle-run-club",
+    in: "sf-run-club",
     title: "Saturday Group Run: Gas Works to Fremont Bridge loop",
     cover: "running",
     description:
@@ -226,7 +226,7 @@ export const events: readonly EventSeed[] = [
   },
   {
     key: "ski-swap",
-    host: "rainlineoutdoor",
+    host: "foglineoutdoor",
     title: "Rainline Community Ski & Snowboard Swap",
     cover: "ski equipment",
     description:
@@ -295,7 +295,7 @@ export const events: readonly EventSeed[] = [
   {
     key: "climbing-night",
     host: "kai.nakamura",
-    in: "seattle-climbers",
+    in: "bay-area-climbers",
     title: "Seattle Climbers Meetup Night @ Cascade Boulders",
     cover: "posts/bouldering-gym-12.jpg",
     description:
@@ -323,7 +323,7 @@ export const events: readonly EventSeed[] = [
   {
     key: "new-grad-mixer",
     host: "rohan.iyer",
-    in: "seattle-tech-new-grads",
+    in: "sf-tech-new-grads",
     title: "Seattle Tech New Grad Mixer (Fall '26)",
     cover: "networking event",
     description:
@@ -352,7 +352,7 @@ export const events: readonly EventSeed[] = [
   {
     key: "board-game-night",
     host: "tasha.okafor",
-    in: "seattle-board-game-night",
+    in: "sf-board-game-night",
     title: "Thursday Board Game Night @ Moonrise",
     cover: "board games",
     description:
@@ -415,8 +415,8 @@ export const events: readonly EventSeed[] = [
     interested: ["maya.chen", "zoe.nguyen", "maddie.collins", "lena.fischer"],
   },
   {
-    key: "montlake-hacks",
-    host: "montlakecampuslife",
+    key: "golden-bear-hacks",
+    host: "sathergatecampuslife",
     title: "Montlake Hacks 2026 (24h Student Hackathon)",
     cover: "hackathon laptops",
     description:
@@ -437,7 +437,7 @@ export const events: readonly EventSeed[] = [
   {
     key: "free-coat-swap",
     host: "maddie.collins",
-    in: "free-stuff-seattle",
+    in: "free-stuff-sf",
     title: "Free Winter Coat & Gear Swap",
     cover: "winter coats",
     description:
@@ -454,9 +454,9 @@ export const events: readonly EventSeed[] = [
     interested: ["priya.raman", "hannah.lee", "marcus.bell", "emily.chen"],
   },
   {
-    key: "rattlesnake-ledge-hike",
+    key: "tennessee-valley-hike",
     host: "tara.singh",
-    in: "pnw-hikers",
+    in: "bay-area-hikers",
     title: "Rattlesnake Ledge Sunday Morning Hike (beginner friendly)",
     cover: "posts/forest-trail-08.jpg",
     description:
@@ -503,7 +503,7 @@ export const events: readonly EventSeed[] = [
   {
     key: "marathon-cheer-station",
     host: "tasha.okafor",
-    in: "seattle-run-club",
+    in: "sf-run-club",
     title: "Seattle Marathon Cheer Station (Mile 20)",
     cover: "events/run-club-01.jpg",
     description:
@@ -578,7 +578,7 @@ export const events: readonly EventSeed[] = [
     interested: ["hannah.lee", "chloe.wright", "jessica.huang", "sophie.dubois", "sam.rivera"],
   },
   {
-    key: "ballard-holiday-market",
+    key: "richmond-holiday-market",
     host: "will.foster",
     title: "Ballard Farmers Market: Holiday Edition",
     cover: "farmers market",
@@ -598,7 +598,7 @@ export const events: readonly EventSeed[] = [
   {
     key: "finals-study-night",
     host: "amara.diallo",
-    in: "uw-class-of-2027",
+    in: "cal-class-of-2027",
     title: "Finals Week Group Study Night (snacks provided)",
     cover: "library studying",
     description:
@@ -615,9 +615,9 @@ export const events: readonly EventSeed[] = [
     interested: ["maya.chen", "ana.torres", "olivia.brooks", "noah.williams", "mei.tanaka"],
   },
   {
-    key: "caphill-art-walk",
+    key: "mission-art-walk",
     host: "harper.quinn",
-    in: "capitol-hill-neighbors",
+    in: "mission-neighbors",
     title: "Capitol Hill Art Walk: December (group meetup)",
     cover: "art gallery",
     description:

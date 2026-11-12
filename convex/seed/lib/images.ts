@@ -3,7 +3,7 @@ import type { PhotoSlot } from "../types";
 import { hash } from "./prng";
 
 const FOLDERS = new Set<string>(Object.keys(seedImages));
-/** A slot topic that names one file ("ballard-01.jpg") rather than topic words. */
+/** A slot topic that names one file ("mission-01.jpg") rather than topic words. */
 const FILE_NAME = /\.(jpe?g|png|webp|gif|avif)$/i;
 const STOP = new Set(
   "a an the of and with in on for to at my is it this that i you we so just free photo image".split(
@@ -289,7 +289,7 @@ export class ImagePicker {
   }
 
   /**
-   * Marks exact-file slots ("covers/ballard-01.jpg") as taken up front, so picks made earlier
+   * Marks exact-file slots ("covers/mission-01.jpg") as taken up front, so picks made earlier
    * in the plan (profile covers, say) never land on a file another row names.
    */
   reserve(slots: readonly PhotoSlot[]): void {
@@ -338,7 +338,7 @@ export class ImagePicker {
     }
     const used = this.used.get(folder) ?? new Set<string>();
     this.used.set(folder, used);
-    // "covers/ballard-01.jpg" names one exact file: hand it out as-is.
+    // "covers/mission-01.jpg" names one exact file: hand it out as-is.
     if (FILE_NAME.test(topic)) {
       const file = pool.find(({ img }) => img.path === `/seed/${folder}/${topic}`)?.img;
       if (file) {

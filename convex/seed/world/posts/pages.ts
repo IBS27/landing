@@ -6,16 +6,16 @@ export const pagePosts: readonly PostSeed[] = [
   // ── The Emerald Ledger ───────────────────────────────────────────────────
   {
     key: "ledger-rent-report",
-    by: "emeraldledger",
+    by: "fogcityledger",
     at: daysAgo(8, "08:15"),
     text: "Median rent for a Seattle one-bedroom is now $2,180, up 7% from last fall. Capitol Hill and South Lake Union saw the biggest jumps. Renters under 30 are now spending an average of 41% of income on housing.",
     link: {
-      url: "https://emeraldledger.news/housing/2026/11/seattle-rents-fall-report",
+      url: "https://fogcityledger.news/housing/2026/11/seattle-rents-fall-report",
       title: "Seattle rents climb 7% in a year, with Capitol Hill leading the way",
-      domain: "emeraldledger.news",
+      domain: "fogcityledger.news",
       description:
         "Our twice-yearly rent survey of 3,400 listings finds one-bedrooms up sharply in Capitol Hill, SLU and Ballard, while studios in the U District flattened for the first time since 2021.",
-      image: "covers/capitol-hill-01.jpg",
+      image: "covers/castro-01.jpg",
     },
     reactions: 55,
     mood: "sad",
@@ -71,7 +71,7 @@ export const pagePosts: readonly PostSeed[] = [
         text: "would love to see this broken down by neighborhood. is the U District number real??",
         replies: [
           {
-            by: "emeraldledger",
+            by: "fogcityledger",
             text: "Nora Kowalski the full neighborhood table is at the bottom of the article. We only counted listings that actually rented, not asking prices.",
             likes: 4,
           },
@@ -80,13 +80,13 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "emeraldledger",
+    by: "fogcityledger",
     at: daysAgo(5, "10:30"),
     text: "Starting Dec 5, Link light rail will run trains until 2am on Fridays and Saturdays as a one-year pilot.",
     link: {
-      url: "https://emeraldledger.news/transit/2026/11/link-late-night-pilot",
+      url: "https://fogcityledger.news/transit/2026/11/link-late-night-pilot",
       title: "Sound Transit adds late-night Link service on weekends",
-      domain: "emeraldledger.news",
+      domain: "fogcityledger.news",
       description:
         "Trains will run every 15 minutes between midnight and 2am on Friday and Saturday nights through next December.",
       image: "light rail",
@@ -99,13 +99,13 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "emeraldledger",
+    by: "fogcityledger",
     at: daysAgo(3, "13:00"),
     text: "The Lucky Gull Diner in Wallingford will close Nov 29 after 22 years. The owners say their lease renewal came with a 60% rent increase.",
     link: {
-      url: "https://emeraldledger.news/food/2026/11/lucky-gull-diner-closing",
+      url: "https://fogcityledger.news/food/2026/11/lucky-gull-diner-closing",
       title: "Lucky Gull Diner to close after 22 years on N 45th",
-      domain: "emeraldledger.news",
+      domain: "fogcityledger.news",
       description:
         "The 24-seat diner, known for its marionberry pancakes and the hand-painted gull over the door, will serve its last breakfast the Sunday after Thanksgiving.",
       image: "diner breakfast",
@@ -125,13 +125,13 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "emeraldledger",
+    by: "fogcityledger",
     at: hoursAgo(20),
     text: "An atmospheric river is headed for Western Washington this weekend. Expect 2 to 4 inches of rain in Seattle and possible urban flooding Saturday night.",
     link: {
-      url: "https://emeraldledger.news/weather/2026/11/atmospheric-river-weekend",
+      url: "https://fogcityledger.news/weather/2026/11/atmospheric-river-weekend",
       title: "Atmospheric river could bring 4 inches of rain to Seattle this weekend",
-      domain: "emeraldledger.news",
+      domain: "fogcityledger.news",
       image: "city bus",
     },
     reactions: 24,
@@ -145,13 +145,13 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "emeraldledger",
+    by: "fogcityledger",
     at: daysAgo(12, "09:00"),
     text: "The empty lot at N 34th and Phinney that's been fenced off since 2019 is officially a park now. Opening day is Saturday.",
     link: {
-      url: "https://emeraldledger.news/neighborhoods/2026/10/fremont-pocket-park-opens",
+      url: "https://fogcityledger.news/neighborhoods/2026/10/fremont-pocket-park-opens",
       title: "Fremont's newest pocket park opens on a former parking lot",
-      domain: "emeraldledger.news",
+      domain: "fogcityledger.news",
       description: "Benches, a small dog run, native plants and a covered bike corral.",
       image: "city park",
     },
@@ -165,13 +165,13 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "emeraldledger",
+    by: "fogcityledger",
     at: daysAgo(22, "07:45"),
     text: "Metro is adding red bus lanes to NW Market St for the 44. Construction starts in January.",
     link: {
-      url: "https://emeraldledger.news/transit/2026/10/route-44-bus-lanes",
+      url: "https://fogcityledger.news/transit/2026/10/route-44-bus-lanes",
       title: "Route 44 gets bus lanes through Ballard",
-      domain: "emeraldledger.news",
+      domain: "fogcityledger.news",
       image: "city bus",
     },
     reactions: 19,
@@ -185,7 +185,7 @@ export const pagePosts: readonly PostSeed[] = [
 
   // ── Montlake Campus Life ─────────────────────────────────────────────────
   {
-    by: "montlakecampuslife",
+    by: "sathergatecampuslife",
     at: hoursAgo(5),
     text: "🍕 FREE FOOD ALERT 🍕 leftover catering from the CSE career fair, Allen Center atrium. Sandwich trays, cookies, a suspicious amount of hummus. Go go go",
     reactions: 41,
@@ -197,14 +197,14 @@ export const pagePosts: readonly PostSeed[] = [
       },
       { by: "isaiah.thompson", text: "sprinting from savery rn" },
       {
-        by: "montlakecampuslife",
+        by: "sathergatecampuslife",
         text: "update: cookies are gone. hummus remains. it will outlive us all",
         likes: 12,
       },
     ],
   },
   {
-    by: "montlakecampuslife",
+    by: "sathergatecampuslife",
     at: daysAgo(2, "12:00"),
     text: "Finals week library hours are out! Odegaard goes 24 hours starting Sunday Dec 6 through Friday Dec 11. Suzzallo stays open until midnight. The HUB will have free coffee 8 to 10am Monday through Wednesday.",
     photos: ["library"],
@@ -218,10 +218,10 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "montlakecampuslife",
+    by: "sathergatecampuslife",
     at: daysAgo(4, "16:00"),
     text: "Montlake Hacks is less than two weeks out and we still have spots! 24 hours, free food, prizes, and the designers-are-welcome track is back. Teams of up to 4, solo signups get matched at check-in.",
-    event: "montlake-hacks",
+    event: "golden-bear-hacks",
     reactions: 29,
     comments: [
       {
@@ -234,7 +234,7 @@ export const pagePosts: readonly PostSeed[] = [
         text: "is it ok to come if it's my first hackathon?",
         replies: [
           {
-            by: "montlakecampuslife",
+            by: "sathergatecampuslife",
             text: "100%! about a third of people every year are first timers",
           },
         ],
@@ -242,7 +242,7 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "montlakecampuslife",
+    by: "sathergatecampuslife",
     at: daysAgo(9, "08:10"),
     text: "frost on the quad this morning. coldest day of the quarter so far. stay warm out there",
     photos: ["posts/uw-campus-08.jpg", "posts/uw-campus-05.jpg"],
@@ -253,7 +253,7 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "montlakecampuslife",
+    by: "sathergatecampuslife",
     at: daysAgo(16, "11:00"),
     text: "Reminder: winter quarter registration period II opens Monday at 6am. Set an alarm. Check your holds now, not Sunday night.",
     reactions: 22,
@@ -332,8 +332,8 @@ export const pagePosts: readonly PostSeed[] = [
 
   // ── Cascade Boulders ─────────────────────────────────────────────────────
   {
-    key: "cascade-new-set",
-    by: "cascadeboulders",
+    key: "sutro-new-set",
+    by: "sutroboulders",
     at: daysAgo(3, "18:00"),
     text: 'Fresh set on the slab and the comp wall is open! 22 new problems, V0 to V9. Kai says the orange V6 is "totally fair" which means it absolutely is not.',
     photos: ["bouldering gym", "climbing holds", "bouldering gym"],
@@ -356,7 +356,7 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "cascadeboulders",
+    by: "sutroboulders",
     at: daysAgo(5, "17:00"),
     text: "Seattle Climbers group night is Wednesday the 18th and they'll be some of the first on the new overhang set. Non-members get the $15 group rate at the desk.",
     event: "climbing-night",
@@ -367,7 +367,7 @@ export const pagePosts: readonly PostSeed[] = [
         text: "I've been bouldering exactly twice, is this ok for me?",
         replies: [
           {
-            by: "cascadeboulders",
+            by: "sutroboulders",
             text: "Leo Novak absolutely! there are groups for every level, come at 6:15 for the intro",
           },
         ],
@@ -375,7 +375,7 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "cascadeboulders",
+    by: "sutroboulders",
     at: daysAgo(17, "16:30"),
     text: "Thank you to all 150 climbers who came out for the fall comp! Results are up at the front desk. Congrats to Andre Silva for taking the open men's category and to everyone who sent the cursed purple V2.",
     photos: ["posts/bouldering-gym-03.jpg", "bouldering gym"],
@@ -517,7 +517,7 @@ export const pagePosts: readonly PostSeed[] = [
 
   // ── Rainline Outdoor Co. ─────────────────────────────────────────────────
   {
-    by: "rainlineoutdoor",
+    by: "foglineoutdoor",
     at: daysAgo(3, "10:00"),
     sponsored: true,
     text: "The Drizzle Shell is back in 6 new colors. 3-layer waterproof, pit zips, and a hood that actually fits over a climbing helmet. Tested on the 99 days of rain we get every winter.",
@@ -537,7 +537,7 @@ export const pagePosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "rainlineoutdoor",
+    by: "foglineoutdoor",
     at: daysAgo(8, "10:00"),
     sponsored: true,
     text: "Cold mornings at the trailhead, meet the Ridgeline Puffy. 800-fill down, water-resistant shell, stuffs into its own pocket.",
@@ -550,7 +550,7 @@ export const pagePosts: readonly PostSeed[] = [
     reactions: 16,
   },
   {
-    by: "rainlineoutdoor",
+    by: "foglineoutdoor",
     at: daysAgo(1, "09:00"),
     sponsored: true,
     text: "Early holiday sale: 25% off shells, puffies and packs through Sunday. Members get free returns until January.",
@@ -566,7 +566,7 @@ export const pagePosts: readonly PostSeed[] = [
   },
   {
     // Not a product page, so its CTA reads "Learn more" (the ad Facebook leads into the Reels shelf with).
-    by: "rainlineoutdoor",
+    by: "foglineoutdoor",
     at: daysAgo(2, "17:00"),
     sponsored: true,
     text: "Heading into the backcountry this winter? Our free avalanche awareness nights cover reading the NWAC forecast, beacon basics and what to pack. No experience needed.",
@@ -580,7 +580,7 @@ export const pagePosts: readonly PostSeed[] = [
     reactions: 12,
   },
   {
-    by: "rainlineoutdoor",
+    by: "foglineoutdoor",
     at: daysAgo(3, "12:00"),
     text: "The community ski & snowboard swap is this Sunday at our SLU flagship. Drop off gear Saturday 4 to 7. 15% of sales go to trail maintenance.",
     event: "ski-swap",
@@ -595,7 +595,7 @@ export const pagePosts: readonly PostSeed[] = [
         by: "theo.grant",
         text: "what time does the line start realistically",
         replies: [
-          { by: "rainlineoutdoor", text: "Theo Grant usually around 8, the good boots go fast!" },
+          { by: "foglineoutdoor", text: "Theo Grant usually around 8, the good boots go fast!" },
         ],
       },
     ],

@@ -305,7 +305,7 @@ export const friendPosts: readonly PostSeed[] = [
       },
       { by: "sofia.alvarez", after: 25, text: "WAIT i do one night shift and you send it??" },
       {
-        by: "cascadeboulders",
+        by: "sutroboulders",
         after: 90,
         text: "big send energy 🟣 Kai is pretending he isn't proud",
       },
@@ -636,7 +636,7 @@ export const friendPosts: readonly PostSeed[] = [
 
   // ── Sofia ───────────────────────────────────────────────────────────────
   {
-    key: "sofia-leavenworth",
+    key: "sofia-bishop",
     by: "sofia.alvarez",
     at: daysAgo(4, "21:30"),
     text: "leavenworth weekend 🍂 two days of granite, one bratwurst, zero rain (somehow). kai flashed the problem i've been projecting since august and i'm choosing to be happy for him",
@@ -1452,14 +1452,14 @@ export const friendPosts: readonly PostSeed[] = [
         replies: [{ by: "kai.nakamura", text: "it's legal. it's just mean" }],
       },
       { by: "maya.chen", after: 45, text: "i already hate it and i haven't touched it" },
-      { by: "cascadeboulders", after: 120, text: "New set drops Friday at 4pm. Kai has not slept" },
+      { by: "sutroboulders", after: 120, text: "New set drops Friday at 4pm. Kai has not slept" },
     ],
   },
   {
     by: "kai.nakamura",
     at: daysAgo(4, "22:30"),
     text: "best weekend",
-    share: "sofia-leavenworth",
+    share: "sofia-bishop",
     reactions: 13,
     comments: [{ by: "sofia.alvarez", after: 20, text: "lucky flash guy" }],
   },
@@ -1544,7 +1544,7 @@ export const friendPosts: readonly PostSeed[] = [
     reactions: 19,
     comments: [
       {
-        by: "rainlineoutdoor",
+        by: "foglineoutdoor",
         after: 60,
         text: "Ben has tuned 40 skis today. Send help (and coffee)",
       },
@@ -1780,7 +1780,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "mei.tanaka",
     at: daysAgo(3, "15:00"),
     text: "i'll have a table at art walk with the new zine!! it's about the 49 bus and it's 24 pages and every page is a different person who rides it",
-    event: "caphill-art-walk",
+    event: "mission-art-walk",
     reactions: 20,
     likedBy: ["maya.chen"],
     comments: [

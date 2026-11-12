@@ -733,7 +733,7 @@ function slugify(name: string) {
   );
 }
 
-const DEFAULT_COVERS = ["/seed/covers/seattle-01.jpg", "/seed/covers/mountains-02.jpg"];
+const DEFAULT_COVERS = ["/seed/covers/sf-01.jpg", "/seed/covers/mountains-02.jpg"];
 
 export const create = viewerMutation({
   args: {

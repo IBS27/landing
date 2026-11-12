@@ -58,9 +58,9 @@ export const insertFriendships = internalMutation({
 /** Pages Maya follows: her old café, her gym, her campus, the local paper, the ramen spot. */
 const MAIN_PERSONA_PAGES = new Set([
   "moonrisecoffee",
-  "cascadeboulders",
-  "montlakecampuslife",
-  "emeraldledger",
+  "sutroboulders",
+  "sathergatecampuslife",
+  "fogcityledger",
   "kumoramen",
 ]);
 

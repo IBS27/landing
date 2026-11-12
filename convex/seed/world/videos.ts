@@ -13,9 +13,9 @@ import { MAIN } from "./people";
 const baseVideoPosts: readonly PostSeed[] = [
   // ── Feed / Watch videos (16:9) ─────────────────────────────────────────────
   {
-    by: "emeraldledger",
+    by: "fogcityledger",
     at: daysAgo(2, "08:15"),
-    video: "seattle-viaduct-wide",
+    video: "bay-bridge-wide",
     privacy: "public",
     text: "Throwback: a drive along the Alaskan Way Viaduct, five years after it came down. Do you miss the view or do you miss the traffic? 🚗",
     reactions: 31,
@@ -31,7 +31,7 @@ const baseVideoPosts: readonly PostSeed[] = [
   {
     by: "sophie.dubois",
     at: hoursAgo(5),
-    video: "seattle-waterfront-wide",
+    video: "embarcadero-wide",
     privacy: "public",
     place: "Elliott Bay Water Taxi",
     text: "water taxi back from west seattle and the skyline was showing off ☀️",
@@ -45,7 +45,7 @@ const baseVideoPosts: readonly PostSeed[] = [
   {
     by: "owen.murphy",
     at: daysAgo(1, "07:40"),
-    video: "puget-ferry-wide",
+    video: "bay-ferry-wide",
     privacy: "public",
     text: "commute views > traffic views. southworth ferry hitting different this morning ⛴️",
     reactions: 27,
@@ -54,7 +54,7 @@ const baseVideoPosts: readonly PostSeed[] = [
   {
     by: "grace.liu",
     at: daysAgo(3, "17:20"),
-    video: "ship-canal-bridge-wide",
+    video: "golden-gate-bridge-wide",
     privacy: "public",
     place: "Fremont, Seattle",
     text: "blue hour under the ship canal bridge. i will never get tired of this city",
@@ -64,9 +64,9 @@ const baseVideoPosts: readonly PostSeed[] = [
   },
   {
     by: "tara.singh",
-    in: "pnw-hikers",
+    in: "bay-area-hikers",
     at: hoursAgo(9),
-    video: "rainier-timelapse-wide",
+    video: "fog-timelapse-wide",
     privacy: "public",
     text: "Timelapse from Seward Park last night. The mountain was OUT 🏔️ Anyone heading up to Paradise this weekend before the road closes?",
     reactions: 26,
@@ -79,7 +79,7 @@ const baseVideoPosts: readonly PostSeed[] = [
   {
     by: "maddie.collins",
     at: daysAgo(6, "12:10"),
-    video: "golden-gardens-wide",
+    video: "ocean-beach-wide",
     privacy: "public",
     place: "Golden Gardens Park",
     text: "practice run for the new year's plunge ❄️🌊 we are not okay. who's joining us Jan 1?",
@@ -88,7 +88,7 @@ const baseVideoPosts: readonly PostSeed[] = [
     comments: [{ by: "ana.torres", text: "absolutely not but I'll hold the towels" }],
   },
   {
-    by: "rainlineoutdoor",
+    by: "foglineoutdoor",
     at: daysAgo(4, "11:00"),
     video: "mowich-rain-wide",
     privacy: "public",
@@ -137,7 +137,7 @@ const baseVideoPosts: readonly PostSeed[] = [
   },
   {
     by: "diego.morales",
-    in: "seattle-foodies",
+    in: "sf-foodies",
     at: daysAgo(2, "21:30"),
     video: "salmon-wide",
     privacy: "public",
@@ -154,7 +154,7 @@ const baseVideoPosts: readonly PostSeed[] = [
   },
   {
     by: "malik.johnson",
-    in: "seattle-concerts",
+    in: "sf-concerts",
     at: daysAgo(1, "23:50"),
     video: "concert-wide",
     privacy: "public",
@@ -222,7 +222,7 @@ const baseVideoPosts: readonly PostSeed[] = [
   },
   {
     by: "sofia.alvarez",
-    in: "pnw-hikers",
+    in: "bay-area-hikers",
     at: daysAgo(5, "19:00"),
     video: "waterfall-wide",
     privacy: "public",
@@ -241,7 +241,7 @@ const baseVideoPosts: readonly PostSeed[] = [
 
   // ── Reels (9:16) ───────────────────────────────────────────────────────────
   {
-    by: "cascadeboulders",
+    by: "sutroboulders",
     at: hoursAgo(2),
     video: "indoor-climbing-tall",
     privacy: "public",
@@ -291,7 +291,7 @@ const baseVideoPosts: readonly PostSeed[] = [
     reactions: 28,
   },
   {
-    by: "rainlineoutdoor",
+    by: "foglineoutdoor",
     at: daysAgo(2, "10:30"),
     video: "mowich-rain-tall",
     privacy: "public",
@@ -379,7 +379,7 @@ const baseVideoPosts: readonly PostSeed[] = [
 
   // ── Sponsored video ad (9:16, letterboxed in the feed) ─────────────────────
   {
-    by: "rainlineoutdoor",
+    by: "foglineoutdoor",
     at: hoursAgo(1),
     sponsored: true,
     video: "ridge-hike-tall",
@@ -412,7 +412,7 @@ const threads: Partial<Record<VideoClip, readonly CommentSeed[]>> = {
   "indoor-climbing-tall": [
     c("grace.liu", "the new orange 11b is SO sandbagged", [
       r("kai.nakamura", "it's a 12a in disguise and everyone knows it"),
-      r("cascadeboulders", "we'll take another look at it this week 👀"),
+      r("sutroboulders", "we'll take another look at it this week 👀"),
     ]),
     c("arjun.mehta", "projecting saturday morning if anyone wants to belay swap"),
     c("sofia.alvarez", "the clip at the third bolt is spicy"),
@@ -494,7 +494,7 @@ const threads: Partial<Record<VideoClip, readonly CommentSeed[]>> = {
   "mowich-rain-tall": [
     c("erin.mcallister", "accurate"),
     c("owen.murphy", "my rain jacket is from 2014 and it shows", [
-      r("rainlineoutdoor", "Time for an upgrade 😉 Bring it in for 20% off a trade-in this month."),
+      r("foglineoutdoor", "Time for an upgrade 😉 Bring it in for 20% off a trade-in this month."),
     ]),
     c("noah.williams", "six months is optimistic"),
     c("lena.fischer", "this is my favorite weather tbh", [r("tara.singh", "same, no crowds")]),
@@ -613,17 +613,17 @@ const threads: Partial<Record<VideoClip, readonly CommentSeed[]>> = {
     c("will.foster", "80% sniffing is generous"),
   ],
   // Feed / Watch videos
-  "seattle-viaduct-wide": [c("marcus.bell", "the viaduct drive at sunset was elite though")],
-  "puget-ferry-wide": [
+  "bay-bridge-wide": [c("marcus.bell", "the viaduct drive at sunset was elite though")],
+  "bay-ferry-wide": [
     c("sophie.dubois", "the ferry snack bar is criminally underrated"),
     c("will.foster", "I would trade my bus for this in a second"),
   ],
-  "ship-canal-bridge-wide": [
+  "golden-gate-bridge-wide": [
     c("maya.chen", "this is so pretty grace 😍"),
     c("lena.fischer", "fremont at blue hour never misses"),
     c("arjun.mehta", "send me the location of the shot"),
   ],
-  "golden-gardens-wide": [
+  "ocean-beach-wide": [
     c("will.foster", "I'm in. I'll regret it but I'm in"),
     c("olivia.brooks", "we did it last year and I still think about it"),
   ],

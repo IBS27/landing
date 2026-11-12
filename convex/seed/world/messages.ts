@@ -105,7 +105,7 @@ export const conversations: readonly ConversationSeed[] = [
       {
         by: "sofia.alvarez",
         text: "i'm still not over this weekend",
-        post: "sofia-leavenworth",
+        post: "sofia-bishop",
         gap: 2900,
       },
       { by: "maya.chen", text: "the larches!!! 😭", gap: 15 },
@@ -147,7 +147,7 @@ export const conversations: readonly ConversationSeed[] = [
         gap: 6,
       },
       { by: "sofia.alvarez", text: "ooh which one", gap: 2 },
-      { by: "maya.chen", listing: "derek-caphill-1br", gap: 1 },
+      { by: "maya.chen", listing: "derek-mission-1br", gap: 1 },
       { by: "sofia.alvarez", text: "wait thats actually cute. how much", gap: 3 },
       { by: "maya.chen", text: "2150 💀", gap: 1 },
       {
@@ -1066,7 +1066,7 @@ export const conversations: readonly ConversationSeed[] = [
       {
         by: "kai.nakamura",
         text: "new set is up btw. the orange v6 is totally fair",
-        post: "cascade-new-set",
+        post: "sutro-new-set",
         gap: 400,
       },
       { by: "grace.liu", text: "is it sandbagged", gap: 6 },
@@ -1407,7 +1407,7 @@ export const conversations: readonly ConversationSeed[] = [
   {
     key: "mp-derek-caphill-1br",
     kind: "marketplace",
-    listing: "derek-caphill-1br",
+    listing: "derek-mission-1br",
     members: ["maya.chen", "derek.holloway"],
     last: hoursAgo(20),
     messages: [
@@ -1587,7 +1587,7 @@ export const conversations: readonly ConversationSeed[] = [
   {
     key: "mp-derek-wallingford-studio",
     kind: "marketplace",
-    listing: "derek-wallingford-studio",
+    listing: "derek-elmwood-studio",
     members: ["leo.novak", "derek.holloway"],
     last: daysAgo(2, "18:45"),
     messages: [
@@ -2172,7 +2172,7 @@ export const conversations: readonly ConversationSeed[] = [
         reactions: [["fatima.hassan", "love"]],
       },
       { by: "priya.raman", text: "ok posted!!", gap: 1500 },
-      { by: "priya.raman", listing: "priya-wallingford-room", gap: 1 },
+      { by: "priya.raman", listing: "priya-elmwood-room", gap: 1 },
       {
         by: "fatima.hassan",
         text: "the plant photos 😭 you're gonna get so many messages",

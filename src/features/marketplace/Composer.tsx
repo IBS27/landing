@@ -81,7 +81,7 @@ const EMPTY: FormState = {
   condition: "",
   brand: "",
   description: "",
-  neighborhood: "Capitol Hill",
+  neighborhood: "Mission",
   meetup: ["public"],
   groupIds: [],
   boost: false,

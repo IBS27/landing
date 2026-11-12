@@ -6,7 +6,7 @@ import type { GroupSeed } from "../types";
  */
 export const groups = [
   {
-    slug: "uw-housing",
+    slug: "cal-housing",
     name: "UW Housing, Sublets & Roommates",
     privacy: "private",
     description:
@@ -57,7 +57,7 @@ export const groups = [
     ],
   },
   {
-    slug: "seattle-apartments",
+    slug: "sf-apartments",
     name: "Seattle Apartments & Rooms for Rent",
     privacy: "public",
     description:
@@ -99,14 +99,14 @@ export const groups = [
     ],
   },
   {
-    slug: "capitol-hill-neighbors",
+    slug: "mission-neighbors",
     name: "Capitol Hill Neighbors",
     privacy: "private",
     description:
       "A place for people who live, work, and hang out on Capitol Hill. Lost cats, construction noise, restaurant openings, street closures, and the occasional neighborly rant.",
     category: "Neighborhood",
     location: "Capitol Hill, Seattle",
-    cover: "covers/capitol-hill-01.jpg",
+    cover: "covers/castro-01.jpg",
     rules: [
       { title: "Neighbors only", body: "Answer the membership questions honestly. We check." },
       {
@@ -134,7 +134,7 @@ export const groups = [
     ],
   },
   {
-    slug: "free-stuff-seattle",
+    slug: "free-stuff-sf",
     name: "Free Stuff Seattle (Buy Nothing)",
     privacy: "private",
     description:
@@ -171,7 +171,7 @@ export const groups = [
     ],
   },
   {
-    slug: "seattle-climbers",
+    slug: "bay-area-climbers",
     name: "Seattle Climbers",
     privacy: "public",
     description:
@@ -208,7 +208,7 @@ export const groups = [
     ],
   },
   {
-    slug: "pnw-hikers",
+    slug: "bay-area-hikers",
     name: "PNW Hikers",
     privacy: "public",
     description:
@@ -245,7 +245,7 @@ export const groups = [
     ],
   },
   {
-    slug: "uw-class-of-2027",
+    slug: "cal-class-of-2027",
     name: "UW Class of 2027",
     privacy: "private",
     description:
@@ -276,7 +276,7 @@ export const groups = [
     ],
   },
   {
-    slug: "seattle-tech-new-grads",
+    slug: "sf-tech-new-grads",
     name: "Seattle Tech Interns & New Grads",
     privacy: "public",
     description:
@@ -313,7 +313,7 @@ export const groups = [
     ],
   },
   {
-    slug: "seattle-board-game-night",
+    slug: "sf-board-game-night",
     name: "Seattle Board Game Night",
     privacy: "public",
     description:
@@ -342,7 +342,7 @@ export const groups = [
     ],
   },
   {
-    slug: "seattle-run-club",
+    slug: "sf-run-club",
     name: "Seattle Run Club",
     privacy: "public",
     description:
@@ -370,7 +370,7 @@ export const groups = [
     ],
   },
   {
-    slug: "seattle-foodies",
+    slug: "sf-foodies",
     name: "Seattle Foodies",
     privacy: "public",
     description:
@@ -399,14 +399,14 @@ export const groups = [
     ],
   },
   {
-    slug: "ballard-marketplace-swap",
+    slug: "richmond-marketplace-swap",
     name: "Ballard Marketplace Swap",
     privacy: "private",
     description:
       "Buy, sell and swap with your Ballard neighbors. Furniture, tools, bikes, baby gear. Local pickup only.",
     category: "Buy and Sell",
     location: "Ballard, Seattle",
-    cover: "covers/ballard-01.jpg",
+    cover: "covers/mission-01.jpg",
     rules: [
       { title: "Price in the post", body: "No 'DM for price'." },
       { title: "Local pickup", body: "Ballard and nearby only. No shipping." },
@@ -420,7 +420,7 @@ export const groups = [
     members: ["derek.holloway", "marcus.bell", "marco.rossi", "ben.carter"],
   },
   {
-    slug: "seattle-concerts",
+    slug: "sf-concerts",
     name: "Seattle Concerts & Shows",
     privacy: "public",
     description:
@@ -447,7 +447,7 @@ export const groups = [
     ],
   },
   {
-    slug: "mariners-fans",
+    slug: "giants-fans",
     name: "Mariners Fans",
     privacy: "public",
     description:
@@ -468,7 +468,7 @@ export const groups = [
   },
   // Groups the main persona hasn't joined, so Groups > Discover has suggestions.
   {
-    slug: "seattle-dog-owners",
+    slug: "sf-dog-owners",
     name: "Seattle Dog Owners",
     privacy: "public",
     description:
@@ -488,7 +488,7 @@ export const groups = [
     members: ["sam.rivera", "lena.fischer", "andre.silva", "yuki.sato", "jessica.huang"],
   },
   {
-    slug: "seattle-coffee-lovers",
+    slug: "sf-coffee-lovers",
     name: "Seattle Coffee Lovers",
     privacy: "public",
     description:
@@ -504,7 +504,7 @@ export const groups = [
     members: ["nina.petrova", "arjun.mehta", "camila.santos", "will.foster"],
   },
   {
-    slug: "seattle-photography",
+    slug: "sf-photography",
     name: "Seattle Photography Club",
     privacy: "public",
     description:
@@ -540,7 +540,7 @@ export const groups = [
     members: ["erin.mcallister", "luis.hernandez", "nora.kowalski"],
   },
   {
-    slug: "seattle-gamers",
+    slug: "sf-gamers",
     name: "Seattle Gamers",
     privacy: "public",
     description:
@@ -556,7 +556,7 @@ export const groups = [
     members: ["kevin.tran", "arjun.mehta", "chris.adeyemi", "samir.khan"],
   },
   {
-    slug: "pike-place-regulars",
+    slug: "ferry-building-regulars",
     name: "Pike Place Market Regulars",
     privacy: "public",
     description:
