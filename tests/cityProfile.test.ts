@@ -850,3 +850,137 @@ describe("common phrasings", () => {
     expect(schedule("I work remote, never on Sundays.")?.weekendsFree).toBe(true);
   });
 });
+
+/* ---------------- Round 5: structure over word lists ---------------- */
+
+describe("evidence and facts come only from each key's own vocabulary", () => {
+  const schedule = (text: string) => facts(text).find((p) => p.entry.key === "schedule");
+
+  test("a weekend quote is just the weekend word", () => {
+    for (const text of [
+      "I work remote with my hubby on weekends.",
+      "I work remote despite MS on weekends.",
+    ]) {
+      const s = schedule(text);
+      expect(s?.quote).toBe("remote");
+      expect(hasProtected(s?.quote ?? "")).toBe(false);
+    }
+    expect(schedule("I work remote and work Saturdays.")?.quote).toBe("remote … Saturdays");
+  });
+
+  test("conditions and things someone has aren't interests", () => {
+    expect(facts("I have a food allergy.")).toEqual([]);
+    expect(facts("I have an emotional support dog.")).toEqual([]);
+    expect(labels("I have a dog and love hiking.")).toEqual(["interest:Hiking"]);
+    expect(labels("I love hiking and have a food allergy")).toEqual(["interest:Hiking"]);
+    expect(labels("Hiking and coffee.")).toEqual(["interest:Hiking", "interest:Coffee"]);
+    const food: FactEntry = { key: "interest", value: { id: "restaurants" } };
+    expect(modelProblems("I have a food allergy.", [{ entry: food, quote: "food" }])).not.toEqual(
+      [],
+    );
+  });
+
+  test("weekend work must be what the work is", () => {
+    expect(schedule("I work remote and have weekends off.")?.entry).toMatchObject({
+      value: { weekendsFree: true },
+    });
+    expect(schedule("I work remote and hike on weekends.")?.entry).toMatchObject({
+      value: { weekendsFree: true },
+    });
+    const free = {
+      key: "schedule" as const,
+      value: { workHours: "day" as const, workplace: "remote" as const, weekendsFree: true },
+    };
+    expect(
+      modelProblems("I work remote and work Saturdays.", [{ entry: free, quote: "remote" }]),
+    ).not.toEqual([]);
+  });
+
+  test("another purpose's budget isn't rent", () => {
+    const budget = (text: string) => entries(text).find((e) => e.key === "budget")?.value;
+    expect(budget("My utilities budget is $300 and my rent budget is $2000.")).toEqual({
+      max: 2000,
+    });
+    expect(budget("My entertainment budget is $400, rent up to $2,200.")).toEqual({ max: 2200 });
+    const at = (max: number, quote: string) => [
+      { entry: { key: "budget" as const, value: { max } }, quote },
+    ];
+    const text = "My salary is $6000 and my rent budget is $2000.";
+    expect(modelProblems(text, at(6000, "$6000"))).not.toEqual([]);
+    expect(modelProblems(text, at(2000, "$2000"))).toEqual([]);
+  });
+
+  test("past jobs, schedules and cars aren't current", () => {
+    expect(labels("I used to work at Google but am joining Figma.")).toEqual(["employer:Figma"]);
+    expect(schedule("I used to work nights, now I work remote.")?.entry).toMatchObject({
+      value: { workHours: "day", workplace: "remote" },
+    });
+    expect(entries("I used to have a car, but now I take BART.")).toEqual([
+      { key: "transport", value: { modes: ["bart"] } },
+    ]);
+  });
+
+  test("places they're leaving or do things in aren't places to live", () => {
+    const slugs = (text: string) =>
+      entries(text).flatMap((e) => (e.key === "neighborhood" ? [e.value.slug] : []));
+    expect(slugs("I am moving out of the Mission and into SoMa.")).toEqual(["south-of-market"]);
+    expect(slugs("I climb in the Mission but want to live in Noe Valley.")).toEqual(["noe-valley"]);
+    expect(slugs("I would like to live in West of Twin Peaks.")).toEqual(["west-of-twin-peaks"]);
+    const mission: FactEntry = { key: "neighborhood", value: { slug: "mission" } };
+    expect(
+      modelProblems("I want to live in Outer Mission.", [{ entry: mission, quote: "Mission" }]),
+    ).not.toEqual([]);
+  });
+
+  test("a quote must be copied as written, so negations line up", () => {
+    const climbing: FactEntry = { key: "interest", value: { id: "climbing" } };
+    expect(
+      modelProblems("I don’t like climbing.", [
+        { entry: climbing, quote: "I don't like climbing" },
+      ]),
+    ).not.toEqual([]);
+    const bike: FactEntry = { key: "transport", value: { modes: ["bike"] } };
+    expect(
+      modelProblems("I cannot   bike.", [{ entry: bike, quote: "I cannot bike" }]),
+    ).not.toEqual([]);
+  });
+
+  test("a move month must be the move, not a start", () => {
+    const text = "I start work in March, but move in April.";
+    const at = (month: string) => [
+      {
+        entry: { key: "moveIn" as const, value: { month } },
+        quote: month === "2027-03" ? "March" : "April",
+      },
+    ];
+    expect(modelProblems(text, at("2027-03"))).not.toEqual([]);
+    expect(modelProblems(text, at("2027-04"))).toEqual([]);
+  });
+
+  test("a work area must be in the text", () => {
+    const text = "I work at Figma in SoMa.";
+    const at = (workArea: string) => [
+      { entry: { key: "employer" as const, value: { name: "Figma", workArea } }, quote: "Figma" },
+    ];
+    expect(modelProblems(text, at("Noe Valley"))).not.toEqual([]);
+    expect(modelProblems(text, at("SoMa"))).toEqual([]);
+  });
+
+  test("model input: pattern families of disclosures", () => {
+    for (const text of [
+      "I use she/they and love hiking.",
+      "My birthday is March 15, 1996.",
+      "My DOB is March 15, 1996.",
+      "I'm Belgian and love hiking.",
+      "We're Black and love hiking.",
+      "I have a peanut allergy and love hiking.",
+      "I'm partnered and love hiking.",
+      "My hubby and I are moving to SF.",
+    ])
+      expect(hasProtected(text)).toBe(true);
+    // The birthday's month isn't read as a move.
+    expect(entries("My birthday is March 15, 1996. Moving in April.")).toEqual([
+      { key: "moveIn", value: { month: "2027-04" } },
+    ]);
+  });
+});

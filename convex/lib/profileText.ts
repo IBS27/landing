@@ -150,6 +150,19 @@ function phraseOf({ part, start, end }: Hit): string {
   return t.slice(from, to).trim();
 }
 
+/** Something they used to do or have ("I used to work nights", "I had a car"), not now. */
+const PAST =
+  /\b(?:used to|formerly|previously|no longer|anymore|last (?:job|year)|old job|was working|worked|had)\b/i;
+
+function isPast(hit: Hit): boolean {
+  return PAST.test(phraseOf(hit));
+}
+
+/** The first current, un-negated match: not something they used to do or have. */
+function firstNow(parts: Part[], re: RegExp): Hit | null {
+  return hits(parts, re).find((h) => !isPast(h)) ?? null;
+}
+
 /**
  * A proposal's quote: the fact's own matched words and nothing else
  * ("hiking", "$2,400", "March 14", "bike … BART"), copied exactly. Nothing
@@ -170,6 +183,45 @@ function wordRe(phrase: string): RegExp {
 const INTEREST_RES = new Map<InterestId, RegExp[]>(
   INTERESTS.map((i) => [i.id as InterestId, i.aliases.map(wordRe)]),
 );
+
+/**
+ * Words that say someone does or likes an activity, versus ones that say they
+ * have or need something. "I love hiking" is an interest; "I have a food
+ * allergy" or "an emotional support dog" isn't, even though "food" and "dog"
+ * are aliases.
+ */
+const LIKES =
+  /\b(?:love[sd]?|loving|like[sd]?|enjoy\w*|into|fan of|do|does|doing|play\w*|go|goes|going|went|practi[cs]e\w*|hobb(?:y|ies)|interests?|passion\w*|obsessed|try(?:ing)?|learn\w*|join\w*|miss)\b/gi;
+const HAS = /\b(?:have|has|had|got|own\w*|with|need\w*|use[sd]?|using|take[sn]?|taking)\b/gi;
+const CONDITION =
+  /\b(?:allerg\w*|intoleran\w*|sensitiv\w*|support|service|therapy|therapeutic|assistance|medical|phobia|afraid|fear|scared)\b/i;
+
+function lastIndex(re: RegExp, text: string): number {
+  let at = -1;
+  for (const m of text.matchAll(re)) at = m.index;
+  return at;
+}
+
+/**
+ * Whether an interest alias at `h` is said as an activity: not part of a
+ * condition ("food allergy", "support dog"), and the nearest cue before it in
+ * its clause is a liking ("love", "into", "play"), or there's no cue at all
+ * ("Hiking, climbing and coffee."), rather than having or needing.
+ */
+function isActivity(h: Hit): boolean {
+  if (CONDITION.test(phraseOf(h))) return false;
+  const before = h.part.text.slice(0, h.start);
+  return lastIndex(HAS, before) <= lastIndex(LIKES, before);
+}
+
+/** The first place `parts` name `id` as something they do or like. */
+function interestHit(parts: Part[], id: InterestId, negatable = true): Hit | null {
+  const all = (INTEREST_RES.get(id) ?? [])
+    .flatMap((re) => hits(parts, re, negatable))
+    .filter(isActivity);
+  all.sort((a, b) => parts.indexOf(a.part) - parts.indexOf(b.part) || a.start - b.start);
+  return all[0] ?? null;
+}
 
 /* ---------------- Neighborhoods ---------------- */
 
@@ -208,24 +260,29 @@ const NEIGHBORHOOD_PATTERNS: { re: RegExp; slug: NeighborhoodSlug }[] = [
   { re: /\bExcelsior\b/i, slug: "excelsior" },
   { re: /\bOuter Mission\b/i, slug: "outer-mission" },
   { re: /\bTwin Peaks\b/i, slug: "twin-peaks" },
+  { re: /\bWest of Twin Peaks\b/i, slug: "west-of-twin-peaks" },
+  { re: /\bVisitacion Valley\b/i, slug: "visitacion-valley" },
+  { re: /\bPortola\b/i, slug: "portola" },
+  { re: /\b(Oceanview|Ingleside|Merced Heights)\b/i, slug: "oceanview-merced-ingleside" },
+  { re: /\b(Lakeshore|Lake Merced)\b/i, slug: "lakeshore" },
+  { re: /\bSea ?cliff\b/i, slug: "seacliff" },
+  { re: /\b(the )?Presidio(?! Heights)\b/i, slug: "presidio" },
+  { re: /\bTreasure Island\b/i, slug: "treasure-island" },
   { re: /\b(Lone Mountain|USF)\b/i, slug: "lone-mountain-usf" },
   { re: /\bPresidio Heights\b/i, slug: "presidio-heights" },
 ];
 
 /** Breaks between "I work in X" and "and want to live in Y". */
 const PLACE_BREAK =
-  /[;:()]|\b(?:but|while|because|though|although|so|whereas)\b|(?:,|\band\b|\bor\b)\s+(?=(?:i|we|want\w*|would|hope\w*|plan\w*|looking|live|living|move|moving|prefer\w*|ideally)\b)/gi;
-const PAST_PLACE = /\b(?:used to|lived|grew up|visit\w*)\b/i;
+  /[;:()]|\b(?:but|while|because|though|although|so|whereas)\b|(?:,|\band\b|\bor\b)\s+(?=(?:i|we|want\w*|would|hope\w*|plan\w*|looking|live|living|move|moving|prefer\w*|ideally|into|to)\b)/gi;
+/** A place they're leaving or used to live in. */
+const PAST_PLACE =
+  /\b(?:used to|lived|grew up|visit\w*|out of|leaving|away from|(?:moving|coming|relocating) from)\b/i;
 const WORK_PLACE =
   /\b(?:work\w*|office|job|commut\w*|based|campus|school|stud(?:y|ying|ent)|class(?:es)?)\b/i;
 const HOME_PLACE = /\b(?:live|living|move|moving|apartment|place|rent|stay|neighborhood)\b/i;
 
-/**
- * Whether a place named at `at` is somewhere they'd consider living: not
- * where they work, study or used to live ("I work at Google in SoMa", "my
- * office will be in the Mission"), unless the same phrase is about living there.
- */
-function isHomePlace(part: Part, at: number): boolean {
+function placePhrase(part: Part, at: number): string {
   let from = 0;
   let to = part.text.length;
   for (const m of part.text.matchAll(PLACE_BREAK)) {
@@ -235,17 +292,33 @@ function isHomePlace(part: Part, at: number): boolean {
       break;
     }
   }
-  const phrase = part.text.slice(from, to);
-  if (PAST_PLACE.test(phrase)) return false;
-  return !WORK_PLACE.test(phrase) || HOME_PLACE.test(phrase);
+  return part.text.slice(from, to);
 }
 
-function neighborhoodsFrom(parts: Part[]): ProposedFact[] {
+/**
+ * Whether a place named at `at` is somewhere they'd consider living: not
+ * where they work, study, do an activity, are leaving or used to live ("I
+ * work at Google in SoMa", "I climb in the Mission", "moving out of the
+ * Mission"), unless the same phrase is about living there.
+ */
+function isHomePlace(part: Part, at: number): boolean {
+  const phrase = placePhrase(part, at);
+  if (PAST_PLACE.test(phrase)) return false;
+  if (HOME_PLACE.test(phrase)) return true;
+  if (WORK_PLACE.test(phrase)) return false;
+  // "I climb in the Mission": an activity's location.
+  return ![...INTEREST_RES.values()].some((res) =>
+    res.some((re) =>
+      hits([part], re, false).some((h) => phrase.includes(h.part.text.slice(h.start, h.end))),
+    ),
+  );
+}
+
+/** The neighborhoods named in a clause, whole names only: the longest wins and none overlap. */
+function placesIn(parts: Part[], negatable: boolean): { hit: Hit; slug: NeighborhoodSlug }[] {
   const found = NEIGHBORHOOD_PATTERNS.flatMap(({ re, slug }) =>
-    hits(parts, re).map((hit) => ({ hit, slug })),
-  )
-    .filter(({ hit }) => isHomePlace(hit.part, hit.start))
-    .sort((a, b) => b.hit.end - b.hit.start - (a.hit.end - a.hit.start));
+    hits(parts, re, negatable).map((hit) => ({ hit, slug })),
+  ).sort((a, b) => b.hit.end - b.hit.start - (a.hit.end - a.hit.start));
   const kept: typeof found = [];
   for (const f of found) {
     const overlaps = kept.some(
@@ -253,13 +326,18 @@ function neighborhoodsFrom(parts: Part[]): ProposedFact[] {
     );
     if (!overlaps) kept.push(f);
   }
-  kept.sort(
+  return kept.sort(
     (a, b) => parts.indexOf(a.hit.part) - parts.indexOf(b.hit.part) || a.hit.start - b.hit.start,
   );
-  return kept.map(({ hit, slug }) => {
-    const entry: FactEntry = { key: "neighborhood", value: { slug } };
-    return { entry, quote: spanQuote([hit]), label: factLabel(entry) };
-  });
+}
+
+function neighborhoodsFrom(parts: Part[]): ProposedFact[] {
+  return placesIn(parts, true)
+    .filter(({ hit }) => isHomePlace(hit.part, hit.start))
+    .map(({ hit, slug }) => {
+      const entry: FactEntry = { key: "neighborhood", value: { slug } };
+      return { entry, quote: spanQuote([hit]), label: factLabel(entry) };
+    });
 }
 
 /* ---------------- Transport ---------------- */
@@ -304,14 +382,17 @@ const AMOUNT = new RegExp(`${NUM}(?:\\s*(-|–|—|to|and)\\s*${NUM})?`, "gi");
 const PER_MONTH = /^\s*(?:\/\s*mo(?:nth)?\b|(?:a|per|each|every)\s+month\b|monthly\b)/i;
 const BUDGET_LEAD =
   /\b(?:budget|rent|spend|afford|up to|under|below|max(?:imum)?|around|about|between|range)\b[^.\d$]{0,15}$/i;
-const RENT_CONTEXT =
-  /\b(?:budget|rent|afford|a month|per month|monthly|apartment|studio|1br|one[\s-]bed\w*|room)\b|\/\s?mo/i;
+/** How sure an amount is the rent: said to be rent (2), a budget or what they can afford (1). */
+const RENT_WORDS =
+  /\b(?:rent|a month|per month|monthly|apartment|studio|1br|one[\s-]bed\w*|room)\b|\/\s?mo/i;
+const BUDGET_WORDS = /\b(?:budget|afford|spend|up to|max(?:imum)?)\b/i;
 /** Money that isn't the rent they're looking for: pay, savings, deposits, other spending, rent now. */
 const NOT_RENT = new RegExp(
   [
     "\\b(?:salary|income|make|makes|making|earn\\w*|paid|paycheck|savings|saved|deposit|bonus|stipend|loans?|debt)\\b",
     "\\b(?:on|for|towards?)\\s+(?:(?:a|an|my|the|new|some)\\s+)*(?:furniture|couch|sofa|bed|groceries|food|utilities|internet|gym|travel|moving|movers|car|parking|tuition|deposit)\\b",
-    "\\b(?:furniture|grocery|groceries|food|travel|moving|tuition|car|parking|wedding)\\s+budget\\b",
+    // "my utilities budget", "an entertainment budget": a budget for something else.
+    "\\b(?!(?:rent|rental|housing|my|our|the|a|an|total|monthly|apartment|max\\w*|overall|new|current|whole|realistic|ideal|budget|is|of)\\b)[a-z]+\\s+budget\\b",
     "\\b(?:current(?:ly)?|right now|at the moment)\\b",
     "(?<!\\b(?:can|could|would|will|to|i['’]ll|willing to)\\s)\\bpay(?:ing)?\\b",
   ].join("|"),
@@ -367,19 +448,29 @@ function amountsIn(part: Part): Amount[] {
   return out;
 }
 
+function rentScore(phrase: string, amount: Amount): number {
+  if (RENT_WORDS.test(phrase) || amount.perMonth) return 2;
+  return BUDGET_WORDS.test(phrase) ? 1 : 0;
+}
+
+/** Whether an amount reads as rent they'd pay, not pay, savings or another expense. */
+function isRentAmount(amount: Amount): boolean {
+  return !NOT_RENT.test(phraseOf(amount.hit));
+}
+
 /** The monthly rent they're looking for: a stated rent budget first, else the first amount that reads as rent. */
 function budgetFrom(parts: Part[]): ProposedFact | null {
-  const found: { amount: Amount; rent: boolean }[] = [];
+  const found: { amount: Amount; rent: number }[] = [];
   for (const part of parts) {
     for (const amount of amountsIn(part)) {
       if (!amount.counts || isNegated(part, amount.hit.start)) continue;
       // Decided by the amount's own phrase: "my salary is $6000 and rent is $2000".
       const phrase = phraseOf(amount.hit);
-      if (NOT_RENT.test(phrase)) continue;
-      found.push({ amount, rent: RENT_CONTEXT.test(phrase) || amount.perMonth });
+      if (!isRentAmount(amount)) continue;
+      found.push({ amount, rent: rentScore(phrase, amount) });
     }
   }
-  const best = found.find((f) => f.rent) ?? found[0];
+  const best = found.find((f) => f.rent === 2) ?? found.find((f) => f.rent === 1) ?? found[0];
   if (!best) return null;
   const entry: FactEntry = { key: "budget", value: best.amount.value };
   return { entry, quote: spanQuote([best.amount.hit]), label: factLabel(entry) };
@@ -472,23 +563,35 @@ const WORKPLACE_PATTERNS: { re: RegExp; place: Workplace }[] = [
   { re: /\bhybrid\b/i, place: "hybrid" },
   { re: /\b(in the office|in-office|in office|commut\w*)/i, place: "office" },
 ];
+/** "Work weekends", "work most Saturdays", "weekend shifts", "on call every weekend": the work is on the weekend. */
 const WORKS_WEEKENDS =
-  /\bwork(s|ing)?\b[^.!?]{0,30}\b(weekends?|saturdays?|sundays?)\b|\bweekend shifts?\b|\bon call\b[^.!?]{0,15}\bweekends?\b/i;
+  /\b(?:work(?:s|ing)?|on call)\s+(?:(?:on|most|some|every|the|all|many|alternate|alternating|other)\s+){0,2}(?:weekends?|saturdays?|sundays?)\b(?!\s+off)|\bweekend shifts?\b/i;
 
-/** Where they say they work weekends, with the weekend word itself not negated ("not weekends"). */
+/**
+ * Where they say they work weekends, as just the weekend word ("weekends",
+ * "Saturdays"), so nothing between it and "work" becomes evidence. Not when
+ * it's negated ("not weekends") or in the past.
+ */
 function weekendWork(parts: Part[], negatable: boolean): Hit | null {
   for (const h of hits(parts, WORKS_WEEKENDS, false)) {
-    const word = h.start + h.part.text.slice(h.start, h.end).search(/weekend|saturday|sunday/i);
-    if (!negatable || (!isNegated(h.part, h.start) && !isNegated(h.part, word))) return h;
+    const text = h.part.text.slice(h.start, h.end);
+    const at = h.start + text.search(/weekend|saturday|sunday/i);
+    const word = {
+      part: h.part,
+      start: at,
+      end: at + (text.slice(at - h.start).match(/^\w+/)?.[0].length ?? 0),
+    };
+    if (!negatable || (!isNegated(h.part, h.start) && !isNegated(h.part, at) && !isPast(h)))
+      return word;
   }
   return null;
 }
 
 function scheduleFrom(parts: Part[]): ProposedFact | null {
-  const hours = WORK_HOURS_PATTERNS.map((p) => ({ ...p, hit: firstHit(parts, p.re) })).find(
+  const hours = WORK_HOURS_PATTERNS.map((p) => ({ ...p, hit: firstNow(parts, p.re) })).find(
     (p) => p.hit,
   );
-  const place = WORKPLACE_PATTERNS.map((p) => ({ ...p, hit: firstHit(parts, p.re) })).find(
+  const place = WORKPLACE_PATTERNS.map((p) => ({ ...p, hit: firstNow(parts, p.re) })).find(
     (p) => p.hit,
   );
   if (!hours?.hit && !place?.hit) return null;
@@ -508,6 +611,7 @@ const EMPLOYER_RE =
 
 function employerFrom(parts: Part[]): ProposedFact | null {
   for (const hit of hits(parts, EMPLOYER_RE)) {
+    if (isPast(hit)) continue;
     const m = hit.part.text.slice(hit.start).match(EMPLOYER_RE);
     if (!m) continue;
     const name = m[1].replace(/[.,]$/, "").trim();
@@ -543,10 +647,10 @@ export function extractFacts(text: string, today: string): ProposedFact[] {
 
   const modes: TransportMode[] = [];
   const spans: Hit[] = [];
-  const noCar = firstHit(parts, NO_CAR);
+  const noCar = firstNow(parts, NO_CAR);
   if (noCar) spans.push(noCar);
   for (const { re, mode } of TRANSPORT_PATTERNS) {
-    const hit = firstHit(parts, re);
+    const hit = firstNow(parts, re);
     if (hit && !(noCar && mode === "car")) {
       modes.push(mode);
       spans.push(hit);
@@ -567,7 +671,7 @@ export function extractFacts(text: string, today: string): ProposedFact[] {
 
   // Interests: alias phrases as whole words, in list order.
   for (const interest of INTERESTS) {
-    const hit = firstOf(parts, INTEREST_RES.get(interest.id) ?? []);
+    const hit = interestHit(parts, interest.id);
     if (hit) {
       const entry: FactEntry = { key: "interest", value: { id: interest.id } };
       add({ entry, quote: spanQuote([hit]), label: factLabel(entry) });
@@ -604,13 +708,8 @@ function factSpans(entry: FactEntry, parts: Part[], carFree?: boolean): Hit[] | 
     case "interest":
       return one(firstOf(parts, INTEREST_RES.get(entry.value.id) ?? [], false));
     case "neighborhood":
-      return one(
-        firstOf(
-          parts,
-          NEIGHBORHOOD_PATTERNS.filter((n) => n.slug === entry.value.slug).map((n) => n.re),
-          false,
-        ),
-      );
+      // Whole names only: "Mission" inside "Outer Mission" isn't the Mission.
+      return one(placesIn(parts, false).find((p) => p.slug === entry.value.slug)?.hit ?? null);
     case "goal":
       return one(
         firstOf(
@@ -685,14 +784,22 @@ function valueEq(a: { min?: number; max: number }, b: { min?: number; max: numbe
   return a.max === b.max && (a.min ?? null) === (b.min ?? null);
 }
 
+/** Lowercase with straight quotes and dashes, character for character, so offsets still line up. */
+function same(s: string): string {
+  return s.toLowerCase().replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, "-");
+}
+
 /**
- * Why `quote` doesn't support `entry` in `text`, or null. The quote must
- * contain the fact's own words (`factSpans`), and each of them must appear
- * somewhere in the text un-negated ("not $3000", "I can't bike"), and for a
- * neighborhood, as a place to live rather than work ("I work in the Mission").
- * Limits ("no more than $2,400") and negations that are the fact ("I don't
- * have a car") count. When the quote isn't in the text as-is, the copy check
- * reports that instead.
+ * Why `quote` doesn't support `entry` in `text`, or null. The quote must be
+ * in the text as written and contain the fact's own words (`factSpans`), and
+ * each of them must appear somewhere in the text in the sense the fact needs:
+ * not negated ("not $3000", "I can't bike") or in the past ("I used to work
+ * nights"); an amount that reads as rent, not pay or another expense; a month
+ * they move in, not one something else starts in while they move in another;
+ * a neighborhood they'd live in, as a whole name, not where they work or are
+ * leaving. Limits ("no more than $2,400") and negations that are the fact
+ * ("I don't have a car") count. A schedule saying weekends are free is
+ * rejected when the text says they work weekends.
  */
 export function quoteProblem(
   text: string,
@@ -704,27 +811,61 @@ export function quoteProblem(
   const spans = factSpans(entry, clauses(q), carFree);
   if (!spans)
     return `the quote "${q}" doesn't contain the words for this fact (the ${entry.key} itself)`;
-  const lq = q.toLowerCase();
   const textParts = clauses(redactProtected(text));
+  const lq = same(q);
+  const occurrences = textParts.flatMap((part) => {
+    const out: { part: Part; at: number }[] = [];
+    const t = same(part.text);
+    for (let i = t.indexOf(lq); i !== -1; i = t.indexOf(lq, i + 1)) out.push({ part, at: i });
+    return out;
+  });
+  if (occurrences.length === 0) return `copy the quote "${q}" exactly as it's written in the text`;
+
   for (const span of spans) {
     const offset = Math.max(0, q.indexOf(span.part.text)) + span.start;
-    const spots = textParts.flatMap((part) => {
-      const out: number[] = [];
-      const t = part.text.toLowerCase();
-      for (let i = t.indexOf(lq); i !== -1; i = t.indexOf(lq, i + 1)) out.push(i + offset);
-      return out.map((at) => ({ part, at }));
-    });
-    if (spots.length === 0) return null;
     const words = span.part.text.slice(span.start, span.end);
-    if (spots.every((s) => isNegated(s.part, s.at)))
-      return `the text says the opposite ("${words}" is negated there)`;
-    if (
-      entry.key === "neighborhood" &&
-      spots.every((s) => isNegated(s.part, s.at) || !isHomePlace(s.part, s.at))
-    )
-      return `"${words}" is where they work or used to be, not somewhere they'd live`;
+    const spots: Hit[] = occurrences.map(({ part, at }) => ({
+      part,
+      start: at + offset,
+      end: at + offset + words.length,
+    }));
+    const live = spots.filter((h) => !isNegated(h.part, h.start));
+    if (live.length === 0) return `the text says the opposite ("${words}" is negated there)`;
+    const fits = live.filter((h) => fitsFact(entry, h, textParts));
+    if (fits.length === 0) return `"${words}" doesn't mean this ${entry.key} in the text`;
   }
+  if (entry.key === "schedule" && entry.value.weekendsFree && weekendWork(textParts, true))
+    return "the text says they work weekends";
   return null;
+}
+
+/** Whether the fact's words at `h` mean the fact in context (see `quoteProblem`). */
+function fitsFact(entry: FactEntry, h: Hit, textParts: Part[]): boolean {
+  switch (entry.key) {
+    case "budget": {
+      const amount = amountsIn(h.part).find((a) => a.hit.start === h.start);
+      return amount ? isRentAmount(amount) : !NOT_RENT.test(phraseOf(h));
+    }
+    case "moveIn": {
+      if (MOVING.test(phraseOf(h))) return true;
+      // "I start work in March, but move in April": March isn't the move.
+      return !monthsIn(textParts, true).some((m) => MOVING.test(phraseOf(m.hit)));
+    }
+    case "neighborhood": {
+      const place = placesIn([h.part], false).find(
+        (p) => p.hit.start <= h.start && h.start < p.hit.end,
+      );
+      return place?.slug === entry.value.slug && isHomePlace(h.part, h.start);
+    }
+    case "interest":
+      return isActivity(h);
+    case "employer":
+    case "schedule":
+    case "transport":
+      return !isPast(h);
+    default:
+      return true;
+  }
 }
 
 /**

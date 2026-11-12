@@ -110,6 +110,7 @@ const DEMONYMS = [
   "serbian",
   "sikh",
   "singaporean",
+  "slovak",
   "somali",
   "south asian",
   "spanish",
@@ -310,6 +311,17 @@ const TERMS: string[] = [
   "kiwis?|m[aā]ori|new zealanders?|guamanian|chamorro|hmong|oromo|yoruba|igbo|uyghur|inuit|romani|navajo|cherokee|nepalese",
   "dual (?:national|citizen)|permanent resident|asylum(?: seekers?)?|naturali[sz]ed|expat(?:riate)?s?",
   "on (?:an? )?(?:f-?1|opt|h-?4|h-?1b|j-?1|l-?1|tn|o-?1)\\b(?: status| visa)?",
+  "on an? [\\w-]+ visa|[\\w-]+ visa holder",
+  // Patterns rather than words, for whole families of disclosures
+  "(?:she|he|they|xe|ze|it)\\/(?:her|hers|him|his|them|theirs|they|she|he|xem|zir|it)",
+  "afab|amab|trans\\w*|ace|aroace|\\w+romantic|polyamor\\w*|poly",
+  "hubby|wifey|significant other|other half|partnered|custody|child(?:free|less)",
+  "(?:we['’]?re|we are|as) a family",
+  "(?:i['’]?m|i am|we['’]?re|we are)\\s+(?:half|part|mixed)\\s+\\w+|afro[\\s-]?\\w+",
+  "allerg\\w*|intoleran\\w*|stutter\\w*|pacemaker|autoimmune|pcos|hrt|ivf|fertility|ssris?|rehab|survivors?",
+  "(?:heart|health|medical|mental|back|knee|hip|lung|kidney|liver|thyroid) (?:problems?|issues?|conditions?)",
+  "hard[\\s-]of[\\s-]hearing|(?:despite|because of|due to) ms|emotional support \\w+|support (?:animal|dog|cat)",
+  "shinto|taoist|confucian|registered \\w+|\\w+ voter",
 ];
 
 /**
@@ -320,6 +332,8 @@ const TERMS: string[] = [
 const CLAUSE_END =
   "[^,;:.!?()\\n]*?(?=\\s*(?:[,;:.!?()\\n]|$|\\b(?:and|but|so|who|which|while|where|because|though|although|plus)\\b))";
 const DISCLOSURE_CUES = [
+  // Birthdays say someone's age
+  "(?:my )?(?:birthday|birth ?date|date of birth|dob|b-?day)\\b",
   // Origin and identity
   "born\\b",
   "raised (?:in|by)\\b",
@@ -340,7 +354,7 @@ const DISCLOSURE = new RegExp(`\\b(?:${DISCLOSURE_CUES.join("|")})${CLAUSE_END}`
 
 /** "I'm black", "a white woman": color words only when they describe a person. */
 const CONTEXTUAL =
-  "(?:(?:i['’]?m|i am|as an?|being)\\s+(?:an?\\s+)?(?:black|white|brown)\\b)|(?:\\b(?:black|white|brown)\\s+(?=(?:wom[ae]n|m[ae]n|person|people|folks?|family|community)\\b))|\\bm[ae]n\\b|\\bbah[aá]['’]?[ií]s?(?![a-z])";
+  "(?:(?:i['’]?m|i am|we['’]?re|we are|as an?|being)\\s+(?:an?\\s+)?(?:black|white|brown)\\b)|(?:\\b(?:black|white|brown)\\s+(?=(?:wom[ae]n|m[ae]n|person|people|folks?|family|community)\\b))|\\bm[ae]n\\b|\\bbah[aá]['’]?[ií]s?(?![a-z])";
 
 const PROTECTED = new RegExp(`(?:\\b(?:${TERMS.join("|")})\\b)|${CONTEXTUAL}`, "gi");
 
@@ -350,9 +364,17 @@ const LEAD_IN =
 /** Removed words next to each other ("a 30-year-old Muslim woman") collapse into one. */
 const RUNS = /\[removed\](?:[\s,/-]+(?:(?:and|or|&|an?)\s+)*\[removed\])+/gi;
 
+/**
+ * "I'm Belgian", "we're Tunisian": a capitalized -ian/-ish/-ese/-i word right
+ * after "I'm" is a nationality or ethnicity, whichever one it is.
+ */
+const NATIONALITY =
+  /\b(?:[Ii]['’]?m|I am|[Ww]e['’]?re|[Ww]e are)\s+(?:(?:half|part)[\s-])?[A-Z][a-z]+(?:ian|ish|ese|ean|ic|i|an)\b(?:[\s-]American)?/g;
+
 /** The text with every protected-trait statement replaced by `REDACTED`. */
 export function redactProtected(text: string): string {
   return text
+    .replace(NATIONALITY, REDACTED)
     .replace(DISCLOSURE, REDACTED)
     .replace(PROTECTED, REDACTED)
     .replace(LEAD_IN, "")

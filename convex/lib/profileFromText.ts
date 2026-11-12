@@ -165,6 +165,11 @@ export const profileFromText = defineTask({
         case "employer":
           if (!text.includes(loose(e.value.name)) || hasProtected(e.value.name))
             problems.push(`${at}: employer "${e.value.name}" isn't named in the text`);
+          if (
+            e.value.workArea !== undefined &&
+            (!text.includes(loose(e.value.workArea)) || hasProtected(e.value.workArea))
+          )
+            problems.push(`${at}: work area "${e.value.workArea}" isn't named in the text`);
           break;
         default:
           break;
