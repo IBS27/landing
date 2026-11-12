@@ -24,7 +24,7 @@ The goal is a faithful, working clone of desktop facebook.com (1440×900, light 
   - `src/lib/format.ts`: `cn`, `shortAge`, `postTime`, `fullTimestamp`, `compactCount`, `price`, `plural`.
   - Tailwind color names map to Facebook tokens: `bg-wash` (page), `bg-card`, `text-primary`, `text-secondary`, `bg-btn` (grey button), `bg-btn-primary`, `bg-btn-soft text-btn-soft-text`, `bg-hover`, `bg-comment`, `bg-input`, `text-link`, `bg-highlight`, `text-fb`/`bg-fb` (#0866FF), `border-divider`, `shadow-base`, `shadow-elevated`, `bg-online`.
   - Font sizes: text-xs 12, text-sm 13, text-base 15, text-md 17, text-lg 20, text-xl 24, text-2xl 32. Facebook body text is 15px; meta text is 13px.
-- **Feature code** goes in `src/features/<area>/`, with the area's Convex functions in `convex/<area>.ts`. Route files in `src/routes` stay thin and import from features.
+- **Feature code** goes in `src/features/<area>/`, with the area's Convex functions in `convex/<area>.ts`. Route files in `src/routes` stay thin and import from features. Landing feature code goes in `src/landing/<area>/` with routes under `src/routes/landing/` (see `AGENTS.md`).
 - **Layout.** The root layout renders the fixed 56px TopNav (`pt-14` on content) and the ChatDock. Each page owns its own rails and sidebars.
   - Home: left rail 360px, center feed column 680px wide (measured on 1440px viewport: rail 0–348, feed 380–1060), right rail 360px (Contacts etc.).
   - Marketplace, Groups, Events, Friends, Watch and Gaming: 360px fixed white left sidebar with a page title and nav rows.

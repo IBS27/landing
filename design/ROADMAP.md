@@ -13,10 +13,12 @@ Nothing else can start until these exist. Apart from #15 waiting on #54, they ca
 - #54 Move the seed world and app from Seattle to San Francisco (in progress; #15 builds on it)
 - #15 Neighborhood data model and San Francisco seed
 - #11 Verified listings and scam signals (also unblocked; an early win for search)
+- #55 Landing app shell: `/landing` routes, layout, navigation and link helpers. Land it first: every Landing UI issue builds inside it
 
 Most of this wave changes `convex/schema.ts`. Post plan comments early so schema changes don't collide.
 
 ## Wave 2: Find a place
+- #56 Landing map: shared SF map whose pins link to Groups, Events and listings
 - #10 Apartment search tuned to the City Profile
 - #12 Network vouching on listings
 - #4 Learn from activity: RSVPs, joins, likes, skips and pins
