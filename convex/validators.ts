@@ -188,6 +188,8 @@ export const notificationKind = v.union(
   v.literal("birthday"),
   v.literal("memory"),
   v.literal("live"),
+  /** Landing: someone vouched for you (convex/vouches.ts). */
+  v.literal("vouch"),
 );
 
 /** Settings → Notifications categories (each maps to one or more notification kinds). */
@@ -300,3 +302,15 @@ export type Source = Infer<typeof source>;
  */
 export const citations = v.object({ first: source, rest: v.array(source) });
 export type Citations = Infer<typeof citations>;
+
+/* ---------- Landing: network vouching (see convex/vouches.ts) ---------- */
+
+/** How a voucher knows the person they vouch for. Never a protected trait. */
+export const vouchRelationship = v.union(
+  v.literal("rented_from"),
+  v.literal("lived_with"),
+  v.literal("worked_with"),
+  v.literal("bought_sold"),
+  v.literal("know_personally"),
+);
+export type VouchRelationship = Infer<typeof vouchRelationship>;
