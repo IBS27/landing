@@ -1,6 +1,7 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { useViewerContext } from "@/app/viewer";
 import { ChatDock } from "@/features/messenger/ChatDock";
+import { PhotoTheaterHost } from "@/features/posts/photoTheater";
 import { FacebookLogo } from "@/icons";
 import { PageUnavailable } from "@/layout/PageUnavailable";
 import { TopNav } from "@/layout/TopNav";
@@ -30,6 +31,7 @@ function RootLayout() {
         <Outlet />
       </div>
       <ChatDock />
+      <PhotoTheaterHost />
     </>
   );
 }

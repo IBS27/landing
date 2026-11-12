@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import {
   Accessibility,
   ArrowLeft,
@@ -8,14 +8,12 @@ import {
   BookOpen,
   Briefcase,
   CalendarDays,
-  ChevronRight,
   CircleUser,
   Clapperboard,
   Clock,
   Cookie,
   CreditCard,
   FileText,
-  Film,
   Globe,
   Image,
   KeyRound,
@@ -26,7 +24,6 @@ import {
   Megaphone,
   Moon,
   Newspaper,
-  Puzzle,
   Scale,
   Search,
   Shield,
@@ -38,11 +35,10 @@ import {
   UsersRound,
 } from "lucide-react";
 import { type ReactNode, useMemo, useState } from "react";
-import { type ThemeSetting, useTheme } from "@/app/theme";
-import { useViewer } from "@/app/viewer";
 import { cn } from "@/lib/format";
-import { Avatar, Card } from "@/ui/primitives";
+import { Card } from "@/ui/primitives";
 import { MetaInfinity } from "./icons";
+import { PaneBody } from "./settings/panes";
 import {
   ActivityLogArt,
   BlockingArt,
@@ -333,24 +329,24 @@ export function SettingsPage({ tab }: { tab?: string }) {
                 type="button"
                 onClick={() => open("accounts-center")}
                 className={cn(
-                  "mb-[15px] flex w-full gap-3 rounded-lg px-3 py-2 text-left",
+                  "mb-[15px] flex w-full gap-3 rounded-lg px-3 pt-[7px] pb-2 text-left",
                   tab === "accounts-center" ? "bg-wash dark:bg-hover" : "hover:bg-hover",
                 )}
               >
                 <MetaInfinity className="mt-0.5 shrink-0 text-icon" />
                 <span>
                   <span className="block text-[17px] text-primary leading-5">Meta Account</span>
-                  <span className="block text-[15px] text-primary leading-5">
+                  <span className="mt-[2px] block text-[15px] text-primary leading-5">
                     Password, security, personal details, cross-profile experiences, ad preferences,
                     verification
                   </span>
                 </span>
               </button>
               {SECTIONS.map((s) => (
-                <div key={s.title} className="pb-4">
+                <div key={s.title} className="pb-[15px]">
                   <h2 className="px-3 font-bold text-[20px] text-primary leading-6">{s.title}</h2>
                   {s.description && (
-                    <p className="px-3 pt-0.5 pb-2 text-[17px] text-secondary leading-5">
+                    <p className="px-3 pt-1 pb-2 text-[17px] text-secondary leading-5">
                       {s.description}
                     </p>
                   )}
@@ -367,7 +363,7 @@ export function SettingsPage({ tab }: { tab?: string }) {
       <main className="flex min-w-0 flex-1 justify-center px-4 pt-4 pb-10">
         <div className="w-full max-w-[930px]">
           {current ? (
-            <Pane item={current} onBack={() => open(undefined)} />
+            <Pane item={current} onBack={() => open(undefined)} onOpen={open} />
           ) : (
             <Landing onOpen={open} />
           )}
@@ -529,596 +525,31 @@ function WideRow({
 
 /* ---------- Panes ---------- */
 
-function Pane({ item, onBack }: { item: Item; onBack: () => void }) {
+function Pane({
+  item,
+  onBack,
+  onOpen,
+}: {
+  item: Item;
+  onBack: () => void;
+  onOpen: (id: string) => void;
+}) {
   return (
-    <Card className="rounded-xl px-10 py-8">
+    <Card className="rounded-xl px-8 pt-6 pb-6">
       <button
         type="button"
         onClick={onBack}
-        className="-ml-2 mb-3 flex items-center gap-1 rounded-md px-2 py-1 font-semibold text-[15px] text-secondary hover:bg-hover"
+        className="-ml-2 mb-3 flex items-center gap-1 rounded-md px-2 py-1 font-semibold text-[15px] text-secondary hover:bg-hover min-[900px]:hidden"
       >
         <ArrowLeft size={18} /> Settings &amp; privacy
       </button>
-      <h2 className="font-bold text-[24px] text-primary leading-7">{item.label}</h2>
-      <p className="mt-1 mb-6 text-[15px] text-secondary leading-5">{item.description}</p>
-      <PaneBody id={item.id} />
-    </Card>
-  );
-}
-
-function PaneBody({ id }: { id: string }) {
-  switch (id) {
-    case "accounts-center":
-      return <AccountsCenter />;
-    case "dark-mode":
-      return <DarkModePane />;
-    case "notifications":
-      return (
-        <Toggles
-          group="notifications"
-          rows={[
-            ["Comments", "Notifications for comments on your posts and replies to your comments."],
-            ["Tags", "Notifications when you're tagged by a friend."],
-            ["Reminders", "Notifications to remind you of updates you may have missed."],
-            [
-              "Activity about you",
-              "Notifications for posts on your profile, likes and other reactions.",
-            ],
-            ["Updates from friends", "Notifications about updates from friends."],
-            ["Friend requests", "Notifications when someone sends you a friend request."],
-            ["People you may know", "Notifications about people you may know."],
-            ["Birthdays", "Notifications about friends' birthdays."],
-            ["Groups", "Notifications about activity in groups you're in."],
-            ["Video", "Notifications about videos from people and Pages you follow."],
-            ["Events", "Notifications about events you're invited to or interested in."],
-            ["Pages you follow", "Notifications about updates from Pages you follow."],
-            ["Marketplace", "Notifications about listings, messages and saved items."],
-            ["Fundraisers and crises", "Notifications about fundraisers and crisis response."],
-          ]}
-        />
-      );
-    case "reaction-preferences":
-      return (
-        <Toggles
-          group="reactions"
-          defaultOff
-          rows={[
-            ["On posts from others", "Hide the number of reactions on posts from other people."],
-            ["On your posts", "Hide the number of reactions on your own posts."],
-          ]}
-        />
-      );
-    case "accessibility":
-      return (
-        <Choice
-          group="accessibility-compact"
-          title="Compact mode"
-          options={["Off", "On"]}
-          hint="Make your font size smaller so more content can fit on the screen."
-        />
-      );
-    case "language":
-      return (
-        <div className="flex flex-col gap-5">
-          <Choice
-            group="language"
-            title="Facebook language"
-            options={[
-              "English (US)",
-              "English (UK)",
-              "Español",
-              "Français (France)",
-              "Tiếng Việt",
-              "中文(简体)",
-            ]}
-            select
-          />
-          <Choice
-            group="translate"
-            title="Posts from friends and Pages"
-            options={["Translate posts into English (US)", "Don't translate"]}
-          />
-          <Choice
-            group="region"
-            title="Region format"
-            options={["English (US)", "English (UK)"]}
-            select
-          />
-        </div>
-      );
-    case "media":
-      return (
-        <div className="flex flex-col gap-5">
-          <Choice
-            group="video-quality"
-            title="Video default quality"
-            options={["Default", "SD only", "HD if available"]}
-          />
-          <Choice
-            group="autoplay"
-            title="Autoplay videos"
-            options={["On", "Off", "On Wi-Fi only"]}
-          />
-        </div>
-      );
-    case "default-audience":
-    case "posts":
-      return (
-        <div className="flex flex-col gap-5">
-          <Choice
-            group="future-posts"
-            title="Who can see your future posts?"
-            options={["Public", "Friends", "Friends except...", "Only me"]}
-            select
-            initial="Friends"
-          />
-          <Choice
-            group="share-posts"
-            title="Allow others to share your posts to their stories?"
-            options={["On", "Off"]}
-          />
-        </div>
-      );
-    case "profile-details":
-    case "find-contact":
-      return (
-        <div className="flex flex-col gap-5">
-          <Choice
-            group="friend-requests"
-            title="Who can send you friend requests?"
-            options={["Everyone", "Friends of friends"]}
-            select
-          />
-          <Choice
-            group="friends-list"
-            title="Who can see your friends list?"
-            options={["Public", "Friends", "Only me"]}
-            select
-            initial="Friends"
-          />
-          <Choice
-            group="lookup-email"
-            title="Who can look you up using the email address you provided?"
-            options={["Everyone", "Friends of friends", "Friends", "Only me"]}
-            select
-          />
-        </div>
-      );
-    case "stories":
-      return (
-        <Choice
-          group="stories"
-          title="Who can see your stories?"
-          options={["Public", "Friends", "Custom"]}
-          select
-          initial="Friends"
-        />
-      );
-    case "reels":
-      return (
-        <Toggles
-          group="reels"
-          rows={[
-            ["Allow people to remix your reels", "People can use your reels in their own remixes."],
-            ["Allow people to download your reels", "People can download your public reels."],
-          ]}
-        />
-      );
-    case "followers":
-      return (
-        <div className="flex flex-col gap-5">
-          <Choice
-            group="who-follow"
-            title="Who can follow me"
-            options={["Public", "Friends"]}
-            select
-            initial="Public"
-          />
-          <Choice
-            group="public-comments"
-            title="Who can comment on your public posts?"
-            options={["Public", "Friends of friends", "Friends"]}
-            select
-          />
-        </div>
-      );
-    case "tagging":
-      return (
-        <Toggles
-          group="tagging"
-          defaultOff
-          rows={[
-            [
-              "Review posts you're tagged in before they appear on your profile",
-              "Tag review lets you approve or dismiss tags.",
-            ],
-            [
-              "Review tags people add to your posts",
-              "When this is on, you can approve tags before they appear.",
-            ],
-          ]}
-        />
-      );
-    case "blocking":
-      return <BlockingPane />;
-    case "activity-log":
-      return <ActivityPane />;
-    default:
-      return (
-        <p className="rounded-lg bg-wash px-4 py-6 text-[15px] text-secondary">
-          There's nothing to change here right now.
-        </p>
-      );
-  }
-}
-
-/** Settings choices are remembered per browser (a convenience, not account data). */
-function useStoredChoice(key: string, initial: string) {
-  const full = `fb-clone:setting:${key}`;
-  const [value, setValue] = useState(() => {
-    try {
-      return localStorage.getItem(full) ?? initial;
-    } catch {
-      return initial;
-    }
-  });
-  return [
-    value,
-    (v: string) => {
-      setValue(v);
-      try {
-        localStorage.setItem(full, v);
-      } catch {
-        // Not persisted; applies for this visit.
-      }
-    },
-  ] as const;
-}
-
-function Switch({
-  on,
-  onChange,
-  label,
-}: {
-  on: boolean;
-  onChange: (v: boolean) => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      aria-label={label}
-      onClick={() => onChange(!on)}
-      className={cn(
-        "relative h-6 w-11 shrink-0 rounded-full transition-colors",
-        on ? "bg-fb" : "bg-[#8f9297]",
-      )}
-    >
-      <span
-        className={cn(
-          "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-[left]",
-          on ? "left-[22px]" : "left-0.5",
+      <div className="px-2 pb-3">
+        <h2 className="font-bold text-[20px] text-primary leading-6">{item.label}</h2>
+        {item.id !== "notifications" && item.id !== "reaction-preferences" && (
+          <p className="pt-1 text-[15px] text-secondary leading-5">{item.description}</p>
         )}
-      />
-    </button>
-  );
-}
-
-function ToggleRow({
-  group,
-  title,
-  sub,
-  defaultOff,
-}: {
-  group: string;
-  title: string;
-  sub: string;
-  defaultOff?: boolean;
-}) {
-  const [v, set] = useStoredChoice(`${group}:${title}`, defaultOff ? "off" : "on");
-  return (
-    <div className="flex items-center gap-4 border-divider border-b py-3 last:border-b-0">
-      <div className="min-w-0 flex-1">
-        <p className="font-semibold text-[15px] text-primary">{title}</p>
-        <p className="text-[13px] text-secondary">{sub}</p>
       </div>
-      <Switch on={v === "on"} onChange={(on) => set(on ? "on" : "off")} label={title} />
-    </div>
-  );
-}
-
-function Toggles({
-  group,
-  rows,
-  defaultOff,
-}: {
-  group: string;
-  rows: [string, string][];
-  defaultOff?: boolean;
-}) {
-  return (
-    <div className="rounded-lg border border-divider px-4">
-      {rows.map(([t, s]) => (
-        <ToggleRow key={t} group={group} title={t} sub={s} defaultOff={defaultOff} />
-      ))}
-    </div>
-  );
-}
-
-function Choice({
-  group,
-  title,
-  options,
-  hint,
-  select,
-  initial,
-}: {
-  group: string;
-  title: string;
-  options: string[];
-  hint?: string;
-  select?: boolean;
-  initial?: string;
-}) {
-  const [v, set] = useStoredChoice(group, initial ?? options[0]);
-  return (
-    <div>
-      <p className="font-semibold text-[17px] text-primary">{title}</p>
-      {hint && <p className="text-[13px] text-secondary">{hint}</p>}
-      {select ? (
-        <select
-          value={v}
-          onChange={(e) => set(e.target.value)}
-          aria-label={title}
-          className="mt-2 h-9 rounded-md bg-btn px-3 font-semibold text-[15px] text-primary outline-none"
-        >
-          {options.map((o) => (
-            <option key={o}>{o}</option>
-          ))}
-        </select>
-      ) : (
-        <div className="mt-1 flex flex-col">
-          {options.map((o) => (
-            <label
-              key={o}
-              className="-mx-2 flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 hover:bg-hover"
-            >
-              <span className="font-medium text-[15px] text-primary">{o}</span>
-              <input
-                type="radio"
-                name={group}
-                checked={v === o}
-                onChange={() => set(o)}
-                className="h-5 w-5 accent-[var(--fb-blue)]"
-              />
-            </label>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function DarkModePane() {
-  const { setting, setSetting } = useTheme();
-  const options: [ThemeSetting, string, string?][] = [
-    ["light", "Off"],
-    ["dark", "On"],
-    [
-      "auto",
-      "Automatic",
-      "We'll automatically adjust the display based on your device's system settings.",
-    ],
-  ];
-  return (
-    <div role="radiogroup" aria-label="Dark mode" className="flex flex-col">
-      {options.map(([value, label, sub]) => (
-        <label
-          key={value}
-          className="-mx-2 flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 hover:bg-hover"
-        >
-          <span>
-            <span className="block font-medium text-[15px] text-primary">{label}</span>
-            {sub && <span className="block text-[13px] text-secondary">{sub}</span>}
-          </span>
-          <input
-            type="radio"
-            name="settings-theme"
-            checked={setting === value}
-            onChange={() => setSetting(value)}
-            className="h-5 w-5 accent-[var(--fb-blue)]"
-          />
-        </label>
-      ))}
-    </div>
-  );
-}
-
-function AccountsCenter() {
-  const viewer = useViewer();
-  const [open, setOpen] = useState<string | null>(null);
-  const rows: { id: string; label: string; Icon: LucideIcon; body: ReactNode }[] = [
-    {
-      id: "personal",
-      label: "Personal details",
-      Icon: CircleUser,
-      body: (
-        <dl className="grid grid-cols-[160px_1fr] gap-y-2 text-[15px]">
-          <dt className="text-secondary">Name</dt>
-          <dd className="text-primary">{viewer.name}</dd>
-          <dt className="text-secondary">Username</dt>
-          <dd className="text-primary">{viewer.username}</dd>
-          <dt className="text-secondary">Birthday</dt>
-          <dd className="text-primary">
-            {viewer.birthday ? formatBirthday(viewer.birthday) : "Not added"}
-          </dd>
-          <dt className="text-secondary">Current city</dt>
-          <dd className="text-primary">{viewer.city ?? "Not added"}</dd>
-        </dl>
-      ),
-    },
-    {
-      id: "password",
-      label: "Password and security",
-      Icon: KeyRound,
-      body: (
-        <div className="flex flex-col">
-          <ToggleRow
-            group="security"
-            title="Two-factor authentication"
-            sub="Require a code when logging in from an unrecognized device."
-            defaultOff
-          />
-          <ToggleRow
-            group="security"
-            title="Login alerts"
-            sub="Get an alert when someone logs into your account from a new place."
-          />
-        </div>
-      ),
-    },
-    {
-      id: "info",
-      label: "Your information and permissions",
-      Icon: FileText,
-      body: (
-        <p className="text-[15px] text-secondary">
-          Access, download or transfer your information, and manage how it's used to personalize
-          your experience.
-        </p>
-      ),
-    },
-    {
-      id: "ads",
-      label: "Ad preferences",
-      Icon: Megaphone,
-      body: (
-        <Toggles
-          group="ad-prefs"
-          rows={[
-            [
-              "Ads about topics you've shown interest in",
-              "Use your activity to show more relevant ads.",
-            ],
-            ["Ads from partners", "Use info from partners about your activity."],
-          ]}
-        />
-      ),
-    },
-    {
-      id: "payments",
-      label: "Payments",
-      Icon: CreditCard,
-      body: <p className="text-[15px] text-secondary">No payment methods added.</p>,
-    },
-    {
-      id: "verified",
-      label: "Meta Verified",
-      Icon: ShieldCheck,
-      body: (
-        <p className="text-[15px] text-secondary">
-          Get a verified badge, account protection and direct support.
-        </p>
-      ),
-    },
-  ];
-  return (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="pb-2 font-semibold text-[17px] text-primary">Profiles</p>
-        <Link
-          to="/$username"
-          params={{ username: viewer.username }}
-          className="flex items-center gap-3 rounded-lg border border-divider px-4 py-3 hover:bg-hover"
-        >
-          <Avatar src={viewer.avatar} size={40} />
-          <span className="min-w-0 flex-1">
-            <span className="block font-semibold text-[15px] text-primary">{viewer.name}</span>
-            <span className="block text-[13px] text-secondary">Facebook</span>
-          </span>
-          <ChevronRight size={20} className="text-icon-secondary" />
-        </Link>
-      </div>
-      <div>
-        <p className="pb-2 font-semibold text-[17px] text-primary">Account settings</p>
-        <div className="overflow-hidden rounded-lg border border-divider">
-          {rows.map((r) => (
-            <div key={r.id} className="border-divider border-b last:border-b-0">
-              <button
-                type="button"
-                onClick={() => setOpen(open === r.id ? null : r.id)}
-                aria-expanded={open === r.id}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-hover"
-              >
-                <r.Icon size={20} className="text-icon" />
-                <span className="flex-1 font-medium text-[15px] text-primary">{r.label}</span>
-                <ChevronRight
-                  size={20}
-                  className={cn(
-                    "text-icon-secondary transition-transform",
-                    open === r.id && "rotate-90",
-                  )}
-                />
-              </button>
-              {open === r.id && <div className="px-4 pt-1 pb-4">{r.body}</div>}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function formatBirthday(mmdd: string) {
-  const [m, d] = mmdd.split("-").map(Number);
-  return new Date(2000, m - 1, d).toLocaleDateString("en-US", { month: "long", day: "numeric" });
-}
-
-function BlockingPane() {
-  const [q, setQ] = useState("");
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="rounded-lg border border-divider p-4">
-        <p className="font-semibold text-[17px] text-primary">Blocked profiles and Pages</p>
-        <p className="mt-1 text-[15px] text-secondary">
-          Once you block someone, they can no longer see things you post on your profile, tag you,
-          invite you to events or groups, start a conversation with you, or add you as a friend.
-        </p>
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Type a name"
-          aria-label="Search people to block"
-          className="mt-3 h-9 w-full rounded-full bg-input px-4 text-[15px] text-primary outline-none placeholder:text-placeholder"
-        />
-        <p className="mt-4 text-center text-[15px] text-secondary">You haven't blocked anyone.</p>
-      </div>
-    </div>
-  );
-}
-
-function ActivityPane() {
-  const viewer = useViewer();
-  return (
-    <div className="flex flex-col gap-3">
-      {[
-        { label: "Your posts", Icon: Newspaper, to: "/$username" as const },
-        { label: "Photos and videos", Icon: Film, to: "/$username/photos" as const },
-        { label: "Saved items", Icon: Puzzle, to: "/saved" as const },
-      ].map(({ label, Icon, to }) => (
-        <Link
-          key={label}
-          to={to}
-          params={{ username: viewer.username }}
-          className="flex items-center gap-3 rounded-lg border border-divider px-4 py-3 hover:bg-hover"
-        >
-          <Icon size={20} className="text-icon" />
-          <span className="flex-1 font-medium text-[15px] text-primary">{label}</span>
-          <ChevronRight size={20} className="text-icon-secondary" />
-        </Link>
-      ))}
-    </div>
+      <PaneBody key={item.id} id={item.id} onOpen={onOpen} />
+    </Card>
   );
 }

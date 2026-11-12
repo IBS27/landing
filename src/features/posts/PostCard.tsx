@@ -22,8 +22,8 @@ import { CommentsSection, GroupCommentPreview } from "./CommentsSection";
 import { CreatePostModal, FEELINGS } from "./CreatePostModal";
 import { BookmarkOutline, CaretRight, CloseIcon, DotsIcon, GroupAudienceIcon } from "./icons";
 import { PhotoGrid } from "./PhotoGrid";
-import { PhotoViewer } from "./PhotoViewer";
 import { PostDialog } from "./PostDialog";
+import { usePhotoTheater } from "./photoTheater";
 import type { PostView, UserSummary } from "./types";
 import { groupParams, isLargeText, postUrl, truncate } from "./util";
 
@@ -435,7 +435,7 @@ export function PostContent({
   smallText?: boolean;
 }) {
   const [showAll, setShowAll] = useState(false);
-  const [viewer, setViewer] = useState<number | null>(null);
+  const openPhoto = usePhotoTheater();
   const bg = backgroundFor(post.background);
   const text = post.text ?? "";
   const cut = expanded || showAll ? null : truncate(text);
@@ -476,7 +476,11 @@ export function PostContent({
         )
       )}
       {post.media.length > 0 && (
-        <PhotoGrid media={post.media} onOpen={setViewer} className={nested ? "" : undefined} />
+        <PhotoGrid
+          media={post.media}
+          onOpen={(i) => openPhoto(post._id, i)}
+          className={nested ? "" : undefined}
+        />
       )}
       {post.attachments.map((att, i) => (
         <AttachmentCard
@@ -497,9 +501,6 @@ export function PostContent({
         </Link>
       )}
       {post.shared && <SharedPost shared={post.shared} />}
-      {viewer !== null && (
-        <PhotoViewer post={post} index={viewer} onClose={() => setViewer(null)} />
-      )}
     </>
   );
 }

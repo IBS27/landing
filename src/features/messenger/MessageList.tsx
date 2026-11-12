@@ -2,14 +2,24 @@ import { Link } from "@tanstack/react-router";
 import { Popover as P, Tooltip as T } from "radix-ui";
 import { Fragment, type ReactNode, useEffect, useRef, useState } from "react";
 import { useM, useQ, useViewer } from "@/app/viewer";
+import { StoryReplyAttachment } from "@/features/feed/StoryReplyAttachment";
 import { useViewerPaginated } from "@/features/posts";
 import { cn, price } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger, Modal, Tooltip } from "@/ui/overlays";
 import { Avatar, Button, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { startCall } from "./CallWindow";
 import { ConversationAvatar } from "./ConversationAvatar";
-import { DotsVerticalIcon, ReplyIcon, SentIcon, SmileOutlineIcon, ThumbIcon } from "./icons";
+import {
+  DotsVerticalIcon,
+  PhoneIcon,
+  ReplyIcon,
+  SentIcon,
+  SmileOutlineIcon,
+  ThumbIcon,
+  VideoCallIcon,
+} from "./icons";
 import {
   type ConversationDetail,
   isBigEmoji,
@@ -39,6 +49,8 @@ type Item =
       readers: Member[];
     };
 
+const isCall = (m: Message) => m.attachments.some((a) => a.kind === "call");
+
 /** Chronological render items with time separators, bubble grouping and read receipts. */
 function buildItems(messages: Message[], members: Member[], viewerId: Id<"users">): Item[] {
   const items: Item[] = [];
@@ -57,8 +69,11 @@ function buildItems(messages: Message[], members: Member[], viewerId: Id<"users"
     const sepBefore = !prev || m.createdAt - prev.createdAt > SEPARATOR_GAP;
     const sepAfter = !next || next.createdAt - m.createdAt > SEPARATOR_GAP;
     if (sepBefore) items.push({ kind: "sep", key: `sep-${m._id}`, ts: m.createdAt });
-    const joinsPrev = !sepBefore && prev.senderId === m.senderId && !m.replyTo;
-    const joinsNext = !sepAfter && next.senderId === m.senderId && !next.replyTo;
+    // Call logs stand alone, like Facebook's call cards.
+    const joinsPrev =
+      !sepBefore && prev.senderId === m.senderId && !m.replyTo && !isCall(m) && !isCall(prev);
+    const joinsNext =
+      !sepAfter && next.senderId === m.senderId && !next.replyTo && !isCall(m) && !isCall(next);
     const pos: Pos = joinsPrev ? (joinsNext ? "middle" : "last") : joinsNext ? "first" : "single";
     items.push({
       kind: "msg",
@@ -174,6 +189,7 @@ export function MessageList({
                 avatarSize={avatarSize}
                 variant={variant}
                 onReply={onReply}
+                onCall={(media) => startCall(detail, media)}
               />
               {it.readers.length > 0 ? (
                 <div className="flex justify-end gap-0.5 pt-0.5 pr-0.5 pb-1">
@@ -280,6 +296,7 @@ function MessageRow({
   avatarSize,
   variant,
   onReply,
+  onCall,
 }: {
   m: Message;
   pos: Pos;
@@ -292,6 +309,7 @@ function MessageRow({
   avatarSize: number;
   variant: Variant;
   onReply: (m: Message) => void;
+  onCall: (media: "audio" | "video") => void;
 }) {
   const [hoverLock, setHoverLock] = useState(false);
   const draft = m.status !== "sent";
@@ -342,6 +360,17 @@ function MessageRow({
           </span>
         ),
       );
+    else if (a.kind === "call")
+      body.push(
+        <CallLog
+          key={`a${i}`}
+          media={a.media}
+          outcome={a.outcome}
+          mine={mine}
+          radius={radius(pos, mine)}
+          onCall={() => onCall(a.media)}
+        />,
+      );
     else if (a.kind === "listing")
       body.push(
         <Link
@@ -358,6 +387,10 @@ function MessageRow({
             </span>
           </span>
         </Link>,
+      );
+    else if (a.kind === "story")
+      body.push(
+        <StoryReplyAttachment key={`a${i}`} story={a} mine={mine} senderFirstName={first} />,
       );
     else if (a.kind === "post")
       body.push(
@@ -513,6 +546,51 @@ function MessageRow({
           Draft{m.author.kind === "agent" ? ` · ${m.author.agent}` : ""}
         </span>
       )}
+    </div>
+  );
+}
+
+/** Call log bubble: "Audio call · No answer" for the caller, "Missed video call" for the callee. */
+function CallLog({
+  media,
+  outcome,
+  mine,
+  radius,
+  onCall,
+}: {
+  media: "audio" | "video";
+  outcome: "no_answer" | "cancelled";
+  mine: boolean;
+  radius: string;
+  onCall: () => void;
+}) {
+  const kind = media === "video" ? "video call" : "audio call";
+  const title = mine ? (media === "video" ? "Video call" : "Audio call") : `Missed ${kind}`;
+  const sub = mine ? (outcome === "no_answer" ? "No answer" : "Cancelled") : null;
+  const Icon = media === "video" ? VideoCallIcon : PhoneIcon;
+  return (
+    <div className="w-[208px] bg-chat-in p-3" style={{ borderRadius: radius }}>
+      <div className="flex items-center gap-2.5">
+        <span
+          className={cn(
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+            mine ? "bg-[var(--hover-overlay)] text-primary" : "bg-[#e41e3f] text-white",
+          )}
+        >
+          <Icon size={media === "video" ? 20 : 18} />
+        </span>
+        <span className="min-w-0">
+          <span className="block font-semibold text-[15px] text-primary leading-5">{title}</span>
+          {sub && <span className="block text-[13px] text-secondary leading-4">{sub}</span>}
+        </span>
+      </div>
+      <button
+        type="button"
+        onClick={onCall}
+        className="mt-3 flex h-8 w-full items-center justify-center rounded-md bg-card font-semibold text-[15px] text-primary transition-[filter] hover:brightness-95 dark:hover:brightness-125"
+      >
+        {mine ? "Call again" : "Call back"}
+      </button>
     </div>
   );
 }

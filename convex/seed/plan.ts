@@ -13,6 +13,7 @@ import { ImagePicker, type Picked } from "./lib/images";
 import { neighborhoods } from "./lib/places";
 import { type Rng, rng } from "./lib/prng";
 import { Clock, DAY, HOUR, MINUTE } from "./lib/time";
+import { isTallClip, videoMedia } from "./lib/videos";
 import type {
   CommentSeed,
   GroupSlug,
@@ -41,8 +42,10 @@ import { MAIN, people } from "./world/people";
 import { friendPosts } from "./world/posts/friends";
 import { groupPosts } from "./world/posts/groups";
 import { pagePosts } from "./world/posts/pages";
+import { threadsFor } from "./world/posts/threads";
 import { rentals as rentalSeeds } from "./world/rentals";
 import { stories as storySeeds } from "./world/stories";
+import { videoPosts, videoStories } from "./world/videos";
 
 type Row<T extends keyof TableRows> = TableRows[T];
 type TableRows = {
@@ -149,6 +152,8 @@ export function buildPlan(now: number) {
             ? p.education.map((e) => ({
                 school: e.school,
                 detail: "detail" in e ? e.detail : undefined,
+                start: "start" in e ? e.start : undefined,
+                end: "end" in e ? e.end : undefined,
               }))
             : undefined,
         relationship: "relationship" in p ? p.relationship : undefined,
@@ -183,6 +188,7 @@ export function buildPlan(now: number) {
         kind: "page",
         pageCategory: pg.category,
         followerCount: pg.followers,
+        links: "links" in pg ? [...pg.links] : undefined,
       },
     });
   }
@@ -363,6 +369,7 @@ export function buildPlan(now: number) {
         category: l.category,
         condition: l.condition,
         brand: l.brand,
+        meetup: l.meetup ? [...l.meetup] : undefined,
         description: l.description,
         photos: photos.map((p) => p.url),
         location: {
@@ -459,6 +466,9 @@ export function buildPlan(now: number) {
         privacy: e.privacy,
         externalGoingCount: e.externalGoing,
         externalInterestedCount: e.externalInterested,
+        ticketUrl: e.tickets?.url,
+        ticketProvider: e.tickets?.provider,
+        ticketPrice: e.tickets?.price,
         createdAt,
       },
     });
@@ -514,6 +524,14 @@ export function buildPlan(now: number) {
     ...pagePosts.map((seed) => ({ seed, kind: "page" as const })),
     ...friendPosts.map((seed) => ({ seed, kind: "friend" as const })),
     ...groupPosts.map((seed) => ({ seed, kind: "group" as const })),
+    ...videoPosts.map((seed) => ({
+      seed,
+      kind: seed.in
+        ? ("group" as const)
+        : isPage.has(seed.by)
+          ? ("page" as const)
+          : ("friend" as const),
+    })),
   ];
   const persons = people.map((p) => p.username as Username);
   const posts: PlannedPost[] = [];
@@ -568,6 +586,7 @@ export function buildPlan(now: number) {
       inPost.add(p.url);
       media.push({ url: p.url, kind: "image", width: p.width, height: p.height, alt: p.alt });
     });
+    if (s.video) media.push(videoMedia(s.video, s.text));
     const privacy =
       s.privacy ??
       (kind === "friend"
@@ -584,7 +603,7 @@ export function buildPlan(now: number) {
       key: string;
     }[] = [];
     let cursor = 0;
-    (s.comments ?? []).forEach((c: CommentSeed, ci) => {
+    [...(s.comments ?? []), ...threadsFor(s)].forEach((c: CommentSeed, ci) => {
       cursor = c.after ?? cursor + r.int(2, 40) * (1 + ci * 0.6);
       const ck = c.key ?? `${key}:c${ci}`;
       const parentIdx = flat.length;
@@ -592,7 +611,16 @@ export function buildPlan(now: number) {
       let rc = cursor;
       (c.replies ?? []).forEach((rep, ri) => {
         rc += rep.after ?? r.int(1, 25) * (1 + ri * 0.4);
-        flat.push({ seed: rep, parentIdx, offset: rc, key: rep.key ?? `${ck}:r${ri}` });
+        const rk = rep.key ?? `${ck}:r${ri}`;
+        const replyIdx = flat.length;
+        flat.push({ seed: rep, parentIdx, offset: rc, key: rk });
+        // Third level: replies to a reply.
+        let nc = rc;
+        (rep.replies ?? []).forEach((sub, si) => {
+          if (sub.replies?.length) fail(`${where}: replies nest at most three levels`);
+          nc += sub.after ?? r.int(1, 20) * (1 + si * 0.4);
+          flat.push({ seed: sub, parentIdx: replyIdx, offset: nc, key: sub.key ?? `${rk}:r${si}` });
+        });
       });
     });
     const maxOffset = Math.max(0, ...flat.map((f) => f.offset)) * MINUTE;
@@ -719,6 +747,7 @@ export function buildPlan(now: number) {
         privacy,
         createdAt,
         sponsored: s.sponsored || undefined,
+        isReel: (s.video && !s.sponsored && isTallClip(s.video)) || undefined,
         reactionCount: reactions.length,
         commentCount: comments.length,
         shareCount: 0,
@@ -750,14 +779,25 @@ export function buildPlan(now: number) {
   };
 
   // ── Stories ─────────────────────────────────────────────────────────────
-  const stories = storySeeds.map((s, i) => {
+  const stories = [...storySeeds, ...videoStories].map((s, i) => {
     checkHandle(s.by, `story ${i}`);
-    const createdAt = Math.max(now - 23 * HOUR, Math.min(clock.at(s.at), latest));
-    const p = pics.pick(s.photo, "posts", `story:${s.by}:${i}`, s.text);
+    const createdAt = s.archived
+      ? Math.min(clock.at(s.at), now - DAY - HOUR)
+      : Math.max(now - 23 * HOUR, Math.min(clock.at(s.at), latest));
+    if (!s.photo && !s.video) fail(`story ${i} has no photo or video`);
+    const p = s.photo ? pics.pick(s.photo, "posts", `story:${s.by}:${i}`, s.text) : null;
     return {
       author: s.by,
       row: {
-        media: { url: p.url, kind: "image" as const, width: p.width, height: p.height, alt: p.alt },
+        media: s.video
+          ? videoMedia(s.video, s.text)
+          : {
+              url: p!.url,
+              kind: "image" as const,
+              width: p!.width,
+              height: p!.height,
+              alt: p!.alt,
+            },
         text: s.text,
         createdAt,
         expiresAt: createdAt + DAY,

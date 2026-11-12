@@ -8,4 +8,5 @@ export { PostsTab } from "./PostsTab";
 export { ProfileLayout, ProfileShell } from "./ProfileLayout";
 export { ProfilePreview } from "./ProfilePreview";
 export type { SectionKey } from "./ProfileTabs";
+export { SearchTab } from "./SearchTab";
 export { ReelsTab, SECTION_KEYS, SectionTab } from "./SectionTab";

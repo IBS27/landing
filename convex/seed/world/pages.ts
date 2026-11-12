@@ -12,6 +12,7 @@ export const pages = [
     avatar: "coffee logo",
     cover: "coffee shop interior",
     joined: 2015,
+    links: ["https://moonrisecoffee.co", "https://instagram.com/moonrisecoffeeco"],
   },
   {
     username: "cascadeboulders",
@@ -24,6 +25,7 @@ export const pages = [
     avatar: "climbing gym logo",
     cover: "climbing gym wall",
     joined: 2016,
+    links: ["https://cascadeboulders.com"],
   },
   {
     username: "waxandneedle",
@@ -35,6 +37,7 @@ export const pages = [
     avatar: "vinyl record",
     cover: "record store",
     joined: 2010,
+    links: ["https://waxandneedle.shop"],
   },
   {
     username: "montlakecampuslife",
@@ -93,6 +96,7 @@ export const pages = [
     avatar: "outdoor brand logo",
     cover: "mountain hiking",
     joined: 2011,
+    links: ["https://rainline.co", "https://instagram.com/rainlineoutdoor"],
   },
 ] as const satisfies readonly PageSeed[];
 

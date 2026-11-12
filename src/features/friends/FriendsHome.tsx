@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useQ } from "@/app/viewer";
 import { cn } from "@/lib/format";
-import { Skeleton } from "@/ui/primitives";
+import { Button, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import { CardButton, PersonGridCard } from "./cards";
 import { FriendsHomeRail } from "./FriendsRail";
@@ -36,6 +36,9 @@ export function FriendsHome() {
     fn().catch(() => setOutcome(id, null));
   };
 
+  const grid = useRef<HTMLDivElement>(null);
+  const cols = useGridColumns(grid);
+  const [pymkRows, setPymkRows] = useState(2);
   const loading = reqs === undefined || pymk === undefined;
   const empty = !loading && reqs.length === 0 && pymk.length === 0;
 
@@ -43,7 +46,7 @@ export function FriendsHome() {
     <div className="flex min-h-[calc(100vh-56px)]">
       <FriendsHomeRail />
       <main className="min-w-0 flex-1 px-5 pt-5 pb-10">
-        <div className="mx-auto w-full max-w-[1040px] px-4">
+        <div ref={grid} className="mx-auto w-full max-w-[1040px] px-4">
           {loading && <GridSkeleton />}
           {empty && (
             <EmptyPane
@@ -61,8 +64,9 @@ export function FriendsHome() {
                   aria: "See all friend requests",
                 }}
               />
-              <ul className="-mx-1 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))]">
-                {reqs.map((p) => {
+              {/* One full row, like Facebook; the rest are under See all. */}
+              <ul className={GRID}>
+                {reqs.slice(0, cols).map((p) => {
                   const o = outcomes[p._id];
                   return (
                     <PersonGridCard
@@ -107,8 +111,8 @@ export function FriendsHome() {
                 title="People you may know"
                 link={{ to: "/friends/suggestions", label: "See all", aria: "See all suggestions" }}
               />
-              <ul className="-mx-1 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))]">
-                {pymk.map((p) => {
+              <ul className={GRID}>
+                {pymk.slice(0, pymkRows * cols).map((p) => {
                   const sent = outcomes[p._id] === "sent";
                   return (
                     <PersonGridCard
@@ -146,12 +150,43 @@ export function FriendsHome() {
                   );
                 })}
               </ul>
+              {pymk.length > pymkRows * cols && (
+                <Button
+                  variant="secondary"
+                  block
+                  className="mt-3"
+                  onClick={() => setPymkRows((r) => r + 2)}
+                >
+                  See more
+                </Button>
+              )}
             </section>
           )}
         </div>
       </main>
     </div>
   );
+}
+
+const MIN_CARD = 180;
+const GRID = "-mx-1 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))]";
+
+/** How many 180px+ cards fit per row in the grid's container (`-mx-1` included). */
+function useGridColumns(ref: RefObject<HTMLDivElement | null>) {
+  const [cols, setCols] = useState(5);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => {
+      const pad = Number.parseFloat(getComputedStyle(el).paddingLeft) * 2;
+      setCols(Math.max(1, Math.floor((el.clientWidth - pad + 8) / MIN_CARD)));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref]);
+  return cols;
 }
 
 function SectionHeader({

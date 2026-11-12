@@ -25,6 +25,7 @@ import {
   useStickyColumn,
 } from "./cards";
 import { useProfile } from "./context";
+import { HighlightsCard } from "./Highlights";
 
 type PostedBy = "anyone" | "owner" | "others";
 type Filters = { postedBy: PostedBy; year: number | undefined };
@@ -47,7 +48,7 @@ export function PostsTab() {
         className="sticky flex w-full min-w-0 flex-col gap-4 min-[900px]:max-w-[490px] min-[900px]:flex-[1_1_490px]"
       >
         <IntroCard />
-        <PhotosPreviewCard photos={overview?.photos} />
+        {!profile.isPage && <HighlightsCard highlights={overview?.highlights} />}
         {!profile.isPage && (
           <FriendsPreviewCard
             friends={overview?.friends}
@@ -55,6 +56,7 @@ export function PostsTab() {
             mutual={overview?.mutualCount ?? 0}
           />
         )}
+        <PhotosPreviewCard photos={overview?.photos} />
         <FooterLinks />
       </div>
       <div className="flex w-full min-w-0 flex-col gap-4 min-[900px]:max-w-[680px] min-[900px]:flex-[1_1_680px]">

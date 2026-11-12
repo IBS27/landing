@@ -1,6 +1,7 @@
 import { ConvexError, type Infer, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
+import { isBlockedEitherWay } from "./lib/blocks";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import {
   type CategoryMeta,
@@ -17,7 +18,13 @@ import {
 import { notify } from "./lib/notify";
 import { isSaved } from "./lib/posts";
 import { getSummaries, getSummary, type UserSummary } from "./lib/users";
-import { listingCategory, listingCondition, rentalDetails, vehicleDetails } from "./validators";
+import {
+  listingCategory,
+  listingCondition,
+  media,
+  rentalDetails,
+  vehicleDetails,
+} from "./validators";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -87,6 +94,8 @@ const listingFields = {
   brand: v.optional(v.string()),
   description: v.string(),
   photos: v.array(photoInput),
+  /** "Add video": one uploaded clip (served URL), shown first in the item gallery. */
+  video: v.optional(media),
   /** A name from NEIGHBORHOODS. */
   neighborhood: v.string(),
   rental: v.optional(rentalDetails),
@@ -326,6 +335,7 @@ export const get = viewerQuery({
       brand: l.brand ?? null,
       description: l.description,
       photos: l.photos,
+      video: l.video ?? null,
       location: l.location,
       status: l.status,
       rental: l.rental ?? null,
@@ -668,6 +678,13 @@ async function resolvePhotos(ctx: MutationCtx, photos: Infer<typeof photoInput>[
   return out;
 }
 
+function listingVideo(video: Infer<typeof media> | undefined) {
+  if (!video) return undefined;
+  if (video.kind !== "video") throw new ConvexError("Choose a video file");
+  if ((video.duration ?? 0) > 61) throw new ConvexError("Videos can be up to 1 minute long");
+  return video;
+}
+
 function placeFor(name: string) {
   const n = NEIGHBORHOODS.find((x) => x.name === name);
   if (!n) throw new ConvexError("Choose a location");
@@ -703,6 +720,7 @@ export const create = viewerMutation({
       brand: args.brand?.trim() || undefined,
       description: args.description.trim(),
       photos,
+      video: listingVideo(args.video),
       location: placeFor(args.neighborhood),
       status: "active",
       rental: args.rental,
@@ -736,6 +754,7 @@ export const update = viewerMutation({
       brand: args.brand?.trim() || undefined,
       description: args.description.trim(),
       photos,
+      video: listingVideo(args.video),
       location: placeFor(args.neighborhood),
       rental: args.rental,
       vehicle: args.vehicle,
@@ -795,6 +814,8 @@ export const messageSeller = viewerMutation({
     const buyerId = ctx.viewer._id;
     const sellerId = l.sellerId;
     if (buyerId === sellerId) throw new ConvexError("You can't message yourself");
+    if (await isBlockedEitherWay(ctx, buyerId, sellerId))
+      throw new ConvexError("This person isn't available right now.");
     const now = Date.now();
 
     let conv = await viewerThread(ctx, l, buyerId);

@@ -4,11 +4,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { DotsIcon } from "@/features/posts/icons";
 import { cn } from "@/lib/format";
-import { Menu, MenuTrigger } from "@/ui/overlays";
+import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/ui/overlays";
 import { Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-import { CaretMenuContent, CaretMenuItem } from "./CaretMenu";
 import { NotificationRow } from "./NotificationRow";
 import type { NotificationView } from "./types";
 
@@ -114,7 +113,9 @@ export function NotificationList({
   const [newer, earlier] = useMemo(() => {
     const a: NotificationView[] = [];
     const b: NotificationView[] = [];
-    for (const n of items ?? []) (fresh.has(n._id) || now - n.createdAt < DAY ? a : b).push(n);
+    // New: unseen when the panel opened (or arrived since), plus unread items from the last day.
+    for (const n of items ?? [])
+      (!n.seen || fresh.has(n._id) || (!n.read && now - n.createdAt < DAY) ? a : b).push(n);
     return [a, b];
   }, [items, fresh, now]);
 
@@ -122,53 +123,56 @@ export function NotificationList({
 
   return (
     <div className="flex flex-col pb-2">
-      <div className="flex items-center justify-between px-4 pt-[15px]">
-        <h1 className="font-bold text-[24px] text-primary leading-7">Notifications</h1>
-        <Menu modal={false}>
-          <MenuTrigger asChild>
-            <button
-              type="button"
-              aria-label="Notification Actions"
-              className="flex h-8 w-8 items-center justify-center rounded-full text-icon-secondary transition-colors hover:bg-hover data-[state=open]:bg-btn"
-            >
-              <DotsIcon size={16} />
-            </button>
-          </MenuTrigger>
-          <CaretMenuContent>
-            <CaretMenuItem
-              icon={<Check size={20} strokeWidth={2.2} />}
-              label="Mark all as read"
-              onSelect={() => void markAllRead({})}
-            />
-            <CaretMenuItem
-              icon={<Settings size={20} strokeWidth={2} />}
-              label="Notification settings"
-              onSelect={() => {
-                onNavigate?.();
-                void navigate({ to: "/settings" });
-              }}
-            />
-            {!page && (
-              <CaretMenuItem
-                icon={<Monitor size={20} strokeWidth={2} />}
-                label="Open Notifications"
+      {/* Title, actions and filter pills stay put while the dropdown's list scrolls. */}
+      <div className={cn(!page && "sticky top-0 z-10 bg-popover pb-0.5")}>
+        <div className="flex items-center justify-between px-4 pt-[15px]">
+          <h1 className="font-bold text-[24px] text-primary leading-7">Notifications</h1>
+          <Menu modal={false}>
+            <MenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="Notification Actions"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-icon-secondary transition-colors hover:bg-hover data-[state=open]:bg-hover"
+              >
+                <DotsIcon size={16} />
+              </button>
+            </MenuTrigger>
+            <MenuContent arrow>
+              <MenuItem
+                icon={<Check size={20} strokeWidth={2.2} />}
+                label="Mark all as read"
+                onSelect={() => void markAllRead({})}
+              />
+              <MenuItem
+                icon={<Settings size={20} strokeWidth={2} />}
+                label="Notification settings"
                 onSelect={() => {
                   onNavigate?.();
-                  void navigate({ to: "/notifications" });
+                  void navigate({ to: "/settings" });
                 }}
               />
-            )}
-          </CaretMenuContent>
-        </Menu>
-      </div>
+              {!page && (
+                <MenuItem
+                  icon={<Monitor size={20} strokeWidth={2} />}
+                  label="Open Notifications"
+                  onSelect={() => {
+                    onNavigate?.();
+                    void navigate({ to: "/notifications" });
+                  }}
+                />
+              )}
+            </MenuContent>
+          </Menu>
+        </div>
 
-      <div className="flex gap-2 px-4 pt-1">
-        <Pill active={!unreadOnly} onClick={() => setUnreadOnly(false)}>
-          All
-        </Pill>
-        <Pill active={unreadOnly} onClick={() => setUnreadOnly(true)}>
-          Unread
-        </Pill>
+        <div className="flex gap-2 px-4 pt-1">
+          <Pill active={!unreadOnly} onClick={() => setUnreadOnly(false)}>
+            All
+          </Pill>
+          <Pill active={unreadOnly} onClick={() => setUnreadOnly(true)}>
+            Unread
+          </Pill>
+        </div>
       </div>
 
       {!items ? (

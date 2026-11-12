@@ -2,6 +2,7 @@ import { paginationOptsValidator } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
+import { dmBlockNotice } from "./lib/blocks";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { friendIds, getSummaries, type UserSummary, userSummary } from "./lib/users";
 import type { ReactionType } from "./validators";
@@ -36,10 +37,22 @@ async function requireMember(ctx: Ctx, conversationId: Id<"conversations">, user
 
 /* ---------------- Summaries ---------------- */
 
-function attachmentPreview(m: Doc<"messages">, who: string, fromViewer: boolean) {
+function attachmentPreview(
+  m: Doc<"messages">,
+  who: string,
+  fromViewer: boolean,
+  isGroup: boolean,
+  otherFirst: string,
+) {
   const a = m.attachments[0];
   const subject = fromViewer ? "You" : who;
   if (!a) return null;
+  if (a.kind === "call") {
+    const video = a.media === "video";
+    if (isGroup) return `${subject} started a ${video ? "video chat" : "call"}.`;
+    if (fromViewer) return `You ${video ? "video " : ""}called ${otherFirst}.`;
+    return `You missed a ${video ? "video " : ""}call from ${who}.`;
+  }
   if (a.kind === "image") {
     const n = m.attachments.filter((x) => x.kind === "image").length;
     return `${subject} sent ${n > 1 ? `${n} photos` : "a photo"}.`;
@@ -54,13 +67,14 @@ function previewText(
   viewerId: Id<"users">,
   sender: UserSummary | undefined,
   isGroup: boolean,
+  otherFirst: string,
 ) {
   const fromViewer = m.senderId === viewerId;
   const first = sender?.firstName ?? "Someone";
   if (m.unsent) return `${fromViewer ? "You" : first} unsent a message`;
   const prefix = fromViewer ? "You: " : isGroup ? `${first}: ` : "";
   if (m.text) return `${prefix}${m.text}`;
-  const att = attachmentPreview(m, first, fromViewer);
+  const att = attachmentPreview(m, first, fromViewer, isGroup, otherFirst);
   if (att) return att;
   const sticker = m.attachments.find((a) => a.kind === "sticker");
   return `${prefix}${sticker?.emoji ?? ""}`;
@@ -119,7 +133,13 @@ async function summarize(
     lastActiveAt: Math.max(0, ...others.map((o) => o.lastActiveAt)),
     preview: last
       ? {
-          text: previewText(last, viewerId, users.get(last.senderId), conv.kind === "group"),
+          text: previewText(
+            last,
+            viewerId,
+            users.get(last.senderId),
+            conv.kind === "group",
+            other?.firstName ?? "them",
+          ),
           fromViewer: last.senderId === viewerId,
           at: last.createdAt,
         }
@@ -490,6 +510,9 @@ export const send = viewerMutation({
   handler: async (ctx, { conversationId, text, images, sticker, replyToId }) => {
     const viewerId = ctx.viewer._id;
     const { conv } = await requireMember(ctx, conversationId, viewerId);
+    // 1:1 threads close while either person has blocked the other.
+    const blocked = await dmBlockNotice(ctx, conv, viewerId);
+    if (blocked) throw new ConvexError(blocked);
     const attachments: Doc<"messages">["attachments"] = [];
     for (const img of images ?? []) {
       const url = await ctx.storage.getUrl(img.storageId);
@@ -503,30 +526,114 @@ export const send = viewerMutation({
       if (r?.conversationId !== conversationId) throw new ConvexError("Bad reply target");
     }
 
-    const now = Date.now();
-    const messageId = await ctx.db.insert("messages", {
-      conversationId,
-      senderId: viewerId,
-      author: { kind: "human" },
-      status: "sent",
-      text: body,
-      attachments,
-      replyToId,
-      createdAt: now,
+    return insertMessage(ctx, conv._id, viewerId, { text: body, attachments, replyToId });
+  },
+});
+
+/** Appends a sent message, bumps the thread for every member and marks it read for the sender. */
+async function insertMessage(
+  ctx: MutationCtx,
+  conversationId: Id<"conversations">,
+  senderId: Id<"users">,
+  fields: Pick<Doc<"messages">, "text" | "attachments" | "replyToId">,
+) {
+  const now = Date.now();
+  const messageId = await ctx.db.insert("messages", {
+    conversationId,
+    senderId,
+    author: { kind: "human" },
+    status: "sent",
+    ...fields,
+    createdAt: now,
+  });
+  await ctx.db.patch(conversationId, { lastMessageAt: now, lastMessageId: messageId });
+  const rows = await ctx.db
+    .query("conversationMembers")
+    .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
+    .collect();
+  for (const r of rows)
+    await ctx.db.patch(r._id, {
+      lastMessageAt: now,
+      archived: undefined,
+      ...(r.userId === senderId ? { lastReadAt: now } : {}),
     });
-    await ctx.db.patch(conv._id, { lastMessageAt: now, lastMessageId: messageId });
-    const rows = await ctx.db
-      .query("conversationMembers")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
-      .collect();
-    for (const r of rows)
-      await ctx.db.patch(r._id, {
-        lastMessageAt: now,
-        archived: undefined,
-        ...(r.userId === viewerId ? { lastReadAt: now } : {}),
-      });
-    await clearTyping(ctx, conversationId, viewerId);
-    return messageId;
+  await clearTyping(ctx, conversationId, senderId);
+  return messageId;
+}
+
+/** Logs a finished outgoing call in the thread ("You called Ethan." / "Missed call"). */
+export const logCall = viewerMutation({
+  args: {
+    conversationId: v.id("conversations"),
+    media: v.union(v.literal("audio"), v.literal("video")),
+    outcome: v.union(v.literal("no_answer"), v.literal("cancelled")),
+    durationMs: v.optional(v.number()),
+  },
+  handler: async (ctx, { conversationId, media, outcome, durationMs }) => {
+    const viewerId = ctx.viewer._id;
+    const { conv } = await requireMember(ctx, conversationId, viewerId);
+    // 1:1 threads close while either person has blocked the other.
+    const blocked = await dmBlockNotice(ctx, conv, viewerId);
+    if (blocked) throw new ConvexError(blocked);
+    return insertMessage(ctx, conversationId, viewerId, {
+      attachments: [
+        {
+          kind: "call",
+          media,
+          outcome,
+          durationMs: durationMs === undefined ? undefined : Math.max(0, Math.round(durationMs)),
+        },
+      ],
+    });
+  },
+});
+
+/* ---------------- End-to-end encryption PIN ---------------- */
+
+async function pinRow(ctx: Ctx, userId: Id<"users">) {
+  return ctx.db
+    .query("messengerPins")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .unique();
+}
+
+async function sha256Hex(text: string) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Whether Messenger should gate chats behind "Create a PIN" for the viewer. */
+export const pinStatus = viewerQuery({
+  args: {},
+  handler: async (ctx) => {
+    const row = await pinRow(ctx, ctx.viewer._id);
+    const hasPin = Boolean(row?.pinHash);
+    return { hasPin, prompt: !hasPin && !row?.dismissedAt };
+  },
+});
+
+/** Stores a 6-digit PIN as a salted SHA-256 hash. */
+export const createPin = viewerMutation({
+  args: { pin: v.string() },
+  handler: async (ctx, { pin }) => {
+    if (!/^\d{6}$/.test(pin)) throw new ConvexError("Your PIN must be 6 digits");
+    const salt = [...crypto.getRandomValues(new Uint8Array(16))]
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    const fields = { pinHash: await sha256Hex(`${salt}:${pin}`), salt, createdAt: Date.now() };
+    const row = await pinRow(ctx, ctx.viewer._id);
+    if (row) await ctx.db.patch(row._id, fields);
+    else await ctx.db.insert("messengerPins", { userId: ctx.viewer._id, ...fields });
+  },
+});
+
+/** "Not now": stop prompting this persona for a PIN. */
+export const dismissPinPrompt = viewerMutation({
+  args: {},
+  handler: async (ctx) => {
+    const row = await pinRow(ctx, ctx.viewer._id);
+    if (row) await ctx.db.patch(row._id, { dismissedAt: Date.now() });
+    else await ctx.db.insert("messengerPins", { userId: ctx.viewer._id, dismissedAt: Date.now() });
   },
 });
 

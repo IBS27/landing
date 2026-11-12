@@ -19,13 +19,15 @@ export function GroupCard({ group, onHide }: { group: GroupCardData; onHide?: ()
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
   const to = { to: "/groups/$groupId", params: groupParams(group) } as const;
+  // The friends line borrows part of the gap above the button, as on Facebook.
+  const gap = group.friendCount > 0 ? "mt-3" : "mt-6";
 
   return (
     <div
       onClick={() => void navigate(to)}
       className="relative flex w-[312px] shrink-0 cursor-pointer flex-col self-start overflow-hidden rounded-xl border border-divider bg-card shadow-base"
     >
-      <div className="relative aspect-[310/174] w-full shrink-0 border-divider border-b">
+      <div className="relative h-[175px] w-full shrink-0 border-divider border-b">
         <img src={group.cover} alt="" className="absolute inset-0 h-full w-full object-cover" />
         {onHide && (
           <Tooltip content="Hide this group">
@@ -43,7 +45,7 @@ export function GroupCard({ group, onHide }: { group: GroupCardData; onHide?: ()
           </Tooltip>
         )}
       </div>
-      <div className="flex flex-col p-4">
+      <div className="flex flex-col px-4 pt-3 pb-4">
         <Link
           {...to}
           onClick={(e) => e.stopPropagation()}
@@ -51,22 +53,22 @@ export function GroupCard({ group, onHide }: { group: GroupCardData; onHide?: ()
         >
           {group.name}
         </Link>
-        <p className="mt-0.5 text-[15px] text-secondary leading-5">
+        <p className="text-[15px] text-secondary leading-5">
           {membersLabel(group.memberCount)} • {group.activity}
         </p>
         {group.friendCount > 0 && (
-          <div className="mt-2 flex items-center gap-2">
-            <span className="flex">
+          <div className="mt-1 flex h-5 items-center gap-1.5">
+            <span className="flex shrink-0">
               {group.friends.map((f, i) => (
                 <Avatar
                   key={f._id}
                   src={f.avatar}
-                  size={20}
-                  className={cn("rounded-full ring-2 ring-card", i > 0 && "-ml-1.5")}
+                  size={16}
+                  className={cn("rounded-full ring-2 ring-card", i > 0 && "-ml-1")}
                 />
               ))}
             </span>
-            <span className="line-clamp-2 text-[13px] text-secondary leading-4">
+            <span className="min-w-0 truncate text-[13px] text-secondary leading-4">
               {friendLine(
                 group.friends.map((f) => f.firstName),
                 group.friendCount,
@@ -78,7 +80,10 @@ export function GroupCard({ group, onHide }: { group: GroupCardData; onHide?: ()
           <Link
             {...to}
             onClick={(e) => e.stopPropagation()}
-            className="mt-5 flex h-9 w-full items-center justify-center rounded-md bg-btn-soft font-semibold text-[15px] text-btn-soft-text hover:brightness-95 dark:hover:brightness-125"
+            className={cn(
+              "flex h-9 w-full items-center justify-center rounded-md bg-btn-soft font-semibold text-[15px] text-btn-soft-text hover:brightness-95 dark:hover:brightness-125",
+              gap,
+            )}
           >
             View group
           </Link>
@@ -91,7 +96,10 @@ export function GroupCard({ group, onHide }: { group: GroupCardData; onHide?: ()
               setBusy(true);
               void join({ groupId: group._id }).finally(() => setBusy(false));
             }}
-            className="mt-5 flex h-9 w-full items-center justify-center rounded-md bg-btn font-semibold text-[15px] text-btn-text hover:brightness-95 disabled:opacity-60 dark:hover:brightness-125"
+            className={cn(
+              "flex h-9 w-full items-center justify-center rounded-md bg-btn font-semibold text-[15px] text-btn-text hover:brightness-95 disabled:opacity-60 dark:hover:brightness-125",
+              gap,
+            )}
           >
             Join group
           </button>

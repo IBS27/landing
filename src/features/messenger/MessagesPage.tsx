@@ -7,12 +7,14 @@ import { Tooltip } from "@/ui/overlays";
 import { Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { CallLayer, canCall, startCall } from "./CallWindow";
 import { ConversationAvatar } from "./ConversationAvatar";
 import { ConversationList, type Filter, FilterChips, SearchMessenger } from "./ConversationList";
 import { type Folder, InboxMenu } from "./InboxMenu";
 import { InfoPanel } from "./InfoPanel";
 import { ComposeIcon, InfoIcon, NoChatsIllustration, PhoneIcon, VideoCallIcon } from "./icons";
 import { NewMessage } from "./NewMessage";
+import { PinDialog } from "./PinGate";
 import { Thread } from "./Thread";
 import { activeLabel, type ConversationDetail } from "./util";
 
@@ -123,6 +125,8 @@ function MessagesLayout({
       <main className="min-w-0 flex-1 bg-wash p-4">
         <div className="flex h-full overflow-hidden rounded-lg bg-card shadow-base">{children}</div>
       </main>
+      <PinDialog />
+      <CallLayer />
     </div>
   );
 }
@@ -252,12 +256,16 @@ function ThreadHeader({
         <div className="flex min-w-0 items-center gap-2.5 p-1.5">{title}</div>
       )}
       <div className="flex-1" />
-      <HeaderIcon label="Start a voice call">
-        <PhoneIcon size={20} />
-      </HeaderIcon>
-      <HeaderIcon label="Start a video call">
-        <VideoCallIcon size={22} />
-      </HeaderIcon>
+      {canCall(c) && (
+        <>
+          <HeaderIcon label="Start a voice call" onClick={() => startCall(c, "audio")}>
+            <PhoneIcon size={20} />
+          </HeaderIcon>
+          <HeaderIcon label="Start a video call" onClick={() => startCall(c, "video")}>
+            <VideoCallIcon size={22} />
+          </HeaderIcon>
+        </>
+      )}
       <HeaderIcon label="Conversation information" active={info} onClick={onToggleInfo}>
         <InfoIcon size={22} />
       </HeaderIcon>

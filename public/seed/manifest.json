@@ -12192,5 +12192,1194 @@
     "provider": "flickr",
     "width": 1024,
     "height": 1024
+  },
+  "videos/body-surf-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Body_surfing_a_wave.webm",
+    "creator": "JaredMcKenzie",
+    "license": "CC0",
+    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "title": "Body surfing a wave",
+    "tags": [
+      "video",
+      "body surf"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/body-surf-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Body_surfing_a_wave.webm",
+    "creator": "JaredMcKenzie",
+    "license": "CC0",
+    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "title": "Body surfing a wave",
+    "tags": [
+      "video",
+      "body surf",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/cat-straw-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Cat_Playing_with_Straw_1_2017-06-08.webm",
+    "creator": "FASTILY",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Cat Playing with Straw 1 2017-06-08",
+    "tags": [
+      "video",
+      "cat straw"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": false
+  },
+  "videos/cat-straw-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Cat_Playing_with_Straw_1_2017-06-08.webm",
+    "creator": "FASTILY",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Cat Playing with Straw 1 2017-06-08",
+    "tags": [
+      "video",
+      "cat straw",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/cat-straw-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Cat_Playing_with_Straw_1_2017-06-08.webm",
+    "creator": "FASTILY",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Cat Playing with Straw 1 2017-06-08",
+    "tags": [
+      "video",
+      "cat straw"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.0,
+    "audio": false
+  },
+  "videos/cat-straw-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Cat_Playing_with_Straw_1_2017-06-08.webm",
+    "creator": "FASTILY",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Cat Playing with Straw 1 2017-06-08",
+    "tags": [
+      "video",
+      "cat straw",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/concert-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Wiyaala_live_performance_kona_bar.webm",
+    "creator": "Warmglow",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Wiyaala live performance kona bar",
+    "tags": [
+      "video",
+      "concert"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/concert-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Wiyaala_live_performance_kona_bar.webm",
+    "creator": "Warmglow",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Wiyaala live performance kona bar",
+    "tags": [
+      "video",
+      "concert",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/concert-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Wiyaala_live_performance_kona_bar.webm",
+    "creator": "Warmglow",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Wiyaala live performance kona bar",
+    "tags": [
+      "video",
+      "concert"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/concert-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Wiyaala_live_performance_kona_bar.webm",
+    "creator": "Warmglow",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Wiyaala live performance kona bar",
+    "tags": [
+      "video",
+      "concert",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/dog-walk-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Dog_walking_in_the_Mission_in_San_Francisco.ogv",
+    "creator": "Sage Ross",
+    "license": "CC BY-SA 3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "title": "Dog walking in the Mission in San Francisco",
+    "tags": [
+      "video",
+      "dog walk"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/dog-walk-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Dog_walking_in_the_Mission_in_San_Francisco.ogv",
+    "creator": "Sage Ross",
+    "license": "CC BY-SA 3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "title": "Dog walking in the Mission in San Francisco",
+    "tags": [
+      "video",
+      "dog walk",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/dog-walk-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Dog_walking_in_the_Mission_in_San_Francisco.ogv",
+    "creator": "Sage Ross",
+    "license": "CC BY-SA 3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "title": "Dog walking in the Mission in San Francisco",
+    "tags": [
+      "video",
+      "dog walk"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/dog-walk-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Dog_walking_in_the_Mission_in_San_Francisco.ogv",
+    "creator": "Sage Ross",
+    "license": "CC BY-SA 3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "title": "Dog walking in the Mission in San Francisco",
+    "tags": [
+      "video",
+      "dog walk",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/espresso-macro-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Macro_Espresso_Process.webm",
+    "creator": "Scott Schiller from San Francisco, CA, USA",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "title": "Macro Espresso Process",
+    "tags": [
+      "video",
+      "espresso macro"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.03,
+    "audio": false
+  },
+  "videos/espresso-macro-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Macro_Espresso_Process.webm",
+    "creator": "Scott Schiller from San Francisco, CA, USA",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "title": "Macro Espresso Process",
+    "tags": [
+      "video",
+      "espresso macro",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/espresso-routine-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Morning_Espresso_Routine_(abridged_version).webm",
+    "creator": "Scott Schiller from San Francisco, CA, USA",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "title": "Morning Espresso Routine (abridged version)",
+    "tags": [
+      "video",
+      "espresso routine"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.03,
+    "audio": true
+  },
+  "videos/espresso-routine-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Morning_Espresso_Routine_(abridged_version).webm",
+    "creator": "Scott Schiller from San Francisco, CA, USA",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "title": "Morning Espresso Routine (abridged version)",
+    "tags": [
+      "video",
+      "espresso routine",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/golden-gardens-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:New_Years_2021_at_Golden_Gardens_03_-_video.webm",
+    "creator": "Joe Mabel",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "New Years 2021 at Golden Gardens 03 - video",
+    "tags": [
+      "video",
+      "golden gardens"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 7.0,
+    "audio": true
+  },
+  "videos/golden-gardens-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:New_Years_2021_at_Golden_Gardens_03_-_video.webm",
+    "creator": "Joe Mabel",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "New Years 2021 at Golden Gardens 03 - video",
+    "tags": [
+      "video",
+      "golden gardens",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/guitar-solo-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:FAST_GUITAR_SOLO.webm",
+    "creator": "Guitinst72",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "title": "FAST GUITAR SOLO",
+    "tags": [
+      "video",
+      "guitar solo"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/guitar-solo-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:FAST_GUITAR_SOLO.webm",
+    "creator": "Guitinst72",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "title": "FAST GUITAR SOLO",
+    "tags": [
+      "video",
+      "guitar solo",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/guitar-solo-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:FAST_GUITAR_SOLO.webm",
+    "creator": "Guitinst72",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "title": "FAST GUITAR SOLO",
+    "tags": [
+      "video",
+      "guitar solo"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/guitar-solo-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:FAST_GUITAR_SOLO.webm",
+    "creator": "Guitinst72",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "title": "FAST GUITAR SOLO",
+    "tags": [
+      "video",
+      "guitar solo",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/indoor-climbing-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Indoor_climbing_Chiba-Japan_2025_11_16.webm",
+    "creator": "Nesnad",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Indoor climbing Chiba-Japan 2025 11 16",
+    "tags": [
+      "video",
+      "indoor climbing"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": false
+  },
+  "videos/indoor-climbing-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Indoor_climbing_Chiba-Japan_2025_11_16.webm",
+    "creator": "Nesnad",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Indoor climbing Chiba-Japan 2025 11 16",
+    "tags": [
+      "video",
+      "indoor climbing",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/kayak-sunset-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Kajakroer_solnedgang.webm",
+    "creator": "Mikkel Houmøller",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Kajakroer solnedgang",
+    "tags": [
+      "video",
+      "kayak sunset"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/kayak-sunset-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Kajakroer_solnedgang.webm",
+    "creator": "Mikkel Houmøller",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Kajakroer solnedgang",
+    "tags": [
+      "video",
+      "kayak sunset",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/kayak-surf-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Great_Falls_National_Park_-_kayak_surfing_-_2.webm",
+    "creator": "Jarek Tuszyński",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Great Falls National Park - kayak surfing - 2",
+    "tags": [
+      "video",
+      "kayak surf"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.03,
+    "audio": true
+  },
+  "videos/kayak-surf-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Great_Falls_National_Park_-_kayak_surfing_-_2.webm",
+    "creator": "Jarek Tuszyński",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Great Falls National Park - kayak surfing - 2",
+    "tags": [
+      "video",
+      "kayak surf",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/kayak-surf-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Great_Falls_National_Park_-_kayak_surfing_-_2.webm",
+    "creator": "Jarek Tuszyński",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Great Falls National Park - kayak surfing - 2",
+    "tags": [
+      "video",
+      "kayak surf"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.03,
+    "audio": true
+  },
+  "videos/kayak-surf-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Great_Falls_National_Park_-_kayak_surfing_-_2.webm",
+    "creator": "Jarek Tuszyński",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Great Falls National Park - kayak surfing - 2",
+    "tags": [
+      "video",
+      "kayak surf",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/mowich-rain-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Mountain_Moment-_Mowich_Rainstorm.webm",
+    "creator": "Mount Rainier National Park",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "title": "Mountain Moment- Mowich Rainstorm",
+    "tags": [
+      "video",
+      "mowich rain"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.03,
+    "audio": true
+  },
+  "videos/mowich-rain-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Mountain_Moment-_Mowich_Rainstorm.webm",
+    "creator": "Mount Rainier National Park",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "title": "Mountain Moment- Mowich Rainstorm",
+    "tags": [
+      "video",
+      "mowich rain",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/mowich-rain-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Mountain_Moment-_Mowich_Rainstorm.webm",
+    "creator": "Mount Rainier National Park",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "title": "Mountain Moment- Mowich Rainstorm",
+    "tags": [
+      "video",
+      "mowich rain"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.03,
+    "audio": true
+  },
+  "videos/mowich-rain-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Mountain_Moment-_Mowich_Rainstorm.webm",
+    "creator": "Mount Rainier National Park",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "title": "Mountain Moment- Mowich Rainstorm",
+    "tags": [
+      "video",
+      "mowich rain",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/myrtle-falls-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:2024-10-12,_Myrtle_Falls_(Mount_Rainier_National_Park),_IMG6608.webm",
+    "creator": "Steven Pavlov",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "2024-10-12, Myrtle Falls (Mount Rainier National Park), IMG6608",
+    "tags": [
+      "video",
+      "myrtle falls"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/myrtle-falls-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:2024-10-12,_Myrtle_Falls_(Mount_Rainier_National_Park),_IMG6608.webm",
+    "creator": "Steven Pavlov",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "2024-10-12, Myrtle Falls (Mount Rainier National Park), IMG6608",
+    "tags": [
+      "video",
+      "myrtle falls",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/noodles-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Noodle_cooking_1_2020-05-18.webm",
+    "creator": "FASTILY",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Noodle cooking 1 2020-05-18",
+    "tags": [
+      "video",
+      "noodles"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": false
+  },
+  "videos/noodles-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Noodle_cooking_1_2020-05-18.webm",
+    "creator": "FASTILY",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Noodle cooking 1 2020-05-18",
+    "tags": [
+      "video",
+      "noodles",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/ocean-shores-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Ocean_Shores_-_Waves_%26Seagulls_2015-06_303_(90_Sec).ogv",
+    "creator": "Chris Light",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Ocean Shores - Waves &Seagulls 2015-06 303 (90 Sec)",
+    "tags": [
+      "video",
+      "ocean shores"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/ocean-shores-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Ocean_Shores_-_Waves_%26Seagulls_2015-06_303_(90_Sec).ogv",
+    "creator": "Chris Light",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Ocean Shores - Waves &Seagulls 2015-06 303 (90 Sec)",
+    "tags": [
+      "video",
+      "ocean shores",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/ocean-waves-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Ocean_surface_waves_02.ogv",
+    "creator": "Mostafameraji",
+    "license": "CC0",
+    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "title": "Ocean surface waves 02",
+    "tags": [
+      "video",
+      "ocean waves"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": false
+  },
+  "videos/ocean-waves-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Ocean_surface_waves_02.ogv",
+    "creator": "Mostafameraji",
+    "license": "CC0",
+    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "title": "Ocean surface waves 02",
+    "tags": [
+      "video",
+      "ocean waves",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/puget-ferry-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Southworth_Dock_(WSF)_05-08-2018_568.ogv",
+    "creator": "Chris Light",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Southworth Dock (WSF) 05-08-2018 568",
+    "tags": [
+      "video",
+      "puget ferry"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/puget-ferry-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Southworth_Dock_(WSF)_05-08-2018_568.ogv",
+    "creator": "Chris Light",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Southworth Dock (WSF) 05-08-2018 568",
+    "tags": [
+      "video",
+      "puget ferry",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/puppies-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Puppiesplaying-tokyoarea-jan7-2020.webm",
+    "creator": "Nesnad",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "title": "Puppiesplaying-tokyoarea-jan7-2020",
+    "tags": [
+      "video",
+      "puppies"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": false
+  },
+  "videos/puppies-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Puppiesplaying-tokyoarea-jan7-2020.webm",
+    "creator": "Nesnad",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "title": "Puppiesplaying-tokyoarea-jan7-2020",
+    "tags": [
+      "video",
+      "puppies",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/puppies-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Puppiesplaying-tokyoarea-jan7-2020.webm",
+    "creator": "Nesnad",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "title": "Puppiesplaying-tokyoarea-jan7-2020",
+    "tags": [
+      "video",
+      "puppies"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.0,
+    "audio": false
+  },
+  "videos/puppies-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Puppiesplaying-tokyoarea-jan7-2020.webm",
+    "creator": "Nesnad",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "title": "Puppiesplaying-tokyoarea-jan7-2020",
+    "tags": [
+      "video",
+      "puppies",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/rain-sonoma-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Rain_in_Sonoma_-_December_2025_-_Sarah_Stierch.webm",
+    "creator": "Missvain",
+    "license": "CC0",
+    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "title": "Rain in Sonoma - December 2025 - Sarah Stierch",
+    "tags": [
+      "video",
+      "rain sonoma"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/rain-sonoma-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Rain_in_Sonoma_-_December_2025_-_Sarah_Stierch.webm",
+    "creator": "Missvain",
+    "license": "CC0",
+    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "title": "Rain in Sonoma - December 2025 - Sarah Stierch",
+    "tags": [
+      "video",
+      "rain sonoma",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/rainier-timelapse-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Time-lapse_of_Mount_Rainier,_Washington,_USA.webm",
+    "creator": "Ryan Lane",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "title": "Time-lapse of Mount Rainier, Washington, USA",
+    "tags": [
+      "video",
+      "rainier timelapse"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.0,
+    "audio": false
+  },
+  "videos/rainier-timelapse-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Time-lapse_of_Mount_Rainier,_Washington,_USA.webm",
+    "creator": "Ryan Lane",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "title": "Time-lapse of Mount Rainier, Washington, USA",
+    "tags": [
+      "video",
+      "rainier timelapse",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/ridge-hike-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Chicken-out_Ridge.webm",
+    "creator": "Maxters2",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Chicken-out Ridge",
+    "tags": [
+      "video",
+      "ridge hike"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": false
+  },
+  "videos/ridge-hike-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Chicken-out_Ridge.webm",
+    "creator": "Maxters2",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Chicken-out Ridge",
+    "tags": [
+      "video",
+      "ridge hike",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/salmon-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Cooking_Salmon_20200410_141528.webm",
+    "creator": "Edvaldo LL Souza",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Cooking Salmon 20200410 141528",
+    "tags": [
+      "video",
+      "salmon"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.03,
+    "audio": true
+  },
+  "videos/salmon-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Cooking_Salmon_20200410_141528.webm",
+    "creator": "Edvaldo LL Souza",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Cooking Salmon 20200410 141528",
+    "tags": [
+      "video",
+      "salmon",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/salmon-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Cooking_Salmon_20200410_141528.webm",
+    "creator": "Edvaldo LL Souza",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Cooking Salmon 20200410 141528",
+    "tags": [
+      "video",
+      "salmon"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.03,
+    "audio": true
+  },
+  "videos/salmon-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Cooking_Salmon_20200410_141528.webm",
+    "creator": "Edvaldo LL Souza",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Cooking Salmon 20200410 141528",
+    "tags": [
+      "video",
+      "salmon",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/seattle-viaduct-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Alaskan_Way_Viaduct_timelapse.webm",
+    "creator": "jonknee",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "title": "Alaskan Way Viaduct timelapse",
+    "tags": [
+      "video",
+      "seattle viaduct"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.03,
+    "audio": true
+  },
+  "videos/seattle-viaduct-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Alaskan_Way_Viaduct_timelapse.webm",
+    "creator": "jonknee",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "title": "Alaskan Way Viaduct timelapse",
+    "tags": [
+      "video",
+      "seattle viaduct",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/seattle-waterfront-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Seattle_Waterfront_2015-06_163_(90_Sec).ogv",
+    "creator": "Chris Light",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Seattle Waterfront 2015-06 163 (90 Sec)",
+    "tags": [
+      "video",
+      "seattle waterfront"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/seattle-waterfront-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Seattle_Waterfront_2015-06_163_(90_Sec).ogv",
+    "creator": "Chris Light",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Seattle Waterfront 2015-06 163 (90 Sec)",
+    "tags": [
+      "video",
+      "seattle waterfront",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/ship-canal-bridge-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:2024-12-20,_Ship_Canal_Bridge_(Seattle),_v075149.webm",
+    "creator": "Steven Pavlov",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "2024-12-20, Ship Canal Bridge (Seattle), v075149",
+    "tags": [
+      "video",
+      "ship canal bridge"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/ship-canal-bridge-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:2024-12-20,_Ship_Canal_Bridge_(Seattle),_v075149.webm",
+    "creator": "Steven Pavlov",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "2024-12-20, Ship Canal Bridge (Seattle), v075149",
+    "tags": [
+      "video",
+      "ship canal bridge",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/skatepark-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Personas_patinando_en_PARCUR.webm",
+    "creator": "ProtoplasmaKid",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Personas patinando en PARCUR",
+    "tags": [
+      "video",
+      "skatepark"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/skatepark-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Personas_patinando_en_PARCUR.webm",
+    "creator": "ProtoplasmaKid",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Personas patinando en PARCUR",
+    "tags": [
+      "video",
+      "skatepark",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/skatepark-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Personas_patinando_en_PARCUR.webm",
+    "creator": "ProtoplasmaKid",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Personas patinando en PARCUR",
+    "tags": [
+      "video",
+      "skatepark"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/skatepark-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Personas_patinando_en_PARCUR.webm",
+    "creator": "ProtoplasmaKid",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Personas patinando en PARCUR",
+    "tags": [
+      "video",
+      "skatepark",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/snowfall-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Berlin_Karow_lub_2025-01-10_Snowfall.webm",
+    "creator": "Lukas Beck",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "title": "Berlin Karow lub 2025-01-10 Snowfall",
+    "tags": [
+      "video",
+      "snowfall"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/snowfall-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Berlin_Karow_lub_2025-01-10_Snowfall.webm",
+    "creator": "Lukas Beck",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "title": "Berlin Karow lub 2025-01-10 Snowfall",
+    "tags": [
+      "video",
+      "snowfall",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/snowfall-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Berlin_Karow_lub_2025-01-10_Snowfall.webm",
+    "creator": "Lukas Beck",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "title": "Berlin Karow lub 2025-01-10 Snowfall",
+    "tags": [
+      "video",
+      "snowfall"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/snowfall-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Berlin_Karow_lub_2025-01-10_Snowfall.webm",
+    "creator": "Lukas Beck",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "title": "Berlin Karow lub 2025-01-10 Snowfall",
+    "tags": [
+      "video",
+      "snowfall",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/sunset-timelapse-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Algonquin_Sunset_2560.webm",
+    "creator": "Alexander Kondratskiy",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "title": "Algonquin Sunset 2560",
+    "tags": [
+      "video",
+      "sunset timelapse"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": false
+  },
+  "videos/sunset-timelapse-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Algonquin_Sunset_2560.webm",
+    "creator": "Alexander Kondratskiy",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "title": "Algonquin Sunset 2560",
+    "tags": [
+      "video",
+      "sunset timelapse",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/sunset-timelapse-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Algonquin_Sunset_2560.webm",
+    "creator": "Alexander Kondratskiy",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "title": "Algonquin Sunset 2560",
+    "tags": [
+      "video",
+      "sunset timelapse"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.0,
+    "audio": false
+  },
+  "videos/sunset-timelapse-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Algonquin_Sunset_2560.webm",
+    "creator": "Alexander Kondratskiy",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "title": "Algonquin Sunset 2560",
+    "tags": [
+      "video",
+      "sunset timelapse",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "videos/waterfall-tall.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Delaneys_Falls.webm",
+    "creator": "Psypherium",
+    "license": "CC0",
+    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "title": "Delaneys Falls",
+    "tags": [
+      "video",
+      "waterfall"
+    ],
+    "width": 720,
+    "height": 1280,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/waterfall-tall.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Delaneys_Falls.webm",
+    "creator": "Psypherium",
+    "license": "CC0",
+    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "title": "Delaneys Falls",
+    "tags": [
+      "video",
+      "waterfall",
+      "poster"
+    ],
+    "width": 720,
+    "height": 1280
+  },
+  "videos/waterfall-wide.mp4": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Delaneys_Falls.webm",
+    "creator": "Psypherium",
+    "license": "CC0",
+    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "title": "Delaneys Falls",
+    "tags": [
+      "video",
+      "waterfall"
+    ],
+    "width": 1280,
+    "height": 720,
+    "duration": 10.0,
+    "audio": true
+  },
+  "videos/waterfall-wide.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Delaneys_Falls.webm",
+    "creator": "Psypherium",
+    "license": "CC0",
+    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "title": "Delaneys Falls",
+    "tags": [
+      "video",
+      "waterfall",
+      "poster"
+    ],
+    "width": 1280,
+    "height": 720
   }
 }

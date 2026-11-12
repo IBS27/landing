@@ -16,7 +16,7 @@ import { PostDialog, PostSkeleton, type PostView, useViewerPaginated } from "@/f
 import { compactCount, shortAge } from "@/lib/format";
 import { Avatar, Button, Card, EmptyState, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
-import { VideoCard, VideoPlayer } from "./VideoCard";
+import { PostVideo, VideoCard } from "./VideoCard";
 
 export type WatchTab = "home" | "live" | "shows" | "explore" | "saved";
 export const WATCH_TABS: WatchTab[] = ["home", "live", "shows", "explore", "saved"];
@@ -261,7 +261,7 @@ function Explore({ q }: { q?: string }) {
         <div className="grid grid-cols-2 gap-4">
           {posts.map((p) => (
             <Card key={p._id} className="overflow-hidden rounded-xl">
-              <VideoPlayer post={p} />
+              <PostVideo post={p} autoPlay={false} />
               <button
                 type="button"
                 onClick={() => setOpen(p)}

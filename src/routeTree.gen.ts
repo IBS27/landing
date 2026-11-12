@@ -30,6 +30,7 @@ import { Route as UsernameAboutRouteImport } from './routes/$username/about'
 import { Route as UsernameFriendsRouteImport } from './routes/$username/friends'
 import { Route as UsernamePhotosRouteImport } from './routes/$username/photos'
 import { Route as UsernameReelsRouteImport } from './routes/$username/reels'
+import { Route as UsernameSearchRouteImport } from './routes/$username/search'
 import { Route as AdsActivityRouteImport } from './routes/ads/activity'
 import { Route as EventsIndexRouteImport } from './routes/events/index'
 import { Route as EventsEventIdRouteImport } from './routes/events/$eventId'
@@ -60,8 +61,11 @@ import { Route as MarketplaceSearchRouteImport } from './routes/marketplace/sear
 import { Route as MarketplaceStatusRouteImport } from './routes/marketplace/status'
 import { Route as MessagesIndexRouteImport } from './routes/messages/index'
 import { Route as MessagesNewRouteImport } from './routes/messages/new'
+import { Route as PhotoPostIdRouteImport } from './routes/photo/$postId'
 import { Route as ReelReelIdRouteImport } from './routes/reel_.$reelId'
 import { Route as SearchTabRouteImport } from './routes/search/$tab'
+import { Route as StoriesStoryIdRouteImport } from './routes/stories/$storyId'
+import { Route as StoriesArchiveRouteImport } from './routes/stories/archive'
 import { Route as StoriesCreateRouteImport } from './routes/stories/create'
 import { Route as UsernamePostsPostIdRouteImport } from './routes/$username/posts/$postId'
 import { Route as GroupsGroupIdIndexRouteImport } from './routes/groups/$groupId/index'
@@ -185,6 +189,11 @@ const UsernamePhotosRoute = UsernamePhotosRouteImport.update({
 const UsernameReelsRoute = UsernameReelsRouteImport.update({
   id: '/reels',
   path: '/reels',
+  getParentRoute: () => UsernameRouteRoute,
+} as any)
+const UsernameSearchRoute = UsernameSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => UsernameRouteRoute,
 } as any)
 const AdsActivityRoute = AdsActivityRouteImport.update({
@@ -338,6 +347,11 @@ const MessagesNewRoute = MessagesNewRouteImport.update({
   path: '/messages/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PhotoPostIdRoute = PhotoPostIdRouteImport.update({
+  id: '/photo/$postId',
+  path: '/photo/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReelReelIdRoute = ReelReelIdRouteImport.update({
   id: '/reel_/$reelId',
   path: '/reel/$reelId',
@@ -346,6 +360,16 @@ const ReelReelIdRoute = ReelReelIdRouteImport.update({
 const SearchTabRoute = SearchTabRouteImport.update({
   id: '/search/$tab',
   path: '/search/$tab',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoriesStoryIdRoute = StoriesStoryIdRouteImport.update({
+  id: '/stories/$storyId',
+  path: '/stories/$storyId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoriesArchiveRoute = StoriesArchiveRouteImport.update({
+  id: '/stories/archive',
+  path: '/stories/archive',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StoriesCreateRoute = StoriesCreateRouteImport.update({
@@ -469,6 +493,7 @@ export interface FileRoutesByFullPath {
   '/$username/friends': typeof UsernameFriendsRoute
   '/$username/photos': typeof UsernamePhotosRoute
   '/$username/reels': typeof UsernameReelsRoute
+  '/$username/search': typeof UsernameSearchRoute
   '/ads/activity': typeof AdsActivityRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/birthdays': typeof EventsBirthdaysRoute
@@ -493,8 +518,11 @@ export interface FileRoutesByFullPath {
   '/marketplace/search': typeof MarketplaceSearchRoute
   '/marketplace/status': typeof MarketplaceStatusRoute
   '/messages/new': typeof MessagesNewRoute
+  '/photo/$postId': typeof PhotoPostIdRoute
   '/reel/$reelId': typeof ReelReelIdRoute
   '/search/$tab': typeof SearchTabRoute
+  '/stories/$storyId': typeof StoriesStoryIdRoute
+  '/stories/archive': typeof StoriesArchiveRoute
   '/stories/create': typeof StoriesCreateRoute
   '/$username/': typeof UsernameIndexRoute
   '/events/': typeof EventsIndexRoute
@@ -542,6 +570,7 @@ export interface FileRoutesByTo {
   '/$username/friends': typeof UsernameFriendsRoute
   '/$username/photos': typeof UsernamePhotosRoute
   '/$username/reels': typeof UsernameReelsRoute
+  '/$username/search': typeof UsernameSearchRoute
   '/ads/activity': typeof AdsActivityRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/birthdays': typeof EventsBirthdaysRoute
@@ -565,8 +594,11 @@ export interface FileRoutesByTo {
   '/marketplace/search': typeof MarketplaceSearchRoute
   '/marketplace/status': typeof MarketplaceStatusRoute
   '/messages/new': typeof MessagesNewRoute
+  '/photo/$postId': typeof PhotoPostIdRoute
   '/reel/$reelId': typeof ReelReelIdRoute
   '/search/$tab': typeof SearchTabRoute
+  '/stories/$storyId': typeof StoriesStoryIdRoute
+  '/stories/archive': typeof StoriesArchiveRoute
   '/stories/create': typeof StoriesCreateRoute
   '/$username': typeof UsernameIndexRoute
   '/events': typeof EventsIndexRoute
@@ -616,6 +648,7 @@ export interface FileRoutesById {
   '/$username/friends': typeof UsernameFriendsRoute
   '/$username/photos': typeof UsernamePhotosRoute
   '/$username/reels': typeof UsernameReelsRoute
+  '/$username/search': typeof UsernameSearchRoute
   '/ads/activity': typeof AdsActivityRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/birthdays': typeof EventsBirthdaysRoute
@@ -640,8 +673,11 @@ export interface FileRoutesById {
   '/marketplace/search': typeof MarketplaceSearchRoute
   '/marketplace/status': typeof MarketplaceStatusRoute
   '/messages/new': typeof MessagesNewRoute
+  '/photo/$postId': typeof PhotoPostIdRoute
   '/reel_/$reelId': typeof ReelReelIdRoute
   '/search/$tab': typeof SearchTabRoute
+  '/stories/$storyId': typeof StoriesStoryIdRoute
+  '/stories/archive': typeof StoriesArchiveRoute
   '/stories/create': typeof StoriesCreateRoute
   '/$username/': typeof UsernameIndexRoute
   '/events/': typeof EventsIndexRoute
@@ -692,6 +728,7 @@ export interface FileRouteTypes {
     | '/$username/friends'
     | '/$username/photos'
     | '/$username/reels'
+    | '/$username/search'
     | '/ads/activity'
     | '/events/$eventId'
     | '/events/birthdays'
@@ -716,8 +753,11 @@ export interface FileRouteTypes {
     | '/marketplace/search'
     | '/marketplace/status'
     | '/messages/new'
+    | '/photo/$postId'
     | '/reel/$reelId'
     | '/search/$tab'
+    | '/stories/$storyId'
+    | '/stories/archive'
     | '/stories/create'
     | '/$username/'
     | '/events/'
@@ -765,6 +805,7 @@ export interface FileRouteTypes {
     | '/$username/friends'
     | '/$username/photos'
     | '/$username/reels'
+    | '/$username/search'
     | '/ads/activity'
     | '/events/$eventId'
     | '/events/birthdays'
@@ -788,8 +829,11 @@ export interface FileRouteTypes {
     | '/marketplace/search'
     | '/marketplace/status'
     | '/messages/new'
+    | '/photo/$postId'
     | '/reel/$reelId'
     | '/search/$tab'
+    | '/stories/$storyId'
+    | '/stories/archive'
     | '/stories/create'
     | '/$username'
     | '/events'
@@ -838,6 +882,7 @@ export interface FileRouteTypes {
     | '/$username/friends'
     | '/$username/photos'
     | '/$username/reels'
+    | '/$username/search'
     | '/ads/activity'
     | '/events/$eventId'
     | '/events/birthdays'
@@ -862,8 +907,11 @@ export interface FileRouteTypes {
     | '/marketplace/search'
     | '/marketplace/status'
     | '/messages/new'
+    | '/photo/$postId'
     | '/reel_/$reelId'
     | '/search/$tab'
+    | '/stories/$storyId'
+    | '/stories/archive'
     | '/stories/create'
     | '/$username/'
     | '/events/'
@@ -932,8 +980,11 @@ export interface RootRouteChildren {
   MarketplaceSearchRoute: typeof MarketplaceSearchRoute
   MarketplaceStatusRoute: typeof MarketplaceStatusRoute
   MessagesNewRoute: typeof MessagesNewRoute
+  PhotoPostIdRoute: typeof PhotoPostIdRoute
   ReelReelIdRoute: typeof ReelReelIdRoute
   SearchTabRoute: typeof SearchTabRoute
+  StoriesStoryIdRoute: typeof StoriesStoryIdRoute
+  StoriesArchiveRoute: typeof StoriesArchiveRoute
   StoriesCreateRoute: typeof StoriesCreateRoute
   EventsIndexRoute: typeof EventsIndexRoute
   FriendsIndexRoute: typeof FriendsIndexRoute
@@ -1100,6 +1151,13 @@ declare module '@tanstack/react-router' {
       path: '/reels'
       fullPath: '/$username/reels'
       preLoaderRoute: typeof UsernameReelsRouteImport
+      parentRoute: typeof UsernameRouteRoute
+    }
+    '/$username/search': {
+      id: '/$username/search'
+      path: '/search'
+      fullPath: '/$username/search'
+      preLoaderRoute: typeof UsernameSearchRouteImport
       parentRoute: typeof UsernameRouteRoute
     }
     '/ads/activity': {
@@ -1312,6 +1370,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/photo/$postId': {
+      id: '/photo/$postId'
+      path: '/photo/$postId'
+      fullPath: '/photo/$postId'
+      preLoaderRoute: typeof PhotoPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reel_/$reelId': {
       id: '/reel_/$reelId'
       path: '/reel/$reelId'
@@ -1324,6 +1389,20 @@ declare module '@tanstack/react-router' {
       path: '/search/$tab'
       fullPath: '/search/$tab'
       preLoaderRoute: typeof SearchTabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stories/$storyId': {
+      id: '/stories/$storyId'
+      path: '/stories/$storyId'
+      fullPath: '/stories/$storyId'
+      preLoaderRoute: typeof StoriesStoryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stories/archive': {
+      id: '/stories/archive'
+      path: '/stories/archive'
+      fullPath: '/stories/archive'
+      preLoaderRoute: typeof StoriesArchiveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stories/create': {
@@ -1468,6 +1547,7 @@ interface UsernameRouteRouteChildren {
   UsernameFriendsRoute: typeof UsernameFriendsRoute
   UsernamePhotosRoute: typeof UsernamePhotosRoute
   UsernameReelsRoute: typeof UsernameReelsRoute
+  UsernameSearchRoute: typeof UsernameSearchRoute
   UsernameIndexRoute: typeof UsernameIndexRoute
   UsernamePostsPostIdRoute: typeof UsernamePostsPostIdRoute
 }
@@ -1478,6 +1558,7 @@ const UsernameRouteRouteChildren: UsernameRouteRouteChildren = {
   UsernameFriendsRoute: UsernameFriendsRoute,
   UsernamePhotosRoute: UsernamePhotosRoute,
   UsernameReelsRoute: UsernameReelsRoute,
+  UsernameSearchRoute: UsernameSearchRoute,
   UsernameIndexRoute: UsernameIndexRoute,
   UsernamePostsPostIdRoute: UsernamePostsPostIdRoute,
 }
@@ -1550,8 +1631,11 @@ const rootRouteChildren: RootRouteChildren = {
   MarketplaceSearchRoute: MarketplaceSearchRoute,
   MarketplaceStatusRoute: MarketplaceStatusRoute,
   MessagesNewRoute: MessagesNewRoute,
+  PhotoPostIdRoute: PhotoPostIdRoute,
   ReelReelIdRoute: ReelReelIdRoute,
   SearchTabRoute: SearchTabRoute,
+  StoriesStoryIdRoute: StoriesStoryIdRoute,
+  StoriesArchiveRoute: StoriesArchiveRoute,
   StoriesCreateRoute: StoriesCreateRoute,
   EventsIndexRoute: EventsIndexRoute,
   FriendsIndexRoute: FriendsIndexRoute,

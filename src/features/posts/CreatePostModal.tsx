@@ -108,6 +108,11 @@ export function CreatePostModal({
   const [feeling, setFeeling] = useState<string | null>(editing?.feeling ?? null);
   const [place, setPlace] = useState<string | null>(editing?.place ?? null);
   const [privacy, setPrivacy] = useState<Audience>(editing?.privacy ?? "friends");
+  // New posts start at the default audience from Settings & privacy.
+  const defaultAudience = useQ(api.settings.get, editing ? "skip" : {})?.defaultAudience;
+  useEffect(() => {
+    if (open && !editing && defaultAudience) setPrivacy(defaultAudience);
+  }, [open, editing, defaultAudience]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);

@@ -4,8 +4,10 @@ import { mergedStream, stream } from "convex-helpers/server/stream";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { relationTo } from "./friends";
+import { blockedSet, isBlockedEitherWay } from "./lib/blocks";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { type Audience, canView, enrichPosts, loadAudience } from "./lib/posts";
+import { visibleFriendIds } from "./lib/settings";
 import { friendIds, getSummaries, type UserSummary, userSummary } from "./lib/users";
 import schema from "./schema";
 
@@ -157,12 +159,22 @@ export const get = viewerQuery({
     if (!u) return null;
     const viewerId = ctx.viewer._id;
     const isSelf = u._id === viewerId;
-    const [relation, theirFriends, viewerFriends] = await Promise.all([
+    // Blocked either way: the profile isn't available, like Facebook.
+    if (await isBlockedEitherWay(ctx, viewerId, u._id)) return null;
+    const [relation, allFriends, viewerFriends] = await Promise.all([
       relationTo(ctx, viewerId, u._id),
       friendIds(ctx, u._id),
       isSelf ? Promise.resolve([] as Id<"users">[]) : friendIds(ctx, viewerId),
     ]);
     const viewerSet = new Set(viewerFriends);
+    const theirFriends = await visibleFriendIds(
+      ctx,
+      u._id,
+      viewerId,
+      allFriends,
+      viewerSet,
+      await blockedSet(ctx, viewerId),
+    );
     const mutual = theirFriends.filter((id) => viewerSet.has(id));
     // Facepile: mutual friends first on someone else's profile, most recent on your own.
     const pileIds = [...mutual, ...theirFriends.filter((id) => !viewerSet.has(id))].slice(0, 8);
@@ -194,6 +206,7 @@ export const get = viewerQuery({
         birthday: showBirthday ? (u.birthday ?? null) : null,
         joinedAt: u.joinedAt,
         pageCategory: u.pageCategory ?? null,
+        links: u.links ?? [],
         note,
       },
       isSelf,
@@ -225,7 +238,14 @@ export const overview = viewerQuery({
     const timelinePhotos: PhotoItem[] = mediaOf(posts, "image");
     const photos = u ? [...timelinePhotos, ...profilePhotos(u, timelinePhotos)] : timelinePhotos;
     // Facebook leads with mutual friends, then everyone else.
-    const ids = theirFriends.map((r) => r.friendId);
+    const ids = await visibleFriendIds(
+      ctx,
+      userId,
+      a.viewerId,
+      theirFriends.map((r) => r.friendId),
+      a.friends,
+      a.blocked,
+    );
     const ordered = [
       ...ids.filter((id) => a.friends.has(id)),
       ...ids.filter((id) => !a.friends.has(id)),
@@ -235,8 +255,14 @@ export const overview = viewerQuery({
     for (const p of posts)
       if (p.place && !checkins.has(p.place))
         checkins.set(p.place, { place: p.place, createdAt: p.createdAt, postId: p._id });
+    // Highlights the viewer can still see (a deleted or hidden post drops out).
+    const byUrl = new Map(photos.map((p) => [p.url, p]));
+    const highlights = (u?.highlights ?? [])
+      .map((url) => byUrl.get(url))
+      .filter((p): p is PhotoItem => !!p);
     return {
       photos: photos.slice(0, 9),
+      highlights,
       photoCount: photos.length,
       friends: ordered.map((id) => map.get(id)).filter((s): s is UserSummary => !!s),
       friendCount: ids.length,
@@ -379,9 +405,47 @@ export const timeline = viewerQuery({
   },
 });
 
+/** "Search" on a profile: the person's timeline posts matching the text, best match first. */
+export const search = viewerQuery({
+  args: { userId: v.id("users"), q: v.string() },
+  handler: async (ctx, { userId, q }) => {
+    const text = q.trim();
+    if (!text) return [];
+    const a = await loadAudience(ctx, ctx.viewer._id);
+    const hits = await ctx.db
+      .query("posts")
+      .withSearchIndex("search_text", (s) => s.search("text", text))
+      .take(256);
+    const out: Doc<"posts">[] = [];
+    for (const p of hits) {
+      if (out.length >= 20) break;
+      const onTimeline =
+        p.timelineUserId === userId || (p.authorId === userId && !p.timelineUserId);
+      if (onTimeline && !p.groupId && !p.eventId && (await canView(ctx, p, a))) out.push(p);
+    }
+    return enrichPosts(ctx, out, a);
+  },
+});
+
 /* ---------------- Mutations ---------------- */
 
 const text = v.optional(v.string());
+/** "YYYY-MM" month, or empty to clear. */
+const month = v.optional(v.string());
+const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
+function cleanMonth(m: string | undefined) {
+  const t = m?.trim();
+  if (!t) return undefined;
+  if (!MONTH.test(t)) throw new ConvexError("Dates must be a month and year");
+  return t;
+}
+function cleanRange<T extends { start?: string; end?: string }>(x: T) {
+  const start = cleanMonth(x.start);
+  const end = cleanMonth(x.end);
+  if (start && end && end < start) throw new ConvexError("End date can't be before the start date");
+  return { start, end };
+}
+export const HIGHLIGHTS_MAX = 9;
 
 /** Edit intro / About details. Empty strings clear a field. Only your own profile. */
 export const update = viewerMutation({
@@ -391,9 +455,13 @@ export const update = viewerMutation({
     city: text,
     hometown: text,
     relationship: text,
-    work: v.optional(v.array(v.object({ title: v.string(), company: v.string() }))),
+    work: v.optional(
+      v.array(v.object({ title: v.string(), company: v.string(), start: month, end: month })),
+    ),
     education: v.optional(
-      v.array(v.object({ school: v.string(), detail: v.optional(v.string()) })),
+      v.array(
+        v.object({ school: v.string(), detail: v.optional(v.string()), start: month, end: month }),
+      ),
     ),
   },
   handler: async (ctx, args) => {
@@ -405,11 +473,15 @@ export const update = viewerMutation({
     if (args.bio && args.bio.length > 101) throw new ConvexError("Bio can be up to 101 characters");
     if (args.work)
       patch.work = args.work
-        .map((w) => ({ title: w.title.trim(), company: w.company.trim() }))
+        .map((w) => ({ title: w.title.trim(), company: w.company.trim(), ...cleanRange(w) }))
         .filter((w) => w.company);
     if (args.education)
       patch.education = args.education
-        .map((e) => ({ school: e.school.trim(), detail: e.detail?.trim() || undefined }))
+        .map((e) => ({
+          school: e.school.trim(),
+          detail: e.detail?.trim() || undefined,
+          ...cleanRange(e),
+        }))
         .filter((e) => e.school);
     await ctx.db.patch(ctx.viewer._id, patch);
   },
@@ -433,6 +505,28 @@ export const setPhoto = viewerMutation({
     } else {
       await ctx.db.patch(ctx.viewer._id, { cover: url ?? undefined });
     }
+  },
+});
+
+/**
+ * Replace the Highlights (featured photos) on your profile. Only photos that
+ * already appear in your Photos can be featured.
+ */
+export const setHighlights = viewerMutation({
+  args: { urls: v.array(v.string()) },
+  handler: async (ctx, { urls }) => {
+    const unique = [...new Set(urls)];
+    if (unique.length > HIGHLIGHTS_MAX)
+      throw new ConvexError(`You can feature up to ${HIGHLIGHTS_MAX} photos`);
+    if (unique.length) {
+      const me = ctx.viewer;
+      const a = await loadAudience(ctx, me._id);
+      const posts = await visibleTimelinePosts(ctx, a, me._id);
+      const timeline = mediaOf(posts, "image");
+      const allowed = new Set([...timeline, ...profilePhotos(me, timeline)].map((p) => p.url));
+      if (unique.some((u) => !allowed.has(u))) throw new ConvexError("Choose from your photos");
+    }
+    await ctx.db.patch(ctx.viewer._id, { highlights: unique.length ? unique : undefined });
   },
 });
 

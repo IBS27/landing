@@ -6,10 +6,9 @@ import { useM } from "@/app/viewer";
 import { DotsIcon } from "@/features/posts/icons";
 import { FacebookLogo } from "@/icons";
 import { cn, fullTimestamp, shortAge } from "@/lib/format";
-import { Menu, MenuTrigger, Tooltip } from "@/ui/overlays";
+import { Menu, MenuContent, MenuItem, MenuTrigger, Tooltip } from "@/ui/overlays";
 import { Avatar, Button } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
-import { CaretMenuContent, CaretMenuItem } from "./CaretMenu";
 import { KindBadge } from "./KindBadge";
 import type { NotificationTarget, NotificationView } from "./types";
 
@@ -197,18 +196,18 @@ export function NotificationRow({
               <DotsIcon size={20} />
             </button>
           </MenuTrigger>
-          <CaretMenuContent>
-            <CaretMenuItem
+          <MenuContent arrow>
+            <MenuItem
               icon={<Check size={20} strokeWidth={2.2} />}
               label={n.read ? "Mark as unread" : "Mark as read"}
               onSelect={() => void setRead({ id: n._id, read: !n.read })}
             />
-            <CaretMenuItem
+            <MenuItem
               icon={<SquareX size={20} strokeWidth={2} />}
               label="Remove this notification"
               onSelect={() => void remove({ id: n._id })}
             />
-          </CaretMenuContent>
+          </MenuContent>
         </Menu>
       </div>
     </div>

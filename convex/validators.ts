@@ -11,6 +11,9 @@ export const media = v.object({
   width: v.optional(v.number()),
   height: v.optional(v.number()),
   alt: v.optional(v.string()),
+  /** Videos: a poster frame shown before playback, and the length in seconds. */
+  poster: v.optional(v.string()),
+  duration: v.optional(v.number()),
 });
 export type Media = Infer<typeof media>;
 
@@ -55,6 +58,21 @@ export const messageAttachment = v.union(
   v.object({ kind: v.literal("listing"), listingId: v.id("listings") }),
   v.object({ kind: v.literal("post"), postId: v.id("posts") }),
   v.object({ kind: v.literal("sticker"), emoji: v.string() }),
+  /** A reply to someone's story: a snapshot of the story so it survives expiry. */
+  v.object({
+    kind: v.literal("story"),
+    storyId: v.id("stories"),
+    url: v.optional(v.string()),
+    background: v.optional(v.string()),
+    text: v.optional(v.string()),
+  }),
+  /** A call log line ("You called Ethan", "Missed video call"). */
+  v.object({
+    kind: v.literal("call"),
+    media: v.union(v.literal("audio"), v.literal("video")),
+    outcome: v.union(v.literal("no_answer"), v.literal("cancelled")),
+    durationMs: v.optional(v.number()),
+  }),
 );
 export type MessageAttachment = Infer<typeof messageAttachment>;
 
@@ -163,4 +181,36 @@ export const notificationKind = v.union(
   v.literal("listing_saved"),
   v.literal("birthday"),
   v.literal("memory"),
+);
+
+/** Settings → Notifications categories (each maps to one or more notification kinds). */
+export const notificationCategory = v.union(
+  v.literal("comments"),
+  v.literal("tags"),
+  v.literal("reminders"),
+  v.literal("activity"),
+  v.literal("friend_updates"),
+  v.literal("friend_requests"),
+  v.literal("people_you_may_know"),
+  v.literal("birthdays"),
+  v.literal("groups"),
+  v.literal("video"),
+  v.literal("events"),
+  v.literal("pages"),
+  v.literal("marketplace"),
+  v.literal("fundraisers"),
+);
+export type NotificationCategory = Infer<typeof notificationCategory>;
+
+/** Settings → "Who can send you friend requests?" */
+export const friendRequestAudience = v.union(
+  v.literal("everyone"),
+  v.literal("friends_of_friends"),
+);
+
+/** Settings → "Who can see your friends list?" */
+export const friendsListAudience = v.union(
+  v.literal("public"),
+  v.literal("friends"),
+  v.literal("only_me"),
 );

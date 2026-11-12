@@ -7,10 +7,8 @@ import {
   Link2,
   MoreHorizontal,
   Music2,
-  Play,
+  Plus,
   Star,
-  Volume2,
-  VolumeX,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -31,10 +29,21 @@ import {
   ShareOutline,
 } from "@/features/posts/icons";
 import { reactionMeta, useReactionHover } from "@/features/posts/reactions";
+import {
+  PauseGlyph,
+  PlayGlyph,
+  safePlay,
+  setSoundOn,
+  useSoundOn,
+  useVideoProgress,
+  useVideoState,
+  VolumeGlyph,
+} from "@/features/posts/VideoPlayer";
 import { cn, compactCount } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/ui/overlays";
 import { Avatar, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
+import { CreateReelDialog } from "./CreateReel";
 
 type Feed = "foryou" | "following" | "profile";
 
@@ -48,6 +57,7 @@ export function ReelsPage({ startId }: { startId?: string }) {
   const navigate = useNavigate();
   const direct = startId !== undefined;
   const [feed, setFeed] = useState<Feed>("foryou");
+  const [creating, setCreating] = useState(false);
   // The list is fixed to the reel the viewer arrived on; the URL then follows scrolling.
   const [initialId] = useState(startId);
   const all = useQ(api.media.reels, { startId: initialId });
@@ -157,6 +167,17 @@ export function ReelsPage({ startId }: { startId?: string }) {
               {label}
             </button>
           ))}
+          <div className="mx-2 my-2 h-px bg-white/15" />
+          <button
+            type="button"
+            onClick={() => setCreating(true)}
+            className="flex h-11 w-[204px] items-center gap-3 rounded-lg px-3 font-medium text-[17px] text-white/80 hover:bg-white/5"
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+              <Plus size={20} />
+            </span>
+            Create reel
+          </button>
         </nav>
       )}
 
@@ -179,6 +200,15 @@ export function ReelsPage({ startId }: { startId?: string }) {
                 ? "Reels you create will appear here."
                 : "Follow people and Pages to see their reels here."}
             </p>
+            {feed === "profile" && (
+              <button
+                type="button"
+                onClick={() => setCreating(true)}
+                className="mt-3 h-9 rounded-md bg-[#0866ff] px-4 font-semibold text-[15px] text-white hover:brightness-110"
+              >
+                Create reel
+              </button>
+            )}
           </div>
         ) : (
           reels.map((p, i) => (
@@ -197,6 +227,7 @@ export function ReelsPage({ startId }: { startId?: string }) {
           </NavArrow>
         </div>
       )}
+      <CreateReelDialog open={creating} onClose={() => setCreating(false)} />
     </div>
   );
 }
@@ -225,19 +256,38 @@ function NavArrow({
   );
 }
 
-function ReelSlide({ post, active, offset }: { post: PostView; active: boolean; offset: boolean }) {
-  const [muted, setMuted] = useState(true);
+type Reel = PostView & { viewerFollowsAuthor: boolean };
+
+function ReelSlide({ post, active, offset }: { post: Reel; active: boolean; offset: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const sound = useSoundOn();
   const [paused, setPaused] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const media = post.media[0];
+  const { playing } = useVideoState(ref);
+  const progress = useVideoProgress(ref, playing);
 
-  // Restart playback whenever the slide comes back into view.
+  // Restart from the top whenever the slide comes back into view.
   useEffect(() => {
-    if (active) setPaused(false);
+    if (active) {
+      setPaused(false);
+      if (ref.current) ref.current.currentTime = 0;
+    }
   }, [active]);
 
-  const playing = active && !paused;
+  // The element follows the slide: plays while active and not paused by the viewer.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (active && !paused) safePlay(el);
+    else el.pause();
+  }, [active, paused]);
+
+  useEffect(() => {
+    if (ref.current) ref.current.muted = !sound;
+  }, [sound]);
+
   const caption = post.text ?? "";
   const longCaption = caption.length > 80 || caption.includes("\n");
 
@@ -252,24 +302,16 @@ function ReelSlide({ post, active, offset }: { post: PostView; active: boolean; 
     >
       <div className="flex items-end gap-[11px]">
         <div className="relative aspect-[9/16] h-[calc(100vh-88px)] overflow-hidden rounded-lg bg-[#18191a]">
-          {media?.kind === "video" ? (
-            <video
-              src={media.url}
-              muted={muted}
-              loop
-              autoPlay={active}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <img
-              src={media?.url}
-              alt={media?.alt ?? ""}
-              className={cn(
-                "h-full w-full object-cover transition-transform ease-linear",
-                playing ? "scale-110 duration-[15000ms]" : "scale-100 duration-500",
-              )}
-            />
-          )}
+          <video
+            ref={ref}
+            src={media?.url}
+            poster={media?.poster}
+            muted={!sound}
+            loop
+            playsInline
+            preload={active ? "auto" : "metadata"}
+            className="h-full w-full object-cover"
+          />
           <button
             type="button"
             aria-label={paused ? "Play" : "Pause"}
@@ -277,19 +319,30 @@ function ReelSlide({ post, active, offset }: { post: PostView; active: boolean; 
             className="absolute inset-0"
           >
             {paused && (
-              <span className="absolute top-1/2 left-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white">
-                <Play size={32} fill="currentColor" strokeWidth={0} className="ml-1" />
+              <span className="absolute top-1/2 left-1/2 flex h-[72px] w-[72px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white">
+                <PlayGlyph size={36} className="ml-1" />
               </span>
             )}
           </button>
-          <button
-            type="button"
-            aria-label={muted ? "Unmute" : "Mute"}
-            onClick={() => setMuted((m) => !m)}
-            className="absolute top-2 left-2 flex h-11 w-11 items-center justify-center rounded-full bg-[rgba(51,51,52,0.67)] text-white hover:bg-[rgba(70,70,72,0.8)]"
-          >
-            {muted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-          </button>
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/35 to-transparent" />
+          <div className="absolute top-2 left-2 flex items-center gap-1">
+            <button
+              type="button"
+              aria-label={paused ? "Play" : "Pause"}
+              onClick={() => setPaused((p) => !p)}
+              className="flex h-11 w-11 items-center justify-center rounded-full text-white hover:bg-white/10"
+            >
+              {paused ? <PlayGlyph size={22} /> : <PauseGlyph size={22} />}
+            </button>
+            <button
+              type="button"
+              aria-label={sound ? "Mute" : "Unmute"}
+              onClick={() => setSoundOn(!sound)}
+              className="flex h-11 w-11 items-center justify-center rounded-full text-white hover:bg-white/10"
+            >
+              <VolumeGlyph muted={!sound} size={22} />
+            </button>
+          </div>
 
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[244px] bg-[linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.1)_12.5%,rgba(0,0,0,0.4))]" />
           <div className="absolute inset-x-0 bottom-0 px-4 pb-6 text-white">
@@ -311,7 +364,7 @@ function ReelSlide({ post, active, offset }: { post: PostView; active: boolean; 
                     {post.author.name}
                   </Link>
                   <GlobeIcon size={12} aria-label="Shared with Public" />
-                  <ReelFollow author={post.author} friend={post.viewerFollowsAuthor} />
+                  <ReelFollow author={post.author} following={post.viewerFollowsAuthor} />
                 </div>
                 <p className="flex items-center gap-1 truncate font-semibold text-[13px] text-white/80 leading-4">
                   <Music2 size={12} /> {post.author.name} · Original audio
@@ -338,6 +391,13 @@ function ReelSlide({ post, active, offset }: { post: PostView; active: boolean; 
               </button>
             )}
           </div>
+          <ReelProgress
+            value={progress}
+            onSeek={(f) => {
+              const el = ref.current;
+              if (el && el.duration > 0) el.currentTime = f * el.duration;
+            }}
+          />
         </div>
 
         <ReelActions post={post} onComment={() => setCommentsOpen(true)} />
@@ -347,28 +407,44 @@ function ReelSlide({ post, active, offset }: { post: PostView; active: boolean; 
   );
 }
 
-/**
- * "· Follow" after the author's name, for Pages the viewer doesn't follow and
- * people who aren't friends yet (following a person sends a friend request).
- * It disappears once followed or requested, like Facebook's.
- */
-function ReelFollow({ author, friend }: { author: PostView["author"]; friend: boolean }) {
-  const viewer = useViewer();
-  const isPage = author.kind === "page";
-  const self = author._id === viewer._id;
-  const following = useQ(api.pages.followingIds, isPage && !self ? {} : "skip");
-  const relation = useQ(
-    api.friends.relation,
-    !isPage && !self && !friend ? { userId: author._id } : "skip",
+/** The thin progress bar along the bottom edge of a reel; click or drag to seek. */
+function ReelProgress({ value, onSeek }: { value: number; onSeek: (f: number) => void }) {
+  const at = (e: React.PointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    return Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+  };
+  return (
+    <div
+      role="slider"
+      tabIndex={-1}
+      aria-label="Reel progress"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(value * 100)}
+      onPointerDown={(e) => {
+        e.currentTarget.setPointerCapture(e.pointerId);
+        onSeek(at(e));
+      }}
+      onPointerMove={(e) => e.currentTarget.hasPointerCapture(e.pointerId) && onSeek(at(e))}
+      className="group/progress absolute inset-x-0 bottom-0 flex h-3 cursor-pointer items-end"
+    >
+      <div className="h-1 w-full bg-white/30 transition-[height] group-hover/progress:h-1.5">
+        <div className="h-full bg-white" style={{ width: `${value * 100}%` }} />
+      </div>
+    </div>
   );
-  const setFollow = useM(api.profiles.setFollow);
-  const sendRequest = useM(api.friends.sendRequest);
+}
+
+/**
+ * "· Follow" after the author's name for people and Pages the viewer doesn't
+ * follow yet. Follows are separate from friend requests; the link disappears
+ * once followed, like Facebook's.
+ */
+function ReelFollow({ author, following }: { author: PostView["author"]; following: boolean }) {
+  const viewer = useViewer();
+  const follow = useM(api.media.follow);
   const [done, setDone] = useState(false);
-  const show =
-    !done &&
-    !self &&
-    (isPage ? following !== undefined && !following.includes(author._id) : relation === "none");
-  if (!show) return null;
+  if (following || done || author._id === viewer._id) return null;
   return (
     <>
       <span className="text-[#e2e5e9]">·</span>
@@ -376,10 +452,7 @@ function ReelFollow({ author, friend }: { author: PostView["author"]; friend: bo
         type="button"
         onClick={() => {
           setDone(true);
-          const req = isPage
-            ? setFollow({ targetId: author._id, follow: true })
-            : sendRequest({ userId: author._id });
-          req.catch(() => setDone(false));
+          follow({ targetId: author._id, follow: true }).catch(() => setDone(false));
         }}
         className="font-semibold hover:underline"
       >

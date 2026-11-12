@@ -7,6 +7,7 @@ import {
   MapPin,
   Pencil,
   Plus,
+  Search,
   Tag,
 } from "lucide-react";
 import { useState } from "react";
@@ -102,14 +103,15 @@ export function ProfileHeader() {
 }
 
 function Cover() {
-  const { profile } = useProfile();
+  const { profile, embedded } = useProfile();
   const { user, isSelf } = profile;
   const photo = useSetProfilePhoto();
   const [viewing, setViewing] = useState(false);
   const [choosing, setChoosing] = useState(false);
 
   return (
-    <div className="relative mx-auto w-full max-w-[1250px]">
+    // In the Friends preview pane the cover keeps the content column's gutters.
+    <div className={cn("relative mx-auto w-full max-w-[1250px]", embedded && "px-4")}>
       <div className="relative aspect-[1250/463] max-h-[463px] w-full overflow-hidden rounded-b-lg bg-wash">
         {user.cover ? (
           <button
@@ -382,6 +384,17 @@ function Actions({ showRecs, onToggleRecs }: { showRecs: boolean; onToggleRecs: 
           >
             {profile.viewerFollows ? "Following" : "Follow"}
           </Button>
+          <Link
+            to="/$username/search"
+            params={{ username: user.username }}
+            search={{ q: "" }}
+            resetScroll={false}
+            aria-label={`Search ${user.name}'s profile`}
+            className="inline-flex h-9 items-center gap-1.5 rounded-md bg-btn px-3 font-semibold text-[15px] text-btn-text transition-[filter] hover:brightness-95 dark:hover:brightness-125"
+          >
+            <Search size={16} strokeWidth={2.6} />
+            Search
+          </Link>
         </>
       ) : (
         <>

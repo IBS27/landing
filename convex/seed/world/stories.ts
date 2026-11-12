@@ -1,4 +1,4 @@
-import { hoursAgo } from "../lib/time";
+import { daysAgo, hoursAgo } from "../lib/time";
 import type { StorySeed } from "../types";
 
 /** Active stories (last 24h) from Maya's friends, newest first. */
@@ -33,4 +33,36 @@ export const stories: readonly StorySeed[] = [
   { by: "emily.chen", photo: "library", text: "midterm #3 survived", at: hoursAgo(16) },
   { by: "ethan.park", photo: "bubble tea", at: hoursAgo(19) },
   { by: "olivia.brooks", photo: "dog park", text: "met a corgi named waffles", at: hoursAgo(22) },
+
+  // Maya's Story archive (expired stories, visible only to her).
+  {
+    by: "maya.chen",
+    photo: "ramen",
+    text: "midterm fuel",
+    at: daysAgo(3, "21:10"),
+    archived: true,
+  },
+  { by: "maya.chen", photo: "mount rainier", at: daysAgo(9, "08:40"), archived: true },
+  {
+    by: "maya.chen",
+    photo: "latte art",
+    text: "ana finally nailed the heart",
+    at: daysAgo(16, "10:15"),
+    archived: true,
+  },
+  {
+    by: "maya.chen",
+    photo: "rainy street",
+    text: "november in seattle",
+    at: daysAgo(24, "17:30"),
+    archived: true,
+  },
+  {
+    by: "maya.chen",
+    photo: "library",
+    text: "suzzallo szn",
+    at: daysAgo(38, "14:05"),
+    archived: true,
+  },
+  { by: "maya.chen", photo: "film camera", at: daysAgo(52, "12:00"), archived: true },
 ];

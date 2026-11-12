@@ -1,8 +1,10 @@
 import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
+import { blockedSet, isBlockedEitherWay } from "./lib/blocks";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { notify } from "./lib/notify";
+import { settingsRow, visibleFriendIds } from "./lib/settings";
 import { areFriends, friendIds, type UserSummary, userSummary } from "./lib/users";
 
 /** How the viewer relates to another user; drives every friend button. */
@@ -59,6 +61,11 @@ export async function personCards(
       .map((id) => samples.get(id))
       .filter((s): s is UserSummary => !!s),
   }));
+}
+
+/** Settings → "Who can send you friend requests?" is "Friends of friends". */
+async function requestsLimited(ctx: QueryCtx, userId: Id<"users">) {
+  return (await settingsRow(ctx, userId))?.friendRequests === "friends_of_friends";
 }
 
 async function docs(ctx: QueryCtx, ids: Id<"users">[]) {
@@ -142,7 +149,7 @@ export const suggestions = viewerQuery({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, { limit }) => {
     const viewerId = ctx.viewer._id;
-    const [friends, incoming, outgoing, everyone] = await Promise.all([
+    const [friends, incoming, outgoing, everyone, blocked] = await Promise.all([
       friendIds(ctx, viewerId),
       ctx.db
         .query("friendRequests")
@@ -153,10 +160,12 @@ export const suggestions = viewerQuery({
         .withIndex("by_from", (q) => q.eq("fromId", viewerId))
         .collect(),
       ctx.db.query("users").collect(),
+      blockedSet(ctx, viewerId),
     ]);
     const friendSet = new Set(friends);
     const exclude = new Set<Id<"users">>([
       viewerId,
+      ...blocked,
       ...friends,
       ...incoming.map((r) => r.fromId),
       ...outgoing.map((r) => r.toId),
@@ -166,7 +175,14 @@ export const suggestions = viewerQuery({
     );
     const cards = await personCards(ctx, friendSet, candidates);
     cards.sort((a, b) => b.mutualCount - a.mutualCount || a.name.localeCompare(b.name));
-    return cards.slice(0, limit ?? 40);
+    // Skip people who only take requests from friends of friends when there's no mutual friend.
+    const out: PersonCard[] = [];
+    for (const c of cards) {
+      if (out.length >= (limit ?? 40)) break;
+      if (c.mutualCount === 0 && (await requestsLimited(ctx, c._id))) continue;
+      out.push(c);
+    }
+    return out;
   },
 });
 
@@ -186,7 +202,14 @@ export const list = viewerQuery({
     const viewerFriends = new Set(await friendIds(ctx, viewerId));
     const users = await docs(
       ctx,
-      rows.map((r) => r.friendId),
+      await visibleFriendIds(
+        ctx,
+        userId,
+        viewerId,
+        rows.map((r) => r.friendId),
+        viewerFriends,
+        await blockedSet(ctx, viewerId),
+      ),
     );
     const cards = await personCards(ctx, viewerFriends, users);
     const since = new Map(rows.map((r) => [r.friendId, r.createdAt]));
@@ -261,7 +284,9 @@ export const sendRequest = viewerMutation({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
     const viewerId = ctx.viewer._id;
-    await targetPerson(ctx, userId, viewerId);
+    const target = await targetPerson(ctx, userId, viewerId);
+    if (await isBlockedEitherWay(ctx, viewerId, userId))
+      throw new ConvexError("This person isn't available right now.");
     if (await areFriends(ctx, viewerId, userId)) return "friend" as const;
     if (await pendingRequest(ctx, viewerId, userId)) return "outgoing" as const;
     const incoming = await pendingRequest(ctx, userId, viewerId);
@@ -276,6 +301,14 @@ export const sendRequest = viewerMutation({
         text: "accepted your friend request.",
       });
       return "friend" as const;
+    }
+    if (await requestsLimited(ctx, userId)) {
+      const theirs = await friendIds(ctx, userId);
+      const mine = new Set(await friendIds(ctx, viewerId));
+      if (!theirs.some((id) => mine.has(id)))
+        throw new ConvexError(
+          `${target.firstName} only accepts friend requests from friends of friends.`,
+        );
     }
     await ctx.db.insert("friendRequests", {
       fromId: viewerId,

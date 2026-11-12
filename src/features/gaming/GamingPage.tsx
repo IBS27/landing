@@ -150,7 +150,7 @@ export function GamingPage() {
         ))}
       </AppRail>
 
-      <main className="min-w-0 flex-1 px-[27px] pt-[11px] pb-10">
+      <main className="min-w-0 flex-1 px-[27px] pt-[6px] pb-10">
         {results ? (
           <Section title={`Results for "${q.trim()}"`}>
             {results.length === 0 ? (
@@ -267,8 +267,8 @@ function PlayHome({ onPlay, best }: { onPlay: (g: Game) => void; best: Record<st
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="pb-6">
-      <h2 className="px-1 pt-1 pb-3 font-bold text-[24px] text-primary leading-7">{title}</h2>
+    <section className="pb-[30px]">
+      <h2 className="px-1 pt-1 pb-2 font-bold text-[24px] text-primary leading-7">{title}</h2>
       {children}
     </section>
   );
@@ -392,7 +392,7 @@ function FeaturedCard({ game, onPlay }: { game: Game; onPlay: () => void }) {
         </span>
         <span className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/10" />
       </div>
-      <div className="flex h-[67px] items-center gap-3 px-3" style={{ background: game.band }}>
+      <div className="flex h-[66px] items-center gap-3 px-3" style={{ background: game.band }}>
         <GameIcon game={game} size={40} />
         <div className="min-w-0 text-white">
           <p className="truncate font-semibold text-[17px] leading-5">{game.name}</p>

@@ -26,6 +26,7 @@ import {
 import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { useChatDock } from "@/app/chat-dock";
 import { useM, useQ } from "@/app/viewer";
+import { PlayGlyph, VideoPlayer } from "@/features/posts/VideoPlayer";
 import { FacebookLogo } from "@/icons";
 import { cn, price } from "@/lib/format";
 import {
@@ -124,7 +125,7 @@ function ItemContainer({ l }: { l: Detail }) {
   const toast = useToast();
   return (
     <div className="flex h-[calc(100vh-132px)] min-h-[560px] overflow-hidden bg-card">
-      <Gallery photos={l.photos} title={l.title} />
+      <Gallery photos={l.photos} video={l.video} title={l.title} />
       <aside className="flex w-[356px] shrink-0 flex-col">
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-4 pb-5">
           <Header l={l} toast={toast.show} />
@@ -144,9 +145,22 @@ function ItemContainer({ l }: { l: Detail }) {
 
 /* ───────────── Gallery ───────────── */
 
-function Gallery({ photos, title }: { photos: string[]; title: string }) {
+function Gallery({
+  photos,
+  video,
+  title,
+}: {
+  photos: string[];
+  video: Detail["video"];
+  title: string;
+}) {
   const [i, setI] = useState(0);
-  const n = photos.length;
+  // The listing video (if any) leads the gallery, then the photos.
+  const slides = [
+    ...(video ? [{ video, thumb: video.poster ?? "" }] : []),
+    ...photos.map((p) => ({ video: null, thumb: p })),
+  ];
+  const n = slides.length;
   const go = (d: number) => setI((x) => (x + d + n) % n);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -158,9 +172,19 @@ function Gallery({ photos, title }: { photos: string[]; title: string }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [n]);
-  const src = photos[i];
+  const slide = slides[i];
+  const src = slide && !slide.video ? slide.thumb : undefined;
   return (
     <div ref={ref} className="relative min-w-0 flex-1 overflow-hidden bg-black">
+      {slide?.video && (
+        <VideoPlayer
+          key={slide.video.url}
+          src={slide.video.url}
+          poster={slide.video.poster}
+          label={`${title} video`}
+          className={n > 1 ? "h-[calc(100%-52px)] w-full" : "h-full w-full"}
+        />
+      )}
       {src && (
         <>
           <img
@@ -177,16 +201,21 @@ function Gallery({ photos, title }: { photos: string[]; title: string }) {
           <GalleryArrow side="left" onClick={() => go(-1)} />
           <GalleryArrow side="right" onClick={() => go(1)} />
           <div className="absolute inset-x-0 bottom-0 flex h-[52px] items-start justify-center gap-3">
-            {photos.map((p, k) => (
+            {slides.map((p, k) => (
               <button
-                key={p + String(k)}
+                key={p.thumb + String(k)}
                 type="button"
-                aria-label={`View photo ${k + 1}`}
+                aria-label={p.video ? "View video" : `View photo ${k + 1 - (video ? 1 : 0)}`}
                 aria-current={k === i}
                 onClick={() => setI(k)}
-                className="relative h-9 w-9 overflow-hidden rounded-[6px]"
+                className="relative h-9 w-9 overflow-hidden rounded-[6px] bg-[#3a3b3c]"
               >
-                <img src={p} alt="" className="h-full w-full object-cover" />
+                {p.thumb && <img src={p.thumb} alt="" className="h-full w-full object-cover" />}
+                {p.video && (
+                  <span className="absolute inset-0 flex items-center justify-center text-white">
+                    <PlayGlyph size={14} />
+                  </span>
+                )}
                 <span
                   className={cn(
                     "absolute inset-0 rounded-[6px]",
@@ -254,7 +283,7 @@ function Header({ l, toast }: { l: Detail; toast: (m: string) => void }) {
         Listed {listedAgo(l.createdAt)} in {l.location.city}
       </p>
       {l.meetup.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+        <div className="mt-2.5 -mb-1 flex flex-wrap gap-x-3 gap-y-1">
           {l.meetup.map((m) => (
             <span key={m} className="flex items-center gap-1 text-[13px] text-secondary leading-4">
               <span className="flex h-4 w-4 items-center justify-center rounded-full border border-secondary font-semibold text-[9px]">
@@ -632,12 +661,6 @@ function Details({ l }: { l: Detail }) {
           <div className="flex justify-between gap-4 py-1.5">
             <dt className="text-primary">Condition</dt>
             <dd className="text-secondary">{conditionLabel(l.condition)}</dd>
-          </div>
-        )}
-        {l.brand && (
-          <div className="flex justify-between gap-4 py-1.5">
-            <dt className="text-primary">Brand</dt>
-            <dd className="text-secondary">{l.brand}</dd>
           </div>
         )}
       </dl>

@@ -8,6 +8,7 @@ import { IconButton } from "@/ui/primitives";
 import { ActionBar } from "./ActionBar";
 import { CommentComposer, CommentList } from "./CommentsSection";
 import { PostContent, PostHeader } from "./PostCard";
+import { ScrollArea } from "./ScrollArea";
 import type { PostView } from "./types";
 
 const VEIL = "bg-[rgba(244,244,244,0.8)] dark:bg-[rgba(11,11,11,0.8)]";
@@ -52,16 +53,13 @@ export function PostDialog({ post, onClose }: { post: PostView; onClose: () => v
               </IconButton>
             </D.Close>
           </div>
-          <div
-            className="min-h-0 flex-1 overflow-y-auto"
-            style={{ scrollbarColor: "var(--scroll-thumb) transparent" }}
-          >
+          <ScrollArea>
             <PostHeader post={post} />
             <PostContent post={post} expanded />
             <ActionBar post={post} onComment={() => setFocusKey((k) => k + 1)} />
             <CommentList postId={post._id} />
             <div className="h-2" />
-          </div>
+          </ScrollArea>
           <div className="border-divider border-t px-4 pt-2 pb-3">
             <CommentComposer postId={post._id} focusKey={focusKey} autoFocus />
           </div>

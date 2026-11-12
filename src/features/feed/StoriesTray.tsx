@@ -5,8 +5,7 @@ import { useQ, useViewer } from "@/app/viewer";
 import { cn } from "@/lib/format";
 import { Card } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
-import { StoryViewer } from "./StoryViewer";
-import { type StoryBucket, storyBackground, storyTextColor } from "./storyUtils";
+import { entryStory, type StoryBucket, storyBackground, storyTextColor } from "./storyUtils";
 
 const TILE = 140;
 const GAP = 8;
@@ -17,7 +16,6 @@ export function StoriesTray() {
   const buckets = useQ(api.stories.tray, {});
   const scroller = useRef<HTMLDivElement>(null);
   const [edges, setEdges] = useState({ start: true, end: true });
-  const [openAt, setOpenAt] = useState<number | null>(null);
 
   const update = () => {
     const el = scroller.current;
@@ -44,8 +42,12 @@ export function StoriesTray() {
   const scrollBy = (dir: 1 | -1) =>
     scroller.current?.scrollBy({ left: dir * (TILE + GAP) * 3, behavior: "smooth" });
 
-  // The viewer's own bucket (if any) opens from the tray's first friend slot.
-  const own = buckets[0]?.author._id === viewer._id ? buckets[0] : null;
+  // Your story first, then people with unseen stories, then the ones you've watched.
+  const ordered = [
+    ...buckets.filter((b) => b.author._id === viewer._id),
+    ...buckets.filter((b) => b.author._id !== viewer._id && !b.seen),
+    ...buckets.filter((b) => b.author._id !== viewer._id && b.seen),
+  ];
 
   return (
     <div className="relative">
@@ -73,12 +75,12 @@ export function StoriesTray() {
             <span className="font-semibold text-[13px] text-primary leading-4">Create story</span>
           </span>
         </Link>
-        {buckets.map((b, i) => (
+        {ordered.map((b) => (
           <StoryTile
             key={b.author._id}
             bucket={b}
-            label={own && i === 0 ? "Your story" : b.author.name}
-            onOpen={() => setOpenAt(i)}
+            own={b.author._id === viewer._id}
+            label={b.author._id === viewer._id ? "Your story" : b.author.name}
           />
         ))}
       </div>
@@ -86,28 +88,19 @@ export function StoriesTray() {
         <TrayArrow side="left" onClick={() => scrollBy(-1)} label="Previous stories" />
       )}
       {!edges.end && <TrayArrow side="right" onClick={() => scrollBy(1)} label="Next stories" />}
-      {openAt !== null && (
-        <StoryViewer buckets={buckets} start={openAt} onClose={() => setOpenAt(null)} />
-      )}
     </div>
   );
 }
 
-function StoryTile({
-  bucket,
-  label,
-  onOpen,
-}: {
-  bucket: StoryBucket;
-  label: string;
-  onOpen: () => void;
-}) {
+function StoryTile({ bucket, label, own }: { bucket: StoryBucket; label: string; own: boolean }) {
   const latest = bucket.stories[bucket.stories.length - 1];
+  // Your own story and people you've caught up on get a grey ring.
+  const seen = own || bucket.seen;
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      aria-label={`${label}'s story`}
+    <Link
+      to="/stories/$storyId"
+      params={{ storyId: entryStory(bucket)._id }}
+      aria-label={own ? "Your story" : `${label}'s story`}
       className="group relative h-[250px] w-[140px] shrink-0 overflow-hidden rounded-lg bg-black text-left shadow-base"
     >
       {latest.background || !latest.media.url ? (
@@ -120,25 +113,41 @@ function StoryTile({
         >
           <span className="line-clamp-5">{latest.text}</span>
         </span>
+      ) : latest.media.kind === "video" && !latest.media.poster ? (
+        <video
+          src={latest.media.url}
+          muted
+          preload="metadata"
+          aria-hidden
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+        />
       ) : (
         <img
-          src={latest.media.url}
+          src={latest.media.kind === "video" ? latest.media.poster : latest.media.url}
           alt=""
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
         />
       )}
       <span className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.26)_0%,transparent_30%,transparent_65%,rgba(0,0,0,0.6)_100%)] transition-colors group-hover:bg-black/10" />
-      <span className="absolute top-3 left-3 flex h-10 w-10 items-center justify-center rounded-full bg-fb">
+      <span
+        className={cn(
+          "absolute top-3 left-3 flex h-10 w-10 items-center justify-center rounded-full",
+          seen ? "bg-[#ced0d4]" : "bg-fb",
+        )}
+      >
         <img
           src={bucket.author.avatar}
           alt=""
-          className="h-9 w-9 rounded-full border-[3px] border-fb object-cover"
+          className={cn(
+            "h-9 w-9 rounded-full border-[3px] object-cover",
+            seen ? "border-[#ced0d4]" : "border-fb",
+          )}
         />
       </span>
       <span className="absolute inset-x-3 bottom-3 line-clamp-2 font-semibold text-[13px] text-white leading-4 [text-shadow:0_1px_2px_rgba(0,0,0,0.4)]">
         {label}
       </span>
-    </button>
+    </Link>
   );
 }
 

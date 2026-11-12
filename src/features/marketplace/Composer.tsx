@@ -4,6 +4,8 @@ import { ChevronDown, Globe, X } from "lucide-react";
 import { type ReactNode, useRef, useState } from "react";
 import { useM, useQ, useViewer, useViewerContext } from "@/app/viewer";
 import { uploadFile } from "@/features/posts/util";
+import { PlayGlyph } from "@/features/posts/VideoPlayer";
+import { captureVideoPoster, probeVideo } from "@/features/posts/videoUpload";
 import { cn, price as fmtPrice } from "@/lib/format";
 import { Avatar, Button, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -21,7 +23,7 @@ import {
   type PropertyType,
   propertyTypeLabel,
 } from "../../../convex/lib/listings";
-import type { ListingCategory } from "../../../convex/validators";
+import type { ListingCategory, Media } from "../../../convex/validators";
 import { SelectField, TextArea, TextField } from "./fields";
 import { CheckRow, Switch, VEHICLE_TYPES } from "./filters";
 import { LockIcon, PhoneIcon, PhotosAddIcon, RocketIcon, VideoAddIcon } from "./icons";
@@ -32,6 +34,8 @@ type Detail = NonNullable<FunctionReturnType<typeof api.listings.get>>;
 
 type FormState = {
   photos: string[];
+  /** "Add video": the uploaded clip (served URL + size), or null. */
+  video: Media | null;
   title: string;
   price: string;
   category: ListingCategory | "";
@@ -70,6 +74,7 @@ type FormState = {
 
 const EMPTY: FormState = {
   photos: [],
+  video: null,
   title: "",
   price: "",
   category: "",
@@ -167,6 +172,7 @@ function fromListing(l: Detail): FormState {
   return {
     ...EMPTY,
     photos: l.photos,
+    video: l.video,
     title: l.title,
     price: String(l.price),
     category: l.category,
@@ -304,6 +310,7 @@ export function ListingComposer({ kind, editing }: { kind: ComposerKind; editing
       brand: kind === "item" ? f.brand || undefined : kind === "vehicle" ? f.make : undefined,
       description: f.description,
       photos: f.photos.map((url) => ({ url })),
+      video: f.video ?? undefined,
       neighborhood: f.neighborhood,
       meetup: kind === "item" ? f.meetup : undefined,
       groupIds: f.groupIds,
@@ -644,12 +651,54 @@ function PhotoPicker({ f, set, toast }: StepProps & { toast: (m: string) => void
     }
   };
 
+  const [videoPending, setVideoPending] = useState(false);
+  const addVideo = async (file: File) => {
+    if (!file.type.startsWith("video/")) return toast("Choose a video file");
+    let probed: Awaited<ReturnType<typeof probeVideo>>;
+    try {
+      probed = await probeVideo(file);
+    } catch {
+      return toast("Couldn't read that video");
+    }
+    if (probed.duration > 61) {
+      URL.revokeObjectURL(probed.url);
+      return toast("Videos can be up to 1 minute long");
+    }
+    setVideoPending(true);
+    try {
+      const upload = async (blob: File) => {
+        const storageId = (await uploadFile(await getUploadUrl({}), blob)) as Id<"_storage">;
+        return photoUrl({ storageId });
+      };
+      const poster = await captureVideoPoster(probed.url);
+      const [url, posterUrl] = await Promise.all([
+        upload(file),
+        poster ? upload(poster) : Promise.resolve(undefined),
+      ]);
+      set({
+        video: {
+          url,
+          kind: "video",
+          width: probed.width,
+          height: probed.height,
+          duration: Math.round(probed.duration * 10) / 10,
+          poster: posterUrl,
+        },
+      });
+    } catch {
+      toast("Couldn't upload the video");
+    } finally {
+      URL.revokeObjectURL(probed.url);
+      setVideoPending(false);
+    }
+  };
+
   const tile =
     "flex flex-col items-center justify-center rounded border border-divider text-center hover:bg-hover";
   return (
     <>
       <p className="mt-3 font-semibold text-[13px] text-secondary leading-4">
-        Photos · {f.photos.length} / 10 Videos · 0 / 1
+        Photos · {f.photos.length} / 10 Videos · {f.video ? 1 : 0} / 1
       </p>
       <input
         ref={input}
@@ -668,11 +717,12 @@ function PhotoPicker({ f, set, toast }: StepProps & { toast: (m: string) => void
         accept="video/*"
         hidden
         onChange={(e) => {
-          if (e.target.files?.length) toast("Videos can be added from the Facebook app");
+          const file = e.target.files?.[0];
+          if (file) void addVideo(file);
           e.target.value = "";
         }}
       />
-      {f.photos.length === 0 && pending === 0 ? (
+      {f.photos.length === 0 && pending === 0 && !f.video && !videoPending ? (
         <div
           className="mt-2 grid grid-cols-2 gap-1"
           onDragOver={(e) => e.preventDefault()}
@@ -716,6 +766,42 @@ function PhotoPicker({ f, set, toast }: StepProps & { toast: (m: string) => void
             void add(e.dataTransfer.files);
           }}
         >
+          {f.video && (
+            <div className="group relative aspect-square overflow-hidden rounded border border-divider bg-black">
+              {f.video.poster ? (
+                <img
+                  src={f.video.poster}
+                  alt="Listing video"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <video
+                  src={f.video.url}
+                  muted
+                  preload="metadata"
+                  className="h-full w-full object-cover"
+                />
+              )}
+              <span className="absolute inset-0 flex items-center justify-center text-white">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-black/50">
+                  <PlayGlyph size={18} className="ml-0.5" />
+                </span>
+              </span>
+              <button
+                type="button"
+                aria-label="Remove video"
+                onClick={() => set({ video: null })}
+                className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#080809] shadow-base"
+              >
+                <X size={14} strokeWidth={2.5} />
+              </button>
+            </div>
+          )}
+          {videoPending && (
+            <div className="flex aspect-square items-center justify-center rounded border border-divider bg-input">
+              <Spinner size={20} />
+            </div>
+          )}
           {f.photos.map((p, i) => (
             <div
               key={p}
@@ -748,6 +834,16 @@ function PhotoPicker({ f, set, toast }: StepProps & { toast: (m: string) => void
             >
               <PhotosAddIcon size={20} className="text-icon" />
               <span className="mt-1 font-semibold text-[13px] text-primary">Add photos</span>
+            </button>
+          )}
+          {!f.video && !videoPending && (
+            <button
+              type="button"
+              onClick={() => video.current?.click()}
+              className={cn(tile, "aspect-square")}
+            >
+              <VideoAddIcon size={20} className="text-icon" />
+              <span className="mt-1 font-semibold text-[13px] text-primary">Add video</span>
             </button>
           )}
         </div>

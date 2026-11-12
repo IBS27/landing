@@ -8,6 +8,8 @@ export type SearchParams = {
   /** Posts: year posted. */
   date?: number;
   from?: "you" | "friends" | "groups" | "public";
+  /** Posts: tagged location (check-in place or mention). */
+  loc?: string;
   /** People: friends and friends of friends. */
   fof?: boolean;
   city?: string;
@@ -21,15 +23,13 @@ export type SearchParams = {
   max?: number;
 };
 
+/** Facebook's result filters, in rail order ("top" is All). */
 export const TAB_KEYS = [
   "top",
-  "posts",
   "people",
-  "photos",
-  "videos",
+  "reels",
   "marketplace",
   "pages",
-  "places",
   "groups",
   "events",
 ] as const;
@@ -57,6 +57,7 @@ export function validateSearchParams(s: Record<string, unknown>): SearchParams {
     seen: bool(s.seen),
     date: num(s.date),
     from: oneOf(FROM, s.from),
+    loc: typeof s.loc === "string" && s.loc ? s.loc : undefined,
     fof: bool(s.fof),
     city: typeof s.city === "string" && s.city ? s.city : undefined,
     pub: bool(s.pub),

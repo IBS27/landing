@@ -1,9 +1,8 @@
 import { Link } from "@tanstack/react-router";
+import { ConvexError } from "convex/values";
 import {
-  Briefcase,
   Cake,
   Clock,
-  GraduationCap,
   Hand,
   Heart,
   Home,
@@ -19,8 +18,15 @@ import { useM, useQ } from "@/app/viewer";
 import { cn } from "@/lib/format";
 import { Avatar, Button, Card, IconButton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
-import { CheckinsCard, ReelsCard } from "./cards";
-import { birthdayLabel, joinedLabel, possessive, useProfile } from "./context";
+import { CheckinsCard, LinkRow, OrgEntry, ReelsCard } from "./cards";
+import {
+  birthdayLabel,
+  joinedLabel,
+  possessive,
+  schoolDates,
+  useProfile,
+  workDates,
+} from "./context";
 import { BioEditor } from "./EditProfileModal";
 import { PhotosCard } from "./PhotosTab";
 
@@ -161,18 +167,22 @@ function FieldsEditor({
   onCancel,
   onDelete,
 }: {
-  fields: { label: string; value: string; placeholder?: string }[];
+  fields: { label: string; value: string; placeholder?: string; type?: "text" | "month" }[];
   onSave: (values: string[]) => Promise<unknown>;
   onCancel: () => void;
   onDelete?: () => Promise<unknown>;
 }) {
   const [values, setValues] = useState(fields.map((f) => f.value));
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const run = async (fn: () => Promise<unknown>) => {
     setBusy(true);
+    setError(null);
     try {
       await fn();
       onCancel();
+    } catch (e) {
+      setError(e instanceof ConvexError ? String(e.data) : "Something went wrong");
     } finally {
       setBusy(false);
     }
@@ -194,6 +204,7 @@ function FieldsEditor({
           <input
             // biome-ignore lint/a11y/noAutofocus: the editor opens on an explicit Edit/Add click
             autoFocus={i === 0}
+            type={f.type ?? "text"}
             value={values[i]}
             placeholder={f.placeholder}
             onChange={(e) => setValues((v) => v.map((x, j) => (j === i ? e.target.value : x)))}
@@ -201,6 +212,7 @@ function FieldsEditor({
           />
         </label>
       ))}
+      {error && <p className="text-[13px] text-[#e41e3f]">{error}</p>}
       <div className="flex items-center justify-between gap-2 border-divider border-t pt-3">
         <span>
           {onDelete && (
@@ -389,7 +401,11 @@ function SectionBody({
       return (
         <>
           <Title>Links</Title>
-          <Empty>No links to show</Empty>
+          {user.links.length > 0 ? (
+            user.links.map((u) => <LinkRow key={u} url={u} />)
+          ) : (
+            <Empty>No links to show</Empty>
+          )}
         </>
       );
     case "contact_info":
@@ -444,6 +460,54 @@ function BioRow() {
   );
 }
 
+type Range = { start?: string; end?: string };
+
+function workFields(w?: { company: string; title: string } & Range) {
+  return [
+    { label: "Company", value: w?.company ?? "" },
+    { label: "Position", value: w?.title ?? "" },
+    { label: "From", value: w?.start ?? "", type: "month" as const },
+    { label: "To (leave empty if you work here now)", value: w?.end ?? "", type: "month" as const },
+  ];
+}
+
+function schoolFields(e?: { school: string; detail?: string } & Range) {
+  return [
+    { label: "School", value: e?.school ?? "" },
+    {
+      label: "Description",
+      value: e?.detail ?? "",
+      placeholder: "Concentration · Class of 2027",
+    },
+    { label: "From", value: e?.start ?? "", type: "month" as const },
+    { label: "To", value: e?.end ?? "", type: "month" as const },
+  ];
+}
+
+/** Work / education row in About: logo tile, name, role and dates, edit pencil. */
+function OrgRow({
+  name,
+  lines,
+  onEdit,
+}: {
+  name: string;
+  lines: (string | null | undefined)[];
+  onEdit?: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-3 py-2">
+      <div className="min-w-0 flex-1">
+        <OrgEntry name={name} lines={lines} />
+      </div>
+      {onEdit && (
+        <IconButton label="Edit" variant="ghost" onClick={onEdit}>
+          <Pencil size={20} strokeWidth={1.8} className="text-secondary" />
+        </IconButton>
+      )}
+    </div>
+  );
+}
+
 function WorkList() {
   const { profile } = useProfile();
   const { user, isSelf } = profile;
@@ -456,11 +520,10 @@ function WorkList() {
       {isSelf &&
         (editing === "new" ? (
           <FieldsEditor
-            fields={[
-              { label: "Company", value: "" },
-              { label: "Position", value: "" },
-            ]}
-            onSave={([company, title]) => save([{ company, title }, ...user.work])}
+            fields={workFields()}
+            onSave={([company, title, start, end]) =>
+              save([{ company, title, start, end }, ...user.work])
+            }
             onCancel={() => setEditing(null)}
           />
         ) : (
@@ -470,32 +533,20 @@ function WorkList() {
         editing === i ? (
           <FieldsEditor
             key={`${w.company}-${i}`}
-            fields={[
-              { label: "Company", value: w.company },
-              { label: "Position", value: w.title },
-            ]}
-            onSave={([company, title]) =>
-              save(user.work.map((x, j) => (j === i ? { company, title } : x)))
+            fields={workFields(w)}
+            onSave={([company, title, start, end]) =>
+              save(user.work.map((x, j) => (j === i ? { company, title, start, end } : x)))
             }
             onDelete={() => save(user.work.filter((_, j) => j !== i))}
             onCancel={() => setEditing(null)}
           />
         ) : (
-          <Row
+          <OrgRow
             key={`${w.company}-${i}`}
-            icon={Briefcase}
+            name={w.company}
+            lines={[w.title, workDates(w)]}
             onEdit={isSelf ? () => setEditing(i) : undefined}
-          >
-            {w.title ? (
-              <>
-                {w.title} at <span className="font-semibold">{w.company}</span>
-              </>
-            ) : (
-              <>
-                Works at <span className="font-semibold">{w.company}</span>
-              </>
-            )}
-          </Row>
+          />
         ),
       )}
       {!isSelf && user.work.length === 0 && <Empty>No workplaces to show</Empty>}
@@ -515,11 +566,10 @@ function EducationList() {
       {isSelf &&
         (editing === "new" ? (
           <FieldsEditor
-            fields={[
-              { label: "School", value: "" },
-              { label: "Description", value: "", placeholder: "Concentration · Class of 2027" },
-            ]}
-            onSave={([school, detail]) => save([{ school, detail }, ...user.education])}
+            fields={schoolFields()}
+            onSave={([school, detail, start, end]) =>
+              save([{ school, detail, start, end }, ...user.education])
+            }
             onCancel={() => setEditing(null)}
           />
         ) : (
@@ -529,26 +579,20 @@ function EducationList() {
         editing === i ? (
           <FieldsEditor
             key={`${e.school}-${i}`}
-            fields={[
-              { label: "School", value: e.school },
-              { label: "Description", value: e.detail ?? "" },
-            ]}
-            onSave={([school, detail]) =>
-              save(user.education.map((x, j) => (j === i ? { school, detail } : x)))
+            fields={schoolFields(e)}
+            onSave={([school, detail, start, end]) =>
+              save(user.education.map((x, j) => (j === i ? { school, detail, start, end } : x)))
             }
             onDelete={() => save(user.education.filter((_, j) => j !== i))}
             onCancel={() => setEditing(null)}
           />
         ) : (
-          <Row
+          <OrgRow
             key={`${e.school}-${i}`}
-            icon={GraduationCap}
-            sub={e.detail}
+            name={e.school}
+            lines={[e.detail, schoolDates(e)]}
             onEdit={isSelf ? () => setEditing(i) : undefined}
-          >
-            {/high school/i.test(e.school) ? "Went to " : "Studied at "}
-            <span className="font-semibold">{e.school}</span>
-          </Row>
+          />
         ),
       )}
       {!isSelf && user.education.length === 0 && <Empty>No schools to show</Empty>}

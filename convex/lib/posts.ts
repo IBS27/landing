@@ -1,6 +1,8 @@
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { reactionSummary } from "../reactions";
+import { blockedSet } from "./blocks";
+import { settingsRow } from "./settings";
 import { getSummaries, getSummary, type UserSummary } from "./users";
 
 /**
@@ -48,6 +50,8 @@ export type ResolvedAttachment =
 export type ReactionInfo = Awaited<ReturnType<typeof reactionSummary>> & {
   /** Display name for "You and N others" / "Name and N others". */
   sampleName: string | null;
+  /** Settings → Reaction preferences: show the reactions but not how many. */
+  countHidden: boolean;
 };
 
 export type PostView = {
@@ -85,11 +89,15 @@ export type Audience = {
   friends: Set<Id<"users">>;
   groups: Set<Id<"groups">>;
   adminGroups: Set<Id<"groups">>;
+  /** People blocked by or blocking the viewer; their posts never show. */
+  blocked: Set<Id<"users">>;
+  /** Settings → Reaction preferences (on others' posts / on the viewer's own). */
+  hideReactionCounts: { others: boolean; own: boolean };
 };
 
 /** Everything needed to decide visibility and permissions for many posts at once. */
 export async function loadAudience(ctx: QueryCtx, viewerId: Id<"users">): Promise<Audience> {
-  const [friendRows, memberRows] = await Promise.all([
+  const [friendRows, memberRows, blocked, settings] = await Promise.all([
     ctx.db
       .query("friendships")
       .withIndex("by_user", (q) => q.eq("userId", viewerId))
@@ -98,18 +106,27 @@ export async function loadAudience(ctx: QueryCtx, viewerId: Id<"users">): Promis
       .query("groupMembers")
       .withIndex("by_user", (q) => q.eq("userId", viewerId))
       .collect(),
+    blockedSet(ctx, viewerId),
+    settingsRow(ctx, viewerId),
   ]);
   return {
     viewerId,
     friends: new Set(friendRows.map((r) => r.friendId)),
     groups: new Set(memberRows.map((r) => r.groupId)),
     adminGroups: new Set(memberRows.filter((r) => r.role !== "member").map((r) => r.groupId)),
+    blocked,
+    hideReactionCounts: {
+      others: settings?.hideReactionCountsOthers ?? false,
+      own: settings?.hideReactionCountsOwn ?? false,
+    },
   };
 }
 
 /** Facebook audience rules: only-me, friends, public; private groups need membership. */
 export async function canView(ctx: QueryCtx, post: Doc<"posts">, a: Audience) {
   if (post.authorId === a.viewerId) return true;
+  if (a.blocked.has(post.authorId)) return false;
+  if (post.timelineUserId && a.blocked.has(post.timelineUserId)) return false;
   if (post.privacy === "only_me") return false;
   if (post.groupId) {
     if (a.groups.has(post.groupId)) return true;
@@ -189,6 +206,7 @@ export async function enrichPost(
   a: Audience,
   depth = 0,
 ): Promise<PostView | null> {
+  if (a.blocked.has(post.authorId)) return null;
   const author = await getSummary(ctx, post.authorId);
   if (!author) return null;
   const [group, timelineUser, taggedMap, attachments, reactions, viewerSaved, shared] =
@@ -223,7 +241,11 @@ export async function enrichPost(
       .filter((u): u is UserSummary => !!u),
     attachments: attachments.filter((x): x is ResolvedAttachment => x !== null),
     shared,
-    reactions: { ...reactions, sampleName: sample?.name ?? null },
+    reactions: {
+      ...reactions,
+      sampleName: sample?.name ?? null,
+      countHidden: isAuthor ? a.hideReactionCounts.own : a.hideReactionCounts.others,
+    },
     commentCount: post.commentCount,
     shareCount: post.shareCount,
     sponsored: post.sponsored === true,

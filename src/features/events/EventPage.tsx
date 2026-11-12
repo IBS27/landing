@@ -106,6 +106,7 @@ function EventBody({ event, tab }: { event: EventView; tab: Tab }) {
           )}
         </div>
         <div className="sticky top-[72px] hidden w-[432px] shrink-0 flex-col gap-4 lg:flex">
+          {event.tickets && <TicketsCard tickets={event.tickets} />}
           {event.online ? (
             <Card className="rounded-xl p-4">
               <h2 className="font-bold text-[20px] text-primary leading-6">Online event</h2>
@@ -437,6 +438,21 @@ function DetailsCard({ event, onGuests }: { event: EventView; onGuests: () => vo
           {event.online ? "Online event" : (event.venue ?? event.city)}
         </span>
       </Row>
+      {event.tickets && (
+        <Row icon={<TicketGlyph size={20} />}>
+          <a
+            href={event.tickets.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline"
+          >
+            Tickets{event.tickets.price && ` · ${event.tickets.price}`}
+          </a>
+          <span className="block text-[13px] text-secondary leading-4">
+            via {event.tickets.provider}
+          </span>
+        </Row>
+      )}
       {dur && <Row icon={<Clock size={20} />}>Duration: {dur}</Row>}
       <Row icon={privacy.icon}>{privacy.text}</Row>
       {event.description && (
@@ -469,6 +485,40 @@ function DetailsCard({ event, onGuests }: { event: EventView; onGuests: () => vo
         ))}
       </div>
     </Card>
+  );
+}
+
+/** Right-column card for ticketed events: where to buy, and a "Find tickets" link out. */
+function TicketsCard({ tickets }: { tickets: NonNullable<EventView["tickets"]> }) {
+  return (
+    <Card className="rounded-xl p-4">
+      <h2 className="font-bold text-[20px] text-primary leading-6">Tickets</h2>
+      <p className="mt-[5px] text-[15px] text-primary leading-5">
+        You can find tickets for this event on {tickets.provider}.
+      </p>
+      <a
+        href={tickets.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-3 flex h-9 w-full items-center justify-center gap-1.5 rounded-lg bg-btn font-semibold text-[15px] text-btn-text transition-[filter] hover:brightness-95 active:scale-[0.99] dark:hover:brightness-125"
+      >
+        <TicketGlyph size={16} />
+        Find tickets
+      </a>
+    </Card>
+  );
+}
+
+/** Facebook's filled, tilted ticket glyph. */
+function TicketGlyph({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+      <path
+        fillRule="evenodd"
+        transform="rotate(-45 8 8)"
+        d="M.5 4.5A1 1 0 0 1 1.5 3.5h13a1 1 0 0 1 1 1v2a1.5 1.5 0 0 0 0 3v2a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1v-2a1.5 1.5 0 0 0 0-3Zm10 .5v1.5h1V5Zm0 2.25v1.5h1v-1.5Zm0 2.25V11h1V9.5Z"
+      />
+    </svg>
   );
 }
 

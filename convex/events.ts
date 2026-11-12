@@ -355,6 +355,13 @@ export const get = viewerQuery({
       address: e.address ?? null,
       city: e.city,
       privacy: e.privacy,
+      tickets: e.ticketUrl
+        ? {
+            url: e.ticketUrl,
+            provider: e.ticketProvider ?? new URL(e.ticketUrl).hostname.replace(/^www\./, ""),
+            price: e.ticketPrice ?? null,
+          }
+        : null,
       group: group ? { _id: group._id, name: group.name, slug: group.slug } : null,
       host,
       hostInfo: {

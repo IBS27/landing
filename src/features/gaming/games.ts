@@ -1,47 +1,10 @@
 /**
  * The Gaming catalog. Titles and art are original (no real game trademarks):
- * covers are generated SVG scenes (see GameCover), and each game plays one of
- * the small built-in engines.
+ * key art lives in public/seed/games (painted by scripts/game-art), and each
+ * game plays one of the small built-in engines.
  */
 
 export type Engine = "merge" | "memory" | "tap";
-
-export type GameScene =
-  | "sky"
-  | "night"
-  | "sea"
-  | "candy"
-  | "dungeon"
-  | "neon"
-  | "jungle"
-  | "felt"
-  | "desert"
-  | "ice"
-  | "arena";
-
-export type GameHero =
-  | "cards"
-  | "fruit"
-  | "sword"
-  | "ship"
-  | "bricks"
-  | "gems"
-  | "house"
-  | "moon"
-  | "candy"
-  | "arrows"
-  | "island"
-  | "temple"
-  | "train"
-  | "puzzle"
-  | "letters"
-  | "puck"
-  | "castle"
-  | "checkers"
-  | "swords"
-  | "bubbles"
-  | "crown"
-  | "snake";
 
 export type Game = {
   id: string;
@@ -56,9 +19,6 @@ export type Game = {
   to: string;
   band: string;
   engine: Engine;
-  /** Generated cover art: backdrop scene and hero illustration. */
-  scene: GameScene;
-  hero: GameHero;
 };
 
 export const CATEGORIES = [
@@ -93,8 +53,6 @@ export const GAMES: Game[] = [
     to: "#9fd36b",
     band: "#bb1708",
     engine: "memory",
-    scene: "sky",
-    hero: "cards",
   }),
   g({
     id: "orchard-friends",
@@ -107,8 +65,6 @@ export const GAMES: Game[] = [
     to: "#ffd25e",
     band: "#7a8a12",
     engine: "merge",
-    scene: "sky",
-    hero: "fruit",
   }),
   g({
     id: "tower-legends",
@@ -121,8 +77,6 @@ export const GAMES: Game[] = [
     to: "#9cc0e8",
     band: "#1e7b1e",
     engine: "tap",
-    scene: "dungeon",
-    hero: "sword",
   }),
   g({
     id: "harbor-tycoon",
@@ -135,8 +89,6 @@ export const GAMES: Game[] = [
     to: "#62d0f5",
     band: "#0a4f7d",
     engine: "merge",
-    scene: "sea",
-    hero: "ship",
   }),
   g({
     id: "brick-burst",
@@ -149,8 +101,6 @@ export const GAMES: Game[] = [
     to: "#f2486e",
     band: "#3b2a9e",
     engine: "tap",
-    scene: "neon",
-    hero: "bricks",
   }),
   g({
     id: "gem-cascade",
@@ -163,8 +113,6 @@ export const GAMES: Game[] = [
     to: "#f7c948",
     band: "#0d6e6e",
     engine: "merge",
-    scene: "dungeon",
-    hero: "gems",
   }),
   g({
     id: "manor-makeover",
@@ -177,8 +125,6 @@ export const GAMES: Game[] = [
     to: "#f6d6a8",
     band: "#a3502a",
     engine: "merge",
-    scene: "desert",
-    hero: "house",
   }),
   g({
     id: "night-solitaire",
@@ -191,8 +137,6 @@ export const GAMES: Game[] = [
     to: "#4b5c9e",
     band: "#1c2340",
     engine: "memory",
-    scene: "night",
-    hero: "moon",
   }),
   g({
     id: "candy-valley",
@@ -205,8 +149,6 @@ export const GAMES: Game[] = [
     to: "#ffd1e8",
     band: "#c2367a",
     engine: "merge",
-    scene: "candy",
-    hero: "candy",
   }),
   g({
     id: "maze-slide",
@@ -219,8 +161,6 @@ export const GAMES: Game[] = [
     to: "#7b61ff",
     band: "#4a3ac2",
     engine: "merge",
-    scene: "neon",
-    hero: "arrows",
   }),
   g({
     id: "island-village",
@@ -233,8 +173,6 @@ export const GAMES: Game[] = [
     to: "#ffe08a",
     band: "#05768f",
     engine: "merge",
-    scene: "sea",
-    hero: "island",
   }),
   g({
     id: "home-story",
@@ -247,8 +185,6 @@ export const GAMES: Game[] = [
     to: "#f4e1a1",
     band: "#3a7a50",
     engine: "memory",
-    scene: "sky",
-    hero: "house",
   }),
   g({
     id: "solitaire-social",
@@ -261,8 +197,6 @@ export const GAMES: Game[] = [
     to: "#47b36b",
     band: "#0f5a30",
     engine: "memory",
-    scene: "felt",
-    hero: "cards",
   }),
   g({
     id: "jungle-trek",
@@ -275,8 +209,6 @@ export const GAMES: Game[] = [
     to: "#c5e1a5",
     band: "#1b5e20",
     engine: "tap",
-    scene: "jungle",
-    hero: "temple",
   }),
   g({
     id: "rail-city",
@@ -289,8 +221,6 @@ export const GAMES: Game[] = [
     to: "#f5b971",
     band: "#8a2c16",
     engine: "merge",
-    scene: "desert",
-    hero: "train",
   }),
   g({
     id: "jigsaw-calm",
@@ -303,8 +233,6 @@ export const GAMES: Game[] = [
     to: "#d0ebff",
     band: "#3b5bdb",
     engine: "memory",
-    scene: "sky",
-    hero: "puzzle",
   }),
   g({
     id: "word-garden",
@@ -317,8 +245,6 @@ export const GAMES: Game[] = [
     to: "#fff3bf",
     band: "#d9480f",
     engine: "memory",
-    scene: "sky",
-    hero: "letters",
   }),
   g({
     id: "puck-rush",
@@ -331,8 +257,6 @@ export const GAMES: Game[] = [
     to: "#a5d8ff",
     band: "#1864ab",
     engine: "tap",
-    scene: "ice",
-    hero: "puck",
   }),
   g({
     id: "castle-clash",
@@ -345,8 +269,6 @@ export const GAMES: Game[] = [
     to: "#b197fc",
     band: "#4527a0",
     engine: "tap",
-    scene: "night",
-    hero: "castle",
   }),
   g({
     id: "checkers-club",
@@ -359,8 +281,6 @@ export const GAMES: Game[] = [
     to: "#ffa8a8",
     band: "#a51111",
     engine: "memory",
-    scene: "felt",
-    hero: "checkers",
   }),
   g({
     id: "arena-blitz",
@@ -373,8 +293,6 @@ export const GAMES: Game[] = [
     to: "#fa5252",
     band: "#862e2e",
     engine: "tap",
-    scene: "arena",
-    hero: "swords",
   }),
   g({
     id: "bubble-pop",
@@ -387,8 +305,6 @@ export const GAMES: Game[] = [
     to: "#e599f7",
     band: "#1c7ed6",
     engine: "tap",
-    scene: "candy",
-    hero: "bubbles",
   }),
   g({
     id: "royal-21",
@@ -401,8 +317,6 @@ export const GAMES: Game[] = [
     to: "#ffd43b",
     band: "#0b5f6e",
     engine: "memory",
-    scene: "felt",
-    hero: "crown",
   }),
   g({
     id: "snake-trail",
@@ -415,8 +329,6 @@ export const GAMES: Game[] = [
     to: "#d8f5a2",
     band: "#2b8a3e",
     engine: "tap",
-    scene: "jungle",
-    hero: "snake",
   }),
 ];
 

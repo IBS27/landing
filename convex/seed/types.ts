@@ -15,6 +15,7 @@ import type { ListingCategory, ReactionType } from "../validators";
 import type { BackgroundName } from "./lib/backgrounds";
 import type { Neighborhood } from "./lib/places";
 import type { TimeSpec } from "./lib/time";
+import type { VideoClip } from "./lib/videos";
 import type { GroupSlug } from "./world/groups";
 import type { PageHandle } from "./world/pages";
 import type { Username } from "./world/people";
@@ -46,8 +47,19 @@ export type PersonSeed = {
   readonly pronouns?: string;
   readonly city: string;
   readonly hometown?: string;
-  readonly work?: readonly { readonly title: string; readonly company: string }[];
-  readonly education?: readonly { readonly school: string; readonly detail?: string }[];
+  /** `start` / `end` are "YYYY-MM"; a job with a start and no end is current. */
+  readonly work?: readonly {
+    readonly title: string;
+    readonly company: string;
+    readonly start?: string;
+    readonly end?: string;
+  }[];
+  readonly education?: readonly {
+    readonly school: string;
+    readonly detail?: string;
+    readonly start?: string;
+    readonly end?: string;
+  }[];
   readonly relationship?: string;
   readonly birthday: Birthday;
   readonly verified?: boolean;
@@ -70,6 +82,8 @@ export type PageSeed = {
   readonly avatar: PhotoSlot;
   readonly cover: PhotoSlot;
   readonly joined: number;
+  /** Website / social URLs for the Page's Links card. */
+  readonly links?: readonly string[];
 };
 
 // ---------------------------------------------------------------------------
@@ -108,6 +122,8 @@ export type ReplySeed = {
   /** Number of reactions on the comment (default 0–3, generated). */
   readonly likes?: number;
   readonly photo?: PhotoSlot;
+  /** Replies to this reply (Facebook's third and deepest level); only on replies. */
+  readonly replies?: readonly ReplySeed[];
 };
 
 export type CommentSeed = ReplySeed & {
@@ -137,6 +153,8 @@ export type PostSeed = {
   readonly on?: Username;
   /** 1–5 photo slots (folder defaults to `posts`). */
   readonly photos?: readonly PhotoSlot[];
+  /** A video clip (`./lib/videos`) instead of photos; 9:16 clips make the post a Reel. */
+  readonly video?: VideoClip;
   /** Text-on-color background; only for short text posts without photos. */
   readonly bg?: BackgroundName;
   /** e.g. "feeling excited", "feeling grateful". */
@@ -167,10 +185,15 @@ export type PostSeed = {
 
 export type StorySeed = {
   readonly by: Handle;
-  readonly photo: PhotoSlot;
+  /** Required unless the story is a `video`. */
+  readonly photo?: PhotoSlot;
+  /** A 9:16 video clip (`./lib/videos`) instead of a photo. */
+  readonly video?: VideoClip;
   readonly text?: string;
-  /** Must be within the last 24 hours. */
+  /** Must be within the last 24 hours, unless `archived`. */
   readonly at: TimeSpec;
+  /** An expired story that only shows in the author's Story archive. */
+  readonly archived?: boolean;
 };
 
 // ---------------------------------------------------------------------------
@@ -204,6 +227,8 @@ export type ListingSeed = {
   readonly category: ListingCategory;
   readonly condition?: ListingCondition;
   readonly brand?: string;
+  /** Meetup preferences shown under "Listed …" on the item page (Public meetup, Door pickup…). */
+  readonly meetup?: readonly ("public" | "door_pickup" | "door_dropoff")[];
   readonly description: string;
   /**
    * Photos (folder `listings`, or `rooms` for rentals). Either one topic whose exact-topic files
@@ -253,6 +278,8 @@ export type EventSeed = {
   /** Going / interested counts from outside the seeded world. */
   readonly externalGoing: number;
   readonly externalInterested: number;
+  /** Ticketed events: ticket site, its display name and an optional price label ("$15 – $25"). */
+  readonly tickets?: { readonly url: string; readonly provider?: string; readonly price?: string };
   readonly going?: readonly Username[];
   readonly interested?: readonly Username[];
   readonly invited?: readonly Username[];

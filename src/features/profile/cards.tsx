@@ -1,25 +1,32 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
-  Briefcase,
   Cake,
   Clock,
-  GraduationCap,
   Heart,
   Home,
   Info,
+  Link2,
   MapPin,
   MoreHorizontal,
   Pencil,
-  Users,
 } from "lucide-react";
 import { type ComponentType, type ReactNode, useEffect, useRef, useState } from "react";
 import { useQ } from "@/app/viewer";
-import { cn, compactCount, plural } from "@/lib/format";
+import { CreateReelDialog } from "@/features/watch/CreateReel";
+import { cn, plural } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/ui/overlays";
 import { Card } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-import { birthdayLabel, joinedLabel, possessive, useProfile } from "./context";
+import type { AboutSection } from "./AboutTab";
+import {
+  birthdayLabel,
+  joinedLabel,
+  possessive,
+  schoolDates,
+  useProfile,
+  workDates,
+} from "./context";
 import { ImageLightbox, PhotoOpener } from "./photos";
 
 /* ---------------- Shared bits ---------------- */
@@ -195,52 +202,181 @@ function DetailRow({ icon: Icon, text }: Row) {
   );
 }
 
-function schoolVerb(school: string, isSelf: boolean) {
-  const past = /high school|academy|secondary/i.test(school);
-  if (past) return "Went to";
-  return isSelf ? "Studies at" : "Studied at";
+/** Section heading inside the intro card ("Work", "Education", "Links"). */
+function IntroSection({
+  title,
+  more,
+  children,
+}: {
+  title: string;
+  more?: { label: string; section: AboutSection };
+  children: ReactNode;
+}) {
+  const { profile } = useProfile();
+  return (
+    <section className="mt-6">
+      <h3 className="font-bold text-[20px] text-primary leading-6">{title}</h3>
+      <div className="pt-4">{children}</div>
+      {more && (
+        <Link
+          to="/$username/about"
+          params={{ username: profile.user.username }}
+          search={{ section: more.section }}
+          className="mt-3 ml-[52px] inline-block font-semibold text-[13px] text-secondary hover:underline"
+        >
+          {more.label}
+        </Link>
+      )}
+    </section>
+  );
 }
 
-/** The left "Personal details" card (pages: "Intro"). */
+const TILE_COLORS = ["#0866ff", "#e41e3f", "#31a24c", "#f7b928", "#9360f7", "#f5533d", "#2abba7"];
+
+/** A logo-style 40px tile for a company or school: brand-coloured initial in a ringed circle. */
+export function OrgTile({ name, size = 40 }: { name: string; size?: number }) {
+  let h = 0;
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const color = TILE_COLORS[h % TILE_COLORS.length];
+  const initial = name
+    .replace(/^the\s+/i, "")
+    .trim()
+    .charAt(0)
+    .toUpperCase();
+  return (
+    <span
+      aria-hidden
+      className="flex shrink-0 items-center justify-center rounded-full border border-divider bg-card font-bold"
+      style={{ width: size, height: size, color, fontSize: size * 0.45 }}
+    >
+      {initial}
+    </span>
+  );
+}
+
+/** Company / school row: tile, bold name, role or detail, dates. */
+export function OrgEntry({ name, lines }: { name: string; lines: (string | null | undefined)[] }) {
+  const [first, ...rest] = lines.filter(Boolean);
+  return (
+    <div className="flex gap-3">
+      <OrgTile name={name} />
+      <div className="min-w-0 pt-[3px]">
+        <div className="font-semibold text-[15px] text-primary leading-5">{name}</div>
+        {first && <div className="mt-[2px] text-[13px] text-primary leading-4">{first}</div>}
+        {rest.map((l) => (
+          <div key={l} className="mt-[3px] text-[13px] text-secondary leading-4">
+            {l}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** "https://www.x.com/a/" → "x.com/a". */
+export function linkLabel(url: string) {
+  return url.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, "");
+}
+
+function InstagramGlyph() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width={22}
+      height={22}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      aria-hidden
+    >
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+/** One "Links" row: link icon (Instagram glyph for instagram.com) and the bare URL. */
+export function LinkRow({ url }: { url: string }) {
+  const label = linkLabel(url);
+  const ig = /^instagram\.com\//i.test(label);
+  return (
+    <div className="flex min-h-9 items-center gap-5 py-[6px] pl-2">
+      <span className="flex w-6 shrink-0 justify-center text-icon-secondary">
+        {ig ? <InstagramGlyph /> : <Link2 size={22} strokeWidth={1.8} />}
+      </span>
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="min-w-0 truncate font-semibold text-[15px] text-primary leading-5 hover:underline"
+      >
+        {ig ? label.replace(/^instagram\.com\//i, "") : label}
+      </a>
+    </div>
+  );
+}
+
+/** Pages: "Intro" (bio, category, location) and "Links" in one card, like Facebook. */
+function PageIntroCard() {
+  const { profile } = useProfile();
+  const { user } = profile;
+  const hasIntro = !!(user.bio || user.pageCategory || user.city);
+  const links = user.links.map((u) => <LinkRow key={u} url={u} />);
+  if (!hasIntro && links.length === 0) return null;
+  return (
+    <ProfileCard title={hasIntro ? "Intro" : "Links"}>
+      {hasIntro ? (
+        <>
+          {user.bio && (
+            <p className="pt-2 pb-3 text-center text-[15px] text-primary leading-5">{user.bio}</p>
+          )}
+          <div className={cn(!user.bio && "pt-2")}>
+            {user.pageCategory && (
+              <DetailRow
+                icon={Info}
+                text={
+                  <>
+                    <span className="font-semibold">Page</span>
+                    <span className="font-normal"> · {user.pageCategory}</span>
+                  </>
+                }
+              />
+            )}
+            {user.city && <DetailRow icon={MapPin} text={user.city} />}
+          </div>
+          {links.length > 0 && (
+            <section className="mt-5">
+              <h3 className="font-bold text-[20px] text-primary leading-6">Links</h3>
+              <div className="pt-2">{links}</div>
+            </section>
+          )}
+        </>
+      ) : (
+        <div className="pt-2">{links}</div>
+      )}
+    </ProfileCard>
+  );
+}
+
+/**
+ * The left intro card (Facebook 2026): "Personal details", then "Work" and
+ * "Education" sections with logo tiles and dates. Pages get Intro + Links.
+ */
 export function IntroCard() {
   const { profile } = useProfile();
   const { user, isSelf, isPage } = profile;
 
-  if (isPage)
-    return (
-      <ProfileCard title="Intro">
-        {user.bio && <p className="py-3 text-center text-[15px] text-primary">{user.bio}</p>}
-        <div className="pt-1">
-          {user.pageCategory && (
-            <DetailRow
-              icon={Info}
-              text={
-                <>
-                  <span className="font-semibold">Page</span>
-                  <span className="font-normal"> · {user.pageCategory}</span>
-                </>
-              }
-            />
-          )}
-          {user.city && <DetailRow icon={MapPin} text={user.city} />}
-          <DetailRow icon={Users} text={`${compactCount(profile.followerCount)} followers`} />
-        </div>
-      </ProfileCard>
-    );
+  if (isPage) return <PageIntroCard />;
 
   const rows: Row[] = [];
-  for (const w of user.work)
-    rows.push({
-      icon: Briefcase,
-      text: w.title ? `${w.title} at ${w.company}` : `Works at ${w.company}`,
-    });
-  for (const e of user.education)
-    rows.push({ icon: GraduationCap, text: `${schoolVerb(e.school, isSelf)} ${e.school}` });
   if (user.city) rows.push({ icon: MapPin, text: `Lives in ${user.city}` });
   if (user.hometown) rows.push({ icon: Home, text: `From ${user.hometown}` });
   if (user.relationship) rows.push({ icon: Heart, text: user.relationship });
   if (user.birthday) rows.push({ icon: Cake, text: birthdayLabel(user.birthday) });
-  rows.push({ icon: Clock, text: joinedLabel(user.joinedAt) });
+  if (rows.length === 0) rows.push({ icon: Clock, text: joinedLabel(user.joinedAt) });
+  const job = user.work[0];
+  const school = user.education[0];
 
   return (
     <ProfileCard
@@ -272,6 +408,19 @@ export function IntroCard() {
           See more personal details
         </Link>
       </div>
+      {job && (
+        <IntroSection title="Work" more={{ label: "See more work", section: "work" }}>
+          <OrgEntry name={job.company} lines={[job.title, workDates(job)]} />
+        </IntroSection>
+      )}
+      {school && (
+        <IntroSection
+          title="Education"
+          more={{ label: "See more education", section: "education" }}
+        >
+          <OrgEntry name={school.school} lines={[school.detail, schoolDates(school)]} />
+        </IntroSection>
+      )}
     </ProfileCard>
   );
 }
@@ -398,6 +547,7 @@ export function ReelsCard() {
   const videos = useQ(api.profiles.videos, { userId: user._id });
   const [tab, setTab] = useState<"yours" | "saved">("yours");
   const [open, setOpen] = useState<VideoRef | null>(null);
+  const [creating, setCreating] = useState(false);
   const tabs = isSelf
     ? [
         { key: "yours" as const, label: "Your reels" },
@@ -410,12 +560,13 @@ export function ReelsCard() {
       title="Reels"
       action={
         isSelf ? (
-          <Link
-            to="/reel"
+          <button
+            type="button"
+            onClick={() => setCreating(true)}
             className="rounded-md px-2 py-1 font-semibold text-[15px] text-link hover:bg-hover"
           >
             Create reel
-          </Link>
+          </button>
         ) : undefined
       }
     >
@@ -444,6 +595,7 @@ export function ReelsCard() {
       {open && (
         <PhotoOpener postId={open.postId} index={open.index} onClose={() => setOpen(null)} />
       )}
+      {isSelf && <CreateReelDialog open={creating} onClose={() => setCreating(false)} />}
     </ProfileCard>
   );
 }

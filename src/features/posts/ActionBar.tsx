@@ -92,7 +92,11 @@ export function ActionBar({
   const [shareOpen, setShareOpen] = useState(false);
   const meta = rx.current ? reactionMeta(rx.current) : null;
   const name = post.author.name;
-  const summary = reactionSummaryText(rx.count, !!rx.current, post.reactions.sampleName);
+  // Settings → Reaction preferences can hide the numbers (the reactions still show).
+  const hideCount = post.reactions.countHidden;
+  const summary = hideCount
+    ? "See who reacted to this"
+    : reactionSummaryText(rx.count, !!rx.current, post.reactions.sampleName);
 
   return (
     <div className={cn("flex h-11 items-center px-1", className)}>
@@ -111,7 +115,7 @@ export function ActionBar({
           label={
             rx.current
               ? `Remove ${meta?.label}`
-              : `React with Like to ${name}'s post${rx.count ? `, ${plural(rx.count, "reaction")}` : ""}`
+              : `React with Like to ${name}'s post${rx.count && !hideCount ? `, ${plural(rx.count, "reaction")}` : ""}`
           }
           onClick={() => {
             rx.toggle();
@@ -126,7 +130,7 @@ export function ActionBar({
           ) : (
             <LikeOutline />
           )}
-          {rx.count > 0 && <Count>{compactCount(rx.count)}</Count>}
+          {rx.count > 0 && !hideCount && <Count>{compactCount(rx.count)}</Count>}
         </BarButton>
       </div>
       <BarButton

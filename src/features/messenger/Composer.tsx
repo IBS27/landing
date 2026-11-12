@@ -1,7 +1,8 @@
+import { ConvexError } from "convex/values";
 import { X } from "lucide-react";
 import { Popover as P } from "radix-ui";
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { useM } from "@/app/viewer";
+import { useM, useQ } from "@/app/viewer";
 import { mediaSize, uploadFile } from "@/features/posts/util";
 import { cn } from "@/lib/format";
 import { Tooltip } from "@/ui/overlays";
@@ -61,6 +62,11 @@ export function Composer({
   const [text, setText] = useState("");
   const [staged, setStaged] = useState<Staged[]>([]);
   const [sending, setSending] = useState(false);
+  /** A send the server refused, shown above the input. */
+  const [error, setError] = useState<string | null>(null);
+  // Blocked either way: the thread explains why instead of sending.
+  const blockNotice = useQ(api.settings.threadBlock, conversationId ? { conversationId } : "skip");
+  const notice = error ?? blockNotice ?? null;
   const [collapsed, setCollapsed] = useState(true);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -91,6 +97,7 @@ export function Composer({
 
   const onChange = (value: string) => {
     setText(value);
+    setError(null);
     setCollapsed(true);
     if (!conversationId) return;
     const now = Date.now();
@@ -106,7 +113,7 @@ export function Composer({
   const target = async () => conversationId ?? (await ensureConversation?.()) ?? null;
 
   const submit = async (opts?: { sticker?: string }) => {
-    if (sending || disabled) return;
+    if (sending || disabled || blockNotice) return;
     const body = text.trim();
     const files = staged;
     if (!opts?.sticker && !body && files.length === 0) return;
@@ -141,7 +148,8 @@ export function Composer({
       }
       onCancelReply?.();
       onSent?.(id);
-    } catch {
+    } catch (e) {
+      setError(e instanceof ConvexError ? String(e.data) : "Couldn't send. Try again.");
       setText(body);
       setStaged(files);
     } finally {
@@ -176,6 +184,14 @@ export function Composer({
 
   return (
     <div className="shrink-0">
+      {notice && (
+        <p
+          role="alert"
+          className="border-divider border-t px-4 py-2 text-center text-[13px] text-secondary leading-4"
+        >
+          {notice}
+        </p>
+      )}
       {replyTo && (
         <div className="flex items-start gap-2 border-divider border-t px-3 pt-2 pb-1">
           <div className="min-w-0 flex-1">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/format";
 import type { PostMedia } from "./types";
+import { PlayGlyph, VideoPlayer } from "./VideoPlayer";
 
 /**
  * Facebook's feed photo layouts: 1 (natural aspect, letterboxed when tall),
@@ -73,19 +74,16 @@ function Single({
   className?: string;
 }) {
   const ratio = item.width && item.height ? item.width / item.height : 4 / 3;
+  // Videos play inline, letterboxed on black when taller than the capped box.
   if (item.kind === "video")
     return (
-      <div className={cn("bg-black", className)}>
-        {/* biome-ignore lint/a11y/useMediaCaption: user videos have no caption track */}
-        <video
-          src={item.url}
-          controls
-          playsInline
-          preload="metadata"
-          className="mx-auto w-full"
-          style={{ aspectRatio: ratio, maxHeight: MAX_MEDIA_HEIGHT }}
-        />
-      </div>
+      <VideoPlayer
+        src={item.url}
+        poster={item.poster}
+        label={item.alt}
+        className={cn("w-full", className)}
+        style={{ aspectRatio: ratio, maxHeight: MAX_MEDIA_HEIGHT }}
+      />
     );
   // Wider than the capped box (680×575) fills edge to edge; narrower photos sit
   // centred on a flat fill of the photo's dominant colour, like Facebook.
@@ -191,7 +189,16 @@ function Tile({
       className={cn("group relative min-h-0 overflow-hidden bg-btn", className)}
     >
       {item.kind === "video" ? (
-        <video src={item.url} muted preload="metadata" className="h-full w-full object-cover" />
+        <>
+          {item.poster ? (
+            <img src={item.poster} alt="" loading="lazy" className="h-full w-full object-cover" />
+          ) : (
+            <video src={item.url} muted preload="metadata" className="h-full w-full object-cover" />
+          )}
+          <span className="absolute top-1/2 left-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white shadow-[0_0_0_2px_rgba(255,255,255,0.9)_inset]">
+            <PlayGlyph size={24} className="ml-0.5" />
+          </span>
+        </>
       ) : (
         <img
           src={item.url}

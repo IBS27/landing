@@ -4,6 +4,12 @@ import type { api } from "../../../convex/_generated/api";
 
 export type StoryBuckets = FunctionReturnType<typeof api.stories.tray>;
 export type StoryBucket = StoryBuckets[number];
+export type StoryItem = StoryBucket["stories"][number];
+
+/** Where opening someone's stories starts: their first unseen story, else the first. */
+export function entryStory(bucket: StoryBucket) {
+  return bucket.stories.find((s) => !s.seen) ?? bucket.stories[0];
+}
 
 /** CSS background for a text story; accepts a known key or a raw CSS color/gradient. */
 export function storyBackground(key: string | null) {

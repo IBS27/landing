@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import type { ComponentType } from "react";
+import { Search } from "lucide-react";
+import { type ComponentType, useState } from "react";
 import { useQ } from "@/app/viewer";
 import {
   CalendarStarGlyph,
@@ -7,28 +8,23 @@ import {
   FlagGlyph,
   GroupsGlyph,
   PeopleGlyph,
-  PhotoGlyph,
-  PinGlyph,
-  PostsGlyph,
+  ReelsGlyph,
   StoreGlyph,
-  VideoGlyph,
 } from "@/features/misc/glyphs";
 import { cn } from "@/lib/format";
-import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/ui/overlays";
+import { Menu, MenuContent, MenuItem, MenuTrigger, PopoverPanel } from "@/ui/overlays";
 import { api } from "../../../convex/_generated/api";
 import type { SearchParams, SearchTab } from "./params";
 
 type IconType = ComponentType<{ size?: number; className?: string }>;
 
+/** Facebook's "Filters" list, in its order. */
 export const TABS: { tab: SearchTab; label: string; Icon: IconType }[] = [
   { tab: "top", label: "All", Icon: CardsGlyph },
-  { tab: "posts", label: "Posts", Icon: PostsGlyph },
   { tab: "people", label: "People", Icon: PeopleGlyph },
-  { tab: "photos", label: "Photos", Icon: PhotoGlyph },
-  { tab: "videos", label: "Videos", Icon: VideoGlyph },
+  { tab: "reels", label: "Reels", Icon: ReelsGlyph },
   { tab: "marketplace", label: "Marketplace", Icon: StoreGlyph },
   { tab: "pages", label: "Pages", Icon: FlagGlyph },
-  { tab: "places", label: "Places", Icon: PinGlyph },
   { tab: "groups", label: "Groups", Icon: GroupsGlyph },
   { tab: "events", label: "Events", Icon: CalendarStarGlyph },
 ];
@@ -124,34 +120,118 @@ function FilterSelect<T extends string | number>({
   );
 }
 
+/** "Tagged location": a searchable list of check-in places from posts. */
+function LocationFilter({
+  value,
+  onChange,
+}: {
+  value: string | undefined;
+  onChange: (v: string | undefined) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState("");
+  const places = useQ(api.search.taggedPlaces, open ? { q: text } : "skip");
+  const pick = (v: string | undefined) => {
+    onChange(v);
+    setOpen(false);
+    setText("");
+  };
+  return (
+    <PopoverPanel
+      open={open}
+      onOpenChange={setOpen}
+      align="start"
+      width={294}
+      trigger={
+        <button
+          type="button"
+          className="flex h-[46px] w-full items-center justify-between rounded-lg pr-3 pl-2 text-left hover:bg-hover data-[state=open]:bg-hover"
+        >
+          <span
+            className={cn("truncate text-[15px] text-primary leading-5", value && "font-semibold")}
+          >
+            {value ?? "Tagged location"}
+          </span>
+          <span className="text-icon-secondary">
+            <Caret />
+          </span>
+        </button>
+      }
+    >
+      <div className="p-2">
+        <label className="flex h-9 items-center gap-2 rounded-full bg-input px-3">
+          <Search size={16} className="shrink-0 text-icon-secondary" />
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && text.trim()) pick(text.trim());
+            }}
+            placeholder="Choose a location..."
+            className="min-w-0 flex-1 bg-transparent text-[15px] text-primary outline-none placeholder:text-placeholder"
+          />
+        </label>
+        <div className="mt-1 max-h-[300px] overflow-y-auto">
+          <button
+            type="button"
+            onClick={() => pick(undefined)}
+            className={cn(
+              "flex h-9 w-full items-center rounded-md px-2 text-left font-medium text-[15px] hover:bg-hover",
+              !value ? "text-link" : "text-primary",
+            )}
+          >
+            Any location
+          </button>
+          {(places ?? []).map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => pick(p)}
+              className={cn(
+                "flex h-9 w-full items-center rounded-md px-2 text-left font-medium text-[15px] hover:bg-hover",
+                p === value ? "text-link" : "text-primary",
+              )}
+            >
+              <span className="truncate">{p}</span>
+            </button>
+          ))}
+          {places?.length === 0 && text.trim() && (
+            <button
+              type="button"
+              onClick={() => pick(text.trim())}
+              className="flex h-9 w-full items-center rounded-md px-2 text-left font-medium text-[15px] text-primary hover:bg-hover"
+            >
+              <span className="truncate">Posts mentioning “{text.trim()}”</span>
+            </button>
+          )}
+        </div>
+      </div>
+    </PopoverPanel>
+  );
+}
+
 /* ---------- Rail ---------- */
 
 function PostFilters({
   params,
   set,
-  withSeen,
 }: {
   params: SearchParams;
   set: (patch: Partial<SearchParams>) => void;
-  withSeen: boolean;
 }) {
   const year = new Date().getFullYear();
   return (
     <>
-      {withSeen && (
-        <>
-          <Toggle
-            label="Recent posts"
-            on={!!params.recent}
-            onChange={(v) => set({ recent: v || undefined })}
-          />
-          <Toggle
-            label="Posts you've seen"
-            on={!!params.seen}
-            onChange={(v) => set({ seen: v || undefined })}
-          />
-        </>
-      )}
+      <Toggle
+        label="Recent posts"
+        on={!!params.recent}
+        onChange={(v) => set({ recent: v || undefined })}
+      />
+      <Toggle
+        label="Posts you've seen"
+        on={!!params.seen}
+        onChange={(v) => set({ seen: v || undefined })}
+      />
       <FilterSelect
         label="Date posted"
         value={params.date}
@@ -169,6 +249,7 @@ function PostFilters({
         ]}
         onChange={(v) => set({ from: v })}
       />
+      <LocationFilter value={params.loc} onChange={(v) => set({ loc: v })} />
     </>
   );
 }
@@ -209,11 +290,19 @@ function SubFilters({
 }) {
   switch (tab) {
     case "top":
-    case "posts":
-      return <PostFilters params={params} set={set} withSeen />;
-    case "photos":
-    case "videos":
-      return <PostFilters params={params} set={set} withSeen={false} />;
+      return <PostFilters params={params} set={set} />;
+    case "reels":
+      return (
+        <FilterSelect
+          label="Date posted"
+          value={params.date}
+          options={[0, 1, 2, 3, 4, 5].map((i) => {
+            const y = new Date().getFullYear() - i;
+            return { value: y, label: String(y) };
+          })}
+          onChange={(v) => set({ date: v })}
+        />
+      );
     case "people":
       return <PeopleFilters params={params} set={set} />;
     case "groups":

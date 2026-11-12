@@ -147,6 +147,11 @@ export const events: readonly EventSeed[] = [
     privacy: "public",
     externalGoing: 142,
     externalInterested: 286,
+    tickets: {
+      url: "https://tickets.velvetowl.example/low-tide-radio",
+      provider: "Velvet Owl Box Office",
+      price: "$12 – $15",
+    },
     going: [
       "malik.johnson",
       "maya.chen",
@@ -546,6 +551,11 @@ export const events: readonly EventSeed[] = [
     privacy: "public",
     externalGoing: 68,
     externalInterested: 245,
+    tickets: {
+      url: "https://moonrise.example/throwdown",
+      provider: "Moonrise Coffee Co.",
+      price: "$10 to compete · Free to watch",
+    },
     going: ["jasmine.ortiz", "tasha.okafor", "ana.torres", "harper.quinn"],
     interested: ["camila.santos", "diego.morales", "marcus.bell", "malik.johnson"],
   },
@@ -646,6 +656,11 @@ export const events: readonly EventSeed[] = [
     privacy: "public",
     externalGoing: 190,
     externalInterested: 820,
+    tickets: {
+      url: "https://waxandneedle.example/record-fair",
+      provider: "Wax & Needle Records",
+      price: "$10 early entry · Free after 10 AM",
+    },
     going: ["malik.johnson", "marco.rossi", "camila.santos", "will.foster"],
     interested: ["zoe.nguyen", "harper.quinn", "isaiah.thompson", "owen.murphy"],
   },

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Check, MapPin, MessageCircle, Star, UserCheck, UserPlus, UserX } from "lucide-react";
+import { Check, MessageCircle, Star, UserCheck, UserPlus, UserX } from "lucide-react";
 import type { ReactNode } from "react";
 import { useChatDock } from "@/app/chat-dock";
 import { useM } from "@/app/viewer";
@@ -12,7 +12,6 @@ import type {
   ListingResult,
   PageResult,
   PersonResult,
-  PlaceResult,
 } from "../../../convex/search";
 import type { SearchTab } from "./params";
 
@@ -386,38 +385,6 @@ export function ListingGrid({ items }: { items: ListingResult[] }) {
         <ListingTile key={l._id} l={l} />
       ))}
     </div>
-  );
-}
-
-/* ---------- Places ---------- */
-
-export function PlaceRow({ p }: { p: PlaceResult }) {
-  return (
-    <ResultRow
-      thumb={
-        <span className="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-btn text-icon">
-          <MapPin size={28} strokeWidth={2} />
-        </span>
-      }
-      title={
-        <Link
-          to="/search/$tab"
-          params={{ tab: "posts" }}
-          search={{ q: p.name }}
-          className="font-medium hover:underline"
-        >
-          {p.name}
-        </Link>
-      }
-      meta={[
-        [
-          p.postCount ? plural(p.postCount, "post") : null,
-          p.eventCount ? plural(p.eventCount, "event") : null,
-        ]
-          .filter(Boolean)
-          .join(" · "),
-      ]}
-    />
   );
 }
 

@@ -1,14 +1,19 @@
 import { ConvexError, v } from "convex/values";
-import type { Id } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
+import { isBlockedEitherWay } from "./lib/blocks";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { notify } from "./lib/notify";
 import { canView, loadAudience } from "./lib/posts";
 import { getSummaries } from "./lib/users";
 import { reactionSummary } from "./reactions";
 
+/** Facebook nests replies at most three levels deep (comment → reply → reply). */
+export const MAX_DEPTH = 3;
+
 /**
- * All comments on a post, oldest first, with replies nested one level
- * (Facebook flattens deeper replies into the same thread).
+ * All comments on a post, oldest first, as Facebook's three-level tree:
+ * top-level comments with `replies`, each reply with its own `replies`.
+ * Deeper legacy rows fold into their depth-3 ancestor's level.
  */
 export const list = viewerQuery({
   args: { postId: v.id("posts") },
@@ -21,19 +26,40 @@ export const list = viewerQuery({
       .query("comments")
       .withIndex("by_post", (q) => q.eq("postId", postId))
       .collect();
-    const users = await getSummaries(
-      ctx,
-      rows.map((r) => r.authorId),
-    );
+    const rowById = new Map(rows.map((r) => [r._id, r]));
+    // A reply opens with its tagged name: stored on new replies, else the parent's author.
+    // When the parent's author answers in their own thread, they're answering the latest
+    // earlier sibling by someone else.
+    const tagOf = (c: Doc<"comments">): Id<"users"> | null => {
+      if (!c.parentId) return null;
+      if (c.replyToId !== undefined) return c.replyToId;
+      const parent = rowById.get(c.parentId);
+      if (!parent) return null;
+      if (parent.authorId !== c.authorId) return parent.authorId;
+      const earlier = rows.filter(
+        (r) => r.parentId === c.parentId && r.createdAt < c.createdAt && r.authorId !== c.authorId,
+      );
+      return earlier.at(-1)?.authorId ?? null;
+    };
+    // Comments by people blocked either way are hidden along with their replies.
+    const blockedThread = (c: Doc<"comments">): boolean => {
+      if (a.blocked.has(c.authorId)) return true;
+      const parent = c.parentId ? rowById.get(c.parentId) : undefined;
+      return parent ? blockedThread(parent) : false;
+    };
+    const users = await getSummaries(ctx, [
+      ...rows.map((r) => r.authorId),
+      ...rows.flatMap((r) => {
+        const t = tagOf(r);
+        return t ? [t] : [];
+      }),
+    ]);
     const enriched = await Promise.all(
       rows.map(async (c) => {
         const author = users.get(c.authorId);
-        if (!author) return null;
+        if (!author || blockedThread(c)) return null;
         const reactions = await reactionSummary(ctx, "comment", c._id, ctx.viewer._id);
-        const parent = c.parentId ? rows.find((r) => r._id === c.parentId) : undefined;
-        // A reply to a reply mentions the person being answered, like Facebook.
-        const replyTo =
-          parent?.parentId !== undefined ? (users.get(parent.authorId) ?? null) : null;
+        const tag = tagOf(c);
         return {
           _id: c._id,
           parentId: c.parentId ?? null,
@@ -41,7 +67,7 @@ export const list = viewerQuery({
           media: c.media ?? null,
           createdAt: c.createdAt,
           author,
-          replyTo,
+          replyTo: tag ? (users.get(tag) ?? null) : null,
           reactions,
           canEdit: c.authorId === ctx.viewer._id,
           canDelete: c.authorId === ctx.viewer._id || post.authorId === ctx.viewer._id,
@@ -51,16 +77,35 @@ export const list = viewerQuery({
     type C = NonNullable<(typeof enriched)[number]>;
     const all = enriched.filter((c): c is C => c !== null);
     const byId = new Map(all.map((c) => [c._id, c]));
-    // Thread root of each comment (replies of replies attach to the top-level comment).
-    const rootOf = (c: C): Id<"comments"> => {
+    // Ancestor chain, nearest first (stops at missing rows).
+    const chain = (c: C): C[] => {
+      const out: C[] = [];
       let cur = c;
-      while (cur.parentId && byId.has(cur.parentId)) cur = byId.get(cur.parentId)!;
-      return cur._id;
+      while (cur.parentId && byId.has(cur.parentId)) {
+        cur = byId.get(cur.parentId)!;
+        out.push(cur);
+      }
+      return out;
     };
-    const top = all.filter((c) => !c.parentId);
+    // Where each comment shows: top level, under a depth-2 reply, or under a top-level comment.
+    const level2 = new Map<Id<"comments">, C[]>();
+    const level3 = new Map<Id<"comments">, C[]>();
+    const top: C[] = [];
+    for (const c of all) {
+      const up = chain(c);
+      if (up.length === 0) top.push(c);
+      else if (up.length === 1) level2.set(up[0]._id, [...(level2.get(up[0]._id) ?? []), c]);
+      else {
+        const anchor = up[up.length - 2];
+        level3.set(anchor._id, [...(level3.get(anchor._id) ?? []), c]);
+      }
+    }
     return top.map((c) => ({
       ...c,
-      replies: all.filter((r) => r.parentId && rootOf(r) === c._id),
+      replies: (level2.get(c._id) ?? []).map((r) => ({
+        ...r,
+        replies: level3.get(r._id) ?? [],
+      })),
     }));
   },
 });
@@ -70,6 +115,8 @@ export const add = viewerMutation({
     postId: v.id("posts"),
     text: v.string(),
     parentId: v.optional(v.id("comments")),
+    /** The name the reply is tagged with; omit (or null) for none. */
+    replyToId: v.optional(v.union(v.id("users"), v.null())),
     /** An attached photo, uploaded via `posts:generateUploadUrl`. */
     photo: v.optional(
       v.object({
@@ -79,17 +126,34 @@ export const add = viewerMutation({
       }),
     ),
   },
-  handler: async (ctx, { postId, text, parentId, photo }) => {
+  handler: async (ctx, { postId, text, parentId: replyingTo, replyToId, photo }) => {
     const body = text.trim();
     const photoUrl = photo ? await ctx.storage.getUrl(photo.storageId) : null;
     if (!body && !photoUrl) throw new ConvexError("Write something first");
     const post = await ctx.db.get(postId);
     if (!post) throw new ConvexError("Post not found");
+    if (await isBlockedEitherWay(ctx, ctx.viewer._id, post.authorId))
+      throw new ConvexError("You can't comment on this post.");
+    // Replying at the deepest level adds a sibling (tagged with the person answered).
+    const answered = replyingTo ? await ctx.db.get(replyingTo) : null;
+    if (replyingTo && (!answered || answered.postId !== postId))
+      throw new ConvexError("Comment not found");
+    let parentId = answered?._id;
+    if (answered) {
+      let depth = 1;
+      for (let c = answered; c.parentId; depth++) {
+        const up = await ctx.db.get(c.parentId);
+        if (!up) break;
+        c = up;
+      }
+      if (depth >= MAX_DEPTH && answered.parentId) parentId = answered.parentId;
+    }
     const now = Date.now();
     const commentId = await ctx.db.insert("comments", {
       postId,
       authorId: ctx.viewer._id,
       parentId,
+      replyToId: parentId ? (replyToId ?? null) : undefined,
       text: body,
       media: photoUrl
         ? { url: photoUrl, kind: "image", width: photo?.width, height: photo?.height }
@@ -100,12 +164,12 @@ export const add = viewerMutation({
     });
     await ctx.db.patch(postId, { commentCount: post.commentCount + 1 });
     const snippet = body.slice(0, 60) || "📷 Photo";
-    if (parentId) {
-      const parent = await ctx.db.get(parentId);
+    if (parentId && answered) {
+      const parent = parentId === answered._id ? answered : await ctx.db.get(parentId);
       if (parent) {
-        await ctx.db.patch(parentId, { replyCount: parent.replyCount + 1 });
+        await ctx.db.patch(parent._id, { replyCount: parent.replyCount + 1 });
         await notify(ctx, {
-          userId: parent.authorId,
+          userId: answered.authorId,
           actorId: ctx.viewer._id,
           kind: "reply",
           text: `replied to your comment: "${snippet}"`,

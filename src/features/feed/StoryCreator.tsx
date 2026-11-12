@@ -7,6 +7,7 @@ import { cn } from "@/lib/format";
 import { Avatar, Button, Card, Divider, IconButton, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { StorySettingsDialog } from "./StorySettingsDialog";
 import { storyBackground, storyTextColor } from "./storyUtils";
 
 type Mode = "pick" | "text" | "photo";
@@ -30,6 +31,7 @@ export function StoryCreator() {
   const [preview, setPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     if (!file) return;
@@ -82,7 +84,7 @@ export function StoryCreator() {
       <aside className="sticky top-14 flex h-[calc(100vh-56px)] w-[360px] shrink-0 flex-col bg-card shadow-[1px_0_2px_var(--shadow-1)]">
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
           <h1 className="font-bold text-[24px] text-primary leading-7">Your story</h1>
-          <IconButton label="Settings">
+          <IconButton label="Story privacy" onClick={() => setSettingsOpen(true)}>
             <Settings size={20} className="text-icon" />
           </IconButton>
         </div>
@@ -217,6 +219,7 @@ export function StoryCreator() {
           </Card>
         )}
       </main>
+      <StorySettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </div>
   );
 }

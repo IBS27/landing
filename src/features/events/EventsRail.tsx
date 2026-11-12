@@ -7,7 +7,6 @@ import {
   CATEGORY_GLYPH_CLASS,
   CalendarGridGlyph,
   EVENT_CATEGORY_GLYPHS,
-  GiftGlyph,
   PersonGlyph,
 } from "@/features/misc/glyphs";
 import { BellFilled } from "@/features/misc/icons";
@@ -103,7 +102,7 @@ export function RailSearch({
   );
 }
 
-/** The Events left rail (home, Your events, birthdays, permalink). */
+/** The Events left rail (home, Your events, birthdays, permalink). Like Facebook, it has no Birthdays row; /events/birthdays is reached from the shortcuts and the home right rail. */
 export function EventsRail({
   section,
   yoursTab,
@@ -122,7 +121,7 @@ export function EventsRail({
     <RailShell label={label}>
       <h1 className="px-4 pt-[15px] pb-0.5 font-bold text-[24px] text-primary leading-7">Events</h1>
       <RailSearch />
-      <div className="flex flex-col px-2">
+      <div className="flex flex-col px-2 pt-2">
         <RailItem
           icon={<CalendarGridIcon />}
           label="Home"
@@ -170,19 +169,13 @@ export function EventsRail({
             </Link>
           ))}
         <RailItem
-          icon={<GiftGlyph />}
-          label="Birthdays"
-          selected={section === "birthdays"}
-          to="/events/birthdays"
-        />
-        <RailItem
           icon={<BellFilled />}
           label="Notifications"
           selected={section === "notifications"}
           to="/events/notifications"
         />
       </div>
-      <div className="px-4 pt-3 pb-3">
+      <div className="px-4 pt-3 pb-2">
         <Link
           to="/events/create"
           className="flex h-9 w-full items-center justify-center gap-1.5 rounded-lg bg-btn-primary px-3 font-semibold text-[15px] text-white transition-colors hover:bg-btn-primary-hover active:scale-[0.99]"

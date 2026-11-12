@@ -1,5 +1,6 @@
 import type { FunctionReturnType } from "convex/server";
 import { createContext, useContext } from "react";
+import { plural } from "@/lib/format";
 import type { api } from "../../../convex/_generated/api";
 
 export type ProfileData = NonNullable<FunctionReturnType<typeof api.profiles.get>>;
@@ -40,4 +41,45 @@ export function joinedLabel(ts: number) {
 export function birthdayLabel(mmdd: string) {
   const [m, d] = mmdd.split("-").map(Number);
   return dayFmt.format(new Date(2000, m - 1, d));
+}
+
+/* ---------------- Work / education dates ("YYYY-MM") ---------------- */
+
+const shortMonthFmt = new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" });
+
+function monthDate(ym: string) {
+  const [y, m] = ym.split("-").map(Number);
+  return new Date(y, m - 1, 1);
+}
+
+/** "2 years, 3 months" between two months (end inclusive of the current month). */
+export function durationLabel(start: string, end?: string) {
+  const s = monthDate(start);
+  const e = end ? monthDate(end) : new Date();
+  const total = Math.max(
+    1,
+    (e.getFullYear() - s.getFullYear()) * 12 + e.getMonth() - s.getMonth() + (end ? 1 : 0),
+  );
+  const years = Math.floor(total / 12);
+  const months = total % 12;
+  return [years && plural(years, "year"), months && plural(months, "month")]
+    .filter(Boolean)
+    .join(", ");
+}
+
+/** Work: "Aug 2024 - Present · 2 years, 3 months". Null without a start month. */
+export function workDates(w: { start?: string; end?: string }) {
+  if (!w.start) return null;
+  const range = `${shortMonthFmt.format(monthDate(w.start))} - ${
+    w.end ? shortMonthFmt.format(monthDate(w.end)) : "Present"
+  }`;
+  return `${range} · ${durationLabel(w.start, w.end)}`;
+}
+
+/** Education: "September 2023 - June 2027". Null without a start month. */
+export function schoolDates(e: { start?: string; end?: string }) {
+  if (!e.start) return null;
+  return `${monthFmt.format(monthDate(e.start))} - ${
+    e.end ? monthFmt.format(monthDate(e.end)) : "Present"
+  }`;
 }

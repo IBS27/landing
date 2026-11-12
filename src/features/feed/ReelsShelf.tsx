@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import type { FunctionReturnType } from "convex/server";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQ } from "@/app/viewer";
@@ -23,7 +24,7 @@ function ReelsGlyph({ size = 20 }: { size?: number }) {
  * 9:16 tiles with previous/next arrows. Each tile opens that reel.
  */
 export function ReelsShelf() {
-  const reels = useQ(api.feed.reelsShelf, {});
+  const reels = useQ(api.media.reelsShelf, {});
   const row = useRef<HTMLDivElement>(null);
   const [edge, setEdge] = useState({ start: true, end: false });
 
@@ -63,37 +64,69 @@ export function ReelsShelf() {
           ? [0, 1, 2, 3].map((i) => (
               <div key={i} className="h-[343px] w-[192px] shrink-0 rounded-[10px] bg-btn" />
             ))
-          : reels.map((r) => (
-              <Link
-                key={r._id}
-                to="/reel/$reelId"
-                params={{ reelId: r._id }}
-                aria-label={r.caption ? `Reel: ${r.caption}` : "Reel"}
-                className="group relative h-[343px] w-[192px] shrink-0 overflow-hidden rounded-[10px] bg-black shadow-[0_1px_2px_rgba(0,0,0,0.2)]"
-              >
-                <img
-                  src={r.image}
-                  alt={r.alt ?? ""}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-[filter] group-hover:brightness-90"
-                />
-                {r.caption && (
-                  <>
-                    <span className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent" />
-                    <span className="absolute inset-x-3 bottom-3 line-clamp-2 break-words font-semibold text-[15px] text-white leading-5 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
-                      {r.caption}
-                    </span>
-                  </>
-                )}
-                <span className="absolute top-[10px] right-[10px] flex h-6 w-8 items-center justify-center text-white drop-shadow">
-                  <DotsIcon size={16} className="rotate-90" />
-                </span>
-              </Link>
-            ))}
+          : reels.map((r) => <ReelTile key={r._id} reel={r} />)}
       </div>
       {!edge.start && <ShelfArrow side="left" onClick={() => page(-1)} />}
       {!edge.end && reels !== undefined && <ShelfArrow side="right" onClick={() => page(1)} />}
     </Card>
+  );
+}
+
+type ShelfReel = FunctionReturnType<typeof api.media.reelsShelf>[number];
+
+/** A 9:16 tile: the poster, a muted looping preview while hovered, caption bottom-left. */
+function ReelTile({ reel: r }: { reel: ShelfReel }) {
+  const video = useRef<HTMLVideoElement>(null);
+  const [hover, setHover] = useState(false);
+  useEffect(() => {
+    const el = video.current;
+    if (!el) return;
+    if (hover) void el.play().catch(() => {});
+    else {
+      el.pause();
+      el.currentTime = 0;
+    }
+  }, [hover]);
+  return (
+    <Link
+      to="/reel/$reelId"
+      params={{ reelId: r._id }}
+      aria-label={r.caption ? `Reel: ${r.caption}` : "Reel"}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className="group relative h-[343px] w-[192px] shrink-0 overflow-hidden rounded-[10px] bg-black shadow-[0_1px_2px_rgba(0,0,0,0.2)]"
+    >
+      {r.poster && (
+        <img
+          src={r.poster}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      )}
+      <video
+        ref={video}
+        src={r.video}
+        muted
+        loop
+        playsInline
+        preload="none"
+        aria-hidden
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ${hover ? "opacity-100" : "opacity-0"}`}
+      />
+      <span className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/5" />
+      {r.caption && (
+        <>
+          <span className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent" />
+          <span className="absolute inset-x-3 bottom-3 line-clamp-2 break-words font-semibold text-[15px] text-white leading-5 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
+            {r.caption}
+          </span>
+        </>
+      )}
+      <span className="absolute top-[10px] right-[10px] flex h-6 w-8 items-center justify-center text-white drop-shadow">
+        <DotsIcon size={16} className="rotate-90" />
+      </span>
+    </Link>
   );
 }
 

@@ -256,10 +256,10 @@ export const typeahead = viewerQuery({
         .take(6),
     ]);
     const people: TypeaheadItem[] = [];
-    // Friends float to the top, like Facebook.
-    const ranked = [...users].sort(
-      (x, y) => Number(a.friends.has(y._id)) - Number(a.friends.has(x._id)),
-    );
+    // Friends float to the top, like Facebook; blocked people never show.
+    const ranked = users
+      .filter((u) => !a.blocked.has(u._id))
+      .sort((x, y) => Number(a.friends.has(y._id)) - Number(a.friends.has(x._id)));
     for (const u of ranked) {
       if (u.kind === "page") {
         people.push({
@@ -386,10 +386,12 @@ export const results = viewerQuery({
     const out = { ...empty };
 
     if (want.has("people") || want.has("pages")) {
-      const users = await ctx.db
-        .query("users")
-        .withSearchIndex("search_name", (s) => s.search("name", q))
-        .take(100);
+      const users = (
+        await ctx.db
+          .query("users")
+          .withSearchIndex("search_name", (s) => s.search("name", q))
+          .take(100)
+      ).filter((u) => !a.blocked.has(u._id));
       if (want.has("people")) {
         let people = await Promise.all(
           users.filter((u) => u.kind !== "page").map((u) => personResult(ctx, a, u)),
@@ -502,9 +504,44 @@ export const peopleCities = viewerQuery({
   },
 });
 
+/** Case-insensitive "does this post mention the location" (check-in or text). */
+function atPlace(p: Doc<"posts">, place: string) {
+  const needle = place.toLowerCase().trim();
+  // "Leavenworth, Washington" also matches posts that just say "Leavenworth".
+  const short = needle.split(",")[0].trim();
+  const tagged = p.place?.toLowerCase();
+  return (
+    (!!tagged && (tagged.includes(needle) || needle.includes(tagged))) ||
+    !!p.text?.toLowerCase().includes(short)
+  );
+}
+
 /**
- * Post results (also Photos and Videos). Full-text matches on post text,
- * filtered to what the viewer may see, with Facebook's post filters.
+ * Locations for the "Tagged location" filter: check-in places on posts the
+ * viewer can see, most used first, narrowed by what they type.
+ */
+export const taggedPlaces = viewerQuery({
+  args: { q: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const needle = clean(args.q ?? "").toLowerCase();
+    const a = await loadAudience(ctx, ctx.viewer._id);
+    const recent = await ctx.db.query("posts").withIndex("by_created").order("desc").take(1500);
+    const counts = new Map<string, number>();
+    for (const p of recent) {
+      if (!p.place || (needle && !p.place.toLowerCase().includes(needle))) continue;
+      if (!(await canView(ctx, p, a))) continue;
+      counts.set(p.place, (counts.get(p.place) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+      .sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0]))
+      .slice(0, 8)
+      .map(([name]) => name);
+  },
+});
+
+/**
+ * Post results (also Reels: posts with a video). Full-text matches on post
+ * text, filtered to what the viewer may see, with Facebook's post filters.
  */
 export const posts = viewerQuery({
   args: {
@@ -517,6 +554,8 @@ export const posts = viewerQuery({
     from: v.optional(
       v.union(v.literal("you"), v.literal("friends"), v.literal("groups"), v.literal("public")),
     ),
+    /** Tagged location: check-in place or a mention in the text. */
+    place: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const q = clean(args.q);
@@ -533,6 +572,7 @@ export const posts = viewerQuery({
       if (args.media === "photo" && !p.media.some((m) => m.kind === "image")) continue;
       if (args.media === "video" && !p.media.some((m) => m.kind === "video")) continue;
       if (args.year && new Date(p.createdAt).getFullYear() !== args.year) continue;
+      if (args.place && !atPlace(p, args.place)) continue;
       if (args.from === "you" && p.authorId !== a.viewerId) continue;
       if (args.from === "friends" && !a.friends.has(p.authorId)) continue;
       if (args.from === "groups" && !p.groupId) continue;

@@ -24,6 +24,7 @@ export { PostCard, PostContent, PostHeader } from "./PostCard";
 export { PostDialog } from "./PostDialog";
 export { type FeedSource, PostFeed, PostSkeleton } from "./PostFeed";
 export { PostPermalink } from "./PostPermalink";
+export { usePhotoTheater } from "./photoTheater";
 export { REACTIONS, ReactionIcon, ReactionIcons, ReactionPicker } from "./reactions";
 export { ShareDialog as ShareMenu, ShareDialog } from "./ShareDialog";
 export type { CommentThread, PostView } from "./types";

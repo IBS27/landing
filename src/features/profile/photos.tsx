@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Dialog as D } from "radix-ui";
 import { useCallback, useEffect, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
@@ -90,6 +90,72 @@ export function ImageLightbox({ src, onClose }: { src: string; onClose: () => vo
             </button>
           </D.Close>
           <img src={src} alt="" className="max-h-full max-w-full object-contain" />
+        </D.Content>
+      </D.Portal>
+    </D.Root>
+  );
+}
+
+/** Several images on the black theater stage with prev / next (Highlights). */
+export function GalleryLightbox({
+  srcs,
+  start,
+  onClose,
+}: {
+  srcs: string[];
+  start: number;
+  onClose: () => void;
+}) {
+  const [i, setI] = useState(start);
+  const n = srcs.length;
+  const go = (d: number) => setI((x) => (x + d + n) % n);
+  const arrow =
+    "absolute top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20";
+  return (
+    <D.Root open onOpenChange={(o) => !o && onClose()}>
+      <D.Portal>
+        <D.Content
+          aria-describedby={undefined}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowLeft") go(-1);
+            if (e.key === "ArrowRight") go(1);
+          }}
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black outline-none"
+        >
+          <D.Title className="sr-only">Highlights</D.Title>
+          <D.Close asChild>
+            <button
+              type="button"
+              aria-label="Close"
+              className="absolute top-2 left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white hover:bg-white/20"
+            >
+              <X size={24} />
+            </button>
+          </D.Close>
+          <img src={srcs[i]} alt="" className="max-h-full max-w-full object-contain" />
+          {n > 1 && (
+            <>
+              <button
+                type="button"
+                aria-label="Previous photo"
+                onClick={() => go(-1)}
+                className={`${arrow} left-4`}
+              >
+                <ChevronLeft size={28} />
+              </button>
+              <button
+                type="button"
+                aria-label="Next photo"
+                onClick={() => go(1)}
+                className={`${arrow} right-4`}
+              >
+                <ChevronRight size={28} />
+              </button>
+              <span className="absolute bottom-4 rounded-full bg-black/50 px-3 py-1 text-[13px] text-white">
+                {i + 1} of {n}
+              </span>
+            </>
+          )}
         </D.Content>
       </D.Portal>
     </D.Root>

@@ -1,9 +1,11 @@
+import { useNavigate } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
 import { X } from "lucide-react";
 import { useRef, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
+import { MetaAIRing } from "@/features/misc/icons";
 import { cn } from "@/lib/format";
-import { Avatar, Spinner } from "@/ui/primitives";
+import { Avatar, Spinner, VerifiedBadge } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { Composer } from "./Composer";
@@ -21,11 +23,15 @@ type Person = FunctionReturnType<typeof api.messenger.searchPeople>["people"][nu
 export function NewMessage({
   variant,
   onConversation,
+  onClose,
 }: {
   variant: "dock" | "page";
   /** Called once a thread exists (picked group chat, or after the first send). */
   onConversation: (id: Id<"conversations">) => void;
+  /** Closes the composer window (after jumping to Meta AI). */
+  onClose?: () => void;
 }) {
+  const navigate = useNavigate();
   const [to, setTo] = useState<Person[]>([]);
   const [q, setQ] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -39,6 +45,10 @@ export function NewMessage({
 
   const chosen = new Set(to.map((p) => p._id));
   const showSuggestions = q.trim().length > 0 || to.length === 0;
+  const term = q.trim().toLowerCase();
+  // Meta AI leads the suggestions, like Facebook's "New message" list.
+  const showMetaAI =
+    to.length === 0 && (!term || "meta ai".startsWith(term) || term.startsWith("meta"));
 
   const add = (p: Person) => {
     setTo((t) => [...t, p]);
@@ -64,16 +74,16 @@ export function NewMessage({
         {to.map((p) => (
           <span
             key={p._id}
-            className="inline-flex h-8 items-center gap-1 rounded-md bg-btn-soft pr-1.5 pl-2 font-semibold text-[13px] text-btn-soft-text"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-btn-soft pr-1.5 pl-2.5 font-semibold text-[15px] text-btn-soft-text"
           >
             {p.name}
             <button
               type="button"
               aria-label={`Remove ${p.name}`}
               onClick={() => setTo((t) => t.filter((x) => x._id !== p._id))}
-              className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-hover"
+              className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-hover"
             >
-              <X size={12} strokeWidth={3} />
+              <X size={16} strokeWidth={2.5} />
             </button>
           </span>
         ))}
@@ -92,7 +102,11 @@ export function NewMessage({
           // biome-ignore lint/a11y/noAutofocus: the To: field is focused when composing, like Facebook
           autoFocus
           aria-label="Send message to"
-          className="h-8 min-w-[80px] flex-1 bg-transparent text-[16px] text-primary outline-none"
+          className={cn(
+            "h-8 min-w-[80px] flex-1 bg-transparent text-[16px] text-primary outline-none",
+            // With a recipient chosen the field drops to its own line under the chips.
+            to.length > 0 && "basis-full",
+          )}
         />
       </div>
 
@@ -101,6 +115,26 @@ export function NewMessage({
           {results === undefined && (
             <li className="flex justify-center py-4">
               <Spinner size={20} />
+            </li>
+          )}
+          {showMetaAI && (
+            <li>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose?.();
+                  void navigate({ to: "/meta-ai" });
+                }}
+                className="mx-2 flex w-[calc(100%-16px)] items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-hover"
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white shadow-[inset_0_0_0_1px_var(--media-inner-border)]">
+                  <MetaAIRing size={28} />
+                </span>
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <span className="truncate text-[15px] text-primary">Meta AI</span>
+                  <VerifiedBadge size={12} />
+                </span>
+              </button>
             </li>
           )}
           {results?.groups.length && q.trim()
@@ -112,7 +146,7 @@ export function NewMessage({
                     className="mx-2 flex w-[calc(100%-16px)] items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-hover"
                   >
                     <ConversationAvatar kind="group" photo={g.photo} others={g.others} size={36} />
-                    <span className="truncate font-medium text-[15px] text-primary">{g.name}</span>
+                    <span className="truncate text-[15px] text-primary">{g.name}</span>
                   </button>
                 </li>
               ))
@@ -127,11 +161,11 @@ export function NewMessage({
                   className="mx-2 flex w-[calc(100%-16px)] items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-hover"
                 >
                   <Avatar src={p.avatar} size={36} online={p.online} />
-                  <span className="truncate font-medium text-[15px] text-primary">{p.name}</span>
+                  <span className="truncate text-[15px] text-primary">{p.name}</span>
                 </button>
               </li>
             ))}
-          {results && results.people.length === 0 && results.groups.length === 0 && (
+          {results && results.people.length === 0 && results.groups.length === 0 && !showMetaAI && (
             <li className="px-4 py-6 text-center text-[15px] text-secondary">No results</li>
           )}
         </ul>

@@ -111,8 +111,8 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className={cn(!last && "mb-8 border-divider border-b pb-14")}>
-      <div className="mb-4">
+    <section className={cn(!last && "mb-8 border-divider border-b pb-10")}>
+      <div className="mb-[21px]">
         <div className="flex items-start justify-between gap-4">
           <h2 className="font-bold text-[20px] text-primary leading-6">{title}</h2>
           {action}
@@ -124,7 +124,7 @@ function Section({
   );
 }
 
-/** A row of 3 visible 312px cards with Facebook's round Previous / Next buttons. */
+/** A row of 3 visible 312px cards; the round Previous / Next buttons sit at the row's vertical middle. */
 function Carousel({
   groups,
   onHide,
@@ -153,7 +153,7 @@ function Carousel({
       <div
         ref={ref}
         onScroll={update}
-        className="scrollbar-none flex items-start gap-2 overflow-x-auto pb-1"
+        className="scrollbar-none flex items-start gap-2 overflow-x-auto pb-5"
       >
         {groups.map((g) => (
           <div key={g._id}>
@@ -174,7 +174,7 @@ function ArrowButton({ side, onClick }: { side: "left" | "right"; onClick: () =>
       aria-label={side === "left" ? "Previous items" : "Next items"}
       onClick={onClick}
       className={cn(
-        "absolute top-[64px] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-card text-icon-secondary shadow-[0_2px_8px_rgba(0,0,0,.1),0_0_0_1px_rgba(0,0,0,.1)] hover:bg-[color-mix(in_srgb,var(--card),#000_4%)]",
+        "absolute top-1/2 z-10 flex -translate-y-1/2 h-12 w-12 items-center justify-center rounded-full bg-card text-icon-secondary shadow-[0_2px_8px_rgba(0,0,0,.1),0_0_0_1px_rgba(0,0,0,.1)] hover:bg-[color-mix(in_srgb,var(--card),#000_4%)]",
         side === "left" ? "-left-6" : "-right-6",
       )}
     >

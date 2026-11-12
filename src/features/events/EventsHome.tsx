@@ -9,14 +9,11 @@ import { EventCard, EventCardSkeleton } from "./EventCard";
 import { EventsLayout, EventsRail } from "./EventsRail";
 import { DATE_LABELS, type DateRange, rangeFor, todayStart } from "./format";
 
-type Pill = "top" | "local" | "this_week" | "online" | "following" | "friends";
+type Pill = "top" | "friends" | "following";
 const PILLS: { value: Pill; label: string }[] = [
   { value: "top", label: "Top" },
-  { value: "local", label: "Local" },
-  { value: "this_week", label: "This week" },
-  { value: "online", label: "Online" },
-  { value: "following", label: "Following" },
   { value: "friends", label: "Friends" },
+  { value: "following", label: "Following" },
 ];
 
 type Loc = "any" | "local" | "online";
@@ -32,12 +29,9 @@ export function EventsHome() {
   const [date, setDate] = useState<DateRange>("any");
   const [loc, setLoc] = useState<Loc>("any");
   const day = todayStart();
-  const range = useMemo(
-    () => rangeFor(pill === "this_week" ? "this_week" : date, day),
-    [pill, date, day],
-  );
+  const range = useMemo(() => rangeFor(date, day), [date, day]);
   const events = useQ(api.events.discover, {
-    filter: pill === "this_week" ? "top" : pill,
+    filter: pill,
     location: loc === "any" ? undefined : loc,
     ...range,
   });
@@ -73,10 +67,7 @@ export function EventsHome() {
                     key={k}
                     label={DATE_LABELS[k]}
                     icon={date === k ? <Check size={18} /> : <span />}
-                    onSelect={() => {
-                      setDate(k);
-                      if (pill === "this_week") setPill("top");
-                    }}
+                    onSelect={() => setDate(k)}
                   />
                 ))}
               </Dropdown>

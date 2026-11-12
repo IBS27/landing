@@ -8,6 +8,7 @@ import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger, Tooltip } from
 import { CountBadge, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { CallLayer, canCall, startCall } from "./CallWindow";
 import { ConversationAvatar } from "./ConversationAvatar";
 import { CloseIcon, ComposeIcon, MinimizeIcon, PhoneIcon, VideoCallIcon } from "./icons";
 import { NewMessage } from "./NewMessage";
@@ -55,6 +56,7 @@ export function ChatDock() {
 
   return (
     <>
+      <CallLayer />
       <div ref={windowsRef}>
         {slots.map((s, i) => (
           <div
@@ -199,12 +201,24 @@ function ChatWindow({ id }: { id: Id<"conversations"> }) {
           </div>
         )}
         <div className={cn("flex items-center", unreadTint && "[&_button]:text-white")}>
-          <HeaderButton label="Start a voice call" tone={tone}>
-            <PhoneIcon size={18} />
-          </HeaderButton>
-          <HeaderButton label="Start a video call" tone={tone}>
-            <VideoCallIcon size={20} />
-          </HeaderButton>
+          {c && canCall(c) && (
+            <>
+              <HeaderButton
+                label="Start a voice call"
+                tone={tone}
+                onClick={() => startCall(c, "audio")}
+              >
+                <PhoneIcon size={18} />
+              </HeaderButton>
+              <HeaderButton
+                label="Start a video call"
+                tone={tone}
+                onClick={() => startCall(c, "video")}
+              >
+                <VideoCallIcon size={20} />
+              </HeaderButton>
+            </>
+          )}
           <HeaderButton label="Minimize chat" tone={tone} onClick={() => minimizeChat(id)}>
             <MinimizeIcon size={20} />
           </HeaderButton>
@@ -347,7 +361,7 @@ function ComposerWindow({ onClose }: { onClose: () => void }) {
           </button>
         </Tooltip>
       </div>
-      <NewMessage variant="dock" onConversation={(id) => openChat(id)} />
+      <NewMessage variant="dock" onConversation={(id) => openChat(id)} onClose={onClose} />
     </div>
   );
 }

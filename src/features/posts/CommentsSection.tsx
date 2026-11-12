@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronDown, X } from "lucide-react";
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useM, useQ, useViewer } from "@/app/viewer";
 import { cn, compactCount, fullTimestamp, shortAge } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger, PopoverPanel, Tooltip } from "@/ui/overlays";
@@ -21,7 +21,7 @@ import {
   StickerOutline,
 } from "./icons";
 import { ReactionIcons, ReactionPicker, reactionMeta, useReactionHover } from "./reactions";
-import type { CommentThread, CommentView } from "./types";
+import type { CommentReply, CommentThread, CommentView } from "./types";
 import { mediaSize, uploadFile } from "./util";
 
 type Sort = "relevant" | "newest" | "all";
@@ -169,88 +169,202 @@ export function CommentList({ postId }: { postId: Id<"posts"> }) {
   );
 }
 
-const SPINE = "absolute left-[31px] w-0.5 bg-thread";
-const ELBOW =
-  "absolute left-[31px] top-0 h-[14px] w-[33px] rounded-bl-[10px] border-thread border-b-2 border-l-2";
+/* ---------- Threads ----------
+ * Facebook nests three levels. Measured offsets from the list's left edge:
+ * comment avatar 40px at 12, reply avatar 24px at 65, reply-to-reply avatar
+ * 24px at 103; text starts 14px after the avatar. "View N replies" sits at 66.
+ * Only a reply with replies of its own draws a threading line: down from its
+ * avatar, curving into each nested reply.
+ */
+
+type Depth = 1 | 2 | 3;
+type Tag = CommentView["author"];
+type ReplyTarget = { comment: CommentView; key: number };
+
+const AVATAR_X: Record<Depth, number> = { 1: 12, 2: 65, 3: 103 };
+const AVATAR_SIZE: Record<Depth, number> = { 1: 40, 2: 24, 3: 24 };
+const VIEW_X = 66;
+/** Line under a depth-2 avatar: 10px in, from 11px below the avatar. */
+const LINE_X = AVATAR_X[2] + 10;
+const LINE_TOP = 6 + AVATAR_SIZE[2] + 11;
+const REPLY_PAGE = 10;
+
+/**
+ * Reveal state for one level of replies: "View N replies" shows the first
+ * page, "View N more replies" the rest. Replies the viewer just added show
+ * right away (with "View all N replies" for the others).
+ */
+function useReplyReveal<T extends { _id: Id<"comments">; author: { _id: string } }>(items: T[]) {
+  const viewer = useViewer();
+  const [shown, setShown] = useState(0);
+  const [initial] = useState(() => new Set(items.map((i) => i._id)));
+  const visible = items.filter(
+    (item, i) => i < shown || (!initial.has(item._id) && item.author._id === viewer._id),
+  );
+  const hidden = items.length - visible.length;
+  const label =
+    hidden <= 0
+      ? null
+      : shown > 0
+        ? `View ${hidden} more ${hidden === 1 ? "reply" : "replies"}`
+        : visible.length > 0
+          ? `View all ${items.length} replies`
+          : items.length === 1
+            ? "View 1 reply"
+            : `View ${items.length} replies`;
+  return {
+    visible,
+    label,
+    /** Some replies already show, so the button sits in their column. */
+    partial: visible.length > 0,
+    open: () => setShown((n) => Math.min(items.length, n + REPLY_PAGE)),
+    openAll: () => setShown(items.length),
+  };
+}
+
+function ViewReplies({ label, x, onClick }: { label: string; x: number; onClick: () => void }) {
+  return (
+    <div style={{ paddingLeft: x }}>
+      <button
+        type="button"
+        onClick={onClick}
+        className="flex h-8 items-center gap-2 rounded-md pr-2 font-semibold text-[15px] text-secondary leading-5 hover:underline"
+      >
+        <ChevronDown size={16} strokeWidth={2.75} className="-ml-px" />
+        {label}
+      </button>
+    </div>
+  );
+}
+
+/** Tag a reply with the answered person, unless that's the viewer. */
+function tagFor(c: CommentView, viewerId: string): Tag | null {
+  return c.author._id === viewerId ? null : c.author;
+}
 
 function Thread({ thread, postId }: { thread: CommentThread; postId: Id<"posts"> }) {
-  const [expanded, setExpanded] = useState(false);
-  const [replyingTo, setReplyingTo] = useState<CommentView | null>(null);
-  const [replyKey, setReplyKey] = useState(0);
-  const replies = thread.replies;
   const viewer = useViewer();
-  // Reveal the thread when the viewer adds a reply.
-  const lastReplyAuthor = replies[replies.length - 1]?.author._id;
-  const prevCount = useRef(replies.length);
-  useEffect(() => {
-    if (replies.length > prevCount.current && lastReplyAuthor === viewer._id) setExpanded(true);
-    prevCount.current = replies.length;
-  }, [replies.length, lastReplyAuthor, viewer._id]);
-
-  const startReply = (c: CommentView) => {
-    setExpanded(true);
-    setReplyingTo(c);
-    setReplyKey((k) => k + 1);
+  const reveal = useReplyReveal(thread.replies);
+  const [target, setTarget] = useState<ReplyTarget | null>(null);
+  const answer = (c: CommentView) => {
+    reveal.openAll();
+    setTarget((t) => ({ comment: c, key: (t?.key ?? 0) + 1 }));
   };
 
-  const children: ReactNode[] = [];
-  if (replies.length > 0 && !expanded)
-    children.push(
-      <button
-        key="view"
-        type="button"
-        onClick={() => setExpanded(true)}
-        className="flex h-8 items-center gap-2 rounded-md pr-2 font-semibold text-[13px] text-secondary hover:underline"
-      >
-        <ChevronDown size={16} strokeWidth={2.5} />
-        View {replies.length === 1 ? "1 reply" : `all ${replies.length} replies`}
-      </button>,
-    );
-  if (expanded)
-    for (const r of replies)
-      children.push(<CommentRow key={r._id} comment={r} small onReply={() => startReply(r)} />);
-  if (replyingTo)
-    children.push(
-      <div key="composer" className="pt-1 pb-1">
-        <CommentComposer
-          postId={postId}
-          parentId={replyingTo._id}
-          size={24}
-          focusKey={replyKey}
-          placeholder={`Reply to ${replyingTo.author.name}…`}
-          onDone={() => setReplyingTo(null)}
-          onCancel={() => setReplyingTo(null)}
-        />
-      </div>,
-    );
-
-  const threaded = expanded && children.length > 0;
   return (
-    <div className="relative">
-      {threaded && <span className={cn(SPINE, "top-[48px] bottom-0")} />}
-      <CommentRow comment={thread} onReply={() => startReply(thread)} />
-      {children.map((child, i) => (
-        <div key={i} className={cn("relative pl-[65px]", !threaded && "pl-[52px]")}>
-          {threaded && (
-            <>
-              {i < children.length - 1 && <span className={cn(SPINE, "top-0 bottom-0")} />}
-              <span className={ELBOW} />
-            </>
+    <div>
+      <CommentRow comment={thread} depth={1} onReply={() => answer(thread)} />
+      {reveal.visible.map((r) => (
+        <ReplyBranch key={r._id} reply={r} postId={postId} />
+      ))}
+      {reveal.label && (
+        <ViewReplies
+          label={reveal.label}
+          x={reveal.partial ? AVATAR_X[2] : VIEW_X}
+          onClick={reveal.open}
+        />
+      )}
+      {target && (
+        <div className="pt-1 pr-4 pb-1" style={{ paddingLeft: AVATAR_X[2] }}>
+          <CommentComposer
+            key={target.key}
+            postId={postId}
+            parentId={target.comment._id}
+            tag={tagFor(target.comment, viewer._id)}
+            size={AVATAR_SIZE[2]}
+            focusKey={target.key}
+            placeholder={`Reply to ${target.comment.author.name}…`}
+            onDone={() => setTarget(null)}
+            onCancel={() => setTarget(null)}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** A reply plus its own replies (third level), joined by the threading line. */
+function ReplyBranch({ reply, postId }: { reply: CommentReply; postId: Id<"posts"> }) {
+  const viewer = useViewer();
+  const reveal = useReplyReveal(reply.replies);
+  const [target, setTarget] = useState<ReplyTarget | null>(null);
+  const answer = (c: CommentView) => {
+    reveal.openAll();
+    setTarget((t) => ({ comment: c, key: (t?.key ?? 0) + 1 }));
+  };
+
+  const nested: { key: string; node: ReactNode }[] = reveal.visible.map((r) => ({
+    key: r._id,
+    node: <CommentRow comment={r} depth={3} onReply={() => answer(r)} />,
+  }));
+  if (target)
+    nested.push({
+      key: "composer",
+      node: (
+        <div className="pt-1 pr-4 pb-1" style={{ paddingLeft: AVATAR_X[3] }}>
+          <CommentComposer
+            key={target.key}
+            postId={postId}
+            parentId={target.comment._id}
+            tag={tagFor(target.comment, viewer._id)}
+            size={AVATAR_SIZE[3]}
+            focusKey={target.key}
+            placeholder={`Reply to ${target.comment.author.name}…`}
+            onDone={() => setTarget(null)}
+            onCancel={() => setTarget(null)}
+          />
+        </div>
+      ),
+    });
+  const hasLine = nested.length > 0 || reveal.label !== null;
+
+  return (
+    <div>
+      <div className="relative">
+        {hasLine && (
+          <span
+            aria-hidden
+            className="absolute bottom-0 w-0.5 bg-thread"
+            style={{ left: LINE_X, top: LINE_TOP }}
+          />
+        )}
+        <CommentRow comment={reply} depth={2} onReply={() => answer(reply)} />
+      </div>
+      {nested.map((n, i) => (
+        <div key={n.key} className="relative">
+          {i < nested.length - 1 && (
+            <span
+              aria-hidden
+              className="absolute top-0 bottom-0 w-0.5 bg-thread"
+              style={{ left: LINE_X }}
+            />
           )}
-          {child}
+          <span
+            aria-hidden
+            className="absolute top-0 h-[18px] rounded-bl-[10px] border-thread border-b-2 border-l-2"
+            style={{ left: LINE_X, width: AVATAR_X[3] - LINE_X }}
+          />
+          {n.node}
         </div>
       ))}
+      {reveal.label && (
+        <ViewReplies
+          label={reveal.label}
+          x={reveal.partial ? AVATAR_X[3] : VIEW_X}
+          onClick={reveal.open}
+        />
+      )}
     </div>
   );
 }
 
 function CommentRow({
   comment,
-  small,
+  depth,
   onReply,
 }: {
   comment: CommentView;
-  small?: boolean;
+  depth: Depth;
   onReply: () => void;
 }) {
   const rx = useOptimisticReaction("comment", comment._id, comment.reactions);
@@ -259,10 +373,13 @@ function CommentRow({
   const [editing, setEditing] = useState(false);
   const remove = useM(api.comments.remove);
   const meta = rx.current ? reactionMeta(rx.current) : null;
-  const size = small ? 24 : 40;
+  const size = AVATAR_SIZE[depth];
 
   return (
-    <div className={cn("group/comment flex gap-2 pt-1", small ? "pr-4" : "pr-4 pl-3")}>
+    <div
+      className="group/comment flex gap-[14px] pt-1 pr-4"
+      style={{ paddingLeft: AVATAR_X[depth] }}
+    >
       <Link
         to="/$username"
         params={{ username: comment.author.username }}
@@ -455,6 +572,7 @@ const QUICK_EMOJI = [
 export function CommentComposer({
   postId,
   parentId,
+  tag: initialTag = null,
   placeholder = "Write a comment…",
   size = 32,
   focusKey,
@@ -465,6 +583,8 @@ export function CommentComposer({
 }: {
   postId: Id<"posts">;
   parentId?: Id<"comments">;
+  /** Name the reply starts with, as a blue tag (Backspace removes it). */
+  tag?: Tag | null;
   placeholder?: string;
   size?: number;
   /** One-row pill with the icons on the right until the viewer starts typing. */
@@ -481,7 +601,12 @@ export function CommentComposer({
   const [text, setText] = useState("");
   const [photo, setPhoto] = useState<{ file: File; preview: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [tag, setTag] = useState(initialTag);
+  const [tagWidth, setTagWidth] = useState(0);
+  const tagRef = useRef<HTMLSpanElement>(null);
   const ref = useRef<HTMLTextAreaElement>(null);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-measure when the tag changes
+  useLayoutEffect(() => setTagWidth(tagRef.current?.offsetWidth ?? 0), [tag]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -489,7 +614,7 @@ export function CommentComposer({
   }, [focusKey]);
 
   const canSend = (text.trim().length > 0 || photo !== null) && !busy;
-  const compact = inline && !text && !photo;
+  const compact = inline && !text && !photo && !tag;
   const submit = async () => {
     if (!canSend) return;
     setBusy(true);
@@ -499,7 +624,13 @@ export function CommentComposer({
         const storageId = (await uploadFile(await getUploadUrl({}), photo.file)) as Id<"_storage">;
         upload = { storageId, ...(await mediaSize(photo.file)) };
       }
-      await add({ postId, parentId, text, photo: upload });
+      await add({
+        postId,
+        parentId,
+        replyToId: parentId ? (tag?._id ?? null) : undefined,
+        text,
+        photo: upload,
+      });
       setText("");
       setPhoto(null);
       onDone?.();
@@ -517,12 +648,22 @@ export function CommentComposer({
         <div
           className={cn("bg-comment", compact ? "flex items-center rounded-[18px]" : "rounded-2xl")}
         >
-          <div className={cn("px-3", compact ? "min-w-0 flex-1 py-2" : "pt-2")}>
+          <div className={cn("relative px-3", compact ? "min-w-0 flex-1 py-2" : "pt-2")}>
+            {tag && (
+              <span
+                ref={tagRef}
+                className="pointer-events-none absolute top-2 left-3 whitespace-nowrap rounded-[3px] bg-[#dde6fd] font-semibold text-[15px] text-link leading-5 dark:bg-[#1d3a63]"
+              >
+                {tag.name}
+              </span>
+            )}
             <AutoTextarea
               ref={ref}
               value={text}
               onChange={setText}
-              placeholder={placeholder}
+              indent={tag ? tagWidth + 4 : 0}
+              onBackspaceAtStart={tag ? () => setTag(null) : undefined}
+              placeholder={tag ? undefined : placeholder}
               autoFocus={autoFocus || !!parentId}
               onSubmit={() => void submit()}
               onEscape={onCancel}
@@ -649,6 +790,8 @@ function AutoTextarea({
   onChange,
   onSubmit,
   onEscape,
+  onBackspaceAtStart,
+  indent = 0,
   placeholder,
   autoFocus,
   ref,
@@ -657,6 +800,10 @@ function AutoTextarea({
   onChange: (v: string) => void;
   onSubmit: () => void;
   onEscape?: () => void;
+  /** Backspace with the caret at the very start (removes a reply tag). */
+  onBackspaceAtStart?: () => void;
+  /** First-line indent in px, leaving room for a tag drawn before the text. */
+  indent?: number;
   placeholder?: string;
   autoFocus?: boolean;
   ref?: React.Ref<HTMLTextAreaElement>;
@@ -686,11 +833,20 @@ function AutoTextarea({
         if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
           e.preventDefault();
           onSubmit();
+        } else if (
+          e.key === "Backspace" &&
+          onBackspaceAtStart &&
+          e.currentTarget.selectionStart === 0 &&
+          e.currentTarget.selectionEnd === 0
+        ) {
+          e.preventDefault();
+          onBackspaceAtStart();
         } else if (e.key === "Escape" && onEscape) {
           e.stopPropagation();
           onEscape();
         }
       }}
+      style={indent ? { textIndent: indent } : undefined}
       className="block w-full resize-none bg-transparent text-[15px] text-primary leading-5 outline-none placeholder:text-placeholder"
     />
   );
