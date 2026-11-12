@@ -74,6 +74,8 @@ export function useCallMedia(kind: "audio" | "video", joined: boolean) {
   // Ask for the mic (and the camera on video calls) once this person is in the call.
   useEffect(() => {
     if (!joined) return;
+    // Per run: a StrictMode replay or quick leave/rejoin must not adopt an earlier run's capture.
+    let cancelled = false;
     const state = cur.current;
     state.alive = true;
     state.cameraWanted = kind === "video";
@@ -98,10 +100,12 @@ export function useCallMedia(kind: "audio" | "video", joined: boolean) {
         return { a: null, v: null };
       }
     };
-    void ask().then(({ a, v }) => {
-      const track = keep(state, a);
-      const cam = keep(state, v);
-      if (!state.alive) return;
+    void ask().then(({ a: track, v: cam }) => {
+      if (cancelled) {
+        track?.stop();
+        cam?.stop();
+        return;
+      }
       setAudio(track);
       setVideo(cam);
       setSource(cam ? "camera" : null);
@@ -110,6 +114,7 @@ export function useCallMedia(kind: "audio" | "video", joined: boolean) {
       setSettled(true);
     });
     return () => {
+      cancelled = true;
       state.alive = false;
       state.audio?.stop();
       state.video?.stop();

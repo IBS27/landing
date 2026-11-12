@@ -3,7 +3,7 @@ import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { notify } from "./lib/notify";
-import { enrichPosts, isSaved, loadAudience } from "./lib/posts";
+import { canSeeEvent, enrichPosts, eventVisible, isSaved, loadAudience } from "./lib/posts";
 import { detailAudiences } from "./lib/settings";
 import { friendIds, getSummaries, getSummary, type UserSummary, userSummary } from "./lib/users";
 
@@ -89,11 +89,7 @@ async function loadCtx(ctx: QueryCtx, viewerId: Id<"users">): Promise<Ctx> {
 
 /** Facebook audience rules for events. */
 function canSee(e: Doc<"events">, c: Ctx) {
-  if (e.hostId === c.viewerId || c.mine.has(e._id)) return true;
-  if (e.privacy === "public") return true;
-  if (e.privacy === "friends") return c.friends.has(e.hostId);
-  if (e.privacy === "group") return e.groupId !== undefined && c.groups.has(e.groupId);
-  return false;
+  return eventVisible(e, c, c.mine.has(e._id));
 }
 
 async function responses(ctx: QueryCtx, eventId: Id<"events">, status: Status) {
@@ -536,7 +532,8 @@ export const respond = viewerMutation({
   },
   handler: async (ctx, { eventId, status }) => {
     const e = await ctx.db.get(eventId);
-    if (!e) throw new ConvexError("Event not found");
+    if (!e || !(await canSeeEvent(ctx, e, await loadAudience(ctx, ctx.viewer._id))))
+      throw new ConvexError("Event not found");
     const viewerId = ctx.viewer._id;
     const row = await ctx.db
       .query("eventResponses")
@@ -573,7 +570,8 @@ export const invite = viewerMutation({
   args: { eventId: v.id("events"), userIds: v.array(v.id("users")) },
   handler: async (ctx, { eventId, userIds }) => {
     const e = await ctx.db.get(eventId);
-    if (!e) throw new ConvexError("Event not found");
+    if (!e || !(await canSeeEvent(ctx, e, await loadAudience(ctx, ctx.viewer._id))))
+      throw new ConvexError("Event not found");
     const viewerId = ctx.viewer._id;
     const friends = new Set(await friendIds(ctx, viewerId));
     let sent = 0;
@@ -686,7 +684,8 @@ export const post = viewerMutation({
   args: { eventId: v.id("events"), text: v.string() },
   handler: async (ctx, { eventId, text }) => {
     const e = await ctx.db.get(eventId);
-    if (!e) throw new ConvexError("Event not found");
+    if (!e || !(await canSeeEvent(ctx, e, await loadAudience(ctx, ctx.viewer._id))))
+      throw new ConvexError("Event not found");
     const body = text.trim();
     if (!body) throw new ConvexError("A post needs some content");
     const postId = await ctx.db.insert("posts", {

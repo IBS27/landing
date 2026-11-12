@@ -574,6 +574,14 @@ export default defineSchema({
     .index("by_post", ["postId"])
     .index("by_user_post", ["userId", "postId"]),
 
+  /** Per-viewer feed choices: "Hide post" (`targetId` a post) and "Snooze for 30 days" (`targetId` a user, until `until`). */
+  feedHides: defineTable({
+    userId: v.id("users"),
+    kind: v.union(v.literal("post"), v.literal("snooze")),
+    targetId: v.string(),
+    until: v.optional(v.number()),
+  }).index("by_user_target", ["userId", "targetId"]),
+
   /** Content reports (posts, messages, listings), "Report a problem" and call problem reports filed by `userId`, with the reason they picked. */
   reports: defineTable({
     userId: v.id("users"),

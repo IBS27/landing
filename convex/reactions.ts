@@ -1,8 +1,9 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { notify } from "./lib/notify";
+import { canView, loadAudience } from "./lib/posts";
 import { getSummaries } from "./lib/users";
 import { type ReactionType, reactionTarget, reactionType } from "./validators";
 
@@ -45,10 +46,40 @@ async function adjustCount(ctx: MutationCtx, targetType: Target, targetId: strin
   }
 }
 
+/** Whether the target exists and the viewer can see it: the post (of a comment) or the conversation. */
+async function canReach(
+  ctx: QueryCtx,
+  targetType: Target,
+  targetId: string,
+  viewerId: Id<"users">,
+) {
+  if (targetType === "message") {
+    const id = ctx.db.normalizeId("messages", targetId);
+    const m = id ? await ctx.db.get(id) : null;
+    if (!m) return false;
+    const member = await ctx.db
+      .query("conversationMembers")
+      .withIndex("by_conversation_user", (q) =>
+        q.eq("conversationId", m.conversationId).eq("userId", viewerId),
+      )
+      .unique();
+    return member !== null;
+  }
+  let postId = targetType === "post" ? ctx.db.normalizeId("posts", targetId) : null;
+  if (targetType === "comment") {
+    const id = ctx.db.normalizeId("comments", targetId);
+    postId = (id ? await ctx.db.get(id) : null)?.postId ?? null;
+  }
+  const post = postId ? await ctx.db.get(postId) : null;
+  return !!post && (await canView(ctx, post, await loadAudience(ctx, viewerId)));
+}
+
 /** Set, change, or (when `type` is null or unchanged) remove the viewer's reaction. */
 export const react = viewerMutation({
   args: { targetType: reactionTarget, targetId: v.string(), type: v.union(reactionType, v.null()) },
   handler: async (ctx, { targetType, targetId, type }) => {
+    if (!(await canReach(ctx, targetType, targetId, ctx.viewer._id)))
+      throw new ConvexError("This content isn't available.");
     const existing = await ctx.db
       .query("reactions")
       .withIndex("by_target_user", (q) =>
@@ -104,6 +135,7 @@ export const react = viewerMutation({
 export const list = viewerQuery({
   args: { targetType: reactionTarget, targetId: v.string() },
   handler: async (ctx, { targetType, targetId }) => {
+    if (!(await canReach(ctx, targetType, targetId, ctx.viewer._id))) return [];
     const rows = await ctx.db
       .query("reactions")
       .withIndex("by_target", (q) => q.eq("targetType", targetType).eq("targetId", targetId))

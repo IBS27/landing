@@ -380,7 +380,7 @@ export const groups = viewerQuery({
         slug: g.slug,
         cover: g.cover,
         privacy: g.privacy,
-        memberCount: g.memberCount + g.externalMemberCount,
+        memberCount: g.memberCount,
       });
     }
     return out;

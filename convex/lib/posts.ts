@@ -137,6 +137,10 @@ export async function canView(ctx: QueryCtx, post: Doc<"posts">, a: Audience) {
   if (a.blocked.has(post.authorId)) return false;
   if (post.timelineUserId && a.blocked.has(post.timelineUserId)) return false;
   if (post.privacy === "only_me") return false;
+  if (post.eventId) {
+    const e = await ctx.db.get(post.eventId);
+    if (!e || !(await canSeeEvent(ctx, e, a))) return false;
+  }
   if (post.groupId) {
     if (a.groups.has(post.groupId)) return true;
     const g = await ctx.db.get(post.groupId);
@@ -161,9 +165,31 @@ export async function canView(ctx: QueryCtx, post: Doc<"posts">, a: Audience) {
   return true;
 }
 
+type EventViewer = Pick<Audience, "viewerId" | "friends" | "groups">;
+
+/** Facebook audience rules for events; `responded` means the viewer was invited or has RSVP'd. */
+export function eventVisible(e: Doc<"events">, a: EventViewer, responded: boolean) {
+  if (e.hostId === a.viewerId || responded) return true;
+  if (e.privacy === "public") return true;
+  if (e.privacy === "friends") return a.friends.has(e.hostId);
+  if (e.privacy === "group") return e.groupId !== undefined && a.groups.has(e.groupId);
+  return false;
+}
+
+/** `eventVisible` for one event, looking up the viewer's response. */
+export async function canSeeEvent(ctx: QueryCtx, e: Doc<"events">, a: EventViewer) {
+  if (eventVisible(e, a, false)) return true;
+  const row = await ctx.db
+    .query("eventResponses")
+    .withIndex("by_event_user", (q) => q.eq("eventId", e._id).eq("userId", a.viewerId))
+    .first();
+  return row !== null;
+}
+
 async function resolveAttachment(
   ctx: QueryCtx,
   att: Doc<"posts">["attachments"][number],
+  a: Audience,
 ): Promise<ResolvedAttachment | null> {
   if (att.kind === "listing") {
     const l = await ctx.db.get(att.listingId);
@@ -182,7 +208,7 @@ async function resolveAttachment(
   }
   if (att.kind === "event") {
     const e = await ctx.db.get(att.eventId);
-    if (!e) return null;
+    if (!e || !(await canSeeEvent(ctx, e, a))) return null;
     return {
       kind: "event",
       eventId: e._id,
@@ -244,7 +270,7 @@ export async function enrichPost(
         ? getSummary(ctx, post.timelineUserId)
         : null,
       getSummaries(ctx, post.taggedIds ?? []),
-      Promise.all(post.attachments.map((att) => resolveAttachment(ctx, att))),
+      Promise.all(post.attachments.map((att) => resolveAttachment(ctx, att, a))),
       reactionSummary(ctx, "post", post._id, a.viewerId),
       isSaved(ctx, a.viewerId, "post", post._id),
       ctx.db

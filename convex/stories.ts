@@ -304,6 +304,9 @@ export const reply = viewerMutation({
     if (story.authorId === viewerId) throw new ConvexError("You can't reply to your own story");
     if (await isBlockedEitherWay(ctx, viewerId, story.authorId))
       throw new ConvexError("This person isn't available right now.");
+    const author = await ctx.db.get(story.authorId);
+    if (!author || !(await canSeeStories(ctx, author, viewerId)))
+      throw new ConvexError("This story isn't available.");
     const conversationId = await dmWith(ctx, viewerId, story.authorId);
     const now = Date.now();
     const messageId = await ctx.db.insert("messages", {

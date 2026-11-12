@@ -22,11 +22,13 @@ export const me = viewerQuery({
 
 export const byUsername = query({
   args: { username: v.string() },
-  handler: async (ctx, { username }) =>
-    ctx.db
+  handler: async (ctx, { username }) => {
+    const u = await ctx.db
       .query("users")
       .withIndex("by_username", (q) => q.eq("username", username))
-      .unique(),
+      .unique();
+    return u && { _id: u._id, name: u.name, username: u.username };
+  },
 });
 
 /** Presence heartbeat; the client calls this every minute while the tab is open. */

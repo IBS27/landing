@@ -174,7 +174,8 @@ export const add = viewerMutation({
     const photoUrl = photo ? await ctx.storage.getUrl(photo.storageId) : null;
     if (!body && !photoUrl) throw new ConvexError("Write something first");
     const post = await ctx.db.get(postId);
-    if (!post) throw new ConvexError("Post not found");
+    if (!post || !(await canView(ctx, post, await loadAudience(ctx, ctx.viewer._id))))
+      throw new ConvexError("Post not found");
     if (await isBlockedEitherWay(ctx, ctx.viewer._id, post.authorId))
       throw new ConvexError("You can't comment on this post.");
     if (!(await canCommentOn(ctx, post, ctx.viewer._id))) {
@@ -244,6 +245,7 @@ export const add = viewerMutation({
     const postAuthor = subs.length ? await ctx.db.get(post.authorId) : null;
     for (const s of subs) {
       if (s.userId === post.authorId || s.userId === answered?.authorId) continue;
+      if (!(await canView(ctx, post, await loadAudience(ctx, s.userId)))) continue;
       await notify(ctx, {
         userId: s.userId,
         actorId: authorId,

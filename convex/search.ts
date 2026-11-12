@@ -507,7 +507,13 @@ export const peopleCities = viewerQuery({
       .query("users")
       .withSearchIndex("search_name", (s) => s.search("name", q))
       .take(100);
-    return [...new Set(users.flatMap((u) => (u.kind !== "page" && u.city ? [u.city] : [])))].sort();
+    const a = await loadAudience(ctx, ctx.viewer._id);
+    const cities = await Promise.all(
+      users
+        .filter((u) => u.kind !== "page" && !a.blocked.has(u._id))
+        .map(async (u) => (await visibleDetails(ctx, u, a.viewerId, a.friends.has(u._id))).city),
+    );
+    return [...new Set(cities.filter((c) => c !== null))].sort();
   },
 });
 

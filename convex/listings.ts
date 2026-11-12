@@ -645,7 +645,7 @@ export const buySellGroups = viewerQuery({
         slug: g.slug,
         cover: g.cover,
         privacy: g.privacy,
-        memberCount: g.memberCount + g.externalMemberCount,
+        memberCount: g.memberCount,
         listingCount: count,
         joined: joined.has(g._id),
       });
@@ -670,7 +670,7 @@ export const listingTargets = viewerQuery({
           _id: g._id,
           name: g.name,
           cover: g.cover,
-          memberCount: g.memberCount + g.externalMemberCount,
+          memberCount: g.memberCount,
         });
     }
     return out;

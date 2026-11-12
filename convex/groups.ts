@@ -4,7 +4,7 @@ import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { activityLabel, externalPostsPerDay } from "./lib/groupActivity";
 import { notify } from "./lib/notify";
-import { enrichPosts, loadAudience } from "./lib/posts";
+import { canView, enrichPosts, eventVisible, loadAudience } from "./lib/posts";
 import { visibleDetails } from "./lib/settings";
 import { friendIds, getSummaries, type UserSummary, userSummary } from "./lib/users";
 
@@ -374,9 +374,12 @@ export const media = viewerQuery({
       .withIndex("by_group", (q) => q.eq("groupId", groupId))
       .order("desc")
       .take(200);
+    const a = await loadAudience(ctx, ctx.viewer._id);
+    const visible = await Promise.all(posts.map((p) => canView(ctx, p, a)));
+    const shown = posts.filter((_, i) => visible[i]);
     const authors = await getSummaries(
       ctx,
-      posts.map((p) => p.authorId),
+      shown.map((p) => p.authorId),
     );
     const out: {
       key: string;
@@ -386,7 +389,7 @@ export const media = viewerQuery({
       kind: "image" | "video";
       username: string;
     }[] = [];
-    for (const p of posts)
+    for (const p of shown)
       p.media.forEach((m, index) => {
         out.push({
           key: `${p._id}:${index}`,
@@ -523,14 +526,16 @@ export const events = viewerQuery({
       .query("events")
       .withIndex("by_group", (q) => q.eq("groupId", groupId))
       .collect();
+    const a = await loadAudience(ctx, ctx.viewer._id);
     const now = Date.now();
-    const view = await Promise.all(
+    const all = await Promise.all(
       rows.map(async (e) => {
         const responses = await ctx.db
           .query("eventResponses")
           .withIndex("by_event", (q) => q.eq("eventId", e._id))
           .collect();
         const mine = responses.find((r) => r.userId === ctx.viewer._id);
+        if (!eventVisible(e, a, mine !== undefined)) return null;
         return {
           _id: e._id,
           title: e.title,
@@ -547,6 +552,7 @@ export const events = viewerQuery({
         };
       }),
     );
+    const view = all.filter((e) => e !== null);
     return {
       upcoming: view
         .filter((e) => (e.endAt ?? e.startAt) >= now)

@@ -2,7 +2,13 @@ import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { viewerMutation, viewerQuery } from "./lib/functions";
-import { type Audience, canView, loadAudience, isSaved as savedState } from "./lib/posts";
+import {
+  type Audience,
+  canSeeEvent,
+  canView,
+  loadAudience,
+  isSaved as savedState,
+} from "./lib/posts";
 import { getSummary } from "./lib/users";
 
 const kind = v.union(v.literal("post"), v.literal("listing"), v.literal("event"));
@@ -135,7 +141,7 @@ async function resolve(ctx: QueryCtx, row: Doc<"saved">, a: Audience): Promise<R
     };
   }
   const e = await ctx.db.get(row.refId as Id<"events">);
-  if (!e) return null;
+  if (!e || !(await canSeeEvent(ctx, e, a))) return null;
   const host = await getSummary(ctx, e.hostId);
   return {
     ...base,

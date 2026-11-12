@@ -244,6 +244,11 @@ export const ping = viewerMutation({
   handler: async (ctx, { sessionId, connected }) => {
     const s = await ownSession(ctx, sessionId, ctx.viewer._id);
     if (!s) return false;
+    // Access can be lost mid-broadcast (blocked, audience changed): stop serving this player.
+    if (!(await watchable(ctx, s.postId, ctx.viewer._id))) {
+      await dropSession(ctx, sessionId);
+      return false;
+    }
     await ctx.db.patch(sessionId, {
       lastSeenAt: Date.now(),
       ...(connected === undefined ? {} : { connected }),

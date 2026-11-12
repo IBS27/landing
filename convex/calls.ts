@@ -12,6 +12,9 @@ import { insertMessage } from "./messenger";
  * someone accepts, and ends when fewer than two people remain. Finished calls
  * are logged in the thread as a call bubble from the caller. WebRTC offer,
  * answer, ICE and mic/camera state travel through `callSignals`.
+ * A group call keeps ringing for callees who haven't answered after someone
+ * else accepts; `declinedIds` is everyone it no longer rings for (declined,
+ * missed at the deadline, or left).
  */
 
 const RING_MS = 30_000;
@@ -111,6 +114,16 @@ export const expire = internalMutation({
   handler: async (ctx, { callId }) => {
     const call = await ctx.db.get(callId);
     if (call?.status === "ringing") await finish(ctx, call, "missed", "no_answer");
+    // Stop ringing for callees of an answered group call who never picked up.
+    else if (call?.status === "active")
+      await ctx.db.patch(callId, {
+        declinedIds: [
+          ...new Set([
+            ...(call.declinedIds ?? []),
+            ...call.calleeIds.filter((id) => !call.joinedIds?.includes(id)),
+          ]),
+        ],
+      });
   },
 });
 
@@ -135,9 +148,9 @@ export const decline = viewerMutation({
   handler: async (ctx, { callId }) => {
     const viewerId = ctx.viewer._id;
     const call = await requireParty(ctx, callId, viewerId);
-    if (call.status !== "ringing" || call.callerId === viewerId) return;
+    if (!live(call) || call.callerId === viewerId || call.joinedIds?.includes(viewerId)) return;
     const declinedIds = [...new Set([...(call.declinedIds ?? []), viewerId])];
-    if (call.calleeIds.every((id) => declinedIds.includes(id)))
+    if (call.status === "ringing" && call.calleeIds.every((id) => declinedIds.includes(id)))
       await finish(ctx, { ...call, declinedIds }, "declined", "declined");
     else await ctx.db.patch(callId, { declinedIds });
   },
@@ -157,7 +170,11 @@ export const leave = viewerMutation({
     }
     const joinedIds = call.joinedIds.filter((id) => id !== viewerId);
     if (joinedIds.length < 2) await finish(ctx, call, "ended", "answered");
-    else await ctx.db.patch(callId, { joinedIds });
+    else
+      await ctx.db.patch(callId, {
+        joinedIds,
+        declinedIds: [...new Set([...(call.declinedIds ?? []), viewerId])],
+      });
   },
 });
 
@@ -206,11 +223,7 @@ export const incoming = viewerQuery({
   args: {},
   handler: async (ctx) => {
     const viewerId = ctx.viewer._id;
-    const ringing = await ctx.db
-      .query("calls")
-      .withIndex("by_status", (q) => q.eq("status", "ringing"))
-      .collect();
-    const mine = ringing.filter(
+    const mine = (await liveCalls(ctx)).filter(
       (c) =>
         c.calleeIds.includes(viewerId) &&
         !c.joinedIds?.includes(viewerId) &&

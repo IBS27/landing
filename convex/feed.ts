@@ -1,4 +1,4 @@
-import { paginationOptsValidator } from "convex/server";
+import { type PaginationOptions, paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { mergedStream, type QueryStream, stream } from "convex-helpers/server/stream";
 import type { Doc, Id } from "./_generated/dataModel";
@@ -7,16 +7,19 @@ import { viewerQuery } from "./lib/functions";
 import { type Audience, canView, enrichPosts, groupChip, loadAudience } from "./lib/posts";
 import { detailAudiences } from "./lib/settings";
 import { getSummaries, isOnline, type UserSummary, userSummary } from "./lib/users";
+import { feedHides } from "./posts";
 import schema from "./schema";
 
 type Source = { authors: Id<"users">[]; groups: Id<"groups">[]; ownWall: boolean };
 
 /**
- * Merge per-author and per-group index streams into one newest-first stream.
+ * One page of the per-author and per-group index streams merged newest-first.
  * Group posts only come from group streams so nothing appears twice. Ads are
- * not organic posts: Home places them itself (`ads`).
+ * not organic posts: Home places them itself (`ads`). Authors the viewer
+ * snoozed are left out; hidden posts stay and render as "Hidden · Undo".
  */
-function feedStream(ctx: QueryCtx, a: Audience, src: Source) {
+async function feedPage(ctx: QueryCtx, a: Audience, src: Source, opts: PaginationOptions) {
+  const snoozed = new Set((await feedHides(ctx, a.viewerId)).snoozed);
   const s = stream(ctx.db, schema);
   const streams: QueryStream<Doc<"posts">>[] = [];
   for (const authorId of src.authors)
@@ -47,7 +50,9 @@ function feedStream(ctx: QueryCtx, a: Audience, src: Source) {
           async (p) => p.authorId !== a.viewerId && !a.friends.has(p.authorId) && !p.sponsored,
         ),
     );
-  return mergedStream(streams, ["createdAt"]);
+  return mergedStream(streams, ["createdAt"])
+    .filterWith(async (p) => !snoozed.has(p.authorId))
+    .paginate(opts);
 }
 
 const emptyPage = { page: [], isDone: true, continueCursor: "" };
@@ -66,11 +71,16 @@ export const home = viewerQuery({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, { paginationOpts }) => {
     const a = await loadAudience(ctx, ctx.viewer._id);
-    const result = await feedStream(ctx, a, {
-      authors: [a.viewerId, ...a.friends, ...(await followedPages(ctx, a))],
-      groups: [...a.groups],
-      ownWall: true,
-    }).paginate(paginationOpts);
+    const result = await feedPage(
+      ctx,
+      a,
+      {
+        authors: [a.viewerId, ...a.friends, ...(await followedPages(ctx, a))],
+        groups: [...a.groups],
+        ownWall: true,
+      },
+      paginationOpts,
+    );
     return { ...result, page: await enrichPosts(ctx, result.page, a) };
   },
 });
@@ -120,7 +130,7 @@ export const recent = viewerQuery({
             ? { authors: [], groups: [...a.groups], ownWall: false }
             : { authors: [a.viewerId, ...people, ...pages], groups: [...a.groups], ownWall: true };
     if (src.authors.length === 0 && src.groups.length === 0) return emptyPage;
-    const result = await feedStream(ctx, a, src).paginate(paginationOpts);
+    const result = await feedPage(ctx, a, src, paginationOpts);
     return { ...result, page: await enrichPosts(ctx, result.page, a) };
   },
 });

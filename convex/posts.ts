@@ -2,7 +2,7 @@ import { paginationOptsValidator } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import { mergedStream, stream } from "convex-helpers/server/stream";
 import type { Doc, Id } from "./_generated/dataModel";
-import type { MutationCtx } from "./_generated/server";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { notify } from "./lib/notify";
 import { canView, enrichPost, enrichPosts, loadAudience } from "./lib/posts";
@@ -355,7 +355,75 @@ export const setSubscribed = viewerMutation({
       return;
     }
     if (row) return;
-    if (!(await ctx.db.get(postId))) throw new ConvexError("Post not found");
+    const post = await ctx.db.get(postId);
+    if (!post || !(await canView(ctx, post, await loadAudience(ctx, userId))))
+      throw new ConvexError("Post not found");
     await ctx.db.insert("postSubscriptions", { userId, postId, createdAt: Date.now() });
+  },
+});
+
+/* ---------- Hide post / Snooze ---------- */
+
+const SNOOZE_MS = 30 * 24 * 60 * 60 * 1000;
+
+/** The viewer's hidden posts and the authors they've snoozed (still in effect). */
+export async function feedHides(ctx: QueryCtx, userId: Id<"users">) {
+  const rows = await ctx.db
+    .query("feedHides")
+    .withIndex("by_user_target", (q) => q.eq("userId", userId))
+    .collect();
+  const now = Date.now();
+  return {
+    posts: rows.filter((r) => r.kind === "post").map((r) => r.targetId),
+    snoozed: rows.filter((r) => r.kind === "snooze" && (r.until ?? 0) > now).map((r) => r.targetId),
+  };
+}
+
+export const hides = viewerQuery({
+  args: {},
+  handler: (ctx) => feedHides(ctx, ctx.viewer._id),
+});
+
+async function setHide(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  kind: "post" | "snooze",
+  targetId: string,
+  until?: number,
+) {
+  const row = await ctx.db
+    .query("feedHides")
+    .withIndex("by_user_target", (q) => q.eq("userId", userId).eq("targetId", targetId))
+    .first();
+  if (row) await ctx.db.patch(row._id, { kind, until });
+  else await ctx.db.insert("feedHides", { userId, kind, targetId, until });
+}
+
+/** "Hide post": collapses it to a "Hidden · Undo" card for this viewer. */
+export const hide = viewerMutation({
+  args: { postId: v.id("posts") },
+  handler: async (ctx, { postId }) => {
+    if (await ctx.db.get(postId)) await setHide(ctx, ctx.viewer._id, "post", postId);
+  },
+});
+
+/** "Snooze <name> for 30 days": their posts leave the viewer's feeds until then. */
+export const snooze = viewerMutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    if (userId !== ctx.viewer._id && (await ctx.db.get(userId)))
+      await setHide(ctx, ctx.viewer._id, "snooze", userId, Date.now() + SNOOZE_MS);
+  },
+});
+
+/** Undo a hide or a snooze. */
+export const unhide = viewerMutation({
+  args: { targetId: v.string() },
+  handler: async (ctx, { targetId }) => {
+    const rows = await ctx.db
+      .query("feedHides")
+      .withIndex("by_user_target", (q) => q.eq("userId", ctx.viewer._id).eq("targetId", targetId))
+      .collect();
+    for (const r of rows) await ctx.db.delete(r._id);
   },
 });

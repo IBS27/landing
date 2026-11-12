@@ -67,7 +67,15 @@ export function PostCard({
   nameSuffix?: ReactNode;
   className?: string;
 }) {
-  const [hidden, setHidden] = useState(false);
+  // "Hide post" and "Snooze" persist per viewer; feeds drop snoozed authors server-side.
+  const hides = useQ(api.posts.hides, expanded || !hideable ? "skip" : {});
+  const hide = useM(api.posts.hide);
+  const unhide = useM(api.posts.unhide);
+  const hidden = hides?.posts.includes(post._id)
+    ? post._id
+    : hides?.snoozed.includes(post.author._id)
+      ? post.author._id
+      : null;
   const [dialogOpen, setDialogOpen] = useState(false);
   const [focusKey, setFocusKey] = useState(0);
   // Group surfaces show the top comment and a "Write an answer…" row under each post.
@@ -78,10 +86,16 @@ export function PostCard({
       <Card className={cn("flex items-center gap-3 rounded-xl p-4", className)}>
         <CircleSlash size={24} className="shrink-0 text-icon" />
         <div className="min-w-0 flex-1">
-          <p className="font-semibold text-[15px]">Hidden</p>
-          <p className="text-secondary text-sm">Hiding posts helps us personalize your Feed.</p>
+          <p className="font-semibold text-[15px]">
+            {hidden === post._id ? "Hidden" : "Snoozed for 30 days"}
+          </p>
+          <p className="text-secondary text-sm">
+            {hidden === post._id
+              ? "Hiding posts helps us personalize your Feed."
+              : `You won't see posts from ${post.author.name} for 30 days.`}
+          </p>
         </div>
-        <Button variant="secondary" onClick={() => setHidden(false)}>
+        <Button variant="secondary" onClick={() => void unhide({ targetId: hidden })}>
           Undo
         </Button>
       </Card>
@@ -91,7 +105,7 @@ export function PostCard({
     <Card className={cn("overflow-hidden rounded-xl", className)}>
       <PostHeader
         post={post}
-        onHide={expanded || !hideable ? undefined : () => setHidden(true)}
+        onHide={expanded || !hideable ? undefined : () => void hide({ postId: post._id })}
         nameSuffix={nameSuffix}
       />
       <PostContent post={post} expanded={expanded} onSeeMore={() => setDialogOpen(true)} />
@@ -376,6 +390,7 @@ function ViewCount({ post }: { post: PostView }) {
 function PostMenu({ post, onHide }: { post: PostView; onHide?: () => void }) {
   const toggleSave = useM(api.saved.toggle);
   const remove = useM(api.posts.remove);
+  const snooze = useM(api.posts.snooze);
   const setSubscribed = useM(api.posts.setSubscribed);
   const report = useM(api.reports.create);
   const follow = useM(api.media.follow);
@@ -426,8 +441,7 @@ function PostMenu({ post, onHide }: { post: PostView; onHide?: () => void }) {
           {post.canDelete && (
             <MenuItem
               icon={<Trash2 size={20} />}
-              label="Move to trash"
-              sub="Items in your trash are deleted after 30 days."
+              label="Delete post"
               onSelect={() => setConfirmDelete(true)}
             />
           )}
@@ -461,7 +475,7 @@ function PostMenu({ post, onHide }: { post: PostView; onHide?: () => void }) {
                 icon={<Clock size={20} />}
                 label={`Snooze ${post.author.firstName} for 30 days`}
                 sub="Temporarily stop seeing posts."
-                onSelect={onHide}
+                onSelect={() => void snooze({ userId: post.author._id })}
               />
               {following && (
                 <MenuItem
@@ -535,11 +549,10 @@ function PostMenu({ post, onHide }: { post: PostView; onHide?: () => void }) {
         />
       )}
       {confirmDelete && (
-        <Modal open onOpenChange={setConfirmDelete} title="Move to your trash?" width={548}>
+        <Modal open onOpenChange={setConfirmDelete} title="Delete post?" width={548}>
           <div className="p-4">
             <p className="text-[15px]">
-              Items in your trash will be automatically deleted after 30 days. You can delete them
-              from your trash earlier by going to activity log in settings.
+              Are you sure you want to delete this post? This can't be undone.
             </p>
             <div className="mt-4 flex justify-end gap-2">
               <Button variant="link" className="px-3" onClick={() => setConfirmDelete(false)}>
@@ -553,7 +566,7 @@ function PostMenu({ post, onHide }: { post: PostView; onHide?: () => void }) {
                   void remove({ postId: post._id });
                 }}
               >
-                Move
+                Delete
               </Button>
             </div>
           </div>
