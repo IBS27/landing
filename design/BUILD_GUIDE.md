@@ -1,6 +1,6 @@
 # Build guide: Facebook clone (base for Landing)
 
-The goal is a faithful, working clone of desktop facebook.com (1440×900, light mode first, dark mode supported) built on fictional seed data. It is the base the Landing product will extend later. This guide covers the clone only; nothing Landing-specific goes in.
+The goal is a faithful, working clone of desktop facebook.com (1440×900, light mode first, dark mode supported) built on fictional seed data. Landing features are built on top of it (see `PRODUCT_BRIEF.md` and `AGENTS.md`). The conventions below apply to all code, clone and Landing alike.
 
 ## Stack
 - Vite + React 19 + TypeScript, TanStack Router with file routes in `src/routes` (the route tree generates automatically), Tailwind v4 (tokens in `src/styles.css`), Radix (`radix-ui`), and `lucide-react` for generic glyphs.
@@ -46,6 +46,6 @@ After each meaningful change, open the app in your **own** preview tab and check
 - Close your tab when done.
 
 ## Don'ts
-- Don't commit or push; the coordinator does.
+- Don't commit or push outside the issue and PR workflow in `AGENTS.md`.
 - Don't edit files owned by another area except to fix a clear break, and keep any such fix minimal.
 - Don't add new dependencies without a strong reason (lucide, radix and convex-helpers are available).
