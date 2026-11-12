@@ -191,7 +191,8 @@ function Footer({ onNavigate }: { onNavigate: () => void }) {
 
 /* ---------- Menu ---------- */
 
-export function AccountMenu() {
+/** `home` is where switching profiles lands: Facebook's feed, or Landing's Home inside Landing. */
+export function AccountMenu({ home = "/" }: { home?: "/" | "/landing" }) {
   const { viewer, switchTo } = useViewerContext();
   const personas = useQuery(api.users.personas);
   const { setting, setSetting } = useTheme();
@@ -392,7 +393,7 @@ export function AccountMenu() {
                     onClick={() => {
                       switchTo(p._id);
                       close();
-                      void navigate({ to: "/" });
+                      void navigate({ to: home });
                     }}
                     className={cn(
                       "flex items-center gap-3 rounded-lg p-2 text-left hover:bg-hover",

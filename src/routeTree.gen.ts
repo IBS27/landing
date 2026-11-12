@@ -58,6 +58,7 @@ import { Route as GroupsDiscoverRouteImport } from './routes/groups/discover'
 import { Route as GroupsFeedRouteImport } from './routes/groups/feed'
 import { Route as GroupsJoinsRouteImport } from './routes/groups/joins'
 import { Route as LandingIndexRouteImport } from './routes/landing/index'
+import { Route as LandingSplatRouteImport } from './routes/landing/$'
 import { Route as LiveProducerRouteImport } from './routes/live.producer'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace/index'
 import { Route as MarketplaceGroupsRouteImport } from './routes/marketplace/groups'
@@ -348,6 +349,11 @@ const LandingIndexRoute = LandingIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LandingRouteRoute,
 } as any)
+const LandingSplatRoute = LandingSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
 const LiveProducerRoute = LiveProducerRouteImport.update({
   id: '/live/producer',
   path: '/live/producer',
@@ -618,6 +624,7 @@ export interface FileRoutesByFullPath {
   '/groups/discover': typeof GroupsDiscoverRoute
   '/groups/feed': typeof GroupsFeedRoute
   '/groups/joins': typeof GroupsJoinsRoute
+  '/landing/$': typeof LandingSplatRoute
   '/live/producer': typeof LiveProducerRoute
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
@@ -710,6 +717,7 @@ export interface FileRoutesByTo {
   '/groups/discover': typeof GroupsDiscoverRoute
   '/groups/feed': typeof GroupsFeedRoute
   '/groups/joins': typeof GroupsJoinsRoute
+  '/landing/$': typeof LandingSplatRoute
   '/live/producer': typeof LiveProducerRoute
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
@@ -806,6 +814,7 @@ export interface FileRoutesById {
   '/groups/discover': typeof GroupsDiscoverRoute
   '/groups/feed': typeof GroupsFeedRoute
   '/groups/joins': typeof GroupsJoinsRoute
+  '/landing/$': typeof LandingSplatRoute
   '/live/producer': typeof LiveProducerRoute
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
@@ -903,6 +912,7 @@ export interface FileRouteTypes {
     | '/groups/discover'
     | '/groups/feed'
     | '/groups/joins'
+    | '/landing/$'
     | '/live/producer'
     | '/marketplace/groups'
     | '/marketplace/inbox'
@@ -995,6 +1005,7 @@ export interface FileRouteTypes {
     | '/groups/discover'
     | '/groups/feed'
     | '/groups/joins'
+    | '/landing/$'
     | '/live/producer'
     | '/marketplace/groups'
     | '/marketplace/inbox'
@@ -1090,6 +1101,7 @@ export interface FileRouteTypes {
     | '/groups/discover'
     | '/groups/feed'
     | '/groups/joins'
+    | '/landing/$'
     | '/live/producer'
     | '/marketplace/groups'
     | '/marketplace/inbox'
@@ -1561,6 +1573,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LandingIndexRouteImport
       parentRoute: typeof LandingRouteRoute
     }
+    '/landing/$': {
+      id: '/landing/$'
+      path: '/$'
+      fullPath: '/landing/$'
+      preLoaderRoute: typeof LandingSplatRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
     '/live/producer': {
       id: '/live/producer'
       path: '/live/producer'
@@ -1899,6 +1918,7 @@ const UsernameRouteRouteWithChildren = UsernameRouteRoute._addFileChildren(
 )
 
 interface LandingRouteRouteChildren {
+  LandingSplatRoute: typeof LandingSplatRoute
   LandingIndexRoute: typeof LandingIndexRoute
   LandingCrewIndexRoute: typeof LandingCrewIndexRoute
   LandingFindIndexRoute: typeof LandingFindIndexRoute
@@ -1909,6 +1929,7 @@ interface LandingRouteRouteChildren {
 }
 
 const LandingRouteRouteChildren: LandingRouteRouteChildren = {
+  LandingSplatRoute: LandingSplatRoute,
   LandingIndexRoute: LandingIndexRoute,
   LandingCrewIndexRoute: LandingCrewIndexRoute,
   LandingFindIndexRoute: LandingFindIndexRoute,

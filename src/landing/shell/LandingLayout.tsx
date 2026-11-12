@@ -55,7 +55,7 @@ function LandingHeader() {
           <FacebookLogo size={32} />
           <span className="hidden sm:inline">Back to Facebook</span>
         </Link>
-        <AccountMenu />
+        <AccountMenu home="/landing" />
       </div>
     </header>
   );
