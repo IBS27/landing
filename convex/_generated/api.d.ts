@@ -38,6 +38,7 @@ import type * as lib_interests from "../lib/interests.js";
 import type * as lib_listings from "../lib/listings.js";
 import type * as lib_notify from "../lib/notify.js";
 import type * as lib_posts from "../lib/posts.js";
+import type * as lib_profileFromText from "../lib/profileFromText.js";
 import type * as lib_profileText from "../lib/profileText.js";
 import type * as lib_reports from "../lib/reports.js";
 import type * as lib_settings from "../lib/settings.js";
@@ -125,6 +126,7 @@ declare const fullApi: ApiFromModules<{
   "lib/listings": typeof lib_listings;
   "lib/notify": typeof lib_notify;
   "lib/posts": typeof lib_posts;
+  "lib/profileFromText": typeof lib_profileFromText;
   "lib/profileText": typeof lib_profileText;
   "lib/reports": typeof lib_reports;
   "lib/settings": typeof lib_settings;

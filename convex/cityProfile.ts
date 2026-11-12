@@ -1,5 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { action } from "./_generated/server";
+import { runAgent } from "./ai/agent";
 import { getProfile, type StatedFact, saveStatedFacts } from "./lib/cityProfile";
 import {
   budgetValue,
@@ -16,7 +17,8 @@ import {
 } from "./lib/cityProfileFacts";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { interestId } from "./lib/interests";
-import { extractFacts, MAX_TEXT_LENGTH } from "./lib/profileText";
+import { profileFromText } from "./lib/profileFromText";
+import { MAX_TEXT_LENGTH, proposalLabel } from "./lib/profileText";
 
 /**
  * Landing City Profile (#3). Other features read profiles with `getProfile`
@@ -127,26 +129,49 @@ export const saveBrief = viewerMutation({
   },
 });
 
+const proposal = v.object({
+  entry: factEntry,
+  quote: v.string(),
+  label: v.string(),
+  carFree: v.optional(v.boolean()),
+});
+
+/** Today in San Francisco, "YYYY-MM-DD" (en-CA formats dates that way). */
+function todayInSF() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date());
+}
+
 /**
- * "Tell us about you": proposes facts from free text, each with the words it
- * came from. Saves nothing; the person confirms what's right and the brief
- * saves it. Rules-based today; #8 puts `runAgent` in front of this with the
- * same `factEntry` output validator and keeps the rules as the fallback.
+ * "Tell us about you": Muse proposes facts from free text, each with the
+ * words it came from (`muse.profileFromText` on #8's `runAgent`). Saves
+ * nothing; the person confirms what's right and the brief saves it. `via`
+ * says who answered: the model, a cached model answer, or the rules-based
+ * fallback when AI is off or the model's answer didn't pass its checks.
  */
 export const suggestFromText = action({
   args: { text: v.string() },
-  returns: v.array(
-    v.object({
-      entry: factEntry,
-      quote: v.string(),
-      label: v.string(),
-      carFree: v.optional(v.boolean()),
-    }),
-  ),
-  handler: async (_ctx, { text }) => {
+  returns: v.object({
+    via: v.union(v.literal("model"), v.literal("cache"), v.literal("fallback")),
+    proposals: v.array(proposal),
+  }),
+  handler: async (ctx, { text }) => {
     if (text.length > MAX_TEXT_LENGTH) {
       throw new ConvexError(`Keep it under ${MAX_TEXT_LENGTH} characters`);
     }
-    return extractFacts(text, Date.now());
+    const trimmed = text.trim();
+    if (!trimmed) return { via: "fallback" as const, proposals: [] };
+    const result = await runAgent(ctx, profileFromText, {
+      input: { text: trimmed, today: todayInSF() },
+      sources: [],
+    });
+    return {
+      via: result.via,
+      proposals: result.output.facts.map((f) => ({
+        entry: f.entry,
+        quote: f.quote,
+        label: proposalLabel(f.entry, f.carFree),
+        ...(f.carFree ? { carFree: true } : {}),
+      })),
+    };
   },
 });

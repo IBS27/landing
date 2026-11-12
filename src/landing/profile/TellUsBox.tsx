@@ -5,7 +5,7 @@ import { cn } from "@/lib/format";
 import { Button, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import { FACT_KEY_LABELS, factSlot } from "../../../convex/lib/cityProfileFacts";
-import type { Proposal } from "./briefState";
+import type { Proposal, Suggestions } from "./briefState";
 
 const MAX = 1000;
 
@@ -20,6 +20,7 @@ export function TellUsBox({ onAdd }: { onAdd: (picked: Proposal[]) => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [proposals, setProposals] = useState<Proposal[] | null>(null);
+  const [via, setVia] = useState<Suggestions["via"] | null>(null);
   const [picked, setPicked] = useState<Set<string>>(new Set());
 
   async function run() {
@@ -27,8 +28,9 @@ export function TellUsBox({ onAdd }: { onAdd: (picked: Proposal[]) => void }) {
     setError(null);
     try {
       const res = await suggest({ text });
-      setProposals(res);
-      setPicked(new Set(res.map((p) => factSlot(p.entry))));
+      setProposals(res.proposals);
+      setVia(res.via);
+      setPicked(new Set(res.proposals.map((p) => factSlot(p.entry))));
     } catch (e) {
       setError(
         e instanceof Error ? e.message.replace(/^.*ConvexError:\s*/, "") : "Something went wrong",
@@ -68,7 +70,7 @@ export function TellUsBox({ onAdd }: { onAdd: (picked: Proposal[]) => void }) {
           onClick={() => void run()}
           icon={busy ? <Spinner size={16} /> : <Sparkles size={16} />}
         >
-          Suggest from my words
+          {busy ? "Muse is reading…" : "Suggest from my words"}
         </Button>
         <span className="text-[13px] text-secondary">Muse suggests; you choose what goes in.</span>
       </div>
@@ -83,8 +85,13 @@ export function TellUsBox({ onAdd }: { onAdd: (picked: Proposal[]) => void }) {
             </p>
           ) : (
             <>
-              <p className="mb-2 font-semibold text-[15px] text-primary">
+              <p className="font-semibold text-[15px] text-primary">
                 Here's what Muse picked up. Untick anything that's wrong.
+              </p>
+              <p className="mb-2 text-[13px] text-secondary">
+                {via === "fallback"
+                  ? "Muse's AI is off right now, so these come from simple keyword matching."
+                  : "Each one shows the words it came from."}
               </p>
               <ul className="flex flex-col gap-1">
                 {proposals.map((p) => {

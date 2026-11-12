@@ -16,9 +16,9 @@ import { INTERESTS, type InterestId, normalize } from "./interests";
  * facts, each with the words it came from. Nothing is saved here: the person
  * ticks what's right and the brief saves it.
  *
- * This is the rules-based path: it works with AI off and is the fallback when
- * the model is unavailable. #8's `runAgent` slots in front of it, validated
- * against the same `factEntry` validator.
+ * This is the rules-based path. Muse's model task (`./profileFromText.ts`)
+ * runs first; these rules are its fallback when AI is off or the model can't
+ * produce a valid answer, so the box always works.
  */
 
 export type ProposedFact = {
@@ -30,6 +30,16 @@ export type ProposedFact = {
 };
 
 export const MAX_TEXT_LENGTH = 1000;
+
+/** How a proposal reads in the confirm list ("Bike, BART, no car"). */
+export function proposalLabel(entry: FactEntry, carFree?: boolean): string {
+  if (entry.key !== "transport") return factLabel(entry);
+  const labels: string[] = TRANSPORT_MODES.filter((m) => entry.value.modes.includes(m.id)).map(
+    (m) => m.label,
+  );
+  if (carFree) labels.push("no car");
+  return labels.join(", ").replace(/^n/, "N");
+}
 
 /** Sentences and clauses, with their original wording. */
 function clauses(text: string): string[] {
@@ -283,12 +293,10 @@ export function extractFacts(text: string, now: number): ProposedFact[] {
   }
   if (modes.size > 0 || noCar) {
     const entry: FactEntry = { key: "transport", value: { modes: [...modes] } };
-    const labels: string[] = TRANSPORT_MODES.filter((m) => modes.has(m.id)).map((m) => m.label);
-    if (noCar) labels.push("no car");
     add({
       entry,
       quote: [...new Set(transportQuotes)].join(" … "),
-      label: labels.join(", ").replace(/^n/, "N"),
+      label: proposalLabel(entry, Boolean(noCar)),
       carFree: Boolean(noCar),
     });
   }

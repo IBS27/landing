@@ -12,7 +12,8 @@ import {
 import type { InterestId } from "../../../convex/lib/interests";
 
 export type CityProfile = FunctionReturnType<typeof api.cityProfile.get>;
-export type Proposal = FunctionReturnType<typeof api.cityProfile.suggestFromText>[number];
+export type Suggestions = FunctionReturnType<typeof api.cityProfile.suggestFromText>;
+export type Proposal = Suggestions["proposals"][number];
 type SaveArgs = Omit<FunctionArgs<typeof api.cityProfile.saveBrief>, "viewerId">;
 
 /** The onboarding form's state. Strings for inputs; converted on save. */
