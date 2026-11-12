@@ -3,7 +3,15 @@ import type { ComponentType } from "react";
 import { MessengerDropdown } from "@/features/messenger/MessengerDropdown";
 import { NotificationsDropdown } from "@/features/notifications/NotificationsDropdown";
 import { SearchBox } from "@/features/search/SearchBox";
-import { FacebookLogo, FriendsIcon, GamingIcon, GroupsIcon, HomeIcon, ReelsIcon } from "@/icons";
+import {
+  FacebookLogo,
+  FriendsIcon,
+  GamingIcon,
+  GroupsIcon,
+  HomeIcon,
+  ReelsIcon,
+  VideoIcon,
+} from "@/icons";
 import { cn } from "@/lib/format";
 import { Tooltip } from "@/ui/overlays";
 import { AccountMenu } from "./AccountMenu";
@@ -27,11 +35,22 @@ const TABS: Tab[] = [
     label: "Reels",
     Icon: ReelsIcon,
     // The single-reel viewer (/reel/<id>) leaves every tab idle.
-    match: (p) => p.startsWith("/watch") || /^\/reel\/?$/.test(p),
+    match: (p) => /^\/reel\/?$/.test(p),
   },
   { to: "/groups/feed", label: "Groups", Icon: GroupsIcon, match: (p) => GROUPS_SECTION.test(p) },
   { to: "/gaming", label: "Gaming", Icon: GamingIcon, match: (p) => p.startsWith("/gaming") },
 ];
+
+/** On Video (/watch) Facebook's third tab becomes Video instead of Reels. */
+const VIDEO_TAB: Tab = {
+  to: "/watch",
+  label: "Video",
+  Icon: VideoIcon,
+  match: (p) => p.startsWith("/watch"),
+};
+
+const tabsFor = (path: string) =>
+  VIDEO_TAB.match(path) ? TABS.map((t) => (t.to === "/reel" ? VIDEO_TAB : t)) : TABS;
 
 /** Facebook shrinks the header search to a round icon on these sections. */
 const collapsedSearch = (p: string) =>
@@ -57,10 +76,10 @@ export function TopNav() {
 
       <nav aria-label="Facebook" className="flex h-full min-w-0 flex-1 justify-center">
         <ul className="flex h-full w-full max-w-[680px] items-stretch gap-[7.5px]">
-          {TABS.map(({ to, label, Icon, match }) => {
+          {tabsFor(path).map(({ to, label, Icon, match }, i) => {
             const active = match(path);
             return (
-              <li key={to} className="relative flex flex-1 py-1">
+              <li key={i} className="relative flex flex-1 py-1">
                 <Tooltip content={label}>
                   <Link
                     to={to}

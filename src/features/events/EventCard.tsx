@@ -115,7 +115,7 @@ export function EventRow({ event }: { event: EventCardView }) {
     .filter(Boolean)
     .join(" · ");
   return (
-    <Card className="relative flex items-center gap-3 rounded-xl px-4 py-2 hover:bg-[color-mix(in_srgb,var(--card),var(--primary-text)_3%)]">
+    <Card className="relative flex items-center gap-3 rounded-xl px-4 py-4 hover:bg-[color-mix(in_srgb,var(--card),var(--primary-text)_3%)]">
       <Link
         to="/events/$eventId"
         params={{ eventId: event._id }}

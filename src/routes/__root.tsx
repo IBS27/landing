@@ -1,4 +1,4 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { useViewerContext } from "@/app/viewer";
 import { ChatDock } from "@/features/messenger/ChatDock";
 import { PhotoTheaterHost } from "@/features/posts/photoTheater";
@@ -13,6 +13,8 @@ export const Route = createRootRoute({
 
 function RootLayout() {
   const { viewer } = useViewerContext();
+  // Messenger call pop-up windows render bare, without Facebook's chrome.
+  const bare = useRouterState({ select: (s) => s.location.pathname.startsWith("/call/") });
   if (viewer === undefined) return <Splash />;
   if (viewer === null)
     return (
@@ -24,6 +26,7 @@ function RootLayout() {
         </p>
       </div>
     );
+  if (bare) return <Outlet />;
   return (
     <>
       <TopNav />

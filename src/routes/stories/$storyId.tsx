@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { StoryViewerPage } from "@/features/feed/StoryViewer";
+import { requireConvexId } from "@/lib/ids";
 
 export const Route = createFileRoute("/stories/$storyId")({
+  beforeLoad: ({ params }) => requireConvexId(params.storyId),
   component: StoryRoute,
 });
 

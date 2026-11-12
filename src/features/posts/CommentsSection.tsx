@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
+import type { FunctionReturnType } from "convex/server";
 import { ChevronDown, X } from "lucide-react";
+import { DropdownMenu as DM } from "radix-ui";
 import { type ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useM, useQ, useViewer } from "@/app/viewer";
 import { cn, compactCount, fullTimestamp, shortAge } from "@/lib/format";
@@ -608,6 +610,10 @@ export function CommentComposer({
   // biome-ignore lint/correctness/useExhaustiveDependencies: re-measure when the tag changes
   useLayoutEffect(() => setTagWidth(tagRef.current?.offsetWidth ?? 0), [tag]);
   const fileRef = useRef<HTMLInputElement>(null);
+  // Top-level composers can comment as a Page the viewer manages (avatar chevron).
+  const [asId, setAsId] = useState<Id<"users"> | null>(null);
+  const identities = useQ(api.comments.commentAs, parentId ? "skip" : {});
+  const as = identities?.find((u) => u._id === asId);
 
   useEffect(() => {
     if (focusKey) ref.current?.focus();
@@ -629,6 +635,7 @@ export function CommentComposer({
         parentId,
         replyToId: parentId ? (tag?._id ?? null) : undefined,
         text,
+        asPageId: as && as._id !== viewer._id ? as._id : undefined,
         photo: upload,
       });
       setText("");
@@ -642,7 +649,19 @@ export function CommentComposer({
   return (
     <div className="flex gap-2 py-1">
       <span className="relative shrink-0 pt-0.5">
-        <Avatar src={viewer.avatar} size={size} />
+        {identities ? (
+          <CommentAsMenu
+            identities={identities}
+            selected={as?._id ?? viewer._id}
+            onSelect={(id) => {
+              setAsId(id);
+              ref.current?.focus();
+            }}
+            size={size}
+          />
+        ) : (
+          <Avatar src={viewer.avatar} size={size} />
+        )}
       </span>
       <div className="min-w-0 flex-1">
         <div
@@ -682,7 +701,7 @@ export function CommentComposer({
               </button>
             </div>
           )}
-          <div className={cn("flex items-center", compact ? "pr-2" : "px-2 pt-1 pb-1.5")}>
+          <div className={cn("flex items-center", compact ? "pr-2" : "px-2 pt-2.5 pb-2")}>
             <div className="flex items-center text-icon-secondary">
               <ComposerIcon label="Comment with an avatar sticker">
                 <AvatarStickerOutline />
@@ -758,6 +777,97 @@ export function CommentComposer({
         </div>
       </div>
     </div>
+  );
+}
+
+type Identity = FunctionReturnType<typeof api.comments.commentAs>[number];
+
+/**
+ * The composer avatar with Facebook's small chevron badge: opens "Comment as",
+ * listing the viewer's profile and the Pages they manage.
+ */
+function CommentAsMenu({
+  identities,
+  selected,
+  onSelect,
+  size,
+}: {
+  identities: Identity[];
+  selected: Id<"users">;
+  onSelect: (id: Id<"users">) => void;
+  size: number;
+}) {
+  const current = identities.find((u) => u._id === selected) ?? identities[0];
+  return (
+    <DM.Root modal={false}>
+      <DM.Trigger asChild>
+        <button
+          type="button"
+          aria-label={`Comment as ${current.name}`}
+          className="relative flex rounded-full outline-none focus-visible:ring-2 focus-visible:ring-fb"
+        >
+          <Avatar src={current.avatar} size={size} />
+          <span className="absolute right-0 bottom-0 flex h-3 w-3 items-center justify-center rounded-full bg-btn text-primary ring-[1.5px] ring-card">
+            <svg viewBox="0 0 8 5" width="7" height="5" fill="none" aria-hidden>
+              <path
+                d="M1 1l3 3 3-3"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+        </button>
+      </DM.Trigger>
+      <DM.Portal>
+        <DM.Content
+          align="start"
+          side="top"
+          sideOffset={6}
+          collisionPadding={8}
+          className="z-[70] w-[320px] rounded-xl bg-popover p-2 shadow-elevated outline-none"
+        >
+          <DM.Label className="px-2 pt-1 pb-2 font-bold text-[17px] text-primary leading-5">
+            Comment as
+          </DM.Label>
+          <DM.RadioGroup
+            value={current._id}
+            onValueChange={(v) => {
+              const pick = identities.find((u) => u._id === v);
+              if (pick) onSelect(pick._id);
+            }}
+          >
+            {identities.map((u) => (
+              <DM.RadioItem
+                key={u._id}
+                value={u._id}
+                className="flex h-[52px] cursor-pointer select-none items-center gap-3 rounded-lg px-2 outline-none data-[highlighted]:bg-hover"
+              >
+                <Avatar src={u.avatar} size={36} />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-medium text-[15px] text-primary leading-5">
+                    {u.name}
+                  </span>
+                  <span className="block text-[13px] text-secondary leading-4">
+                    {u.kind === "page" ? "Page" : "Your profile"}
+                  </span>
+                </span>
+                <span
+                  aria-hidden
+                  className={cn(
+                    "h-5 w-5 shrink-0 rounded-full",
+                    u._id === current._id
+                      ? "border-[6px] border-fb"
+                      : "border-2 border-icon-secondary",
+                  )}
+                />
+              </DM.RadioItem>
+            ))}
+          </DM.RadioGroup>
+        </DM.Content>
+      </DM.Portal>
+    </DM.Root>
   );
 }
 

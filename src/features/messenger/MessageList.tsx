@@ -9,6 +9,7 @@ import { Menu, MenuContent, MenuItem, MenuTrigger, Modal, Tooltip } from "@/ui/o
 import { Avatar, Button, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { formatCallDuration } from "../../../convex/lib/callFormat";
 import { startCall } from "./CallWindow";
 import { ConversationAvatar } from "./ConversationAvatar";
 import {
@@ -366,6 +367,7 @@ function MessageRow({
           key={`a${i}`}
           media={a.media}
           outcome={a.outcome}
+          durationMs={a.durationMs}
           mine={mine}
           radius={radius(pos, mine)}
           onCall={() => onCall(a.media)}
@@ -554,19 +556,27 @@ function MessageRow({
 function CallLog({
   media,
   outcome,
+  durationMs,
   mine,
   radius,
   onCall,
 }: {
   media: "audio" | "video";
-  outcome: "no_answer" | "cancelled";
+  outcome: "no_answer" | "cancelled" | "answered" | "declined";
+  durationMs?: number;
   mine: boolean;
   radius: string;
   onCall: () => void;
 }) {
   const kind = media === "video" ? "video call" : "audio call";
-  const title = mine ? (media === "video" ? "Video call" : "Audio call") : `Missed ${kind}`;
-  const sub = mine ? (outcome === "no_answer" ? "No answer" : "Cancelled") : null;
+  const answered = outcome === "answered";
+  const missed = !mine && !answered;
+  const title = missed ? `Missed ${kind}` : media === "video" ? "Video call" : "Audio call";
+  const sub = answered
+    ? formatCallDuration(durationMs ?? 0)
+    : mine
+      ? { no_answer: "No answer", cancelled: "Cancelled", declined: "Declined" }[outcome]
+      : null;
   const Icon = media === "video" ? VideoCallIcon : PhoneIcon;
   return (
     <div className="w-[208px] bg-chat-in p-3" style={{ borderRadius: radius }}>
@@ -574,7 +584,7 @@ function CallLog({
         <span
           className={cn(
             "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
-            mine ? "bg-[var(--hover-overlay)] text-primary" : "bg-[#e41e3f] text-white",
+            missed ? "bg-[#e41e3f] text-white" : "bg-[var(--hover-overlay)] text-primary",
           )}
         >
           <Icon size={media === "video" ? 20 : 18} />
@@ -589,7 +599,7 @@ function CallLog({
         onClick={onCall}
         className="mt-3 flex h-8 w-full items-center justify-center rounded-md bg-card font-semibold text-[15px] text-primary transition-[filter] hover:brightness-95 dark:hover:brightness-125"
       >
-        {mine ? "Call again" : "Call back"}
+        {mine && !answered ? "Call again" : "Call back"}
       </button>
     </div>
   );

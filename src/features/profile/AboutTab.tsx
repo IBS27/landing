@@ -18,7 +18,15 @@ import { useM, useQ } from "@/app/viewer";
 import { cn } from "@/lib/format";
 import { Avatar, Button, Card, IconButton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
-import { CheckinsCard, LinkRow, OrgEntry, ReelsCard } from "./cards";
+import {
+  type Checkin,
+  CheckinsCard,
+  CommunityList,
+  LinkRow,
+  OrgEntry,
+  ReelsCard,
+  useCommunities,
+} from "./cards";
 import {
   birthdayLabel,
   joinedLabel,
@@ -278,6 +286,30 @@ function SimpleField({
   );
 }
 
+/** Personal details → "Communities": the public groups the person is in. */
+function Communities() {
+  const { profile } = useProfile();
+  const { all } = useCommunities(profile.user._id, profile.isPage);
+  if (!all || all.length === 0) return null;
+  return (
+    <>
+      <div className="pt-5">
+        <Title>Communities</Title>
+      </div>
+      <CommunityList groups={all.slice(0, 6)} />
+      {all.length > 6 && (
+        <Link
+          to="/$username/$section"
+          params={{ username: profile.user.username, section: "groups" }}
+          className="mt-3 inline-block font-semibold text-[15px] text-link hover:underline"
+        >
+          See all
+        </Link>
+      )}
+    </>
+  );
+}
+
 /* ---------------- Sections ---------------- */
 
 function SectionBody({
@@ -285,7 +317,7 @@ function SectionBody({
   checkins,
 }: {
   section: AboutSection;
-  checkins: { place: string; createdAt: number }[] | undefined;
+  checkins: Checkin[] | undefined;
 }) {
   const { profile } = useProfile();
   const { user, isSelf } = profile;
@@ -352,6 +384,7 @@ function SectionBody({
           {!isSelf && !user.city && !user.hometown && !user.relationship && !user.birthday && (
             <Empty>No personal details to show</Empty>
           )}
+          <Communities />
         </>
       );
     case "work":
@@ -388,7 +421,7 @@ function SectionBody({
           <Title>Places visited</Title>
           {checkins && checkins.length > 0 ? (
             checkins.map((c) => (
-              <Row key={c.place} icon={MapPin} sub="Checked in">
+              <Row key={c.place} icon={MapPin} sub={c.region}>
                 {c.place}
               </Row>
             ))

@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, EyeOff, Flag } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useQ } from "@/app/viewer";
+import { useM, useQ } from "@/app/viewer";
 import { DotsIcon } from "@/features/posts/icons";
-import { Card, IconButton } from "@/ui/primitives";
+import { Menu, MenuContent, MenuItem, MenuTrigger, Modal } from "@/ui/overlays";
+import { Button, Card, IconButton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 
 const TILE = 192;
@@ -24,7 +25,13 @@ function ReelsGlyph({ size = 20 }: { size?: number }) {
  * 9:16 tiles with previous/next arrows. Each tile opens that reel.
  */
 export function ReelsShelf() {
-  const reels = useQ(api.media.reelsShelf, {});
+  const live = useQ(api.media.reelsShelf, {});
+  const hide = useM(api.media.hideReel);
+  /** Reels hidden from this shelf just now: they stay as an "Undo" placeholder in place. */
+  const [justHidden, setJustHidden] = useState<{ reel: ShelfReel; at: number }[]>([]);
+  const [reporting, setReporting] = useState<ShelfReel | null>(null);
+  const [reportedIds, setReportedIds] = useState<Set<string>>(new Set());
+  const reels = live && withPlaceholders(live, justHidden, reportedIds);
   const row = useRef<HTMLDivElement>(null);
   const [edge, setEdge] = useState({ start: true, end: false });
 
@@ -38,6 +45,18 @@ export function ReelsShelf() {
   };
   // biome-ignore lint/correctness/useExhaustiveDependencies: re-measure once tiles arrive
   useEffect(update, [reels?.length]);
+
+  const hideReel = (reel: ShelfReel, at: number, reason: "hidden" | "reported") => {
+    setJustHidden((h) => [...h.filter((x) => x.reel._id !== reel._id), { reel, at }]);
+    hide({ postId: reel._id, hidden: true, reason }).catch(() =>
+      setJustHidden((h) => h.filter((x) => x.reel._id !== reel._id)),
+    );
+  };
+  // The placeholder stays until the reel is back in the live list, so the row doesn't jump.
+  const undo = (reel: ShelfReel) =>
+    void hide({ postId: reel._id, hidden: false }).then(() =>
+      setJustHidden((h) => h.filter((x) => x.reel._id !== reel._id)),
+    );
 
   if (reels !== undefined && reels.length === 0) return null;
   const page = (dir: 1 | -1) =>
@@ -64,18 +83,120 @@ export function ReelsShelf() {
           ? [0, 1, 2, 3].map((i) => (
               <div key={i} className="h-[343px] w-[192px] shrink-0 rounded-[10px] bg-btn" />
             ))
-          : reels.map((r) => <ReelTile key={r._id} reel={r} />)}
+          : reels.map((t, i) =>
+              t.hidden ? (
+                <HiddenTile
+                  key={t.reel._id}
+                  reported={t.reported}
+                  onUndo={t.reported ? undefined : () => undo(t.reel)}
+                />
+              ) : (
+                <ReelTile
+                  key={t.reel._id}
+                  reel={t.reel}
+                  onHide={() => hideReel(t.reel, i, "hidden")}
+                  onReport={() => setReporting(t.reel)}
+                />
+              ),
+            )}
       </div>
       {!edge.start && <ShelfArrow side="left" onClick={() => page(-1)} />}
       {!edge.end && reels !== undefined && <ShelfArrow side="right" onClick={() => page(1)} />}
+      <Modal
+        open={reporting !== null}
+        onOpenChange={(o) => !o && setReporting(null)}
+        title="Report reel?"
+        width={548}
+      >
+        <div className="p-4">
+          <p className="text-[15px] text-primary leading-5">
+            We'll review this reel against our Community Standards. Your report is anonymous, and
+            the reel will be hidden from your Reels.
+          </p>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="link" className="px-3" onClick={() => setReporting(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              className="px-8"
+              onClick={() => {
+                const r = reporting;
+                setReporting(null);
+                if (!r) return;
+                const at = reels?.findIndex((t) => t.reel._id === r._id) ?? 0;
+                setJustHidden((h) => h.filter((x) => x.reel._id !== r._id));
+                hideReel(r, Math.max(0, at), "reported");
+                setReportedIds((ids) => new Set(ids).add(r._id));
+              }}
+            >
+              Report
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </Card>
   );
 }
 
 type ShelfReel = FunctionReturnType<typeof api.media.reelsShelf>[number];
+type ShelfTile = { reel: ShelfReel; hidden: boolean; reported: boolean };
+
+/** The live shelf with this session's hidden reels re-inserted where they were, as placeholders. */
+function withPlaceholders(
+  live: ShelfReel[],
+  hidden: { reel: ShelfReel; at: number }[],
+  reported: Set<string>,
+): ShelfTile[] {
+  const hiddenIds = new Set(hidden.map((h) => h.reel._id));
+  const tiles: ShelfTile[] = live
+    .filter((r) => !hiddenIds.has(r._id))
+    .map((reel) => ({ reel, hidden: false, reported: false }));
+  for (const h of [...hidden].sort((a, b) => a.at - b.at))
+    tiles.splice(Math.min(h.at, tiles.length), 0, {
+      reel: h.reel,
+      hidden: true,
+      reported: reported.has(h.reel._id),
+    });
+  return tiles;
+}
+
+/** What's left of a tile after "Hide reel" (with Undo) or "Report". */
+function HiddenTile({ reported, onUndo }: { reported: boolean; onUndo?: () => void }) {
+  return (
+    <div className="flex h-[343px] w-[192px] shrink-0 flex-col items-center justify-center gap-2 rounded-[10px] bg-comment px-4 text-center">
+      {reported ? (
+        <Flag size={28} className="text-icon-secondary" />
+      ) : (
+        <EyeOff size={28} className="text-icon-secondary" />
+      )}
+      <p className="font-semibold text-[15px] text-primary leading-5">
+        {reported ? "Thanks for reporting" : "Reel hidden"}
+      </p>
+      <p className="text-[13px] text-secondary leading-4">
+        {reported
+          ? "You won't see this reel again."
+          : "You'll see fewer reels like this in your Feed."}
+      </p>
+      {onUndo && (
+        <Button variant="secondary" className="mt-1 px-4" onClick={onUndo}>
+          Undo
+        </Button>
+      )}
+    </div>
+  );
+}
 
 /** A 9:16 tile: the poster, a muted looping preview while hovered, caption bottom-left. */
-function ReelTile({ reel: r }: { reel: ShelfReel }) {
+function ReelTile({
+  reel: r,
+  onHide,
+  onReport,
+}: {
+  reel: ShelfReel;
+  onHide: () => void;
+  onReport: () => void;
+}) {
   const video = useRef<HTMLVideoElement>(null);
   const [hover, setHover] = useState(false);
   useEffect(() => {
@@ -87,46 +208,73 @@ function ReelTile({ reel: r }: { reel: ShelfReel }) {
       el.currentTime = 0;
     }
   }, [hover]);
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
-    <Link
-      to="/reel/$reelId"
-      params={{ reelId: r._id }}
-      aria-label={r.caption ? `Reel: ${r.caption}` : "Reel"}
+    <div
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       className="group relative h-[343px] w-[192px] shrink-0 overflow-hidden rounded-[10px] bg-black shadow-[0_1px_2px_rgba(0,0,0,0.2)]"
     >
-      {r.poster && (
-        <img
-          src={r.poster}
-          alt=""
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover"
+      <Link
+        to="/reel/$reelId"
+        params={{ reelId: r._id }}
+        aria-label={r.caption ? `Reel: ${r.caption}` : "Reel"}
+        className="absolute inset-0"
+      >
+        {r.poster && (
+          <img
+            src={r.poster}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
+        <video
+          ref={video}
+          src={r.video}
+          muted
+          loop
+          playsInline
+          preload="none"
+          aria-hidden
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ${hover ? "opacity-100" : "opacity-0"}`}
         />
-      )}
-      <video
-        ref={video}
-        src={r.video}
-        muted
-        loop
-        playsInline
-        preload="none"
-        aria-hidden
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ${hover ? "opacity-100" : "opacity-0"}`}
-      />
-      <span className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/5" />
-      {r.caption && (
-        <>
-          <span className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent" />
-          <span className="absolute inset-x-3 bottom-3 line-clamp-2 break-words font-semibold text-[15px] text-white leading-5 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
-            {r.caption}
-          </span>
-        </>
-      )}
-      <span className="absolute top-[10px] right-[10px] flex h-6 w-8 items-center justify-center text-white drop-shadow">
-        <DotsIcon size={16} className="rotate-90" />
-      </span>
-    </Link>
+        <span className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/5" />
+        {r.caption && (
+          <>
+            <span className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent" />
+            <span className="absolute inset-x-3 bottom-3 line-clamp-2 break-words font-semibold text-[15px] text-white leading-5 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
+              {r.caption}
+            </span>
+          </>
+        )}
+      </Link>
+      <Menu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
+        <MenuTrigger asChild>
+          <button
+            type="button"
+            aria-label="More options for this reel"
+            className="absolute top-[6px] right-[6px] flex h-8 w-8 items-center justify-center rounded-full text-white drop-shadow hover:bg-white/20 data-[state=open]:bg-white/20"
+          >
+            <DotsIcon size={16} className="rotate-90" />
+          </button>
+        </MenuTrigger>
+        <MenuContent width={300} align="end">
+          <MenuItem
+            icon={<EyeOff size={20} />}
+            label="Hide reel"
+            sub="See fewer reels like this."
+            onSelect={onHide}
+          />
+          <MenuItem
+            icon={<Flag size={20} />}
+            label="Report"
+            sub="We won't let them know who reported this."
+            onSelect={onReport}
+          />
+        </MenuContent>
+      </Menu>
+    </div>
   );
 }
 

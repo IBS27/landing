@@ -8,33 +8,28 @@ import { Card } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 
 /**
- * A Video-feed post: header (with "· Follow" for unfollowed Pages and the view
- * count), caption, an inline 16:9 player and the action bar.
+ * A Video-feed post: header (with "· Follow" for unfollowed Pages), caption, an
+ * inline 16:9 player and the action bar with the view count in its stats row.
  */
 export function VideoCard({ post }: { post: PostView }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const views = viewsLabel(post);
   return (
     <Card className="overflow-hidden rounded-xl">
-      <PostHeader
-        post={post}
-        nameSuffix={<FollowPage author={post.author} />}
-        metaSuffix={
-          views && (
-            <>
-              <span aria-hidden>·</span>
-              <span>{views}</span>
-            </>
-          )
-        }
-      />
+      <PostHeader post={post} nameSuffix={<FollowPage author={post.author} />} />
       <PostContent
         post={{ ...post, media: [], attachments: [], shared: null }}
         onSeeMore={() => setDialogOpen(true)}
         smallText
       />
       <PostVideo post={post} />
-      <ActionBar post={post} onComment={() => setDialogOpen(true)} />
+      <ActionBar
+        post={post}
+        onComment={() => setDialogOpen(true)}
+        trailing={
+          views && <span className="mr-1 px-1 text-[15px] text-secondary leading-5">{views}</span>
+        }
+      />
       {dialogOpen && <PostDialog post={post} onClose={() => setDialogOpen(false)} />}
     </Card>
   );

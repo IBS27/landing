@@ -56,20 +56,31 @@ async function followedSet(ctx: QueryCtx, a: Audience) {
   return new Set<Id<"users">>([...a.friends, ...rows.map((r) => r.targetId)]);
 }
 
+/** Reels the viewer hid or reported from the Reels shelf. */
+async function hiddenSet(ctx: QueryCtx, viewerId: Id<"users">) {
+  const rows = await ctx.db
+    .query("hiddenPosts")
+    .withIndex("by_user_post", (q) => q.eq("userId", viewerId))
+    .collect();
+  return new Set<Id<"posts">>(rows.map((r) => r.postId));
+}
+
 /**
  * Reels: vertical video posts, newest first, each with whether the viewer
  * follows its author. When `startId` is given that reel leads the list
- * (direct /reel/<id> links).
+ * (direct /reel/<id> links). Reels the viewer hid are left out, except one
+ * opened by its direct link.
  */
 export const reels = viewerQuery({
   args: { startId: v.optional(v.string()), limit: v.optional(v.number()) },
   handler: async (ctx, { startId, limit = 40 }) => {
     const a = await loadAudience(ctx, ctx.viewer._id);
+    const hidden = await hiddenSet(ctx, a.viewerId);
     const picked = await stream(ctx.db, schema)
       .query("posts")
       .withIndex("by_created")
       .order("desc")
-      .filterWith(async (p) => isReelPost(p) && (await canView(ctx, p, a)))
+      .filterWith(async (p) => isReelPost(p) && !hidden.has(p._id) && (await canView(ctx, p, a)))
       .take(limit);
     const start = startId ? ctx.db.normalizeId("posts", startId) : null;
     if (start && !picked.some((p) => p._id === start)) {
@@ -93,11 +104,12 @@ export const reelsShelf = viewerQuery({
   args: {},
   handler: async (ctx) => {
     const a = await loadAudience(ctx, ctx.viewer._id);
+    const hidden = await hiddenSet(ctx, a.viewerId);
     const posts = await stream(ctx.db, schema)
       .query("posts")
       .withIndex("by_created")
       .order("desc")
-      .filterWith(async (p) => isReelPost(p) && (await canView(ctx, p, a)))
+      .filterWith(async (p) => isReelPost(p) && !hidden.has(p._id) && (await canView(ctx, p, a)))
       .take(10);
     return posts.map((p) => {
       const m = p.media[0];
@@ -108,6 +120,41 @@ export const reelsShelf = viewerQuery({
         caption: p.text?.trim() || null,
       };
     });
+  },
+});
+
+/**
+ * Hide a reel (shelf "Hide reel") or report it ("Report"; reported reels are
+ * hidden too). `hidden: false` undoes a hide.
+ */
+export const hideReel = viewerMutation({
+  args: {
+    postId: v.id("posts"),
+    hidden: v.boolean(),
+    reason: v.optional(v.union(v.literal("hidden"), v.literal("reported"))),
+  },
+  handler: async (ctx, { postId, hidden, reason = "hidden" }) => {
+    const viewerId = ctx.viewer._id;
+    const post = await ctx.db.get(postId);
+    if (!post || !isReelPost(post)) throw new ConvexError("Reel not found");
+    const row = await ctx.db
+      .query("hiddenPosts")
+      .withIndex("by_user_post", (q) => q.eq("userId", viewerId).eq("postId", postId))
+      .first();
+    if (!hidden) {
+      if (row) await ctx.db.delete(row._id);
+      return;
+    }
+    if (row) {
+      if (reason === "reported" && row.reason !== "reported")
+        await ctx.db.patch(row._id, { reason });
+    } else
+      await ctx.db.insert("hiddenPosts", {
+        userId: viewerId,
+        postId,
+        reason,
+        createdAt: Date.now(),
+      });
   },
 });
 

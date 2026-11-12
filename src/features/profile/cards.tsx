@@ -13,7 +13,7 @@ import {
 import { type ComponentType, type ReactNode, useEffect, useRef, useState } from "react";
 import { useQ } from "@/app/viewer";
 import { CreateReelDialog } from "@/features/watch/CreateReel";
-import { cn, plural } from "@/lib/format";
+import { cn, compactCount, plural } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/ui/overlays";
 import { Card } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -273,6 +273,46 @@ export function OrgEntry({ name, lines }: { name: string; lines: (string | null 
   );
 }
 
+/** Public groups the person is in, for "Communities" (`null` while loading or when empty). */
+export function useCommunities(userId: Id<"users">, skip?: boolean) {
+  const groups = useQ(api.profiles.groups, skip ? "skip" : { userId });
+  const open = groups?.filter((g) => g.privacy === "public");
+  return { all: open, top: open && open.length > 0 ? open.slice(0, 3) : null };
+}
+
+type Community = { _id: string; name: string; slug: string; cover: string; memberCount: number };
+
+/** "Communities" rows: group cover tile, name, "Group · 12K members". */
+export function CommunityList({ groups }: { groups: Community[] }) {
+  return (
+    <div className="flex flex-col gap-4">
+      {groups.map((g) => (
+        <Link
+          key={g._id}
+          to="/groups/$groupId"
+          params={{ groupId: g.slug }}
+          className="group flex items-center gap-3"
+        >
+          <img
+            src={g.cover}
+            alt=""
+            loading="lazy"
+            className="h-10 w-10 shrink-0 rounded-lg object-cover shadow-[0_0_0_1px_var(--media-inner-border)]"
+          />
+          <div className="min-w-0">
+            <div className="truncate font-semibold text-[15px] text-primary leading-5 group-hover:underline">
+              {g.name}
+            </div>
+            <div className="truncate text-[13px] text-secondary leading-4">
+              Group · {compactCount(g.memberCount)} {g.memberCount === 1 ? "member" : "members"}
+            </div>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 /** "https://www.x.com/a/" → "x.com/a". */
 export function linkLabel(url: string) {
   return url.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, "");
@@ -360,13 +400,14 @@ function PageIntroCard() {
 }
 
 /**
- * The left intro card (Facebook 2026): "Personal details", then "Work" and
- * "Education" sections with logo tiles and dates. Pages get Intro + Links.
+ * The left intro card (Facebook 2026): "Personal details", then "Communities",
+ * "Work" and "Education" sections with logo tiles and dates. Pages get Intro + Links.
  */
 export function IntroCard() {
   const { profile } = useProfile();
   const { user, isSelf, isPage } = profile;
 
+  const communities = useCommunities(user._id, isPage);
   if (isPage) return <PageIntroCard />;
 
   const rows: Row[] = [];
@@ -408,6 +449,23 @@ export function IntroCard() {
           See more personal details
         </Link>
       </div>
+      {communities.top && (
+        <section className="mt-6">
+          <h3 className="font-bold text-[20px] text-primary leading-6">Communities</h3>
+          <div className="pt-4">
+            <CommunityList groups={communities.top} />
+          </div>
+          {(communities.all?.length ?? 0) > communities.top.length && (
+            <Link
+              to="/$username/$section"
+              params={{ username: user.username, section: "groups" }}
+              className="mt-3 ml-[52px] inline-block font-semibold text-[13px] text-secondary hover:underline"
+            >
+              See more communities
+            </Link>
+          )}
+        </section>
+      )}
       {job && (
         <IntroSection title="Work" more={{ label: "See more work", section: "work" }}>
           <OrgEntry name={job.company} lines={[job.title, workDates(job)]} />
@@ -606,11 +664,9 @@ const dateFmt = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 });
 
-export function CheckinsCard({
-  checkins,
-}: {
-  checkins: { place: string; createdAt: number; postId: Id<"posts"> }[] | undefined;
-}) {
+export type Checkin = { place: string; region: string; createdAt: number; postId: Id<"posts"> };
+
+export function CheckinsCard({ checkins }: { checkins: Checkin[] | undefined }) {
   const navigate = useNavigate();
   const { profile } = useProfile();
   return (
@@ -638,52 +694,46 @@ export function CheckinsCard({
       ) : checkins.length === 0 ? (
         <CardEmpty>No check-ins to show</CardEmpty>
       ) : (
-        <div className="mt-4 grid grid-cols-1 gap-x-4 gap-y-4 min-[900px]:grid-cols-2">
-          {checkins.map((c) => {
-            const [title, ...rest] = c.place.split(",");
-            return (
-              <Link
-                key={c.place}
-                to="/$username/posts/$postId"
-                params={{ username: profile.user.username, postId: c.postId }}
-                className="flex items-center gap-4 rounded-lg p-1 hover:bg-hover"
-              >
-                <MapThumb />
-                <div className="min-w-0">
-                  <div className="truncate font-semibold text-[17px] text-primary">{title}</div>
-                  {rest.length > 0 && (
-                    <div className="truncate text-[13px] text-secondary">
-                      {rest.join(",").trim()}
-                    </div>
-                  )}
-                  <div className="text-[13px] text-secondary">
-                    Visited on {dateFmt.format(c.createdAt)}
-                  </div>
+        <div className="mt-4 grid grid-cols-1 gap-3 min-[900px]:grid-cols-2">
+          {checkins.map((c) => (
+            <Link
+              key={c.place}
+              to="/$username/posts/$postId"
+              params={{ username: profile.user.username, postId: c.postId }}
+              className="flex items-center gap-4 rounded-[10px] border border-divider p-4 transition-colors hover:bg-hover"
+            >
+              <PinTile />
+              <div className="min-w-0">
+                <div className="truncate font-semibold text-[17px] text-primary leading-[22px]">
+                  {c.place}
                 </div>
-              </Link>
-            );
-          })}
+                <div className="truncate text-[13px] text-secondary leading-4">{c.region}</div>
+                <div className="truncate text-[13px] text-secondary leading-4">
+                  Visited on {dateFmt.format(c.createdAt)}
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
       )}
     </ProfileCard>
   );
 }
 
-/** Stylized 80px map tile with a pin (stands in for Facebook's static map). */
-function MapThumb() {
+/** Facebook's place placeholder: a grey-blue tile with a white pin. */
+function PinTile() {
   return (
-    <svg viewBox="0 0 80 80" width={80} height={80} className="shrink-0 rounded-lg" aria-hidden>
-      <rect width="80" height="80" fill="#e8eef3" />
-      <path d="M0 52 80 34v8L0 60Z" fill="#fff" />
-      <path d="M28 0h7l-9 80h-7Z" fill="#fff" />
-      <path d="M52 0h4l6 80h-4Z" fill="#fdf1c9" />
-      <rect x="40" y="8" width="20" height="16" rx="2" fill="#cfe8c9" />
-      <rect x="4" y="64" width="18" height="12" rx="2" fill="#cfe8c9" />
-      <path
-        d="M40 22c-6 0-10 4.4-10 9.6C30 39 40 48 40 48s10-9 10-16.4C50 26.4 46 22 40 22Z"
-        fill="#e41e3f"
-      />
-      <circle cx="40" cy="31.5" r="3.6" fill="#fff" />
-    </svg>
+    <span
+      aria-hidden
+      className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-[#c3cbde] dark:bg-[#4e4f50]"
+    >
+      <svg viewBox="0 0 24 32" width={30} height={40}>
+        <path
+          d="M12 0C5.4 0 0 5.2 0 11.7 0 20.3 12 32 12 32s12-11.7 12-20.3C24 5.2 18.6 0 12 0Z"
+          className="fill-white dark:fill-[#b0b3b8]"
+        />
+        <circle cx="12" cy="11.5" r="4.2" className="fill-[#c3cbde] dark:fill-[#4e4f50]" />
+      </svg>
+    </span>
   );
 }

@@ -4,9 +4,8 @@ import type { PostMedia } from "./types";
 import { PlayGlyph, VideoPlayer } from "./VideoPlayer";
 
 /**
- * Facebook's feed photo layouts: 1 (natural aspect, letterboxed when tall),
- * 2 (side by side), 3 and 4 (one large on top, the rest below) and 5+
- * (two on top, three below with a "+N" overlay on the last tile).
+ * Facebook's feed photo layouts: 1 (natural aspect, letterboxed when tall);
+ * 2+ are a collage shaped by the first item's orientation (see `Collage`).
  */
 export function PhotoGrid({
   media,
@@ -20,45 +19,98 @@ export function PhotoGrid({
   if (media.length === 0) return null;
   if (media.length === 1)
     return <Single item={media[0]} onOpen={() => onOpen?.(0)} className={className} />;
+  return <Collage media={media} onOpen={onOpen} className={className} />;
+}
 
-  const tile = (i: number, cls: string, overlay?: number) => (
+type Orientation = "portrait" | "square" | "landscape";
+
+const ratioCache = new Map<string, number>();
+
+/** The item's width/height ratio: from its stored size, else measured once the image loads. */
+function useMediaRatio(item: PostMedia): number | undefined {
+  const known = item.width && item.height ? item.width / item.height : undefined;
+  const src = item.kind === "video" ? item.poster : item.url;
+  const [measured, setMeasured] = useState(() => (src ? ratioCache.get(src) : undefined));
+  useEffect(() => {
+    if (known || !src) return;
+    const cached = ratioCache.get(src);
+    if (cached) return setMeasured(cached);
+    let live = true;
+    const img = new Image();
+    img.onload = () => {
+      if (!img.naturalWidth || !img.naturalHeight) return;
+      const r = img.naturalWidth / img.naturalHeight;
+      ratioCache.set(src, r);
+      if (live) setMeasured(r);
+    };
+    img.src = src;
+    return () => {
+      live = false;
+    };
+  }, [known, src]);
+  return known ?? measured;
+}
+
+/**
+ * Multi-photo collages, laid out from the first item's orientation like Facebook:
+ * - 2: side by side (portrait: square box; square: 2:1), stacked when landscape.
+ * - 3/4: portrait → one large on the left (2/3 width) with the rest stacked on
+ *   the right; otherwise one large on top (2/3 height) with the rest in a row.
+ * - 5+: portrait → two stacked on the left, three on the right; otherwise two
+ *   squares on top, three below. The fifth tile carries a "+N" overlay.
+ */
+function Collage({
+  media,
+  onOpen,
+  className,
+}: {
+  media: PostMedia[];
+  onOpen?: (index: number) => void;
+  className?: string;
+}) {
+  const ratio = useMediaRatio(media[0]);
+  const orientation: Orientation =
+    ratio === undefined || ratio > 1.1 ? "landscape" : ratio < 0.9 ? "portrait" : "square";
+  const portrait = orientation === "portrait";
+  const tile = (i: number, cls = "", overlay?: number) => (
     <Tile key={i} item={media[i]} onOpen={() => onOpen?.(i)} className={cls} overlay={overlay} />
   );
   const n = media.length;
-  let content: React.ReactNode;
+  let grid: string;
+  let tiles: React.ReactNode[];
   if (n === 2) {
-    content = (
-      <div className="grid aspect-[2/1] grid-cols-2 gap-0.5">{[tile(0, ""), tile(1, "")]}</div>
-    );
-  } else if (n === 3) {
-    content = (
-      <div className="grid aspect-square grid-cols-2 grid-rows-[3fr_2fr] gap-0.5">
-        {tile(0, "col-span-2")}
-        {tile(1, "")}
-        {tile(2, "")}
-      </div>
-    );
-  } else if (n === 4) {
-    content = (
-      <div className="grid aspect-square grid-cols-3 grid-rows-[2fr_1fr] gap-0.5">
-        {tile(0, "col-span-3")}
-        {tile(1, "")}
-        {tile(2, "")}
-        {tile(3, "")}
-      </div>
-    );
+    grid =
+      orientation === "landscape"
+        ? "aspect-square grid-rows-2"
+        : portrait
+          ? "aspect-square grid-cols-2"
+          : "aspect-[2/1] grid-cols-2";
+    tiles = [tile(0), tile(1)];
+  } else if (n <= 4) {
+    // One large tile, the rest stacked beside (portrait) or in a row below it.
+    const [box, lead] = portrait
+      ? n === 3
+        ? ["grid-cols-[2fr_1fr] grid-rows-2", "row-span-2"]
+        : ["grid-cols-[2fr_1fr] grid-rows-3", "row-span-3"]
+      : n === 3
+        ? ["grid-rows-[2fr_1fr] grid-cols-2", "col-span-2"]
+        : ["grid-rows-[2fr_1fr] grid-cols-3", "col-span-3"];
+    grid = `aspect-square ${box}`;
+    tiles = media.map((_, i) => tile(i, i === 0 ? lead : ""));
   } else {
-    content = (
-      <div className="grid aspect-square grid-cols-6 grid-rows-2 gap-0.5">
-        {tile(0, "col-span-3")}
-        {tile(1, "col-span-3")}
-        {tile(2, "col-span-2")}
-        {tile(3, "col-span-2")}
-        {tile(4, "col-span-2", n > 5 ? n - 5 : undefined)}
-      </div>
-    );
+    const more = n > 5 ? n - 5 : undefined;
+    grid = portrait
+      ? "aspect-square grid-flow-col grid-cols-[3fr_2fr] grid-rows-6"
+      : "aspect-[6/5] grid-cols-6 grid-rows-[3fr_2fr]";
+    const big = portrait ? "row-span-3" : "col-span-3";
+    const small = portrait ? "row-span-2" : "col-span-2";
+    tiles = [tile(0, big), tile(1, big), tile(2, small), tile(3, small), tile(4, small, more)];
   }
-  return <div className={cn("overflow-hidden", className)}>{content}</div>;
+  return (
+    <div className={cn("overflow-hidden", className)}>
+      <div className={cn("grid gap-0.5", grid)}>{tiles}</div>
+    </div>
+  );
 }
 
 /** Facebook caps a single photo's height and letterboxes narrower photos. */

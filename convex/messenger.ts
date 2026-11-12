@@ -3,6 +3,7 @@ import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { dmBlockNotice } from "./lib/blocks";
+import { formatCallDuration } from "./lib/callFormat";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { friendIds, getSummaries, type UserSummary, userSummary } from "./lib/users";
 import type { ReactionType } from "./validators";
@@ -49,6 +50,8 @@ function attachmentPreview(
   if (!a) return null;
   if (a.kind === "call") {
     const video = a.media === "video";
+    if (a.outcome === "answered")
+      return `${video ? "Video" : "Audio"} call · ${formatCallDuration(a.durationMs ?? 0)}`;
     if (isGroup) return `${subject} started a ${video ? "video chat" : "call"}.`;
     if (fromViewer) return `You ${video ? "video " : ""}called ${otherFirst}.`;
     return `You missed a ${video ? "video " : ""}call from ${who}.`;
@@ -531,7 +534,7 @@ export const send = viewerMutation({
 });
 
 /** Appends a sent message, bumps the thread for every member and marks it read for the sender. */
-async function insertMessage(
+export async function insertMessage(
   ctx: MutationCtx,
   conversationId: Id<"conversations">,
   senderId: Id<"users">,
@@ -560,33 +563,6 @@ async function insertMessage(
   await clearTyping(ctx, conversationId, senderId);
   return messageId;
 }
-
-/** Logs a finished outgoing call in the thread ("You called Ethan." / "Missed call"). */
-export const logCall = viewerMutation({
-  args: {
-    conversationId: v.id("conversations"),
-    media: v.union(v.literal("audio"), v.literal("video")),
-    outcome: v.union(v.literal("no_answer"), v.literal("cancelled")),
-    durationMs: v.optional(v.number()),
-  },
-  handler: async (ctx, { conversationId, media, outcome, durationMs }) => {
-    const viewerId = ctx.viewer._id;
-    const { conv } = await requireMember(ctx, conversationId, viewerId);
-    // 1:1 threads close while either person has blocked the other.
-    const blocked = await dmBlockNotice(ctx, conv, viewerId);
-    if (blocked) throw new ConvexError(blocked);
-    return insertMessage(ctx, conversationId, viewerId, {
-      attachments: [
-        {
-          kind: "call",
-          media,
-          outcome,
-          durationMs: durationMs === undefined ? undefined : Math.max(0, Math.round(durationMs)),
-        },
-      ],
-    });
-  },
-});
 
 /* ---------------- End-to-end encryption PIN ---------------- */
 

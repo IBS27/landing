@@ -11,10 +11,12 @@ import {
 } from "@/features/misc/AppRail";
 import { CATEGORY_GLYPH_CLASS, GAME_CATEGORY_GLYPHS } from "@/features/misc/glyphs";
 import { BellFilled, BookmarkFilled, ControllerFilled } from "@/features/misc/icons";
+import { usePref } from "@/features/misc/settings/controls";
 import { cn } from "@/lib/format";
 import { Modal } from "@/ui/overlays";
 import { Button, Card, EmptyState } from "@/ui/primitives";
 import { GameCover } from "./GameCover";
+import { GameSettingsDialog } from "./GameSettingsDialog";
 import {
   byId,
   CATEGORIES,
@@ -63,6 +65,8 @@ export function GamingPage() {
   const [view, setView] = useState<View>({ kind: "play" });
   const [q, setQ] = useState("");
   const [playing, setPlaying] = useState<Game | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [gameNotifications, setGameNotifications] = usePref("games-notifications");
   const [saved, setSaved] = useLocalJSON<string[]>(`fb-clone:games:${viewer._id}`, []);
   const [best, setBest] = useLocalJSON<Record<string, number>>(
     `fb-clone:game-best:${viewer._id}`,
@@ -84,7 +88,13 @@ export function GamingPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-56px)] items-start">
-      <AppRail title="Games" label="Games" action={<RailGear label="Edit notification settings" />}>
+      <AppRail
+        title="Games"
+        label="Games"
+        action={
+          <RailGear label="Edit notification settings" onClick={() => setSettingsOpen(true)} />
+        }
+      >
         <RailSearch value={q} onChange={setQ} placeholder="Search games" />
         <AppRailItem
           large
@@ -172,10 +182,24 @@ export function GamingPage() {
           <PlayHome onPlay={setPlaying} best={best} />
         ) : view.kind === "notifications" ? (
           <Section title="Notifications">
-            <EmptyCard
-              title="No notifications"
-              body="When games you play send you updates, you'll see them here."
-            />
+            {gameNotifications === "Off" ? (
+              <Card className="rounded-xl">
+                <EmptyState
+                  title="Notifications from games are off"
+                  body="Turn them on to hear when it's your turn or a friend beats your score."
+                  action={
+                    <Button variant="primary" onClick={() => setGameNotifications("On")}>
+                      Turn on
+                    </Button>
+                  }
+                />
+              </Card>
+            ) : (
+              <EmptyCard
+                title="No notifications"
+                body="When games you play send you updates, you'll see them here."
+              />
+            )}
           </Section>
         ) : view.kind === "yours" ? (
           <Section title="Your games">
@@ -212,6 +236,7 @@ export function GamingPage() {
           onClose={() => setPlaying(null)}
         />
       )}
+      <GameSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }

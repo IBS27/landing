@@ -16,13 +16,16 @@ import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as ClimateRouteImport } from './routes/climate'
 import { Route as FeedsRouteImport } from './routes/feeds'
 import { Route as FundraisersRouteImport } from './routes/fundraisers'
+import { Route as MeRouteImport } from './routes/me'
 import { Route as MemoriesRouteImport } from './routes/memories'
 import { Route as MetaAiRouteImport } from './routes/meta-ai'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PagesRouteImport } from './routes/pages'
 import { Route as ReelRouteImport } from './routes/reel'
+import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as VideoRouteImport } from './routes/video'
 import { Route as WatchRouteImport } from './routes/watch'
 import { Route as UsernameIndexRouteImport } from './routes/$username/index'
 import { Route as UsernameSectionRouteImport } from './routes/$username/$section'
@@ -32,6 +35,7 @@ import { Route as UsernamePhotosRouteImport } from './routes/$username/photos'
 import { Route as UsernameReelsRouteImport } from './routes/$username/reels'
 import { Route as UsernameSearchRouteImport } from './routes/$username/search'
 import { Route as AdsActivityRouteImport } from './routes/ads/activity'
+import { Route as CallCallIdRouteImport } from './routes/call/$callId'
 import { Route as EventsIndexRouteImport } from './routes/events/index'
 import { Route as EventsEventIdRouteImport } from './routes/events/$eventId'
 import { Route as EventsBirthdaysRouteImport } from './routes/events/birthdays'
@@ -81,6 +85,7 @@ import { Route as MarketplaceCreateItemRouteImport } from './routes/marketplace/
 import { Route as MarketplaceCreateRentalRouteImport } from './routes/marketplace/create/rental'
 import { Route as MarketplaceCreateVehicleRouteImport } from './routes/marketplace/create/vehicle'
 import { Route as MarketplaceEditListingIdRouteImport } from './routes/marketplace/edit/$listingId'
+import { Route as MarketplaceItemIndexRouteImport } from './routes/marketplace/item/index'
 import { Route as MarketplaceItemListingIdRouteImport } from './routes/marketplace/item/$listingId'
 import { Route as MarketplaceYouIndexRouteImport } from './routes/marketplace/you/index'
 import { Route as MarketplaceYouSellingRouteImport } from './routes/marketplace/you/selling'
@@ -121,6 +126,11 @@ const FundraisersRoute = FundraisersRouteImport.update({
   path: '/fundraisers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MeRoute = MeRouteImport.update({
+  id: '/me',
+  path: '/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MemoriesRoute = MemoriesRouteImport.update({
   id: '/memories',
   path: '/memories',
@@ -146,6 +156,11 @@ const ReelRoute = ReelRouteImport.update({
   path: '/reel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReelsRoute = ReelsRouteImport.update({
+  id: '/reels',
+  path: '/reels',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SavedRoute = SavedRouteImport.update({
   id: '/saved',
   path: '/saved',
@@ -154,6 +169,11 @@ const SavedRoute = SavedRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VideoRoute = VideoRouteImport.update({
+  id: '/video',
+  path: '/video',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WatchRoute = WatchRouteImport.update({
@@ -199,6 +219,11 @@ const UsernameSearchRoute = UsernameSearchRouteImport.update({
 const AdsActivityRoute = AdsActivityRouteImport.update({
   id: '/ads/activity',
   path: '/ads/activity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CallCallIdRoute = CallCallIdRouteImport.update({
+  id: '/call/$callId',
+  path: '/call/$callId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EventsIndexRoute = EventsIndexRouteImport.update({
@@ -450,6 +475,11 @@ const MarketplaceEditListingIdRoute =
     path: '/marketplace/edit/$listingId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const MarketplaceItemIndexRoute = MarketplaceItemIndexRouteImport.update({
+  id: '/marketplace/item/',
+  path: '/marketplace/item/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketplaceItemListingIdRoute =
   MarketplaceItemListingIdRouteImport.update({
     id: '/marketplace/item/$listingId',
@@ -480,13 +510,16 @@ export interface FileRoutesByFullPath {
   '/climate': typeof ClimateRoute
   '/feeds': typeof FeedsRoute
   '/fundraisers': typeof FundraisersRoute
+  '/me': typeof MeRoute
   '/memories': typeof MemoriesRoute
   '/meta-ai': typeof MetaAiRoute
   '/notifications': typeof NotificationsRoute
   '/pages': typeof PagesRoute
   '/reel': typeof ReelRoute
+  '/reels': typeof ReelsRoute
   '/saved': typeof SavedRoute
   '/settings': typeof SettingsRoute
+  '/video': typeof VideoRoute
   '/watch': typeof WatchRoute
   '/$username/$section': typeof UsernameSectionRoute
   '/$username/about': typeof UsernameAboutRoute
@@ -495,6 +528,7 @@ export interface FileRoutesByFullPath {
   '/$username/reels': typeof UsernameReelsRoute
   '/$username/search': typeof UsernameSearchRoute
   '/ads/activity': typeof AdsActivityRoute
+  '/call/$callId': typeof CallCallIdRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/birthdays': typeof EventsBirthdaysRoute
   '/events/create': typeof EventsCreateRoute
@@ -548,6 +582,7 @@ export interface FileRoutesByFullPath {
   '/messages/t/$conversationId': typeof MessagesTConversationIdRoute
   '/groups/$groupId/': typeof GroupsGroupIdIndexRoute
   '/marketplace/create/': typeof MarketplaceCreateIndexRoute
+  '/marketplace/item/': typeof MarketplaceItemIndexRoute
   '/marketplace/you/': typeof MarketplaceYouIndexRoute
 }
 export interface FileRoutesByTo {
@@ -557,13 +592,16 @@ export interface FileRoutesByTo {
   '/climate': typeof ClimateRoute
   '/feeds': typeof FeedsRoute
   '/fundraisers': typeof FundraisersRoute
+  '/me': typeof MeRoute
   '/memories': typeof MemoriesRoute
   '/meta-ai': typeof MetaAiRoute
   '/notifications': typeof NotificationsRoute
   '/pages': typeof PagesRoute
   '/reel': typeof ReelRoute
+  '/reels': typeof ReelsRoute
   '/saved': typeof SavedRoute
   '/settings': typeof SettingsRoute
+  '/video': typeof VideoRoute
   '/watch': typeof WatchRoute
   '/$username/$section': typeof UsernameSectionRoute
   '/$username/about': typeof UsernameAboutRoute
@@ -572,6 +610,7 @@ export interface FileRoutesByTo {
   '/$username/reels': typeof UsernameReelsRoute
   '/$username/search': typeof UsernameSearchRoute
   '/ads/activity': typeof AdsActivityRoute
+  '/call/$callId': typeof CallCallIdRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/birthdays': typeof EventsBirthdaysRoute
   '/events/create': typeof EventsCreateRoute
@@ -624,6 +663,7 @@ export interface FileRoutesByTo {
   '/messages/t/$conversationId': typeof MessagesTConversationIdRoute
   '/groups/$groupId': typeof GroupsGroupIdIndexRoute
   '/marketplace/create': typeof MarketplaceCreateIndexRoute
+  '/marketplace/item': typeof MarketplaceItemIndexRoute
   '/marketplace/you': typeof MarketplaceYouIndexRoute
 }
 export interface FileRoutesById {
@@ -635,13 +675,16 @@ export interface FileRoutesById {
   '/climate': typeof ClimateRoute
   '/feeds': typeof FeedsRoute
   '/fundraisers': typeof FundraisersRoute
+  '/me': typeof MeRoute
   '/memories': typeof MemoriesRoute
   '/meta-ai': typeof MetaAiRoute
   '/notifications': typeof NotificationsRoute
   '/pages': typeof PagesRoute
   '/reel': typeof ReelRoute
+  '/reels': typeof ReelsRoute
   '/saved': typeof SavedRoute
   '/settings': typeof SettingsRoute
+  '/video': typeof VideoRoute
   '/watch': typeof WatchRoute
   '/$username/$section': typeof UsernameSectionRoute
   '/$username/about': typeof UsernameAboutRoute
@@ -650,6 +693,7 @@ export interface FileRoutesById {
   '/$username/reels': typeof UsernameReelsRoute
   '/$username/search': typeof UsernameSearchRoute
   '/ads/activity': typeof AdsActivityRoute
+  '/call/$callId': typeof CallCallIdRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/events/birthdays': typeof EventsBirthdaysRoute
   '/events/create': typeof EventsCreateRoute
@@ -703,6 +747,7 @@ export interface FileRoutesById {
   '/messages/t/$conversationId': typeof MessagesTConversationIdRoute
   '/groups/$groupId/': typeof GroupsGroupIdIndexRoute
   '/marketplace/create/': typeof MarketplaceCreateIndexRoute
+  '/marketplace/item/': typeof MarketplaceItemIndexRoute
   '/marketplace/you/': typeof MarketplaceYouIndexRoute
 }
 export interface FileRouteTypes {
@@ -715,13 +760,16 @@ export interface FileRouteTypes {
     | '/climate'
     | '/feeds'
     | '/fundraisers'
+    | '/me'
     | '/memories'
     | '/meta-ai'
     | '/notifications'
     | '/pages'
     | '/reel'
+    | '/reels'
     | '/saved'
     | '/settings'
+    | '/video'
     | '/watch'
     | '/$username/$section'
     | '/$username/about'
@@ -730,6 +778,7 @@ export interface FileRouteTypes {
     | '/$username/reels'
     | '/$username/search'
     | '/ads/activity'
+    | '/call/$callId'
     | '/events/$eventId'
     | '/events/birthdays'
     | '/events/create'
@@ -783,6 +832,7 @@ export interface FileRouteTypes {
     | '/messages/t/$conversationId'
     | '/groups/$groupId/'
     | '/marketplace/create/'
+    | '/marketplace/item/'
     | '/marketplace/you/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -792,13 +842,16 @@ export interface FileRouteTypes {
     | '/climate'
     | '/feeds'
     | '/fundraisers'
+    | '/me'
     | '/memories'
     | '/meta-ai'
     | '/notifications'
     | '/pages'
     | '/reel'
+    | '/reels'
     | '/saved'
     | '/settings'
+    | '/video'
     | '/watch'
     | '/$username/$section'
     | '/$username/about'
@@ -807,6 +860,7 @@ export interface FileRouteTypes {
     | '/$username/reels'
     | '/$username/search'
     | '/ads/activity'
+    | '/call/$callId'
     | '/events/$eventId'
     | '/events/birthdays'
     | '/events/create'
@@ -859,6 +913,7 @@ export interface FileRouteTypes {
     | '/messages/t/$conversationId'
     | '/groups/$groupId'
     | '/marketplace/create'
+    | '/marketplace/item'
     | '/marketplace/you'
   id:
     | '__root__'
@@ -869,13 +924,16 @@ export interface FileRouteTypes {
     | '/climate'
     | '/feeds'
     | '/fundraisers'
+    | '/me'
     | '/memories'
     | '/meta-ai'
     | '/notifications'
     | '/pages'
     | '/reel'
+    | '/reels'
     | '/saved'
     | '/settings'
+    | '/video'
     | '/watch'
     | '/$username/$section'
     | '/$username/about'
@@ -884,6 +942,7 @@ export interface FileRouteTypes {
     | '/$username/reels'
     | '/$username/search'
     | '/ads/activity'
+    | '/call/$callId'
     | '/events/$eventId'
     | '/events/birthdays'
     | '/events/create'
@@ -937,6 +996,7 @@ export interface FileRouteTypes {
     | '/messages/t/$conversationId'
     | '/groups/$groupId/'
     | '/marketplace/create/'
+    | '/marketplace/item/'
     | '/marketplace/you/'
   fileRoutesById: FileRoutesById
 }
@@ -948,15 +1008,19 @@ export interface RootRouteChildren {
   ClimateRoute: typeof ClimateRoute
   FeedsRoute: typeof FeedsRoute
   FundraisersRoute: typeof FundraisersRoute
+  MeRoute: typeof MeRoute
   MemoriesRoute: typeof MemoriesRoute
   MetaAiRoute: typeof MetaAiRoute
   NotificationsRoute: typeof NotificationsRoute
   PagesRoute: typeof PagesRoute
   ReelRoute: typeof ReelRoute
+  ReelsRoute: typeof ReelsRoute
   SavedRoute: typeof SavedRoute
   SettingsRoute: typeof SettingsRoute
+  VideoRoute: typeof VideoRoute
   WatchRoute: typeof WatchRoute
   AdsActivityRoute: typeof AdsActivityRoute
+  CallCallIdRoute: typeof CallCallIdRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
   EventsBirthdaysRoute: typeof EventsBirthdaysRoute
   EventsCreateRoute: typeof EventsCreateRoute
@@ -1001,6 +1065,7 @@ export interface RootRouteChildren {
   MarketplaceYouSellingRoute: typeof MarketplaceYouSellingRoute
   MessagesTConversationIdRoute: typeof MessagesTConversationIdRoute
   MarketplaceCreateIndexRoute: typeof MarketplaceCreateIndexRoute
+  MarketplaceItemIndexRoute: typeof MarketplaceItemIndexRoute
   MarketplaceYouIndexRoute: typeof MarketplaceYouIndexRoute
 }
 
@@ -1055,6 +1120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FundraisersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/me': {
+      id: '/me'
+      path: '/me'
+      fullPath: '/me'
+      preLoaderRoute: typeof MeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/memories': {
       id: '/memories'
       path: '/memories'
@@ -1090,6 +1162,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reels': {
+      id: '/reels'
+      path: '/reels'
+      fullPath: '/reels'
+      preLoaderRoute: typeof ReelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/saved': {
       id: '/saved'
       path: '/saved'
@@ -1102,6 +1181,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/video': {
+      id: '/video'
+      path: '/video'
+      fullPath: '/video'
+      preLoaderRoute: typeof VideoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/watch': {
@@ -1165,6 +1251,13 @@ declare module '@tanstack/react-router' {
       path: '/ads/activity'
       fullPath: '/ads/activity'
       preLoaderRoute: typeof AdsActivityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/call/$callId': {
+      id: '/call/$callId'
+      path: '/call/$callId'
+      fullPath: '/call/$callId'
+      preLoaderRoute: typeof CallCallIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/events/': {
@@ -1510,6 +1603,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketplaceEditListingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marketplace/item/': {
+      id: '/marketplace/item/'
+      path: '/marketplace/item'
+      fullPath: '/marketplace/item/'
+      preLoaderRoute: typeof MarketplaceItemIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marketplace/item/$listingId': {
       id: '/marketplace/item/$listingId'
       path: '/marketplace/item/$listingId'
@@ -1599,15 +1699,19 @@ const rootRouteChildren: RootRouteChildren = {
   ClimateRoute: ClimateRoute,
   FeedsRoute: FeedsRoute,
   FundraisersRoute: FundraisersRoute,
+  MeRoute: MeRoute,
   MemoriesRoute: MemoriesRoute,
   MetaAiRoute: MetaAiRoute,
   NotificationsRoute: NotificationsRoute,
   PagesRoute: PagesRoute,
   ReelRoute: ReelRoute,
+  ReelsRoute: ReelsRoute,
   SavedRoute: SavedRoute,
   SettingsRoute: SettingsRoute,
+  VideoRoute: VideoRoute,
   WatchRoute: WatchRoute,
   AdsActivityRoute: AdsActivityRoute,
+  CallCallIdRoute: CallCallIdRoute,
   EventsEventIdRoute: EventsEventIdRoute,
   EventsBirthdaysRoute: EventsBirthdaysRoute,
   EventsCreateRoute: EventsCreateRoute,
@@ -1652,6 +1756,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketplaceYouSellingRoute: MarketplaceYouSellingRoute,
   MessagesTConversationIdRoute: MessagesTConversationIdRoute,
   MarketplaceCreateIndexRoute: MarketplaceCreateIndexRoute,
+  MarketplaceItemIndexRoute: MarketplaceItemIndexRoute,
   MarketplaceYouIndexRoute: MarketplaceYouIndexRoute,
 }
 export const routeTree = rootRouteImport

@@ -7,12 +7,10 @@ import { cn } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/ui/overlays";
 import { Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
 import { NotificationRow } from "./NotificationRow";
 import type { NotificationView } from "./types";
 
 const PAGE = 15;
-const DAY = 24 * 60 * 60 * 1000;
 
 function Pill({
   active,
@@ -74,8 +72,8 @@ function EmptyNotifications({ unread }: { unread: boolean }) {
 
 /**
  * Notifications panel body, shared by the bell dropdown and /notifications.
- * Mounting it marks everything seen (clears the red badge); items that were
- * unseen at that moment, or arrived in the last day, show under "New".
+ * Like Facebook, opening it clears the red badge; items newer than the
+ * previous visit show under "New", the rest under "Earlier".
  */
 export function NotificationList({
   variant,
@@ -94,30 +92,25 @@ export function NotificationList({
   const markAllSeen = useM(api.notifications.markAllSeen);
   const markAllRead = useM(api.notifications.markAllRead);
   const navigate = useNavigate();
-  const [fresh, setFresh] = useState<Set<Id<"notifications">>>(() => new Set());
-  const [now] = useState(() => Date.now());
 
   const items = data?.items;
+  const seenAt = data?.seenAt;
+  // "New" is relative to the previous visit, frozen when the panel opens, so
+  // what arrived since stays under New while it is open.
+  const [since, setSince] = useState<number | null>(null);
+  if (since === null && seenAt !== undefined) setSince(seenAt);
   useEffect(() => {
-    if (!items) return;
-    const unseen = items.filter((n) => !n.seen);
-    if (unseen.length === 0) return;
-    setFresh((prev) => {
-      const next = new Set(prev);
-      for (const n of unseen) next.add(n._id);
-      return next;
-    });
-    void markAllSeen({});
-  }, [items, markAllSeen]);
+    // Clear the badge on open, and again for anything that arrives while open.
+    if (items && seenAt !== undefined && items.some((n) => n.createdAt > seenAt))
+      void markAllSeen({});
+  }, [items, seenAt, markAllSeen]);
 
   const [newer, earlier] = useMemo(() => {
     const a: NotificationView[] = [];
     const b: NotificationView[] = [];
-    // New: unseen when the panel opened (or arrived since), plus unread items from the last day.
-    for (const n of items ?? [])
-      (!n.seen || fresh.has(n._id) || (!n.read && now - n.createdAt < DAY) ? a : b).push(n);
+    for (const n of items ?? []) (since !== null && n.createdAt > since ? a : b).push(n);
     return [a, b];
-  }, [items, fresh, now]);
+  }, [items, since]);
 
   const page = variant === "page";
 

@@ -77,33 +77,6 @@ export const byGroup = viewerQuery({
   },
 });
 
-/**
- * "On this day": the viewer's posts from this calendar day in earlier years.
- * `tzOffset` is the client's `Date#getTimezoneOffset()` so "this day" is the
- * viewer's local day, not the server's (UTC).
- */
-export const memories = viewerQuery({
-  args: {
-    month: v.number(),
-    day: v.number(),
-    year: v.number(),
-    tzOffset: v.optional(v.number()),
-  },
-  handler: async (ctx, { month, day, year, tzOffset = 0 }) => {
-    const a = await loadAudience(ctx, ctx.viewer._id);
-    const mine = await ctx.db
-      .query("posts")
-      .withIndex("by_author", (q) => q.eq("authorId", ctx.viewer._id))
-      .order("desc")
-      .collect();
-    const hits = mine.filter((p) => {
-      const d = new Date(p.createdAt - tzOffset * 60_000);
-      return d.getUTCMonth() + 1 === month && d.getUTCDate() === day && d.getUTCFullYear() < year;
-    });
-    return enrichPosts(ctx, hits, a);
-  },
-});
-
 /* ---------------- Mutations ---------------- */
 
 export const generateUploadUrl = viewerMutation({

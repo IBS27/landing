@@ -8,8 +8,10 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { useQ } from "@/app/viewer";
 import { cn } from "@/lib/format";
 import { Spinner } from "@/ui/primitives";
+import { api } from "../../../convex/_generated/api";
 
 /* ------------------------------------------------------------------ */
 /* Shared state                                                        */
@@ -37,13 +39,20 @@ export function useSoundOn() {
 
 /** Live playback state of a <video> element. */
 export function useVideoState(ref: RefObject<HTMLVideoElement | null>) {
-  const [s, setS] = useState({ playing: false, time: 0, duration: 0, waiting: false });
+  const [s, setS] = useState({
+    playing: false,
+    ended: false,
+    time: 0,
+    duration: 0,
+    waiting: false,
+  });
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const sync = (waiting?: boolean) =>
       setS((p) => ({
         playing: !el.paused,
+        ended: el.ended,
         time: el.currentTime,
         duration: Number.isFinite(el.duration) ? el.duration : 0,
         waiting: waiting ?? p.waiting,
@@ -51,7 +60,15 @@ export function useVideoState(ref: RefObject<HTMLVideoElement | null>) {
     const on = () => sync();
     const wait = () => sync(true);
     const ready = () => sync(false);
-    const events = ["play", "pause", "timeupdate", "durationchange", "loadedmetadata", "seeked"];
+    const events = [
+      "play",
+      "pause",
+      "ended",
+      "timeupdate",
+      "durationchange",
+      "loadedmetadata",
+      "seeked",
+    ];
     for (const e of events) el.addEventListener(e, on);
     el.addEventListener("waiting", wait);
     el.addEventListener("playing", ready);
@@ -92,6 +109,22 @@ export function formatVideoTime(s: number) {
   return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${sec}` : `${m}:${sec}`;
 }
 
+/**
+ * The viewer's video preferences (Settings → Media): whether videos autoplay
+ * (Facebook's "Default" autoplays) and the default quality label.
+ */
+export function useVideoPrefs() {
+  const settings = useQ(api.settings.get, {});
+  const autoplay = settings?.prefs.autoplay;
+  const quality = settings?.prefs["video-quality"];
+  return {
+    /** Undefined while loading, so nothing starts before the choice is known. */
+    autoplay: autoplay === undefined ? undefined : autoplay !== "Off",
+    qualityLabel:
+      quality === "SD only" ? "360p" : quality === "HD if available" ? "720p HD" : "Auto (720p)",
+  };
+}
+
 /** Plays `el`, falling back to muted playback when the browser blocks sound. */
 export function safePlay(el: HTMLVideoElement) {
   el.play().catch(() => {
@@ -122,6 +155,13 @@ export function PauseGlyph({ size = 20, className }: IconProps) {
     </svg>
   );
 }
+function ReplayGlyph({ size = 40 }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden>
+      <path d="M12 4.5V1.8a.5.5 0 0 0-.85-.36L7.4 5.15a.5.5 0 0 0 0 .7l3.75 3.72A.5.5 0 0 0 12 9.2V6.5a6 6 0 1 1-6 6 1 1 0 1 0-2 0 8 8 0 1 0 8-8Z" />
+    </svg>
+  );
+}
 function GearGlyph({ size = 20 }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor">
@@ -149,8 +189,9 @@ const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 /**
  * Facebook's inline video player (feed, Watch, Marketplace). Autoplays muted
- * once at least half of it is on screen and pauses when it scrolls away; a
- * click toggles playback. Hovering reveals the control bar: play/pause, time,
+ * once at least half of it is on screen (unless Settings → Media → Autoplay is
+ * Off) and pauses when it scrolls away; a click toggles playback. When a clip
+ * ends the bar hides and a centred "Replay" sits over the dimmed last frame. Hovering reveals the control bar: play/pause, time,
  * scrubber, settings, fullscreen and volume. The video is letterboxed on black
  * inside whatever box the caller sizes.
  */
@@ -187,28 +228,30 @@ export function VideoPlayer({
   const [speed, setSpeed] = useState(1);
   const [fullscreen, setFullscreen] = useState(false);
   const idle = useRef<number | undefined>(undefined);
+  const prefs = useVideoPrefs();
+  const autoplayOn = autoPlay && prefs.autoplay === true;
 
   useEffect(() => {
     const el = ref.current;
     if (el) el.muted = !sound;
   }, [sound]);
 
-  // Autoplay while ≥50% visible.
+  // Autoplay while ≥50% visible; any playing video pauses once it scrolls away.
   useEffect(() => {
     const el = ref.current;
     const box = root.current;
-    if (!el || !box || !autoPlay) return;
+    if (!el || !box) return;
     const io = new IntersectionObserver(
       ([e]) => {
         if (e.intersectionRatio >= 0.5) {
-          if (!userPaused.current && el.paused) safePlay(el);
+          if (autoplayOn && !userPaused.current && el.paused && !el.ended) safePlay(el);
         } else if (!el.paused) el.pause();
       },
       { threshold: [0, 0.5, 1] },
     );
     io.observe(box);
     return () => io.disconnect();
-  }, [autoPlay]);
+  }, [autoplayOn]);
 
   useEffect(() => {
     if (state.playing) setStarted(true);
@@ -222,10 +265,22 @@ export function VideoPlayer({
 
   useEffect(() => () => window.clearTimeout(idle.current), []);
 
+  const replay = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    userPaused.current = false;
+    el.currentTime = 0;
+    safePlay(el);
+  }, []);
+
   const toggle = useCallback(() => {
     const el = ref.current;
     if (!el) return;
-    if (el.paused) {
+    if (el.ended) {
+      userPaused.current = false;
+      el.currentTime = 0;
+      safePlay(el);
+    } else if (el.paused) {
       userPaused.current = false;
       safePlay(el);
     } else {
@@ -245,7 +300,8 @@ export function VideoPlayer({
     else void root.current?.requestFullscreen?.();
   };
 
-  const showControls = active || menu || (started && !state.playing) || !started;
+  const ended = state.ended && !state.playing;
+  const showControls = !ended && (active || menu || (started && !state.playing) || !started);
 
   return (
     <div
@@ -286,8 +342,24 @@ export function VideoPlayer({
         </span>
       )}
 
+      {/* Ended: the last frame dims under Facebook's centred Replay. */}
+      {ended && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <button
+            type="button"
+            onClick={replay}
+            className="flex flex-col items-center gap-1 rounded-lg px-4 py-2 text-white transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-white"
+          >
+            <ReplayGlyph size={44} />
+            <span className="font-semibold text-[15px] leading-5 [text-shadow:0_0_2px_rgba(0,0,0,0.5)]">
+              Replay
+            </span>
+          </button>
+        </div>
+      )}
+
       {/* Big centre play button while paused. */}
-      {!state.playing && (
+      {!state.playing && !ended && (
         <button
           type="button"
           aria-label="Play video"
@@ -326,6 +398,7 @@ export function VideoPlayer({
             </BarButton>
             {menu && (
               <SettingsMenu
+                quality={prefs.qualityLabel}
                 speed={speed}
                 onSpeed={(s) => {
                   setSpeed(s);
@@ -367,7 +440,7 @@ export function VideoPlayer({
       </div>
 
       {/* Muted autoplay hint: Facebook keeps the speaker visible while muted. */}
-      {!sound && state.playing && !showControls && (
+      {!sound && state.playing && !showControls && !ended && (
         <button
           type="button"
           aria-label="Unmute"
@@ -452,7 +525,12 @@ function Scrubber({
       }}
       className="group/scrub relative mx-1 flex h-6 min-w-0 flex-1 cursor-pointer items-center"
     >
-      <div className="relative h-1 w-full overflow-hidden rounded-full bg-white/35">
+      <div
+        className={cn(
+          "relative w-full overflow-hidden rounded-full bg-white/35 transition-[height] duration-150",
+          drag !== null ? "h-1.5" : "h-[2px] group-hover/scrub:h-1.5",
+        )}
+      >
         <div className="absolute inset-y-0 left-0 bg-white" style={{ width: `${frac * 100}%` }} />
       </div>
       <span
@@ -467,10 +545,12 @@ function Scrubber({
 }
 
 function SettingsMenu({
+  quality,
   speed,
   onSpeed,
   onClose,
 }: {
+  quality: string;
   speed: number;
   onSpeed: (s: number) => void;
   onClose: () => void;
@@ -493,7 +573,7 @@ function SettingsMenu({
     >
       <div className="flex items-center justify-between rounded-md px-2 py-2 text-[15px]">
         <span className="font-semibold">Quality</span>
-        <span className="text-[13px] text-[#b0b3b8]">Auto (720p)</span>
+        <span className="text-[13px] text-[#b0b3b8]">{quality}</span>
       </div>
       <div className="my-1 h-px bg-white/10" />
       <p className="px-2 pt-1 pb-1 font-semibold text-[15px]">Playback speed</p>

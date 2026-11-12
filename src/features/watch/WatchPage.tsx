@@ -17,6 +17,7 @@ import { compactCount, shortAge } from "@/lib/format";
 import { Avatar, Button, Card, EmptyState, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import { PostVideo, VideoCard } from "./VideoCard";
+import { VideoSettingsDialog } from "./VideoSettings";
 
 export type WatchTab = "home" | "live" | "shows" | "explore" | "saved";
 export const WATCH_TABS: WatchTab[] = ["home", "live", "shows", "explore", "saved"];
@@ -36,11 +37,16 @@ export function WatchPage({ tab, q }: { tab: WatchTab; q?: string }) {
   const navigate = useNavigate();
   const [query, setQuery] = useState(q ?? "");
   const watchlist = useQ(api.media.watchlist, {});
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const setTab = (t: WatchTab) => void navigate({ to: "/watch", search: { tab: t } });
 
   return (
     <div className="flex min-h-[calc(100vh-56px)] items-start">
-      <AppRail title="Video" label="Video" action={<RailGear label="Video settings" />}>
+      <AppRail
+        title="Video"
+        label="Video"
+        action={<RailGear label="Video settings" onClick={() => setSettingsOpen(true)} />}
+      >
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -115,6 +121,7 @@ export function WatchPage({ tab, q }: { tab: WatchTab; q?: string }) {
           {tab === "saved" && <SavedVideos />}
         </div>
       </main>
+      <VideoSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }

@@ -91,9 +91,43 @@ export const insertStories = internalMutation({
   args: { rows: v.array(T.stories.validator) },
   handler: (ctx, { rows }) => insertAll(ctx, "stories", rows),
 });
+/** Saved items, filed into named collections (created per user; "For later" by default). */
 export const insertSaved = internalMutation({
-  args: { rows: v.array(T.saved.validator) },
-  handler: (ctx, { rows }) => insertAll(ctx, "saved", rows),
+  args: {
+    rows: v.array(
+      v.object({
+        userId: v.id("users"),
+        kind: T.saved.validator.fields.kind,
+        refId: v.string(),
+        collection: v.optional(v.string()),
+        createdAt: v.number(),
+      }),
+    ),
+  },
+  handler: async (ctx, { rows }) => {
+    const ids = new Map<string, Id<"savedCollections">>();
+    // Each user's "For later" dates from their first save, so it lists first.
+    const firstSave = new Map<string, number>();
+    for (const r of rows)
+      firstSave.set(r.userId, Math.min(firstSave.get(r.userId) ?? r.createdAt, r.createdAt));
+    for (const { collection, ...row } of rows) {
+      const name = collection ?? "For later";
+      const key = `${row.userId}|${name}`;
+      let collectionId = ids.get(key);
+      if (!collectionId) {
+        const created = rows
+          .filter((r) => r.userId === row.userId && r.collection === collection)
+          .reduce((m, r) => Math.min(m, r.createdAt), row.createdAt);
+        collectionId = await ctx.db.insert("savedCollections", {
+          userId: row.userId,
+          name,
+          createdAt: collection ? created : (firstSave.get(row.userId) ?? created) - 1,
+        });
+        ids.set(key, collectionId);
+      }
+      await ctx.db.insert("saved", { ...row, collectionId });
+    }
+  },
 });
 export const insertNotifications = internalMutation({
   args: { rows: v.array(T.notifications.validator) },

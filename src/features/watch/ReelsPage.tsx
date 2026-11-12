@@ -7,7 +7,6 @@ import {
   Link2,
   MoreHorizontal,
   Music2,
-  Plus,
   Star,
   X,
 } from "lucide-react";
@@ -30,13 +29,10 @@ import {
 } from "@/features/posts/icons";
 import { reactionMeta, useReactionHover } from "@/features/posts/reactions";
 import {
-  PauseGlyph,
   PlayGlyph,
   safePlay,
   setSoundOn,
   useSoundOn,
-  useVideoProgress,
-  useVideoState,
   VolumeGlyph,
 } from "@/features/posts/VideoPlayer";
 import { cn, compactCount } from "@/lib/format";
@@ -167,17 +163,6 @@ export function ReelsPage({ startId }: { startId?: string }) {
               {label}
             </button>
           ))}
-          <div className="mx-2 my-2 h-px bg-white/15" />
-          <button
-            type="button"
-            onClick={() => setCreating(true)}
-            className="flex h-11 w-[204px] items-center gap-3 rounded-lg px-3 font-medium text-[17px] text-white/80 hover:bg-white/5"
-          >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
-              <Plus size={20} />
-            </span>
-            Create reel
-          </button>
         </nav>
       )}
 
@@ -265,8 +250,12 @@ function ReelSlide({ post, active, offset }: { post: Reel; active: boolean; offs
   const [expanded, setExpanded] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const media = post.media[0];
-  const { playing } = useVideoState(ref);
-  const progress = useVideoProgress(ref, playing);
+  /** Bumped on each tap that resumes playback: a play glyph flashes and fades. */
+  const [resumed, setResumed] = useState(0);
+  const togglePause = () => {
+    if (paused) setResumed((n) => n + 1);
+    setPaused(!paused);
+  };
 
   // Restart from the top whenever the slide comes back into view.
   useEffect(() => {
@@ -315,25 +304,23 @@ function ReelSlide({ post, active, offset }: { post: Reel; active: boolean; offs
           <button
             type="button"
             aria-label={paused ? "Play" : "Pause"}
-            onClick={() => setPaused((p) => !p)}
-            className="absolute inset-0"
+            onClick={togglePause}
+            className="absolute inset-0 cursor-pointer"
           >
-            {paused && (
-              <span className="absolute top-1/2 left-1/2 flex h-[72px] w-[72px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white">
+            {paused ? (
+              <CenterGlyph>
                 <PlayGlyph size={36} className="ml-1" />
-              </span>
+              </CenterGlyph>
+            ) : (
+              resumed > 0 && (
+                <CenterGlyph key={resumed} fade>
+                  <PlayGlyph size={36} className="ml-1" />
+                </CenterGlyph>
+              )
             )}
           </button>
           <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/35 to-transparent" />
           <div className="absolute top-2 left-2 flex items-center gap-1">
-            <button
-              type="button"
-              aria-label={paused ? "Play" : "Pause"}
-              onClick={() => setPaused((p) => !p)}
-              className="flex h-11 w-11 items-center justify-center rounded-full text-white hover:bg-white/10"
-            >
-              {paused ? <PlayGlyph size={22} /> : <PauseGlyph size={22} />}
-            </button>
             <button
               type="button"
               aria-label={sound ? "Mute" : "Unmute"}
@@ -391,13 +378,6 @@ function ReelSlide({ post, active, offset }: { post: Reel; active: boolean; offs
               </button>
             )}
           </div>
-          <ReelProgress
-            value={progress}
-            onSeek={(f) => {
-              const el = ref.current;
-              if (el && el.duration > 0) el.currentTime = f * el.duration;
-            }}
-          />
         </div>
 
         <ReelActions post={post} onComment={() => setCommentsOpen(true)} />
@@ -407,31 +387,27 @@ function ReelSlide({ post, active, offset }: { post: Reel; active: boolean; offs
   );
 }
 
-/** The thin progress bar along the bottom edge of a reel; click or drag to seek. */
-function ReelProgress({ value, onSeek }: { value: number; onSeek: (f: number) => void }) {
-  const at = (e: React.PointerEvent<HTMLDivElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    return Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-  };
+/** The round glyph centred on a reel; `fade` plays once and disappears (tap feedback). */
+function CenterGlyph({ fade, children }: { fade?: boolean; children: React.ReactNode }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    if (!fade) return;
+    const a = ref.current?.animate(
+      [
+        { opacity: 1, transform: "translate(-50%, -50%) scale(1)" },
+        { opacity: 0, transform: "translate(-50%, -50%) scale(1.25)" },
+      ],
+      { duration: 600, easing: "ease-out", fill: "forwards" },
+    );
+    return () => a?.cancel();
+  }, [fade]);
   return (
-    <div
-      role="slider"
-      tabIndex={-1}
-      aria-label="Reel progress"
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={Math.round(value * 100)}
-      onPointerDown={(e) => {
-        e.currentTarget.setPointerCapture(e.pointerId);
-        onSeek(at(e));
-      }}
-      onPointerMove={(e) => e.currentTarget.hasPointerCapture(e.pointerId) && onSeek(at(e))}
-      className="group/progress absolute inset-x-0 bottom-0 flex h-3 cursor-pointer items-end"
+    <span
+      ref={ref}
+      className="pointer-events-none absolute top-1/2 left-1/2 flex h-[72px] w-[72px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white"
     >
-      <div className="h-1 w-full bg-white/30 transition-[height] group-hover/progress:h-1.5">
-        <div className="h-full bg-white" style={{ width: `${value * 100}%` }} />
-      </div>
-    </div>
+      {children}
+    </span>
   );
 }
 

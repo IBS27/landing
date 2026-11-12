@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as calls from "../calls.js";
 import type * as comments from "../comments.js";
 import type * as conversations from "../conversations.js";
 import type * as events from "../events.js";
@@ -15,6 +16,7 @@ import type * as feed from "../feed.js";
 import type * as friends from "../friends.js";
 import type * as groups from "../groups.js";
 import type * as lib_blocks from "../lib/blocks.js";
+import type * as lib_callFormat from "../lib/callFormat.js";
 import type * as lib_functions from "../lib/functions.js";
 import type * as lib_listings from "../lib/listings.js";
 import type * as lib_notify from "../lib/notify.js";
@@ -23,6 +25,7 @@ import type * as lib_settings from "../lib/settings.js";
 import type * as lib_users from "../lib/users.js";
 import type * as listings from "../listings.js";
 import type * as media from "../media.js";
+import type * as memories from "../memories.js";
 import type * as messenger from "../messenger.js";
 import type * as notifications from "../notifications.js";
 import type * as pages from "../pages.js";
@@ -68,6 +71,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  calls: typeof calls;
   comments: typeof comments;
   conversations: typeof conversations;
   events: typeof events;
@@ -75,6 +79,7 @@ declare const fullApi: ApiFromModules<{
   friends: typeof friends;
   groups: typeof groups;
   "lib/blocks": typeof lib_blocks;
+  "lib/callFormat": typeof lib_callFormat;
   "lib/functions": typeof lib_functions;
   "lib/listings": typeof lib_listings;
   "lib/notify": typeof lib_notify;
@@ -83,6 +88,7 @@ declare const fullApi: ApiFromModules<{
   "lib/users": typeof lib_users;
   listings: typeof listings;
   media: typeof media;
+  memories: typeof memories;
   messenger: typeof messenger;
   notifications: typeof notifications;
   pages: typeof pages;

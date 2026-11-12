@@ -1,5 +1,6 @@
-import { daysAgo, hoursAgo } from "../lib/time";
-import type { PostSeed, StorySeed } from "../types";
+import { daysAgo, hoursAgo, type TimeSpec } from "../lib/time";
+import { isTallClip, type VideoClip } from "../lib/videos";
+import type { CommentSeed, Handle, PostSeed, ReplySeed, StorySeed } from "../types";
 
 /**
  * Video posts: 16:9 clips for the feed and Watch, 9:16 clips that become
@@ -7,7 +8,7 @@ import type { PostSeed, StorySeed } from "../types";
  * offer "Follow"), one Sponsored video ad, and a few video stories. Clips live
  * in `../lib/videos`.
  */
-export const videoPosts: readonly PostSeed[] = [
+const baseVideoPosts: readonly PostSeed[] = [
   // ── Feed / Watch videos (16:9) ─────────────────────────────────────────────
   {
     by: "emeraldledger",
@@ -381,6 +382,350 @@ export const videoPosts: readonly PostSeed[] = [
     text: "Built for the scramble. The Ridgeline Softshell stretches where you do, sheds snow and wind, and packs down to the size of a water bottle. Shop the winter collection → rainline.co",
     reactions: 64,
   },
+];
+
+// ── Comment threads on Reels and videos ─────────────────────────────────────
+
+/** Compact comment builders: `c(by, text, replies?)`, `r(by, text, replies?)`. */
+const c = (by: Handle, text: string, replies?: readonly ReplySeed[]): CommentSeed => ({
+  by,
+  text,
+  replies,
+});
+const r = (by: Handle, text: string, replies?: readonly ReplySeed[]): ReplySeed => ({
+  by,
+  text,
+  replies,
+});
+
+/**
+ * Extra comments per clip, appended to that video post's own. Reels get 3–25
+ * (replies included) so the Reels rail's comment counts read like Facebook's.
+ */
+const threads: Partial<Record<VideoClip, readonly CommentSeed[]>> = {
+  // Reels
+  "indoor-climbing-tall": [
+    c("grace.liu", "the new orange 11b is SO sandbagged", [
+      r("kai.nakamura", "it's a 12a in disguise and everyone knows it"),
+      r("cascadeboulders", "we'll take another look at it this week 👀"),
+    ]),
+    c("arjun.mehta", "projecting saturday morning if anyone wants to belay swap"),
+    c("sofia.alvarez", "the clip at the third bolt is spicy"),
+    c("lena.fischer", "finally some new stuff on the north wall 🙌"),
+    c("leo.novak", "how do people trust those little holds", [
+      r("grace.liu", "you don't. you just commit and pray"),
+    ]),
+    c("theo.grant", "yall the auto belays are open again right?"),
+    c("ben.carter", "setters cooked with this one"),
+    c("andre.silva", "who's the climber? that flag at 0:06 was clean"),
+    c("maya.chen", "ok I'm finally trying lead this month"),
+    c("tara.singh", "need a rest day from looking at this"),
+  ],
+  "myrtle-falls-tall": [
+    c("erin.mcallister", "PEAK pnw content"),
+    c("arjun.mehta", "the mountain was out for you 🥹"),
+    c("sofia.alvarez", "was the road to paradise icy at all?", [
+      r("tara.singh", "dry until about the last mile, chains not needed yet"),
+      r("sofia.alvarez", "perfect thank you!!"),
+    ]),
+    c("maya.chen", "adding to the list before the snow"),
+    c("leo.novak", "this doesn't even look real"),
+    c("kevin.tran", "0.8 miles i can do that"),
+    c("ana.torres", "my lock screen now sorry"),
+    c("lena.fischer", "best little hike in the park honestly"),
+    c("will.foster", "went in august and it was packed, this is way nicer"),
+    c("grace.liu", "the light!!!"),
+    c("noah.williams", "we should do a group trip before it closes", [
+      r("zoe.nguyen", "I'm in"),
+      r("isaiah.thompson", "me too if there's a car"),
+      r("noah.williams", "making a chat"),
+    ]),
+    c("hannah.lee", "how do you always find the perfect weather"),
+    c("owen.murphy", "the rainier hype is real"),
+    c("priya.raman", "so pretty"),
+    c("theo.grant", "wildflowers must have been insane earlier"),
+    c("rachel.goldberg", "saving for next summer"),
+    c("mei.tanaka", "want to paint this so bad"),
+  ],
+  "body-surf-tall": [
+    c("sophie.dubois", "52 is generous honestly"),
+    c("will.foster", "the scream at the end 😂"),
+    c("jamal.wilson", "no wetsuit?? you're built different", [
+      r("luis.hernandez", "3mm wetsuit, still regretted it"),
+    ]),
+    c("erin.mcallister", "this is a cry for help"),
+    c("owen.murphy", "westport?", [r("luis.hernandez", "yeah right by the jetty")]),
+    c("ryan.oconnor", "my toes hurt watching this"),
+  ],
+  "espresso-macro-tall": [
+    c("jasmine.ortiz", "the tiger striping 🤌"),
+    c("nina.petrova", "what grinder are you using?", [
+      r("moonrisecoffee", "Mazzer Super Jolly, dialed in fresh every morning ☕"),
+    ]),
+    c("tasha.okafor", "this is the most relaxing thing I've seen all week"),
+    c("diego.morales", "pulling shots at 6am hits different"),
+    c("maya.chen", "the cardamom bun + this combo is elite"),
+    c("samir.khan", "I could watch this on loop"),
+    c("chris.adeyemi", "how many grams in?", [r("moonrisecoffee", "18 in, 38 out, ~28 sec")]),
+    c("harper.quinn", "coffee asmr"),
+  ],
+  "noodles-tall": [
+    c("diego.morales", "the noodle pull 🔥"),
+    c("camila.santos", "line was around the block last friday"),
+    c("kevin.tran", "tonkotsu or spicy miso?", [
+      r("kumoramen", "Spicy miso if you're new, tonkotsu if you're loyal 🍜"),
+      r("kevin.tran", "both it is"),
+    ]),
+    c("malik.johnson", "I'm hungry now thanks"),
+    c("jessica.huang", "we need to go back"),
+    c("ethan.park", "best ramen on the hill not even close"),
+  ],
+  "ocean-waves-tall": [
+    c("luis.hernandez", "best office ever"),
+    c("nina.petrova", "jealous of your fieldwork"),
+    c("sophie.dubois", "they pay me to look at water (sometimes)"),
+    c("maya.chen", "so calming 🌊"),
+  ],
+  "mowich-rain-tall": [
+    c("erin.mcallister", "accurate"),
+    c("owen.murphy", "my rain jacket is from 2014 and it shows", [
+      r("rainlineoutdoor", "Time for an upgrade 😉 Bring it in for 20% off a trade-in this month."),
+    ]),
+    c("noah.williams", "six months is optimistic"),
+    c("lena.fischer", "this is my favorite weather tbh", [r("tara.singh", "same, no crowds")]),
+    c("jordan.kim", "forecast: wet. forever."),
+    c("chloe.wright", "I moved here for this and I don't regret it"),
+    c("ryan.oconnor", "the drip off the trees 🌧️"),
+    c("amara.diallo", "pnw rain hits different in the forest"),
+  ],
+  "puppies-tall": [
+    c("olivia.brooks", "THEY'VE CHOSEN VIOLENCE 😭"),
+    c("hannah.lee", "I need both. immediately."),
+    c("maya.chen", "the little one with the ear flop!!!", [
+      r("camila.santos", "that's Mochi, she's the instigator"),
+      r("maya.chen", "of course she is"),
+    ]),
+    c("ana.torres", "are they up for adoption??", [
+      r("camila.santos", "yes! through Seattle Humane, link in my bio"),
+      r("ana.torres", "sending to my roommate rn"),
+      r("hannah.lee", "do NOT tempt me"),
+    ]),
+    c("zoe.nguyen", "the bed is theirs now, you live there"),
+    c("jasmine.ortiz", "obsessed"),
+    c("tasha.okafor", "I would die for them"),
+    c("amara.diallo", "the tail wags 😭😭"),
+    c("emily.chen", "can we please get a dog", [r("kevin.tran", "no")]),
+    c("isaiah.thompson", "this is the content I'm here for"),
+    c("priya.raman", "omg"),
+    c("chloe.wright", "fostering is on my list for next year"),
+    c("ethan.park", "MOCHI"),
+    c("will.foster", "bed has been fully claimed"),
+    c("olivia.brooks", "my fosters say hi 🐶", [r("camila.santos", "puppy playdate???")]),
+    c("lily.anderson", "cutest thing on my feed today"),
+    c("rachel.goldberg", "need hourly updates"),
+  ],
+  "cat-straw-tall": [
+    c("harper.quinn", "Biscuit would never lose like this"),
+    c("yuki.sato", "she's undefeated 🏆", [r("harper.quinn", "rematch. 3pm. be there.")]),
+    c("mei.tanaka", "the little butt wiggle before the pounce 😭"),
+    c("jessica.huang", "cats with straws is an entire genre"),
+    c("marco.rossi", "she plays rough indeed"),
+    c("nora.kowalski", "what's her name?", [r("yuki.sato", "Tofu 🐱")]),
+    c("aisha.rahman", "TOFU 😍"),
+    c("daniel.reyes", "my cat ignores every toy I buy but loves straws, explain"),
+    c("sam.rivera", "fighting for her life"),
+    c("fatima.hassan", "this made my morning"),
+    c("chloe.wright", "the straw had a family"),
+    c("zoe.nguyen", "need more Tofu content"),
+  ],
+  "concert-tall": [
+    c("malik.johnson", "this was the best set of the year"),
+    c("harper.quinn", "I was like 3 people behind you!!", [
+      r("sam.rivera", "no way, wish I saw you"),
+    ]),
+    c("zoe.nguyen", "the lights tho"),
+    c("jamal.wilson", "still ringing from this"),
+  ],
+  "guitar-solo-tall": [
+    c("malik.johnson", "this is so clean"),
+    c("waxandneedle", "come play our in-store session 🎸", [
+      r("andre.silva", "for real?? dm'd you"),
+    ]),
+    c("theo.grant", "night shift brain is the best practice brain"),
+    c("sam.rivera", "what amp is that?", [
+      r("andre.silva", "cheap little boss katana, does the job"),
+    ]),
+    c("chris.adeyemi", "neighbors must love you"),
+    c("ben.carter", "slept through this? couldn't be me"),
+    c("kai.nakamura", "the bends 🔥"),
+    c("marco.rossi", "need the tab for this"),
+    c("noah.williams", "lowkey sounds like a whole song"),
+    c("ryan.oconnor", "please start a band", [
+      r("andre.silva", "we need a drummer"),
+      r("ryan.oconnor", "I have a cajon and no shame"),
+    ]),
+    c("jordan.kim", "goosebumps"),
+    c("daniel.reyes", "so good man"),
+  ],
+  "kayak-surf-tall": [
+    c("arjun.mehta", "12 to 1 is a great ratio honestly"),
+    c("sofia.alvarez", "where is this??", [r("erin.mcallister", "skookumchuck, the narrows")]),
+    c("nina.petrova", "I'll stick to flat water thanks"),
+  ],
+  "sunset-timelapse-tall": [
+    c("chris.adeyemi", "that sky 😮‍💨"),
+    c("mei.tanaka", "the pink right before it goes dark", [
+      r("aisha.rahman", "post the painting!!"),
+    ]),
+    c("lily.anderson", "golden hour supremacy"),
+    c("tyler.jensen", "where were you shooting from?"),
+  ],
+  "waterfall-tall": [
+    c("grace.liu", "wait until you see snoqualmie in the spring"),
+    c("leo.novak", "chicago has the bean, we have this. not fair"),
+    c("sofia.alvarez", "which trail was this?", [
+      r("leo.novak", "twin falls! super easy"),
+      r("sofia.alvarez", "good pick for a first one"),
+    ]),
+    c("marcus.bell", "welcome to the pnw, you'll never leave"),
+    c("arjun.mehta", "ok now do rainier"),
+  ],
+  "salmon-tall": [
+    c("camila.santos", "that sear 😮‍💨"),
+    c("diego.morales", "family meal is the real menu"),
+    c("kumoramen", "Line cook energy 🔥"),
+    c("malik.johnson", "recipe pls", [
+      r("diego.morales", "salt pepper hot pan, don't touch it, butter baste at the end"),
+      r("malik.johnson", "that's it??"),
+      r("diego.morales", "that's it"),
+    ]),
+    c("jasmine.ortiz", "this is a whole vibe"),
+    c("nora.kowalski", "I would eat this every day"),
+  ],
+  "dog-walk-tall": [
+    c("maddie.collins", "he really runs the house"),
+    c("olivia.brooks", "PICKLES 😭"),
+    c("will.foster", "80% sniffing is generous"),
+  ],
+  // Feed / Watch videos
+  "seattle-viaduct-wide": [c("marcus.bell", "the viaduct drive at sunset was elite though")],
+  "puget-ferry-wide": [
+    c("sophie.dubois", "the ferry snack bar is criminally underrated"),
+    c("will.foster", "I would trade my bus for this in a second"),
+  ],
+  "ship-canal-bridge-wide": [
+    c("maya.chen", "this is so pretty grace 😍"),
+    c("lena.fischer", "fremont at blue hour never misses"),
+    c("arjun.mehta", "send me the location of the shot"),
+  ],
+  "golden-gardens-wide": [
+    c("will.foster", "I'm in. I'll regret it but I'm in"),
+    c("olivia.brooks", "we did it last year and I still think about it"),
+  ],
+  "mowich-rain-wide": [
+    c("tara.singh", "road closes next weekend, go now!"),
+    c("lena.fischer", "rainy mowich is the best mowich"),
+  ],
+  "ocean-shores-wide": [
+    c("emily.chen", "the hat 😭"),
+    c("jessica.huang", "we used to go every summer as kids"),
+  ],
+  "kayak-sunset-wide": [
+    c("chris.adeyemi", "no thoughts head empty paddle"),
+    c("rachel.goldberg", "this looks so peaceful"),
+  ],
+  "guitar-solo-wide": [c("andre.silva", "putting this on my calendar")],
+  "skatepark-wide": [c("zoe.nguyen", "you'll drop in by spring!! I believe")],
+  "cat-straw-wide": [
+    c("yuki.sato", "Tofu sends her regards", [r("harper.quinn", "Biscuit accepts the challenge")]),
+  ],
+  "snowfall-wide": [c("maya.chen", "so jealous!! enjoy home"), c("grace.liu", "SNOW ❄️")],
+  "sunset-timelapse-wide": [c("nina.petrova", "how are your sunsets always better than mine")],
+  "dog-walk-wide": [c("maddie.collins", "the swagger 😂"), c("marco.rossi", "main character")],
+};
+
+/**
+ * Reels and videos people re-shared to their own timelines (drives Share
+ * counts). Shares of the newest reels come from people outside Maya's friends,
+ * so they don't crowd the top of her Home feed.
+ */
+const shares: readonly { clip: VideoClip; by: Handle; at: TimeSpec; text?: string }[] = [
+  {
+    clip: "indoor-climbing-tall",
+    by: "ben.carter",
+    at: hoursAgo(1.5),
+    text: "who's coming saturday 🧗",
+  },
+  { clip: "indoor-climbing-tall", by: "andre.silva", at: hoursAgo(1) },
+  {
+    clip: "myrtle-falls-tall",
+    by: "erin.mcallister",
+    at: hoursAgo(4),
+    text: "adding this to the list",
+  },
+  { clip: "myrtle-falls-tall", by: "will.foster", at: hoursAgo(3) },
+  { clip: "body-surf-tall", by: "jamal.wilson", at: hoursAgo(8), text: "luis you are not well" },
+  {
+    clip: "espresso-macro-tall",
+    by: "jasmine.ortiz",
+    at: hoursAgo(16),
+    text: "best coffee on the hill, not up for debate ☕",
+  },
+  { clip: "noodles-tall", by: "kevin.tran", at: daysAgo(1, "19:30"), text: "dinner tonight? 🍜" },
+  {
+    clip: "puppies-tall",
+    by: "olivia.brooks",
+    at: daysAgo(2, "21:00"),
+    text: "someone please adopt these babies 🐶",
+  },
+  { clip: "puppies-tall", by: "aisha.rahman", at: daysAgo(2, "22:30") },
+  { clip: "puppies-tall", by: "lily.anderson", at: daysAgo(1, "12:00"), text: "MOCHI 😭" },
+  { clip: "puppies-tall", by: "hannah.lee", at: daysAgo(1, "08:15") },
+  {
+    clip: "cat-straw-tall",
+    by: "harper.quinn",
+    at: daysAgo(2, "09:00"),
+    text: "Biscuit has competition",
+  },
+  { clip: "cat-straw-tall", by: "nora.kowalski", at: daysAgo(2, "14:00") },
+  {
+    clip: "guitar-solo-tall",
+    by: "malik.johnson",
+    at: daysAgo(3, "12:40"),
+    text: "this man needs a record deal",
+  },
+  { clip: "guitar-solo-tall", by: "sam.rivera", at: daysAgo(3, "10:00") },
+  {
+    clip: "mowich-rain-tall",
+    by: "tara.singh",
+    at: daysAgo(2, "12:00"),
+    text: "gear check before you go",
+  },
+  { clip: "salmon-tall", by: "camila.santos", at: daysAgo(7, "13:00") },
+  { clip: "puppies-wide", by: "ana.torres", at: hoursAgo(12.5), text: "the fosters!! 🥹" },
+];
+
+/** Every video post, plus friends' shares of the popular ones. */
+export const videoPosts: readonly PostSeed[] = [
+  ...baseVideoPosts.map((p) => {
+    const extra = p.video ? threads[p.video] : undefined;
+    const shared = p.video && shares.some((s) => s.clip === p.video);
+    // Reels travel further than feed posts: more people react to them.
+    const reel = p.video && !p.sponsored && isTallClip(p.video);
+    return {
+      ...p,
+      key: p.key ?? (shared ? `video-${p.video}` : undefined),
+      reactions: reel && p.reactions ? Math.min(120, Math.round(p.reactions * 2.5)) : p.reactions,
+      comments: extra ? [...(p.comments ?? []), ...extra] : p.comments,
+    };
+  }),
+  ...shares.map((s) => ({
+    by: s.by,
+    at: s.at,
+    share: `video-${s.clip}`,
+    text: s.text,
+    privacy: "public" as const,
+  })),
 ];
 
 /** Video stories (last 24h) from Maya's friends. */

@@ -62,7 +62,7 @@ export function PostDialog({ post, onClose }: { post: PostView; onClose: () => v
             <CommentList postId={post._id} />
             <div className="h-2" />
           </ScrollArea>
-          <div className="border-divider border-t px-4 pt-2 pb-3">
+          <div className="border-divider border-t px-4 pt-2 pb-[13px]">
             <CommentComposer postId={post._id} focusKey={focusKey} autoFocus />
           </div>
         </D.Content>

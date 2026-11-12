@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Check, Plus, Rss, UserPlus } from "lucide-react";
+import { Check, Flag, Mail, MessageCircle, Plus, Rss, Smartphone, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { compactCount } from "@/lib/format";
@@ -10,6 +10,7 @@ import type { PageCard } from "../../../convex/pages";
 import { AppRail, AppRailDivider, AppRailHeading, AppRailItem, RailGear } from "./AppRail";
 import { BusinessSuiteGlyph, FollowedPagesGlyph, PersonPlusGlyph } from "./glyphs";
 import { CompassFilled } from "./icons";
+import { Group, PrefToggle, ToggleRow, useOptimistic, useSettings } from "./settings/controls";
 
 export type PagesView = "discover" | "followed" | "invites" | "business";
 export const PAGES_VIEWS: PagesView[] = ["discover", "followed", "invites", "business"];
@@ -19,6 +20,7 @@ export function PagesPage({ view }: { view: PagesView }) {
   const navigate = useNavigate();
   const dir = useQ(api.pages.directory, {});
   const [creating, setCreating] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const go = (v: PagesView) => void navigate({ to: "/pages", search: { view: v } });
 
   return (
@@ -26,7 +28,9 @@ export function PagesPage({ view }: { view: PagesView }) {
       <AppRail
         title="Pages"
         label="Page header"
-        action={<RailGear label="Edit notification settings" />}
+        action={
+          <RailGear label="Edit notification settings" onClick={() => setSettingsOpen(true)} />
+        }
       >
         <div className="px-2 pt-1 pb-2">
           <Button
@@ -165,6 +169,7 @@ export function PagesPage({ view }: { view: PagesView }) {
         </div>
       </main>
       {creating && <CreatePageDialog onClose={() => setCreating(false)} />}
+      <PageNotificationsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }
@@ -242,6 +247,72 @@ function PageTile({ page }: { page: PageCard }) {
         </div>
       </div>
     </Card>
+  );
+}
+
+const CHANNELS = [
+  { id: "push", label: "Push", Icon: Smartphone },
+  { id: "email", label: "Email", Icon: Mail },
+  { id: "sms", label: "SMS", Icon: MessageCircle },
+] as const;
+
+/** Pages rail gear: the "Pages you follow" notification category, same data as Settings. */
+function PageNotificationsDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const settings = useSettings();
+  const setNotification = useM(api.settings.setNotification);
+  const [allowed, setAllowed] = useOptimistic(
+    settings ? !settings.notificationsOff.includes("pages") : undefined,
+    (on) => setNotification({ category: "pages", on }),
+  );
+  return (
+    <Modal open={open} onOpenChange={(o) => !o && onClose()} title="Page notifications" width={548}>
+      <div className="px-2 pt-3 pb-2">
+        <p className="px-2 pb-2 text-[15px] text-secondary leading-5">
+          These are notifications about updates from Pages you follow.
+        </p>
+        <Group>
+          <ToggleRow
+            title="Allow notifications on Facebook"
+            on={allowed}
+            onChange={setAllowed}
+            Icon={Flag}
+          />
+        </Group>
+        <Group title="Where you receive these notifications">
+          {CHANNELS.map((ch) =>
+            allowed === false ? (
+              <ToggleRow
+                key={ch.id}
+                title={ch.label}
+                Icon={ch.Icon}
+                on={false}
+                onChange={() => undefined}
+                disabled
+              />
+            ) : (
+              <PrefToggle
+                key={ch.id}
+                id={`notify-pages-${ch.id}`}
+                title={ch.label}
+                Icon={ch.Icon}
+              />
+            ),
+          )}
+        </Group>
+      </div>
+      <div className="flex items-center justify-between border-divider border-t px-4 py-3">
+        <Link
+          to="/settings"
+          search={{ tab: "notifications" }}
+          className="font-semibold text-[15px] text-link hover:underline"
+        >
+          All notification settings
+        </Link>
+        <Button variant="primary" className="min-w-[84px]" onClick={onClose}>
+          Done
+        </Button>
+      </div>
+    </Modal>
   );
 }
 

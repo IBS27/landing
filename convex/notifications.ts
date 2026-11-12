@@ -24,7 +24,6 @@ export type NotificationView = {
   text: string;
   createdAt: number;
   read: boolean;
-  seen: boolean;
   actor: UserSummary | null;
   /** Image shown when there is no actor (event cover, the viewer for memories). */
   image: string | null;
@@ -112,7 +111,6 @@ async function enrich(
         text: n.text,
         createdAt: n.createdAt,
         read: n.read,
-        seen: n.seen,
         actor,
         image: actor ? null : (event?.cover ?? (n.kind === "memory" ? viewer.avatar : null)),
         emphasis,
@@ -124,7 +122,25 @@ async function enrich(
   );
 }
 
-/** Newest notifications for the bell dropdown and the Notifications page. */
+/**
+ * When the viewer last opened Notifications. Before the first open, the newest
+ * notification already flagged `seen` (seed data) stands in for it.
+ */
+async function seenAt(ctx: QueryCtx, viewer: Doc<"users">): Promise<number> {
+  if (viewer.notificationsSeenAt !== undefined) return viewer.notificationsSeenAt;
+  const lastSeen = await ctx.db
+    .query("notifications")
+    .withIndex("by_user", (q) => q.eq("userId", viewer._id))
+    .order("desc")
+    .filter((f) => f.eq(f.field("seen"), true))
+    .first();
+  return lastSeen?.createdAt ?? 0;
+}
+
+/**
+ * Newest notifications for the bell dropdown and the Notifications page.
+ * `seenAt` is when the panel was last opened: newer items go under "New".
+ */
 export const list = viewerQuery({
   args: {
     unreadOnly: v.optional(v.boolean()),
@@ -142,17 +158,19 @@ export const list = viewerQuery({
     return {
       items: await enrich(ctx, ctx.viewer, rows.slice(0, n)),
       hasMore: rows.length > n,
+      seenAt: await seenAt(ctx, ctx.viewer),
     };
   },
 });
 
-/** The red badge on the bell: notifications the viewer hasn't seen yet. */
+/** The red badge on the bell: notifications that arrived since Notifications was last opened. */
 export const unseenCount = viewerQuery({
   args: {},
   handler: async (ctx) => {
+    const since = await seenAt(ctx, ctx.viewer);
     const rows = await ctx.db
       .query("notifications")
-      .withIndex("by_user_unseen", (q) => q.eq("userId", ctx.viewer._id).eq("seen", false))
+      .withIndex("by_user", (q) => q.eq("userId", ctx.viewer._id).gt("createdAt", since))
       .take(100);
     return rows.length;
   },
@@ -162,6 +180,7 @@ export const unseenCount = viewerQuery({
 export const markAllSeen = viewerMutation({
   args: {},
   handler: async (ctx) => {
+    await ctx.db.patch(ctx.viewer._id, { notificationsSeenAt: Date.now() });
     const rows = await ctx.db
       .query("notifications")
       .withIndex("by_user_unseen", (q) => q.eq("userId", ctx.viewer._id).eq("seen", false))

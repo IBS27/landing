@@ -70,8 +70,14 @@ export const messageAttachment = v.union(
   v.object({
     kind: v.literal("call"),
     media: v.union(v.literal("audio"), v.literal("video")),
-    outcome: v.union(v.literal("no_answer"), v.literal("cancelled")),
+    outcome: v.union(
+      v.literal("no_answer"),
+      v.literal("cancelled"),
+      v.literal("answered"),
+      v.literal("declined"),
+    ),
     durationMs: v.optional(v.number()),
+    callId: v.optional(v.id("calls")),
   }),
 );
 export type MessageAttachment = Infer<typeof messageAttachment>;

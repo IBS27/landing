@@ -132,6 +132,8 @@ const pref = (options: readonly string[], def?: string): Pref => ({
  */
 export const PREFS: Record<string, Pref> = {
   "compact-mode": pref(OFF_ON),
+  "saved-reminders": pref(ON_OFF),
+  "memories-notifications": pref(["All memories", "Highlights", "None"]),
   translations: pref(["Translate posts into English (US)", "Don't translate"]),
   "region-format": pref(["English (US)", "English (UK)", "Español", "Français (France)"]),
   "video-quality": pref(["Default", "SD only", "HD if available"]),
@@ -160,6 +162,8 @@ export const PREFS: Record<string, Pref> = {
   "login-alerts": pref(ON_OFF),
   "ads-interests": pref(ON_OFF),
   "ads-partners": pref(ON_OFF),
+  "games-notifications": pref(ON_OFF),
+  "games-activity": pref(ON_OFF),
   ...Object.fromEntries(
     NOTIFICATION_CATEGORIES.flatMap((c) =>
       (["push", "email", "sms"] as const).map((ch) => [

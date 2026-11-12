@@ -71,6 +71,8 @@ export default defineSchema({
     followerCount: v.optional(v.number()),
     /** Pages created in the app: the person who manages the Page. */
     pageOwnerId: v.optional(v.id("users")),
+    /** Last time the Notifications panel was opened: newer notifications are "New" and badge the bell. */
+    notificationsSeenAt: v.optional(v.number()),
     /** Profile note ("Share a thought…" bubble); shown for 24 hours. */
     note: v.optional(v.object({ text: v.string(), createdAt: v.number() })),
     /** Story privacy (Stories → Settings); unset means Friends. Custom shares with `storyAudienceIds`. */
@@ -83,6 +85,7 @@ export default defineSchema({
   })
     .index("by_username", ["username"])
     .index("by_persona", ["isPersona"])
+    .index("by_page_owner", ["pageOwnerId"])
     .searchIndex("search_name", { searchField: "name" }),
 
   /** Stored in both directions once accepted, so lookups are a single index read. */
@@ -229,12 +232,40 @@ export default defineSchema({
     userId: v.id("users"),
     kind: v.union(v.literal("post"), v.literal("listing"), v.literal("event")),
     refId: v.string(),
-    collection: v.optional(v.string()),
+    /** The viewer's collection this item is filed under ("For later" by default). */
+    collectionId: v.optional(v.id("savedCollections")),
     createdAt: v.number(),
   })
     .index("by_user", ["userId", "createdAt"])
     .index("by_user_ref", ["userId", "kind", "refId"])
-    .index("by_ref", ["kind", "refId"]),
+    .index("by_ref", ["kind", "refId"])
+    .index("by_collection", ["collectionId", "createdAt"]),
+
+  /** Saved → My collections. */
+  savedCollections: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    createdAt: v.number(),
+  }).index("by_user", ["userId", "createdAt"]),
+
+  /** Memories → Hide People / Hide Dates. Dates are local calendar days, "YYYY-MM-DD". */
+  memoryHides: defineTable(
+    v.union(
+      v.object({
+        userId: v.id("users"),
+        kind: v.literal("person"),
+        personId: v.id("users"),
+        createdAt: v.number(),
+      }),
+      v.object({
+        userId: v.id("users"),
+        kind: v.literal("dates"),
+        start: v.string(),
+        end: v.string(),
+        createdAt: v.number(),
+      }),
+    ),
+  ).index("by_user", ["userId", "createdAt"]),
 
   listings: defineTable({
     sellerId: v.id("users"),
@@ -321,6 +352,38 @@ export default defineSchema({
     createdAt: v.optional(v.number()),
     dismissedAt: v.optional(v.number()),
   }).index("by_user", ["userId"]),
+
+  /** Messenger audio/video calls. `joinedIds` is who is in the call right now. */
+  calls: defineTable({
+    conversationId: v.id("conversations"),
+    callerId: v.id("users"),
+    calleeIds: v.array(v.id("users")),
+    kind: v.union(v.literal("audio"), v.literal("video")),
+    status: v.union(
+      v.literal("ringing"),
+      v.literal("active"),
+      v.literal("ended"),
+      v.literal("missed"),
+      v.literal("declined"),
+    ),
+    startedAt: v.number(),
+    answeredAt: v.optional(v.number()),
+    endedAt: v.optional(v.number()),
+    joinedIds: v.optional(v.array(v.id("users"))),
+    declinedIds: v.optional(v.array(v.id("users"))),
+  })
+    .index("by_status", ["status"])
+    .index("by_conversation", ["conversationId", "startedAt"]),
+
+  /** WebRTC signaling (offer / answer / ICE candidates / mic+camera state) between call peers. */
+  callSignals: defineTable({
+    callId: v.id("calls"),
+    fromId: v.id("users"),
+    toId: v.id("users"),
+    type: v.union(v.literal("offer"), v.literal("answer"), v.literal("ice"), v.literal("media")),
+    payload: v.string(),
+    createdAt: v.number(),
+  }).index("by_call_to", ["callId", "toId", "createdAt"]),
 
   events: defineTable({
     hostId: v.id("users"),
@@ -409,4 +472,12 @@ export default defineSchema({
     .index("by_user", ["userId", "createdAt"])
     .index("by_blocked", ["blockedId"])
     .index("by_pair", ["userId", "blockedId"]),
+
+  /** Posts (Reels) `userId` hid or reported; hidden from that viewer only. */
+  hiddenPosts: defineTable({
+    userId: v.id("users"),
+    postId: v.id("posts"),
+    reason: v.union(v.literal("hidden"), v.literal("reported")),
+    createdAt: v.number(),
+  }).index("by_user_post", ["userId", "postId"]),
 });

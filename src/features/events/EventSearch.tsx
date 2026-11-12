@@ -39,7 +39,7 @@ export function EventSearch({ q, category }: { q: string; category?: string }) {
       </Link>
       <h1 className="px-4 font-bold text-[24px] text-primary leading-7">Search Results</h1>
       <form
-        className="mx-4 mt-2.5 mb-3"
+        className="mx-4 mt-2.5 mb-[23px]"
         onSubmit={(e) => {
           e.preventDefault();
           void navigate({ to: "/events/search", search: { q: text.trim() } });
@@ -110,7 +110,7 @@ export function EventSearch({ q, category }: { q: string; category?: string }) {
             ]}
           />
         </FilterRow>
-        <FilterRow icon={<PeopleGlyph />}>
+        <FilterRow icon={<PeopleGlyph />} className="min-h-[68px]">
           <button
             type="button"
             role="switch"
@@ -142,7 +142,7 @@ export function EventSearch({ q, category }: { q: string; category?: string }) {
   return (
     <ToastProvider>
       <EventsLayout rail={rail}>
-        <div className="mx-auto flex max-w-[712px] flex-col gap-2 px-4 pt-8 pb-10">
+        <div className="mx-auto flex max-w-[712px] flex-col gap-4 px-4 pt-8 pb-10">
           {results === undefined ? (
             [0, 1, 2, 3].map((i) => (
               <Card key={i} className="flex items-center gap-3 rounded-xl px-4 py-4">
@@ -169,9 +169,17 @@ export function EventSearch({ q, category }: { q: string; category?: string }) {
   );
 }
 
-function FilterRow({ icon, children }: { icon: ReactNode; children: ReactNode }) {
+function FilterRow({
+  icon,
+  children,
+  className,
+}: {
+  icon: ReactNode;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="flex min-h-[60px] items-center gap-2 px-2">
+    <div className={cn("flex min-h-[60px] items-center gap-2 px-2", className)}>
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-btn text-icon">
         {icon}
       </span>

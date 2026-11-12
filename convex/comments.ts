@@ -1,14 +1,40 @@
 import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
+import type { QueryCtx } from "./_generated/server";
 import { isBlockedEitherWay } from "./lib/blocks";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { notify } from "./lib/notify";
 import { canView, loadAudience } from "./lib/posts";
-import { getSummaries } from "./lib/users";
+import { getSummaries, userSummary } from "./lib/users";
 import { reactionSummary } from "./reactions";
 
 /** Facebook nests replies at most three levels deep (comment → reply → reply). */
 export const MAX_DEPTH = 3;
+
+/** Pages the user manages: they can comment as them, and edit or delete those comments. */
+async function managedPages(ctx: QueryCtx, userId: Id<"users">) {
+  const pages = await ctx.db
+    .query("users")
+    .withIndex("by_page_owner", (q) => q.eq("pageOwnerId", userId))
+    .collect();
+  return pages.filter((p) => p.kind === "page");
+}
+
+/** Whether the user wrote the comment, or manages the Page that did. */
+async function actsAsAuthor(ctx: QueryCtx, userId: Id<"users">, authorId: Id<"users">) {
+  if (authorId === userId) return true;
+  const author = await ctx.db.get(authorId);
+  return author?.kind === "page" && author.pageOwnerId === userId;
+}
+
+/** The composer's "Comment as" choices: the viewer's profile, then the Pages they manage. */
+export const commentAs = viewerQuery({
+  args: {},
+  handler: async (ctx) => [
+    userSummary(ctx.viewer),
+    ...(await managedPages(ctx, ctx.viewer._id)).map(userSummary),
+  ],
+});
 
 /**
  * All comments on a post, oldest first, as Facebook's three-level tree:
@@ -47,6 +73,10 @@ export const list = viewerQuery({
       const parent = c.parentId ? rowById.get(c.parentId) : undefined;
       return parent ? blockedThread(parent) : false;
     };
+    const mine = new Set<Id<"users">>([
+      ctx.viewer._id,
+      ...(await managedPages(ctx, ctx.viewer._id)).map((p) => p._id),
+    ]);
     const users = await getSummaries(ctx, [
       ...rows.map((r) => r.authorId),
       ...rows.flatMap((r) => {
@@ -69,8 +99,8 @@ export const list = viewerQuery({
           author,
           replyTo: tag ? (users.get(tag) ?? null) : null,
           reactions,
-          canEdit: c.authorId === ctx.viewer._id,
-          canDelete: c.authorId === ctx.viewer._id || post.authorId === ctx.viewer._id,
+          canEdit: mine.has(c.authorId),
+          canDelete: mine.has(c.authorId) || mine.has(post.authorId),
         };
       }),
     );
@@ -117,6 +147,8 @@ export const add = viewerMutation({
     parentId: v.optional(v.id("comments")),
     /** The name the reply is tagged with; omit (or null) for none. */
     replyToId: v.optional(v.union(v.id("users"), v.null())),
+    /** Comment as a Page the viewer manages instead of their own profile. */
+    asPageId: v.optional(v.id("users")),
     /** An attached photo, uploaded via `posts:generateUploadUrl`. */
     photo: v.optional(
       v.object({
@@ -126,8 +158,11 @@ export const add = viewerMutation({
       }),
     ),
   },
-  handler: async (ctx, { postId, text, parentId: replyingTo, replyToId, photo }) => {
+  handler: async (ctx, { postId, text, parentId: replyingTo, replyToId, asPageId, photo }) => {
     const body = text.trim();
+    if (asPageId && !(await actsAsAuthor(ctx, ctx.viewer._id, asPageId)))
+      throw new ConvexError("You can't comment as this Page");
+    const authorId = asPageId ?? ctx.viewer._id;
     const photoUrl = photo ? await ctx.storage.getUrl(photo.storageId) : null;
     if (!body && !photoUrl) throw new ConvexError("Write something first");
     const post = await ctx.db.get(postId);
@@ -151,7 +186,7 @@ export const add = viewerMutation({
     const now = Date.now();
     const commentId = await ctx.db.insert("comments", {
       postId,
-      authorId: ctx.viewer._id,
+      authorId,
       parentId,
       replyToId: parentId ? (replyToId ?? null) : undefined,
       text: body,
@@ -170,7 +205,7 @@ export const add = viewerMutation({
         await ctx.db.patch(parent._id, { replyCount: parent.replyCount + 1 });
         await notify(ctx, {
           userId: answered.authorId,
-          actorId: ctx.viewer._id,
+          actorId: authorId,
           kind: "reply",
           text: `replied to your comment: "${snippet}"`,
           postId,
@@ -180,7 +215,7 @@ export const add = viewerMutation({
     }
     await notify(ctx, {
       userId: post.authorId,
-      actorId: ctx.viewer._id,
+      actorId: authorId,
       kind: "comment",
       text: `commented on your post: "${snippet}"`,
       postId,
@@ -196,7 +231,8 @@ export const edit = viewerMutation({
   handler: async (ctx, { commentId, text }) => {
     const c = await ctx.db.get(commentId);
     if (!c) throw new ConvexError("Comment not found");
-    if (c.authorId !== ctx.viewer._id) throw new ConvexError("Only the author can edit");
+    if (!(await actsAsAuthor(ctx, ctx.viewer._id, c.authorId)))
+      throw new ConvexError("Only the author can edit");
     const body = text.trim();
     if (!body) throw new ConvexError("A comment can't be empty");
     await ctx.db.patch(commentId, { text: body });
@@ -209,8 +245,10 @@ export const remove = viewerMutation({
     const c = await ctx.db.get(commentId);
     if (!c) return;
     const post = await ctx.db.get(c.postId);
-    if (c.authorId !== ctx.viewer._id && post?.authorId !== ctx.viewer._id)
-      throw new ConvexError("You can't delete this comment");
+    const allowed =
+      (await actsAsAuthor(ctx, ctx.viewer._id, c.authorId)) ||
+      (!!post && (await actsAsAuthor(ctx, ctx.viewer._id, post.authorId)));
+    if (!allowed) throw new ConvexError("You can't delete this comment");
     // Remove the comment and its whole reply subtree.
     const doomed: Id<"comments">[] = [commentId];
     for (let i = 0; i < doomed.length; i++) {

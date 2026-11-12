@@ -22,7 +22,7 @@ export function SideRail({
       aria-label={label}
       className="sticky top-14 hidden h-[calc(100vh-56px)] w-[360px] shrink-0 flex-col overflow-y-auto bg-card min-[900px]:flex"
     >
-      <div className="flex items-center justify-between px-4 pt-[11px] pb-2">
+      <div className="flex min-h-[57px] items-center justify-between px-4 pt-[11px] pb-2.5">
         <h1 className="font-bold text-[24px] text-primary leading-7">{title}</h1>
         {action}
       </div>
