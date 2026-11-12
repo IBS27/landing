@@ -89,48 +89,6 @@ export const ads = viewerQuery({
   },
 });
 
-/**
- * The Home "Reels" shelf: the newest public photo posts (the seed world has
- * no video files, so photos stand in for reels, as on /reel). Each tile opens
- * `/reel/<postId>`. Plays are not tracked, so the view count is derived from
- * the post's engagement.
- */
-export const reelsShelf = viewerQuery({
-  args: {},
-  handler: async (ctx) => {
-    const a = await loadAudience(ctx, ctx.viewer._id);
-    const posts = await stream(ctx.db, schema)
-      .query("posts")
-      .withIndex("by_created")
-      .order("desc")
-      .filterWith(
-        async (p) =>
-          !p.groupId &&
-          !p.eventId &&
-          !p.sponsored &&
-          p.media.some((m) => m.kind === "image") &&
-          (await canView(ctx, p, a)),
-      )
-      .take(16);
-    const seen = new Set<string>();
-    return posts
-      .flatMap((p) => {
-        const photo = p.media.find((m) => m.kind === "image");
-        if (!photo || seen.has(photo.url)) return [];
-        seen.add(photo.url);
-        return [
-          {
-            _id: p._id,
-            image: photo.url,
-            alt: photo.alt ?? null,
-            caption: p.text?.trim() || null,
-          },
-        ];
-      })
-      .slice(0, 8);
-  },
-});
-
 export const feedFilter = v.union(
   v.literal("all"),
   v.literal("favorites"),

@@ -9,6 +9,7 @@ import { viewerMutation, viewerQuery } from "./lib/functions";
 import { type Audience, canView, enrichPosts, loadAudience } from "./lib/posts";
 import { visibleFriendIds } from "./lib/settings";
 import { friendIds, getSummaries, type UserSummary, userSummary } from "./lib/users";
+import { isReelPost } from "./media";
 import schema from "./schema";
 
 /* ---------------- Helpers ---------------- */
@@ -314,12 +315,13 @@ export const photos = viewerQuery({
   },
 });
 
-/** Reels/videos the person posted. */
+/** Reels the person posted (vertical video posts). */
 export const videos = viewerQuery({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
     const a = await loadAudience(ctx, ctx.viewer._id);
-    return mediaOf(await visibleTimelinePosts(ctx, a, userId), "video");
+    const posts = await visibleTimelinePosts(ctx, a, userId);
+    return mediaOf(posts.filter(isReelPost), "video");
   },
 });
 
