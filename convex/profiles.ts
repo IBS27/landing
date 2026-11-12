@@ -7,7 +7,7 @@ import { relationTo } from "./friends";
 import { blockedSet, isBlockedEitherWay } from "./lib/blocks";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { type Audience, canView, enrichPosts, loadAudience } from "./lib/posts";
-import { visibleFriendIds } from "./lib/settings";
+import { detailAudiences, visibleDetails, visibleFriendIds } from "./lib/settings";
 import { friendIds, getSummaries, type UserSummary, userSummary } from "./lib/users";
 import { isReelPost } from "./media";
 import schema from "./schema";
@@ -189,7 +189,11 @@ export const get = viewerQuery({
           .withIndex("by_pair", (q) => q.eq("userId", viewerId).eq("targetId", u._id))
           .first()
       : null;
-    const showBirthday = isSelf || relation === "friend";
+    // Each About detail follows its own audience; the owner also gets the audiences to edit.
+    const [details, audiences] = await Promise.all([
+      visibleDetails(ctx, u, viewerId, relation === "friend"),
+      isSelf ? detailAudiences(ctx, u._id) : null,
+    ]);
     // Notes are shared with friends (Facebook's default audience).
     const note =
       u.note && Date.now() - u.note.createdAt < NOTE_TTL && (isSelf || relation === "friend")
@@ -201,12 +205,7 @@ export const get = viewerQuery({
         cover: u.cover ?? null,
         bio: u.bio ?? null,
         pronouns: u.pronouns ?? null,
-        city: u.city ?? null,
-        hometown: u.hometown ?? null,
-        work: u.work ?? [],
-        education: u.education ?? [],
-        relationship: u.relationship ?? null,
-        birthday: showBirthday ? (u.birthday ?? null) : null,
+        ...details,
         joinedAt: u.joinedAt,
         pageCategory: u.pageCategory ?? null,
         links: u.links ?? [],
@@ -215,6 +214,7 @@ export const get = viewerQuery({
       isSelf,
       isPage,
       relation,
+      audiences,
       friendCount: theirFriends.length,
       mutualCount: isSelf ? 0 : mutual.length,
       facepile: pileIds.map((id) => pileMap.get(id)).filter((s): s is UserSummary => !!s),

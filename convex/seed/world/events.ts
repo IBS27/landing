@@ -14,7 +14,7 @@ export const events: readonly EventSeed[] = [
     title: "Cascade Fall Bouldering Comp",
     cover: "posts/bouldering-gym-03.jpg",
     description:
-      "Our fall in-house comp is back! 40 problems from V0 to V10, scored redpoint style, 3 hour session. Categories for beginner, intermediate and open. Registration is $25 for members and $40 for non-members and includes a comp shirt and a day pass for the rest of the weekend.\n\nRaffle at 2pm (crashpad, shoes, a Rainline Outdoor jacket). Kai and the setting crew have been hiding in the back room for two weeks, so expect some weird ones.",
+      "Our fall in-house comp is back!\n40 problems from V0 to V10, scored redpoint style\n3 hour session · Beginner, Intermediate and Open categories\n\nRegistration: $25 members / $40 non-members\nIncludes a comp shirt and a day pass for the rest of the weekend.\n\nRaffle at 2pm (crashpad, shoes, a Rainline Outdoor jacket). Kai and the setting crew have been hiding in the back room for two weeks, so expect some weird ones.",
     category: "Fitness",
     start: daysAgo(18, "10:00"),
     hours: 6,
@@ -117,7 +117,7 @@ export const events: readonly EventSeed[] = [
     title: "In-Store Set: Marigold Static (all ages, free)",
     cover: "record store band",
     description:
-      "Friday in-store! Marigold Static plays a short set between the used bins to celebrate their new 7\". Free, all ages, starts at 7 sharp because we close at 9. 10% off anything you buy during the set.\n\nWe'll move the dollar bins out of the way but it'll still be cozy. Doors stay open for the first 50 people, after that it's standing on the sidewalk under the awning, which honestly is also fine.",
+      "Friday in-store! Marigold Static plays a short set between the used bins to celebrate their new 7\".\n\nFree · All ages\nStarts at 7 sharp (we close at 9)\n10% off anything you buy during the set\n\nWe'll move the dollar bins out of the way but it'll still be cozy. Doors stay open for the first 50 people, after that it's standing on the sidewalk under the awning, which honestly is also fine.",
     category: "Music",
     start: daysAgo(6, "19:00"),
     hours: 1.5,
@@ -138,7 +138,7 @@ export const events: readonly EventSeed[] = [
     title: "Low Tide Radio w/ Glass Harbor + Pale Kites",
     cover: "events/concert-01.jpg",
     description:
-      "we're playing the owl again!! last show before we go into the studio in december, so we're doing the whole new record front to back plus the old ones people actually like.\n\nGlass Harbor and Pale Kites open. doors 8, music 8:45. $12 advance / $15 door, 21+. merch table will have the new shirts (the green ones, finally) and a few tapes. come early, it was at capacity last time and Camila had to turn people away in the rain.",
+      "we're playing the owl again!! last show before we go into the studio in december, so we're doing the whole new record front to back plus the old ones people actually like.\n\nw/ Glass Harbor + Pale Kites\ndoors 8 / music 8:45\n$12 advance / $15 door · 21+\n\nmerch table will have the new shirts (the green ones, finally) and a few tapes. come early, it was at capacity last time and Camila had to turn people away in the rain.",
     category: "Music",
     start: daysFromNow(1, "20:00"),
     hours: 4,
@@ -148,8 +148,8 @@ export const events: readonly EventSeed[] = [
     externalGoing: 142,
     externalInterested: 286,
     tickets: {
-      url: "https://tickets.velvetowl.example/low-tide-radio",
-      provider: "Velvet Owl Box Office",
+      url: "https://tixora.example/e/low-tide-radio-velvet-owl",
+      provider: "Tixora",
       price: "$12 – $15",
     },
     going: [
@@ -230,7 +230,7 @@ export const events: readonly EventSeed[] = [
     title: "Rainline Community Ski & Snowboard Swap",
     cover: "ski equipment",
     description:
-      "Our annual swap is back before the pass opens. Drop off gear Saturday 4-7pm, we price it with you and take a 15% cut that goes to the Washington Trails Association. Sale is Sunday 9am-2pm, cash or card.\n\nWe take skis, boards, boots, poles, helmets (less than 5 years old), outerwear, kids' stuff. No straight skis from 1994 please, we've seen them all. Bindings checked by our shop crew on site. Line usually starts around 8:15 for the good stuff.",
+      "Our annual swap is back before the pass opens.\n\nGear drop-off: Saturday 4–7pm (we price it with you; our 15% cut goes to the Washington Trails Association)\nSale: Sunday 9am–2pm, cash or card\n\nWe take skis, boards, boots, poles, helmets (less than 5 years old), outerwear and kids' stuff. No straight skis from 1994 please, we've seen them all.\nBindings checked by our shop crew on site. Line usually starts around 8:15 for the good stuff.",
     category: "Outdoors",
     start: daysFromNow(3, "09:00"),
     hours: 5,
@@ -279,7 +279,7 @@ export const events: readonly EventSeed[] = [
     title: "Tuesday Trivia at The Velvet Owl: 2000s Night",
     cover: "pub trivia",
     description:
-      "Trivia is back in the back room every Tuesday. This week is all 2000s: flip phones, Disney Channel, the Seahawks' 2005 season, emo bands. Teams up to 6, free to play, first place gets a $60 bar tab and the ugly owl trophy.\n\nStarts 7:30, show up by 7:15 to get a table. Happy hour pricing runs until trivia ends. 21+.",
+      "Trivia is back in the back room every Tuesday!\nThis week is all 2000s: flip phones, Disney Channel, the Seahawks' 2005 season, emo bands.\n\nTeams up to 6 · Free to play\n1st place: $60 bar tab and the ugly owl trophy\n\nStarts 7:30, show up by 7:15 to get a table. Happy hour pricing runs until trivia ends. 21+.",
     category: "Games",
     start: daysFromNow(5, "19:30"),
     hours: 2.5,
@@ -384,7 +384,7 @@ export const events: readonly EventSeed[] = [
     title: "Kumo Turns 9: $9 Bowls All Day",
     cover: "ramen",
     description:
-      "Nine years of tonkotsu! To say thanks, every regular bowl is $9 all day at both shops (U District and Capitol Hill). First 100 people at each location get a Kumo tote.\n\nNo reservations, the line will be long, it moves fast. Spicy miso will run out by dinner, it always does. Takeout is regular price.",
+      "Nine years of tonkotsu! 🍜\nTo say thanks, every regular bowl is $9 all day at both shops (U District and Capitol Hill).\nFirst 100 people at each location get a Kumo tote.\n\nNo reservations. The line will be long, it moves fast.\nSpicy miso will run out by dinner, it always does.\nTakeout is regular price.",
     category: "Food & Drink",
     start: daysFromNow(8, "11:00"),
     hours: 11,
@@ -542,7 +542,7 @@ export const events: readonly EventSeed[] = [
     title: "Moonrise Latte Art Throwdown",
     cover: "posts/latte-art-04.jpg",
     description:
-      "16 baristas from around the city, single elimination, judged on the spot by three people who have opinions about tulips. $10 to enter (sign up at the counter), free to watch.\n\nWinner takes home $300 and a bag of our holiday roast every month for a year. Beer and cider from our neighbors at the bar, hot chocolate for the non-drinkers. Our own Jasmine is defending her title and has been practicing swans on the regulars for weeks.",
+      "16 baristas from around the city, single elimination, judged on the spot by three people who have opinions about tulips.\n\n$10 to enter (sign up at the counter) · Free to watch\nWinner takes home $300 + a bag of our holiday roast every month for a year\n\nBeer and cider from our neighbors at the bar, hot chocolate for the non-drinkers. Our own Jasmine is defending her title and has been practicing swans on the regulars for weeks.",
     category: "Food & Drink",
     start: daysFromNow(22, "19:00"),
     hours: 3,
@@ -552,8 +552,8 @@ export const events: readonly EventSeed[] = [
     externalGoing: 68,
     externalInterested: 245,
     tickets: {
-      url: "https://moonrise.example/throwdown",
-      provider: "Moonrise Coffee Co.",
+      url: "https://gatepass.example/moonrise-latte-art-throwdown",
+      provider: "Gatepass",
       price: "$10 to compete · Free to watch",
     },
     going: ["jasmine.ortiz", "tasha.okafor", "ana.torres", "harper.quinn"],
@@ -647,7 +647,7 @@ export const events: readonly EventSeed[] = [
     title: "Wax & Needle Winter Record Fair",
     cover: "vinyl records",
     description:
-      "Our biggest day of the year. 25 dealers from all over the Northwest packed into the store and the parking lot tent. Early bird entry 9am for $10, free after 10. DJs spinning all day, coffee from Moonrise's cart, and we're pulling about 3,000 records out of the basement that have never been on the floor.\n\nBring cash for the dealers, bring a tote, and please don't block the aisles while you flip. Sellers: there's still room for 2 more tables, DM us.",
+      "Our biggest day of the year!\n25 dealers from all over the Northwest, packed into the store and the parking lot tent.\n\n9am: Early bird entry ($10)\n10am–4pm: Free entry\nDJs spinning all day, coffee from Moonrise's cart\n\nWe're pulling about 3,000 records out of the basement that have never been on the floor. Bring cash for the dealers, bring a tote, and please don't block the aisles while you flip.\n\nSellers: there's still room for 2 more tables, DM us.",
     category: "Music",
     start: daysFromNow(30, "09:00"),
     hours: 7,
@@ -657,8 +657,8 @@ export const events: readonly EventSeed[] = [
     externalGoing: 190,
     externalInterested: 820,
     tickets: {
-      url: "https://waxandneedle.example/record-fair",
-      provider: "Wax & Needle Records",
+      url: "https://tixora.example/e/wax-and-needle-winter-record-fair",
+      provider: "Tixora",
       price: "$10 early entry · Free after 10 AM",
     },
     going: ["malik.johnson", "marco.rossi", "camila.santos", "will.foster"],

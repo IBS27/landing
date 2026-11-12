@@ -2,7 +2,7 @@ import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { reactionSummary } from "../reactions";
 import { blockedSet } from "./blocks";
-import { settingsRow } from "./settings";
+import { canSeeWallPosts, settingsRow } from "./settings";
 import { getSummaries, getSummary, type UserSummary } from "./users";
 
 /**
@@ -97,6 +97,8 @@ export type Audience = {
   blocked: Set<Id<"users">>;
   /** Settings → Reaction preferences (on others' posts / on the viewer's own). */
   hideReactionCounts: { others: boolean; own: boolean };
+  /** Per-owner "Who can see what others post on your profile?" results, filled lazily. */
+  wallAccess: Map<Id<"users">, Promise<boolean>>;
 };
 
 /** Everything needed to decide visibility and permissions for many posts at once. */
@@ -123,6 +125,7 @@ export async function loadAudience(ctx: QueryCtx, viewerId: Id<"users">): Promis
       others: settings?.hideReactionCountsOthers ?? false,
       own: settings?.hideReactionCountsOwn ?? false,
     },
+    wallAccess: new Map(),
   };
 }
 
@@ -137,8 +140,22 @@ export async function canView(ctx: QueryCtx, post: Doc<"posts">, a: Audience) {
     const g = await ctx.db.get(post.groupId);
     return g?.privacy === "public";
   }
-  if (post.privacy === "friends")
-    return a.friends.has(post.authorId) || post.timelineUserId === a.viewerId;
+  if (
+    post.privacy === "friends" &&
+    !a.friends.has(post.authorId) &&
+    post.timelineUserId !== a.viewerId
+  )
+    return false;
+  // A wall post also follows the timeline owner's "Who can see what others post on your profile?".
+  const owner = post.timelineUserId;
+  if (owner && owner !== post.authorId && owner !== a.viewerId) {
+    let access = a.wallAccess.get(owner);
+    if (!access) {
+      access = canSeeWallPosts(ctx, owner, a.viewerId);
+      a.wallAccess.set(owner, access);
+    }
+    return access;
+  }
   return true;
 }
 

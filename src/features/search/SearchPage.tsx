@@ -245,7 +245,13 @@ function TopResults({
   if (lead) out.push(<Fragment key={lead.key}>{lead.node}</Fragment>);
   posts.forEach((p, i) => {
     out.push(
-      <PostCard key={p._id} post={p} hideable={false} nameSuffix={<FollowLink post={p} />} />,
+      <PostCard
+        key={p._id}
+        post={p}
+        hideable={false}
+        showViews={false}
+        nameSuffix={<FollowLink post={p} />}
+      />,
     );
     const m = i % 2 === 1 ? rest[(i - 1) / 2] : undefined;
     if (m) out.push(<Fragment key={m.key}>{m.node}</Fragment>);

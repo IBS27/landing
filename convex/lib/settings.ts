@@ -161,6 +161,10 @@ export const PREFS: Record<string, Pref> = {
   "audience-hometown": pref(AUDIENCE3),
   "audience-work": pref(AUDIENCE3),
   "audience-birthday": pref(AUDIENCE3, "Friends"),
+  "audience-education": pref(AUDIENCE3),
+  "audience-relationship": pref(AUDIENCE3),
+  /** Own profile's "Get more out of Facebook" card (its X hides it for good). */
+  "profile-tips-card": pref(["Show", "Hidden"]),
   "two-factor": pref(OFF_ON),
   "login-alerts": pref(ON_OFF),
   "ads-interests": pref(ON_OFF),
@@ -288,4 +292,72 @@ export async function canCommentOn(ctx: QueryCtx, post: Doc<"posts">, viewerId: 
   if (await areFriends(ctx, post.authorId, viewerId)) return true;
   if (audience === "Friends") return false;
   return (await mutualFriendIds(ctx, post.authorId, viewerId)).length > 0;
+}
+
+/* ---------- Profile details audiences ---------- */
+
+/** About details that carry their own audience (Settings → Profile details, or the About tab). */
+export const DETAIL_PREFS = {
+  city: "audience-city",
+  hometown: "audience-hometown",
+  work: "audience-work",
+  education: "audience-education",
+  relationship: "audience-relationship",
+  birthday: "audience-birthday",
+} as const;
+export type DetailField = keyof typeof DETAIL_PREFS;
+export type DetailAudience = (typeof AUDIENCE3)[number];
+
+/** Each detail's audience, as chosen by the person (defaults filled in). */
+export async function detailAudiences(
+  ctx: QueryCtx,
+  userId: Id<"users">,
+): Promise<Record<DetailField, DetailAudience>> {
+  const { prefs } = await getSettings(ctx, userId);
+  const out = {} as Record<DetailField, DetailAudience>;
+  for (const [field, key] of Object.entries(DETAIL_PREFS) as [DetailField, string][])
+    out[field] = prefs[key] as DetailAudience;
+  return out;
+}
+
+/**
+ * The person's About details that the viewer may see: the owner sees
+ * everything; others see a detail only when its audience is Public, or
+ * Friends and they are friends. Hidden details come back empty.
+ */
+export async function visibleDetails(
+  ctx: QueryCtx,
+  u: Doc<"users">,
+  viewerId: Id<"users">,
+  isFriend?: boolean,
+) {
+  const isSelf = u._id === viewerId;
+  const aud = await detailAudiences(ctx, u._id);
+  const friend =
+    isSelf ||
+    (Object.values(aud).includes("Friends") &&
+      (isFriend ?? (await areFriends(ctx, u._id, viewerId))));
+  const show = (f: DetailField) =>
+    isSelf || aud[f] === "Public" || (aud[f] === "Friends" && friend);
+  return {
+    city: show("city") ? (u.city ?? null) : null,
+    hometown: show("hometown") ? (u.hometown ?? null) : null,
+    work: show("work") ? (u.work ?? []) : [],
+    education: show("education") ? (u.education ?? []) : [],
+    relationship: show("relationship") ? (u.relationship ?? null) : null,
+    birthday: show("birthday") ? (u.birthday ?? null) : null,
+  };
+}
+
+/**
+ * "Who can see what others post on your profile?": whether the viewer may see
+ * posts other people wrote on `ownerId`'s timeline. The owner always can.
+ */
+export async function canSeeWallPosts(ctx: QueryCtx, ownerId: Id<"users">, viewerId: Id<"users">) {
+  if (ownerId === viewerId) return true;
+  const rule = (await getSettings(ctx, ownerId)).prefs["who-can-see-profile-posts"];
+  if (rule === "Only me") return false;
+  if (await areFriends(ctx, ownerId, viewerId)) return true;
+  if (rule === "Friends") return false;
+  return (await mutualFriendIds(ctx, ownerId, viewerId)).length > 0;
 }

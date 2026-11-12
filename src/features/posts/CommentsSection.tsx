@@ -70,10 +70,13 @@ export function GroupCommentPreview({
   postId,
   commentCount,
   onViewMore,
+  placeholder = "Write an answer…",
 }: {
   postId: Id<"posts">;
   commentCount: number;
   onViewMore: () => void;
+  /** Groups ask for an answer; profile timelines for a comment. */
+  placeholder?: string;
 }) {
   const viewer = useViewer();
   const [mountedAt] = useState(() => Date.now());
@@ -103,7 +106,7 @@ export function GroupCommentPreview({
         <Thread key={t._id} thread={t} postId={postId} />
       ))}
       <div className="px-3 pt-1">
-        <CommentComposer postId={postId} placeholder="Write an answer…" inline />
+        <CommentComposer postId={postId} placeholder={placeholder} inline />
       </div>
     </div>
   );

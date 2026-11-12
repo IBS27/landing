@@ -121,7 +121,7 @@ function EventBody({ event, tab }: { event: EventView; tab: Tab }) {
             </Card>
           ) : (
             <Card className="overflow-hidden rounded-xl">
-              <StaticMap seed={event._id} address={event.address} />
+              <StaticMap address={event.address} city={event.city} />
               <div className="px-4 py-3">
                 <p className="font-semibold text-[17px] text-primary leading-5">
                   {event.venue ?? event.city}
@@ -383,12 +383,33 @@ function privacyLine(e: EventView) {
   }
 }
 
+/**
+ * Facebook trims a long description to about six lines and keeps the host's
+ * line breaks. Wrapped lines are estimated from the card's ~80 characters.
+ */
+function previewDescription(text: string, maxLines = 6, perLine = 80) {
+  const out: string[] = [];
+  let used = 0;
+  for (const line of text.split("\n")) {
+    const cost = Math.max(1, Math.ceil(line.length / perLine));
+    if (used + cost > maxLines) {
+      const room = (maxLines - used) * perLine - 12;
+      if (room > 24) out.push(line.slice(0, room).replace(/\s+\S*$/, ""));
+      return { text: out.join("\n").trimEnd(), truncated: true };
+    }
+    out.push(line);
+    used += cost;
+  }
+  return { text, truncated: false };
+}
+
 function DetailsCard({ event, onGuests }: { event: EventView; onGuests: () => void }) {
   const [expanded, setExpanded] = useState(false);
   const responded = event.goingCount + event.interestedCount;
   const privacy = privacyLine(event);
-  const long = event.description.length > 320;
-  const desc = expanded || !long ? event.description : event.description.slice(0, 300).trimEnd();
+  const preview = previewDescription(event.description);
+  const long = preview.truncated;
+  const desc = expanded || !long ? event.description : preview.text;
 
   return (
     <Card className="rounded-xl p-4">
@@ -490,7 +511,7 @@ function TicketsCard({ tickets }: { tickets: NonNullable<EventView["tickets"]> }
   return (
     <Card className="rounded-xl p-4">
       <h2 className="font-bold text-[20px] text-primary leading-6">Tickets</h2>
-      <p className="mt-[5px] text-[15px] text-primary leading-5">
+      <p className="mt-[5px] text-pretty text-[15px] text-primary leading-5">
         You can find tickets for this event on {tickets.provider}.
       </p>
       <a

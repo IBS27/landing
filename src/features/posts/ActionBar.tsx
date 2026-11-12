@@ -76,8 +76,8 @@ export function reactionSummaryText(
 /**
  * Facebook's post action bar. `compact` (the 2026 feed style): Like / Comment
  * / Share with inline counts on the left, the stacked reaction icons on the
- * right. `labelled` (photo theater): a stats row (reactions + "You and 6
- * others" left, "2 comments · 1 share" right) above three equal labelled
+ * right. `labelled` (photo/video theater): a stats row (reaction icons + "1.2K"
+ * left, "2 comments · 1 share" right) above three equal labelled
  * Like / Comment / Share buttons between divider lines.
  */
 export function ActionBar({
@@ -174,7 +174,8 @@ export function ActionBar({
                 className="flex min-w-0 items-center gap-1.5 hover:underline"
               >
                 <ReactionIcons types={rx.top} />
-                {!hideCount && <span className="truncate">{summary}</span>}
+                {/* The theater shows Facebook's compact count, not a name list. */}
+                {!hideCount && <span className="truncate">{compactCount(rx.count)}</span>}
               </button>
             )}
             <div className="flex-1" />

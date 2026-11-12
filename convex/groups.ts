@@ -5,6 +5,7 @@ import { viewerMutation, viewerQuery } from "./lib/functions";
 import { activityLabel, externalPostsPerDay } from "./lib/groupActivity";
 import { notify } from "./lib/notify";
 import { enrichPosts, loadAudience } from "./lib/posts";
+import { visibleDetails } from "./lib/settings";
 import { friendIds, getSummaries, type UserSummary, userSummary } from "./lib/users";
 
 /**
@@ -130,6 +131,42 @@ async function relation(
     .withIndex("by_pair", (q) => q.eq("fromId", userId).eq("toId", viewerId))
     .first();
   return received ? "received" : "none";
+}
+
+/** Groups this size and up show a "Top voices" section on the People tab. */
+const TOP_VOICES_MIN_MEMBERS = 1000;
+
+/**
+ * Top voices: the most active quarter of the group's members by posts and
+ * comments in the group (at least 3 contributions, at most 25 people), keyed
+ * to their contribution count.
+ */
+async function topVoices(ctx: QueryCtx, g: Doc<"groups">, memberIds: Id<"users">[]) {
+  const out = new Map<Id<"users">, number>();
+  if (g.memberCount < TOP_VOICES_MIN_MEMBERS) return out;
+  const posts = await ctx.db
+    .query("posts")
+    .withIndex("by_group", (q) => q.eq("groupId", g._id))
+    .collect();
+  const counts = new Map<Id<"users">, number>();
+  const bump = (id: Id<"users">) => counts.set(id, (counts.get(id) ?? 0) + 1);
+  const comments = await Promise.all(
+    posts.map((p) =>
+      ctx.db
+        .query("comments")
+        .withIndex("by_post", (q) => q.eq("postId", p._id))
+        .collect(),
+    ),
+  );
+  for (const p of posts) bump(p.authorId);
+  for (const list of comments) for (const c of list) bump(c.authorId);
+  const ranked = memberIds
+    .map((id) => [id, counts.get(id) ?? 0] as const)
+    .filter(([, n]) => n >= 3)
+    .sort((a, b) => b[1] - a[1]);
+  const limit = Math.min(25, Math.max(3, Math.round(memberIds.length / 4)));
+  for (const [id, n] of ranked.slice(0, limit)) out.set(id, n);
+  return out;
 }
 
 /* ---------------- Queries ---------------- */
@@ -401,20 +438,36 @@ export const members = viewerQuery({
         .map((u) => [u._id, u]),
     );
     const term = q?.trim().toLowerCase() ?? "";
+    const voices = await topVoices(
+      ctx,
+      g,
+      rows.map((m) => m.userId),
+    );
     const view = await Promise.all(
       rows.map(async (m) => {
         const u = summaries.get(m.userId);
         const doc = docs.get(m.userId);
         if (!u || !doc) return null;
+        const follows =
+          doc.kind === "page"
+            ? await ctx.db
+                .query("follows")
+                .withIndex("by_pair", (q) => q.eq("userId", viewerId).eq("targetId", m.userId))
+                .first()
+            : null;
+        // City and work follow the member's About audiences.
+        const d = await visibleDetails(ctx, doc, viewerId, friends.has(m.userId));
         return {
           ...u,
           role: m.role,
           joinedAt: m.joinedAt,
           relation: await relation(ctx, viewerId, friends, m.userId),
-          city: doc.city ?? null,
-          work: doc.work?.[0] ?? null,
+          city: d.city,
+          work: d.work[0] ?? null,
           pageCategory: doc.pageCategory ?? null,
           followerCount: doc.followerCount ?? null,
+          viewerFollows: follows !== null,
+          topVoice: voices.has(m.userId),
         };
       }),
     );
@@ -430,6 +483,7 @@ export const members = viewerQuery({
         total: g.memberCount,
         canSee: false,
         staff,
+        topVoices: [],
         friends: [],
         nearby: [],
         newest: [],
@@ -441,6 +495,9 @@ export const members = viewerQuery({
       total: g.memberCount,
       canSee: true,
       staff,
+      topVoices: all
+        .filter((m) => m.topVoice)
+        .sort((a, b) => (voices.get(b._id) ?? 0) - (voices.get(a._id) ?? 0)),
       friends: all.filter((m) => m.relation === "friend"),
       nearby: all.filter(
         (m) =>

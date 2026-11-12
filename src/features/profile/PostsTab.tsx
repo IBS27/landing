@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router";
 import { LayoutGrid, List, Settings, SlidersHorizontal } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useM, useQ, useViewer } from "@/app/viewer";
@@ -20,6 +21,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import {
   FooterLinks,
   FriendsPreviewCard,
+  GetMoreCard,
   IntroCard,
   PhotosPreviewCard,
   useStickyColumn,
@@ -52,6 +54,7 @@ export function PostsTab() {
         style={sticky.style}
         className="sticky flex w-full min-w-0 flex-col gap-4 min-[900px]:max-w-[490px] min-[900px]:flex-[1_1_490px]"
       >
+        <GetMoreCard />
         <IntroCard />
         {!profile.isPage && <HighlightsCard highlights={overview?.highlights} />}
         <PhotosPreviewCard photos={overview?.photos} />
@@ -77,6 +80,7 @@ export function PostsTab() {
 
 function ProfileComposer() {
   const viewer = useViewer();
+  const navigate = useNavigate();
   const { profile } = useProfile();
   const { user, isSelf } = profile;
   const [open, setOpen] = useState(false);
@@ -105,7 +109,7 @@ function ProfileComposer() {
             <ComposerAction
               icon={<LiveVideoIcon />}
               label="Live video"
-              onClick={() => openWith()}
+              onClick={() => void navigate({ to: "/live/producer" })}
             />
             <ComposerAction
               icon={<PhotoVideoIcon />}
@@ -499,7 +503,7 @@ function Timeline({
       {view === "list" ? (
         <div className="flex flex-col gap-4">
           {posts.map((p) => (
-            <PostCard key={p._id} post={p} hideable={false} />
+            <PostCard key={p._id} post={p} hideable={false} inlineComments />
           ))}
         </div>
       ) : (

@@ -10,6 +10,7 @@ import {
   LANGUAGES,
   PREFS,
   settingsRow,
+  visibleDetails,
 } from "./lib/settings";
 import { friendIds, userSummary } from "./lib/users";
 import {
@@ -135,14 +136,17 @@ export const blockSearch = viewerQuery({
     ]);
     const blockedIds = new Set(mine.map((r) => r.blockedId));
     const friendSet = new Set(friends);
-    return users
-      .filter((u) => u._id !== viewerId)
-      .map((u) => ({
-        ...userSummary(u),
-        city: u.city ?? null,
-        isFriend: friendSet.has(u._id),
-        blocked: blockedIds.has(u._id),
-      }));
+    return Promise.all(
+      users
+        .filter((u) => u._id !== viewerId)
+        .map(async (u) => ({
+          ...userSummary(u),
+          // Respect the person's City audience, like every other profile surface.
+          city: (await visibleDetails(ctx, u, viewerId, friendSet.has(u._id))).city,
+          isFriend: friendSet.has(u._id),
+          blocked: blockedIds.has(u._id),
+        })),
+    );
   },
 });
 

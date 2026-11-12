@@ -17,6 +17,7 @@ import { useVideoTheater } from "@/features/posts/videoTheaterNav";
 import { compactCount, shortAge } from "@/lib/format";
 import { Avatar, Button, Card, EmptyState, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
+import { ManageWatchlistDialog } from "./ManageWatchlist";
 import { PostVideo, VideoCard } from "./VideoCard";
 import { VideoSettingsDialog } from "./VideoSettings";
 
@@ -39,6 +40,7 @@ export function WatchPage({ tab, q }: { tab: WatchTab; q?: string }) {
   const [query, setQuery] = useState(q ?? "");
   const watchlist = useQ(api.media.watchlist, {});
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [manageOpen, setManageOpen] = useState(false);
   const setTab = (t: WatchTab) => void navigate({ to: "/watch", search: { tab: t } });
 
   return (
@@ -74,7 +76,7 @@ export function WatchPage({ tab, q }: { tab: WatchTab; q?: string }) {
           action={
             <button
               type="button"
-              onClick={() => setTab("shows")}
+              onClick={() => setManageOpen(true)}
               className="rounded-md px-2 py-1 text-[15px] text-link hover:bg-hover"
             >
               Manage
@@ -123,6 +125,7 @@ export function WatchPage({ tab, q }: { tab: WatchTab; q?: string }) {
         </div>
       </main>
       <VideoSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      {manageOpen && <ManageWatchlistDialog onClose={() => setManageOpen(false)} />}
     </div>
   );
 }

@@ -53,6 +53,7 @@ import {
   propertyTypeLabel,
 } from "../../../convex/lib/listings";
 import { LISTING_REPORT_REASONS } from "../../../convex/lib/reports";
+import { areaMap } from "../maps/lookup";
 import { ListingGrid } from "./grid";
 import { BookmarkFill, BookmarkOutline, MessengerGradient, ShareArrow } from "./icons";
 import { MapTile } from "./MapTile";
@@ -139,7 +140,6 @@ function ItemContainer({ l }: { l: Detail }) {
           <LocationMap l={l} />
           <SellerInfo l={l} />
           {!l.isOwner && <SponsoredAd listingId={l._id} toast={toast.show} />}
-          <RelatedSearches l={l} />
         </div>
         {!l.isOwner && <MessageBar l={l} />}
       </aside>
@@ -684,7 +684,15 @@ function Details({ l }: { l: Detail }) {
 function LocationMap({ l }: { l: Detail }) {
   const [open, setOpen] = useState(false);
   const place = l.location.neighborhood ?? l.location.city.split(",")[0] ?? l.location.city;
-  const seed = `${l.location.lat ?? ""},${l.location.lng ?? ""},${place}`;
+  const area = areaMap(l.location.neighborhood) ?? areaMap(l.location.city);
+  if (!area) {
+    return (
+      <p className="mt-[21px] text-[13px] leading-4">
+        <span className="text-primary">{l.location.city}</span>
+        <span className="text-secondary"> · Location is approximate</span>
+      </p>
+    );
+  }
   return (
     <>
       <button
@@ -693,7 +701,7 @@ function LocationMap({ l }: { l: Detail }) {
         onClick={() => setOpen(true)}
         className="mt-[19px] block w-full overflow-hidden rounded-lg"
       >
-        <MapTile label={place} seed={seed} height={51} radius={20} info />
+        <MapTile src={area.strip} alt={`Map of ${place}`} height={51} radius={20} info />
       </button>
       <p className="mt-[21px] text-[13px] leading-4">
         <span className="text-primary">{l.location.city}</span>
@@ -702,7 +710,7 @@ function LocationMap({ l }: { l: Detail }) {
       <Modal open={open} onOpenChange={setOpen} title="Location" width={700}>
         <div className="p-4">
           <div className="overflow-hidden rounded-lg">
-            <MapTile label={place} seed={seed} height={420} radius={84} info />
+            <MapTile src={area.map} alt={`Map of ${place}`} height={420} radius={64} info />
           </div>
           <p className="mt-3 text-[15px] text-primary leading-5">
             {l.location.neighborhood ? `${l.location.neighborhood}, ` : ""}
@@ -887,63 +895,6 @@ function SponsoredAd({
           </p>
         </div>
       </Modal>
-    </section>
-  );
-}
-
-/* ───────────── Related searches ───────────── */
-
-const STOP = new Set(
-  "and the for with from new used size like very good great set pair inch only one two all its our your this that near".split(
-    " ",
-  ),
-);
-
-/** Search phrases a buyer might try next, derived from the listing. */
-function relatedSearches(l: Detail) {
-  const place = (l.location.neighborhood ?? l.location.city.split(",")[0] ?? "").toLowerCase();
-  if (l.rental) {
-    const type =
-      l.rental.propertyType === "room" ? "room" : propertyTypeLabel(l.rental.propertyType);
-    const verb = l.rental.listingType === "sale" ? "for sale" : "for rent";
-    return [
-      `${type.toLowerCase()} ${verb} ${place}`,
-      `${type.toLowerCase()} ${verb}`,
-      `${l.rental.bedrooms > 0 ? `${l.rental.bedrooms} bedroom` : "studio"} ${place}`,
-    ];
-  }
-  const words = l.title
-    .toLowerCase()
-    .split(/[^a-z]+/)
-    .filter((w) => w.length > 2 && !STOP.has(w));
-  const out = [
-    words.slice(0, 3).join(" "),
-    words.slice(0, 2).join(" "),
-    l.brand?.toLowerCase() ?? "",
-    l.vehicle ? `${l.vehicle.make} ${l.vehicle.model}`.toLowerCase() : "",
-    l.categoryMeta?.label.toLowerCase() ?? "",
-  ];
-  return [...new Set(out.map((x) => x.trim()).filter(Boolean))].slice(0, 4);
-}
-
-function RelatedSearches({ l }: { l: Detail }) {
-  const terms = relatedSearches(l);
-  if (terms.length === 0) return null;
-  return (
-    <section className="pt-6">
-      <h2 className="font-semibold text-[17px] text-primary leading-5">Related searches</h2>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {terms.map((q) => (
-          <Link
-            key={q}
-            to="/marketplace/search"
-            search={{ q }}
-            className="flex h-9 max-w-full items-center truncate rounded-full bg-btn px-3 text-[15px] text-btn-text hover:brightness-95 dark:hover:brightness-125"
-          >
-            {q}
-          </Link>
-        ))}
-      </div>
     </section>
   );
 }

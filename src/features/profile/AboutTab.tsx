@@ -16,8 +16,11 @@ import {
 import { type ComponentType, type ReactNode, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { cn } from "@/lib/format";
+import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/ui/overlays";
 import { Avatar, Button, Card, IconButton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
+import type { DetailAudience, DetailField } from "../../../convex/lib/settings";
+import { type Audience, AudienceIcon } from "../posts/Audience";
 import {
   type Checkin,
   CheckinsCard,
@@ -118,12 +121,15 @@ function Row({
   sub,
   onEdit,
   muted,
+  audience,
 }: {
   icon: IconT;
   children: ReactNode;
   sub?: ReactNode;
   onEdit?: () => void;
   muted?: boolean;
+  /** The detail's audience control, shown to the owner only. */
+  audience?: DetailField;
 }) {
   return (
     <div className="flex min-h-11 items-center gap-3 py-[6px]">
@@ -141,12 +147,55 @@ function Row({
         </div>
         {sub && <div className="text-[13px] text-secondary leading-4">{sub}</div>}
       </div>
+      {audience && <DetailAudienceButton field={audience} />}
       {onEdit && (
         <IconButton label="Edit" variant="ghost" onClick={onEdit}>
           <Pencil size={20} strokeWidth={1.8} className="text-secondary" />
         </IconButton>
       )}
     </div>
+  );
+}
+
+const DETAIL_AUDIENCES: { value: DetailAudience; icon: Audience; sub: string }[] = [
+  { value: "Public", icon: "public", sub: "Anyone on or off Facebook" },
+  { value: "Friends", icon: "friends", sub: "Your friends on Facebook" },
+  { value: "Only me", icon: "only_me", sub: "Only you" },
+];
+
+/** Owner-only audience picker beside an About detail (Public / Friends / Only me). */
+function DetailAudienceButton({ field }: { field: DetailField }) {
+  const { profile } = useProfile();
+  const setPref = useM(api.settings.setPref);
+  const value = profile.audiences?.[field];
+  if (!profile.isSelf || !value) return null;
+  const current = DETAIL_AUDIENCES.find((a) => a.value === value) ?? DETAIL_AUDIENCES[0];
+  return (
+    <Menu>
+      <MenuTrigger asChild>
+        <IconButton label={`Audience: ${current.value}`} title={current.value} variant="ghost">
+          <span className="text-secondary">
+            <AudienceIcon value={current.icon} size={16} />
+          </span>
+        </IconButton>
+      </MenuTrigger>
+      <MenuContent align="end" width={300}>
+        {DETAIL_AUDIENCES.map((a) => (
+          <MenuItem
+            key={a.value}
+            onSelect={() => void setPref({ key: `audience-${field}`, value: a.value })}
+            icon={<AudienceIcon value={a.icon} size={18} />}
+            label={
+              <span className="flex items-center justify-between">
+                {a.value}
+                {a.value === value && <span className="h-2.5 w-2.5 rounded-full bg-fb" />}
+              </span>
+            }
+            sub={a.sub}
+          />
+        ))}
+      </MenuContent>
+    </Menu>
   );
 }
 
@@ -265,6 +314,7 @@ function SimpleField({
   const { profile } = useProfile();
   const update = useM(api.profiles.update);
   const [editing, setEditing] = useState(false);
+  const audience = field === "pronouns" ? undefined : field;
   if (editing)
     return (
       <FieldsEditor
@@ -280,6 +330,7 @@ function SimpleField({
     <Row
       icon={icon}
       sub={hideLabel ? undefined : label}
+      audience={audience}
       onEdit={profile.isSelf ? () => setEditing(true) : undefined}
     >
       {display ? display(value) : value}
@@ -370,7 +421,7 @@ function SectionBody({
             addLabel="Add a relationship status"
           />
           {user.birthday && (
-            <Row icon={Cake} sub="Birthday">
+            <Row icon={Cake} sub="Birthday" audience="birthday">
               {birthdayLabel(user.birthday)}
             </Row>
           )}
@@ -535,6 +586,7 @@ function OrgRow({
       <div className="min-w-0 flex-1">
         <OrgEntry kind={kind} name={name} lines={lines} />
       </div>
+      <DetailAudienceButton field={kind === "work" ? "work" : "education"} />
       {onEdit && (
         <IconButton label="Edit" variant="ghost" onClick={onEdit}>
           <Pencil size={20} strokeWidth={1.8} className="text-secondary" />

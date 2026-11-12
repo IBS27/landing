@@ -18,7 +18,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useQ, useViewer } from "@/app/viewer";
+import { useM, useQ, useViewer } from "@/app/viewer";
 import {
   AppRail,
   AppRailDivider,
@@ -55,46 +55,75 @@ type View =
   | { kind: "yours" }
   | { kind: "category"; name: string };
 
-/** Per-viewer "Your games" shortcuts and best scores (a browser convenience). */
-function useLocalJSON<T>(key: string, initial: T) {
-  const [value, setValue] = useState<T>(() => {
+/**
+ * The viewer's "Your games" and per-game best scores, stored in Convex. Data
+ * the page kept in browser storage before is imported once, then cleared.
+ */
+function useGameData() {
+  const viewer = useViewer();
+  const data = useQ(api.games.mine, {});
+  const importLocal = useM(api.games.importLocal);
+  useEffect(() => {
+    const keys = [`fb-clone:games:${viewer._id}`, `fb-clone:game-best:${viewer._id}`];
+    let saved: string[] = [];
+    let best: Record<string, number> = {};
     try {
-      const raw = localStorage.getItem(key);
-      return raw ? (JSON.parse(raw) as T) : initial;
+      const rawSaved = localStorage.getItem(keys[0] ?? "");
+      const rawBest = localStorage.getItem(keys[1] ?? "");
+      if (!rawSaved && !rawBest) return;
+      const parsedSaved: unknown = rawSaved ? JSON.parse(rawSaved) : [];
+      const parsedBest: unknown = rawBest ? JSON.parse(rawBest) : {};
+      if (Array.isArray(parsedSaved))
+        saved = parsedSaved.filter((x): x is string => typeof x === "string");
+      if (parsedBest && typeof parsedBest === "object")
+        best = Object.fromEntries(
+          Object.entries(parsedBest).filter((e): e is [string, number] => typeof e[1] === "number"),
+        );
     } catch {
-      return initial;
+      return;
     }
-  });
-  const set = useCallback(
-    (next: T) => {
-      setValue(next);
+    const clear = () => {
       try {
-        localStorage.setItem(key, JSON.stringify(next));
+        for (const k of keys) localStorage.removeItem(k);
       } catch {
-        // Storage unavailable: keep the value for this session only.
+        // Storage unavailable: the import is idempotent, so a retry is harmless.
       }
-    },
-    [key],
+    };
+    if (saved.length === 0 && Object.keys(best).length === 0) return clear();
+    importLocal({
+      saved,
+      best: Object.entries(best).map(([gameId, score]) => ({ gameId, score })),
+    })
+      .then(clear)
+      .catch(() => {});
+  }, [viewer._id, importLocal]);
+  const best = useMemo(
+    () => Object.fromEntries((data?.scores ?? []).map((s) => [s.gameId, s.best])),
+    [data],
   );
-  return [value, set] as const;
+  return { saved: data?.saved ?? [], scores: data?.scores ?? [], best };
 }
 
 /** /gaming and /gaming/play — Facebook's Games home. */
 export function GamingPage() {
-  const viewer = useViewer();
   const [view, setView] = useState<View>({ kind: "play" });
   const [q, setQ] = useState("");
   const [playing, setPlaying] = useState<Game | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [gameNotifications, setGameNotifications] = usePref("games-notifications");
-  const [saved, setSaved] = useLocalJSON<string[]>(`fb-clone:games:${viewer._id}`, []);
-  const [best, setBest] = useLocalJSON<Record<string, number>>(
-    `fb-clone:game-best:${viewer._id}`,
-    {},
-  );
+  const { saved, scores, best } = useGameData();
+  const toggleSaveGame = useM(api.games.toggleSave);
+  const recordPlay = useM(api.games.recordPlay);
+  const reportScore = useM(api.games.reportScore);
   const savedGames = saved.map((id) => byId.get(id)).filter((x): x is Game => !!x);
-  const toggleSave = (id: string) =>
-    setSaved(saved.includes(id) ? saved.filter((x) => x !== id) : [id, ...saved]);
+  const recentGames = scores.map((s) => byId.get(s.gameId)).filter((x): x is Game => !!x);
+  const play = useCallback(
+    (game: Game) => {
+      setPlaying(game);
+      void recordPlay({ gameId: game.id }).catch(() => {});
+    },
+    [recordPlay],
+  );
 
   const results = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -162,7 +191,7 @@ export function GamingPage() {
             bare
             icon={<GameIcon game={x} size={36} />}
             label={x.name}
-            onClick={() => setPlaying(x)}
+            onClick={() => play(x)}
           />
         ))}
         <AppRailItem
@@ -195,11 +224,11 @@ export function GamingPage() {
             {results.length === 0 ? (
               <EmptyCard title="No games found" body="Check the spelling or try another search." />
             ) : (
-              <TileGrid games={results} onPlay={setPlaying} />
+              <TileGrid games={results} onPlay={play} />
             )}
           </Section>
         ) : view.kind === "play" ? (
-          <PlayHome onPlay={setPlaying} best={best} />
+          <PlayHome onPlay={play} recent={recentGames} />
         ) : view.kind === "notifications" ? (
           <Section title="Notifications">
             {gameNotifications === "Off" ? (
@@ -229,7 +258,7 @@ export function GamingPage() {
                 body="Open a game and select Save to add it to your games."
               />
             ) : (
-              <TileGrid games={savedGames} onPlay={setPlaying} />
+              <TileGrid games={savedGames} onPlay={play} />
             )}
           </Section>
         ) : (
@@ -238,7 +267,7 @@ export function GamingPage() {
               games={
                 view.name === "All games" ? GAMES : GAMES.filter((x) => x.category === view.name)
               }
-              onPlay={setPlaying}
+              onPlay={play}
             />
           </Section>
         )}
@@ -249,10 +278,8 @@ export function GamingPage() {
           game={playing}
           saved={saved.includes(playing.id)}
           best={best[playing.id] ?? 0}
-          onSave={() => toggleSave(playing.id)}
-          onScore={(s) => {
-            if (s > (best[playing.id] ?? 0)) setBest({ ...best, [playing.id]: s });
-          }}
+          onSave={() => void toggleSaveGame({ gameId: playing.id })}
+          onScore={(s) => void reportScore({ gameId: playing.id, score: s }).catch(() => {})}
           onClose={() => setPlaying(null)}
         />
       )}
@@ -263,10 +290,9 @@ export function GamingPage() {
 
 /* ---------- Home sections ---------- */
 
-function PlayHome({ onPlay, best }: { onPlay: (g: Game) => void; best: Record<string, number> }) {
+function PlayHome({ onPlay, recent }: { onPlay: (g: Game) => void; recent: Game[] }) {
   const featured = FEATURED.map((id) => byId.get(id)).filter((x): x is Game => !!x);
   const picks = TOP_PICKS.map((id) => byId.get(id)).filter((x): x is Game => !!x);
-  const recent = GAMES.filter((x) => best[x.id] !== undefined);
   const released = RECENTLY_RELEASED.map((id) => byId.get(id)).filter((x): x is Game => !!x);
   return (
     <>
@@ -592,10 +618,17 @@ function GamePlayer({
   onClose: () => void;
 }) {
   const [score, setScore] = useState(0);
+  // Only new highs go to the server; the stored best arrives back via `best`.
+  const [sessionHigh, setSessionHigh] = useState(0);
+  const sent = useRef(best);
   const report = useCallback(
     (s: number) => {
       setScore(s);
-      onScore(s);
+      if (s > sent.current) {
+        sent.current = s;
+        setSessionHigh(s);
+        onScore(s);
+      }
     },
     [onScore],
   );
@@ -644,7 +677,8 @@ function GamePlayer({
               Score <span className="font-semibold text-primary">{Math.max(0, score)}</span>
             </span>
             <span className="mr-1 flex items-center gap-1 text-[13px] text-secondary">
-              <Trophy size={14} /> Best <span className="font-semibold text-primary">{best}</span>
+              <Trophy size={14} /> Best{" "}
+              <span className="font-semibold text-primary">{Math.max(best, sessionHigh)}</span>
             </span>
             <Button
               variant={saved ? "secondary" : "soft"}

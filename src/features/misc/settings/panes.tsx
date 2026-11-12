@@ -214,8 +214,10 @@ export function PaneBody({ id, onOpen }: { id: string; onOpen: (id: string) => v
       return (
         <Group description="Choose who can see each of these details on your profile.">
           <PrefChoice id="audience-work" title="Work" />
+          <PrefChoice id="audience-education" title="Education" />
           <PrefChoice id="audience-city" title="Current city" />
           <PrefChoice id="audience-hometown" title="Hometown" />
+          <PrefChoice id="audience-relationship" title="Relationship status" />
           <PrefChoice id="audience-birthday" title="Birthday" />
         </Group>
       );

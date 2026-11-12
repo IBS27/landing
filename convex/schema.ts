@@ -400,6 +400,40 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_call_to", ["callId", "toId", "createdAt"]),
 
+  /**
+   * Live video viewers: one row per open player (a person may watch in two
+   * tabs). The host's Live Producer keeps one WebRTC connection per row;
+   * `connected` is set once the stream reaches the viewer (the viewer count).
+   */
+  liveViewers: defineTable({
+    postId: v.id("posts"),
+    userId: v.id("users"),
+    connected: v.boolean(),
+    joinedAt: v.number(),
+    lastSeenAt: v.number(),
+  }).index("by_post", ["postId", "joinedAt"]),
+
+  /** WebRTC signaling between a live host and one viewer session (offer, answer, ICE). */
+  liveSignals: defineTable({
+    postId: v.id("posts"),
+    sessionId: v.id("liveViewers"),
+    /** true: viewer → host; false: host → viewer. */
+    toHost: v.boolean(),
+    type: v.union(v.literal("offer"), v.literal("answer"), v.literal("ice")),
+    payload: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_post_dir", ["postId", "toHost", "createdAt"])
+    .index("by_session_dir", ["sessionId", "toHost", "createdAt"]),
+
+  /** Reactions sent during a live video; each floats up over the stream once. */
+  liveReactions: defineTable({
+    postId: v.id("posts"),
+    userId: v.id("users"),
+    type: reactionType,
+    createdAt: v.number(),
+  }).index("by_post", ["postId", "createdAt"]),
+
   events: defineTable({
     hostId: v.id("users"),
     groupId: v.optional(v.id("groups")),
@@ -542,4 +576,23 @@ export default defineSchema({
     createdAt: v.number(),
     publishedAt: v.optional(v.number()),
   }).index("by_user", ["userId", "createdAt"]),
+
+  /** Games → "Your games": instant games `userId` saved (`gameId` is a catalog id). */
+  gameSaves: defineTable({
+    userId: v.id("users"),
+    gameId: v.string(),
+    savedAt: v.number(),
+  })
+    .index("by_user", ["userId", "savedAt"])
+    .index("by_user_game", ["userId", "gameId"]),
+
+  /** Games: `userId`'s best score per game and when they last played it ("Recently played"). */
+  gameScores: defineTable({
+    userId: v.id("users"),
+    gameId: v.string(),
+    best: v.number(),
+    lastPlayedAt: v.number(),
+  })
+    .index("by_user", ["userId", "lastPlayedAt"])
+    .index("by_user_game", ["userId", "gameId"]),
 });

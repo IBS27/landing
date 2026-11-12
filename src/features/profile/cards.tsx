@@ -9,15 +9,16 @@ import {
   MapPin,
   MoreHorizontal,
   Pencil,
+  X,
 } from "lucide-react";
 import { type ComponentType, type ReactNode, useEffect, useRef, useState } from "react";
-import { useQ } from "@/app/viewer";
+import { useM, useQ } from "@/app/viewer";
 import { FOOTER_LINKS } from "@/features/misc/AppRail";
 import { FooterLink } from "@/features/policies/FooterLink";
 import { CreateReelDialog } from "@/features/watch/CreateReel";
 import { cn, compactCount, plural } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/ui/overlays";
-import { Card } from "@/ui/primitives";
+import { Card, IconButton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { AboutSection } from "./AboutTab";
@@ -29,6 +30,7 @@ import {
   useProfile,
   workDates,
 } from "./context";
+import { EditProfileModal } from "./EditProfileModal";
 import { ImageLightbox, PhotoOpener } from "./photos";
 
 /* ---------------- Shared bits ---------------- */
@@ -414,6 +416,62 @@ function PageIntroCards() {
         </ProfileCard>
       )}
     </>
+  );
+}
+
+/**
+ * Own profile only: Facebook's "Get more out of Facebook" nudge above the
+ * intro. "Update your profile" opens Edit profile; the X hides it for good.
+ */
+export function GetMoreCard() {
+  const { profile } = useProfile();
+  const show = profile.isSelf && !profile.isPage;
+  const settings = useQ(api.settings.get, show ? {} : "skip");
+  const setPref = useM(api.settings.setPref);
+  const [editing, setEditing] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  if (!show || !settings || dismissed || settings.prefs["profile-tips-card"] === "Hidden")
+    return null;
+  return (
+    <Card className="relative rounded-xl px-6 pt-6 pb-4">
+      <span className="absolute top-3 right-3">
+        <IconButton
+          label="Close"
+          variant="ghost"
+          size={32}
+          onClick={() => {
+            setDismissed(true);
+            void setPref({ key: "profile-tips-card", value: "Hidden" });
+          }}
+        >
+          <X size={20} strokeWidth={2} className="text-secondary" />
+        </IconButton>
+      </span>
+      <div className="flex gap-3 pr-6">
+        <svg viewBox="0 0 24 24" width={24} height={24} className="shrink-0 text-fb" aria-hidden>
+          <circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" strokeWidth="2" />
+          <circle cx="12" cy="9.25" r="3.75" fill="currentColor" />
+          <path
+            d="M4.9 19.1C6.3 16.3 8.9 15 12 15s5.7 1.3 7.1 4.1A10 10 0 0 1 12 22a10 10 0 0 1-7.1-2.9Z"
+            fill="currentColor"
+          />
+        </svg>
+        <div className="min-w-0">
+          <h2 className="font-bold text-[17px] text-primary leading-5">Get more out of Facebook</h2>
+          <p className="mt-0.5 text-[15px] text-secondary leading-5">
+            We've made it easier to add the stuff you're into, and see which friends like it too.
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={() => setEditing(true)}
+        className="mt-4 h-9 w-full rounded-md bg-btn-soft font-semibold text-[15px] text-btn-soft-text transition-[filter] hover:brightness-95 dark:hover:brightness-125"
+      >
+        Update your profile
+      </button>
+      <EditProfileModal open={editing} onOpenChange={setEditing} />
+    </Card>
   );
 }
 

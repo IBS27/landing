@@ -44,7 +44,7 @@ function iceServers(): RTCIceServer[] {
   return DEFAULT_ICE;
 }
 
-const ICE_SERVERS = iceServers();
+export const ICE_SERVERS = iceServers();
 
 export type MediaState = { mic: boolean; cam: boolean; screen: boolean };
 export type RemotePeer = {

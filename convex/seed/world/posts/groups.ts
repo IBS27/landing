@@ -1068,8 +1068,8 @@ export const groupPosts: readonly PostSeed[] = [
     by: "theo.grant",
     in: "free-stuff-seattle",
     at: hoursAgo(3),
-    text: "free couch on the curb in Wallingford (N 43rd near Burke). put it out last night and my roommate is already test driving it lol. cream loveseat, no rips, come get it before the rain does",
-    photos: ["couch on curb"],
+    text: "free couch on the curb in Wallingford (N 43rd near Burke). red leather chesterfield, no rips, it just doesn't fit up the stairs at the new place. come get it before the rain does",
+    photos: ["listings/sofa-01.jpg"],
     reactions: 5,
     comments: [
       {

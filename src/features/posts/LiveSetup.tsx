@@ -20,7 +20,8 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { type Audience, AudienceChip } from "./Audience";
 import { CommentComposer, CommentList } from "./CommentsSection";
-import { formatElapsed, LiveBadge, useElapsed } from "./LivePost";
+import { FloatingReactions, formatElapsed, LiveBadge, useElapsed, ViewerCount } from "./LivePost";
+import { useLiveBroadcast } from "./useLiveStream";
 
 /** How often the host's page tells Convex it's still broadcasting. */
 const HEARTBEAT_MS = 15_000;
@@ -85,9 +86,11 @@ function useCameraPreview(enabled: boolean) {
  * "Live video" button. Left: post details, audience and "Go live" (enabled
  * once the camera preview is running). Centre: the camera preview with a
  * microphone level meter. Going live publishes an "is live now" post that
- * friends see in their feeds; the clone streams nothing beyond this local
- * preview. While live, the right panel shows the post's comments in real time
- * and "End live video" ends the broadcast and returns to the feed. The page
+ * friends see in their feeds, and this page streams the camera and microphone
+ * to everyone who opens it (WebRTC, see `useLiveBroadcast`). While live, the
+ * preview shows the viewer count and reactions floating up, the right panel
+ * shows the post's comments in real time, and "End live video" ends the
+ * broadcast and returns to the feed. The page
  * runs full screen under its own slim header (no TopNav). "Streaming software"
  * shows a per-session server URL and stream key, but no encoder can actually
  * connect to the clone, so only the webcam can go live.
@@ -111,6 +114,7 @@ export function LiveProducer() {
 
   const liveId = current?._id ?? null;
   const ready = source === "webcam" && status === "ready" && previewing;
+  useLiveBroadcast(liveId, source === "webcam" ? stream : null);
 
   // Keep the broadcast alive while this page is open.
   useEffect(() => {
@@ -296,7 +300,15 @@ export function LiveProducer() {
               ) : (
                 <PreviewMessage status={status} onRetry={retry} />
               )}
-              {current && <LiveOverlay startedAt={current.live?.startedAt ?? current.createdAt} />}
+              {current && (
+                <>
+                  <LiveOverlay
+                    postId={current._id}
+                    startedAt={current.live?.startedAt ?? current.createdAt}
+                  />
+                  <FloatingReactions postId={current._id} className="right-3 bottom-3" />
+                </>
+              )}
             </div>
             {source === "software" && !current ? (
               <StreamSetup />
@@ -557,7 +569,7 @@ function LiveDetails({
         <p className="mt-1 whitespace-pre-wrap text-[15px] text-primary leading-5">{post.text}</p>
       )}
       <p className="mt-2 text-[13px] text-secondary leading-4">
-        Your friends can see that you're live in their feeds.
+        Your friends can see that you're live in their feeds and watch your video there.
       </p>
     </div>
   );
@@ -634,11 +646,12 @@ function PreviewMessage({ status, onRetry }: { status: MediaStatus; onRetry: () 
   );
 }
 
-function LiveOverlay({ startedAt }: { startedAt: number }) {
+function LiveOverlay({ postId, startedAt }: { postId: Id<"posts">; startedAt: number }) {
   const elapsed = useElapsed(startedAt);
   return (
     <div className="absolute top-3 left-3 flex items-center gap-1.5">
       <LiveBadge />
+      <ViewerCount postId={postId} />
       <span className="inline-flex h-6 items-center rounded bg-black/55 px-1.5 font-semibold text-[13px] text-white tabular-nums">
         {formatElapsed(elapsed)}
       </span>

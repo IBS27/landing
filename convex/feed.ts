@@ -5,6 +5,7 @@ import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { viewerQuery } from "./lib/functions";
 import { type Audience, canView, enrichPosts, groupChip, loadAudience } from "./lib/posts";
+import { detailAudiences } from "./lib/settings";
 import { getSummaries, isOnline, type UserSummary, userSummary } from "./lib/users";
 import schema from "./schema";
 
@@ -153,7 +154,14 @@ export const rails = viewerQuery({
     const contacts = people
       .map((u) => ({ ...userSummary(u), online: !ctx.viewer.activeStatusOff && isOnline(u) }))
       .sort((x, y) => Number(y.online) - Number(x.online) || x.name.localeCompare(y.name));
-    const birthdays = people.filter((u) => u.birthday === today).map(userSummary);
+    // A birthday set to "Only me" isn't announced to friends.
+    const birthdayPeople = people.filter((u) => u.birthday === today);
+    const birthdayAudiences = await Promise.all(
+      birthdayPeople.map((u) => detailAudiences(ctx, u._id)),
+    );
+    const birthdays = birthdayPeople
+      .filter((_, i) => birthdayAudiences[i].birthday !== "Only me")
+      .map(userSummary);
 
     const groups = (
       await Promise.all(

@@ -4,7 +4,7 @@ import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { blockedSet, isBlockedEitherWay } from "./lib/blocks";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { notify } from "./lib/notify";
-import { settingsRow, visibleFriendIds } from "./lib/settings";
+import { settingsRow, visibleDetails, visibleFriendIds } from "./lib/settings";
 import { areFriends, friendIds, type UserSummary, userSummary } from "./lib/users";
 
 /** How the viewer relates to another user; drives every friend button. */
@@ -226,29 +226,33 @@ export const list = viewerQuery({
     ]);
     const inc = new Set(incoming.map((r) => r.fromId));
     const out = new Set(outgoing.map((r) => r.toId));
-    return cards.map((c) => {
-      const u = byId.get(c._id);
-      const relation: Relation =
-        c._id === viewerId
-          ? "self"
-          : viewerFriends.has(c._id)
-            ? "friend"
-            : out.has(c._id)
-              ? "outgoing"
-              : inc.has(c._id)
-                ? "incoming"
-                : "none";
-      return {
-        ...c,
-        relation,
-        friendsSince: since.get(c._id) ?? 0,
-        city: u?.city ?? null,
-        hometown: u?.hometown ?? null,
-        birthday: u?.birthday ?? null,
-        work: u?.work?.[0] ?? null,
-        school: u?.education?.[0]?.school ?? null,
-      };
-    });
+    return Promise.all(
+      cards.map(async (c) => {
+        const u = byId.get(c._id);
+        // City, hometown, birthday, work and school each follow that person's audience.
+        const d = u ? await visibleDetails(ctx, u, viewerId, viewerFriends.has(c._id)) : null;
+        const relation: Relation =
+          c._id === viewerId
+            ? "self"
+            : viewerFriends.has(c._id)
+              ? "friend"
+              : out.has(c._id)
+                ? "outgoing"
+                : inc.has(c._id)
+                  ? "incoming"
+                  : "none";
+        return {
+          ...c,
+          relation,
+          friendsSince: since.get(c._id) ?? 0,
+          city: d?.city ?? null,
+          hometown: d?.hometown ?? null,
+          birthday: d?.birthday ?? null,
+          work: d?.work[0] ?? null,
+          school: d?.education[0]?.school ?? null,
+        };
+      }),
+    );
   },
 });
 

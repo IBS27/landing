@@ -4,6 +4,7 @@ import type { QueryCtx } from "./_generated/server";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { notify } from "./lib/notify";
 import { enrichPosts, isSaved, loadAudience } from "./lib/posts";
+import { detailAudiences } from "./lib/settings";
 import { friendIds, getSummaries, getSummary, type UserSummary, userSummary } from "./lib/users";
 
 /* ---------------- Categories ---------------- */
@@ -503,18 +504,24 @@ export const birthdays = viewerQuery({
     const docs = (await Promise.all(ids.map((id) => ctx.db.get(id)))).filter(
       (u): u is Doc<"users"> => !!u && (u.kind ?? "person") === "person" && !!u.birthday,
     );
+    // A birthday set to "Only me" stays off friends' calendars.
+    const hidden = await Promise.all(
+      docs.map(async (u) => (await detailAudiences(ctx, u._id)).birthday === "Only me"),
+    );
     return Promise.all(
-      docs.map(async (u) => {
-        const wall = await ctx.db
-          .query("posts")
-          .withIndex("by_timeline", (q) => q.eq("timelineUserId", u._id).gte("createdAt", since))
-          .collect();
-        return {
-          user: userSummary(u),
-          birthday: u.birthday as string,
-          wroteToday: wall.some((p) => p.authorId === ctx.viewer._id),
-        };
-      }),
+      docs
+        .filter((_, i) => !hidden[i])
+        .map(async (u) => {
+          const wall = await ctx.db
+            .query("posts")
+            .withIndex("by_timeline", (q) => q.eq("timelineUserId", u._id).gte("createdAt", since))
+            .collect();
+          return {
+            user: userSummary(u),
+            birthday: u.birthday as string,
+            wroteToday: wall.some((p) => p.authorId === ctx.viewer._id),
+          };
+        }),
     );
   },
 });

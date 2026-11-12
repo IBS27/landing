@@ -5,13 +5,16 @@ import {
   CircleSlash,
   Clock,
   Flag,
+  Info,
   Link2,
   Pencil,
   Trash2,
+  UserMinus,
   Users,
+  UserX,
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
-import { useM } from "@/app/viewer";
+import { useM, useQ } from "@/app/viewer";
 import { cn, fullTimestamp, postTime } from "@/lib/format";
 import {
   Menu,
@@ -35,6 +38,7 @@ import { BookmarkOutline, CaretRight, CloseIcon, DotsIcon, GroupAudienceIcon } f
 import { LivePostMedia } from "./LivePost";
 import { PhotoGrid } from "./PhotoGrid";
 import { PostDialog } from "./PostDialog";
+import { BlockDialog, unfollowSub, WhySeeingDialog } from "./PostMenuDialogs";
 import { usePhotoTheater } from "./photoTheater";
 import type { PostView, UserSummary } from "./types";
 import { groupParams, isLargeText, postUrl, truncate } from "./util";
@@ -51,9 +55,15 @@ export function PostCard({
   hideable = true,
   nameSuffix,
   className,
+  inlineComments = false,
+  showViews = true,
 }: {
   post: PostView;
   expanded?: boolean;
+  /** A video's "1.2K views" in the stats row (compact search results leave it out). */
+  showViews?: boolean;
+  /** Profile timelines: the top comment and a "Write a comment…" row under the post. */
+  inlineComments?: boolean;
   /** Feeds show the X "Hide post" button; search results don't. */
   hideable?: boolean;
   /** After the author's name (search: "· Follow"). */
@@ -91,18 +101,19 @@ export function PostCard({
       <ActionBar
         post={post}
         onComment={() => (expanded ? setFocusKey((k) => k + 1) : setDialogOpen(true))}
-        trailing={<ViewCount post={post} />}
+        trailing={showViews ? <ViewCount post={post} /> : undefined}
       />
       {expanded && (
         <div className="border-divider border-t">
           <CommentsSection postId={post._id} focusKey={focusKey} />
         </div>
       )}
-      {!expanded && inGroups && (
+      {!expanded && (inGroups || inlineComments) && (
         <GroupCommentPreview
           postId={post._id}
           commentCount={post.commentCount}
           onViewMore={() => setDialogOpen(true)}
+          placeholder={inGroups ? undefined : "Write a comment…"}
         />
       )}
       {dialogOpen && <PostDialog post={post} onClose={() => setDialogOpen(false)} />}
@@ -363,6 +374,12 @@ function PostMenu({ post, onHide }: { post: PostView; onHide?: () => void }) {
   const remove = useM(api.posts.remove);
   const setSubscribed = useM(api.posts.setSubscribed);
   const report = useM(api.reports.create);
+  const follow = useM(api.media.follow);
+  const followingIds = useQ(api.pages.followingIds, post.canEdit ? "skip" : {});
+  const following = !post.canEdit && !!followingIds?.includes(post.author._id);
+  const unfollow = () => void follow({ targetId: post.author._id, follow: false });
+  const [why, setWhy] = useState(false);
+  const [blocking, setBlocking] = useState(false);
   const [editing, setEditing] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -432,11 +449,24 @@ function PostMenu({ post, onHide }: { post: PostView; onHide?: () => void }) {
                 />
               )}
               <MenuItem
+                icon={<Info size={20} />}
+                label={post.sponsored ? "Why am I seeing this ad?" : "Why am I seeing this post?"}
+                onSelect={() => setWhy(true)}
+              />
+              <MenuItem
                 icon={<Clock size={20} />}
                 label={`Snooze ${post.author.firstName} for 30 days`}
                 sub="Temporarily stop seeing posts."
                 onSelect={onHide}
               />
+              {following && (
+                <MenuItem
+                  icon={<UserMinus size={20} />}
+                  label={`Unfollow ${post.author.name}`}
+                  sub={unfollowSub(post)}
+                  onSelect={unfollow}
+                />
+              )}
               {post.group && (
                 <MenuItem
                   icon={<Users size={20} />}
@@ -453,11 +483,33 @@ function PostMenu({ post, onHide }: { post: PostView; onHide?: () => void }) {
                 sub="We won't let them know who reported this."
                 onSelect={() => setReporting(true)}
               />
+              {!post.sponsored && (
+                <MenuItem
+                  icon={<UserX size={20} />}
+                  label={
+                    post.author.kind === "page"
+                      ? `Block ${post.author.name}`
+                      : `Block ${post.author.firstName}'s profile`
+                  }
+                  sub="You won't be able to see or contact each other."
+                  onSelect={() => setBlocking(true)}
+                />
+              )}
             </>
           )}
         </MenuContent>
       </Menu>
       {editing && <CreatePostModal open onOpenChange={setEditing} editing={post} />}
+      {why && (
+        <WhySeeingDialog
+          post={post}
+          following={following}
+          onUnfollow={unfollow}
+          onHide={onHide}
+          onClose={() => setWhy(false)}
+        />
+      )}
+      {blocking && <BlockDialog post={post} onClose={() => setBlocking(false)} />}
       {reporting && (
         <ReportDialog
           noun="post"

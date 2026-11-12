@@ -4,6 +4,7 @@ import { cn } from "@/lib/format";
 import { Modal } from "@/ui/overlays";
 import { Button } from "@/ui/primitives";
 import { PLACES, RADII } from "../../../convex/lib/listings";
+import { metersPerPixel, REGION_ZOOM, regionMap } from "../maps/lookup";
 import { MapTile } from "./MapTile";
 
 export type MpLocation = {
@@ -143,7 +144,15 @@ export function LocationDialog({ open, onClose }: { open: boolean; onClose: () =
           </select>
         </label>
         <div className="mt-4 overflow-hidden rounded-lg">
-          <MapTile label={place.name} height={220} radius={Math.min(90, 18 + place.radiusMi)} />
+          <MapTile
+            src={regionMap(place.name) ?? regionMap("Seattle") ?? ""}
+            alt={`Map of ${place.name}, ${place.region}`}
+            height={220}
+            radius={Math.max(
+              6,
+              (place.radiusMi * 1609.34) / metersPerPixel(REGION_ZOOM, place.lat),
+            )}
+          />
         </div>
       </div>
       <div className="flex justify-end gap-2 border-divider border-t px-4 py-3">

@@ -4,6 +4,7 @@ import type { QueryCtx } from "./_generated/server";
 import { viewerQuery } from "./lib/functions";
 import { activityLabel, externalPostsPerDay } from "./lib/groupActivity";
 import { type Audience, canView, enrichPosts, loadAudience } from "./lib/posts";
+import { visibleDetails } from "./lib/settings";
 import { friendIds } from "./lib/users";
 
 /* ---------------- Shapes ---------------- */
@@ -112,16 +113,18 @@ async function friendState(
 async function personResult(ctx: QueryCtx, a: Audience, u: Doc<"users">): Promise<PersonResult> {
   const theirs = await friendIds(ctx, u._id);
   const mutualCount = u._id === a.viewerId ? 0 : theirs.filter((id) => a.friends.has(id)).length;
-  const work = u.work?.[0];
+  // Lives in / works at / studied at follow the person's About audiences.
+  const d = await visibleDetails(ctx, u, a.viewerId, a.friends.has(u._id));
+  const work = d.work[0];
   return {
     _id: u._id,
     name: u.name,
     username: u.username,
     avatar: u.avatar,
     verified: u.verified,
-    city: u.city ?? null,
+    city: d.city,
     work: work ? `${work.title} at ${work.company}` : null,
-    school: u.education?.[0]?.school ?? null,
+    school: d.education[0]?.school ?? null,
     mutualCount,
     friendState: await friendState(ctx, a.viewerId, a.friends, u._id),
   };
@@ -282,10 +285,11 @@ export const typeahead = viewerQuery({
       else {
         const theirs = await friendIds(ctx, u._id);
         const mutual = theirs.filter((id) => a.friends.has(id)).length;
+        const city = mutual ? null : (await visibleDetails(ctx, u, a.viewerId, false)).city;
         sub = mutual
           ? `${mutual} mutual friend${mutual === 1 ? "" : "s"}`
-          : u.city
-            ? `Lives in ${u.city}`
+          : city
+            ? `Lives in ${city}`
             : "";
       }
       people.push({
