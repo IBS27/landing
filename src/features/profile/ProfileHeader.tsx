@@ -232,7 +232,9 @@ function NameBlock() {
   const { user, isPage } = profile;
   const details: { icon: typeof MapPin; text: string }[] = [];
   if (isPage && user.pageCategory) details.push({ icon: Tag, text: user.pageCategory });
-  if (user.city) details.push({ icon: MapPin, text: user.city });
+  // Facebook only shows the location line when there is no friend count/facepile to show.
+  if (user.city && (isPage || profile.friendCount === 0))
+    details.push({ icon: MapPin, text: user.city });
 
   return (
     <div className="min-w-0 flex-1">
