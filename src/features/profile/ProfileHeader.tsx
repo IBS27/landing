@@ -1,9 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import {
-  Briefcase,
   Camera,
   ChevronDown,
-  GraduationCap,
   MapPin,
   Pencil,
   Plus,
@@ -89,8 +87,8 @@ export function ProfileHeader() {
       <div className={cn("relative mx-auto w-full max-w-[1186px]", columnPad(embedded))}>
         <div className="flex items-center gap-[18px] pt-6 pr-[2px] pl-[10px]">
           <ProfilePicture />
-          {/* Facebook centres this row on the picture, ~4.5px above its midline. */}
-          <div className="flex min-w-0 flex-1 flex-wrap items-start justify-between gap-x-4 gap-y-3 pb-[9px]">
+          {/* Facebook centres the name block and the buttons on the picture, ~4.5px above its midline. Bio and work live in the Intro card, not here. */}
+          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-4 gap-y-3 pb-[9px]">
             <NameBlock />
             <Actions showRecs={showRecs} onToggleRecs={onToggleRecs} />
           </div>
@@ -243,9 +241,6 @@ function NameBlock() {
   const details: { icon: typeof MapPin; text: string }[] = [];
   if (isPage && user.pageCategory) details.push({ icon: Tag, text: user.pageCategory });
   if (user.city) details.push({ icon: MapPin, text: user.city });
-  if (!isPage && user.work[0]) details.push({ icon: Briefcase, text: user.work[0].company });
-  if (!isPage && user.education[0])
-    details.push({ icon: GraduationCap, text: user.education[0].school });
 
   return (
     <div className="min-w-0 flex-1">
@@ -285,9 +280,6 @@ function NameBlock() {
           )}
         </div>
       ) : null}
-      {user.bio && !isPage && (
-        <p className="mt-[3px] text-[15px] text-primary leading-5">{user.bio}</p>
-      )}
       {details.length > 0 && (
         <div className="mt-[3px] flex flex-wrap items-center text-[15px] text-primary leading-5">
           {details.map((d, i) => (
