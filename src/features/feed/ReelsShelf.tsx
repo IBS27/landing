@@ -3,7 +3,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQ } from "@/app/viewer";
 import { DotsIcon } from "@/features/posts/icons";
-import { compactCount } from "@/lib/format";
 import { Card, IconButton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 
@@ -69,7 +68,7 @@ export function ReelsShelf() {
                 key={r._id}
                 to="/reel/$reelId"
                 params={{ reelId: r._id }}
-                aria-label={`Reel, ${compactCount(r.views)} views`}
+                aria-label={r.caption ? `Reel: ${r.caption}` : "Reel"}
                 className="group relative h-[343px] w-[192px] shrink-0 overflow-hidden rounded-[10px] bg-black shadow-[0_1px_2px_rgba(0,0,0,0.2)]"
               >
                 <img
@@ -78,15 +77,16 @@ export function ReelsShelf() {
                   loading="lazy"
                   className="h-full w-full object-cover transition-[filter] group-hover:brightness-90"
                 />
-                <span className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 to-transparent" />
-                <span className="absolute top-2 right-1 flex h-6 w-8 items-center justify-center text-white drop-shadow">
+                {r.caption && (
+                  <>
+                    <span className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent" />
+                    <span className="absolute inset-x-3 bottom-3 line-clamp-2 break-words font-semibold text-[15px] text-white leading-5 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
+                      {r.caption}
+                    </span>
+                  </>
+                )}
+                <span className="absolute top-[10px] right-[10px] flex h-6 w-8 items-center justify-center text-white drop-shadow">
                   <DotsIcon size={16} className="rotate-90" />
-                </span>
-                <span className="absolute bottom-2.5 left-3 flex items-center gap-1 font-semibold text-[13px] text-white leading-4 drop-shadow">
-                  <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden>
-                    <path d="M4 2.8v10.4c0 .8.9 1.3 1.6.8l7.8-5.2a1 1 0 0 0 0-1.6L5.6 2c-.7-.5-1.6 0-1.6.8Z" />
-                  </svg>
-                  {compactCount(r.views)}
                 </span>
               </Link>
             ))}

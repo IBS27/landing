@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/format";
 import type { PostMedia } from "./types";
 
@@ -87,7 +88,7 @@ function Single({
       </div>
     );
   // Wider than the capped box (680×575) fills edge to edge; narrower photos sit
-  // centred on a heavily blurred copy, which reads as Facebook's dominant-colour fill.
+  // centred on a flat fill of the photo's dominant colour, like Facebook.
   const letterboxed = ratio < 1.2;
   return (
     <button
@@ -96,14 +97,7 @@ function Single({
       className={cn("relative block w-full overflow-hidden bg-[#1c1e21]", className)}
       style={{ aspectRatio: ratio, maxHeight: MAX_MEDIA_HEIGHT }}
     >
-      {letterboxed && (
-        <img
-          src={item.url}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 h-full w-full scale-150 object-cover blur-[60px] brightness-[0.8] saturate-[0.9]"
-        />
-      )}
+      {letterboxed && <LetterboxFill url={item.url} />}
       <img
         src={item.url}
         alt={item.alt ?? ""}
@@ -112,6 +106,71 @@ function Single({
       />
     </button>
   );
+}
+
+/**
+ * Facebook's letterbox colour is the photo's dominant colour: the mean of the
+ * most populated 3-bit-per-channel colour bucket over a 64×64 sample.
+ */
+const SAMPLE = 64;
+const fillCache = new Map<string, string | null>();
+
+function dominantFill(url: string): Promise<string | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = SAMPLE;
+        canvas.height = SAMPLE;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(null);
+        ctx.drawImage(img, 0, 0, SAMPLE, SAMPLE);
+        const { data } = ctx.getImageData(0, 0, SAMPLE, SAMPLE);
+        // Per bucket: summed r, g, b and pixel count.
+        const buckets = new Map<number, [number, number, number, number]>();
+        let best: [number, number, number, number] = [0, 0, 0, 0];
+        for (let i = 0; i < data.length; i += 4) {
+          const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
+          const key = ((r >> 5) << 6) | ((g >> 5) << 3) | (b >> 5);
+          const e = buckets.get(key) ?? [0, 0, 0, 0];
+          e[0] += r;
+          e[1] += g;
+          e[2] += b;
+          e[3] += 1;
+          buckets.set(key, e);
+          if (e[3] > best[3]) best = e;
+        }
+        const [r, g, b] = best.slice(0, 3).map((v) => Math.round(v / best[3]));
+        resolve(`rgb(${r}, ${g}, ${b})`);
+      } catch {
+        resolve(null); // cross-origin image without CORS: keep the neutral dark fill
+      }
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+function LetterboxFill({ url }: { url: string }) {
+  const [color, setColor] = useState(() => fillCache.get(url));
+  useEffect(() => {
+    if (fillCache.has(url)) {
+      setColor(fillCache.get(url));
+      return;
+    }
+    let live = true;
+    dominantFill(url).then((c) => {
+      fillCache.set(url, c);
+      if (live) setColor(c);
+    });
+    return () => {
+      live = false;
+    };
+  }, [url]);
+  if (!color) return null;
+  return <span aria-hidden className="absolute inset-0" style={{ backgroundColor: color }} />;
 }
 
 function Tile({

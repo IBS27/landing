@@ -33,7 +33,7 @@ export function FeaturedTab() {
           <EmptyState title="No featured posts yet" body="Popular posts will show up here." />
         </Card>
       ) : (
-        posts.map((p) => <PostCard key={p._id} post={inGroup(p, group)} />)
+        posts.map((p) => <PostCard key={p._id} post={inGroup(p, group)} hideable={false} />)
       )}
     </div>
   );

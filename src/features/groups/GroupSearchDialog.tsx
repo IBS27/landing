@@ -60,7 +60,7 @@ export function GroupSearchDialog({ group, onClose }: { group: GroupView; onClos
             We didn't find any results for "{term.trim()}"
           </p>
         ) : (
-          results.map((p) => <PostCard key={p._id} post={inGroup(p, group)} />)
+          results.map((p) => <PostCard key={p._id} post={inGroup(p, group)} hideable={false} />)
         )}
       </div>
     </Modal>

@@ -418,17 +418,8 @@ function TabBar({ group, stuck }: { group: GroupView; stuck: boolean }) {
     <div className="sticky top-14 z-20 bg-card shadow-[0_1px_2px_var(--shadow-1)]">
       <div className="mx-auto flex h-[60px] w-full max-w-[1250px] items-center justify-between px-4 min-[1250px]:px-8">
         {stuck ? (
-          <div className="flex min-w-0 animate-[fade-in_150ms_ease-out] items-center gap-3">
-            <button
-              type="button"
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="flex min-w-0 items-center gap-3 rounded-lg p-1 hover:bg-hover"
-            >
-              <Avatar src={group.cover} size={40} square />
-              <span className="truncate font-medium text-[17px] text-primary">{group.name}</span>
-            </button>
-            {!isMember(group) && <JoinButton group={group} />}
-          </div>
+          // Facebook's stuck bar is blank on the left: just search + … on the right.
+          <div />
         ) : (
           <nav aria-label="Group sections" className="flex h-full items-stretch">
             {TABS.map((t) => (

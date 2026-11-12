@@ -37,7 +37,6 @@ import { Avatar, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 
 type Feed = "foryou" | "following" | "profile";
-const REEL_SECONDS = 15;
 
 /**
  * Facebook Reels viewer. Always dark (even in light mode). `/reel` shows the
@@ -231,14 +230,7 @@ function ReelSlide({ post, active, offset }: { post: PostView; active: boolean; 
   const [paused, setPaused] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
-  const following = useQ(api.pages.followingIds, {});
-  const toggleFollow = useM(api.pages.toggleFollow);
-  const viewer = useViewer();
   const media = post.media[0];
-  const followsAuthor =
-    post.author._id === viewer._id ||
-    post.viewerFollowsAuthor ||
-    (following?.includes(post.author._id) ?? false);
 
   // Restart playback whenever the slide comes back into view.
   useEffect(() => {
@@ -319,18 +311,7 @@ function ReelSlide({ post, active, offset }: { post: PostView; active: boolean; 
                     {post.author.name}
                   </Link>
                   <GlobeIcon size={12} aria-label="Shared with Public" />
-                  {!followsAuthor && (
-                    <>
-                      <span className="text-[#e2e5e9]">·</span>
-                      <button
-                        type="button"
-                        onClick={() => void toggleFollow({ pageId: post.author._id })}
-                        className="font-semibold hover:underline"
-                      >
-                        Follow
-                      </button>
-                    </>
-                  )}
+                  <ReelFollow author={post.author} friend={post.viewerFollowsAuthor} />
                 </div>
                 <p className="flex items-center gap-1 truncate font-semibold text-[13px] text-white/80 leading-4">
                   <Music2 size={12} /> {post.author.name} · Original audio
@@ -357,25 +338,54 @@ function ReelSlide({ post, active, offset }: { post: PostView; active: boolean; 
               </button>
             )}
           </div>
-          <div className="absolute inset-x-2 bottom-1 h-[3px] overflow-hidden rounded-full bg-white/30">
-            {active && (
-              <div
-                key={post._id}
-                className="h-full origin-left rounded-full bg-white"
-                style={{
-                  animation: `reel-progress ${REEL_SECONDS}s linear infinite`,
-                  animationPlayState: playing ? "running" : "paused",
-                }}
-              />
-            )}
-          </div>
         </div>
 
         <ReelActions post={post} onComment={() => setCommentsOpen(true)} />
       </div>
       {commentsOpen && <PostDialog post={post} onClose={() => setCommentsOpen(false)} />}
-      <style>{"@keyframes reel-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}"}</style>
     </section>
+  );
+}
+
+/**
+ * "· Follow" after the author's name, for Pages the viewer doesn't follow and
+ * people who aren't friends yet (following a person sends a friend request).
+ * It disappears once followed or requested, like Facebook's.
+ */
+function ReelFollow({ author, friend }: { author: PostView["author"]; friend: boolean }) {
+  const viewer = useViewer();
+  const isPage = author.kind === "page";
+  const self = author._id === viewer._id;
+  const following = useQ(api.pages.followingIds, isPage && !self ? {} : "skip");
+  const relation = useQ(
+    api.friends.relation,
+    !isPage && !self && !friend ? { userId: author._id } : "skip",
+  );
+  const setFollow = useM(api.profiles.setFollow);
+  const sendRequest = useM(api.friends.sendRequest);
+  const [done, setDone] = useState(false);
+  const show =
+    !done &&
+    !self &&
+    (isPage ? following !== undefined && !following.includes(author._id) : relation === "none");
+  if (!show) return null;
+  return (
+    <>
+      <span className="text-[#e2e5e9]">·</span>
+      <button
+        type="button"
+        onClick={() => {
+          setDone(true);
+          const req = isPage
+            ? setFollow({ targetId: author._id, follow: true })
+            : sendRequest({ userId: author._id });
+          req.catch(() => setDone(false));
+        }}
+        className="font-semibold hover:underline"
+      >
+        Follow
+      </button>
+    </>
   );
 }
 

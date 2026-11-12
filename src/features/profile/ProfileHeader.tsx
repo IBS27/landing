@@ -88,7 +88,8 @@ export function ProfileHeader() {
       <div className={cn("relative mx-auto w-full max-w-[1186px]", columnPad(embedded))}>
         <div className="flex items-center gap-[18px] pt-6 pr-[2px] pl-[10px]">
           <ProfilePicture />
-          <div className="flex min-w-0 flex-1 flex-wrap items-start justify-between gap-x-4 gap-y-3">
+          {/* Facebook centres this row on the picture, ~4.5px above its midline. */}
+          <div className="flex min-w-0 flex-1 flex-wrap items-start justify-between gap-x-4 gap-y-3 pb-[9px]">
             <NameBlock />
             <Actions showRecs={showRecs} onToggleRecs={onToggleRecs} />
           </div>
@@ -254,12 +255,12 @@ function NameBlock() {
         <Link
           to="/$username/$section"
           params={{ username: user.username, section: "followers" }}
-          className="mt-[6px] inline-block font-semibold text-[15px] text-primary leading-5 hover:underline"
+          className="mt-[2px] inline-block font-semibold text-[15px] text-primary leading-5 hover:underline"
         >
           {compactCount(profile.followerCount)} followers
         </Link>
       ) : profile.friendCount > 0 ? (
-        <div className="mt-[6px] font-semibold text-[15px] text-secondary leading-5">
+        <div className="mt-[2px] font-semibold text-[15px] text-secondary leading-5">
           <Link
             to="/$username/friends"
             params={{ username: user.username }}
@@ -282,9 +283,11 @@ function NameBlock() {
           )}
         </div>
       ) : null}
-      {user.bio && !isPage && <p className="mt-1 text-[15px] text-primary leading-5">{user.bio}</p>}
+      {user.bio && !isPage && (
+        <p className="mt-[3px] text-[15px] text-primary leading-5">{user.bio}</p>
+      )}
       {details.length > 0 && (
-        <div className="mt-1 flex flex-wrap items-center text-[15px] text-primary leading-5">
+        <div className="mt-[3px] flex flex-wrap items-center text-[15px] text-primary leading-5">
           {details.map((d, i) => (
             <span key={d.text} className="flex items-center font-medium">
               {i > 0 && <span className="px-1">·</span>}
@@ -301,7 +304,7 @@ function NameBlock() {
               <Link
                 to="/$username"
                 params={{ username: f.username }}
-                className="-ml-2 rounded-full ring-2 ring-card hover:brightness-95"
+                className="-ml-2 flex rounded-full ring-2 ring-card hover:brightness-95"
                 style={{ zIndex: 10 - i }}
               >
                 <Avatar src={f.avatar} size={32} />

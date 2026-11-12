@@ -72,7 +72,7 @@ export const list = viewerQuery({
         const link = post.attachments.find((x) => x.kind === "link");
         items.push({
           ...base,
-          title: post.text?.split("\n")[0]?.slice(0, 120) || link?.title || `${author.name}'s post`,
+          title: post.text?.split("\n")[0]?.slice(0, 300) || link?.title || `${author.name}'s post`,
           typeLabel: post.media.some((m) => m.kind === "video") ? "Video" : "Post",
           thumbnail:
             post.media.find((m) => m.kind === "image")?.url ?? link?.image ?? author.avatar,

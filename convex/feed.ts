@@ -123,7 +123,7 @@ export const reelsShelf = viewerQuery({
             _id: p._id,
             image: photo.url,
             alt: photo.alt ?? null,
-            views: 180 + p.reactionCount * 43 + p.commentCount * 97 + p.shareCount * 211,
+            caption: p.text?.trim() || null,
           },
         ];
       })

@@ -41,8 +41,12 @@ export function ChatDock() {
 
   // The Messenger page replaces the dock.
   if (path.startsWith("/messages")) return null;
-  // Facebook drops the floating "New message" button on Reels and the listing composer.
-  const showCompose = !path.startsWith("/reel") && !path.startsWith("/marketplace/create");
+  // Facebook drops the floating "New message" button on Reels, listing pages and the listing
+  // forms (it stays on the /marketplace/create type picker).
+  const showCompose =
+    !path.startsWith("/reel") &&
+    !path.startsWith("/marketplace/item/") &&
+    !/^\/marketplace\/create\/./.test(path);
 
   const slots: ({ kind: "composer" } | { kind: "chat"; id: Id<"conversations"> })[] = [
     ...(dock.composerOpen ? [{ kind: "composer" as const }] : []),

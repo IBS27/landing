@@ -311,7 +311,7 @@ function GroupFeed({ group }: { group: GroupView }) {
       ) : (
         <>
           {shown.posts.map((p) => (
-            <PostCard key={p._id} post={inGroup(p, group)} />
+            <PostCard key={p._id} post={inGroup(p, group)} hideable={false} />
           ))}
           <div ref={sentinel} />
           {hasMore && <PostSkeleton />}

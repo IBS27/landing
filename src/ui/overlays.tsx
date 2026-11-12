@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
 import { Dialog as D, DropdownMenu as DM, Popover as P, Tooltip as T } from "radix-ui";
-import type { ReactNode } from "react";
+import { type ReactNode, useRef } from "react";
 import { cn } from "@/lib/format";
 import { IconButton } from "./primitives";
 
@@ -32,6 +32,30 @@ export function Tooltip({
 }
 
 export const TooltipProvider = T.Provider;
+
+/* ---------- Auto-focus on open ---------- */
+
+/** Whether the latest interaction was a pointer press (vs. a key press). */
+let pointerInput = false;
+if (typeof document !== "undefined") {
+  document.addEventListener("pointerdown", () => (pointerInput = true), true);
+  document.addEventListener("keydown", () => (pointerInput = false), true);
+}
+
+/**
+ * Facebook draws no focus ring inside a panel opened with the mouse. When a
+ * pointer opened it, focus the panel itself instead of its first control (Tab
+ * still walks into it); keyboard opens keep Radix's first-control focus.
+ */
+function useOpenAutoFocus() {
+  const ref = useRef<HTMLDivElement>(null);
+  const onOpenAutoFocus = (e: Event) => {
+    if (!pointerInput) return;
+    e.preventDefault();
+    ref.current?.focus({ preventScroll: true });
+  };
+  return { ref, onOpenAutoFocus };
+}
 
 /* ---------- Pointer arrow (the notch Facebook draws on "…" menus) ---------- */
 
@@ -102,11 +126,14 @@ export function PopoverPanel({
   arrow?: boolean;
   className?: string;
 }) {
+  const autoFocus = useOpenAutoFocus();
   return (
     <P.Root open={open} onOpenChange={onOpenChange}>
       <P.Trigger asChild>{trigger}</P.Trigger>
       <P.Portal>
         <P.Content
+          ref={autoFocus.ref}
+          onOpenAutoFocus={autoFocus.onOpenAutoFocus}
           align={align}
           alignOffset={alignOffset}
           sideOffset={arrow ? 15 : 4}
@@ -214,6 +241,30 @@ export function MenuSeparator() {
 
 /* ---------- Modal dialog ---------- */
 
+/** The header's left (logo, search) and right (Menu … Account) clusters stay undimmed. */
+const NAV_LEFT = 320;
+const NAV_RIGHT = 208;
+const VEIL = "bg-[rgba(244,244,244,0.8)] dark:bg-[rgba(11,11,11,0.8)]";
+/** Darkens the white header to the veil's grey (246) while dark icons keep full strength. */
+const NAV_VEIL =
+  "fixed top-0 z-[60] h-14 bg-[rgb(246,246,246)] mix-blend-darken dark:bg-[rgba(11,11,11,0.8)] dark:mix-blend-normal";
+
+/** Facebook's modal scrim: veils the page and the header's centre tabs, not its icon clusters. */
+export function ModalScrim() {
+  return (
+    <>
+      <D.Overlay
+        className={`fixed inset-0 z-[60] ${VEIL}`}
+        style={{
+          clipPath: `polygon(${NAV_LEFT}px 0, calc(100% - ${NAV_RIGHT}px) 0, calc(100% - ${NAV_RIGHT}px) 56px, 100% 56px, 100% 100%, 0 100%, 0 56px, ${NAV_LEFT}px 56px)`,
+        }}
+      />
+      <div aria-hidden className={`${NAV_VEIL} left-0`} style={{ width: NAV_LEFT }} />
+      <div aria-hidden className={`${NAV_VEIL} right-0`} style={{ width: NAV_RIGHT }} />
+    </>
+  );
+}
+
 export function Modal({
   open,
   onOpenChange,
@@ -235,11 +286,14 @@ export function Modal({
   hideHeader?: boolean;
   onBack?: () => void;
 }) {
+  const autoFocus = useOpenAutoFocus();
   return (
     <D.Root open={open} onOpenChange={onOpenChange}>
       <D.Portal>
-        <D.Overlay className="fixed inset-0 z-[60] bg-[rgba(244,244,244,0.8)] dark:bg-[rgba(11,11,11,0.8)]" />
+        <ModalScrim />
         <D.Content
+          ref={autoFocus.ref}
+          onOpenAutoFocus={autoFocus.onOpenAutoFocus}
           aria-describedby={undefined}
           className={cn(
             "fixed top-1/2 left-1/2 z-[61] flex max-h-[calc(100vh-40px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg bg-card shadow-elevated outline-none",

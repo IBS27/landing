@@ -3,14 +3,13 @@ import { X } from "lucide-react";
 import { Dialog as D } from "radix-ui";
 import { useState } from "react";
 import { FacebookLogo } from "@/icons";
+import { ModalScrim } from "@/ui/overlays";
 import { IconButton } from "@/ui/primitives";
 import { ActionBar } from "./ActionBar";
 import { CommentComposer, CommentList } from "./CommentsSection";
 import { PostContent, PostHeader } from "./PostCard";
 import type { PostView } from "./types";
 
-/** The header's right cluster (Menu, Messenger, Notifications, Account) stays undimmed. */
-const NAV_RIGHT = 208;
 const VEIL = "bg-[rgba(244,244,244,0.8)] dark:bg-[rgba(11,11,11,0.8)]";
 
 /**
@@ -26,18 +25,7 @@ export function PostDialog({ post, onClose }: { post: PostView; onClose: () => v
   return (
     <D.Root open onOpenChange={(o) => !o && onClose()}>
       <D.Portal>
-        <D.Overlay
-          className={`fixed inset-0 z-[60] ${VEIL}`}
-          style={{
-            clipPath: `polygon(0 0, calc(100% - ${NAV_RIGHT}px) 0, calc(100% - ${NAV_RIGHT}px) 56px, 100% 56px, 100% 100%, 0 100%)`,
-          }}
-        />
-        {/* Veil the header strip behind the right icons without dimming them (light mode). */}
-        <div
-          aria-hidden
-          className="fixed top-0 right-0 z-[60] h-14 bg-[rgb(246,246,246)] mix-blend-darken dark:bg-[rgba(11,11,11,0.8)] dark:mix-blend-normal"
-          style={{ width: NAV_RIGHT }}
-        />
+        <ModalScrim />
         <div className="pointer-events-auto fixed top-0 left-0 z-[61] flex h-14 w-[320px] items-center gap-2 bg-nav pl-4">
           <span aria-hidden className={`absolute inset-0 ${VEIL}`} />
           <D.Close asChild>
