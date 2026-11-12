@@ -1,3 +1,4 @@
+import { Link, useNavigate } from "@tanstack/react-router";
 import { CircleCheck, Lock, Pencil, Sparkles } from "lucide-react";
 import { type ReactNode, useEffect, useId, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
@@ -34,10 +35,13 @@ import { TellUsBox } from "./TellUsBox";
  * proposes facts the person confirms. Saved facts are "stated"; everything
  * Landing infers later shows up separately with its evidence.
  */
-export function CityBriefPage() {
+export function CityBriefPage({ startEditing = false }: { startEditing?: boolean }) {
   const profile = useQ(api.cityProfile.get, {});
-  const [editing, setEditing] = useState(false);
+  const navigate = useNavigate();
+  // Opened from the City Profile's "Edit brief": edit straight away and go back there after.
+  const [editing, setEditing] = useState(startEditing);
   const [justSaved, setJustSaved] = useState(false);
+  const backToProfile = () => void navigate({ to: "/landing/profile" });
 
   if (profile === undefined) {
     return (
@@ -56,7 +60,15 @@ export function CityBriefPage() {
         {justSaved && (
           <div className="mb-3 flex items-center gap-2 rounded-lg bg-highlight px-4 py-3 text-[15px] text-primary">
             <CircleCheck size={20} className="shrink-0 text-accent" />
-            Saved. Landing will use this for apartment search, neighborhoods and your crew.
+            <span className="min-w-0 flex-1">
+              Saved. Landing will use this for apartment search, neighborhoods and your crew.
+            </span>
+            <Link
+              to="/landing"
+              className="flex h-9 shrink-0 items-center rounded-md bg-btn-primary px-3 font-semibold text-[15px] text-white hover:bg-btn-primary-hover"
+            >
+              Continue to Landing
+            </Link>
           </div>
         )}
         <ProfileSummary
@@ -85,8 +97,9 @@ export function CityBriefPage() {
         key={profile.userId}
         profile={profile}
         onboarded={onboarded}
-        onCancel={onboarded ? () => setEditing(false) : undefined}
+        onCancel={onboarded ? (startEditing ? backToProfile : () => setEditing(false)) : undefined}
         onSaved={() => {
+          if (startEditing) return backToProfile();
           setEditing(false);
           setJustSaved(true);
           window.scrollTo({ top: 0 });
@@ -96,12 +109,9 @@ export function CityBriefPage() {
   );
 }
 
+/** Sits inside Landing's layout, which provides the page background and nav. */
 function Shell({ children }: { children: ReactNode }) {
-  return (
-    <div className="min-h-[calc(100vh-56px)] bg-wash">
-      <div className="mx-auto w-full max-w-[720px] px-4 py-6">{children}</div>
-    </div>
-  );
+  return <div className="mx-auto w-full max-w-[720px] px-4 pt-6 pb-10">{children}</div>;
 }
 
 function BriefEditor({
@@ -564,7 +574,7 @@ function Segmented<T extends string>({
   );
 }
 
-function PrivacyNote() {
+export function PrivacyNote() {
   return (
     <div className="flex items-start gap-3 px-2 py-3 text-[13px] text-secondary">
       <Lock size={16} className="mt-0.5 shrink-0" />

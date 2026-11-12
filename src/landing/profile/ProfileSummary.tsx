@@ -29,25 +29,34 @@ function marked(f: AnyFact) {
 export function ProfileSummary({
   profile,
   action,
+  showHeader = true,
 }: {
   profile: CityProfile;
   /** Header action, e.g. an "Edit brief" button. */
   action?: ReactNode;
+  /** Off when the page already has a title (Landing → City Profile). */
+  showHeader?: boolean;
 }) {
   const statedInterests = profile.interests.filter((f) => f.source === "stated");
   const inferredInterests = profile.interests.filter((f) => f.source === "inferred");
   return (
     <Card className="overflow-hidden">
-      <div className="flex items-center justify-between gap-3 px-4 pt-4 pb-2">
-        <div>
-          <h2 className="font-bold text-[20px] text-primary leading-6">Your City Profile</h2>
-          <p className="text-[13px] text-secondary">
-            What Landing uses to tune search, neighborhoods and crews. Only you can see it.
-            Everything comes from your brief unless it's marked.
-          </p>
+      {showHeader ? (
+        <div className="flex items-center justify-between gap-3 px-4 pt-4 pb-2">
+          <div>
+            <h2 className="font-bold text-[20px] text-primary leading-6">Your City Profile</h2>
+            <p className="text-[13px] text-secondary">
+              What Landing uses to tune search, neighborhoods and crews. Only you can see it.
+              Everything comes from your brief unless it's marked.
+            </p>
+          </div>
+          {action}
         </div>
-        {action}
-      </div>
+      ) : (
+        <p className="px-4 pt-3 text-[13px] text-secondary">
+          Everything comes from your brief unless it's marked.
+        </p>
+      )}
       <dl className="divide-y divide-divider px-4 pb-2">
         <Row k="budget" fact={profile.budget}>
           {profile.budget && budgetLabel(profile.budget.value)}
