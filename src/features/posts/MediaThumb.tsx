@@ -1,7 +1,10 @@
 import { cn } from "@/lib/format";
 import { type ThumbMedia, thumbSource } from "./thumb";
 
-/** A cover-fit media thumbnail: the image, a video's poster, or else the video's first frame. */
+/**
+ * A cover-fit media thumbnail that fills its box: the image, a video's poster,
+ * or else the video's first frame. Size the box, not the thumbnail.
+ */
 export function MediaThumb({
   media,
   alt = "",

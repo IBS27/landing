@@ -198,7 +198,9 @@ function FeaturedCard({ group }: { group: GroupView }) {
                   className="flex w-[220px] shrink-0 flex-col overflow-hidden rounded-lg border border-divider hover:bg-hover"
                 >
                   {p.media[0] ? (
-                    <MediaThumb media={p.media[0]} className="h-[120px]" />
+                    <div className="h-[120px]">
+                      <MediaThumb media={p.media[0]} />
+                    </div>
                   ) : (
                     <div className="line-clamp-5 h-[120px] bg-comment p-3 text-[15px] text-primary">
                       {p.text}

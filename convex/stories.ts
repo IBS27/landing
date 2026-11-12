@@ -319,7 +319,8 @@ export const reply = viewerMutation({
         {
           kind: "story",
           storyId,
-          url: story.media.url || undefined,
+          // The snapshot renders as an image, so a video story keeps its poster frame.
+          url: (story.media.kind === "video" ? story.media.poster : story.media.url) || undefined,
           background: story.background,
           text: story.text,
         },
