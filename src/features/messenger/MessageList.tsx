@@ -4,6 +4,7 @@ import { Fragment, type ReactNode, useEffect, useRef, useState } from "react";
 import { useM, useQ, useViewer } from "@/app/viewer";
 import { StoryReplyAttachment } from "@/features/feed/StoryReplyAttachment";
 import { useViewerPaginated } from "@/features/posts";
+import { ChatDraft } from "@/landing/inbox/ProposalCard";
 import { cn, price } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger, Modal, Tooltip } from "@/ui/overlays";
 import { Avatar, Button, Spinner } from "@/ui/primitives";
@@ -148,7 +149,11 @@ export function MessageList({
   }, [newest]);
 
   const memberMap = new Map(detail.members.map((m) => [m._id, m]));
-  const chronological = [...results].reverse();
+  // Muse drafts waiting for approval render as ChatDraft cards at the bottom (#6).
+  const drafts = useQ(api.proposals.forConversation, { conversationId });
+  const chronological = [...results]
+    .reverse()
+    .filter((m) => !(m.status === "pending_approval" && m.author.kind === "agent"));
   const items = buildItems(chronological, detail.members, viewer._id);
   const lastMine = [...chronological].reverse().find((m) => m.senderId === viewer._id);
   const isGroup = detail.kind === "group";
@@ -221,6 +226,9 @@ export function MessageList({
             </Fragment>
           ),
         )}
+        {drafts?.map((p) => (
+          <ChatDraft key={p._id} p={p} compact={variant === "dock"} />
+        ))}
         {active.length > 0 && <style>{TYPING_KEYFRAMES}</style>}
         {active.map((t) => (
           <div key={t.user._id} className="mt-1 flex items-end gap-2">
