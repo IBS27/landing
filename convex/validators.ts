@@ -300,3 +300,73 @@ export type Source = Infer<typeof source>;
  */
 export const citations = v.object({ first: source, rest: v.array(source) });
 export type Citations = Infer<typeof citations>;
+
+/** A WGS84 point. */
+export const latLng = v.object({ lat: v.number(), lng: v.number() });
+
+/**
+ * GeoJSON MultiPolygon coordinates: polygons → rings (outer first, then holes)
+ * → `[lng, lat]` positions. Helpers live in `convex/lib/geo.ts`.
+ */
+export const multiPolygon = v.array(v.array(v.array(v.array(v.number()))));
+
+export const transitSystem = v.union(
+  v.literal("bart"),
+  v.literal("muni_metro"),
+  v.literal("caltrain"),
+);
+export type TransitSystem = Infer<typeof transitSystem>;
+
+/**
+ * A cited fact about one neighborhood (#15): a transit station, a Muni Metro
+ * line's stops there, a nightlife corridor, or a campus. `key` is stable across
+ * reseeds ("bart:16th", "muni:n", "corridor:valencia", "campus:ucsf-parnassus");
+ * a line or corridor that crosses several neighborhoods has one row in each.
+ */
+export const neighborhoodFact = v.union(
+  v.object({
+    neighborhoodId: v.id("neighborhoods"),
+    key: v.string(),
+    kind: v.literal("transit_station"),
+    system: transitSystem,
+    name: v.string(),
+    /** BART line colors, Muni Metro letters, or Caltrain service patterns. */
+    lines: v.array(v.string()),
+    point: latLng,
+    citations,
+  }),
+  v.object({
+    neighborhoodId: v.id("neighborhoods"),
+    key: v.string(),
+    kind: v.literal("transit_line"),
+    system: transitSystem,
+    /** "N" */
+    line: v.string(),
+    /** "N Judah" */
+    name: v.string(),
+    /** The line's stops inside this neighborhood, in route order. */
+    stops: v.array(v.object({ name: v.string(), point: latLng })),
+    citations,
+  }),
+  v.object({
+    neighborhoodId: v.id("neighborhoods"),
+    key: v.string(),
+    kind: v.literal("nightlife_corridor"),
+    name: v.string(),
+    detail: v.string(),
+    /** The whole corridor, in order (it may extend into neighboring areas). */
+    path: v.array(latLng),
+    citations,
+  }),
+  v.object({
+    neighborhoodId: v.id("neighborhoods"),
+    key: v.string(),
+    kind: v.literal("campus"),
+    name: v.string(),
+    institution: v.string(),
+    detail: v.string(),
+    point: latLng,
+    citations,
+  }),
+);
+export type NeighborhoodFact = Infer<typeof neighborhoodFact>;

@@ -11,6 +11,8 @@
  *   fields of listings / events / posts / conversations.
  */
 import type { Doc } from "../_generated/dataModel";
+import type { LatLng } from "../lib/geo";
+import type { NeighborhoodSlug } from "../lib/neighborhoods";
 import type { ListingCategory, ReactionType } from "../validators";
 import type { BackgroundName } from "./lib/backgrounds";
 import type { Neighborhood } from "./lib/places";
@@ -107,6 +109,10 @@ export type GroupSeed = {
   readonly admins: readonly Username[];
   readonly moderators?: readonly Username[];
   readonly members: readonly Username[];
+  /** A neighborhood Group: based at the neighborhood's center (sets `point` and `neighborhoodId`). */
+  readonly neighborhood?: NeighborhoodSlug;
+  /** Where a Group without a neighborhood is based (e.g. the Ferry Building). */
+  readonly point?: LatLng;
 };
 
 // ---------------------------------------------------------------------------
@@ -338,3 +344,78 @@ export type ConversationSeed = {
 };
 
 export type { ReactionType };
+
+// ---------------------------------------------------------------------------
+// Neighborhoods (#15)
+
+/**
+ * An external page as fetched (DataSF, an agency's station page, a GTFS feed...). Stored in
+ * `externalSources` (#7); the snippet is quoted verbatim from the page.
+ */
+export type SourceSnapshot = {
+  readonly url: string;
+  readonly title: string;
+  readonly publisher: string;
+  readonly snippet: string;
+  readonly fetchedAt: number;
+};
+
+export type TransitSystem = "bart" | "muni_metro" | "caltrain";
+
+/** A station (generated from GTFS). `sources` are keys of `TRANSIT_SOURCES`. */
+export type TransitStationSeed = {
+  readonly key: string;
+  readonly system: TransitSystem;
+  readonly name: string;
+  readonly lines: readonly string[];
+  readonly point: LatLng;
+  readonly sources: readonly string[];
+};
+
+/** A Muni Metro line and its stops in the city, in route order (generated from GTFS). */
+export type TransitLineSeed = {
+  readonly key: string;
+  readonly system: TransitSystem;
+  readonly line: string;
+  readonly name: string;
+  readonly stops: readonly { readonly name: string; readonly point: LatLng }[];
+  readonly sources: readonly string[];
+};
+
+/** A nightlife corridor (hand-curated, cited). `sources` are keys of `LANDMARK_SOURCES`. */
+export type CorridorSeed = {
+  readonly key: string;
+  readonly name: string;
+  readonly detail: string;
+  /** The corridor in order, from cross streets. */
+  readonly path: readonly LatLng[];
+  readonly sources: readonly string[];
+};
+
+/** A college or university campus (hand-curated, cited). `sources` are keys of `LANDMARK_SOURCES`. */
+export type CampusSeed = {
+  readonly key: string;
+  readonly name: string;
+  readonly institution: string;
+  readonly detail: string;
+  readonly point: LatLng;
+  readonly sources: readonly string[];
+};
+
+/**
+ * A place the neighborhood Group threads recommend. Businesses are fictional at real cross
+ * streets; parks, beaches, streets and landmarks are real. Not stored: the registry keeps the
+ * threads consistent (tests check every place sits where the threads say) and gives #18 pins.
+ */
+export type PlaceSeed = {
+  readonly key: string;
+  readonly name: string;
+  readonly kind: string;
+  readonly real: boolean;
+  /** The neighborhood whose Group threads talk about it. */
+  readonly neighborhood: NeighborhoodSlug;
+  /** Cross streets ("Irving St & 9th Ave") or the real place's name, as located. */
+  readonly at: string;
+  readonly point: LatLng;
+  readonly note: string;
+};
