@@ -21,6 +21,7 @@ import {
   reactionType,
   rentalDetails,
   vehicleDetails,
+  vouchRelationship,
 } from "./validators";
 
 export default defineSchema({
@@ -671,4 +672,22 @@ export default defineSchema({
     startedAt: v.optional(v.number()),
     finishedAt: v.optional(v.number()),
   }).index("by_kind_key", ["kind", "key", "createdAt"]),
+
+  /**
+   * Landing network vouching: `voucherId` says they know `subjectId` (usually a
+   * lister). One row per pair; vouching again updates it. About the person, not
+   * a listing, so it carries over to all their listings (convex/lib/vouches.ts).
+   */
+  vouches: defineTable({
+    voucherId: v.id("users"),
+    subjectId: v.id("users"),
+    relationship: vouchRelationship,
+    /** Optional, at most VOUCH_NOTE_MAX characters. */
+    note: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_subject", ["subjectId", "createdAt"])
+    .index("by_voucher", ["voucherId", "createdAt"])
+    .index("by_pair", ["voucherId", "subjectId"]),
 });
