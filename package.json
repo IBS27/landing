@@ -30,6 +30,7 @@
     "dev:convex": "convex dev",
     "typecheck": "tsc -p . && tsc -p convex",
     "lint": "biome check .",
+    "test": "bun test",
     "format": "biome check --write .",
     "seed": "convex run seed:reset"
   }
