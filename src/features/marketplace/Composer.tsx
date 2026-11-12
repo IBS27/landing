@@ -179,7 +179,7 @@ function fromListing(l: Detail): FormState {
     condition: l.condition ?? "",
     brand: l.brand ?? "",
     description: l.description,
-    neighborhood: l.location.neighborhood ?? "Capitol Hill",
+    neighborhood: l.location.neighborhood ?? "Mission",
     meetup: l.meetup,
     vehicleType: l.vehicle?.vehicleType ?? "",
     year: l.vehicle ? String(l.vehicle.year) : "",
