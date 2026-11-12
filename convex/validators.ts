@@ -314,3 +314,22 @@ export const vouchRelationship = v.union(
   v.literal("know_personally"),
 );
 export type VouchRelationship = Infer<typeof vouchRelationship>;
+
+/* ── Scam signals (#11) ────────────────────────────────────────────────── */
+
+/** Why a chat message is worth a second look. Worded as things to check, not accusations. */
+export const chatFlagCategory = v.union(
+  v.literal("deposit_before_viewing"),
+  v.literal("away_lister"),
+  v.literal("untraceable_payment"),
+  v.literal("pressure"),
+  v.literal("off_platform"),
+);
+export type ChatFlagCategory = Infer<typeof chatFlagCategory>;
+
+export const chatFlag = v.object({
+  messageId: v.id("messages"),
+  category: chatFlagCategory,
+  /** One plain sentence on why this is worth checking. */
+  reason: v.string(),
+});

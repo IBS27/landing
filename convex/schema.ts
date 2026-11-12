@@ -4,6 +4,7 @@ import {
   aiJobStatus,
   aiRun,
   badge,
+  chatFlag,
   friendRequestAudience,
   friendsListAudience,
   listingCategory,
@@ -646,6 +647,23 @@ export default defineSchema({
   })
     .index("by_user", ["userId", "lastPlayedAt"])
     .index("by_user_game", ["userId", "gameId"]),
+  /**
+   * Things to check in a Marketplace chat about a rental (#11): which of the
+   * lister's messages Ember flagged, for one viewer. Refreshed when new
+   * messages arrive.
+   */
+  chatChecks: defineTable({
+    conversationId: v.id("conversations"),
+    viewerId: v.id("users"),
+    listingId: v.id("listings"),
+    flags: v.array(chatFlag),
+    /** The conversation's `lastMessageAt` when it was checked; newer means stale. */
+    checkedThrough: v.number(),
+    via: v.union(v.literal("model"), v.literal("cache"), v.literal("fallback")),
+    runId: v.optional(v.id("aiRuns")),
+    createdAt: v.number(),
+  }).index("by_conversation_viewer", ["conversationId", "viewerId"]),
+
   /**
    * One row per model call made through `runAgent` (convex/ai/agent.ts), including
    * calls that ended in the task's non-AI fallback. Model results are reused by
