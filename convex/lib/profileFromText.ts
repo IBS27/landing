@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { defineTask } from "../ai/agent";
 import {
+  type FactEntry,
   factEntry,
   factSlot,
   GOALS,
@@ -12,7 +13,13 @@ import {
   WORKPLACES,
 } from "./cityProfileFacts";
 import { INTEREST_SECTIONS, INTERESTS } from "./interests";
-import { extractFacts, mentionsInterest } from "./profileText";
+import {
+  extractFacts,
+  isWorkplaceQuote,
+  mentionsInterest,
+  narrowQuote,
+  negatedInText,
+} from "./profileText";
 import { hasProtected, REDACTED, redactProtected } from "./protectedText";
 
 /**
@@ -93,6 +100,14 @@ function loose(s: string) {
     .trim();
 }
 
+/**
+ * Muse's (or the rules') proposals as the person sees and saves them: each
+ * quote cut down to the phrase naming its fact (`narrowQuote`).
+ */
+export function tidyProposals<T extends { entry: FactEntry; quote: string }>(facts: T[]): T[] {
+  return facts.map((f) => ({ ...f, quote: narrowQuote(f.entry, f.quote) }));
+}
+
 export const profileFromText = defineTask({
   agent: "muse",
   name: "muse.profileFromText",
@@ -115,6 +130,8 @@ export const profileFromText = defineTask({
         );
       else if (!text.includes(quote))
         problems.push(`${at}.quote "${f.quote}" isn't copied exactly from the text`);
+      else if (negatedInText(input.text, f.quote))
+        problems.push(`${at}: the text says the opposite ("${f.quote}" is negated there); drop it`);
       const slot = factSlot(f.entry);
       if (seen.has(slot)) problems.push(`${at}: more than one fact for ${slot}`);
       seen.add(slot);
@@ -136,6 +153,12 @@ export const profileFromText = defineTask({
             );
           break;
         }
+        case "neighborhood":
+          if (isWorkplaceQuote(f.quote))
+            problems.push(
+              `${at}: "${f.quote}" is about work; propose only places they'd consider living`,
+            );
+          break;
         case "interest":
           // Named in the quote, and not only in a negated clause of the text ("don't like climbing").
           if (!mentionsInterest(f.quote, e.value.id) || !mentionsInterest(input.text, e.value.id))

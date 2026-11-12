@@ -9,6 +9,7 @@ import {
   valueKey,
 } from "./cityProfileFacts";
 import { getInterest, type InterestId } from "./interests";
+import { narrowQuote } from "./profileText";
 import { hasProtected } from "./protectedText";
 
 /**
@@ -161,6 +162,28 @@ async function touchProfile(
 }
 
 export type StatedFact = { entry: FactEntry; evidence: FactEvidence };
+
+/**
+ * The brief's entries as stated facts. `fromText` holds the quotes the person
+ * confirmed from their own words ("Tell us about you"), by fact slot. Each is
+ * cut down to the phrase naming its fact, and one that still names a
+ * protected trait is never kept: that fact saves as a plain brief answer.
+ */
+export function briefFacts(
+  entries: FactEntry[],
+  fromText: { slot: string; quote: string }[],
+): StatedFact[] {
+  const quotes = new Map(fromText.map((q) => [q.slot, q.quote]));
+  return entries.map((entry) => {
+    const raw = quotes.get(factSlot(entry));
+    const quote = raw ? narrowQuote(entry, raw.slice(0, 400)).slice(0, 200).trim() : "";
+    const evidence: FactEvidence =
+      quote && !hasProtected(quote)
+        ? { kind: "free_text", summary: "From what you wrote about yourself", quote }
+        : { kind: "brief", summary: "You said so in your brief" };
+    return { entry, evidence };
+  });
+}
 
 /**
  * Makes `facts` the person's stated facts for `keys` (the onboarding brief).

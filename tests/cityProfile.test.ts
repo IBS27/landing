@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import type { Id } from "../convex/_generated/dataModel";
 import type { MutationCtx } from "../convex/_generated/server";
 import {
+  briefFacts,
   getProfile,
   interestWeights,
   recordInferredFact,
@@ -15,8 +16,8 @@ import {
   moveInProblem,
   valueKey,
 } from "../convex/lib/cityProfileFacts";
-import { profileFromText, profileInput } from "../convex/lib/profileFromText";
-import { extractFacts } from "../convex/lib/profileText";
+import { profileFromText, profileInput, tidyProposals } from "../convex/lib/profileFromText";
+import { extractFacts, narrowQuote } from "../convex/lib/profileText";
 import { hasProtected, REDACTED, redactProtected } from "../convex/lib/protectedText";
 import {
   applyProposals,
@@ -77,6 +78,56 @@ describe("protected traits", () => {
       // The whole sentence is never an acceptable quote.
       expect(modelProblems(text, [{ entry: out[0].entry, quote: text }])).not.toEqual([]);
     }
+  });
+
+  test("contractions and full forms are both caught", () => {
+    for (const text of [
+      "I've got MS and love hiking.",
+      "I have got MS and love hiking.",
+      "I am single and love hiking.",
+      "We are single and love hiking.",
+    ]) {
+      expect(profileInput(text).text).toBe(`${REDACTED} and love hiking.`);
+      expect(facts(text).map((p) => p.quote)).toEqual(["love hiking."]);
+    }
+  });
+
+  test("a model quote is cut down to the phrase naming its fact", () => {
+    const hiking: FactEntry = { key: "interest", value: { id: "hiking" } };
+    expect(narrowQuote(hiking, "I've got MS and love hiking.")).toBe("love hiking.");
+    expect(
+      tidyProposals([{ entry: hiking, quote: "I really like work and love hiking" }])[0].quote,
+    ).toBe("love hiking");
+    const budget: FactEntry = { key: "budget", value: { min: 1800, max: 2400 } };
+    expect(narrowQuote(budget, "I'm new here, budget $1,800 to $2,400")).toBe(
+      "budget $1,800 to $2,400",
+    );
+    const moveIn: FactEntry = { key: "moveIn", value: { month: "2027-03" } };
+    expect(narrowQuote(moveIn, "I love tacos and I'm moving in March")).toBe("I'm moving in March");
+  });
+
+  test("a protected quote never survives save and read", async () => {
+    const hiking: FactEntry = { key: "interest", value: { id: "hiking" } };
+    const coffee: FactEntry = { key: "interest", value: { id: "coffee" } };
+    const facts = briefFacts(
+      [hiking, coffee],
+      [
+        // A tampered or unredacted whole-sentence quote is narrowed to the activity.
+        { slot: "interest:hiking", quote: "I've got MS and love hiking." },
+        // One that can't be narrowed away from the trait is dropped.
+        { slot: "interest:coffee", quote: "As a Muslim coffee lover" },
+      ],
+    );
+    expect(facts.map((f) => f.evidence)).toEqual([
+      { kind: "free_text", summary: "From what you wrote about yourself", quote: "love hiking." },
+      { kind: "brief", summary: "You said so in your brief" },
+    ]);
+    const tables: Record<string, Row[]> = { cityProfiles: [], cityProfileFacts: [] };
+    const ctx = writableCtx(tables);
+    const user = "users:priya" as Id<"users">;
+    await saveStatedFacts(ctx, user, ["interest"], facts);
+    for (const f of (await getProfile(ctx, user)).facts)
+      expect(hasProtected(f.evidence.quote ?? "")).toBe(false);
   });
 
   test("ordinary plans and belongings aren't disclosures", () => {
@@ -162,6 +213,29 @@ describe("budget", () => {
     expect(budget("Budget is $2.4k a month.")).toEqual({ max: 2400 });
   });
 
+  test("negated amounts don't count, limits do", () => {
+    expect(budget("My budget is not $3000; it is $2000.")).toEqual({ max: 2000 });
+    expect(budget("Rent no more than $2,400 a month.")).toEqual({ max: 2400 });
+    expect(budget("Rent not over $2,400.")).toEqual({ max: 2400 });
+  });
+
+  test("rent wins over other expenses", () => {
+    expect(budget("I can spend $2400 on furniture. My rent budget is $1800.")).toEqual({
+      max: 1800,
+    });
+    expect(budget("I'll spend $600 on a couch.")).toBeNull();
+    expect(budget("$2,400 for a studio")).toEqual({ max: 2400 });
+  });
+
+  test("the model check rejects a negated amount", () => {
+    const text = "My budget is not $3000; it is $2000.";
+    const at = (max: number, quote: string) => [
+      { entry: { key: "budget" as const, value: { max } }, quote },
+    ];
+    expect(modelProblems(text, at(3000, "$3000"))).not.toEqual([]);
+    expect(modelProblems(text, at(2000, "$2000"))).toEqual([]);
+  });
+
   test("years and times aren't amounts", () => {
     expect(budget("Moving in March 2027 and I work 9 to 5.")).toBeNull();
     expect(budget("Moving in March 2027, budget $2400")).toEqual({ max: 2400 });
@@ -202,6 +276,19 @@ describe("move-in dates", () => {
       const out = profileFromText.fallback({ text, today: TODAY }, []);
       expect(modelProblems(text, out.facts)).toEqual([]);
     }
+  });
+
+  test("negated months don't count, limits do", () => {
+    expect(moveIn("I do not want to move in March. I am moving in April.")).toEqual({
+      month: "2027-04",
+    });
+    expect(moveIn("Not moving until March.")).toEqual({ month: "2027-03" });
+    const text = "I do not want to move in March. I am moving in April.";
+    const at = (month: string, quote: string) => [
+      { entry: { key: "moveIn" as const, value: { month } }, quote },
+    ];
+    expect(modelProblems(text, at("2027-03", "move in March"))).not.toEqual([]);
+    expect(modelProblems(text, at("2027-04", "moving in April"))).toEqual([]);
   });
 
   test("the model check uses the same rules", () => {
@@ -329,6 +416,19 @@ describe("neighborhoods", () => {
     expect(slugs("Looking at the Mission and Mission Bay.")).toEqual(["mission", "mission-bay"]);
     expect(slugs("Inner Sunset or the Outer Sunset.")).toEqual(["inner-sunset", "sunset-parkside"]);
     expect(slugs("Bernal Heights or Noe Valley")).toEqual(["bernal-heights", "noe-valley"]);
+  });
+
+  test("a workplace isn't a place to live", () => {
+    const text = "I work in the Mission and want to live in the Outer Sunset.";
+    expect(slugs(text)).toEqual(["sunset-parkside"]);
+    expect(slugs("My office is in SoMa, looking at Noe Valley")).toEqual(["noe-valley"]);
+    const mission: FactEntry = { key: "neighborhood", value: { slug: "mission" } };
+    expect(modelProblems(text, [{ entry: mission, quote: "I work in the Mission" }])).not.toEqual(
+      [],
+    );
+    expect(
+      modelProblems("Moving to the Mission.", [{ entry: mission, quote: "Moving to the Mission" }]),
+    ).toEqual([]);
   });
 });
 

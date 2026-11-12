@@ -270,7 +270,7 @@ const TERMS: string[] = [
   "parents?|parenting|stepparent|single (?:mom|dad|parent|mother|father)|newborn|infant",
   "married|divorced|widow(?:ed|er)?|husband|wife|spouse|fianc[eé]e?|engaged(?! (?:in|with))",
   "boyfriend|girlfriend|(?:my|our|with (?:a|my)|domestic) partner|(?:my|our|a young|with (?:my|our)) family",
-  "family status|i['’]?m single|single (?:mom|dad|parent|mother|father)",
+  "family status|(?:i['’]?m|i am|we['’]?re|we are) single|single (?:mom|dad|parent|mother|father)",
   // Veteran status and politics
   "veterans?|military|army|marines?",
   "democrats?|republicans?|conservative|liberal|progressive|libertarian|socialist|maga",
@@ -298,7 +298,7 @@ const DISCLOSURE_CUES = [
   // Health
   "(?:diagnosed with|living with|suffer(?:s|ing)? from|struggl(?:e|es|ing) with|recovering from|(?:being )?treated for|in treatment for|on (?:meds|medication) for)\\b",
   // "I have lupus", not "I have a car", "I have two cats" or "I have always loved hiking".
-  "(?:i|we) (?:have|['’]ve got|['’]ve had|had|got) (?!(?:a|an|the|my|our|no|some|any|two|three|four|five|\\d+|lots|plenty|been|to|always|never|just|also|really|still|already|recently|only|ever|time|fun|friends|roommates|experience|pets?|cats?|dogs?|bikes?|plans?|money|savings|enough|\\w+ed)\\b)",
+  "(?:i|we)(?: have| had| got|['’]ve got|['’]ve had| have got) (?!(?:a|an|the|my|our|no|some|any|two|three|four|five|\\d+|lots|plenty|been|to|always|never|just|also|really|still|already|recently|only|ever|time|fun|friends|roommates|experience|pets?|cats?|dogs?|bikes?|plans?|money|savings|enough|\\w+ed)\\b)",
 ];
 const DISCLOSURE = new RegExp(`\\b(?:${DISCLOSURE_CUES.join("|")})${CLAUSE_END}`, "gi");
 

@@ -2,14 +2,12 @@ import { ConvexError, v } from "convex/values";
 import { api } from "./_generated/api";
 import { action } from "./_generated/server";
 import { runAgent } from "./ai/agent";
-import { getProfile, type StatedFact, saveStatedFacts } from "./lib/cityProfile";
+import { briefFacts, getProfile, saveStatedFacts } from "./lib/cityProfile";
 import {
   budgetValue,
   type FactEntry,
-  type FactEvidence,
   type FactKey,
   factEntry,
-  factSlot,
   goalId,
   moveInProblem,
   moveInValue,
@@ -20,9 +18,8 @@ import {
 } from "./lib/cityProfileFacts";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { interestId } from "./lib/interests";
-import { profileFromText, profileInput } from "./lib/profileFromText";
+import { profileFromText, profileInput, tidyProposals } from "./lib/profileFromText";
 import { MAX_TEXT_LENGTH, proposalLabel } from "./lib/profileText";
-import { hasProtected } from "./lib/protectedText";
 
 /**
  * Landing City Profile (#3). Other features read profiles with `getProfile`
@@ -115,20 +112,7 @@ export const saveBrief = viewerMutation({
       ...[...new Set(b.goals)].map((id) => ({ key: "goal" as const, value: { id } })),
     ];
 
-    // A quote that names a protected trait is never kept as evidence.
-    const quotes = new Map(
-      (fromText ?? [])
-        .map((q) => ({ slot: q.slot, quote: q.quote.trim().slice(0, 200) }))
-        .filter((q) => q.quote && !hasProtected(q.quote))
-        .map((q) => [q.slot, q.quote] as const),
-    );
-    const facts: StatedFact[] = entries.map((entry) => {
-      const quote = quotes.get(factSlot(entry));
-      const evidence: FactEvidence = quote
-        ? { kind: "free_text", summary: "From what you wrote about yourself", quote }
-        : { kind: "brief", summary: "You said so in your brief" };
-      return { entry, evidence };
-    });
+    const facts = briefFacts(entries, fromText ?? []);
     await saveStatedFacts(ctx, ctx.viewer._id, BRIEF_KEYS, facts, { completeBrief: true });
     return getProfile(ctx, ctx.viewer);
   },
@@ -173,7 +157,7 @@ export const suggestFromText = action({
     });
     return {
       via: result.via,
-      proposals: result.output.facts.map((f) => ({
+      proposals: tidyProposals(result.output.facts).map((f) => ({
         entry: f.entry,
         quote: f.quote,
         label: proposalLabel(f.entry, f.carFree),

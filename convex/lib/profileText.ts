@@ -56,6 +56,12 @@ type Hit = { part: Part; start: number; end: number };
 
 const NEGATION =
   /\b(?:don['’]?t|do not|doesn['’]?t|does not|didn['’]?t|did not|never|not|no longer|no|nor|neither|hate[sd]?|dislike[sd]?|can(?:not|['’]?t) stand|avoid(?:s|ing)?|isn['’]?t|aren['’]?t|wasn['’]?t|won['’]?t|wouldn['’]?t|without|quit|stopped|gave up)\b/gi;
+/**
+ * Words after "no"/"not" that make it a limit rather than a negation ("no more
+ * than $2,400", "not moving until March").
+ */
+const BOUND =
+  /^\s+(?:(?:more|less|later|earlier|sooner|higher|lower|over|above|below|under|exceeding|beyond)\b|(?:\w+\s+)?(?:until|till)\b)/i;
 /** Where a negation stops: a contrast, a new clause about the person, or punctuation. */
 const NEGATION_END =
   /\b(?:but|though|although|however|except|yet|whereas|while|instead|so|because)\b|[;:—–]|(?:,|\band)\s+(?=(?:i|we)\b)/i;
@@ -69,6 +75,8 @@ export function negatedSpans(text: string): [number, number][] {
   const spans: [number, number][] = [];
   for (const m of text.matchAll(NEGATION)) {
     const from = m.index + m[0].length;
+    // "no more than $2,400", "not until March": a limit, not a negation.
+    if (BOUND.test(text.slice(from))) continue;
     const rest = text.slice(from);
     const stop = rest.search(NEGATION_END);
     spans.push([from, stop === -1 ? text.length : from + stop]);
@@ -221,10 +229,16 @@ const NEIGHBORHOOD_PATTERNS: { re: RegExp; slug: NeighborhoodSlug }[] = [
   { re: /\bPresidio Heights\b/i, slug: "presidio-heights" },
 ];
 
+const WORKPLACE_BEFORE =
+  /\b(?:work(?:s|ing|ed)?|office(?: is)?|job(?: is)?|commut\w*|study(?:ing)?|school(?: is)?|visit\w*)\s+(?:in|at|near|to|by|out of|around)\s+(?:the\s+)?$/i;
+
 function neighborhoodsFrom(parts: Part[]): ProposedFact[] {
   const found = NEIGHBORHOOD_PATTERNS.flatMap(({ re, slug }) =>
     hits(parts, re).map((hit) => ({ hit, slug })),
-  ).sort((a, b) => b.hit.end - b.hit.start - (a.hit.end - a.hit.start));
+  )
+    // "I work in the Mission" names a workplace, not somewhere to live.
+    .filter(({ hit }) => !WORKPLACE_BEFORE.test(hit.part.text.slice(0, hit.start)))
+    .sort((a, b) => b.hit.end - b.hit.start - (a.hit.end - a.hit.start));
   const kept: typeof found = [];
   for (const f of found) {
     const overlaps = kept.some(
@@ -280,6 +294,11 @@ const PER_MONTH = /^\s*(?:\/\s*mo(?:nth)?\b|(?:a|per|each|every)\s+month\b|month
 const BUDGET_LEAD =
   /\b(?:budget|rent|spend|afford|up to|under|below|max(?:imum)?|around|about|between|range)\b[^.\d$]{0,15}$/i;
 
+const RENT_CONTEXT =
+  /\b(?:budget|rent|a month|per month|monthly|apartment|studio|1br|one[\s-]bed\w*|room)\b|\/\s?mo/i;
+const OTHER_EXPENSE =
+  /^\s*(?:on|for|towards?)\s+(?!rent\b|(?:a|an|my|the)\s+(?:place|room|studio|apartment|1br)\b|housing\b)/i;
+
 /** Whole dollars; thousands only with an explicit "k" ("$2.4k"), so "$20" is twenty dollars. */
 function dollarsOf(raw: string, k: boolean): number {
   return Math.round(Number(raw.replace(/,/g, "")) * (k ? 1000 : 1));
@@ -293,10 +312,12 @@ const inRange = (n: number) => n >= 300 && n <= 20000;
  * "up to" and the like, so "March 2027" or "9 to 5" aren't amounts.
  */
 function budgetFrom(parts: Part[]): ProposedFact | null {
+  const found: { fact: ProposedFact; rent: boolean }[] = [];
   for (const part of parts) {
     const p = part.text;
     for (const m of p.matchAll(AMOUNT)) {
       const [, dollarA, a, kA, sep, dollarB, b, kB] = m;
+      if (isNegated(part, m.index)) continue;
       const before = p.slice(0, m.index);
       const after = p.slice(m.index + m[0].length);
       const isRange = b !== undefined && (sep !== "and" || /\bbetween\s*$/i.test(before));
@@ -306,7 +327,8 @@ function budgetFrom(parts: Part[]): ProposedFact | null {
         (isRange && (dollarB || kB)) ||
         PER_MONTH.test(after) ||
         BUDGET_LEAD.test(before);
-      if (!counts) continue;
+      // "$2,400 on furniture" is an expense, not rent.
+      if (!counts || OTHER_EXPENSE.test(after)) continue;
       // "1.8–2.4k": the "k" covers both ends.
       const low = dollarsOf(a, Boolean(kA) || (isRange && Boolean(kB) && Number(a) < 100));
       const high = isRange ? dollarsOf(b, Boolean(kB)) : null;
@@ -317,10 +339,14 @@ function budgetFrom(parts: Part[]): ProposedFact | null {
       if (!value) continue;
       const entry: FactEntry = { key: "budget", value };
       const hit = { part, start: m.index, end: m.index + m[0].length };
-      return { entry, quote: quoteOf(hit), label: factLabel(entry) };
+      found.push({
+        fact: { entry, quote: quoteOf(hit), label: factLabel(entry) },
+        rent: RENT_CONTEXT.test(p) || PER_MONTH.test(after),
+      });
     }
   }
-  return null;
+  // An amount said to be rent beats any other dollar amount.
+  return (found.find((f) => f.rent) ?? found[0])?.fact ?? null;
 }
 
 const MONTHS = [
@@ -355,8 +381,9 @@ function moveInFrom(parts: Part[], today: string): ProposedFact | null {
     const p = part.text;
     if (!MOVE_WORDS.test(p)) continue;
     const m = MONTH_RE.exec(p);
-    // "may" alone is too often the verb.
+    // "may" alone is too often the verb; "don't want to move in March" isn't a plan.
     if (!m || (m[1].toLowerCase() === "may" && !m[3] && !/\bin may\b/i.test(p))) continue;
+    if (isNegated(part, m.index)) continue;
     const month = MONTHS.findIndex((x) => x.startsWith(m[1].toLowerCase().slice(0, 3)));
     let year = m[3] ? Number(m[3]) : Number(today.slice(0, 4));
     if (!m[3] && month + 1 < Number(today.slice(5, 7))) year += 1;
@@ -493,4 +520,72 @@ export function extractFacts(text: string, today: string): ProposedFact[] {
     }
   }
   return out;
+}
+
+/* ---------------- Checks on Muse's proposals ---------------- */
+
+/**
+ * Whether every place `quote` appears in `text` is inside a negation ("my
+ * budget is not $3000", "I don't want to move in March"): it doesn't support
+ * a fact. False when the quote isn't found as-is.
+ */
+export function negatedInText(text: string, quote: string): boolean {
+  const q = quote.trim().toLowerCase();
+  if (!q) return false;
+  let seen = false;
+  for (const part of clauses(redactProtected(text))) {
+    const t = part.text.toLowerCase();
+    for (let i = t.indexOf(q); i !== -1; i = t.indexOf(q, i + 1)) {
+      seen = true;
+      if (!isNegated(part, i)) return false;
+    }
+  }
+  return seen;
+}
+
+/** Whether a neighborhood's quote is about work, not where they'd live ("I work in the Mission"). */
+export function isWorkplaceQuote(quote: string): boolean {
+  return /\b(?:work(?:s|ing|ed)?|office|job|commut\w*)\b/i.test(quote);
+}
+
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * The quote cut down to the phrase that names the fact ("love hiking" from
+ * "I've got … and love hiking"), the way the rules quote, so a longer quote
+ * can't carry anything else into the saved evidence. Transport and schedule
+ * quotes, and quotes where the fact's words can't be found, are returned as-is.
+ */
+export function narrowQuote(entry: FactEntry, quote: string): string {
+  const parts = clauses(quote);
+  const firstOf = (res: RegExp[]) =>
+    res.map((re) => firstHit(parts, re, false)).find((h) => h !== null) ?? null;
+  let hit: Hit | null = null;
+  switch (entry.key) {
+    case "interest":
+      hit = firstOf(INTEREST_RES.get(entry.value.id) ?? []);
+      break;
+    case "neighborhood":
+      hit = firstOf(
+        NEIGHBORHOOD_PATTERNS.filter((n) => n.slug === entry.value.slug).map((n) => n.re),
+      );
+      break;
+    case "goal":
+      hit = firstOf(GOAL_PATTERNS.filter((g) => g.id === entry.value.id).map((g) => g.re));
+      break;
+    case "budget":
+      hit = firstOf([AMOUNT]);
+      break;
+    case "moveIn":
+      hit = firstOf([MONTH_RE]);
+      break;
+    case "employer":
+      hit = firstOf([new RegExp(escapeRe(entry.value.name.trim()), "i")]);
+      break;
+    default:
+      break;
+  }
+  return hit ? quoteOf(hit) : quote.trim();
 }
