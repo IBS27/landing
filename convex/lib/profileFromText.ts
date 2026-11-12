@@ -4,19 +4,26 @@ import {
   factEntry,
   factSlot,
   GOALS,
+  moveInProblem,
   SF_NEIGHBORHOODS,
   TRANSPORT_MODES,
+  todayInSF,
   WORK_HOURS,
   WORKPLACES,
 } from "./cityProfileFacts";
 import { INTEREST_SECTIONS, INTERESTS } from "./interests";
-import { extractFacts } from "./profileText";
+import { extractFacts, mentionsInterest } from "./profileText";
+import { hasProtected, REDACTED, redactProtected } from "./protectedText";
 
 /**
  * Muse's "Tell us about you" task (#3 on #8's `runAgent`): reads what the
  * person wrote and proposes typed City Profile facts, each with the exact
  * words it came from. The output is only a proposal. The person ticks what's
  * right and `saveBrief` stores it, so the agent never writes profile data.
+ *
+ * Protected traits: the model only ever sees the text with them removed
+ * (`profileInput`), and a quote can't contain one. An interest must be backed
+ * by words naming the activity, so who someone is can't stand in for it.
  *
  * Grounding: every quote must be copied from the text and an employer must be
  * named in it (`check`). Values are limited to the profile's own vocabularies
@@ -25,11 +32,16 @@ import { extractFacts } from "./profileText";
  */
 
 export type ProfileTextInput = {
-  /** What the person wrote, trimmed. */
+  /** What the person wrote, trimmed, with protected traits replaced by `REDACTED`. */
   text: string;
-  /** "YYYY-MM-DD", so "in March" resolves to the right year. */
+  /** "YYYY-MM-DD" in San Francisco, so "in March" resolves to the right year. */
   today: string;
 };
+
+/** The task's input: the only form of the person's text that reaches the model. */
+export function profileInput(text: string, now = Date.now()): ProfileTextInput {
+  return { text: redactProtected(text.trim()), today: todayInSF(now) };
+}
 
 const proposedFact = v.object({
   entry: factEntry,
@@ -64,11 +76,11 @@ Each fact is { entry: { key, value }, quote, carFree? }. At most one fact per ke
 - transport: modes from ${TRANSPORT_MODES.map((m) => m.id).join(", ")} that they'll use to get around ("N Judah", "the bus" and "streetcar" are muni). Include "car" only if they'll have one. Set carFree true only when they say they won't have a car.
 - schedule: workHours ${WORK_HOURS.map((w) => w.id).join(" | ")}, workplace ${WORKPLACES.map((w) => w.id).join(" | ")} (only if they say), weekendsFree false only if they say they work weekends. Propose a schedule only when they say something about work hours or where they work.
 - employer: the company or school by the name they use, only if they name it. workArea only if they say where it is.
-- interest: activities they say they do or enjoy, using these ids. Map synonyms ("boulder" = climbing, "board game nights" = board_games). Skip anything with no close match:
+- interest: activities they say they do or enjoy, using these ids. The quote must name the activity itself. Skip activities they say they don't do or don't like. Map synonyms ("boulder" = climbing, "board game nights" = board_games). Skip anything with no close match:
 ${interestList}
 - goal: ${GOALS.map((g) => `${g.id} (${g.label.toLowerCase()})`).join(", ")}. Only when they say what they want from the move.
 
-Never turn who someone is into a fact: no age, gender, ethnicity, nationality, religion, health, family or relationship status, and no interest stood in for one (a cultural or faith group is not an interest). If the text has nothing usable, return { "facts": [] }.`;
+Never turn who someone is into a fact: no age, gender, ethnicity, nationality, religion, health, family or relationship status, and no interest stood in for one (a cultural or faith group is not an interest). Anything like that has already been replaced with "${REDACTED}": never quote it or guess what it was. If the text has nothing usable, return { "facts": [] }.`;
 
 /** Lowercase, straight quotes, single spaces: for "was this copied from the text?" checks. */
 function loose(s: string) {
@@ -80,9 +92,6 @@ function loose(s: string) {
     .replace(/\s+/g, " ")
     .trim();
 }
-
-const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
-const DATE = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 
 export const profileFromText = defineTask({
   agent: "muse",
@@ -100,6 +109,10 @@ export const profileFromText = defineTask({
       const at = `facts[${i}]`;
       const quote = loose(f.quote);
       if (!quote) problems.push(`${at}.quote is empty`);
+      else if (hasProtected(f.quote))
+        problems.push(
+          `${at}.quote includes something about who they are; quote only the words for this fact`,
+        );
       else if (!text.includes(quote))
         problems.push(`${at}.quote "${f.quote}" isn't copied exactly from the text`);
       const slot = factSlot(f.entry);
@@ -115,15 +128,20 @@ export const profileFromText = defineTask({
           if (e.value.min !== undefined && (e.value.min < 0 || e.value.min > e.value.max))
             problems.push(`${at}: budget min should be between 0 and max`);
           break;
-        case "moveIn":
-          if (!MONTH.test(e.value.month)) problems.push(`${at}: month must be "YYYY-MM"`);
-          else if (e.value.month < input.today.slice(0, 7))
-            problems.push(`${at}: move-in month is before today (${input.today})`);
-          if (
-            e.value.date !== undefined &&
-            (!DATE.test(e.value.date) || !e.value.date.startsWith(e.value.month))
-          )
-            problems.push(`${at}: date must be "YYYY-MM-DD" inside the month`);
+        case "moveIn": {
+          const problem = moveInProblem(e.value, input.today);
+          if (problem)
+            problems.push(
+              `${at}: ${problem} (month "YYYY-MM", date a real "YYYY-MM-DD" in it, not before ${input.today})`,
+            );
+          break;
+        }
+        case "interest":
+          // Named in the quote, and not only in a negated clause of the text ("don't like climbing").
+          if (!mentionsInterest(f.quote, e.value.id) || !mentionsInterest(input.text, e.value.id))
+            problems.push(
+              `${at}: the quote "${f.quote}" doesn't say they do or like ${e.value.id}; quote the words naming the activity, or drop it`,
+            );
           break;
         case "transport":
           if (e.value.modes.length === 0 && !f.carFree)
@@ -142,7 +160,7 @@ export const profileFromText = defineTask({
     return problems;
   },
   fallback: (input) => ({
-    facts: extractFacts(input.text, Date.parse(`${input.today}T12:00:00Z`)).map((p) => ({
+    facts: extractFacts(input.text, input.today).map((p) => ({
       entry: p.entry,
       quote: p.quote,
       ...(p.carFree ? { carFree: true } : {}),
@@ -151,4 +169,6 @@ export const profileFromText = defineTask({
   // Short text in, short JSON out: keep it quick for an onboarding form.
   effort: "low",
   maxAttempts: 2,
+  // 2: protected traits redacted, interests must be named in their quote, one move-in policy.
+  version: 2,
 });

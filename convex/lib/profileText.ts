@@ -3,18 +3,24 @@ import {
   factLabel,
   factSlot,
   type GoalId,
+  moveInProblem,
   type NeighborhoodSlug,
   TRANSPORT_MODES,
   type TransportMode,
   type WorkHours,
   type Workplace,
 } from "./cityProfileFacts";
-import { INTERESTS, type InterestId, normalize } from "./interests";
+import { INTERESTS, type InterestId } from "./interests";
+import { REDACTED, redactProtected } from "./protectedText";
 
 /**
  * Turns the optional "Tell us about you" text into proposed City Profile
  * facts, each with the words it came from. Nothing is saved here: the person
  * ticks what's right and the brief saves it.
+ *
+ * Protected traits are removed before anything is read (`redactProtected`),
+ * so no proposal or quote can carry one, and negated mentions ("I don't like
+ * climbing") propose nothing.
  *
  * This is the rules-based path. Muse's model task (`./profileFromText.ts`)
  * runs first; these rules are its fallback when AI is off or the model can't
@@ -41,35 +47,133 @@ export function proposalLabel(entry: FactEntry, carFree?: boolean): string {
   return labels.join(", ").replace(/^n/, "N");
 }
 
+/* ---------------- Clauses, negation and quotes ---------------- */
+
+/** One sentence or clause, with the spans a negation covers ("don't like climbing or coffee"). */
+type Part = { text: string; negated: [number, number][] };
+
+type Hit = { part: Part; start: number; end: number };
+
+const NEGATION =
+  /\b(?:don['’]?t|do not|doesn['’]?t|does not|didn['’]?t|did not|never|not|no longer|no|nor|neither|hate[sd]?|dislike[sd]?|can['’]?t stand|avoid(?:s|ing)?|isn['’]?t|aren['’]?t|wasn['’]?t|won['’]?t|wouldn['’]?t|without|quit|stopped|gave up)\b/gi;
+/** Where a negation stops: a contrast, a new clause about the person, or punctuation. */
+const NEGATION_END =
+  /\b(?:but|though|although|however|except|yet|whereas|while|instead|so|because)\b|[;:—–()]|(?:,|\band)\s+(?=(?:i|we)\b)/i;
+
+/**
+ * The spans of `text` a negation covers, from the end of the negating word to
+ * the end of its clause. A match that starts inside one is negated; one that
+ * starts with the negating word itself ("don't know anyone", "no car") isn't.
+ */
+export function negatedSpans(text: string): [number, number][] {
+  const spans: [number, number][] = [];
+  for (const m of text.matchAll(NEGATION)) {
+    const from = m.index + m[0].length;
+    const rest = text.slice(from);
+    const stop = rest.search(NEGATION_END);
+    spans.push([from, stop === -1 ? text.length : from + stop]);
+  }
+  return spans;
+}
+
+function isNegated(part: Part, at: number): boolean {
+  return part.negated.some(([s, e]) => at >= s && at < e);
+}
+
 /** Sentences and clauses, with their original wording. */
-function clauses(text: string): string[] {
+function clauses(text: string): Part[] {
   return text
     .split(/(?<=[.!?;])\s+|\n+/)
     .map((s) => s.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .map((t) => ({ text: t, negated: negatedSpans(t) }));
 }
 
-function clip(s: string, max = 120): string {
-  const t = s.replace(/\s+/g, " ").trim();
-  return t.length > max ? `${t.slice(0, max - 1).trimEnd()}…` : t;
+function global(re: RegExp): RegExp {
+  return re.global ? re : new RegExp(re.source, `${re.flags}g`);
 }
 
-/** The first clause matching `re`, as the quote for a proposal. */
-function quoteFor(parts: string[], re: RegExp): string | null {
-  const hit = parts.find((p) => re.test(p));
-  return hit ? clip(hit) : null;
+/** Every match of `re` across the parts, in reading order; negated ones skipped unless `negatable` is false. */
+function hits(parts: Part[], re: RegExp, negatable = true): Hit[] {
+  const out: Hit[] = [];
+  const g = global(re);
+  for (const part of parts) {
+    for (const m of part.text.matchAll(g)) {
+      if (m[0].length === 0) continue;
+      if (negatable && isNegated(part, m.index)) continue;
+      out.push({ part, start: m.index, end: m.index + m[0].length });
+    }
+  }
+  return out;
 }
 
-function wordRe(phrase: string, flags = "i"): RegExp {
-  const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "[\\s-]+");
-  return new RegExp(`(^|[^a-z0-9])${escaped}($|[^a-z0-9])`, flags);
+function firstHit(parts: Part[], re: RegExp, negatable = true): Hit | null {
+  return hits(parts, re, negatable)[0] ?? null;
+}
+
+const QUOTE_MAX = 120;
+const LEADING_FILLER = /^(?:[\s,.;:–—-]|\b(?:and|or|but|who|that|which|also|so)\b)+/i;
+
+/**
+ * The words around a match, as the quote for a proposal: the stretch of its
+ * clause between redactions (so never a removed protected trait), without
+ * leading filler, at most about `QUOTE_MAX` characters, copied exactly.
+ */
+function quoteOf({ part, start, end }: Hit): string {
+  const t = part.text;
+  const before = t.lastIndexOf(REDACTED, start);
+  let from = before === -1 ? 0 : before + REDACTED.length;
+  const after = t.indexOf(REDACTED, end);
+  let to = after === -1 ? t.length : after;
+  if (to - from > QUOTE_MAX) {
+    // A window around the match, widened to whole words.
+    from = Math.max(from, start - 50);
+    to = Math.min(to, end + 50);
+    while (from > 0 && /\w/.test(t[from - 1])) from--;
+    while (to < t.length && /\w/.test(t[to])) to++;
+  }
+  const raw = t.slice(from, to);
+  const lead = Math.min(raw.match(LEADING_FILLER)?.[0].length ?? 0, start - from);
+  return raw.slice(lead).trim();
+}
+
+function quoteFor(parts: Part[], re: RegExp): string | null {
+  const hit = firstHit(parts, re);
+  return hit ? quoteOf(hit) : null;
+}
+
+/** A phrase as a whole-word pattern; spaces match any separator ("board-games", "farmer's market"). */
+function wordRe(phrase: string): RegExp {
+  const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "[^a-z0-9]+");
+  return new RegExp(`(?<![a-z0-9])${escaped}(?![a-z0-9])`, "gi");
+}
+
+const INTEREST_RES = new Map<InterestId, RegExp[]>(
+  INTERESTS.map((i) => [i.id as InterestId, i.aliases.map(wordRe)]),
+);
+
+/** The first place `parts` say they do or like `id` (one of its aliases, not negated). */
+function interestHit(parts: Part[], id: InterestId): Hit | null {
+  const all = (INTEREST_RES.get(id) ?? []).flatMap((re) => hits(parts, re));
+  all.sort((a, b) => parts.indexOf(a.part) - parts.indexOf(b.part) || a.start - b.start);
+  return all[0] ?? null;
+}
+
+/**
+ * Whether `text` names the activity `id` without negating it. Muse's checks
+ * use it so an interest is backed by the activity itself, never by who
+ * someone is ("I am Hindu" doesn't make yoga).
+ */
+export function mentionsInterest(text: string, id: InterestId): boolean {
+  return interestHit(clauses(text), id) !== null;
 }
 
 /* ---------------- Neighborhoods ---------------- */
 
 /**
  * Everyday names → Analysis Neighborhood. Ambiguous words ("Mission",
- * "Sunset", "Marina") must be capitalized or follow "the".
+ * "Sunset", "Marina") must be capitalized or follow "the". Matches can't
+ * overlap and longer names win, so "Outer Mission" isn't also the Mission.
  */
 const NEIGHBORHOOD_PATTERNS: { re: RegExp; slug: NeighborhoodSlug }[] = [
   { re: /\bMission Bay\b/i, slug: "mission-bay" },
@@ -105,6 +209,26 @@ const NEIGHBORHOOD_PATTERNS: { re: RegExp; slug: NeighborhoodSlug }[] = [
   { re: /\bPresidio Heights\b/i, slug: "presidio-heights" },
 ];
 
+function neighborhoodsFrom(parts: Part[]): ProposedFact[] {
+  const found = NEIGHBORHOOD_PATTERNS.flatMap(({ re, slug }) =>
+    hits(parts, re).map((hit) => ({ hit, slug })),
+  ).sort((a, b) => b.hit.end - b.hit.start - (a.hit.end - a.hit.start));
+  const kept: typeof found = [];
+  for (const f of found) {
+    const overlaps = kept.some(
+      (k) => k.hit.part === f.hit.part && k.hit.start < f.hit.end && f.hit.start < k.hit.end,
+    );
+    if (!overlaps) kept.push(f);
+  }
+  kept.sort(
+    (a, b) => parts.indexOf(a.hit.part) - parts.indexOf(b.hit.part) || a.hit.start - b.hit.start,
+  );
+  return kept.map(({ hit, slug }) => {
+    const entry: FactEntry = { key: "neighborhood", value: { slug } };
+    return { entry, quote: quoteOf(hit), label: factLabel(entry) };
+  });
+}
+
 /* ---------------- Transport ---------------- */
 
 const NO_CAR =
@@ -137,38 +261,52 @@ const GOAL_PATTERNS: { re: RegExp; id: GoalId }[] = [
 
 /* ---------------- Budget and dates ---------------- */
 
-const AMOUNT =
-  /\$\s?(\d{1,2}(?:[.,]\d{1,3})?)\s?(k)?\b|\b(\d{1,2}(?:[.,]\d{3})|\d{1,2}(?:\.\d)?k)\s?(?:\/\s?mo(?:nth)?|a month|per month|monthly)?/gi;
+const NUM = String.raw`(\$\s?)?(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)(\s?k\b)?`;
+/** One amount or a range: "$2,400", "$2.4k", "1800–2400", "$1,800 to $2,400". */
+const AMOUNT = new RegExp(`${NUM}(?:\\s*(-|–|—|to|and)\\s*${NUM})?`, "gi");
+const PER_MONTH = /^\s*(?:\/\s*mo(?:nth)?\b|(?:a|per|each|every)\s+month\b|monthly\b)/i;
+const BUDGET_LEAD =
+  /\b(?:budget|rent|spend|afford|up to|under|below|max(?:imum)?|around|about|between|range)\b[^.\d$]{0,15}$/i;
 
-function parseAmount(raw: string, k: boolean): number | null {
-  const n = Number(raw.replace(/,/g, ""));
-  if (!Number.isFinite(n)) return null;
-  const v = k || n < 30 ? n * 1000 : n;
-  return v >= 300 && v <= 20000 ? Math.round(v / 50) * 50 : null;
+/** Whole dollars; thousands only with an explicit "k" ("$2.4k"), so "$20" is twenty dollars. */
+function dollarsOf(raw: string, k: boolean): number {
+  return Math.round(Number(raw.replace(/,/g, "")) * (k ? 1000 : 1));
 }
 
-function budgetFrom(parts: string[]): ProposedFact | null {
-  for (const p of parts) {
-    if (!/\$|budget|rent|\/\s?mo|a month|per month|\bk\b/i.test(p)) continue;
-    const amounts: number[] = [];
+const inRange = (n: number) => n >= 300 && n <= 20000;
+
+/**
+ * Monthly rent from the first clause that states one. A number counts when it
+ * has a "$" or "k", is followed by "a month", or follows "budget", "rent",
+ * "up to" and the like, so "March 2027" or "9 to 5" aren't amounts.
+ */
+function budgetFrom(parts: Part[]): ProposedFact | null {
+  for (const part of parts) {
+    const p = part.text;
     for (const m of p.matchAll(AMOUNT)) {
-      if (m[1]) {
-        const a = parseAmount(m[1], Boolean(m[2]));
-        if (a) amounts.push(a);
-      } else if (m[3]) {
-        const raw = m[3].toLowerCase();
-        const a = parseAmount(raw.replace("k", ""), raw.endsWith("k"));
-        if (a && /\$|budget|rent|mo|month/i.test(p)) amounts.push(a);
-      }
+      const [, dollarA, a, kA, sep, dollarB, b, kB] = m;
+      const before = p.slice(0, m.index);
+      const after = p.slice(m.index + m[0].length);
+      const isRange = b !== undefined && (sep !== "and" || /\bbetween\s*$/i.test(before));
+      const counts =
+        dollarA ||
+        kA ||
+        (isRange && (dollarB || kB)) ||
+        PER_MONTH.test(after) ||
+        BUDGET_LEAD.test(before);
+      if (!counts) continue;
+      // "1.8–2.4k": the "k" covers both ends.
+      const low = dollarsOf(a, Boolean(kA) || (isRange && Boolean(kB) && Number(a) < 100));
+      const high = isRange ? dollarsOf(b, Boolean(kB)) : null;
+      let value: { min?: number; max: number } | null = null;
+      if (high !== null && inRange(high))
+        value = inRange(low) && low < high ? { min: low, max: high } : { max: high };
+      else if (inRange(low)) value = { max: low };
+      if (!value) continue;
+      const entry: FactEntry = { key: "budget", value };
+      const hit = { part, start: m.index, end: m.index + m[0].length };
+      return { entry, quote: quoteOf(hit), label: factLabel(entry) };
     }
-    if (amounts.length === 0) continue;
-    const max = Math.max(...amounts);
-    const min = amounts.length > 1 ? Math.min(...amounts) : undefined;
-    const entry: FactEntry = {
-      key: "budget",
-      value: min !== undefined && min < max ? { min, max } : { max },
-    };
-    return { entry, quote: clip(p), label: factLabel(entry) };
   }
   return null;
 }
@@ -192,76 +330,100 @@ const MONTH_RE = new RegExp(
   "i",
 );
 
-function moveInFrom(parts: string[], now: number): ProposedFact | null {
-  for (const p of parts) {
-    if (!/\b(mov|land|arriv|start|relocat|get(ting)? to|coming)/i.test(p)) continue;
-    const m = p.match(MONTH_RE);
+const MOVE_WORDS = /\b(mov|land|arriv|start|relocat|get(ting)? to|coming)/i;
+
+/**
+ * The move-in month (and day, when given) from the first clause about moving.
+ * Without a year it's the next such month. Uses the same rules as Muse's
+ * checks and `saveBrief` (`moveInProblem`): an impossible or past date drops
+ * the day, and a past month proposes nothing.
+ */
+function moveInFrom(parts: Part[], today: string): ProposedFact | null {
+  for (const part of parts) {
+    const p = part.text;
+    if (!MOVE_WORDS.test(p)) continue;
+    const m = MONTH_RE.exec(p);
     // "may" alone is too often the verb.
     if (!m || (m[1].toLowerCase() === "may" && !m[3] && !/\bin may\b/i.test(p))) continue;
     const month = MONTHS.findIndex((x) => x.startsWith(m[1].toLowerCase().slice(0, 3)));
-    const today = new Date(now);
-    let year = m[3] ? Number(m[3]) : today.getUTCFullYear();
-    if (!m[3] && month < today.getUTCMonth()) year += 1;
-    const mm = String(month + 1).padStart(2, "0");
-    const day = m[2] ? Number(m[2]) : undefined;
-    const value =
-      day && day <= 31
-        ? { month: `${year}-${mm}`, date: `${year}-${mm}-${String(day).padStart(2, "0")}` }
-        : { month: `${year}-${mm}` };
+    let year = m[3] ? Number(m[3]) : Number(today.slice(0, 4));
+    if (!m[3] && month + 1 < Number(today.slice(5, 7))) year += 1;
+    const mm = `${year}-${String(month + 1).padStart(2, "0")}`;
+    const candidates: { month: string; date?: string }[] = m[2]
+      ? [{ month: mm, date: `${mm}-${m[2].padStart(2, "0")}` }]
+      : [];
+    candidates.push({ month: mm });
+    const value = candidates.find((c) => moveInProblem(c, today) === null);
+    if (!value) continue;
     const entry: FactEntry = { key: "moveIn", value };
-    return { entry, quote: clip(p), label: factLabel(entry) };
+    const hit = { part, start: m.index, end: m.index + m[0].length };
+    return { entry, quote: quoteOf(hit), label: factLabel(entry) };
   }
   return null;
 }
 
 /* ---------------- Schedule and work ---------------- */
 
-function scheduleFrom(parts: string[]): ProposedFact | null {
-  const all = parts.join(" ");
-  let workHours: WorkHours | null = null;
+const WORK_HOURS_PATTERNS: { re: RegExp; hours: WorkHours }[] = [
   // "Work nights", not "board game nights".
-  if (/\b(night shifts?|work(ing|s)? nights|nights? nurse|overnights?|graveyard)\b/i.test(all))
-    workHours = "night";
-  else if (/\b(evening shifts?|work evenings|closing shifts?)\b/i.test(all)) workHours = "evening";
-  else if (/\b(9\s?(-|to)\s?5|nine to five|day job|office job|work days)\b/i.test(all))
-    workHours = "day";
-  else if (/\b(shifts? vary|irregular hours|freelanc)/i.test(all)) workHours = "varies";
-  let workplace: Workplace | undefined;
-  if (/\b(remote|work from home|wfh)\b/i.test(all)) workplace = "remote";
-  else if (/\bhybrid\b/i.test(all)) workplace = "hybrid";
-  else if (/\b(in the office|in-office|in office|commut)/i.test(all)) workplace = "office";
-  if (!workHours && workplace) workHours = "day";
-  if (!workHours) return null;
-  const weekendsFree = !/\bwork(s|ing)?\b[^.!?]{0,20}\bweekends?\b|\bweekend shifts?\b/i.test(all);
-  const quoteRe =
-    /night|overnight|graveyard|evening|9\s?(-|to)\s?5|nine to five|day job|office|remote|home|wfh|hybrid|commut|shift|weekend|freelanc/i;
+  {
+    re: /\b(night shifts?|work(ing|s)? nights|nights? nurse|overnights?|graveyard)\b/i,
+    hours: "night",
+  },
+  { re: /\b(evening shifts?|work evenings|closing shifts?)\b/i, hours: "evening" },
+  { re: /\b(9\s?(-|to)\s?5|nine to five|day job|office job|work days)\b/i, hours: "day" },
+  { re: /\b(shifts? vary|irregular hours|freelanc\w*)/i, hours: "varies" },
+];
+const WORKPLACE_PATTERNS: { re: RegExp; place: Workplace }[] = [
+  { re: /\b(remote|work from home|wfh)\b/i, place: "remote" },
+  { re: /\bhybrid\b/i, place: "hybrid" },
+  { re: /\b(in the office|in-office|in office|commut\w*)/i, place: "office" },
+];
+const WORKS_WEEKENDS = /\bwork(s|ing)?\b[^.!?]{0,20}\bweekends?\b|\bweekend shifts?\b/i;
+
+function scheduleFrom(parts: Part[]): ProposedFact | null {
+  const hours = WORK_HOURS_PATTERNS.map((p) => ({ ...p, hit: firstHit(parts, p.re) })).find(
+    (p) => p.hit,
+  );
+  const place = WORKPLACE_PATTERNS.map((p) => ({ ...p, hit: firstHit(parts, p.re) })).find(
+    (p) => p.hit,
+  );
+  const hit = hours?.hit ?? place?.hit;
+  if (!hit) return null;
+  const workHours = hours?.hours ?? "day";
+  const weekendsFree = firstHit(parts, WORKS_WEEKENDS) === null;
   const entry: FactEntry = {
     key: "schedule",
-    value: workplace ? { workHours, workplace, weekendsFree } : { workHours, weekendsFree },
+    value: place
+      ? { workHours, workplace: place.place, weekendsFree }
+      : { workHours, weekendsFree },
   };
-  return { entry, quote: quoteFor(parts, quoteRe) ?? clip(all), label: factLabel(entry) };
+  return { entry, quote: quoteOf(hit), label: factLabel(entry) };
 }
 
 const EMPLOYER_RE =
   /\b(?:work(?:ing)? (?:at|for)|job at|joining|starting at|engineer at|designer at|nurse at|intern(?:ing)? at)\s+((?:[A-Z][\w&'.-]*)(?:\s+[A-Z][\w&'.-]*){0,3})/;
 
-function employerFrom(parts: string[]): ProposedFact | null {
-  for (const p of parts) {
-    const m = p.match(EMPLOYER_RE);
+function employerFrom(parts: Part[]): ProposedFact | null {
+  for (const hit of hits(parts, EMPLOYER_RE)) {
+    const m = hit.part.text.slice(hit.start).match(EMPLOYER_RE);
     if (!m) continue;
     const name = m[1].replace(/[.,]$/, "").trim();
     if (name.length < 2 || name.length > 60) continue;
     const entry: FactEntry = { key: "employer", value: { name } };
-    return { entry, quote: clip(p), label: factLabel(entry) };
+    return { entry, quote: quoteOf(hit), label: factLabel(entry) };
   }
   return null;
 }
 
 /* ---------------- Entry point ---------------- */
 
-/** Proposed facts found in `text`, one per slot, in reading order of kind. */
-export function extractFacts(text: string, now: number): ProposedFact[] {
-  const parts = clauses(text.slice(0, MAX_TEXT_LENGTH));
+/**
+ * Proposed facts found in `text`, one per slot, in reading order of kind.
+ * `today` is "YYYY-MM-DD" in San Francisco.
+ */
+export function extractFacts(text: string, today: string): ProposedFact[] {
+  const parts = clauses(redactProtected(text.slice(0, MAX_TEXT_LENGTH)));
   if (parts.length === 0) return [];
   const out: ProposedFact[] = [];
   const add = (p: ProposedFact | null) => {
@@ -269,15 +431,8 @@ export function extractFacts(text: string, now: number): ProposedFact[] {
   };
 
   add(budgetFrom(parts));
-  add(moveInFrom(parts, now));
-
-  for (const { re, slug } of NEIGHBORHOOD_PATTERNS) {
-    const q = quoteFor(parts, re);
-    if (q) {
-      const entry: FactEntry = { key: "neighborhood", value: { slug } };
-      add({ entry, quote: q, label: factLabel(entry) });
-    }
-  }
+  add(moveInFrom(parts, today));
+  for (const n of neighborhoodsFrom(parts)) add(n);
 
   const modes = new Set<TransportMode>();
   const transportQuotes: string[] = [];
@@ -307,17 +462,11 @@ export function extractFacts(text: string, now: number): ProposedFact[] {
   add(employerFrom(parts));
 
   // Interests: alias phrases as whole words, in list order.
-  const seen = new Set<InterestId>();
   for (const interest of INTERESTS) {
-    for (const alias of interest.aliases) {
-      if (seen.has(interest.id)) break;
-      const re = wordRe(normalize(alias));
-      const hit = parts.find((p) => re.test(` ${normalize(p)} `));
-      if (hit) {
-        seen.add(interest.id);
-        const entry: FactEntry = { key: "interest", value: { id: interest.id } };
-        add({ entry, quote: clip(hit), label: factLabel(entry) });
-      }
+    const hit = interestHit(parts, interest.id);
+    if (hit) {
+      const entry: FactEntry = { key: "interest", value: { id: interest.id } };
+      add({ entry, quote: quoteOf(hit), label: factLabel(entry) });
     }
   }
 

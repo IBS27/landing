@@ -11,15 +11,18 @@ import {
   factEntry,
   factSlot,
   goalId,
+  moveInProblem,
   moveInValue,
   neighborhoodSlug,
   scheduleValue,
+  todayInSF,
   transportValue,
 } from "./lib/cityProfileFacts";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { interestId } from "./lib/interests";
-import { profileFromText } from "./lib/profileFromText";
+import { profileFromText, profileInput } from "./lib/profileFromText";
 import { MAX_TEXT_LENGTH, proposalLabel } from "./lib/profileText";
+import { hasProtected } from "./lib/protectedText";
 
 /**
  * Landing City Profile (#3). Other features read profiles with `getProfile`
@@ -56,9 +59,6 @@ const BRIEF_KEYS: readonly FactKey[] = [
   "goal",
 ];
 
-const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
-const DATE = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
-
 function check(ok: boolean, message: string) {
   if (!ok) throw new ConvexError(message);
 }
@@ -82,12 +82,10 @@ export const saveBrief = viewerMutation({
       b.budget.min === undefined || (b.budget.min >= 0 && b.budget.min <= b.budget.max),
       "The low end of your budget should be below the high end",
     );
-    check(MONTH.test(b.moveIn.month), "Pick a move-in month");
-    check(
-      b.moveIn.date === undefined ||
-        (DATE.test(b.moveIn.date) && b.moveIn.date.startsWith(b.moveIn.month)),
-      "Move-in date doesn't match the month",
-    );
+    // A move-in they saved before stays valid after it passes; a new one can't be in the past.
+    const saved = (await getProfile(ctx, ctx.viewer)).moveIn?.value;
+    const moveIn = moveInProblem(b.moveIn, todayInSF(), saved);
+    check(moveIn === null, moveIn ?? "");
     check(b.transport.modes.length > 0, "Pick at least one way of getting around");
     check(
       b.interests.length <= 25 && b.neighborhoods.length <= 10 && b.goals.length <= 10,
@@ -117,7 +115,13 @@ export const saveBrief = viewerMutation({
       ...[...new Set(b.goals)].map((id) => ({ key: "goal" as const, value: { id } })),
     ];
 
-    const quotes = new Map((fromText ?? []).map((q) => [q.slot, q.quote.trim().slice(0, 200)]));
+    // A quote that names a protected trait is never kept as evidence.
+    const quotes = new Map(
+      (fromText ?? [])
+        .map((q) => ({ slot: q.slot, quote: q.quote.trim().slice(0, 200) }))
+        .filter((q) => q.quote && !hasProtected(q.quote))
+        .map((q) => [q.slot, q.quote] as const),
+    );
     const facts: StatedFact[] = entries.map((entry) => {
       const quote = quotes.get(factSlot(entry));
       const evidence: FactEvidence = quote
@@ -136,11 +140,6 @@ const proposal = v.object({
   label: v.string(),
   carFree: v.optional(v.boolean()),
 });
-
-/** Today in San Francisco, "YYYY-MM-DD" (en-CA formats dates that way). */
-function todayInSF() {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date());
-}
 
 /**
  * "Tell us about you": Muse proposes facts from free text, each with the
@@ -162,10 +161,11 @@ export const suggestFromText = action({
     if (text.length > MAX_TEXT_LENGTH) {
       throw new ConvexError(`Keep it under ${MAX_TEXT_LENGTH} characters`);
     }
-    const trimmed = text.trim();
-    if (!trimmed) return { via: "fallback" as const, proposals: [] };
+    // Protected traits are removed here, before the model or the rules read anything.
+    const input = profileInput(text);
+    if (!input.text) return { via: "fallback" as const, proposals: [] };
     const result = await runAgent(ctx, profileFromText, {
-      input: { text: trimmed, today: todayInSF() },
+      input,
       // No sources: the model reads only the caller's own text, and the result goes
       // back to that viewer alone (the cache key doesn't include shownTo).
       sources: [],

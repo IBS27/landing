@@ -173,6 +173,68 @@ export function factSlot(e: FactEntry): string {
   }
 }
 
+/**
+ * An order-insensitive key for a fact value: equal values give equal keys.
+ * Arrays are sets here (transport modes), so their order doesn't count.
+ */
+export function valueKey(x: unknown): string {
+  if (Array.isArray(x)) return `[${x.map(valueKey).sort().join(",")}]`;
+  if (x && typeof x === "object") {
+    const o = x as Record<string, unknown>;
+    return `{${Object.keys(o)
+      .filter((k) => o[k] !== undefined)
+      .sort()
+      .map((k) => `${k}:${valueKey(o[k])}`)
+      .join(",")}}`;
+  }
+  return JSON.stringify(x);
+}
+
+/* ---------------- Move-in dates ---------------- */
+
+/** Today in San Francisco, "YYYY-MM-DD" (en-CA formats dates that way). */
+export function todayInSF(now = Date.now()): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(now);
+}
+
+/** A real month, "YYYY-MM". */
+export function isMonth(s: string): boolean {
+  return /^20\d\d-(0[1-9]|1[0-2])$/.test(s);
+}
+
+/** A real calendar date, "YYYY-MM-DD": no February 31. */
+export function isCalendarDate(s: string): boolean {
+  const m = /^(20\d\d)-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.exec(s);
+  if (!m) return false;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  return d <= new Date(Date.UTC(y, mo, 0)).getUTCDate();
+}
+
+/**
+ * Why a move-in can't be proposed or saved, or null when it's fine. The one
+ * policy for extraction, Muse's checks, the brief form and `saveBrief`:
+ * - the month and date must be real ("2027-02-31" isn't), and the date inside the month;
+ * - a new move-in can't be in the past: not before this month, and a date not before today;
+ * - one the person already saved (`saved`) stays valid after it passes, so they can
+ *   still edit the rest of their brief once they've moved.
+ */
+export function moveInProblem(
+  value: FactValue<"moveIn">,
+  today: string,
+  saved?: FactValue<"moveIn"> | null,
+): string | null {
+  if (!isMonth(value.month)) return "Pick a move-in month";
+  if (
+    value.date !== undefined &&
+    (!isCalendarDate(value.date) || !value.date.startsWith(value.month))
+  )
+    return "Your move-in date isn't a real date in that month";
+  if (saved && valueKey(saved) === valueKey(value)) return null;
+  if (value.month < today.slice(0, 7)) return "Your move-in month is in the past";
+  if (value.date !== undefined && value.date < today) return "Your move-in date is in the past";
+  return null;
+}
+
 /* ---------------- Provenance ---------------- */
 
 export const factSource = literals("stated", "inferred");
