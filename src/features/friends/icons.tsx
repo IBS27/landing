@@ -1,4 +1,4 @@
-import type { SVGProps } from "react";
+import { type SVGProps, useId } from "react";
 
 /** Facebook's filled friend glyphs (rail icons, friend buttons). */
 
@@ -16,11 +16,22 @@ const HEAD = "M8 1.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z";
 const BODY =
   "M8 11c-3.87 0-7 2.24-7 5v.5A2.5 2.5 0 0 0 3.5 19h7.04A5.98 5.98 0 0 1 9.3 11.1 9.6 9.6 0 0 0 8 11Z";
 
-/** Two people (rail "Home"). */
+/** Two people (rail "Home"): one in front, one behind and higher. */
 export function FriendsHomeGlyph(p: P) {
+  const id = useId();
   return (
     <Svg {...p}>
-      <path d="M7 1.5a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5Zm7.25 1.25a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM7 10.5c-3.6 0-6.5 2.1-6.5 4.75v.75A2.5 2.5 0 0 0 3 18.5h8a2.5 2.5 0 0 0 2.5-2.5v-.75C13.5 12.6 10.6 10.5 7 10.5Zm8 8h1.5A2.5 2.5 0 0 0 19 16v-.5c0-2.35-2.1-4.27-5.02-4.67A5.66 5.66 0 0 1 15 14.2V16c0 .93-.25 1.8-.69 2.5H15Z" />
+      <mask id={id}>
+        <rect width="20" height="20" fill="#fff" />
+        <circle cx="6.5" cy="8.3" r="4.6" fill="#000" />
+        <rect x="-1" y="11" width="15" height="9" rx="4.5" fill="#000" />
+      </mask>
+      <g mask={`url(#${id})`}>
+        <circle cx="14" cy="4.6" r="3.6" />
+        <rect x="8.5" y="9.2" width="11" height="6.3" rx="3.15" />
+      </g>
+      <circle cx="6.5" cy="8.3" r="3.3" />
+      <rect x="0.5" y="12.5" width="12" height="6" rx="3" />
     </Svg>
   );
 }
@@ -80,6 +91,18 @@ export function PersonXGlyph(p: P) {
   );
 }
 
+/** Filled gear (rail title "Edit notification settings"). */
+export function GearGlyph(p: P) {
+  return (
+    <Svg {...p} viewBox="0 0 24 24">
+      <path
+        fillRule="evenodd"
+        d="M10.2 1.5h3.6a1 1 0 0 1 1 .86l.32 2.27c.6.26 1.16.58 1.68.97l2.13-.86a1 1 0 0 1 1.24.43l1.8 3.12a1 1 0 0 1-.24 1.29l-1.8 1.41a7.6 7.6 0 0 1 0 2.02l1.8 1.41a1 1 0 0 1 .24 1.29l-1.8 3.12a1 1 0 0 1-1.24.43l-2.13-.86c-.52.39-1.08.71-1.68.97l-.32 2.27a1 1 0 0 1-1 .86h-3.6a1 1 0 0 1-1-.86l-.32-2.27a7.9 7.9 0 0 1-1.68-.97l-2.13.86a1 1 0 0 1-1.24-.43l-1.8-3.12a1 1 0 0 1 .24-1.29l1.8-1.41a7.6 7.6 0 0 1 0-2.02l-1.8-1.41a1 1 0 0 1-.24-1.29l1.8-3.12a1 1 0 0 1 1.24-.43l2.13.86c.52-.39 1.08-.71 1.68-.97l.32-2.27a1 1 0 0 1 1-.86ZM12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+      />
+    </Svg>
+  );
+}
+
 /** Gift (rail "Birthdays"). */
 export function GiftGlyph(p: P) {
   return (
@@ -89,20 +112,21 @@ export function GiftGlyph(p: P) {
   );
 }
 
-/** The two-person illustration on the empty right pane. */
+/** The two-person illustration on the empty right pane (traced from Facebook's). */
 export function PeopleIllustration({ size = 112 }: { size?: number }) {
+  const id = useId();
   return (
-    <svg viewBox="0 0 112 112" width={size} height={size} aria-hidden>
-      <rect x="18" y="0" width="20" height="58" rx="5" fill="#65686c" opacity=".55" />
-      <rect x="18" y="10" width="20" height="26" rx="10" fill="#8ab4f8" />
-      <path d="M0 60a12 12 0 0 1 12-12h32a12 12 0 0 1 12 12v52H0V60Z" fill="#bcc0c4" />
-      <circle cx="68" cy="22" r="9" fill="#bcc0c4" />
-      <circle cx="74" cy="44" r="14" fill="#0866ff" />
-      <path
-        d="M60 44a14 14 0 0 1 14-14c4 0 7.5 1.6 10 4.2L64 47.5A14 14 0 0 1 60 44Z"
-        fill="#bcc0c4"
-      />
-      <path d="M38 112a36 36 0 0 1 72 0H38Z" fill="#65686c" opacity=".85" />
+    <svg viewBox="0 -3 112 112" width={size} height={size} aria-hidden>
+      <clipPath id={id}>
+        <circle cx="73" cy="53" r="11" />
+      </clipPath>
+      <path d="M23 21a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v24H23V21Z" fill="#7d8085" />
+      <rect x="23" y="27" width="20" height="23" rx="8" fill="#9ec5fe" />
+      <path d="M12 61a6 6 0 0 1 6-6h30a6 6 0 0 1 6 6v38H12V61Z" fill="#bcc0c4" />
+      <circle cx="66" cy="34" r="7" fill="#bcc0c4" />
+      <circle cx="73" cy="53" r="11" fill="#0866ff" />
+      <circle cx="68" cy="45" r="10" fill="#bcc0c4" clipPath={`url(#${id})`} />
+      <path d="M42 99a29 29 0 0 1 58 0H42Z" fill="#7d8085" />
     </svg>
   );
 }

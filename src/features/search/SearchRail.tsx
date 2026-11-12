@@ -1,36 +1,36 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import {
-  CalendarDays,
-  Flag,
-  GalleryVerticalEnd,
-  Image,
-  MapPin,
-  Newspaper,
-  PlaySquare,
-  Store,
-  Users,
-  UsersRound,
-} from "lucide-react";
 import type { ComponentType } from "react";
 import { useQ } from "@/app/viewer";
+import {
+  CalendarStarGlyph,
+  CardsGlyph,
+  FlagGlyph,
+  GroupsGlyph,
+  PeopleGlyph,
+  PhotoGlyph,
+  PinGlyph,
+  PostsGlyph,
+  StoreGlyph,
+  VideoGlyph,
+} from "@/features/misc/glyphs";
 import { cn } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/ui/overlays";
 import { api } from "../../../convex/_generated/api";
 import type { SearchParams, SearchTab } from "./params";
 
-type IconType = ComponentType<{ size?: number; strokeWidth?: number; className?: string }>;
+type IconType = ComponentType<{ size?: number; className?: string }>;
 
 export const TABS: { tab: SearchTab; label: string; Icon: IconType }[] = [
-  { tab: "top", label: "All", Icon: GalleryVerticalEnd },
-  { tab: "posts", label: "Posts", Icon: Newspaper },
-  { tab: "people", label: "People", Icon: Users },
-  { tab: "photos", label: "Photos", Icon: Image },
-  { tab: "videos", label: "Videos", Icon: PlaySquare },
-  { tab: "marketplace", label: "Marketplace", Icon: Store },
-  { tab: "pages", label: "Pages", Icon: Flag },
-  { tab: "places", label: "Places", Icon: MapPin },
-  { tab: "groups", label: "Groups", Icon: UsersRound },
-  { tab: "events", label: "Events", Icon: CalendarDays },
+  { tab: "top", label: "All", Icon: CardsGlyph },
+  { tab: "posts", label: "Posts", Icon: PostsGlyph },
+  { tab: "people", label: "People", Icon: PeopleGlyph },
+  { tab: "photos", label: "Photos", Icon: PhotoGlyph },
+  { tab: "videos", label: "Videos", Icon: VideoGlyph },
+  { tab: "marketplace", label: "Marketplace", Icon: StoreGlyph },
+  { tab: "pages", label: "Pages", Icon: FlagGlyph },
+  { tab: "places", label: "Places", Icon: PinGlyph },
+  { tab: "groups", label: "Groups", Icon: GroupsGlyph },
+  { tab: "events", label: "Events", Icon: CalendarStarGlyph },
 ];
 
 /* ---------- Filter controls ---------- */
@@ -313,7 +313,7 @@ export function SearchRail({ tab, params }: { tab: SearchTab; params: SearchPara
                     active ? "bg-fb text-white" : "bg-btn text-icon",
                   )}
                 >
-                  <Icon size={20} strokeWidth={2} />
+                  <Icon size={20} />
                 </span>
                 <span className="font-medium text-[15px] text-primary leading-5">{label}</span>
               </Link>

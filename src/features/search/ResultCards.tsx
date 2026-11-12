@@ -64,7 +64,7 @@ function ResultRow({
 }) {
   return (
     <div className={cn("flex min-h-[76px] items-center gap-3 py-2", className)}>
-      <div className="shrink-0">{thumb}</div>
+      <div className="flex shrink-0 [&>*]:flex">{thumb}</div>
       <div className="min-w-0 flex-1">
         <div className="text-[17px] text-primary leading-[22px]">{title}</div>
         {meta.filter(Boolean).map((m, i) => (

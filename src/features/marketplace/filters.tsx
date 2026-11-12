@@ -262,7 +262,7 @@ export function ToggleRow({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <div className="flex min-h-[45px] items-center gap-2 px-2">
+    <div className="flex min-h-[34px] items-center gap-2 px-2">
       <span className="flex-1 font-semibold text-[15px] text-primary leading-5">{label}</span>
       <Switch checked={checked} onChange={onChange} label={label} />
     </div>
@@ -307,7 +307,7 @@ export function RangeInputs({
   return (
     <div className="px-2 py-2">
       <p className="font-semibold text-[15px] text-primary leading-5">{label}</p>
-      <div className="mt-2 flex items-center gap-3">
+      <div className="mt-0.5 flex items-center gap-3">
         {input(a, setA, "Min")}
         <span className="text-[15px] text-primary">to</span>
         {input(b, setB, "Max")}

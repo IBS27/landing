@@ -20,7 +20,7 @@ import { Card } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { birthdayLabel, joinedLabel, possessive, useProfile } from "./context";
-import { PhotoOpener } from "./photos";
+import { ImageLightbox, PhotoOpener } from "./photos";
 
 /* ---------------- Shared bits ---------------- */
 
@@ -163,11 +163,11 @@ export function CardEmpty({ children }: { children: ReactNode }) {
  */
 export function useStickyColumn() {
   const ref = useRef<HTMLDivElement>(null);
-  const [top, setTop] = useState(132);
+  const [top, setTop] = useState(120);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const update = () => setTop(Math.min(132, window.innerHeight - el.offsetHeight - 16));
+    const update = () => setTop(Math.min(120, window.innerHeight - el.offsetHeight - 16));
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
@@ -278,7 +278,9 @@ export function IntroCard() {
 
 /* ---------------- Photos preview ---------------- */
 
-type PhotoRef = { postId: Id<"posts">; index: number; url: string };
+/** `postId` is null for the profile picture / cover photo (opens a plain lightbox). */
+type PhotoRef = { postId: Id<"posts"> | null; index: number; url: string };
+type VideoRef = { postId: Id<"posts">; index: number; url: string };
 
 /** A square photo tile that opens the photo theater. */
 export function PhotoTile({ photo, className }: { photo: PhotoRef; className?: string }) {
@@ -293,9 +295,12 @@ export function PhotoTile({ photo, className }: { photo: PhotoRef; className?: s
         <img src={photo.url} alt="" loading="lazy" className="h-full w-full object-cover" />
         <span className="absolute inset-0 transition-colors hover:bg-black/10" />
       </button>
-      {open && (
-        <PhotoOpener postId={photo.postId} index={photo.index} onClose={() => setOpen(false)} />
-      )}
+      {open &&
+        (photo.postId ? (
+          <PhotoOpener postId={photo.postId} index={photo.index} onClose={() => setOpen(false)} />
+        ) : (
+          <ImageLightbox src={photo.url} onClose={() => setOpen(false)} />
+        ))}
     </>
   );
 }
@@ -392,7 +397,7 @@ export function ReelsCard() {
   const { user, isSelf } = profile;
   const videos = useQ(api.profiles.videos, { userId: user._id });
   const [tab, setTab] = useState<"yours" | "saved">("yours");
-  const [open, setOpen] = useState<PhotoRef | null>(null);
+  const [open, setOpen] = useState<VideoRef | null>(null);
   const tabs = isSelf
     ? [
         { key: "yours" as const, label: "Your reels" },

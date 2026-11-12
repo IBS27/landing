@@ -71,6 +71,8 @@ export type PostView = {
   reactions: ReactionInfo;
   commentCount: number;
   shareCount: number;
+  /** A Page ad: the header reads "Ad" and the link strip gets a call-to-action button. */
+  sponsored: boolean;
   viewerSaved: boolean;
   /** The viewer follows (is friends with) the author; drives the "· Follow" link. */
   viewerFollowsAuthor: boolean;
@@ -224,6 +226,7 @@ export async function enrichPost(
     reactions: { ...reactions, sampleName: sample?.name ?? null },
     commentCount: post.commentCount,
     shareCount: post.shareCount,
+    sponsored: post.sponsored === true,
     viewerSaved,
     viewerFollowsAuthor: isAuthor || a.friends.has(post.authorId),
     canEdit: isAuthor,

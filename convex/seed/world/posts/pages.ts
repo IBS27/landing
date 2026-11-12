@@ -15,7 +15,7 @@ export const pagePosts: readonly PostSeed[] = [
       domain: "emeraldledger.news",
       description:
         "Our twice-yearly rent survey of 3,400 listings finds one-bedrooms up sharply in Capitol Hill, SLU and Ballard, while studios in the U District flattened for the first time since 2021.",
-      image: "seattle apartment buildings",
+      image: "rooms/apartment building",
     },
     reactions: 55,
     mood: "sad",
@@ -89,7 +89,7 @@ export const pagePosts: readonly PostSeed[] = [
       domain: "emeraldledger.news",
       description:
         "Trains will run every 15 minutes between midnight and 2am on Friday and Saturday nights through next December.",
-      image: "light rail train",
+      image: "light rail",
     },
     reactions: 48,
     mood: "love",
@@ -132,7 +132,7 @@ export const pagePosts: readonly PostSeed[] = [
       url: "https://emeraldledger.news/weather/2026/11/atmospheric-river-weekend",
       title: "Atmospheric river could bring 4 inches of rain to Seattle this weekend",
       domain: "emeraldledger.news",
-      image: "heavy rain city",
+      image: "city bus",
     },
     reactions: 24,
     mood: "wow",
@@ -153,7 +153,7 @@ export const pagePosts: readonly PostSeed[] = [
       title: "Fremont's newest pocket park opens on a former parking lot",
       domain: "emeraldledger.news",
       description: "Benches, a small dog run, native plants and a covered bike corral.",
-      image: "small city park",
+      image: "city park",
     },
     reactions: 33,
     mood: "love",
@@ -207,7 +207,7 @@ export const pagePosts: readonly PostSeed[] = [
     by: "montlakecampuslife",
     at: daysAgo(2, "12:00"),
     text: "Finals week library hours are out! Odegaard goes 24 hours starting Sunday Dec 6 through Friday Dec 11. Suzzallo stays open until midnight. The HUB will have free coffee 8 to 10am Monday through Wednesday.",
-    photos: ["library studying"],
+    photos: ["library"],
     reactions: 37,
     comments: [
       {
@@ -245,7 +245,7 @@ export const pagePosts: readonly PostSeed[] = [
     by: "montlakecampuslife",
     at: daysAgo(9, "08:10"),
     text: "frost on the quad this morning. coldest day of the quarter so far. stay warm out there",
-    photos: ["frost campus quad", "university building morning"],
+    photos: ["uw campus", "uw campus"],
     reactions: 46,
     mood: "love",
     comments: [
@@ -271,7 +271,7 @@ export const pagePosts: readonly PostSeed[] = [
     by: "moonrisecoffee",
     at: daysAgo(2, "09:30"),
     text: "Holiday menu is here ☕ Gingerbread oat latte, a smoked maple cortado, cardamom buns (weekends only, they sell out by 10), and the return of the peppermint mocha nobody admits to ordering.",
-    photos: ["holiday latte", "cardamom buns", "coffee shop counter"],
+    photos: ["latte", "cardamom buns", "coffee shop"],
     reactions: 53,
     mood: "love",
     likedBy: ["maya.chen", "tasha.okafor"],
@@ -336,7 +336,7 @@ export const pagePosts: readonly PostSeed[] = [
     by: "cascadeboulders",
     at: daysAgo(3, "18:00"),
     text: 'Fresh set on the slab and the comp wall is open! 22 new problems, V0 to V9. Kai says the orange V6 is "totally fair" which means it absolutely is not.',
-    photos: ["bouldering gym", "climbing wall holds", "climber bouldering"],
+    photos: ["bouldering gym", "climbing holds", "bouldering gym"],
     reactions: 47,
     likedBy: ["maya.chen", "sofia.alvarez"],
     comments: [
@@ -378,7 +378,7 @@ export const pagePosts: readonly PostSeed[] = [
     by: "cascadeboulders",
     at: daysAgo(17, "16:30"),
     text: "Thank you to all 150 climbers who came out for the fall comp! Results are up at the front desk. Congrats to Andre Silva for taking the open men's category and to everyone who sent the cursed purple V2.",
-    photos: ["bouldering competition", "climbing gym crowd"],
+    photos: ["bouldering gym", "bouldering gym"],
     reactions: 39,
     comments: [
       { by: "andre.silva", text: "still can't feel my forearms" },
@@ -391,7 +391,7 @@ export const pagePosts: readonly PostSeed[] = [
     by: "waxandneedle",
     at: daysAgo(5, "21:30"),
     text: "Thank you to everyone who squeezed in for Marigold Static on Friday. We counted 74 people in a room that fits 50 and nobody knocked over the dollar bins. A miracle.",
-    photos: ["band playing record store", "record store crowd"],
+    photos: ["concert"],
     reactions: 31,
     comments: [
       {
@@ -405,7 +405,7 @@ export const pagePosts: readonly PostSeed[] = [
     by: "waxandneedle",
     at: daysAgo(1, "12:30"),
     text: "New arrivals wall is restocked. Big haul of 70s Japanese city pop, a pile of Sub Pop first pressings from a collection out of Tacoma, and more jazz reissues than we have room for.",
-    photos: ["vinyl records", "record store shelves"],
+    photos: ["vinyl records", "vinyl records"],
     reactions: 27,
     comments: [
       {
@@ -435,7 +435,7 @@ export const pagePosts: readonly PostSeed[] = [
     by: "paperlanternbooks",
     at: daysAgo(4, "11:00"),
     text: 'November staff picks are on the front table. Sam\'s pick this month is a 600 page Icelandic mystery that they keep describing as "cozy" which is concerning.',
-    photos: ["bookstore table", "stack of books"],
+    photos: ["bookstore", "stack of books"],
     reactions: 34,
     comments: [
       { by: "sam.rivera", text: "it IS cozy. there's a lot of soup. also a lot of murder" },
@@ -459,7 +459,7 @@ export const pagePosts: readonly PostSeed[] = [
     by: "paperlanternbooks",
     at: daysAgo(19, "15:30"),
     text: "Moby has claimed the poetry section for the afternoon. Please browse around him.",
-    photos: ["cat sleeping bookshelf"],
+    photos: ["cat"],
     reactions: 55,
     mood: "love",
     comments: [
@@ -477,7 +477,7 @@ export const pagePosts: readonly PostSeed[] = [
     by: "kumoramen",
     at: daysAgo(6, "11:30"),
     text: "New on the menu: black garlic tantanmen. Sesame broth, spicy pork, bok choy, and a black garlic oil we've been working on since August. Both shops starting today.",
-    photos: ["ramen", "spicy ramen bowl"],
+    photos: ["ramen", "ramen"],
     reactions: 49,
     comments: [
       {
@@ -511,7 +511,7 @@ export const pagePosts: readonly PostSeed[] = [
     at: daysAgo(1, "11:00"),
     sponsored: true,
     text: "Raining sideways? Stay in. Kumo delivers to the U District, Capitol Hill, Eastlake and Fremont, and your first order through our site gets free chashu.",
-    photos: ["ramen takeout"],
+    photos: ["ramen"],
     reactions: 18,
   },
 
@@ -526,7 +526,7 @@ export const pagePosts: readonly PostSeed[] = [
       title: "Drizzle Shell 3L Rain Jacket",
       domain: "rainline.co",
       description: "Packable, fully seam-taped, 2-year warranty. Free shipping in Washington.",
-      image: "rain jacket hiking",
+      image: "rain jacket",
     },
     reactions: 22,
     comments: [
@@ -545,7 +545,7 @@ export const pagePosts: readonly PostSeed[] = [
       url: "https://rainline.co/products/ridgeline-puffy",
       title: "Ridgeline Insulated Jacket",
       domain: "rainline.co",
-      image: "puffy jacket mountains",
+      image: "puffy jacket",
     },
     reactions: 16,
   },
@@ -559,7 +559,7 @@ export const pagePosts: readonly PostSeed[] = [
       title: "Holiday Sale: 25% Off Outerwear",
       domain: "rainline.co",
       description: "Shells, insulation, packs and base layers. Ends Sunday.",
-      image: "outdoor gear store",
+      image: "gear store",
     },
     reactions: 31,
     comments: [{ by: "arjun.mehta", text: "Grace Liu the pack you wanted is on sale" }],

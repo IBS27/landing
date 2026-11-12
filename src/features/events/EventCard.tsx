@@ -126,9 +126,9 @@ export function EventRow({ event }: { event: EventCardView }) {
         src={event.cover}
         onError={hideBroken}
         alt=""
-        className="pointer-events-none my-2 h-[60px] w-[60px] shrink-0 rounded-lg object-cover"
+        className="pointer-events-none h-[60px] w-[60px] shrink-0 rounded-lg object-cover"
       />
-      <div className="pointer-events-none min-w-0 flex-1 py-2">
+      <div className="pointer-events-none min-w-0 flex-1 py-0.5">
         <p className="text-[13px] text-primary uppercase leading-4">
           {relativeDate(event.startAt, event.endAt, Date.now(), true)}
         </p>

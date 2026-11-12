@@ -3,7 +3,7 @@ import { useQ } from "@/app/viewer";
 import { Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import { kindOf, ListingComposer } from "./Composer";
-import { HelpIcon, TagIcon } from "./icons";
+import { HelpIcon, SellingTagIcon, TagIcon } from "./icons";
 import { MpShell, RailDivider, RailRow } from "./rails";
 
 /* Spot illustrations for the listing-type cards (60px circles). */
@@ -90,7 +90,11 @@ export function CreateChooserPage() {
               to="/marketplace/create"
             />
             <RailDivider className="my-2" />
-            <RailRow icon={<TagIcon />} label="Your listings" to="/marketplace/you/selling" />
+            <RailRow
+              icon={<SellingTagIcon />}
+              label="Your listings"
+              to="/marketplace/you/selling"
+            />
             <RailRow
               icon={<HelpIcon />}
               label="Seller Help"

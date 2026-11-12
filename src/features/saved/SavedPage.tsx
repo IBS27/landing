@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { Check, Forward, MoreHorizontal, Plus, Settings, SlidersHorizontal } from "lucide-react";
+import { Check, Forward, MoreHorizontal, Plus, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { useM, useQ, useViewer } from "@/app/viewer";
 import { RailDivider, RailHeading, RailItem, SideRail } from "@/features/feed/SideRail";
+import { CardsGlyph } from "@/features/misc/glyphs";
+import { GearFilled } from "@/features/misc/icons";
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from "@/ui/overlays";
 import { Avatar, Button, Card, IconButton, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -14,16 +16,6 @@ const KIND_LABEL: Record<Kind, string> = {
   listing: "Marketplace",
   event: "Events",
 };
-
-/** FB's stacked-cards "Saved Items" glyph. */
-function SavedItemsIcon() {
-  return (
-    <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor" aria-hidden>
-      <path d="M5 3.5A1.5 1.5 0 0 1 6.5 2h9A1.5 1.5 0 0 1 17 3.5v7a1.5 1.5 0 0 1-1.5 1.5H15V6.5A2.5 2.5 0 0 0 12.5 4H5v-.5Z" />
-      <path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h8A1.5 1.5 0 0 1 14 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 3 16.5v-9Zm2.5 1a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5h-6Zm0 3a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" />
-    </svg>
-  );
-}
 
 /** /saved: everything the viewer saved (posts, listings, events). */
 export function SavedPage() {
@@ -37,12 +29,12 @@ export function SavedPage() {
         label="List of saved item"
         action={
           <IconButton label="Settings">
-            <Settings size={20} className="text-icon" />
+            <GearFilled className="text-icon" />
           </IconButton>
         }
       >
         <RailItem
-          icon={<SavedItemsIcon />}
+          icon={<CardsGlyph />}
           label="Saved Items"
           selected
           tintRow={false}

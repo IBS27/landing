@@ -15,6 +15,8 @@ export type TimeSpec =
       readonly days: number;
       readonly hm: string;
       readonly future?: boolean;
+      /** Whole calendar years back (same month and day), for "On this day" memories. */
+      readonly years?: number;
     };
 
 export const minutesAgo = (m: number): TimeSpec => ({ kind: "offset", ms: -m * MINUTE });
@@ -24,6 +26,14 @@ export const hoursFromNow = (h: number): TimeSpec => ({ kind: "offset", ms: h * 
 /** `daysAgo(2)` is exactly 48h ago; `daysAgo(2, "14:30")` is 2:30 PM Seattle time two days ago. */
 export const daysAgo = (d: number, hm?: string): TimeSpec =>
   hm ? { kind: "clock", days: -d, hm } : { kind: "offset", ms: -d * DAY };
+
+/** Today's Seattle month-day `n` years ago at `hm` (Feb 29 rolls to Mar 1). */
+export const yearsAgo = (n: number, hm: string): TimeSpec => ({
+  kind: "clock",
+  days: 0,
+  hm,
+  years: n,
+});
 
 export const daysFromNow = (d: number, hm?: string): TimeSpec =>
   hm ? { kind: "clock", days: d, hm, future: true } : { kind: "offset", ms: d * DAY };
@@ -68,10 +78,15 @@ export class Clock {
     const [h, m] = spec.hm.split(":").map(Number);
     const local = new Date(this.now + this.offset);
     const t =
-      Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate() + spec.days, h, m) -
-      this.offset;
+      Date.UTC(
+        local.getUTCFullYear() - (spec.years ?? 0),
+        local.getUTCMonth(),
+        local.getUTCDate() + spec.days,
+        h,
+        m,
+      ) - this.offset;
     if (spec.future) return t > this.now ? t : t + DAY;
-    if (t > this.now - 2 * MINUTE) {
+    if (!spec.years && t > this.now - 2 * MINUTE) {
       return this.now - (3 + ((h * 60 + m) % 47)) * MINUTE;
     }
     return t;
@@ -79,7 +94,12 @@ export class Clock {
 
   /** Seattle calendar date `days` from today as "MM-DD". */
   monthDay(days = 0): string {
-    const d = new Date(this.now + this.offset + days * DAY);
+    return this.monthDayOf(this.now + days * DAY);
+  }
+
+  /** Seattle calendar date of `t` as "MM-DD" (using today's UTC offset). */
+  monthDayOf(t: number): string {
+    const d = new Date(t + this.offset);
     const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
     const dd = String(d.getUTCDate()).padStart(2, "0");
     return `${mm}-${dd}`;

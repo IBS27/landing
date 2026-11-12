@@ -202,8 +202,8 @@ export const discover = viewerQuery({
     const candidates = all.filter((g) => g.visible && !joinedBefore.has(g._id));
     const cards = await Promise.all(candidates.map((g) => groupCard(ctx, g, friends, viewerId)));
 
-    // Suggestions lean on topics the viewer already follows; each carousel
-    // avoids repeating the cards the previous one opens with.
+    // Suggestions lean on topics the viewer already follows (then friends who
+    // are members). The sections don't repeat each other's groups, as on Facebook.
     const myTags = new Set<string>();
     for (const m of myRows) {
       const g = all.find((x) => x._id === m.groupId);
@@ -215,19 +215,24 @@ export const discover = viewerQuery({
     };
     const byMembers = [...cards].sort((a, b) => b.memberCount - a.memberCount);
     const suggested = [...cards]
-      .sort((a, b) => topical(b._id) - topical(a._id) || b.lastActiveAt - a.lastActiveAt)
-      .slice(0, 9);
-    const shown = new Set(suggested.slice(0, 3).map((c) => c._id));
-    const friendsGroups = cards
-      .filter((c) => c.friendCount > 0 && !shown.has(c._id))
-      .sort((a, b) => b.friendCount - a.friendCount);
-    for (const c of friendsGroups.slice(0, 3)) shown.add(c._id);
+      .sort(
+        (a, b) =>
+          topical(b._id) - topical(a._id) ||
+          b.friendCount - a.friendCount ||
+          b.lastActiveAt - a.lastActiveAt,
+      )
+      .slice(0, 4);
+    const shown = new Set(suggested.map((c) => c._id));
     const city = ctx.viewer.city?.split(",")[0] ?? "Seattle";
     const popular = byMembers
       .filter((c) => c.location?.includes(city) && !shown.has(c._id))
-      .slice(0, 9);
-    const categories = [...new Set(cards.map((c) => c.category))].sort();
-    return { suggested, popular, friends: friendsGroups, more: byMembers, categories, city };
+      .slice(0, 4);
+    for (const c of popular) shown.add(c._id);
+    const rest = byMembers.filter((c) => !shown.has(c._id));
+    // A small catalog still fills the grid, skipping what the carousels open with.
+    const opening = new Set([...suggested.slice(0, 3), ...popular.slice(0, 3)].map((c) => c._id));
+    const more = rest.length >= 3 ? rest : byMembers.filter((c) => !opening.has(c._id));
+    return { suggested, popular, more, city };
   },
 });
 

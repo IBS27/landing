@@ -47,6 +47,8 @@ export default defineSchema({
     followerCount: v.optional(v.number()),
     /** Pages created in the app: the person who manages the Page. */
     pageOwnerId: v.optional(v.id("users")),
+    /** Profile note ("Share a thought…" bubble); shown for 24 hours. */
+    note: v.optional(v.object({ text: v.string(), createdAt: v.number() })),
   })
     .index("by_username", ["username"])
     .index("by_persona", ["isPersona"])

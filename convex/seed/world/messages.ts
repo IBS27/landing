@@ -49,7 +49,7 @@ export const conversations: readonly ConversationSeed[] = [
       {
         by: "maya.chen",
         text: "found this from your 21st lmaooo",
-        photo: "birthday party",
+        photo: "dinner party",
         gap: 1,
       },
       { by: "ethan.park", text: "NOT THAT PICTURE", gap: 34, reactions: [["maya.chen", "haha"]] },
@@ -337,7 +337,7 @@ export const conversations: readonly ConversationSeed[] = [
         photo: "bouldering gym",
         gap: 2200,
       },
-      { by: "zoe.nguyen", photo: "rock climber", gap: 1 },
+      { by: "zoe.nguyen", photo: "granite cliff", gap: 1 },
       { by: "maya.chen", text: "ZOE", gap: 5 },
       {
         by: "maya.chen",
@@ -457,7 +457,7 @@ export const conversations: readonly ConversationSeed[] = [
         text: "the giant one is spoken for (my lab mate) but i have a monstera that's lowkey thriving",
         gap: 4,
       },
-      { by: "priya.raman", photo: "monstera plant", gap: 1 },
+      { by: "priya.raman", photo: "monstera", gap: 1 },
       { by: "maya.chen", text: "she's beautiful", gap: 3 },
       { by: "maya.chen", text: "how much", gap: 1 },
       {
@@ -721,7 +721,7 @@ export const conversations: readonly ConversationSeed[] = [
         reactions: [["jessica.huang", "haha"]],
       },
       { by: "jessica.huang", text: "ok photo dump from the weekend", gap: 3000 },
-      { by: "jessica.huang", photo: "pike place market", gap: 1 },
+      { by: "jessica.huang", photo: "pike place", gap: 1 },
       { by: "jessica.huang", photo: "gas works park", gap: 1, reactions: [["maya.chen", "love"]] },
       { by: "jessica.huang", photo: "ramen", gap: 1 },
       { by: "maya.chen", text: "the gas works one!!!", gap: 15 },
@@ -802,7 +802,6 @@ export const conversations: readonly ConversationSeed[] = [
       {
         by: "maya.chen",
         text: "final! sending the print file to your email",
-        photo: "holiday poster",
         gap: 1500,
       },
       {
@@ -1084,7 +1083,7 @@ export const conversations: readonly ConversationSeed[] = [
     key: "roomies",
     kind: "group",
     title: "Roomies 🏠",
-    photo: "cozy apartment kitchen",
+    photo: "kitchen sink",
     members: ["maya.chen", "ana.torres", "hannah.lee"],
     last: hoursAgo(2),
     messages: [
@@ -1216,7 +1215,7 @@ export const conversations: readonly ConversationSeed[] = [
         text: "it's not what i wanted it's what the api forced on us",
         gap: 1,
       },
-      { by: "maya.chen", text: "empty state ✨", photo: "app wireframe", gap: 15 },
+      { by: "maya.chen", text: "empty state ✨", photo: "phone screen", gap: 15 },
       { by: "noah.williams", text: "beautiful", gap: 3, reactions: [["maya.chen", "love"]] },
       {
         by: "zoe.nguyen",
@@ -1298,7 +1297,7 @@ export const conversations: readonly ConversationSeed[] = [
         text: "Got it all set up. Thanks again, way better than working off the kitchen counter",
         gap: 200,
       },
-      { by: "marcus.bell", photo: "home office desk", gap: 1 },
+      { by: "marcus.bell", photo: "gaming setup", gap: 1 },
       {
         by: "maya.chen",
         text: "yay it looks so good there!!",
@@ -1683,7 +1682,7 @@ export const conversations: readonly ConversationSeed[] = [
       {
         by: "marcus.bell",
         text: "It lives here now. Thank you!",
-        photo: "teal velvet sofa",
+        photo: "listings/velvet loveseat",
         gap: 90,
       },
       {
@@ -2018,7 +2017,7 @@ export const conversations: readonly ConversationSeed[] = [
         gap: 1500,
       },
       { by: "marcus.bell", text: "I have a COUCH now", gap: 10 },
-      { by: "marcus.bell", photo: "teal velvet sofa", gap: 1 },
+      { by: "marcus.bell", photo: "listings/velvet loveseat", gap: 1 },
       {
         by: "chris.adeyemi",
         text: "look at you. a real adult",

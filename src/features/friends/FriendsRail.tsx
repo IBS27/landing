@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, ChevronRight, Settings } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { cn } from "@/lib/format";
 import {
   FriendRequestsGlyph,
   FriendsHomeGlyph,
+  GearGlyph,
   GiftGlyph,
   PersonListGlyph,
   PersonPlusGlyph,
@@ -58,14 +59,14 @@ const RAIL =
 export function FriendsHomeRail() {
   return (
     <nav aria-label="Friends" className={RAIL}>
-      <div className="flex items-center justify-between px-4 pt-[11px] pb-[9px]">
+      <div className="flex items-center justify-between px-4 pt-[11px] pb-[10px]">
         <h1 className="font-bold text-[24px] text-primary leading-7">Friends</h1>
         <Link
           to="/settings"
           aria-label="Edit notification settings"
           className="flex h-9 w-9 items-center justify-center rounded-full bg-btn text-icon transition-[filter] hover:brightness-95 dark:hover:brightness-125"
         >
-          <Settings size={20} strokeWidth={2.2} />
+          <GearGlyph size={20} />
         </Link>
       </div>
       <ul className="flex flex-col px-0 pb-4">
@@ -89,9 +90,7 @@ export function FriendsHomeRail() {
                   <span className="min-w-0 flex-1 truncate font-medium text-[17px] text-primary leading-5">
                     {it.label}
                   </span>
-                  {it.chevron && (
-                    <ChevronRight size={22} strokeWidth={2} className="mr-1 text-secondary" />
-                  )}
+                  {it.chevron && <RailChevron />}
                 </>
               )}
             </Link>
@@ -99,6 +98,26 @@ export function FriendsHomeRail() {
         ))}
       </ul>
     </nav>
+  );
+}
+
+/** Facebook's 20px rail chevron (taller and heavier than lucide's). */
+function RailChevron() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width={20}
+      height={20}
+      aria-hidden
+      className="shrink-0 text-secondary"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8 3l7 7-7 7" />
+    </svg>
   );
 }
 
@@ -115,11 +134,11 @@ export function FriendsSubRail({
 }) {
   return (
     <nav aria-label={title} className={RAIL}>
-      <div className="flex items-start gap-3 px-4 pt-3">
+      <div className="flex items-start gap-3 px-4 pt-[18px]">
         <Link
           to="/friends"
           aria-label="Back"
-          className="-ml-2 mt-[11px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-hover"
+          className="-ml-2 mt-[5px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-hover"
         >
           <ArrowLeft size={20} strokeWidth={2.2} className="text-secondary" />
         </Link>

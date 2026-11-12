@@ -4,10 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { DotsIcon } from "@/features/posts/icons";
 import { cn } from "@/lib/format";
-import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/ui/overlays";
+import { Menu, MenuTrigger } from "@/ui/overlays";
 import { Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { CaretMenuContent, CaretMenuItem } from "./CaretMenu";
 import { NotificationRow } from "./NotificationRow";
 import type { NotificationView } from "./types";
 
@@ -40,13 +41,13 @@ function Pill({
 
 function SectionHeader({ title, seeAll }: { title: string; seeAll?: () => void }) {
   return (
-    <div className="flex items-center justify-between px-4 pt-[17px] pb-0.5">
+    <div className="flex items-center justify-between px-4 pt-3 pb-0.5">
       <h3 className="font-semibold text-[17px] text-primary leading-5">{title}</h3>
       {seeAll && (
         <Link
           to="/notifications"
           onClick={seeAll}
-          className="-mr-2 rounded-md px-2 py-1 text-[15px] text-link leading-5 hover:bg-hover"
+          className="-mr-2 rounded-md px-2 text-[17px] text-link leading-5 hover:bg-hover"
         >
           See all
         </Link>
@@ -121,7 +122,7 @@ export function NotificationList({
 
   return (
     <div className="flex flex-col pb-2">
-      <div className="flex items-center justify-between px-4 pt-[13px]">
+      <div className="flex items-center justify-between px-4 pt-[15px]">
         <h1 className="font-bold text-[24px] text-primary leading-7">Notifications</h1>
         <Menu modal={false}>
           <MenuTrigger asChild>
@@ -133,14 +134,14 @@ export function NotificationList({
               <DotsIcon size={16} />
             </button>
           </MenuTrigger>
-          <MenuContent width={344} className="rounded-tr-none">
-            <MenuItem
-              icon={<Check size={20} />}
+          <CaretMenuContent>
+            <CaretMenuItem
+              icon={<Check size={20} strokeWidth={2.2} />}
               label="Mark all as read"
               onSelect={() => void markAllRead({})}
             />
-            <MenuItem
-              icon={<Settings size={20} />}
+            <CaretMenuItem
+              icon={<Settings size={20} strokeWidth={2} />}
               label="Notification settings"
               onSelect={() => {
                 onNavigate?.();
@@ -148,8 +149,8 @@ export function NotificationList({
               }}
             />
             {!page && (
-              <MenuItem
-                icon={<Monitor size={20} />}
+              <CaretMenuItem
+                icon={<Monitor size={20} strokeWidth={2} />}
                 label="Open Notifications"
                 onSelect={() => {
                   onNavigate?.();
@@ -157,11 +158,11 @@ export function NotificationList({
                 }}
               />
             )}
-          </MenuContent>
+          </CaretMenuContent>
         </Menu>
       </div>
 
-      <div className="flex gap-2 px-4 pt-[6px]">
+      <div className="flex gap-2 px-4 pt-1">
         <Pill active={!unreadOnly} onClick={() => setUnreadOnly(false)}>
           All
         </Pill>

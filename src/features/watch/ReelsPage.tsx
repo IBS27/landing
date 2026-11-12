@@ -116,7 +116,7 @@ export function ReelsPage({ startId }: { startId?: string }) {
   return (
     <div className="dark fixed inset-x-0 top-14 bottom-0 bg-black text-[#e2e5e9]">
       {direct ? (
-        <div className="absolute top-3 left-3 z-20 flex items-center gap-2">
+        <div className="absolute top-0 left-3 z-20 flex items-center gap-2">
           <button
             type="button"
             aria-label="Close viewer and return to feed"
@@ -191,10 +191,10 @@ export function ReelsPage({ startId }: { startId?: string }) {
       {count > 0 && (
         <div className="absolute top-1/2 right-3 z-20 flex -translate-y-1/2 flex-col gap-4">
           <NavArrow label="Previous Card" disabled={index === 0} onClick={() => go(index - 1)}>
-            <ChevronUp size={28} />
+            <ChevronUp size={24} strokeWidth={2.75} />
           </NavArrow>
           <NavArrow label="Next Card" disabled={index >= count - 1} onClick={() => go(index + 1)}>
-            <ChevronDown size={28} />
+            <ChevronDown size={24} strokeWidth={2.75} />
           </NavArrow>
         </div>
       )}
@@ -219,7 +219,7 @@ function NavArrow({
       aria-label={label}
       disabled={disabled}
       onClick={onClick}
-      className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white/15"
+      className="flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#a8abaf] bg-[#1c1c1d] text-[#e2e5e9] transition-colors hover:bg-[#2a2a2b] disabled:cursor-not-allowed disabled:border-[#4b4c4f] disabled:text-[#65686c] disabled:hover:bg-[#1c1c1d]"
     >
       {children}
     </button>
@@ -253,7 +253,7 @@ function ReelSlide({ post, active, offset }: { post: PostView; active: boolean; 
     <section
       className={cn(
         "flex h-full snap-start snap-always items-start justify-center pt-4",
-        offset && "min-[1000px]:pl-[136px]",
+        offset ? "min-[1000px]:pl-[136px]" : "pr-3",
       )}
       aria-label={`Reel by ${post.author.name}`}
       data-reel-id={post._id}
@@ -388,7 +388,7 @@ function ReelActions({ post, onComment }: { post: PostView; onComment: () => voi
   const meta = rx.current ? reactionMeta(rx.current) : null;
 
   return (
-    <div className="flex w-12 flex-col items-center gap-3 pb-1">
+    <div className="flex w-12 flex-col items-center gap-[5px] pb-1">
       <div className="relative" {...hover.bind}>
         {hover.open && (
           <div className="absolute right-full bottom-0 z-30 pr-2">

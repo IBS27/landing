@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Bookmark, Clapperboard, Compass, MonitorPlay, Radio, Tv } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Bookmark, Radio } from "lucide-react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import {
   AppRail,
@@ -10,6 +10,8 @@ import {
   RailGear,
   RailSearch,
 } from "@/features/misc/AppRail";
+import { LiveGlyph, ReelsGlyph, ShowsGlyph, VideoGlyph } from "@/features/misc/glyphs";
+import { BookmarkFilled, CompassFilled } from "@/features/misc/icons";
 import { PostDialog, PostSkeleton, type PostView, useViewerPaginated } from "@/features/posts";
 import { compactCount, shortAge } from "@/lib/format";
 import { Avatar, Button, Card, EmptyState, Skeleton } from "@/ui/primitives";
@@ -19,14 +21,15 @@ import { VideoCard, VideoPlayer } from "./VideoCard";
 export type WatchTab = "home" | "live" | "shows" | "explore" | "saved";
 export const WATCH_TABS: WatchTab[] = ["home", "live", "shows", "explore", "saved"];
 
-const NAV: { tab: WatchTab | "reels"; label: string; Icon: typeof Tv }[] = [
-  { tab: "home", label: "Home", Icon: MonitorPlay },
-  { tab: "live", label: "Live", Icon: Radio },
-  { tab: "reels", label: "Reels", Icon: Clapperboard },
-  { tab: "shows", label: "Shows", Icon: Tv },
-  { tab: "explore", label: "Explore", Icon: Compass },
-  { tab: "saved", label: "Saved videos", Icon: Bookmark },
-];
+const NAV: { tab: WatchTab | "reels"; label: string; Icon: (p: { size?: number }) => ReactNode }[] =
+  [
+    { tab: "home", label: "Home", Icon: VideoGlyph },
+    { tab: "live", label: "Live", Icon: LiveGlyph },
+    { tab: "reels", label: "Reels", Icon: ReelsGlyph },
+    { tab: "shows", label: "Shows", Icon: ShowsGlyph },
+    { tab: "explore", label: "Explore", Icon: CompassFilled },
+    { tab: "saved", label: "Saved videos", Icon: BookmarkFilled },
+  ];
 
 /** /watch — Facebook's Video destination. */
 export function WatchPage({ tab, q }: { tab: WatchTab; q?: string }) {

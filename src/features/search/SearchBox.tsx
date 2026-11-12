@@ -34,8 +34,17 @@ function IconCircle({ children, blue }: { children: ReactNode; blue?: boolean })
  * Header search. Focusing it opens Facebook's overlay: the logo turns into a
  * back arrow and a 320px panel shows recent searches, or typeahead results.
  */
-/** `collapsed` renders the round icon Facebook shows on Groups, Gaming and Messenger. */
-export function SearchBox({ collapsed = false }: { collapsed?: boolean }) {
+/**
+ * `collapsed` renders the round icon Facebook shows on Marketplace, Gaming, Messenger and the
+ * Groups section pages. The resting pill is 240px on Home and 280px (`wide`) elsewhere.
+ */
+export function SearchBox({
+  collapsed = false,
+  wide = false,
+}: {
+  collapsed?: boolean;
+  wide?: boolean;
+}) {
   const location = useRouterState({ select: (s) => s.location });
   const searchQ = (location.search as { q?: unknown }).q;
   const routeQ =
@@ -207,7 +216,8 @@ export function SearchBox({ collapsed = false }: { collapsed?: boolean }) {
       ) : (
         <div
           className={cn(
-            "flex h-10 w-[240px] items-center rounded-full bg-input pl-3",
+            "flex h-10 shrink-0 items-center rounded-full bg-input pl-3",
+            wide ? "w-[280px]" : "w-[240px]",
             open && "invisible",
           )}
         >

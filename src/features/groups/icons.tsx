@@ -1,4 +1,4 @@
-import type { SVGProps } from "react";
+import { type SVGProps, useId } from "react";
 
 /** Facebook-style glyphs for the Groups surfaces (filled, currentColor). */
 
@@ -12,20 +12,47 @@ function Svg({ size = 20, children, ...p }: P) {
   );
 }
 
-/** Rail "Your feed": a news-feed card. */
+/** Rail "Your feed": a framed card with a solid header band (dot + two lines). */
 export function FeedGlyph({ size = 20, ...p }: P) {
   return (
     <Svg size={size} {...p}>
-      <path d="M4.5 2A2.5 2.5 0 0 0 2 4.5v11A2.5 2.5 0 0 0 4.5 18h11a2.5 2.5 0 0 0 2.5-2.5v-11A2.5 2.5 0 0 0 15.5 2h-11ZM4 7h12v8.5a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5V7Zm1.75-3.25a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm3 .25h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1 0-1.5ZM6 9.5a.75.75 0 0 1 .75-.75h6.5a.75.75 0 0 1 0 1.5h-6.5A.75.75 0 0 1 6 9.5Zm0 3a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-4.5A.75.75 0 0 1 6 12.5Z" />
+      <path
+        fillRule="evenodd"
+        d="M4.75 2.5A2.75 2.75 0 0 0 2 5.25v9.5a2.75 2.75 0 0 0 2.75 2.75h10.5A2.75 2.75 0 0 0 18 14.75v-9.5A2.75 2.75 0 0 0 15.25 2.5H4.75ZM3.75 9h12.5v5.75c0 .55-.45 1-1 1H4.75c-.55 0-1-.45-1-1V9Zm2.5-4.4a1.15 1.15 0 1 0 0 2.3 1.15 1.15 0 0 0 0-2.3Zm2.6.35a.6.6 0 0 0 0 1.2h5.4a.6.6 0 0 0 0-1.2h-5.4Zm0 1.6a.6.6 0 0 0 0 1.2h5.4a.6.6 0 0 0 0-1.2h-5.4Z"
+      />
     </Svg>
   );
 }
 
-/** Rail "Discover": a compass. */
+/** Rail "Discover": a solid disc holding a tilted rounded square with a dot. */
 export function CompassGlyph({ size = 20, ...p }: P) {
+  const id = useId();
   return (
     <Svg size={size} {...p}>
-      <path d="M10 1a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm3.9 5.53-1.84 5.03a1 1 0 0 1-.5.5L6.53 13.9a.35.35 0 0 1-.43-.43l1.84-5.03a1 1 0 0 1 .5-.5l5.03-1.84a.35.35 0 0 1 .43.43ZM10 8.75a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Z" />
+      <mask id={id}>
+        <circle cx="10" cy="10" r="9" fill="#fff" />
+        <rect
+          x="5.6"
+          y="5.6"
+          width="8.8"
+          height="8.8"
+          rx="1.6"
+          fill="#000"
+          transform="rotate(-18 10 10)"
+        />
+        <circle cx="9.3" cy="10.3" r="1.5" fill="#fff" />
+      </mask>
+      <circle cx="10" cy="10" r="9" mask={`url(#${id})`} />
+    </Svg>
+  );
+}
+
+/** Rail "Your groups": three people with a check. */
+export function YourGroupsGlyph({ size = 20, ...p }: P) {
+  return (
+    <Svg size={size} {...p}>
+      <path d="M10 8.6a2.8 2.8 0 1 0 0-5.6 2.8 2.8 0 0 0 0 5.6ZM4.5 9.2a2.1 2.1 0 1 0 0-4.2 2.1 2.1 0 0 0 0 4.2Zm11 0a2.1 2.1 0 1 0 0-4.2 2.1 2.1 0 0 0 0 4.2ZM10 10c-2.85 0-5 2-5 4.6v.4c0 .55.45 1 1 1h5.7a4.5 4.5 0 0 1 3.12-4.2A5.2 5.2 0 0 0 10 10Zm-6.2.6C2.2 10.95 1 12.6 1 14.65c0 .47.38.85.85.85H3.6v-.9c0-1.5.5-2.9 1.4-4a3.3 3.3 0 0 0-1.2 0Z" />
+      <path d="M19.03 12.97a.75.75 0 0 1 0 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-1.75-1.75a.75.75 0 1 1 1.06-1.06L15 15.94l2.97-2.97a.75.75 0 0 1 1.06 0Z" />
     </Svg>
   );
 }
@@ -222,5 +249,45 @@ export function CloseGlyph({ size = 20, ...p }: P) {
     <Svg size={size} {...p}>
       <path d="M4.47 4.47a.75.75 0 0 1 1.06 0L10 8.94l4.47-4.47a.75.75 0 1 1 1.06 1.06L11.06 10l4.47 4.47a.75.75 0 1 1-1.06 1.06L10 11.06l-4.47 4.47a.75.75 0 0 1-1.06-1.06L8.94 10 4.47 5.53a.75.75 0 0 1 0-1.06Z" />
     </Svg>
+  );
+}
+
+/* ---------------- Colored composer icons (24px) ---------------- */
+
+/** Group composer "Anonymous post": a light-blue hat and glasses. */
+export function AnonymousPostIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="#0EA5F7" aria-hidden>
+      <path d="M7.6 3.2c.2-.7.9-1.1 1.6-.9l2.2.6c.4.1.8.1 1.2 0l2.2-.6c.7-.2 1.4.2 1.6.9l1.3 5.3H6.3l1.3-5.3Z" />
+      <rect x="2" y="9.4" width="20" height="2.2" rx="1.1" />
+      <path d="M6.6 12.9a3.6 3.6 0 0 1 3.4 2.4c.6-.4 1.3-.6 2-.6s1.4.2 2 .6a3.6 3.6 0 1 1-.2 1.9 2.6 2.6 0 0 0-3.6 0 3.6 3.6 0 1 1-3.6-4.3Z" />
+    </svg>
+  );
+}
+
+/** Group composer "Feeling/activity": an orange outlined smile. */
+export function GroupFeelingIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden>
+      <circle cx="12" cy="12" r="10" fill="none" stroke="#E9710F" strokeWidth="2" />
+      <circle cx="8.7" cy="9.4" r="1.4" fill="#E9710F" />
+      <circle cx="15.3" cy="9.4" r="1.4" fill="#E9710F" />
+      <path
+        fill="#E9710F"
+        d="M6.9 13.1h10.2a.6.6 0 0 1 .58.75C17 16.5 14.8 18.2 12 18.2s-5-1.7-5.68-4.35a.6.6 0 0 1 .58-.75Z"
+      />
+    </svg>
+  );
+}
+
+/** Group composer "Poll": white bars on an orange disc. */
+export function PollIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden>
+      <circle cx="12" cy="12" r="11" fill="#F7A43B" />
+      <rect x="7.4" y="9" width="2.2" height="8" rx="1.1" fill="#fff" />
+      <rect x="10.9" y="6.5" width="2.2" height="10.5" rx="1.1" fill="#fff" />
+      <rect x="14.4" y="10.5" width="2.2" height="6.5" rx="1.1" fill="#fff" />
+    </svg>
   );
 }

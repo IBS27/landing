@@ -12,9 +12,9 @@ import {
   CATEGORY_ICONS,
   GearIcon,
   InboxIcon,
+  SellingTagIcon,
   ShieldIcon,
   StoreIcon,
-  TagIcon,
 } from "./icons";
 import { LocationDialog, useMarketplaceLocation } from "./location";
 
@@ -326,7 +326,7 @@ export function MainRail({
           to="/marketplace/status"
         />
         <RailRow icon={<BagIcon />} label="Buying" chevron to="/marketplace/you" />
-        <RailRow icon={<TagIcon />} label="Selling" chevron to="/marketplace/you/selling" />
+        <RailRow icon={<SellingTagIcon />} label="Selling" chevron to="/marketplace/you/selling" />
         <CreateListingButton className="mx-2 mt-2" />
         <RailDivider className="mt-2" />
         <div className="pt-4">

@@ -12,7 +12,8 @@ type Source = { authors: Id<"users">[]; groups: Id<"groups">[]; ownWall: boolean
 
 /**
  * Merge per-author and per-group index streams into one newest-first stream.
- * Group posts only come from group streams so nothing appears twice.
+ * Group posts only come from group streams so nothing appears twice. Ads are
+ * not organic posts: Home places them itself (`ads`).
  */
 function feedStream(ctx: QueryCtx, a: Audience, src: Source) {
   const s = stream(ctx.db, schema);
@@ -23,14 +24,17 @@ function feedStream(ctx: QueryCtx, a: Audience, src: Source) {
         .query("posts")
         .withIndex("by_author", (q) => q.eq("authorId", authorId))
         .order("desc")
-        .filterWith(async (p) => !p.groupId && !p.eventId && (await canView(ctx, p, a))),
+        .filterWith(
+          async (p) => !p.groupId && !p.eventId && !p.sponsored && (await canView(ctx, p, a)),
+        ),
     );
   for (const groupId of src.groups)
     streams.push(
       s
         .query("posts")
         .withIndex("by_group", (q) => q.eq("groupId", groupId))
-        .order("desc"),
+        .order("desc")
+        .filterWith(async (p) => !p.sponsored),
     );
   if (src.ownWall)
     streams.push(
@@ -38,7 +42,9 @@ function feedStream(ctx: QueryCtx, a: Audience, src: Source) {
         .query("posts")
         .withIndex("by_timeline", (q) => q.eq("timelineUserId", a.viewerId))
         .order("desc")
-        .filterWith(async (p) => p.authorId !== a.viewerId && !a.friends.has(p.authorId)),
+        .filterWith(
+          async (p) => p.authorId !== a.viewerId && !a.friends.has(p.authorId) && !p.sponsored,
+        ),
     );
   return mergedStream(streams, ["createdAt"]);
 }
@@ -65,6 +71,63 @@ export const home = viewerQuery({
       ownWall: true,
     }).paginate(paginationOpts);
     return { ...result, page: await enrichPosts(ctx, result.page, a) };
+  },
+});
+
+/** Sponsored Page posts for the Home feed, newest first. Home slots one in every few posts. */
+export const ads = viewerQuery({
+  args: {},
+  handler: async (ctx) => {
+    const a = await loadAudience(ctx, ctx.viewer._id);
+    const ads = await stream(ctx.db, schema)
+      .query("posts")
+      .withIndex("by_created")
+      .order("desc")
+      .filterWith(async (p) => p.sponsored === true && (await canView(ctx, p, a)))
+      .take(12);
+    return enrichPosts(ctx, ads, a);
+  },
+});
+
+/**
+ * The Home "Reels" shelf: the newest public photo posts (the seed world has
+ * no video files, so photos stand in for reels, as on /reel). Each tile opens
+ * `/reel/<postId>`. Plays are not tracked, so the view count is derived from
+ * the post's engagement.
+ */
+export const reelsShelf = viewerQuery({
+  args: {},
+  handler: async (ctx) => {
+    const a = await loadAudience(ctx, ctx.viewer._id);
+    const posts = await stream(ctx.db, schema)
+      .query("posts")
+      .withIndex("by_created")
+      .order("desc")
+      .filterWith(
+        async (p) =>
+          !p.groupId &&
+          !p.eventId &&
+          !p.sponsored &&
+          p.media.some((m) => m.kind === "image") &&
+          (await canView(ctx, p, a)),
+      )
+      .take(16);
+    const seen = new Set<string>();
+    return posts
+      .flatMap((p) => {
+        const photo = p.media.find((m) => m.kind === "image");
+        if (!photo || seen.has(photo.url)) return [];
+        seen.add(photo.url);
+        return [
+          {
+            _id: p._id,
+            image: photo.url,
+            alt: photo.alt ?? null,
+            views: 180 + p.reactionCount * 43 + p.commentCount * 97 + p.shareCount * 211,
+          },
+        ];
+      })
+      .slice(0, 8);
   },
 });
 
@@ -164,7 +227,7 @@ export const rails = viewerQuery({
   },
 });
 
-/** Two Page posts with media stand in for ads in the Sponsored slot. */
+/** Two Page posts with media stand in for ads in the Sponsored slot (feed ads excluded). */
 async function sponsored(ctx: QueryCtx, viewerId: Id<"users">) {
   const recent = await ctx.db.query("posts").withIndex("by_created").order("desc").take(300);
   const out: {
@@ -177,7 +240,7 @@ async function sponsored(ctx: QueryCtx, viewerId: Id<"users">) {
   const seen = new Set<Id<"users">>();
   for (const p of recent) {
     if (out.length === 2) break;
-    if (p.groupId || p.authorId === viewerId || seen.has(p.authorId)) continue;
+    if (p.groupId || p.sponsored || p.authorId === viewerId || seen.has(p.authorId)) continue;
     const link = p.attachments.find((x) => x.kind === "link");
     const image = link?.image ?? p.media.find((m) => m.kind === "image")?.url;
     if (!image) continue;

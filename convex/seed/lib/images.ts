@@ -196,6 +196,15 @@ function tokens(s: string): string[] {
     .map(stem);
 }
 
+/** "Teal velvet sofa" → "teal velvet sofa": the form file-name topics use. */
+function phrase(s: string): string {
+  return s
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((t) => t && !/^\d+$/.test(t))
+    .join(" ");
+}
+
 function expand(words: string[]): string[] {
   return [...new Set(words.flatMap((w) => [w, ...tokens(SYNONYMS[w] ?? "")]))];
 }
@@ -219,14 +228,16 @@ export type Picked = {
 };
 
 type Indexed = { img: SeedImage; topic: Set<string>; tags: Set<string> };
-type Ranked = { img: SeedImage; score: number; tie: number };
+type Ranked = { img: SeedImage; score: number; tie: number; exact: boolean };
 
 /**
  * Deterministic photo picker. A slot's topic words (plus synonyms) are scored
  * against each image's file-name topic (strong) and manifest tags (weak);
  * optional `context` words (a listing title, post text) break ties. Remaining
- * ties are broken by a stable hash of the caller's key. Images already handed
- * out are avoided while unused matches remain, so listings rarely share photos.
+ * ties are broken by a stable hash of the caller's key. Images whose file-name
+ * topic equals the slot topic exactly ("velvet sofa" → `velvet-sofa-02.jpg`)
+ * always come first. Images already handed out are avoided while unused matches
+ * remain, so listings and posts rarely share photos.
  */
 export class ImagePicker {
   private readonly used = new Map<ImageFolder, Set<string>>();
@@ -275,6 +286,13 @@ export class ImagePicker {
     return { folder: borrowed ?? fallback, topic };
   }
 
+  /** How many images in the slot's folder have exactly the slot's topic as their file-name topic. */
+  exactCount(slot: PhotoSlot, fallback: ImageFolder): number {
+    const { folder, topic } = this.parse(slot, fallback);
+    const want = phrase(topic);
+    return (this.index.get(folder) ?? []).filter(({ img }) => img.topic === want).length;
+  }
+
   /** How many images in the slot's folder match its topic strongly. */
   matchCount(slot: PhotoSlot, fallback: ImageFolder): number {
     const { folder, topic } = this.parse(slot, fallback);
@@ -303,6 +321,7 @@ export class ImagePicker {
       }));
     }
     const want = expand(tokens(topic));
+    const wantPhrase = phrase(topic);
     const ctx = expand(tokens(context));
     const used = this.used.get(folder) ?? new Set<string>();
     this.used.set(folder, used);
@@ -311,15 +330,22 @@ export class ImagePicker {
         let score = 0;
         for (const t of want) score += tt.has(t) ? 10 : tags.has(t) ? 2 : 0;
         for (const t of ctx) score += tt.has(t) ? 3 : tags.has(t) ? 0.5 : 0;
-        return { img, score, tie: hash(`${key}|${img.path}`) };
+        const exact = img.topic === wantPhrase;
+        if (exact) score += 100;
+        return { img, score, tie: hash(`${key}|${img.path}`), exact };
       })
       .sort((a, b) => b.score - a.score || a.tie - b.tie);
     const best = ranked[0].score;
     const strong = (r: Ranked) => r.score >= 10 || (best < 10 && r.score > 0);
     const out: Picked[] = [];
     const taken = new Set<string>(exclude);
-    // Unused strong matches first, then reused strong matches, then weaker ones.
+    // Unused exact matches, then unused strong matches, then reused strong matches, then weaker ones.
+    // A slot that names another folder's item ("listings/velvet loveseat" in a post) wants that very
+    // item, so it takes the exact file even when a listing already shows it.
+    const crossFolder = folder !== fallback && ImagePicker.split(slot).folder !== undefined;
     const passes: ((r: Ranked) => boolean)[] = [
+      (r) => r.exact && !used.has(r.img.path),
+      (r) => r.exact && crossFolder,
       (r) => strong(r) && !used.has(r.img.path),
       (r) => strong(r),
       (r) => r.score > 0 && !used.has(r.img.path),

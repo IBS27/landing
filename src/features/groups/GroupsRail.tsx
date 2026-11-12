@@ -6,7 +6,14 @@ import { cn } from "@/lib/format";
 import { Tooltip } from "@/ui/overlays";
 import { Avatar, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
-import { CompassGlyph, FeedGlyph, GearGlyph, PeopleGlyph, PlusGlyph, SearchGlyph } from "./icons";
+import {
+  CompassGlyph,
+  FeedGlyph,
+  GearGlyph,
+  PlusGlyph,
+  SearchGlyph,
+  YourGroupsGlyph,
+} from "./icons";
 import { lastActive } from "./util";
 
 export type RailSection = "feed" | "discover" | "joins" | null;
@@ -36,19 +43,19 @@ export function GroupsRail({ active }: { active: RailSection }) {
         <RailRow
           to="/groups/feed"
           label="Your feed"
-          icon={<FeedGlyph />}
+          icon={<FeedGlyph size={24} />}
           selected={active === "feed"}
         />
         <RailRow
           to="/groups/discover"
           label="Discover"
-          icon={<CompassGlyph />}
+          icon={<CompassGlyph size={24} />}
           selected={active === "discover"}
         />
         <RailRow
           to="/groups/joins"
           label="Your groups"
-          icon={<PeopleGlyph />}
+          icon={<YourGroupsGlyph size={24} />}
           selected={active === "joins"}
         />
       </div>

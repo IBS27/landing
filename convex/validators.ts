@@ -110,6 +110,7 @@ export const rentalDetails = v.object({
     v.literal("room"),
     v.literal("townhouse"),
     v.literal("studio"),
+    v.literal("condo"),
   ),
   listingType: v.union(v.literal("rent"), v.literal("sublet"), v.literal("sale")),
   bedrooms: v.number(),

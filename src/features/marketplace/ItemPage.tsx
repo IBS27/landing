@@ -23,7 +23,7 @@ import {
   Trash2,
   WashingMachine,
 } from "lucide-react";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { useChatDock } from "@/app/chat-dock";
 import { useM, useQ } from "@/app/viewer";
 import { FacebookLogo } from "@/icons";
@@ -130,15 +130,10 @@ function ItemContainer({ l }: { l: Detail }) {
           <Header l={l} toast={toast.show} />
           {l.isOwner && l.stats && <Insights stats={l.stats} />}
           <Details l={l} />
-          <div className="mt-4 overflow-hidden rounded-lg">
-            <MapTile label={l.location.neighborhood ?? l.location.city} height={52} radius={20} />
-          </div>
-          <p className="mt-2 text-[13px] leading-4">
-            <span className="text-primary">{l.location.city}</span>
-            <span className="text-secondary"> · Location is approximate</span>
-          </p>
+          <LocationMap l={l} />
           <div className="mt-4 h-px bg-divider" />
           <SellerInfo l={l} />
+          <RelatedSearches l={l} />
         </div>
         {!l.isOwner && <MessageBar l={l} />}
       </aside>
@@ -651,7 +646,79 @@ function Details({ l }: { l: Detail }) {
   );
 }
 
+/* ───────────── Location ───────────── */
+
+/** The map strip under the details; opens a larger map of the approximate area. */
+function LocationMap({ l }: { l: Detail }) {
+  const [open, setOpen] = useState(false);
+  const place = l.location.neighborhood ?? l.location.city.split(",")[0] ?? l.location.city;
+  const seed = `${l.location.lat ?? ""},${l.location.lng ?? ""},${place}`;
+  return (
+    <>
+      <button
+        type="button"
+        aria-label={`View ${place} on map`}
+        onClick={() => setOpen(true)}
+        className="mt-4 block w-full overflow-hidden rounded-lg"
+      >
+        <MapTile label={place} seed={seed} height={52} radius={20} info />
+      </button>
+      <p className="mt-2 text-[13px] leading-4">
+        <span className="text-primary">{l.location.city}</span>
+        <span className="text-secondary"> · Location is approximate</span>
+      </p>
+      <Modal open={open} onOpenChange={setOpen} title="Location" width={700}>
+        <div className="p-4">
+          <div className="overflow-hidden rounded-lg">
+            <MapTile label={place} seed={seed} height={420} radius={84} info />
+          </div>
+          <p className="mt-3 text-[15px] text-primary leading-5">
+            {l.location.neighborhood ? `${l.location.neighborhood}, ` : ""}
+            {l.location.city}
+          </p>
+          <p className="text-[13px] text-secondary leading-4">
+            Location is approximate. The seller's exact address is never shown.
+          </p>
+        </div>
+      </Modal>
+    </>
+  );
+}
+
 /* ───────────── Seller ───────────── */
+
+function Star({ fill }: { fill: "full" | "half" | "empty" }) {
+  const id = useId();
+  return (
+    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden>
+      {fill === "half" && (
+        <defs>
+          <linearGradient id={id}>
+            <stop offset="50%" stopColor="#E0761A" />
+            <stop offset="50%" stopColor="var(--color-btn)" />
+          </linearGradient>
+        </defs>
+      )}
+      <path
+        d="M8 .9l2.1 4.5 4.9.6-3.6 3.4.9 4.9L8 11.9l-4.3 2.4.9-4.9L1 6l4.9-.6Z"
+        fill={fill === "full" ? "#E0761A" : fill === "half" ? `url(#${id})` : "var(--color-btn)"}
+      />
+    </svg>
+  );
+}
+
+function Stars({ stars, count }: { stars: number; count: number }) {
+  return (
+    <span className="flex shrink-0 items-center gap-1" title={`${stars} out of 5 stars`}>
+      <span className="flex">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <Star key={n} fill={stars >= n ? "full" : stars >= n - 0.5 ? "half" : "empty"} />
+        ))}
+      </span>
+      <span className="text-[12px] text-secondary leading-4">({count})</span>
+    </span>
+  );
+}
 
 function SellerInfo({ l }: { l: Detail }) {
   const s = l.seller;
@@ -667,19 +734,81 @@ function SellerInfo({ l }: { l: Detail }) {
           Seller details
         </Link>
       </div>
-      <Link
-        to="/$username"
-        params={{ username: s.username }}
-        className="mt-3 flex items-center gap-3 rounded-lg"
-      >
-        <Avatar src={s.avatar} size={48} />
-        <span className="font-semibold text-[15px] text-primary hover:underline">{s.name}</span>
-      </Link>
+      <div className="mt-3 flex items-center gap-3">
+        <Link to="/$username" params={{ username: s.username }} className="shrink-0 rounded-full">
+          <Avatar src={s.avatar} size={48} />
+        </Link>
+        <Link
+          to="/$username"
+          params={{ username: s.username }}
+          className="min-w-0 flex-1 truncate font-semibold text-[15px] text-primary hover:underline"
+        >
+          {s.name}
+        </Link>
+        {s.rating && <Stars stars={s.rating.stars} count={s.rating.count} />}
+      </div>
       <div className="mt-3 flex items-center gap-3 text-[15px] text-primary">
         <span className="flex h-5 w-5 items-center justify-center grayscale">
           <FacebookLogo size={20} />
         </span>
         Joined Facebook in {s.joinedYear}
+      </div>
+    </section>
+  );
+}
+
+/* ───────────── Related searches ───────────── */
+
+const STOP = new Set(
+  "and the for with from new used size like very good great set pair inch only one two all its our your this that near".split(
+    " ",
+  ),
+);
+
+/** Search phrases a buyer might try next, derived from the listing. */
+function relatedSearches(l: Detail) {
+  const place = (l.location.neighborhood ?? l.location.city.split(",")[0] ?? "").toLowerCase();
+  if (l.rental) {
+    const type =
+      l.rental.propertyType === "room" ? "room" : propertyTypeLabel(l.rental.propertyType);
+    const verb = l.rental.listingType === "sale" ? "for sale" : "for rent";
+    return [
+      `${type.toLowerCase()} ${verb} ${place}`,
+      `${type.toLowerCase()} ${verb}`,
+      `${l.rental.bedrooms > 0 ? `${l.rental.bedrooms} bedroom` : "studio"} ${place}`,
+    ];
+  }
+  const words = l.title
+    .toLowerCase()
+    .split(/[^a-z]+/)
+    .filter((w) => w.length > 2 && !STOP.has(w));
+  const out = [
+    words.slice(0, 3).join(" "),
+    words.slice(0, 2).join(" "),
+    l.brand?.toLowerCase() ?? "",
+    l.vehicle ? `${l.vehicle.make} ${l.vehicle.model}`.toLowerCase() : "",
+    l.categoryMeta?.label.toLowerCase() ?? "",
+  ];
+  return [...new Set(out.map((x) => x.trim()).filter(Boolean))].slice(0, 4);
+}
+
+function RelatedSearches({ l }: { l: Detail }) {
+  const terms = relatedSearches(l);
+  if (terms.length === 0) return null;
+  return (
+    <section className="pt-6">
+      <h2 className="font-semibold text-[17px] text-primary leading-5">Related searches</h2>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {terms.map((q) => (
+          <Link
+            key={q}
+            to="/marketplace/search"
+            search={{ q }}
+            className="flex h-9 max-w-full items-center truncate rounded-full bg-btn px-3 text-[15px] text-btn-text hover:brightness-95 dark:hover:brightness-125"
+          >
+            {q}
+          </Link>
+        ))}
       </div>
     </section>
   );

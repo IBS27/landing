@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { cn, price } from "@/lib/format";
 import { Skeleton, Spinner } from "@/ui/primitives";
-import { bedsBaths, type ListingCard } from "../../../convex/lib/listings";
+import { homeTitle, type ListingCard } from "../../../convex/lib/listings";
 
 export function priceLabel(n: number) {
   return n === 0 ? "FREE" : price(n);
@@ -15,7 +15,7 @@ export function milesLabel(n: number) {
 
 /** One Marketplace grid card: square photo, price, title, location. */
 export function ListingCardView({ l, footer }: { l: ListingCard; footer?: ReactNode }) {
-  const rentLine = l.rental && l.rental.listingType !== "sale" ? ` · ${bedsBaths(l.rental)}` : "";
+  const title = l.rental ? homeTitle(l.rental, l.title) : l.title;
   return (
     <div className="pb-3">
       <Link
@@ -25,12 +25,7 @@ export function ListingCardView({ l, footer }: { l: ListingCard; footer?: ReactN
       >
         <div className="relative aspect-square overflow-hidden rounded-[6px] border border-black/10 bg-input dark:border-white/10">
           {l.photo && (
-            <img
-              src={l.photo}
-              alt={l.title}
-              loading="lazy"
-              className="h-full w-full object-cover"
-            />
+            <img src={l.photo} alt={title} loading="lazy" className="h-full w-full object-cover" />
           )}
           <span className="pointer-events-none absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/5" />
           {l.justListed && l.status === "active" && (
@@ -44,11 +39,8 @@ export function ListingCardView({ l, footer }: { l: ListingCard; footer?: ReactN
             </span>
           )}
         </div>
-        <div className="mt-2 flex items-baseline gap-1.5 truncate text-[17px] leading-5">
-          <span className="font-semibold text-primary">
-            {priceLabel(l.price)}
-            {rentLine && <span className="font-normal">{rentLine}</span>}
-          </span>
+        <div className="mt-3 flex items-baseline gap-1.5 truncate text-[17px] leading-5">
+          <span className="font-semibold text-primary">{priceLabel(l.price)}</span>
           {l.originalPrice !== null && l.originalPrice > l.price && (
             <span className="font-medium text-secondary line-through">
               {price(l.originalPrice)}
@@ -56,7 +48,7 @@ export function ListingCardView({ l, footer }: { l: ListingCard; footer?: ReactN
           )}
         </div>
         <p className="mt-1 truncate text-[15px] text-primary leading-5 group-hover:underline">
-          {l.title}
+          {title}
         </p>
         <p className="mt-1 truncate text-[13px] text-secondary leading-4">{l.city}</p>
         {l.mileage !== null && (
@@ -68,7 +60,7 @@ export function ListingCardView({ l, footer }: { l: ListingCard; footer?: ReactN
   );
 }
 
-export const gridClass = "grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-x-2 gap-y-1";
+export const gridClass = "grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-x-2";
 
 export function GridSkeleton({ count = 8 }: { count?: number }) {
   return (

@@ -149,7 +149,7 @@ export function SearchPage({ tab, params }: { tab: SearchTab; params: SearchPara
       ? {
           q,
           types,
-          limit: tab === "top" ? 5 : 50,
+          limit: tab === "top" ? 3 : 50,
           filters: {
             friendsOfFriends: params.fof,
             city: params.city,
@@ -284,7 +284,8 @@ export function SearchPage({ tab, params }: { tab: SearchTab; params: SearchPara
               )}
 
               {tab === "photos" && posts.posts && <PhotoGridResults posts={posts.posts} />}
-              {tab !== "photos" && posts.posts?.map((p) => <PostCard key={p._id} post={p} />)}
+              {tab !== "photos" &&
+                posts.posts?.map((p) => <PostCard key={p._id} post={p} hideable={false} />)}
               {posts.enabled && (
                 <>
                   <InfiniteSentinel

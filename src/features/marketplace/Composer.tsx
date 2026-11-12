@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
-import { ChevronDown, Globe, ImagePlus, Lock, Rocket, Smartphone, Video, X } from "lucide-react";
+import { ChevronDown, Globe, X } from "lucide-react";
 import { type ReactNode, useRef, useState } from "react";
 import { useM, useQ, useViewer, useViewerContext } from "@/app/viewer";
 import { uploadFile } from "@/features/posts/util";
@@ -24,6 +24,7 @@ import {
 import type { ListingCategory } from "../../../convex/validators";
 import { SelectField, TextArea, TextField } from "./fields";
 import { CheckRow, Switch, VEHICLE_TYPES } from "./filters";
+import { LockIcon, PhoneIcon, PhotosAddIcon, RocketIcon, VideoAddIcon } from "./icons";
 import { useToast } from "./toast";
 
 export type ComposerKind = "item" | "vehicle" | "property";
@@ -494,7 +495,7 @@ function DetailsStep({
         <>
           <h2 className="mt-5 font-semibold text-[17px] text-primary leading-5">Required</h2>
           <p className="text-[15px] text-secondary leading-5">Be as descriptive as possible.</p>
-          <div className="mt-3 flex flex-col gap-3">
+          <div className="mt-3 flex flex-col gap-4">
             <TextField
               label="Title"
               value={f.title}
@@ -525,12 +526,6 @@ function DetailsStep({
               value={f.description}
               onChange={(description) => set({ description })}
             />
-            <SelectField
-              label="Location"
-              value={f.neighborhood}
-              options={HOODS}
-              onChange={(neighborhood) => set({ neighborhood })}
-            />
           </div>
           <button
             type="button"
@@ -552,20 +547,26 @@ function DetailsStep({
             />
           </button>
           {more && (
-            <div className="mt-2 flex flex-col gap-3">
+            <div className="mt-2 flex flex-col gap-4">
               <TextField label="Brand" value={f.brand} onChange={(brand) => set({ brand })} />
+              <SelectField
+                label="Location"
+                value={f.neighborhood}
+                options={HOODS}
+                onChange={(neighborhood) => set({ neighborhood })}
+              />
             </div>
           )}
           <div className="mt-3 h-px bg-divider" />
           <ToggleBlock
-            icon={<Rocket size={24} />}
+            icon={<RocketIcon size={24} />}
             title="Boost listing after publish"
             body="Add a step to boost your listing after it publishes, to help you reach more potential buyers by turning it into an ad."
             checked={f.boost}
             onChange={(boost) => set({ boost })}
           />
           <ToggleBlock
-            icon={<Lock size={24} />}
+            icon={<LockIcon size={24} />}
             title="Hide from friends"
             body={
               <>
@@ -603,7 +604,7 @@ function ToggleBlock({
 }) {
   return (
     <div className="mt-4 flex gap-3">
-      <span className="mt-0.5 shrink-0 text-icon">{icon}</span>
+      <span className="mt-0.5 shrink-0 text-primary">{icon}</span>
       <div className="min-w-0 flex-1">
         <p className="font-medium text-[17px] text-primary leading-5">{title}</p>
         <p className="mt-0.5 text-[13px] text-secondary leading-4">{body}</p>
@@ -683,10 +684,10 @@ function PhotoPicker({ f, set, toast }: StepProps & { toast: (m: string) => void
           <button
             type="button"
             onClick={() => input.current?.click()}
-            className={cn(tile, "h-[162px]")}
+            className={cn(tile, "h-[162px] justify-start! pt-[30px]")}
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-btn">
-              <ImagePlus size={20} />
+              <PhotosAddIcon size={20} />
             </span>
             <span className="mt-2 font-semibold text-[17px] text-primary leading-5">
               Add photos
@@ -696,10 +697,10 @@ function PhotoPicker({ f, set, toast }: StepProps & { toast: (m: string) => void
           <button
             type="button"
             onClick={() => video.current?.click()}
-            className={cn(tile, "h-[162px]")}
+            className={cn(tile, "h-[162px] justify-start! pt-[30px]")}
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-btn">
-              <Video size={20} />
+              <VideoAddIcon size={20} />
             </span>
             <span className="mt-2 font-semibold text-[17px] text-primary leading-5">Add video</span>
             <span className="text-[15px] text-secondary leading-5">or drag and drop</span>
@@ -745,14 +746,14 @@ function PhotoPicker({ f, set, toast }: StepProps & { toast: (m: string) => void
               onClick={() => input.current?.click()}
               className={cn(tile, "aspect-square")}
             >
-              <ImagePlus size={20} className="text-icon" />
+              <PhotosAddIcon size={20} className="text-icon" />
               <span className="mt-1 font-semibold text-[13px] text-primary">Add photos</span>
             </button>
           )}
         </div>
       )}
       <div className="mt-4 flex items-center gap-3 rounded-xl bg-wash px-3 py-3">
-        <Smartphone size={22} className="shrink-0 text-icon" />
+        <PhoneIcon size={24} className="shrink-0 text-primary" />
         <p className="flex-1 text-[13px] text-primary leading-4">
           Upload photos directly from your phone.{" "}
           <span className="font-semibold text-link">Learn more</span>
@@ -772,7 +773,7 @@ function VehicleFields({ f, set }: StepProps) {
       <p className="text-[15px] text-secondary leading-5">
         Help buyers know more about the vehicle you're listing.
       </p>
-      <div className="mt-3 flex flex-col gap-3">
+      <div className="mt-3 flex flex-col gap-4">
         <SelectField
           label="Vehicle type"
           value={f.vehicleType}
@@ -857,7 +858,7 @@ function VehicleFields({ f, set }: StepProps) {
 
 function PropertyFields({ f, set }: StepProps) {
   return (
-    <div className="mt-5 flex flex-col gap-3">
+    <div className="mt-5 flex flex-col gap-4">
       <SelectField
         label="Home for Sale or Rent"
         value={f.saleOrRent}

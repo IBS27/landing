@@ -8,19 +8,11 @@ import { Avatar, Button, Card, EmptyState, Skeleton, VerifiedBadge } from "@/ui/
 import { api } from "../../../convex/_generated/api";
 import type { PageCard } from "../../../convex/pages";
 import { AppRail, AppRailDivider, AppRailHeading, AppRailItem, RailGear } from "./AppRail";
+import { BusinessSuiteGlyph, FollowedPagesGlyph, PersonPlusGlyph } from "./glyphs";
 import { CompassFilled } from "./icons";
 
 export type PagesView = "discover" | "followed" | "invites" | "business";
 export const PAGES_VIEWS: PagesView[] = ["discover", "followed", "invites", "business"];
-
-function BusinessSuiteGlyph() {
-  return (
-    <svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" aria-hidden>
-      <circle cx="10" cy="10" r="7.6" strokeWidth="1.8" />
-      <path d="M7.5 6.2 11.6 10l-4.1 3.8" strokeWidth="1.8" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 /** /pages — "Discover" Pages, Followed Pages, Invites and the viewer's own Pages. */
 export function PagesPage({ view }: { view: PagesView }) {
@@ -63,14 +55,14 @@ export function PagesPage({ view }: { view: PagesView }) {
         />
         <AppRailItem
           large
-          icon={<Rss size={20} strokeWidth={2.4} />}
+          icon={<FollowedPagesGlyph />}
           label="Followed Pages"
           selected={view === "followed"}
           onClick={() => go("followed")}
         />
         <AppRailItem
           large
-          icon={<UserPlus size={20} strokeWidth={2.4} />}
+          icon={<PersonPlusGlyph />}
           label="Invites"
           selected={view === "invites"}
           onClick={() => go("invites")}

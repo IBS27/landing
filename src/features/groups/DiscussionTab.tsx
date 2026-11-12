@@ -3,13 +3,24 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useQ, useViewer } from "@/app/viewer";
 import { groupParams } from "@/features/feed/links";
 import { CreatePostModal, PostCard, PostSkeleton } from "@/features/posts";
-import { FeelingIcon, PhotoVideoIcon, TagPeopleIcon } from "@/features/posts/icons";
 import { cn } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger, Tooltip } from "@/ui/overlays";
 import { Avatar, Card, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
+import { AnonymousDialog, PollDialog } from "./ComposerDialogs";
 import { type GroupView, isMember, useGroup } from "./context";
-import { ChevronDownGlyph, EyeGlyph, EyeOffGlyph, GlobeGlyph, LockGlyph, PinGlyph } from "./icons";
+import {
+  AnonymousPostIcon,
+  ChevronDownGlyph,
+  EyeGlyph,
+  EyeOffGlyph,
+  GlobeGlyph,
+  GroupFeelingIcon,
+  LockGlyph,
+  PeopleGlyph,
+  PinGlyph,
+  PollIcon,
+} from "./icons";
 import { inGroup } from "./posts";
 
 /** Discussion: composer + feed on the left, About and Recent media on the right. */
@@ -71,8 +82,9 @@ function StickyAside({ children }: { children: ReactNode }) {
 function GroupComposer({ group }: { group: GroupView }) {
   const viewer = useViewer();
   const [open, setOpen] = useState(false);
-  const [panel, setPanel] = useState<"photo" | "feeling" | "tag" | undefined>();
-  const openWith = (p?: "photo" | "feeling" | "tag") => {
+  const [panel, setPanel] = useState<"feeling" | undefined>();
+  const [dialog, setDialog] = useState<"anonymous" | "poll" | null>(null);
+  const openWith = (p?: "feeling") => {
     setPanel(p);
     setOpen(true);
   };
@@ -92,20 +104,16 @@ function GroupComposer({ group }: { group: GroupView }) {
       </div>
       <div className="mt-3 flex border-divider-soft border-t pt-2">
         <ComposerAction
-          icon={<PhotoVideoIcon />}
-          label="Photo/video"
-          onClick={() => openWith("photo")}
+          icon={<AnonymousPostIcon />}
+          label="Anonymous post"
+          onClick={() => setDialog("anonymous")}
         />
         <ComposerAction
-          icon={<TagPeopleIcon />}
-          label="Tag people"
-          onClick={() => openWith("tag")}
-        />
-        <ComposerAction
-          icon={<FeelingIcon />}
+          icon={<GroupFeelingIcon />}
           label="Feeling/activity"
           onClick={() => openWith("feeling")}
         />
+        <ComposerAction icon={<PollIcon />} label="Poll" onClick={() => setDialog("poll")} />
       </div>
       <CreatePostModal
         open={open}
@@ -113,6 +121,17 @@ function GroupComposer({ group }: { group: GroupView }) {
         initialPanel={panel}
         groupId={group._id}
         groupName={group.name}
+      />
+      <AnonymousDialog
+        group={group}
+        open={dialog === "anonymous"}
+        onOpenChange={(o) => setDialog(o ? "anonymous" : null)}
+        onWritePost={() => openWith()}
+      />
+      <PollDialog
+        group={group}
+        open={dialog === "poll"}
+        onOpenChange={(o) => setDialog(o ? "poll" : null)}
       />
     </Card>
   );
@@ -319,11 +338,12 @@ function PrivateNotice() {
 /* ---------------- Sidebar ---------------- */
 
 export function PrivacyRows({ group, compact }: { group: GroupView; compact?: boolean }) {
+  const size = compact ? 16 : 20;
   const sub = compact ? "text-[15px]" : "text-[13px]";
   return (
     <>
       <InfoRow
-        icon={group.privacy === "public" ? <GlobeGlyph /> : <LockGlyph />}
+        icon={group.privacy === "public" ? <GlobeGlyph size={size} /> : <LockGlyph size={size} />}
         title={group.privacy === "public" ? "Public" : "Private"}
         sub={
           group.privacy === "public"
@@ -332,13 +352,15 @@ export function PrivacyRows({ group, compact }: { group: GroupView; compact?: bo
         }
         subClass={sub}
         muted={!compact}
+        compact={compact}
       />
       <InfoRow
-        icon={group.visible ? <EyeGlyph /> : <EyeOffGlyph />}
+        icon={group.visible ? <EyeGlyph size={size} /> : <EyeOffGlyph size={size} />}
         title={group.visible ? "Visible" : "Hidden"}
         sub={group.visible ? "Anyone can find this group." : "Only members can find this group."}
         subClass={sub}
         muted={!compact}
+        compact={compact}
       />
     </>
   );
@@ -350,6 +372,7 @@ export function InfoRow({
   sub,
   subClass = "text-[13px]",
   muted,
+  compact,
 }: {
   icon: ReactNode;
   title: ReactNode;
@@ -357,18 +380,33 @@ export function InfoRow({
   subClass?: string;
   /** About tab: grey icons. */
   muted?: boolean;
+  /** Discussion sidebar: 16px icons. */
+  compact?: boolean;
 }) {
   return (
     <div className="flex gap-3">
-      <span className={cn("mt-0.5 shrink-0", muted ? "text-icon-secondary" : "text-icon")}>
+      <span
+        className={cn(
+          "shrink-0",
+          compact ? "mt-[3px]" : "mt-0.5",
+          muted ? "text-icon-secondary" : "text-icon",
+        )}
+      >
         {icon}
       </span>
       <div className="min-w-0">
         <p className="text-[17px] text-primary leading-[22px]">{title}</p>
-        {sub && <p className={cn("text-primary", subClass)}>{sub}</p>}
+        {sub && <p className={cn("text-primary leading-5", subClass)}>{sub}</p>}
       </div>
     </div>
   );
+}
+
+/** Facebook's group type, shown in the About sidebar ("General", "Buy and Sell", "Gaming"). */
+function groupType(category: string) {
+  if (/buy|sell|swap|marketplace/i.test(category)) return "Buy and Sell";
+  if (/gam/i.test(category)) return "Gaming";
+  return "General";
 }
 
 export function Description({ text, limit = 160 }: { text: string; limit?: number }) {
@@ -396,18 +434,12 @@ export function Description({ text, limit = 160 }: { text: string; limit?: numbe
 
 function AboutCard({ group }: { group: GroupView }) {
   return (
-    <Card className="flex flex-col gap-4 rounded-xl p-4">
-      <h2 className="font-semibold text-[17px] text-primary">About</h2>
+    <Card className="flex flex-col gap-3 rounded-xl p-4">
+      <h2 className="font-semibold text-[17px] text-primary leading-5">About</h2>
       <Description text={group.description} />
       <PrivacyRows group={group} compact />
-      {group.location && <InfoRow icon={<PinGlyph />} title={group.location} />}
-      <Link
-        to="/groups/$groupId/about"
-        params={groupParams(group)}
-        className="flex h-9 items-center justify-center rounded-md bg-btn font-semibold text-[15px] text-btn-text hover:brightness-95 dark:hover:brightness-125"
-      >
-        Learn more
-      </Link>
+      {group.location && <InfoRow compact icon={<PinGlyph size={16} />} title={group.location} />}
+      <InfoRow compact icon={<PeopleGlyph size={16} />} title={groupType(group.category)} />
     </Card>
   );
 }

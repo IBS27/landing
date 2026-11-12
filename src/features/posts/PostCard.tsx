@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Bell, CircleSlash, Clock, Flag, Link2, Pencil, Trash2, Users } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useM } from "@/app/viewer";
@@ -15,11 +15,11 @@ import {
 import { Avatar, Button, Card, IconButton, VerifiedBadge } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import { ActionBar } from "./ActionBar";
-import { AttachmentCard } from "./Attachments";
+import { AdStrip, AttachmentCard, adCallToAction } from "./Attachments";
 import { AudienceIcon, audienceLabel } from "./Audience";
 import { backgroundFor } from "./backgrounds";
-import { CommentsSection } from "./CommentsSection";
-import { CreatePostModal } from "./CreatePostModal";
+import { CommentsSection, GroupCommentPreview } from "./CommentsSection";
+import { CreatePostModal, FEELINGS } from "./CreatePostModal";
 import { BookmarkOutline, CaretRight, CloseIcon, DotsIcon, GroupAudienceIcon } from "./icons";
 import { PhotoGrid } from "./PhotoGrid";
 import { PhotoViewer } from "./PhotoViewer";
@@ -34,15 +34,20 @@ import { groupParams, isLargeText, postUrl, truncate } from "./util";
 export function PostCard({
   post,
   expanded = false,
+  hideable = true,
   className,
 }: {
   post: PostView;
   expanded?: boolean;
+  /** Feeds show the X "Hide post" button; search results don't. */
+  hideable?: boolean;
   className?: string;
 }) {
   const [hidden, setHidden] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [focusKey, setFocusKey] = useState(0);
+  // Group surfaces show the top comment and a "Write an answer…" row under each post.
+  const inGroups = useRouterState({ select: (s) => s.location.pathname.startsWith("/groups") });
 
   if (hidden)
     return (
@@ -60,7 +65,7 @@ export function PostCard({
 
   return (
     <Card className={cn("overflow-hidden rounded-xl", className)}>
-      <PostHeader post={post} onHide={expanded ? undefined : () => setHidden(true)} />
+      <PostHeader post={post} onHide={expanded || !hideable ? undefined : () => setHidden(true)} />
       <PostContent post={post} expanded={expanded} onSeeMore={() => setDialogOpen(true)} />
       <ActionBar
         post={post}
@@ -70,6 +75,13 @@ export function PostCard({
         <div className="border-divider border-t">
           <CommentsSection postId={post._id} focusKey={focusKey} />
         </div>
+      )}
+      {!expanded && inGroups && (
+        <GroupCommentPreview
+          postId={post._id}
+          commentCount={post.commentCount}
+          onViewMore={() => setDialogOpen(true)}
+        />
       )}
       {dialogOpen && <PostDialog post={post} onClose={() => setDialogOpen(false)} />}
     </Card>
@@ -91,16 +103,26 @@ export function PostHeader({
 }) {
   const author = <NameLink user={post.author} />;
   const meta = (
-    <span className="flex items-center gap-1 text-[13px] text-secondary leading-4">
-      <Tooltip content={fullTimestamp(post.createdAt)} side="bottom">
+    <span className="flex items-center gap-1 font-semibold text-[13px] text-secondary leading-4">
+      {post.sponsored ? (
         <Link
           to="/$username/posts/$postId"
           params={{ username: post.author.username, postId: post._id }}
           className="hover:underline"
         >
-          {postTime(post.createdAt)}
+          Ad
         </Link>
-      </Tooltip>
+      ) : (
+        <Tooltip content={fullTimestamp(post.createdAt)} side="bottom">
+          <Link
+            to="/$username/posts/$postId"
+            params={{ username: post.author.username, postId: post._id }}
+            className="hover:underline"
+          >
+            {postTime(post.createdAt)}
+          </Link>
+        </Tooltip>
+      )}
       <span aria-hidden>·</span>
       <Tooltip
         content={
@@ -155,7 +177,7 @@ export function PostHeader({
           <Avatar src={post.author.avatar} size={40} />
         </Link>
       )}
-      <div className="min-w-0 flex-1 pt-px">
+      <div className="min-w-0 flex-1">
         {post.group ? (
           <>
             <p className="font-semibold text-[15px] leading-5">
@@ -198,7 +220,7 @@ export function PostHeader({
         )}
       </div>
       {!compact && (
-        <div className="-mt-0.5 -mr-1 flex items-center">
+        <div className="flex items-center">
           <PostMenu post={post} onHide={onHide} />
           {onHide && (
             <IconButton label="Hide post" variant="ghost" onClick={onHide}>
@@ -229,7 +251,16 @@ function NameLink({ user }: { user: UserSummary }) {
 /** "is feeling happy", "is at Place", "is with Name and 2 others". */
 function Activity({ post }: { post: PostView }) {
   const parts: ReactNode[] = [];
-  if (post.feeling) parts.push(<span key="f"> is feeling {post.feeling}</span>);
+  // Stored as "proud" (composer) or "feeling proud" (seed): show "is 😌 feeling proud".
+  const feeling = post.feeling?.replace(/^feeling\s+/i, "");
+  const emoji = FEELINGS.find(([, f]) => f === feeling)?.[0];
+  if (feeling)
+    parts.push(
+      <span key="f">
+        {" "}
+        is {emoji ? `${emoji} ` : ""}feeling {feeling}
+      </span>,
+    );
   // The timeline owner is already named ("A ▸ B"), so don't repeat them as tagged.
   const tagged = post.tagged.filter((u) => u._id !== post.timelineUser?._id);
   if (tagged.length) {
@@ -423,7 +454,7 @@ export function PostContent({
         text && (
           <div
             className={cn(
-              "whitespace-pre-wrap break-words px-4 pt-1 pb-4 text-primary",
+              "whitespace-pre-wrap break-words px-3 pt-1 pb-4 text-primary",
               large ? "text-[24px] leading-7" : "text-[15px] leading-5",
               (post.media.length > 0 || post.attachments.length > 0 || post.shared) && "pb-3",
             )}
@@ -448,8 +479,23 @@ export function PostContent({
         <PhotoGrid media={post.media} onOpen={setViewer} className={nested ? "" : undefined} />
       )}
       {post.attachments.map((att, i) => (
-        <AttachmentCard key={i} att={att} />
+        <AttachmentCard
+          key={i}
+          att={att}
+          cta={
+            post.sponsored && att.kind === "link" ? adCallToAction(post.text, att.url) : undefined
+          }
+        />
       ))}
+      {post.sponsored && !post.attachments.some((a) => a.kind === "link") && (
+        <Link
+          to="/$username"
+          params={{ username: post.author.username }}
+          className="group block border-divider border-t"
+        >
+          <AdStrip domain="facebook.com" title={post.author.name} cta={adCallToAction(post.text)} />
+        </Link>
+      )}
       {post.shared && <SharedPost shared={post.shared} />}
       {viewer !== null && (
         <PhotoViewer post={post} index={viewer} onClose={() => setViewer(null)} />

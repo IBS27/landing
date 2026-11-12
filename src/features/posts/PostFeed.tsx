@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { Card, EmptyState, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -38,8 +38,17 @@ function useFeed(source: FeedSource) {
 /**
  * A paginated list of PostCards with skeletons and infinite scroll.
  * Cards are stacked with Facebook's 12px gap; the parent sets the width.
+ * `interleave(i)` renders extra cards (ads, the Reels shelf) after post `i`.
  */
-export function PostFeed({ source, empty }: { source: FeedSource; empty?: ReactNode }) {
+export function PostFeed({
+  source,
+  empty,
+  interleave,
+}: {
+  source: FeedSource;
+  empty?: ReactNode;
+  interleave?: (index: number) => ReactNode;
+}) {
   const { results, status, loadMore } = useFeed(source);
   const sentinel = useRef<HTMLDivElement>(null);
   const posts = results as PostView[];
@@ -81,8 +90,11 @@ export function PostFeed({ source, empty }: { source: FeedSource; empty?: ReactN
 
   return (
     <div className="flex flex-col gap-3">
-      {posts.map((p) => (
-        <PostCard key={p._id} post={p} />
+      {posts.map((p, i) => (
+        <Fragment key={p._id}>
+          <PostCard post={p} />
+          {interleave?.(i)}
+        </Fragment>
       ))}
       <div ref={sentinel} />
       {(status === "LoadingMore" || status === "CanLoadMore") && <PostSkeleton />}

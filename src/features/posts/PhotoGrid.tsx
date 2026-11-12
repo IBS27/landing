@@ -59,6 +59,9 @@ export function PhotoGrid({
   return <div className={cn("overflow-hidden", className)}>{content}</div>;
 }
 
+/** Facebook caps a single photo's height and letterboxes narrower photos. */
+const MAX_MEDIA_HEIGHT = 575;
+
 function Single({
   item,
   onOpen,
@@ -69,8 +72,6 @@ function Single({
   className?: string;
 }) {
   const ratio = item.width && item.height ? item.width / item.height : 4 / 3;
-  // Tall photos are letterboxed (Facebook caps the height and fills the sides).
-  const shown = Math.max(ratio, 0.8);
   if (item.kind === "video")
     return (
       <div className={cn("bg-black", className)}>
@@ -80,34 +81,34 @@ function Single({
           controls
           playsInline
           preload="metadata"
-          className="mx-auto max-h-[700px] w-full"
-          style={{ aspectRatio: Math.max(ratio, 0.5) }}
+          className="mx-auto w-full"
+          style={{ aspectRatio: ratio, maxHeight: MAX_MEDIA_HEIGHT }}
         />
       </div>
     );
+  // Wider than the capped box (680×575) fills edge to edge; narrower photos sit
+  // centred on a heavily blurred copy, which reads as Facebook's dominant-colour fill.
+  const letterboxed = ratio < 1.2;
   return (
     <button
       type="button"
       onClick={onOpen}
-      className={cn("relative block w-full overflow-hidden bg-black/90", className)}
-      style={{ aspectRatio: shown }}
+      className={cn("relative block w-full overflow-hidden bg-[#1c1e21]", className)}
+      style={{ aspectRatio: ratio, maxHeight: MAX_MEDIA_HEIGHT }}
     >
-      {shown !== ratio && (
+      {letterboxed && (
         <img
           src={item.url}
           alt=""
           aria-hidden
-          className="absolute inset-0 h-full w-full scale-110 object-cover opacity-70 blur-2xl"
+          className="absolute inset-0 h-full w-full scale-150 object-cover blur-[60px] brightness-[0.8] saturate-[0.9]"
         />
       )}
       <img
         src={item.url}
         alt={item.alt ?? ""}
         loading="lazy"
-        className={cn(
-          "relative mx-auto h-full",
-          shown !== ratio ? "w-auto object-contain" : "w-full object-cover",
-        )}
+        className="relative h-full w-full object-contain"
       />
     </button>
   );

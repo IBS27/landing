@@ -112,7 +112,7 @@ export function buildPlan(now: number) {
   const isPage = new Set<string>(pages.map((p) => p.username));
   const nameOf = new Map<string, string>();
   const genderIndex = { m: 0, w: 0 };
-  const coverTopics = ["mountains", "city skyline", "forest", "ocean", "sunset", "lake"];
+  const coverTopics = ["mountains", "city skyline", "forest", "city night", "trail", "texture"];
 
   const users: { handle: Handle; row: Row<"users"> }[] = [];
   for (const p of people) {
@@ -133,8 +133,9 @@ export function buildPlan(now: number) {
         firstName: p.name.split(" ")[0],
         username: p.username,
         avatar: pics.avatar(p.gender, genderIndex[p.gender]++),
+        // Profile covers stay in the covers folder so they never take a post's photo.
         cover: pics.pick(
-          ("cover" in p && p.cover) || r.pick(coverTopics),
+          `covers/${("cover" in p && p.cover) || r.pick(coverTopics)}`,
           "covers",
           `cover:${p.username}`,
         ).url,
@@ -308,6 +309,7 @@ export function buildPlan(now: number) {
   const listingSeller = new Map<string, Username>();
   const listingCreated = new Map<string, number>();
   const listingPhoto = new Map<string, string>();
+  const listingByPhoto = new Map<string, string>();
   const listings: {
     key: string;
     seller: Username;
@@ -322,16 +324,29 @@ export function buildPlan(now: number) {
     const r = rng(`listing:${l.key}`);
     const hood = neighborhoods[l.hood];
     const createdAt = Math.min(clock.at(l.listed), latest);
-    // The library has only a few photos per item type: show as many on-topic photos as exist
-    // (up to the authored count) rather than padding with unrelated items.
+    // A listing shows its own photos: the exact-topic files for a single topic (never padded with
+    // other items), or one distinct photo per slot. No photo may appear on two listings.
     const folder = l.rental ? "rooms" : "listings";
-    const photos = pics.pickMany(
-      l.photos,
-      folder,
-      `listing:${l.key}`,
-      Math.max(1, Math.min(l.photoCount, pics.matchCount(l.photos, folder))),
-      `${l.title} ${CATEGORY_HINTS[l.category] ?? ""}`,
-    );
+    const hint = `${l.title} ${CATEGORY_HINTS[l.category] ?? ""}`;
+    const photos: Picked[] = [];
+    if (typeof l.photos === "string") {
+      const exact = pics.exactCount(l.photos, folder);
+      const n = exact > 0 ? Math.min(l.photoCount ?? exact, exact) : 1;
+      photos.push(...pics.pickMany(l.photos, folder, `listing:${l.key}`, n, hint));
+    } else {
+      const inListing = new Set<string>();
+      l.photos.forEach((slot, i) => {
+        const p = pics.pick(slot, folder, `listing:${l.key}:${i}`, hint, inListing);
+        if (!inListing.has(p.url)) photos.push(p);
+        inListing.add(p.url);
+      });
+    }
+    if (photos.length === 0) fail(`listing ${l.key} has no photos`);
+    for (const p of photos) {
+      const other = listingByPhoto.get(p.url);
+      if (other) fail(`listings ${other} and ${l.key} share photo ${p.url}`);
+      listingByPhoto.set(p.url, l.key);
+    }
     const status = l.status ?? "active";
     const ageDays = (now - createdAt) / DAY;
     listingTitle.set(l.key, l.title);
@@ -556,7 +571,7 @@ export function buildPlan(now: number) {
     const privacy =
       s.privacy ??
       (kind === "friend"
-        ? r.chance(0.55)
+        ? r.chance(0.35)
           ? ("friends" as const)
           : ("public" as const)
         : "public");
@@ -1120,15 +1135,26 @@ export function buildPlan(now: number) {
       });
     }
   }
-  const memories = posts.filter(
-    (p) => personaSet.has(p.author) && now - p.row.createdAt > 300 * DAY,
-  );
-  for (const m of memories) {
+  // "On this day": one notification per persona, pointing at their newest memory from today's date.
+  for (const persona of personas) {
+    const memories = posts
+      .filter(
+        (p) =>
+          p.author === persona &&
+          now - p.row.createdAt > 300 * DAY &&
+          clock.monthDayOf(p.row.createdAt) === clock.monthDay(0),
+      )
+      .sort((a, b) => b.row.createdAt - a.row.createdAt);
+    if (memories.length === 0) continue;
+    const years = Math.round((now - memories[0].row.createdAt) / (365.25 * DAY));
     notes.push({
-      user: m.author as Username,
+      user: persona,
       kind: "memory",
-      text: `You have a memory from ${Math.round((now - m.row.createdAt) / (365 * DAY))} years ago. Look back on it today.`,
-      post: m.key,
+      text:
+        memories.length === 1
+          ? `You have a memory from ${years} ${years === 1 ? "year" : "years"} ago. Look back on it today.`
+          : `You have ${memories.length} memories to look back on today.`,
+      post: memories[0].key,
       createdAt: clock.at({ kind: "clock", days: 0, hm: "07:00" }),
     });
   }

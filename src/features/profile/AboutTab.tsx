@@ -10,7 +10,6 @@ import {
   Link2,
   MapPin,
   Pencil,
-  Pin,
   Plus,
   Trash2,
   User,
@@ -231,9 +230,12 @@ function SimpleField({
   field,
   addLabel,
   display,
+  hideLabel,
 }: {
   icon: IconT;
   label: string;
+  /** Pinned details show only the value, without the "Current city" subline. */
+  hideLabel?: boolean;
   value: string | null;
   field: "city" | "hometown" | "relationship" | "pronouns";
   addLabel: string;
@@ -254,7 +256,11 @@ function SimpleField({
   if (!value)
     return profile.isSelf ? <AddRow label={addLabel} onClick={() => setEditing(true)} /> : null;
   return (
-    <Row icon={icon} sub={label} onEdit={profile.isSelf ? () => setEditing(true) : undefined}>
+    <Row
+      icon={icon}
+      sub={hideLabel ? undefined : label}
+      onEdit={profile.isSelf ? () => setEditing(true) : undefined}
+    >
       {display ? display(value) : value}
     </Row>
   );
@@ -281,11 +287,12 @@ function SectionBody({
           <Title>Pinned details</Title>
           {user.city || isSelf ? (
             <SimpleField
-              icon={Pin}
+              icon={MapPin}
               label="Current city"
               value={user.city}
               field="city"
               addLabel="Add current city"
+              hideLabel
             />
           ) : (
             <Empty>No pinned details to show</Empty>

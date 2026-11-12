@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/format";
 import { IconButton } from "./primitives";
 
-/* ---------- Tooltip (Facebook's dark rounded bubble) ---------- */
+/* ---------- Tooltip (Facebook's frosted bubble: white in light mode, black in dark) ---------- */
 
 export function Tooltip({
   content,
@@ -22,7 +22,7 @@ export function Tooltip({
         <T.Content
           side={side}
           sideOffset={6}
-          className="z-[100] max-w-xs rounded-lg bg-[rgba(0,0,0,0.8)] px-3 py-2 text-[13px] text-white leading-4 shadow-base dark:bg-[rgba(228,230,235,0.95)] dark:text-[#050505]"
+          className="z-[100] max-w-xs rounded-xl bg-[rgba(255,255,255,0.8)] px-3 py-2 text-[13px] text-[#080809] leading-[17px] shadow-[0_2px_4px_0_rgba(0,0,0,0.5)] backdrop-blur-md dark:bg-[rgba(0,0,0,0.8)] dark:text-[#e2e5e9]"
         >
           {content}
         </T.Content>
@@ -32,6 +32,50 @@ export function Tooltip({
 }
 
 export const TooltipProvider = T.Provider;
+
+/* ---------- Pointer arrow (the notch Facebook draws on "…" menus) ---------- */
+
+type Align = "start" | "center" | "end";
+
+/** 16x10 notch that sits on the panel's top edge, pointing at the trigger's center. */
+function PanelArrow({ align }: { align: Align }) {
+  return (
+    <svg
+      viewBox="0 0 16 10"
+      width="16"
+      height="10"
+      aria-hidden
+      className={cn(
+        "pointer-events-none absolute bottom-full fill-popover group-data-[side=top]:hidden",
+        align === "end" && "right-0",
+        align === "start" && "left-0 -scale-x-100",
+        align === "center" && "left-1/2 -translate-x-1/2",
+      )}
+    >
+      {align === "center" ? (
+        <path d="M0 10C3 10 5.6 2.9 6.8 1.1a1.4 1.4 0 0 1 2.4 0C10.4 2.9 13 10 16 10Z" />
+      ) : (
+        <path d="M0 10C5 7.2 9.6 3.6 12.1 1.2a1.9 1.9 0 0 1 3 .3c.6.8.9 1.7.9 2.6V10Z" />
+      )}
+    </svg>
+  );
+}
+
+/** With an arrow, the panel's square corner lines up 4px past the trigger's center. */
+const arrowShift = (align: Align, triggerWidthVar: string) =>
+  align === "center"
+    ? undefined
+    : `calc((var(${triggerWidthVar}) / 2 - 4px) * ${align === "end" ? -1 : 1}) 0`;
+
+const ARROW_CORNER: Record<Align, string> = {
+  end: "data-[side=bottom]:rounded-tr-none",
+  start: "data-[side=bottom]:rounded-tl-none",
+  center: "",
+};
+
+/** The card shadow as a filter, so the notch casts the same shadow as the panel. */
+const ARROW_SHADOW =
+  "drop-shadow(0 12px 14px var(--shadow-2)) drop-shadow(0 2px 2px var(--shadow-1))";
 
 /* ---------- Popover panel (header dropdowns) ---------- */
 
@@ -43,16 +87,19 @@ export function PopoverPanel({
   align = "end",
   alignOffset,
   width = 360,
+  arrow = false,
   className,
 }: {
   trigger: ReactNode;
   children: ReactNode;
   open?: boolean;
   onOpenChange?: (o: boolean) => void;
-  align?: "start" | "center" | "end";
+  align?: Align;
   /** Shift along the alignment axis (header panels line up with the right edge). */
   alignOffset?: number;
   width?: number;
+  /** Draw Facebook's pointer notch toward the trigger. */
+  arrow?: boolean;
   className?: string;
 }) {
   return (
@@ -62,15 +109,24 @@ export function PopoverPanel({
         <P.Content
           align={align}
           alignOffset={alignOffset}
-          sideOffset={4}
+          sideOffset={arrow ? 15 : 4}
           collisionPadding={8}
           className={cn(
-            "z-50 flex max-h-[calc(100vh-72px)] flex-col overflow-hidden rounded-lg bg-popover shadow-elevated outline-none data-[state=open]:animate-[fade-in_120ms_ease-out]",
+            "group z-50 flex max-h-[calc(100vh-72px)] flex-col rounded-xl bg-popover outline-none data-[state=open]:animate-[fade-in_120ms_ease-out]",
+            arrow ? ARROW_CORNER[align] : "shadow-elevated",
             className,
           )}
-          style={{ width }}
+          style={{
+            width,
+            translate: arrow ? arrowShift(align, "--radix-popover-trigger-width") : undefined,
+            filter: arrow ? ARROW_SHADOW : undefined,
+          }}
         >
-          {children}
+          {arrow && <PanelArrow align={align} />}
+          {/* Clip scrolling content to the rounded corners without clipping the arrow. */}
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[inherit]">
+            {children}
+          </div>
         </P.Content>
       </P.Portal>
     </P.Root>
@@ -86,22 +142,34 @@ export function MenuContent({
   children,
   align = "end",
   width = 344,
+  arrow = false,
   className,
 }: {
   children: ReactNode;
-  align?: "start" | "center" | "end";
+  align?: Align;
   width?: number;
+  /** Draw Facebook's pointer notch toward the trigger (header "…" menus). */
+  arrow?: boolean;
   className?: string;
 }) {
   return (
     <DM.Portal>
       <DM.Content
         align={align}
-        sideOffset={6}
+        sideOffset={arrow ? 15 : 6}
         collisionPadding={8}
-        className={cn("z-50 rounded-lg bg-popover p-2 shadow-elevated outline-none", className)}
-        style={{ width }}
+        className={cn(
+          "group z-50 rounded-xl bg-popover p-2 outline-none",
+          arrow ? ARROW_CORNER[align] : "shadow-elevated",
+          className,
+        )}
+        style={{
+          width,
+          translate: arrow ? arrowShift(align, "--radix-dropdown-menu-trigger-width") : undefined,
+          filter: arrow ? ARROW_SHADOW : undefined,
+        }}
       >
+        {arrow && <PanelArrow align={align} />}
         {children}
       </DM.Content>
     </DM.Portal>
@@ -125,7 +193,7 @@ export function MenuItem({
     <DM.Item
       onSelect={onSelect}
       className={cn(
-        "flex cursor-pointer select-none items-center gap-3 rounded-md px-2 py-1.5 outline-none data-[highlighted]:bg-hover",
+        "flex min-h-9 cursor-pointer select-none items-center gap-3 rounded-[4px] p-2 outline-none data-[highlighted]:bg-hover",
         danger && "text-negative",
       )}
     >

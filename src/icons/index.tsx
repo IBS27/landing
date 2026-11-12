@@ -1,4 +1,4 @@
-import type { SVGProps } from "react";
+import { type ReactNode, type SVGProps, useId } from "react";
 
 type P = SVGProps<SVGSVGElement> & { size?: number };
 const base = (size = 24, p: P) => ({
@@ -42,32 +42,175 @@ export function FacebookWordmark({ className }: { className?: string }) {
   );
 }
 
-/* ---------- Top navigation tabs (outline when idle, filled when active) ---------- */
+/* ---------- Top navigation tabs (2px outline when idle, solid when active) ---------- */
 
-export function HomeIcon({ active, size = 24, ...p }: P & { active?: boolean }) {
-  return active ? (
+type TabIconProps = P & { active?: boolean };
+
+/** Idle tab glyphs are 2px round-capped strokes on a 24px grid. */
+const outline = (size: number, p: P) => ({
+  ...base(size, p),
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 2,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+});
+
+/** Solid glyph with `cut` drawn as see-through gaps (a mask keeps it correct on any background). */
+function Cutout({ size, p, solid, cut }: { size: number; p: P; solid: ReactNode; cut: ReactNode }) {
+  const id = useId();
+  return (
     <svg {...base(size, p)}>
-      <path d="M8.99 23H7.93c-1.354 0-2.471 0-3.355-.119-.928-.125-1.747-.396-2.403-1.053-.656-.656-.928-1.475-1.053-2.403C1 18.541 1 17.425 1 16.07v-4.875c0-1.204-.000-2.07.209-2.875a6 6 0 0 1 .955-1.943c.493-.664 1.153-1.21 2.07-1.966l2.986-2.465c.997-.823 1.83-1.511 2.574-1.979C10.582.443 11.244.207 12 .207c.756 0 1.418.236 2.206.733.743.468 1.577 1.156 2.574 1.979l2.987 2.465c.916.756 1.576 1.302 2.07 1.966a6 6 0 0 1 .954 1.943c.21.805.209 1.67.209 2.875v4.875c0 1.354 0 2.47-.119 3.354-.125.928-.396 1.747-1.053 2.403-.656.657-1.475.928-2.403 1.053-.884.12-2 .119-3.354.119H15.01a.5.5 0 0 1-.5-.5v-5.5a2.5 2.5 0 0 0-5 0V22.5a.5.5 0 0 1-.5.5Z" />
-    </svg>
-  ) : (
-    <svg {...base(size, p)}>
-      <path d="M9.464 1.286C10.294.803 11.092.5 12 .5c.908 0 1.707.303 2.537.786.795.462 1.7 1.142 2.815 1.977l2.232 1.675c1.391 1.042 2.359 1.766 2.888 2.826.53 1.059.53 2.268.528 4.006v4.3c0 1.355 0 2.471-.119 3.355-.124.928-.396 1.747-1.052 2.403-.657.657-1.476.928-2.404 1.053-.884.119-2 .119-3.354.119H7.93c-1.354 0-2.471 0-3.355-.119-.928-.125-1.747-.396-2.403-1.053-.656-.656-.928-1.475-1.053-2.403C1 18.541 1 17.425 1 16.07v-4.3c0-1.738-.002-2.947.528-4.006.53-1.06 1.497-1.784 2.888-2.826L6.65 3.263c1.114-.835 2.02-1.515 2.815-1.977ZM10.47 3.015c-.703.409-1.53 1.028-2.69 1.898l-2 1.5c-1.68 1.26-2.198 1.693-2.462 2.22C3.05 9.162 3 9.835 3 11.936V16c0 1.436.002 2.437.103 3.192.099.734.28 1.122.556 1.399.277.277.665.457 1.4.556.754.101 1.756.103 3.191.103H9.5v-4a2.5 2.5 0 0 1 5 0v4h1.25c1.435 0 2.436-.002 3.192-.103.734-.099 1.122-.28 1.399-.556.277-.277.457-.665.556-1.4.101-.754.103-1.755.103-3.191v-4.064c0-2.101-.05-2.774-.318-3.303-.264-.527-.782-.96-2.463-2.22l-2-1.5c-1.16-.87-1.986-1.489-2.69-1.898C12.84 2.619 12.403 2.5 12 2.5c-.403 0-.84.119-1.53.515Z" />
+      <mask id={id} maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+        <rect width="24" height="24" fill="#fff" />
+        <g fill="#000" stroke="#000" strokeLinecap="round" strokeLinejoin="round">
+          {cut}
+        </g>
+      </mask>
+      <g mask={`url(#${id})`}>{solid}</g>
     </svg>
   );
 }
 
-export function FriendsIcon({ active, size = 24, ...p }: P & { active?: boolean }) {
+const HOUSE =
+  "M2 9.7c0-.9.4-1.8 1.1-2.4l7-5.6a3 3 0 0 1 3.8 0l7 5.6c.7.6 1.1 1.5 1.1 2.4V19a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3Z";
+
+export function HomeIcon({ active, size = 24, ...p }: TabIconProps) {
   return active ? (
     <svg {...base(size, p)}>
-      <path d="M8.5 1a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm8.5 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM8.5 13C4.32 13 1 15.43 1 18.5v1A3.5 3.5 0 0 0 4.5 23h8a3.5 3.5 0 0 0 3.5-3.5v-1c0-3.07-3.32-5.5-7.5-5.5Zm9.5 9.5a5.43 5.43 0 0 0 .4-2v-2c0-1.74-.82-3.26-2.13-4.42C21.23 12.9 23 15.2 23 17.5v1.5a3.5 3.5 0 0 1-3.5 3.5H18Z" />
+      <path
+        fillRule="evenodd"
+        d="M1 9.5c0-1 .45-1.9 1.2-2.5l7.6-6a3.5 3.5 0 0 1 4.4 0l7.6 6c.75.6 1.2 1.5 1.2 2.5V20a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3ZM10.5 13h3a1.5 1.5 0 0 1 1.5 1.5V21H9v-6.5a1.5 1.5 0 0 1 1.5-1.5Z"
+      />
     </svg>
   ) : (
-    <svg {...base(size, p)}>
-      <path d="M8.5 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm-5 3a5 5 0 1 1 10 0 5 5 0 0 1-10 0Zm13.5-1a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-4 2a4 4 0 1 1 8 0 4 4 0 0 1-8 0ZM1 18.5C1 15.43 4.32 13 8.5 13s7.5 2.43 7.5 5.5v1a3.5 3.5 0 0 1-3.5 3.5h-8A3.5 3.5 0 0 1 1 19.5v-1Zm7.5-3.5C5.19 15 3 16.82 3 18.5v1A1.5 1.5 0 0 0 4.5 21h8a1.5 1.5 0 0 0 1.5-1.5v-1c0-1.68-2.19-3.5-5.5-3.5Zm9.06 3.03a1 1 0 0 1 1.02-.98C21.07 17.13 23 18.46 23 20.5a2.5 2.5 0 0 1-2.5 2.5H18a1 1 0 1 1 0-2h2.5a.5.5 0 0 0 .5-.5c0-.68-.72-1.4-2.46-1.45a1 1 0 0 1-.98-1.02Z" />
+    <svg {...outline(size, p)}>
+      <path d={HOUSE} />
+      <path d="M9.4 22v-6.4a2.2 2.2 0 0 1 2.2-2.2h.8a2.2 2.2 0 0 1 2.2 2.2V22" />
     </svg>
   );
 }
 
+export function FriendsIcon({ active, size = 24, ...p }: TabIconProps) {
+  const id = useId();
+  if (active) {
+    const leftBody = "M4.3 16.2h5.4a3.3 3.3 0 0 1 0 6.6H4.3a3.3 3.3 0 0 1 0-6.6Z";
+    return (
+      <svg {...base(size, p)}>
+        <mask id={id} maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+          <rect width="24" height="24" fill="#fff" />
+          <path d={leftBody} stroke="#000" strokeWidth="3" />
+        </mask>
+        <circle cx="7" cy="8.6" r="4" />
+        <circle cx="16.2" cy="4.6" r="3.8" />
+        <path
+          mask={`url(#${id})`}
+          d="M15.4 10.5h3.6a3.9 3.9 0 0 1 0 7.8h-3.4c-1.7 0-3.3-1.1-3.3-3.9s1.4-3.9 3.1-3.9Z"
+        />
+        <path d={leftBody} />
+      </svg>
+    );
+  }
+  return (
+    <svg {...outline(size, p)}>
+      <circle cx="6.8" cy="9.1" r="2.8" />
+      <rect x="1.2" y="16.8" width="11.4" height="4.9" rx="2.45" />
+      <circle cx="16.2" cy="5" r="2.8" />
+      <path d="M16.8 11.8h1.8a2.9 2.9 0 0 1 0 5.8h-1.8" />
+    </svg>
+  );
+}
+
+/** Facebook's Reels mark: a clapperboard with a play button. */
+export function ReelsIcon({ active, size = 24, ...p }: TabIconProps) {
+  const lines = <path d="M2.5 7.5h19M8.4 2.6l1.9 4.9M14.4 2.6l1.9 4.9" />;
+  const play = (
+    <path
+      stroke="none"
+      d="M10 12.5v5c0 .6.7 1 1.2.7l4-2.5a.8.8 0 0 0 0-1.4l-4-2.5c-.5-.3-1.2 0-1.2.7Z"
+    />
+  );
+  return active ? (
+    <Cutout
+      size={size}
+      p={p}
+      solid={<rect x="1.25" y="1.25" width="21.5" height="21.5" rx="6.25" />}
+      cut={
+        <>
+          <g fill="none" strokeWidth="1.6">
+            {lines}
+          </g>
+          {play}
+        </>
+      }
+    />
+  ) : (
+    <svg {...outline(size, p)}>
+      <rect x="2.25" y="2.25" width="19.5" height="19.5" rx="5.25" />
+      {lines}
+      <g fill="currentColor">{play}</g>
+    </svg>
+  );
+}
+
+export function GroupsIcon({ active, size = 24, ...p }: TabIconProps) {
+  const inner = (
+    <>
+      <circle cx="12" cy="8.8" r="2.8" />
+      <path d="M6.6 20.4v-.8c.3-2.8 2.5-4.6 5.4-4.6s5.1 1.8 5.4 4.6v.8M2.3 9.6a2.45 2.45 0 0 1 0 4.8M21.7 9.6a2.45 2.45 0 0 0 0 4.8" />
+    </>
+  );
+  return active ? (
+    <Cutout
+      size={size}
+      p={p}
+      solid={<circle cx="12" cy="12" r="11" />}
+      cut={
+        <g fill="none" strokeWidth="1.6">
+          {inner}
+        </g>
+      }
+    />
+  ) : (
+    <svg {...outline(size, p)}>
+      <circle cx="12" cy="12" r="10" />
+      {inner}
+    </svg>
+  );
+}
+
+export function GamingIcon({ active, size = 24, ...p }: TabIconProps) {
+  const dots = (
+    <g stroke="none">
+      <circle cx="17.4" cy="9.6" r="1.4" />
+      <circle cx="15.2" cy="14.2" r="1.4" />
+    </g>
+  );
+  const plus = <path d="M5.2 12h5.2M7.8 9.4v5.2" />;
+  return active ? (
+    <Cutout
+      size={size}
+      p={p}
+      solid={<rect x="0.75" y="4.25" width="22.5" height="15.5" rx="7.75" />}
+      cut={
+        <>
+          <g fill="none" strokeWidth="2">
+            {plus}
+          </g>
+          {dots}
+        </>
+      }
+    />
+  ) : (
+    <svg {...outline(size, p)}>
+      <rect x="1.75" y="5.25" width="20.5" height="13.5" rx="6.75" />
+      {plus}
+      <g fill="currentColor">{dots}</g>
+    </svg>
+  );
+}
+
+/** Older play-in-square video glyph (Watch). */
 export function VideoIcon({ active, size = 24, ...p }: P & { active?: boolean }) {
   return active ? (
     <svg {...base(size, p)}>
@@ -76,30 +219,6 @@ export function VideoIcon({ active, size = 24, ...p }: P & { active?: boolean })
   ) : (
     <svg {...base(size, p)}>
       <path d="M10.996 8.132A1 1 0 0 0 9.5 9v6a1 1 0 0 0 1.496.868l5.25-3a1 1 0 0 0 0-1.736l-5.25-3ZM7.93 1h8.14c1.354 0 2.471 0 3.355.119.928.125 1.747.396 2.403 1.053.657.656.928 1.475 1.053 2.403C23 5.459 23 6.575 23 7.93v8.14c0 1.354 0 2.471-.119 3.355-.125.928-.396 1.747-1.053 2.403-.656.657-1.475.928-2.403 1.053-.884.119-2 .119-3.354.119H7.93c-1.354 0-2.471 0-3.355-.119-.928-.125-1.747-.396-2.403-1.053-.656-.656-.928-1.475-1.053-2.403C1 18.541 1 17.425 1 16.07V7.93c0-1.354 0-2.471.119-3.355.125-.928.396-1.747 1.053-2.403.656-.657 1.475-.928 2.403-1.053C5.459 1 6.575 1 7.93 1ZM4.84 3.1c-.734.1-1.122.28-1.399.557-.277.277-.457.665-.556 1.4C2.784 5.811 2.782 6.812 2.782 8.247v7.508c0 1.435.002 2.436.103 3.192.099.734.28 1.122.556 1.399.277.277.665.457 1.4.556.754.101 1.755.103 3.191.103h7.936c1.435 0 2.436-.002 3.192-.103.734-.099 1.122-.28 1.399-.556.277-.277.457-.665.556-1.4.101-.755.103-1.756.103-3.191V8.247c0-1.435-.002-2.436-.103-3.191-.099-.735-.28-1.123-.556-1.4-.277-.277-.665-.457-1.4-.556-.755-.101-1.756-.103-3.191-.103H8.032c-1.435 0-2.437.002-3.192.103Z" />
-    </svg>
-  );
-}
-
-export function GroupsIcon({ active, size = 24, ...p }: P & { active?: boolean }) {
-  return active ? (
-    <svg {...base(size, p)}>
-      <path d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1Zm0 4.5a3.25 3.25 0 1 1 0 6.5 3.25 3.25 0 0 1 0-6.5Zm-5.5 2a2.25 2.25 0 1 1 0 4.5 2.25 2.25 0 0 1 0-4.5Zm11 0a2.25 2.25 0 1 1 0 4.5 2.25 2.25 0 0 1 0-4.5ZM12 13.5c2.86 0 5.12 1.5 5.62 3.9a8.98 8.98 0 0 1-11.24 0c.5-2.4 2.76-3.9 5.62-3.9Zm-6.3.03a6.6 6.6 0 0 0-1.43 2.6A8.97 8.97 0 0 1 3.13 14c.66-.32 1.53-.5 2.57-.47Zm12.6 0c1.04-.03 1.91.15 2.57.47a8.97 8.97 0 0 1-1.14 2.13 6.6 6.6 0 0 0-1.43-2.6Z" />
-    </svg>
-  ) : (
-    <svg {...base(size, p)}>
-      <path d="M12 3a9 9 0 0 0-7.34 14.21c.86-2.13 2.66-3.6 4.89-4.21A4.24 4.24 0 0 1 7.75 9.5a4.25 4.25 0 1 1 6.7 3.5c2.23.6 4.03 2.08 4.89 4.21A9 9 0 0 0 12 3Zm5.86 15.82C17.33 16.54 15.04 15 12 15s-5.33 1.54-5.86 3.82A8.96 8.96 0 0 0 12 21a8.96 8.96 0 0 0 5.86-2.18ZM1 12C1 5.925 5.925 1 12 1s11 4.925 11 11-4.925 11-11 11S1 18.075 1 12Zm11-4.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
-    </svg>
-  );
-}
-
-export function GamingIcon({ active, size = 24, ...p }: P & { active?: boolean }) {
-  return active ? (
-    <svg {...base(size, p)}>
-      <path d="M8 4h8c3.87 0 7 3.13 7 7v3.5a5.5 5.5 0 0 1-10 3.17L12.3 17h-.6l-.7.67A5.5 5.5 0 0 1 1 14.5V11c0-3.87 3.13-7 7-7Zm-1 4a1 1 0 0 0-1 1v1H5a1 1 0 1 0 0 2h1v1a1 1 0 1 0 2 0v-1h1a1 1 0 1 0 0-2H8V9a1 1 0 0 0-1-1Zm9.5 0a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Zm-2 3a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Z" />
-    </svg>
-  ) : (
-    <svg {...base(size, p)}>
-      <path d="M8 6a5 5 0 0 0-5 5v3.5a3.5 3.5 0 0 0 6.25 2.16l.88-1.08A1.5 1.5 0 0 1 11.3 15h1.4c.45 0 .88.2 1.17.55l.88 1.08A3.5 3.5 0 0 0 21 14.5V11a5 5 0 0 0-5-5H8Zm-7 5c0-3.87 3.13-7 7-7h8c3.87 0 7 3.13 7 7v3.5a5.5 5.5 0 0 1-9.8 3.44L12.53 17h-1.06l-.67.94A5.5 5.5 0 0 1 1 14.5V11Zm6-3a1 1 0 0 1 1 1v1h1a1 1 0 1 1 0 2H8v1a1 1 0 1 1-2 0v-1H5a1 1 0 1 1 0-2h1V9a1 1 0 0 1 1-1Zm8.25 1.25a1.25 1.25 0 1 1 2.5 0 1.25 1.25 0 0 1-2.5 0Zm-2 2.75a1.25 1.25 0 1 1 2.5 0 1.25 1.25 0 0 1-2.5 0Z" />
     </svg>
   );
 }
@@ -121,8 +240,10 @@ export function MarketplaceIcon({ active, size = 24, ...p }: P & { active?: bool
 export function MenuGridIcon({ size = 20, ...p }: P) {
   return (
     <svg {...base(size, p)} viewBox="0 0 20 20">
-      {[2, 8, 14].flatMap((y) =>
-        [2, 8, 14].map((x) => <rect key={`${x}-${y}`} x={x} y={y} width="4" height="4" rx="1" />),
+      {[0.75, 7.5, 14.25].flatMap((y) =>
+        [0.75, 7.5, 14.25].map((x) => (
+          <rect key={`${x}-${y}`} x={x} y={y} width="5" height="5" rx="1.5" />
+        )),
       )}
     </svg>
   );
@@ -138,8 +259,9 @@ export function MessengerIcon({ size = 20, ...p }: P) {
 
 export function BellIcon({ size = 20, ...p }: P) {
   return (
-    <svg {...base(size, p)}>
-      <path d="M3 9.5a9 9 0 0 1 18 0v2.927c0 1.69.475 3.345 1.37 4.778a1.5 1.5 0 0 1-1.272 2.295h-4.625a4.5 4.5 0 0 1-8.946 0H2.902a1.5 1.5 0 0 1-1.272-2.295A9.01 9.01 0 0 0 3 12.43V9.5Zm6.55 10a2.5 2.5 0 0 0 4.9 0h-4.9Z" />
+    <svg {...base(size, p)} viewBox="0 0 20 20">
+      <path d="M10 .4c-3.86 0-6.9 3.1-6.9 6.95v3.3c0 1.13-.38 2.23-1.08 3.12l-.66.85c-.62.8-.05 1.98.96 1.98h15.36c1.01 0 1.58-1.17.96-1.98l-.66-.85a5.05 5.05 0 0 1-1.08-3.12v-3.3C16.9 3.5 13.86.4 10 .4Z" />
+      <path d="M7.4 16.6a2.6 2.6 0 0 0 5.2 0" fill="none" stroke="currentColor" strokeWidth="1.6" />
     </svg>
   );
 }
@@ -229,18 +351,25 @@ export function BmGroups({ size = 36 }: B) {
 }
 
 export function BmReels({ size = 36 }: B) {
+  const id = useId();
   return (
     <svg {...box(size)}>
       <defs>
-        <linearGradient id="br1" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#FF6A3D" />
-          <stop offset="1" stopColor="#FF2E7A" />
+        <linearGradient id={id} x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0" stopColor="#F7A33E" />
+          <stop offset="0.5" stopColor="#EE6E78" />
+          <stop offset="1" stopColor="#D6489F" />
         </linearGradient>
       </defs>
-      <rect x="3" y="3" width="30" height="30" rx="8" fill="url(#br1)" />
-      <path d="M3.5 11h29M13 3.5 16.5 11M22.5 3.5 26 11" stroke="#fff" strokeWidth="2" />
+      <rect x="5" y="5.25" width="26" height="26" rx="7.5" fill={`url(#${id})`} />
       <path
-        d="M15 16.3v9.4c0 .8.86 1.3 1.55.9l7.6-4.7a1.05 1.05 0 0 0 0-1.8l-7.6-4.7a1.04 1.04 0 0 0-1.55.9Z"
+        d="M5.5 13.1h25M11.6 5.6l3.4 7.5M20.2 5.6l3.4 7.5"
+        stroke="#fff"
+        strokeWidth="1.6"
+        fill="none"
+      />
+      <path
+        d="M15 18.9v7.2c0 .9 1 1.4 1.7 1l6.1-3.6a1.1 1.1 0 0 0 0-1.9l-6.1-3.6c-.7-.5-1.7 0-1.7.9Z"
         fill="#fff"
       />
     </svg>
@@ -364,17 +493,39 @@ export function BmPages({ size = 36 }: B) {
   );
 }
 
+/** Meta AI's mark: seven tilted petals in a ring, magenta to violet. */
+const META_AI_PETALS: [number, number, number][] = [
+  [18.1, 6.1, -27],
+  [25.6, 9.8, -15],
+  [27.4, 18.1, 72],
+  [22.3, 24.7, -53],
+  [13.5, 24.7, -23],
+  [8.2, 18.1, 57],
+  [10.3, 9.8, -79],
+];
+
 export function BmMetaAI({ size = 36 }: B) {
+  const id = useId();
   return (
     <svg {...box(size)}>
       <defs>
-        <linearGradient id="bai1" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#0082FB" />
-          <stop offset="0.5" stopColor="#A142F4" />
-          <stop offset="1" stopColor="#E040A0" />
+        <linearGradient id={id} x1="4" y1="4" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#E553FE" />
+          <stop offset="1" stopColor="#5541FD" />
         </linearGradient>
       </defs>
-      <circle cx="18" cy="18" r="14" fill="none" stroke="url(#bai1)" strokeWidth="5" />
+      <g fill={`url(#${id})`}>
+        {META_AI_PETALS.map(([cx, cy, r]) => (
+          <ellipse
+            key={`${cx}-${cy}`}
+            cx={cx}
+            cy={cy}
+            rx="2.8"
+            ry="4.2"
+            transform={`rotate(${r} ${cx} ${cy})`}
+          />
+        ))}
+      </g>
     </svg>
   );
 }

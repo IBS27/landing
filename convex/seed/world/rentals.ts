@@ -2,8 +2,8 @@ import { daysAgo, daysFromNow, hoursAgo } from "../lib/time";
 import type { ListingSeed } from "../types";
 
 /**
- * Property rentals (Marketplace category "propertyrentals"). Photo slots use
- * the `rooms` folder by default. Registry keys: derek-caphill-1br,
+ * Property rentals (Marketplace category "propertyrentals"). One `rooms` photo
+ * slot per picture; every rental gets its own distinct photos. Registry keys: derek-caphill-1br,
  * derek-wallingford-studio, derek-fremont-2br, fatima-udistrict-sublet,
  * priya-wallingford-room.
  *
@@ -20,8 +20,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "Top floor 1 bedroom in a 6 unit building off 15th Ave E. Hardwood floors, big south facing windows, updated kitchen with gas range and dishwasher, washer/dryer in the unit. Walk to Volunteer Park and the 10 bus, about 12 min to Capitol Hill Link.\n\n12 month lease. $2,150/mo, deposit equal to one month. Water/sewer/garbage flat $85/mo, tenant pays electric and internet. Cats ok with $300 deposit, sorry no dogs (building rule). No smoking.\n\nShowings Saturday and Sunday afternoons. Message me with your move-in date and a little about yourself.",
-    photos: "apartment living room",
-    photoCount: 6,
+    photos: ["living room", "kitchen", "bedroom", "bathroom"],
     hood: "Capitol Hill",
     listed: daysAgo(5, "09:30"),
     views: 812,
@@ -49,8 +48,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "Bright studio in the lower unit of my Wallingford duplex. Separate entrance, full kitchen, new LVP floors, lots of closet space. Utilities included (water, sewer, garbage, electric, wifi). Shared laundry in the basement.\n\nWalk to the shops on 45th, 15 min bus to UW on the 44. 12 month lease preferred, 6 months possible for $100/mo more. $1,000 deposit. No pets, no smoking. Great for a grad student or someone working remote.",
-    photos: "studio apartment",
-    photoCount: 5,
+    photos: ["studio", "kitchen", "bathroom"],
     hood: "Wallingford",
     listed: daysAgo(6, "10:15"),
     views: 694,
@@ -77,8 +75,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "2 bed 1 bath in a quiet 8 unit building a few blocks up the hill from the Fremont Troll. Both bedrooms fit a queen + desk. Dishwasher, laundry in the building, one off-street parking spot included. Walk to the Burke-Gilman, Gas Works, and the 40/62 buses.\n\n$3,100/mo, 12 month lease, deposit $2,000. Tenant pays electric + internet, W/S/G is $110/mo. Small dog or cat considered. Roommates welcome, each adult applies separately ($45 screening fee each).",
-    photos: "apartment living room",
-    photoCount: 6,
+    photos: ["living room", "kitchen", "bedroom", "bathroom", "apartment building"],
     hood: "Fremont",
     listed: daysAgo(10, "11:00"),
     views: 588,
@@ -105,8 +102,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "Upper unit of my Wallingford duplex. 2 bedrooms, 1 bath, private deck with a peek of Lake Union. Updated kitchen, gas fireplace, private washer/dryer. I live nearby and fix things fast.\n\n$2,950/mo + utilities. 12 month lease, deposit $2,500. One pet ok with deposit. No smoking anywhere on the property.",
-    photos: "apartment living room",
-    photoCount: 5,
+    photos: ["living room", "kitchen", "bedroom", "bathroom"],
     hood: "Wallingford",
     status: "pending",
     listed: daysAgo(18, "09:45"),
@@ -133,14 +129,13 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "1 bedroom in a small brick building 3 blocks from Roosevelt station, 1 stop to UW, 10 min to downtown. Recently painted, new fridge, laundry in the building. Whole Foods and Toronado down the street. $1,950/mo, 12 month lease, $1,500 deposit. Cats ok.",
-    photos: "bedroom",
-    photoCount: 4,
+    photos: ["living room", "kitchen", "bedroom", "bathroom"],
     hood: "Roosevelt",
     listed: daysAgo(1, "10:30"),
     views: 284,
     groups: ["uw-housing"],
     rental: {
-      propertyType: "apartment",
+      propertyType: "condo",
       listingType: "rent",
       bedrooms: 1,
       bathrooms: 1,
@@ -161,8 +156,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "Craftsman 3 bed 1.75 bath house in Greenwood. Fenced backyard, detached garage, full basement with washer/dryer. New furnace last year. Close to Greenwood Ave restaurants and the 5 bus.\n\n$4,200/mo, tenant pays all utilities. 12 month lease minimum, deposit $3,500. Dogs welcome (that's what the yard is for). Available now.",
-    photos: "house exterior",
-    photoCount: 6,
+    photos: ["house", "living room", "kitchen", "bedroom"],
     hood: "Greenwood",
     listed: daysAgo(24, "13:00"),
     views: 903,
@@ -191,8 +185,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "subletting my room for the summer (June 1 to Aug 31) while I'm at an internship in Minneapolis. $1,150/mo, utilities + wifi are about $70 on top, split 3 ways.\n\nroom is furnished: full bed, desk, dresser, blackout curtains. you'd live with 2 grad students (one in CS, one in public health), both quiet, clean, and around a lot. no smoking, no pets (landlord rule). 5 min walk to campus and the U District Link station.\n\nlooking for someone tidy, ideally a student or summer intern. message me and we can do a video tour",
-    photos: "bedroom",
-    photoCount: 4,
+    photos: ["bedroom", "kitchen"],
     hood: "U District",
     listed: daysAgo(6, "20:30"),
     views: 467,
@@ -220,8 +213,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "I'm studying abroad in Copenhagen winter + spring so my room is up for sublet Jan 3 to June 15! $1,050/mo plus about $60 utilities. room comes furnished with a desk and bed frame (bring your own mattress or I can leave a topper).\n\nmy roommate Leah is a nursing student, super chill, works some weekends and loves cooking way too much. apartment has a dishwasher and laundry in the building. 44 bus is a block away, 15 min to campus. no pets. women and nonbinary folks preferred since it's a 2 person apartment",
-    photos: "bedroom",
-    photoCount: 4,
+    photos: ["bedroom", "living room"],
     hood: "Wallingford",
     listed: daysAgo(10, "19:00"),
     views: 389,
@@ -251,8 +243,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "one of our housemates is graduating so we have a room opening in January. 4BR/2BA house in the U District, 8 min walk to campus. we're all grad students (HCDE, oceanography, CSE), we cook together on sundays sometimes and otherwise keep to ourselves. house has a backyard, washer/dryer, and a very loud but beloved radiator.\n\n$1,050/mo + utilities (~$80). 6 month lease to start, renewable. $1,050 deposit. no smokers",
-    photos: "bedroom",
-    photoCount: 4,
+    photos: ["bedroom", "bathroom", "kitchen"],
     hood: "U District",
     listed: daysAgo(7, "21:00"),
     views: 356,
@@ -279,8 +270,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "Room available in a 3BR house in Wallingford, 5 min walk to Gas Works Park. You'd share with me (PhD student, French, bakes a lot) and a software engineer who travels for work half the month. Shared bathroom with one person. Big kitchen, garden, washer/dryer.\n\n$1,100/mo including utilities and internet. Month to month after the first 6 months. One month deposit. We have a very old cat named Gaspard, so no other pets please.",
-    photos: "bedroom",
-    photoCount: 5,
+    photos: ["bedroom", "living room", "kitchen"],
     hood: "Wallingford",
     listed: daysAgo(14, "18:30"),
     views: 412,
@@ -307,8 +297,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "looking for a 3rd roommate for winter + spring! we're 2 sophomores (nursing + bio), pretty clean, early sleepers on weekdays. the room is furnished with a twin XL bed and desk. $975 + ~$55 utilities. 2 blocks from the Ave and the U District station",
-    photos: "bedroom",
-    photoCount: 3,
+    photos: ["bedroom", "kitchen"],
     hood: "U District",
     listed: daysAgo(3, "17:45"),
     views: 241,
@@ -335,8 +324,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "room with its own bathroom in a newer townhouse. roommates are 2 software engineers, we work a lot and play Mario Kart a lot. W/D in unit, rooftop deck, 6 min walk to Roosevelt Link. $1,250/mo + ~$90 utilities, lease through July",
-    photos: "bedroom",
-    photoCount: 4,
+    photos: ["bedroom", "living room"],
     hood: "Roosevelt",
     listed: daysAgo(9, "20:10"),
     views: 330,
@@ -364,8 +352,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "My roommate is moving to Austin so I'm looking for someone to take her room starting Jan 1. 2BR/1BA near Broadway & Thomas, 5 min to Capitol Hill station. I'm a product designer, work hybrid, quiet, I have a cat named Pixel (she's friendly). Room fits a queen. $1,350 + utilities split. Lease through August, then we can renew together.",
-    photos: "bedroom",
-    photoCount: 4,
+    photos: ["bedroom", "kitchen"],
     hood: "Capitol Hill",
     listed: daysAgo(2, "12:20"),
     views: 274,
@@ -392,8 +379,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "room opening in our house off 12th. 4 of us, mix of service industry + students, so someone is always awake lol. we share a big kitchen and a porch. W/D in the basement. $1,200 includes utilities. month to month with 30 days notice, $600 deposit. queer and trans friendly house",
-    photos: "bedroom",
-    photoCount: 3,
+    photos: ["bedroom", "bathroom"],
     hood: "Capitol Hill",
     listed: daysAgo(12, "15:40"),
     views: 381,
@@ -420,8 +406,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "yes it's a band house. yes there's a practice space in the basement. no, we don't practice after 10pm. room is on the top floor, smallest one in the house but it gets good light. $900 + ~$70 utilities. looking for someone chill who doesn't mind bass through the floor on tuesdays",
-    photos: "bedroom",
-    photoCount: 3,
+    photos: ["bedroom", "bathroom", "living room"],
     hood: "Capitol Hill",
     listed: daysAgo(20, "16:00"),
     views: 455,
@@ -447,8 +432,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "room open in our 4BR in upper Fremont. 3 of us work at or basically live at Cascade Boulders, there's a hangboard in the garage and a gear room. we do group dinners on sundays. $1,100 + utilities (~$75). 12 month lease. 10 min walk to the gym, 28 bus to downtown. no smoking",
-    photos: "bedroom",
-    photoCount: 4,
+    photos: ["bedroom", "bathroom"],
     hood: "Fremont",
     listed: daysAgo(8, "09:20"),
     views: 302,
@@ -475,8 +459,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "Room in a 3BR house near 65th & 24th. Me (vet tech), my partner, and our golden retriever Moose. Looking for a quiet, tidy person who likes dogs (Moose will want to be your best friend). Fenced yard, W/D, off-street parking spot. $1,150 + 1/3 utilities. 12 month lease, $1,150 deposit.",
-    photos: "bedroom",
-    photoCount: 4,
+    photos: ["bedroom", "living room"],
     hood: "Ballard",
     listed: daysAgo(15, "19:30"),
     views: 337,
@@ -503,8 +486,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "My friend is moving out so I'm looking for a roommate. Newer building, 5 min walk to Spring District/120th Link station, easy commute to Redmond or downtown Bellevue. Gym, rooftop, in unit W/D. Room has its own bathroom and walk-in closet. $1,400 + utilities (~$100). Lease through September. Vegetarian household, no smoking.",
-    photos: "bedroom",
-    photoCount: 5,
+    photos: ["bedroom", "living room", "kitchen"],
     hood: "Bellevue",
     listed: daysAgo(11, "08:40"),
     views: 268,
@@ -531,8 +513,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "room in a 3BR/2.5BA townhouse in Overlake, 10 min walk to the Redmond Technology Link station. housemates are 2 new grads (Amazon + Microsoft). garage spot included, W/D in unit. $1,250 + ~$80 utilities. 12 month lease, available Jan 1. great for new grads starting in January",
-    photos: "townhouse",
-    photoCount: 4,
+    photos: ["bedroom", "living room"],
     hood: "Redmond",
     listed: daysAgo(4, "21:15"),
     views: 219,
@@ -561,8 +542,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "my exchange ends in December so I'm subletting my studio Jan 1 to June 30. furnished (bed, desk, small sofa, kitchen stuff). building has a gym and laundry on each floor. 3 min walk to U District station. $1,450/mo, utilities included except electric (~$30). landlord approves sublets, small application.",
-    photos: "studio apartment",
-    photoCount: 4,
+    photos: ["studio", "kitchen", "bathroom"],
     hood: "U District",
     listed: daysAgo(6, "14:30"),
     views: 376,
@@ -590,8 +570,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "I'm doing guest spots in Portland for a few months so my studio is open Dec 15 to end of Feb. furnished, cozy, exposed brick, radiator heat (included). 2 blocks from Cal Anderson. you'd have to water my plants. $1,500 all in. no pets unfortunately, Biscuit is coming with me",
-    photos: "studio apartment",
-    photoCount: 4,
+    photos: ["studio", "kitchen", "bathroom"],
     hood: "Capitol Hill",
     listed: daysAgo(1, "18:40"),
     views: 197,
@@ -619,8 +598,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "taking over my lease through July! studio with a loft bed and a little balcony, dishwasher, laundry on the floor. 4 min walk to Roosevelt station. $1,395/mo + electric. building allows dogs and cats. management will run a standard application",
-    photos: "studio apartment",
-    photoCount: 3,
+    photos: ["studio", "kitchen", "bathroom"],
     hood: "Roosevelt",
     listed: hoursAgo(18),
     views: 88,
@@ -650,14 +628,13 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "Taking over my lease (through June) because I'm buying a place. 1BR on upper Queen Anne, partial Space Needle view from the living room, W/D in unit, assigned garage spot ($100/mo extra). Gas stove, dishwasher. Quiet building, lots of dogs. $2,300/mo, lease transfer through the building.",
-    photos: "apartment living room",
-    photoCount: 5,
+    photos: ["living room", "kitchen", "bedroom", "bathroom"],
     hood: "Queen Anne",
     listed: daysAgo(16, "12:00"),
     views: 509,
     groups: ["seattle-apartments"],
     rental: {
-      propertyType: "apartment",
+      propertyType: "condo",
       listingType: "rent",
       bedrooms: 1,
       bathrooms: 1,
@@ -679,14 +656,13 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "My girlfriend and I are moving to Bellevue so our 2 bed 2 bath is up for grabs. Split floor plan (great for roommates), in unit W/D, balcony, dishwasher. 5 min walk to Climate Pledge Arena and the RapidRide D. $3,400/mo, landlord does a new 12 month lease. Parking spot available for $175. Cats ok.",
-    photos: "apartment living room",
-    photoCount: 6,
+    photos: ["living room", "kitchen", "bedroom", "bathroom", "apartment building"],
     hood: "Queen Anne",
     listed: daysAgo(5, "19:15"),
     views: 466,
     groups: ["seattle-apartments"],
     rental: {
-      propertyType: "apartment",
+      propertyType: "condo",
       listingType: "rent",
       bedrooms: 2,
       bathrooms: 2,
@@ -707,8 +683,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "2 bedroom, 1 bath on Beacon Hill, 6 min walk to Beacon Hill station (2 stops to downtown). Updated kitchen, washer/dryer in unit, big living room with mountain views on clear days (so, sometimes). $2,700/mo + utilities. 12 month lease, $2,000 deposit. Small pets ok. I'm moving in with my fiance and want this place to go to someone nice.",
-    photos: "apartment living room",
-    photoCount: 5,
+    photos: ["living room", "kitchen", "bedroom", "bathroom"],
     hood: "Beacon Hill",
     listed: daysAgo(9, "18:00"),
     views: 421,
@@ -735,8 +710,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "3 bed 2.5 bath townhouse a few blocks from Columbia City station and Rainier Ave. 2 car tandem garage, rooftop deck, W/D. We're buying a house after the wedding so we're helping the owner find the next tenant. $3,600/mo, tenant pays utilities. 12 month lease, deposit $3,000. Pets negotiable.",
-    photos: "townhouse",
-    photoCount: 5,
+    photos: ["townhouse", "living room", "kitchen", "bedroom"],
     hood: "Columbia City",
     listed: daysAgo(21, "10:45"),
     views: 389,
@@ -763,8 +737,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "Taking over my lease, I'm relocating. 2 bed 2 bath in downtown Redmond, walk to the Downtown Redmond Link station, Redmond Town Center and the Sammamish River Trail. W/D in unit, gym, 1 garage spot included. $2,850/mo, lease through August, building will run your application. Pets ok with fee.",
-    photos: "apartment living room",
-    photoCount: 5,
+    photos: ["living room", "kitchen", "bedroom", "bathroom"],
     hood: "Redmond",
     listed: daysAgo(30, "17:30"),
     views: 342,
@@ -792,8 +765,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "propertyrentals",
     description:
       "My landlord asked me to help find the next tenant since I'm moving out Jan 1. 3 bed 1.5 bath bungalow, fully fenced yard (my dog approves), updated kitchen, detached garage that fits one car or a lot of bikes. 10 min to Greenwood Ave, the 5 bus, and Carkeek Park. $3,900/mo, utilities not included. 12 month lease.",
-    photos: "house exterior",
-    photoCount: 5,
+    photos: ["house", "living room", "kitchen", "bedroom"],
     hood: "Greenwood",
     listed: daysAgo(13, "14:20"),
     views: 497,
@@ -821,8 +793,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "homesales",
     description:
       "Selling one of my own units. 2 bed 2.5 bath townhouse built 2017, 1,240 sq ft over three floors plus a private rooftop deck with downtown and Rainier views. Quartz counters, gas range, mini split heat pump, attached one car garage.\n\n6 min walk to Beacon Hill Link station. HOA $120/mo. Open house Sunday 1-3pm, or message me for a private showing. Agents welcome.",
-    photos: "house exterior",
-    photoCount: 5,
+    photos: ["townhouse", "living room", "kitchen", "bedroom"],
     hood: "Beacon Hill",
     listed: daysAgo(4, "11:00"),
     views: 655,
@@ -847,8 +818,7 @@ export const rentals: readonly ListingSeed[] = [
     category: "homesales",
     description:
       "We're relocating so our 1925 craftsman is for sale by owner. 3 bed 2 bath, 1,860 sq ft, original fir floors, built ins, updated kitchen (2021), finished basement with the second bath and laundry. Fenced backyard with raised beds and a detached studio/shed.\n\n5 blocks to Ballard Ave and the farmers market. Pre-inspection report available. Serious buyers or agents with pre-approval please.",
-    photos: "house",
-    photoCount: 5,
+    photos: ["house", "living room", "kitchen", "bedroom"],
     hood: "Ballard",
     listed: daysAgo(9, "16:30"),
     views: 1204,

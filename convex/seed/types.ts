@@ -179,7 +179,7 @@ export type StorySeed = {
 export type ListingCondition = "new" | "used_like_new" | "used_good" | "used_fair";
 
 export type RentalSeed = {
-  readonly propertyType: "apartment" | "house" | "room" | "townhouse" | "studio";
+  readonly propertyType: "apartment" | "house" | "room" | "townhouse" | "studio" | "condo";
   readonly listingType: "rent" | "sublet" | "sale";
   readonly bedrooms: number;
   readonly bathrooms: number;
@@ -205,9 +205,15 @@ export type ListingSeed = {
   readonly condition?: ListingCondition;
   readonly brand?: string;
   readonly description: string;
-  /** Photo topic (folder `listings`, or `rooms` for rentals) and how many photos (2–6). */
-  readonly photos: PhotoSlot;
-  readonly photoCount: number;
+  /**
+   * Photos (folder `listings`, or `rooms` for rentals). Either one topic whose exact-topic files
+   * belong to this listing alone (`"velvet sofa"` → `listings/velvet-sofa-NN.jpg`, up to
+   * `photoCount` of them), or one slot per photo (`["living room", "bedroom", "kitchen"]`), each
+   * filled with a photo no other listing uses. The seed fails if two listings share a photo.
+   */
+  readonly photos: PhotoSlot | readonly PhotoSlot[];
+  /** Upper bound for a single-topic `photos` (defaults to every exact-topic file). */
+  readonly photoCount?: number;
   readonly hood: Neighborhood;
   readonly status?: "active" | "pending" | "sold";
   readonly listed: TimeSpec;

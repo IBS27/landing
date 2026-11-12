@@ -1,83 +1,32 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import {
-  BookOpen,
-  Briefcase,
-  ChevronDown,
-  Church,
-  Clapperboard,
-  Drama,
-  Dumbbell,
-  Footprints,
-  Gamepad2,
-  Gift,
-  HandHeart,
-  HeartPulse,
-  House,
-  Laugh,
-  type LucideIcon,
-  Martini,
-  Music,
-  Palette,
-  PartyPopper,
-  Plus,
-  Scissors,
-  Search,
-  ShoppingBag,
-  Sprout,
-  Stethoscope,
-  Trophy,
-  Utensils,
-} from "lucide-react";
+import { ChevronDown, Plus, Search } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useQ } from "@/app/viewer";
 import { RailDivider, RailHeading, RailItem } from "@/features/feed/SideRail";
-import { BellIcon } from "@/icons";
+import {
+  CATEGORY_GLYPH_CLASS,
+  CalendarGridGlyph,
+  EVENT_CATEGORY_GLYPHS,
+  GiftGlyph,
+  PersonGlyph,
+} from "@/features/misc/glyphs";
+import { BellFilled } from "@/features/misc/icons";
 import { cn } from "@/lib/format";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { hideBroken, relativeDate } from "./format";
 
-export const CATEGORIES: { name: string; icon: LucideIcon }[] = [
-  { name: "Classics", icon: BookOpen },
-  { name: "Comedy", icon: Laugh },
-  { name: "Crafts", icon: Scissors },
-  { name: "Dance", icon: Footprints },
-  { name: "Drinks", icon: Martini },
-  { name: "Fitness & Workouts", icon: Dumbbell },
-  { name: "Foods", icon: Utensils },
-  { name: "Games", icon: Gamepad2 },
-  { name: "Gardening", icon: Sprout },
-  { name: "Health & Medical", icon: Stethoscope },
-  { name: "Healthy Living & Self-Care", icon: HeartPulse },
-  { name: "Home & Garden", icon: House },
-  { name: "Music & Audio", icon: Music },
-  { name: "Parties", icon: PartyPopper },
-  { name: "Professional Networking", icon: Briefcase },
-  { name: "Religions", icon: Church },
-  { name: "Shopping", icon: ShoppingBag },
-  { name: "Social Issues", icon: HandHeart },
-  { name: "Sports", icon: Trophy },
-  { name: "Theater", icon: Drama },
-  { name: "TV & Movies", icon: Clapperboard },
-  { name: "Visual Arts", icon: Palette },
-];
+export const CATEGORIES: { name: string }[] = Object.keys(EVENT_CATEGORY_GLYPHS).map((name) => ({
+  name,
+}));
 
 /** Facebook's filled calendar-grid glyph (Events "Home"). */
-export function CalendarGridIcon({ size = 20 }: { size?: number }) {
-  return (
-    <svg viewBox="0 0 20 20" width={size} height={size} fill="currentColor" aria-hidden>
-      <path d="M5 1.75a.75.75 0 0 1 1.5 0V3h7V1.75a.75.75 0 0 1 1.5 0V3h.5A2.5 2.5 0 0 1 18 5.5v10a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 2 15.5v-10A2.5 2.5 0 0 1 4.5 3H5V1.75ZM3.5 8v2.5h3.25V8H3.5Zm4.75 0v2.5h3.5V8h-3.5Zm5 0v2.5h3.25V8h-3.25Zm3.25 4h-3.25v2.75h3.25V12Zm-4.75 2.75V12h-3.5v2.75h3.5Zm-5 0V12H3.5v2.75h3.25Z" />
-    </svg>
-  );
-}
+export const CalendarGridIcon = CalendarGridGlyph;
+export const PersonIcon = PersonGlyph;
 
-export function PersonIcon({ size = 20 }: { size?: number }) {
-  return (
-    <svg viewBox="0 0 20 20" width={size} height={size} fill="currentColor" aria-hidden>
-      <circle cx="10" cy="5.75" r="3.75" />
-      <path d="M3 16.25C3 12.8 5.9 11 10 11s7 1.8 7 5.25c0 .97-.78 1.75-1.75 1.75H4.75C3.78 18 3 17.22 3 16.25Z" />
-    </svg>
-  );
+function CategoryGlyph({ name }: { name: string }) {
+  const G = EVENT_CATEGORY_GLYPHS[name];
+  return G ? <G className={CATEGORY_GLYPH_CLASS} /> : null;
 }
 
 export type RailSection = "home" | "yours" | "birthdays" | "notifications" | "none";
@@ -221,13 +170,13 @@ export function EventsRail({
             </Link>
           ))}
         <RailItem
-          icon={<Gift size={20} strokeWidth={2.2} />}
+          icon={<GiftGlyph />}
           label="Birthdays"
           selected={section === "birthdays"}
           to="/events/birthdays"
         />
         <RailItem
-          icon={<BellIcon size={20} />}
+          icon={<BellFilled />}
           label="Notifications"
           selected={section === "notifications"}
           to="/events/notifications"
@@ -251,7 +200,7 @@ export function EventsRail({
         {CATEGORIES.map((c) => (
           <RailItem
             key={c.name}
-            icon={<c.icon size={20} strokeWidth={2} className="opacity-60" />}
+            icon={<CategoryGlyph name={c.name} />}
             label={c.name}
             to="/events/search"
             search={{ q: c.name, category: c.name }}

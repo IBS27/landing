@@ -8,7 +8,7 @@ import { columnPad, ProfileContext } from "./context";
 import { ProfileHeader } from "./ProfileHeader";
 import { ProfileTabs } from "./ProfileTabs";
 
-/** Header + sticky tabs for one profile; tab content renders below on the grey wash. */
+/** Header + tabs for one profile; tab content renders below on the grey wash. */
 export function ProfileShell({
   username,
   embedded = false,
@@ -26,7 +26,14 @@ export function ProfileShell({
       <div className="min-h-[calc(100vh-56px)] bg-wash">
         <ProfileHeader />
         <ProfileTabs />
-        <div className={cn("mx-auto w-full max-w-[1186px] pt-4 pb-10", columnPad(embedded))}>
+        {/* Tall enough that switching tabs can always scroll the tab bar to the top. */}
+        <div
+          className={cn(
+            "mx-auto w-full max-w-[1186px] pt-4 pb-10",
+            !embedded && "min-h-[calc(100vh-130px)]",
+            columnPad(embedded),
+          )}
+        >
           {children}
         </div>
       </div>

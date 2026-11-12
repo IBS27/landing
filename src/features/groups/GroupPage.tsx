@@ -20,6 +20,7 @@ import { GroupCard } from "./GroupCard";
 import { GroupSearchDialog } from "./GroupSearchDialog";
 import { InviteDialog } from "./InviteDialog";
 import {
+  CalendarGlyph,
   ChevronDownGlyph,
   GlobeGlyph,
   JoinedGlyph,
@@ -58,7 +59,7 @@ export function GroupPage() {
     <GroupContext.Provider value={group}>
       <div className="min-h-[calc(100vh-56px)]">
         <GroupHeader group={group} />
-        <div className="mx-auto w-full max-w-[1250px] px-4 pt-4 pb-10 min-[1250px]:px-8">
+        <div className="mx-auto w-full max-w-[1250px] px-4 pt-3 pb-10 min-[1250px]:px-8">
           {group.invite && <InviteBanner group={group} />}
           <Outlet />
         </div>
@@ -77,7 +78,6 @@ const TABS = [
   { label: "Media", to: "/groups/$groupId/media" },
   { label: "Files", to: "/groups/$groupId/files" },
 ] as const;
-const MORE_TABS = [{ label: "Events", to: "/groups/$groupId/events" }] as const;
 
 function GroupHeader({ group }: { group: GroupView }) {
   const [showRelated, setShowRelated] = useState(false);
@@ -117,9 +117,9 @@ function GroupHeader({ group }: { group: GroupView }) {
               alt={`${group.name} cover`}
               className="h-full w-full object-cover"
             />
-            {group.creator?.kind === "page" && (
-              <div className="absolute inset-x-0 bottom-0 bg-fb px-4 py-3 text-[15px] text-white">
-                <span className="font-medium">Group by </span>
+            {group.creator && (
+              <div className="absolute inset-x-0 bottom-0 flex h-[43px] items-center bg-fb px-4 text-[15px] text-white leading-5">
+                <span className="font-medium">Group by&nbsp;</span>
                 <Link
                   to="/$username"
                   params={{ username: group.creator.username }}
@@ -131,7 +131,7 @@ function GroupHeader({ group }: { group: GroupView }) {
             )}
           </div>
           <div className="px-4 min-[1250px]:px-8">
-            <div className="flex flex-wrap items-end justify-between gap-4 pt-6 pb-4">
+            <div className="flex flex-wrap items-center justify-between gap-4 pt-[27px] pb-[25px]">
               <div className="min-w-0">
                 <h1 className="font-bold text-[28px] text-primary leading-8">
                   <Link
@@ -154,25 +154,6 @@ function GroupHeader({ group }: { group: GroupView }) {
                     {membersLabel(group.memberCount, true)}
                   </Link>
                 </div>
-                {group.memberPreview.length > 0 && (
-                  <Link
-                    to="/groups/$groupId/members"
-                    params={groupParams(group)}
-                    className="mt-3 flex"
-                    aria-label="See members"
-                  >
-                    {group.memberPreview.slice(0, 10).map((u, i) => (
-                      <Tooltip key={u._id} content={u.name}>
-                        <span
-                          className={cn("rounded-full ring-2 ring-card", i > 0 && "-ml-2")}
-                          style={{ zIndex: 20 - i }}
-                        >
-                          <Avatar src={u.avatar} size={32} />
-                        </span>
-                      </Tooltip>
-                    ))}
-                  </Link>
-                )}
               </div>
               <HeaderActions
                 group={group}
@@ -185,7 +166,7 @@ function GroupHeader({ group }: { group: GroupView }) {
           </div>
         </div>
       </div>
-      <div ref={sentinel} className="h-px" aria-hidden />
+      <div ref={sentinel} className="h-0" aria-hidden />
       <TabBar group={group} stuck={stuck} />
     </>
   );
@@ -203,6 +184,7 @@ function HeaderActions({
   const [inviteOpen, setInviteOpen] = useState(false);
   return (
     <div className="flex items-center gap-2">
+      {isMember(group) && <MemberFacepile group={group} />}
       {isMember(group) ? (
         <>
           <Button
@@ -242,6 +224,30 @@ function HeaderActions({
       </Tooltip>
       {inviteOpen && <InviteDialog group={group} onClose={() => setInviteOpen(false)} />}
     </div>
+  );
+}
+
+/** Overlapping member avatars beside the header buttons (kept on the button row so the header height matches Facebook's). */
+function MemberFacepile({ group }: { group: GroupView }) {
+  if (group.memberPreview.length === 0) return null;
+  return (
+    <Link
+      to="/groups/$groupId/members"
+      params={groupParams(group)}
+      className="mr-2 hidden min-[1100px]:flex"
+      aria-label="See members"
+    >
+      {group.memberPreview.slice(0, 8).map((u, i) => (
+        <Tooltip key={u._id} content={u.name}>
+          <span
+            className={cn("rounded-full ring-2 ring-card", i > 0 && "-ml-2")}
+            style={{ zIndex: 20 - i }}
+          >
+            <Avatar src={u.avatar} size={32} />
+          </span>
+        </Tooltip>
+      ))}
+    </Link>
   );
 }
 
@@ -406,7 +412,6 @@ function TabBar({ group, stuck }: { group: GroupView; stuck: boolean }) {
                 : rest === "/events"
                   ? "Events"
                   : null;
-  const moreActive = MORE_TABS.some((t) => t.label === activeLabel);
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
@@ -431,7 +436,12 @@ function TabBar({ group, stuck }: { group: GroupView; stuck: boolean }) {
                 {t.label}
               </TabLink>
             ))}
-            <MoreTab group={group} active={moreActive} label={moreActive ? activeLabel : null} />
+            {/* Facebook's tab row is just these six; Events opens from the … menu. */}
+            {activeLabel === "Events" && (
+              <TabLink group={group} to="/groups/$groupId/events" active>
+                Events
+              </TabLink>
+            )}
           </nav>
         )}
         <div className="flex items-center gap-2">
@@ -481,52 +491,8 @@ function TabLink({
   );
 }
 
-function MoreTab({
-  group,
-  active,
-  label,
-}: {
-  group: GroupView;
-  active: boolean;
-  label: string | null;
-}) {
-  const navigate = useNavigate();
-  return (
-    <Menu modal={false}>
-      <MenuTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            "relative flex items-center px-1 font-semibold text-[15px] outline-none",
-            active ? "text-link" : "text-secondary",
-          )}
-        >
-          <span
-            className={cn(
-              "flex items-center gap-1 rounded-md px-3 py-[10px]",
-              !active && "hover:bg-hover",
-            )}
-          >
-            {label ?? "More"}
-            <ChevronDownGlyph size={12} />
-          </span>
-          {active && <span className="absolute inset-x-0 bottom-0 h-[3px] rounded-t-[1px] bg-fb" />}
-        </button>
-      </MenuTrigger>
-      <MenuContent align="start" width={220}>
-        {MORE_TABS.map((t) => (
-          <MenuItem
-            key={t.label}
-            label={t.label}
-            onSelect={() => void navigate({ to: t.to, params: groupParams(group) })}
-          />
-        ))}
-      </MenuContent>
-    </Menu>
-  );
-}
-
 function MoreMenu({ group }: { group: GroupView }) {
+  const navigate = useNavigate();
   const [reported, setReported] = useState(false);
   const [copied, setCopied] = useState(false);
   useEffect(() => {
@@ -553,6 +519,13 @@ function MoreMenu({ group }: { group: GroupView }) {
           </MenuTrigger>
         </Tooltip>
         <MenuContent width={320}>
+          <MenuItem
+            icon={<CalendarGlyph size={20} />}
+            label="Events"
+            onSelect={() =>
+              void navigate({ to: "/groups/$groupId/events", params: groupParams(group) })
+            }
+          />
           <MenuItem
             icon={<Link2 size={20} />}
             label="Copy link"

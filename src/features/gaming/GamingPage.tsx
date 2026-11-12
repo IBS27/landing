@@ -1,11 +1,4 @@
-import {
-  Bookmark,
-  BookmarkCheck,
-  ChevronLeft,
-  ChevronRight,
-  MonitorPlay,
-  Trophy,
-} from "lucide-react";
+import { Bookmark, BookmarkCheck, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useViewer } from "@/app/viewer";
 import {
@@ -16,10 +9,12 @@ import {
   RailGear,
   RailSearch,
 } from "@/features/misc/AppRail";
+import { CATEGORY_GLYPH_CLASS, GAME_CATEGORY_GLYPHS } from "@/features/misc/glyphs";
 import { BellFilled, BookmarkFilled, ControllerFilled } from "@/features/misc/icons";
 import { cn } from "@/lib/format";
 import { Modal } from "@/ui/overlays";
 import { Button, Card, EmptyState } from "@/ui/primitives";
+import { GameCover } from "./GameCover";
 import { byId, CATEGORIES, FEATURED, GAMES, type Game, playersLabel, TOP_PICKS } from "./games";
 import { MiniGame } from "./MiniGames";
 
@@ -92,7 +87,6 @@ export function GamingPage() {
             setView({ kind: "play" });
           }}
         />
-        <AppRailItem large icon={<MonitorPlay size={20} />} label="Gaming video" to="/watch" />
         <AppRailItem
           large
           icon={<BellFilled />}
@@ -145,7 +139,7 @@ export function GamingPage() {
           <AppRailItem
             key={c}
             large
-            icon={<CategoryGlyph name={c} />}
+            icon={<CategoryGlyph name={c} selected={isCat(c) && !results} />}
             label={c}
             selected={isCat(c) && !results}
             onClick={() => {
@@ -223,7 +217,7 @@ function PlayHome({ onPlay, best }: { onPlay: (g: Game) => void; best: Record<st
   return (
     <>
       <Section title="Featured Games">
-        <Carousel step={346}>
+        <Carousel step={346} arrows="grey">
           {featured.map((x) => (
             <FeaturedCard key={x.id} game={x} onPlay={() => onPlay(x)} />
           ))}
@@ -293,10 +287,13 @@ function Carousel({
   children,
   step,
   rows = 1,
+  arrows = "white",
 }: {
   children: ReactNode;
   step: number;
   rows?: 1 | 2;
+  /** Featured Games uses grey arrows; tile carousels white floating ones. */
+  arrows?: "white" | "grey";
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [edges, setEdges] = useState({ start: true, end: false });
@@ -333,20 +330,31 @@ function Carousel({
       >
         {children}
       </div>
-      {!edges.start && <Arrow side="left" onClick={() => by(-1)} />}
-      {!edges.end && <Arrow side="right" onClick={() => by(1)} />}
+      {!edges.start && <Arrow side="left" tone={arrows} onClick={() => by(-1)} />}
+      {!edges.end && <Arrow side="right" tone={arrows} onClick={() => by(1)} />}
     </div>
   );
 }
 
-function Arrow({ side, onClick }: { side: "left" | "right"; onClick: () => void }) {
+function Arrow({
+  side,
+  tone,
+  onClick,
+}: {
+  side: "left" | "right";
+  tone: "white" | "grey";
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
       aria-label={side === "left" ? "Previous" : "Next"}
       onClick={onClick}
       className={cn(
-        "absolute top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-card text-icon shadow-[0_2px_8px_var(--shadow-1),0_0_0_1px_var(--shadow-1)] hover:bg-[color-mix(in_srgb,var(--card),#000_5%)]",
+        "absolute top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full text-icon",
+        tone === "grey"
+          ? "bg-btn hover:brightness-95 dark:hover:brightness-125"
+          : "bg-card shadow-[0_2px_8px_var(--shadow-1),0_0_0_1px_var(--shadow-1)] hover:bg-[color-mix(in_srgb,var(--card),#000_5%)]",
         side === "left" ? "-left-4" : "-right-4",
       )}
     >
@@ -357,41 +365,13 @@ function Arrow({ side, onClick }: { side: "left" | "right"; onClick: () => void 
 
 /* ---------- Art ---------- */
 
-/** Generated cover art: the game's gradient, soft light blobs and its emoji mark. */
-export function GameArt({
-  game,
-  className,
-  mark = 64,
-}: {
-  game: Game;
-  className?: string;
-  mark?: number;
-}) {
-  return (
-    <div
-      className={cn("relative overflow-hidden", className)}
-      style={{ background: `linear-gradient(135deg, ${game.from}, ${game.to})` }}
-      aria-hidden
-    >
-      <span className="absolute -top-1/4 -left-1/4 h-3/4 w-3/4 rounded-full bg-white/20 blur-2xl" />
-      <span className="absolute -right-1/4 -bottom-1/3 h-3/4 w-3/4 rounded-full bg-black/15 blur-2xl" />
-      <span
-        className="absolute inset-0 flex items-center justify-center drop-shadow-[0_6px_10px_rgba(0,0,0,0.25)]"
-        style={{ fontSize: mark }}
-      >
-        {game.emoji}
-      </span>
-    </div>
-  );
-}
-
 function GameIcon({ game, size }: { game: Game; size: number }) {
   return (
     <span
-      className="inline-block shrink-0 overflow-hidden rounded-lg"
+      className="inline-block shrink-0 overflow-hidden rounded-lg shadow-[0_0_0_1px_rgba(0,0,0,0.1)]"
       style={{ width: size, height: size }}
     >
-      <GameArt game={game} className="h-full w-full" mark={size * 0.55} />
+      <GameCover game={game} variant="icon" className="block h-full w-full" />
     </span>
   );
 }
@@ -404,7 +384,7 @@ function FeaturedCard({ game, onPlay }: { game: Game; onPlay: () => void }) {
       className="group w-[334px] shrink-0 overflow-hidden rounded-xl bg-card text-left shadow-base"
     >
       <div className="relative h-[188px]">
-        <GameArt game={game} className="h-full w-full" mark={96} />
+        <GameCover game={game} className="block h-full w-full" />
         <span className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white">
           <svg viewBox="0 0 12 12" width="12" height="12" fill="currentColor" aria-hidden>
             <path d="M3 1.8v8.4c0 .5.5.8 1 .5l6.6-4.2a.6.6 0 0 0 0-1L4 1.3c-.5-.3-1 0-1 .5Z" />
@@ -433,9 +413,9 @@ function PickTile({ game, onPlay }: { game: Game; onPlay: () => void }) {
       onClick={onPlay}
       className="group relative h-[208px] w-[164px] shrink-0 overflow-hidden rounded-xl text-left shadow-base"
     >
-      <GameArt game={game} className="absolute inset-0 scale-125 blur-xl" mark={0} />
+      <GameCover game={game} className="absolute inset-0 h-full w-full scale-150 blur-xl" />
       <span className="absolute inset-0 bg-[rgba(44,44,44,0.6)]" />
-      <GameArt game={game} className="relative h-[95px]" mark={52} />
+      <GameCover game={game} className="relative block h-[95px] w-full" />
       <div className="relative flex h-[113px] flex-col justify-between p-2">
         <p className="line-clamp-2 font-semibold text-[17px] text-white leading-5">{game.name}</p>
         <span className="self-start rounded-2xl bg-black/80 px-2 py-1.5 font-semibold text-[13px] text-white/80 leading-4">
@@ -457,25 +437,11 @@ function TileGrid({ games, onPlay }: { games: Game[]; onPlay: (g: Game) => void 
   );
 }
 
-function CategoryGlyph({ name }: { name: string }) {
-  const map: Record<string, string> = {
-    "All games": "🎮",
-    Action: "💥",
-    Adventure: "🗺️",
-    Arcade: "🕹️",
-    Battle: "⚔️",
-    Board: "♟️",
-    Builder: "🏗️",
-    Card: "🃏",
-    "Match 3": "🍬",
-    Puzzle: "🧩",
-    Simulation: "🏙️",
-    Solitaire: "♠️",
-    Sports: "🏀",
-    Strategy: "🏰",
-    Word: "🔤",
-  };
-  return <span className="text-[18px] leading-none opacity-80 grayscale">{map[name] ?? "🎮"}</span>;
+function CategoryGlyph({ name, selected }: { name: string; selected: boolean }) {
+  const G = GAME_CATEGORY_GLYPHS[name];
+  if (!G) return null;
+  // "All games" is a dark glyph on Facebook; the rest are faint white art.
+  return <G className={selected || name === "All games" ? undefined : CATEGORY_GLYPH_CLASS} />;
 }
 
 /* ---------- Player ---------- */

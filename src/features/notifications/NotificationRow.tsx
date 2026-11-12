@@ -6,9 +6,10 @@ import { useM } from "@/app/viewer";
 import { DotsIcon } from "@/features/posts/icons";
 import { FacebookLogo } from "@/icons";
 import { cn, fullTimestamp, shortAge } from "@/lib/format";
-import { Menu, MenuContent, MenuItem, MenuTrigger, Tooltip } from "@/ui/overlays";
+import { Menu, MenuTrigger, Tooltip } from "@/ui/overlays";
 import { Avatar, Button } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
+import { CaretMenuContent, CaretMenuItem } from "./CaretMenu";
 import { KindBadge } from "./KindBadge";
 import type { NotificationTarget, NotificationView } from "./types";
 
@@ -99,7 +100,7 @@ export function NotificationRow({
   const stop = (e: MouseEvent | KeyboardEvent) => e.stopPropagation();
 
   return (
-    <div className="group relative px-2">
+    <div className="group/row relative px-2">
       <div
         role="button"
         tabIndex={0}
@@ -115,7 +116,7 @@ export function NotificationRow({
           menuOpen && "bg-hover",
         )}
       >
-        <span className="relative shrink-0 self-start">
+        <span className="relative flex shrink-0 self-start">
           {n.actor ? (
             <Avatar src={n.actor.avatar} size={56} />
           ) : n.image ? (
@@ -129,7 +130,7 @@ export function NotificationRow({
             <KindBadge n={n} />
           </span>
         </span>
-        <span className="flex min-w-0 flex-1 flex-col pr-1">
+        <span className={cn("flex min-w-0 flex-1 flex-col", wide ? "pr-7" : "pr-1")}>
           <NotificationText n={n} />
           <Tooltip content={fullTimestamp(n.createdAt)}>
             <span
@@ -178,10 +179,11 @@ export function NotificationRow({
 
       <div
         className={cn(
-          "absolute top-1/2 right-[44px] -translate-y-1/2 transition-opacity",
+          "absolute top-1/2 -translate-y-1/2 transition-opacity",
+          wide ? "right-9" : "right-2",
           menuOpen
             ? "opacity-100"
-            : "opacity-0 group-focus-within:opacity-100 group-hover:opacity-100",
+            : "opacity-0 group-focus-within/row:opacity-100 group-hover/row:opacity-100",
         )}
       >
         <Menu modal={false} open={menuOpen} onOpenChange={setMenuOpen}>
@@ -195,18 +197,18 @@ export function NotificationRow({
               <DotsIcon size={20} />
             </button>
           </MenuTrigger>
-          <MenuContent width={344}>
-            <MenuItem
-              icon={<Check size={20} />}
+          <CaretMenuContent>
+            <CaretMenuItem
+              icon={<Check size={20} strokeWidth={2.2} />}
               label={n.read ? "Mark as unread" : "Mark as read"}
               onSelect={() => void setRead({ id: n._id, read: !n.read })}
             />
-            <MenuItem
-              icon={<SquareX size={20} />}
+            <CaretMenuItem
+              icon={<SquareX size={20} strokeWidth={2} />}
               label="Remove this notification"
               onSelect={() => void remove({ id: n._id })}
             />
-          </MenuContent>
+          </CaretMenuContent>
         </Menu>
       </div>
     </div>

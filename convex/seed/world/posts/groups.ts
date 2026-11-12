@@ -210,7 +210,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "uw-housing",
     at: hoursAgo(5),
     text: "Anyone know if the Roosevelt Lofts allow cats? website says 'pet friendly' but the leasing office keeps dodging the question 🐱",
-    photos: ["apartment building"],
+    photos: ["rooms/apartment building"],
     reactions: 3,
     comments: [
       {
@@ -231,7 +231,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "uw-housing",
     at: daysAgo(1, "12:30"),
     text: "Taking over my lease in Capitol Hill, $1,950 1BR, Jan 1\n\nFinished my MS early and got a job in Portland. Summit Ave near Olive, 4th floor, huge windows, dishwasher, laundry in the building. Lease runs through Aug 31. Landlord is fine with a takeover, you just apply normally ($45 screening fee).",
-    photos: ["rooms/apartment living room", "rooms/bedroom", "rooms/kitchen"],
+    photos: ["rooms/living room", "rooms/bedroom", "rooms/kitchen"],
     reactions: 11,
     comments: [
       {
@@ -361,7 +361,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "uw-housing",
     at: hoursAgo(20),
     text: "Is this listing legit? $975 for a whole 1BR on University Way, 'fully furnished, utilities included.' Guy says he's a doctor working overseas and his lawyer will send me the keys once I wire first + last. the pictures look really nice which is kinda the problem",
-    photos: ["rooms/apartment living room", "rooms/bedroom"],
+    photos: ["rooms/bedroom"],
     reactions: 8,
     mood: "haha",
     comments: [
@@ -435,7 +435,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "uw-housing",
     at: hoursAgo(2),
     text: "do any buildings near campus have actual secure bike storage? mine got stolen from the rack outside Odegaard yesterday",
-    photos: ["empty bike rack"],
+    photos: ["bike rack"],
     reactions: 2,
     mood: "sad",
     comments: [
@@ -464,7 +464,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "uw-housing",
     at: daysAgo(2, "17:30"),
     text: "Room in 4BR house in Ravenna, $925/mo + utilities, available Jan 1 (lease through Aug). Housemates are 2 grad students and a very old dog. Big backyard, slow wifi, good dinners.",
-    photos: ["rooms/bedroom", "rooms/kitchen", "backyard"],
+    photos: ["rooms/bedroom", "rooms/kitchen"],
     reactions: 7,
     comments: [
       {
@@ -665,7 +665,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-apartments",
     at: daysAgo(14, "12:10"),
     text: "$1,395 studio on Boylston (First Hill) but it's above a bar... anyone live near there? I'm at SU nursing so the location is perfect otherwise",
-    photos: ["rooms/studio apartment"],
+    photos: ["rooms/studio"],
     reactions: 3,
     comments: [
       {
@@ -751,7 +751,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-apartments",
     at: daysAgo(1, "11:15"),
     text: "$1,175 | room in 2BR, Greenwood, Jan 1\n\nmy roommate's moving in with her boyfriend so I need a new one! I work at a startup in Fremont, I cook too much, and I have a very large monstera. 15 min to Fremont on the 5.",
-    photos: ["rooms/bedroom", "rooms/apartment living room"],
+    photos: ["rooms/bedroom", "rooms/living room"],
     reactions: 6,
     comments: [
       {
@@ -885,7 +885,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "capitol-hill-neighbors",
     at: daysAgo(8, "07:40"),
     text: "is jackhammering on E Olive at 7am legal?? I work from home fridays and I'm losing my mind",
-    photos: ["construction site"],
+    photos: ["construction"],
     reactions: 9,
     mood: "haha",
     comments: [
@@ -907,7 +907,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "capitol-hill-neighbors",
     at: daysAgo(4, "12:00"),
     text: "Moonrise is collecting warm socks and gloves through Dec 15! drop them at the counter and we'll bring everything to the shelter on Pine. new or gently used, no judgment on sock patterns",
-    photos: ["donation box"],
+    photos: ["donation bin"],
     reactions: 27,
     mood: "love",
     comments: [
@@ -925,7 +925,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "capitol-hill-neighbors",
     at: daysAgo(2, "18:10"),
     text: "Pike/Pine at 5pm. it's November, it's pitch black, and honestly it's beautiful",
-    photos: ["rainy street night", "neon sign rain"],
+    photos: ["neon rain", "neon sign"],
     reactions: 24,
     mood: "love",
     comments: [
@@ -976,7 +976,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "capitol-hill-neighbors",
     at: daysAgo(10, "15:00"),
     text: "Velvet Owl is hiring a weekend door person, $22/hr + tips. message me",
-    photos: ["bar interior"],
+    photos: ["bar"],
     reactions: 8,
     comments: [
       { by: "camila.santos", text: "it's actually a fun job, the regulars are wild", after: 20 },
@@ -1020,7 +1020,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "free-stuff-seattle",
     at: hoursAgo(19),
     text: "Leaving for Copenhagen in January so I'm giving away my kitchen + plants 🌿 all free, Wallingford pickup:\n\n- a huge trailing pothos, 2 snake plants, a fiddle leaf fig that's a little dramatic\n- rice cooker (works perfectly)\n- 4 mismatched mugs, a stack of plates, a cast iron pan\n- a whole drawer of spices I will never finish\n\nfirst come first served, pickup by Sunday. comment and I'll DM you!",
-    photos: ["houseplants", "kitchen shelf", "cast iron pan"],
+    photos: ["houseplants", "cast iron"],
     reactions: 23,
     mood: "love",
     comments: [
@@ -1068,7 +1068,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "theo.grant",
     in: "free-stuff-seattle",
     at: hoursAgo(3),
-    text: "free couch on the curb in Wallingford (N 43rd near Burke), come get it before the rain does. gray 3 seater, no rips",
+    text: "free couch on the curb in Wallingford (N 43rd near Burke), come get it before the rain does. cream loveseat, no rips",
     photos: ["couch on curb"],
     reactions: 5,
     comments: [
@@ -1114,7 +1114,6 @@ export const groupPosts: readonly PostSeed[] = [
     in: "free-stuff-seattle",
     at: daysAgo(2, "10:30"),
     text: "free: like 40 hangers, a dorm whiteboard, and a shower caddy. U District porch pickup, first to comment gets it",
-    photos: ["hangers", "whiteboard"],
     reactions: 3,
     comments: [
       {
@@ -1208,7 +1207,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "free-stuff-seattle",
     at: daysAgo(9, "13:30"),
     text: "Free: about 15 pallets. Good for raised beds or a very ambitious headboard. Ballard, bring a truck.",
-    photos: ["wooden pallets"],
+    photos: ["pallets"],
     reactions: 7,
     comments: [
       {
@@ -1271,7 +1270,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "free-stuff-seattle",
     at: daysAgo(15, "11:40"),
     text: "free plant cuttings! pothos + tradescantia, rooted in little jars. First Hill pickup, take as many as you want",
-    photos: ["plant cuttings in jars"],
+    photos: ["plant cuttings"],
     reactions: 11,
     comments: [
       { by: "hannah.lee", text: "taking 2!! my windowsill is so empty", after: 35 },
@@ -1335,7 +1334,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-climbers",
     at: daysAgo(4, "20:30"),
     text: "Index on Sunday: rock was dry until about 2, then the classic PNW betrayal. Lower Town Wall had seepage in the usual spots. Parking lot was empty, which tells you everything about November",
-    photos: ["granite cliff", "climbing rope"],
+    photos: ["granite cliff", "climbing gear"],
     reactions: 16,
     comments: [
       {
@@ -1366,7 +1365,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-climbers",
     at: daysAgo(1, "22:30"),
     text: "anyone have beta for the pink V5 in the cave at Cascade? I can do every move except the heel hook, it just will not stick",
-    photos: ["bouldering wall"],
+    photos: ["bouldering gym"],
     reactions: 12,
     comments: [
       {
@@ -1413,7 +1412,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-climbers",
     at: daysAgo(1, "13:00"),
     text: "Leavenworth this weekend? forecast says dry Saturday east of the pass. room for 2 in my car, leaving Seattle 6am",
-    photos: ["leavenworth mountains"],
+    photos: ["larches"],
     reactions: 7,
     comments: [
       {
@@ -1473,7 +1472,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-climbers",
     at: daysAgo(14, "19:15"),
     text: "first outdoor V6!!! Leavenworth, 4th session on it, almost cried",
-    photos: ["bouldering outdoors", "granite boulder"],
+    photos: ["bouldering outdoors", "bouldering outdoors"],
     reactions: 38,
     mood: "love",
     comments: [
@@ -1530,7 +1529,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "pnw-hikers",
     at: hoursAgo(11),
     text: "Snoqualmie Pass got 8 inches overnight. If you're heading up: traction tires or chains, check WSDOT before you leave, keep dogs leashed near the plows",
-    photos: ["snowy mountain road"],
+    photos: ["snowy mountains"],
     reactions: 29,
     mood: "wow",
     comments: [
@@ -1564,7 +1563,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "pnw-hikers",
     at: daysAgo(4, "18:30"),
     text: "Lake 22 on Saturday: muddy, then icy, then gorgeous. Bridge at the bottom is fine, upper switchbacks were slick so bring spikes. Cell service dies right after the parking lot",
-    photos: ["mountain lake", "forest trail", "foggy lake"],
+    photos: ["mountain lake", "forest trail", "mountain lake"],
     tagged: ["sofia.alvarez"],
     reactions: 26,
     mood: "love",
@@ -1594,7 +1593,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "pnw-hikers",
     at: daysAgo(7, "15:30"),
     text: "ran Mt Si up and down in 1:52 this morning. trail is wet but no snow below the haystack. headlamp needed by 4:30",
-    photos: ["mountain summit view"],
+    photos: ["mount rainier"],
     reactions: 15,
     comments: [
       { by: "luis.hernandez", text: "1:52 is wild", after: 30 },
@@ -1611,7 +1610,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "pnw-hikers",
     at: daysAgo(2, "16:00"),
     text: "Discovery Park in the rain today. 3 herons, zero people",
-    photos: ["foggy beach", "heron"],
+    photos: ["beach", "heron"],
     reactions: 22,
     comments: [
       { by: "theo.grant", text: "the lighthouse loop is so good in the rain", after: 40 },
@@ -1654,7 +1653,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "uw-class-of-2027",
     at: daysAgo(2, "23:50"),
     text: "capstone demo is in 3 weeks and our prototype has 4 screens. we are so back (we are not back)",
-    photos: ["students laptops library night"],
+    photos: ["library"],
     tagged: ["ethan.park", "noah.williams", "zoe.nguyen"],
     reactions: 25,
     mood: "haha",
@@ -1693,7 +1692,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "uw-class-of-2027",
     at: daysAgo(8, "11:30"),
     text: "cap and gown orders open in Feb through the UW bookstore. ignore the 'early bird' emails from random sites",
-    photos: ["graduation cap and gown"],
+    photos: ["uw campus"],
     reactions: 19,
     comments: [
       { by: "amara.diallo", text: "yes. those are scams, only order through UW", after: 20 },
@@ -1710,7 +1709,6 @@ export const groupPosts: readonly PostSeed[] = [
     in: "uw-class-of-2027",
     at: daysAgo(6, "17:00"),
     text: "decorating grad caps for anyone who wants one! $25, any design. comment and I'll add you to the list",
-    photos: ["decorated graduation cap"],
     reactions: 28,
     comments: [
       { by: "zoe.nguyen", text: "me! something with film strips", after: 15 },
@@ -1966,7 +1964,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-board-game-night",
     at: daysAgo(7, "22:40"),
     text: "tonight's crew!! 31 people, 7 tables, one very intense Catan game that ended in a handshake. thank you Moonrise for letting us take over again",
-    photos: ["board games table", "friends playing board games", "coffee shop night"],
+    photos: ["board games", "coffee shop"],
     reactions: 27,
     mood: "love",
     comments: [
@@ -2001,7 +1999,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-board-game-night",
     at: daysAgo(5, "20:10"),
     text: "I want to bring Halli Galli to game night, it's very popular in Korea. is it ok if it's loud? there is a bell",
-    photos: ["card game"],
+    photos: ["halli galli"],
     reactions: 11,
     comments: [
       { by: "tasha.okafor", text: "LOUD IS WELCOME", after: 10, likes: 4 },
@@ -2014,7 +2012,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-board-game-night",
     at: daysAgo(10, "18:30"),
     text: "We have $150 from the tip jar for the group library. What should we buy? Vote in the comments",
-    photos: ["board game shelf"],
+    photos: ["wingspan"],
     reactions: 8,
     comments: [
       { by: "theo.grant", text: "Cascadia", after: 10 },
@@ -2058,7 +2056,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-run-club",
     at: daysAgo(5, "11:20"),
     text: "Saturday recap: 42 runners, 1 rainbow, 0 dry socks. shoutout to everyone tapering for the Seattle Marathon on the 29th 🏃",
-    photos: ["group of runners", "rainy trail run"],
+    photos: ["runners", "runners"],
     reactions: 24,
     comments: [
       { by: "luis.hernandez", text: "my socks are still wet", after: 30 },
@@ -2104,7 +2102,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-run-club",
     at: daysAgo(2, "21:00"),
     text: "tuesday track was COLD. who's doing the holiday lights run in december?",
-    photos: ["running track night"],
+    photos: ["running track"],
     reactions: 7,
     comments: [
       { by: "theo.grant", text: "me!", after: 15 },
@@ -2139,7 +2137,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-foodies",
     at: daysAgo(2, "20:15"),
     text: "Kumo Ramen's new black garlic tonkotsu 🍜 worth the 40 min line in the rain",
-    photos: ["ramen bowl", "ramen shop"],
+    photos: ["ramen", "ramen shop"],
     reactions: 31,
     mood: "love",
     comments: [
@@ -2186,7 +2184,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-foodies",
     at: daysAgo(6, "19:30"),
     text: "new to Capitol Hill, what's the move for a cheap weeknight dinner? I've been eating cereal for a week",
-    photos: ["bowl of cereal"],
+    photos: ["cereal"],
     reactions: 10,
     mood: "haha",
     comments: [
@@ -2209,7 +2207,7 @@ export const groupPosts: readonly PostSeed[] = [
     by: "will.foster",
     in: "ballard-marketplace-swap",
     at: daysAgo(2, "10:45"),
-    text: "$160: mid-century armchair, reupholstered in mustard wool, walnut legs, rebuilt the springs myself. Pickup near the Locks.",
+    text: "$220: mid-century cane armchair, solid teak, rewove the seat and back myself. Pickup near the Locks.",
     listing: "will-armchair",
     reactions: 12,
     comments: [
@@ -2243,7 +2241,6 @@ export const groupPosts: readonly PostSeed[] = [
     in: "ballard-marketplace-swap",
     at: daysAgo(8, "12:30"),
     text: "$40 each: two 4x4 cube shelves, Ballard near Market St. need them gone by Sunday",
-    photos: ["cube bookshelf"],
     reactions: 4,
     comments: [
       {
@@ -2317,7 +2314,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-concerts",
     at: daysAgo(5, "13:00"),
     text: "the basement show in the CD last night was the best $5 I've ever spent",
-    photos: ["concert crowd", "band playing small venue"],
+    photos: ["concert", "concert"],
     reactions: 18,
     comments: [
       { by: "harper.quinn", text: "the drummer was unreal", after: 30 },
@@ -2421,7 +2418,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-dog-owners",
     at: hoursAgo(5),
     text: "Magnuson off-leash area is a mud pit this week, bring towels. Also whoever's golden kept stealing everyone's tennis balls: legend.",
-    photos: ["dog"],
+    photos: ["dog park"],
     reactions: 64,
     mood: "love",
     comments: [
@@ -2464,7 +2461,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-photography",
     at: hoursAgo(3),
     text: "Last night from Kerry Park. Waited two hours for the clouds to break and got about four minutes of this.",
-    photos: ["seattle-skyline", "sunset"],
+    photos: ["kerry park", "sunset"],
     reactions: 142,
     mood: "love",
     comments: [
@@ -2494,7 +2491,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "seattle-gamers",
     at: hoursAgo(20),
     text: "LAN night at the Capitol Hill spot on Friday. 24 seats, bring your own peripherals. Smash bracket at 9.",
-    photos: ["gaming-setup"],
+    photos: ["gaming setup"],
     reactions: 46,
     comments: [
       { by: "kevin.tran", text: "saving a seat for me pls", after: 15 },
@@ -2506,7 +2503,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "pike-place-regulars",
     at: hoursAgo(7),
     text: "Dungeness crab is back at the fish stalls and prices are actually reasonable this year. Go early, they sold out by 1 last Saturday.",
-    photos: ["pike-place"],
+    photos: ["pike place"],
     reactions: 58,
     comments: [{ by: "sam.rivera", text: "chowder line was 40 min at noon fyi", after: 25 }],
   },

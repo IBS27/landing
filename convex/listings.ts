@@ -8,8 +8,10 @@ import {
   categoryFor,
   distanceTo,
   type ListingCard,
+  matchesPropertyType,
   NEIGHBORHOODS,
   type Near,
+  sellerRating,
   toCard,
 } from "./lib/listings";
 import { notify } from "./lib/notify";
@@ -39,6 +41,7 @@ const propertyType = v.union(
   v.literal("room"),
   v.literal("townhouse"),
   v.literal("studio"),
+  v.literal("condo"),
 );
 
 export const browseFilters = v.object({
@@ -135,7 +138,7 @@ function matches(
   if (rf.some((x) => x !== undefined) || f.privateRoomOnly) {
     const r = l.rental;
     if (!r) return false;
-    if (f.propertyType && r.propertyType !== f.propertyType) return false;
+    if (f.propertyType && !matchesPropertyType(r.propertyType, f.propertyType)) return false;
     if (f.privateRoomOnly && r.propertyType !== "room") return false;
     if (f.minBedrooms !== undefined && r.bedrooms < f.minBedrooms) return false;
     if (f.minBathrooms !== undefined && r.bathrooms < f.minBathrooms) return false;
@@ -330,7 +333,11 @@ export const get = viewerQuery({
       meetup: l.meetup ?? [],
       createdAt: l.createdAt,
       updatedAt: l.updatedAt,
-      seller: { ...seller, joinedYear: new Date(sellerDoc.joinedAt).getFullYear() },
+      seller: {
+        ...seller,
+        joinedYear: new Date(sellerDoc.joinedAt).getFullYear(),
+        rating: sellerRating(sellerDoc._id),
+      },
       isOwner,
       viewerSaved,
       conversationId: thread?._id ?? null,

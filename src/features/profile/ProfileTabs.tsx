@@ -49,8 +49,9 @@ function tabPath(username: string, t: Tab) {
 }
 
 /**
- * The 60px profile tab bar. It sticks under the header; once stuck it swaps
- * the tabs for the person's avatar and name, like Facebook.
+ * The 60px profile tab bar. Switching tabs scrolls the page so the bar sits
+ * under the TopNav. On the All tab, once the bar scrolls away a 48px bar with
+ * the person's avatar and name pins under the TopNav, like Facebook.
  */
 export function ProfileTabs() {
   const { profile, embedded } = useProfile();
@@ -63,87 +64,120 @@ export function ProfileTabs() {
     return path === p || path === `${p}/`;
   };
   const moreActive = more.some(isActive);
+  const onAll = isActive(tabs[0]);
 
-  const sentinel = useRef<HTMLDivElement>(null);
-  const [stuck, setStuck] = useState(false);
+  const bar = useRef<HTMLDivElement>(null);
+  const prev = useRef({ username: user.username, path });
   useEffect(() => {
-    const el = sentinel.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([e]) => setStuck(!e.isIntersecting && e.boundingClientRect.top < 56),
-      {
-        rootMargin: "-56px 0px 0px 0px",
-      },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+    const last = prev.current;
+    prev.current = { username: user.username, path };
+    if (embedded || last.username !== user.username || last.path === path) return;
+    const raf = requestAnimationFrame(() => {
+      const el = bar.current;
+      // Like Facebook: the header's hairline stays in view 13px under the TopNav.
+      if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70 });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [embedded, user.username, path]);
+
+  const [stuck, setStuck] = useState(false);
+  const pinnable = onAll && !embedded;
+  useEffect(() => {
+    if (!pinnable) {
+      setStuck(false);
+      return;
+    }
+    // Pins once the tab row has scrolled up under the bar (56 TopNav + 48 bar). A scroll
+    // listener rather than an IntersectionObserver: a jump past the row (restored scroll,
+    // anchor links) never intersects, so an observer would miss it.
+    let raf = 0;
+    const check = () => {
+      raf = 0;
+      const el = bar.current;
+      if (el) setStuck(el.getBoundingClientRect().bottom <= 104);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(check);
+    };
+    check();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [pinnable]);
 
   return (
     <>
-      <div ref={sentinel} aria-hidden className="h-0" />
-      <div className="sticky top-14 z-20 bg-card shadow-[0_1px_2px_var(--shadow-1)]">
+      <div ref={bar} className="relative z-10 bg-card shadow-[0_1px_2px_var(--shadow-1)]">
         <div
           className={cn(
             "mx-auto flex h-[60px] w-full max-w-[1186px] items-center justify-between",
             columnPad(embedded),
           )}
         >
-          {stuck ? (
-            <button
-              type="button"
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="flex items-center gap-3 rounded-lg px-4 py-1.5 transition-colors hover:bg-hover"
-            >
-              <Avatar src={user.avatar} size={40} />
-              <span className="font-semibold text-[17px] text-primary">{user.name}</span>
-            </button>
-          ) : (
-            <nav aria-label="Profile tabs" className="flex h-full items-stretch">
-              {tabs.map((t) => (
-                <TabLink key={t.label} tab={t} active={isActive(t)} />
-              ))}
-              <Menu>
-                <MenuTrigger asChild>
-                  <button
-                    type="button"
+          <nav aria-label="Profile tabs" className="flex h-full items-stretch">
+            {tabs.map((t) => (
+              <TabLink key={t.label} tab={t} active={isActive(t)} />
+            ))}
+            <Menu>
+              <MenuTrigger asChild>
+                <button
+                  type="button"
+                  className={cn(
+                    "group relative flex h-full items-center outline-none",
+                    moreActive ? "text-link" : "text-secondary",
+                  )}
+                >
+                  <span
                     className={cn(
-                      "group relative flex h-full items-center outline-none",
-                      moreActive ? "text-link" : "text-secondary",
+                      "flex h-12 items-center gap-1 rounded-md px-4 font-semibold text-[15px] transition-colors",
+                      !moreActive && "group-hover:bg-hover",
                     )}
                   >
-                    <span
-                      className={cn(
-                        "flex h-12 items-center gap-1 rounded-md px-4 font-semibold text-[15px] transition-colors",
-                        !moreActive && "group-hover:bg-hover",
-                      )}
-                    >
-                      More
-                      <CaretDown size={12} />
-                    </span>
-                    {moreActive && <ActiveBar />}
-                  </button>
-                </MenuTrigger>
-                <MenuContent width={220} align="start">
-                  {more.map((t) => (
-                    <Link
-                      key={t.label}
-                      to="/$username/$section"
-                      params={{
-                        username: user.username,
-                        section: t.kind === "section" ? t.section : "",
-                      }}
-                    >
-                      <MenuItem label={t.label} />
-                    </Link>
-                  ))}
-                </MenuContent>
-              </Menu>
-            </nav>
-          )}
+                    More
+                    <CaretDown size={12} />
+                  </span>
+                  {moreActive && <ActiveBar />}
+                </button>
+              </MenuTrigger>
+              <MenuContent width={220} align="start">
+                {more.map((t) => (
+                  <Link
+                    key={t.label}
+                    to="/$username/$section"
+                    params={{
+                      username: user.username,
+                      section: t.kind === "section" ? t.section : "",
+                    }}
+                    resetScroll={false}
+                  >
+                    <MenuItem label={t.label} />
+                  </Link>
+                ))}
+              </MenuContent>
+            </Menu>
+          </nav>
           <ProfileMoreMenu />
         </div>
       </div>
+      {stuck && (
+        <div className="fixed inset-x-0 top-14 z-20 bg-card shadow-[0_1px_2px_var(--shadow-1)]">
+          <div className="mx-auto flex h-12 w-full max-w-[1186px] items-center justify-between px-4 min-[1218px]:px-0">
+            <button
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="flex items-center gap-3 rounded-lg px-4 py-1 transition-colors hover:bg-hover"
+            >
+              <Avatar src={user.avatar} size={40} />
+              <span className="text-[17px] text-primary leading-5">{user.name}</span>
+            </button>
+            <ProfileMoreMenu />
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -177,6 +211,7 @@ function TabLink({ tab, active }: { tab: Tab; active: boolean }) {
       <Link
         to="/$username/$section"
         params={{ username, section: tab.section }}
+        resetScroll={false}
         className={cls}
         aria-current={active ? "page" : undefined}
       >
@@ -187,6 +222,7 @@ function TabLink({ tab, active }: { tab: Tab; active: boolean }) {
     <Link
       to={tab.to}
       params={{ username }}
+      resetScroll={false}
       className={cls}
       aria-current={active ? "page" : undefined}
     >

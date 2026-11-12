@@ -50,6 +50,62 @@ export function CommentsSection({ postId, focusKey }: { postId: Id<"posts">; foc
 
 /* ---------- List ---------- */
 
+/** "Most relevant": most reactions and replies first, then oldest first. */
+function byRelevance(a: CommentThread, b: CommentThread) {
+  return (
+    b.reactions.count + b.replies.length * 2 - (a.reactions.count + a.replies.length * 2) ||
+    a.createdAt - b.createdAt
+  );
+}
+
+/**
+ * Under a post in Groups: the most relevant comment (plus any the viewer adds
+ * here), "View more comments" when there are others, and an inline
+ * "Write an answer…" composer.
+ */
+export function GroupCommentPreview({
+  postId,
+  commentCount,
+  onViewMore,
+}: {
+  postId: Id<"posts">;
+  commentCount: number;
+  onViewMore: () => void;
+}) {
+  const viewer = useViewer();
+  const [mountedAt] = useState(() => Date.now());
+  const threads = useQ(api.comments.list, commentCount > 0 ? { postId } : "skip");
+  const shown = useMemo(() => {
+    if (!threads?.length) return [];
+    const top = [...threads].sort(byRelevance)[0];
+    const mine = threads.filter(
+      (t) => t._id !== top._id && t.author._id === viewer._id && t.createdAt >= mountedAt,
+    );
+    return [top, ...mine];
+  }, [threads, viewer._id, mountedAt]);
+  const hidden = (threads?.length ?? commentCount) - shown.length;
+
+  return (
+    <div className="pb-2">
+      {hidden > 0 && (
+        <button
+          type="button"
+          onClick={onViewMore}
+          className="mx-4 mb-1 font-semibold text-[15px] text-secondary leading-5 hover:underline"
+        >
+          View more comments
+        </button>
+      )}
+      {shown.map((t) => (
+        <Thread key={t._id} thread={t} postId={postId} />
+      ))}
+      <div className="px-3 pt-1">
+        <CommentComposer postId={postId} placeholder="Write an answer…" inline />
+      </div>
+    </div>
+  );
+}
+
 export function CommentList({ postId }: { postId: Id<"posts"> }) {
   const threads = useQ(api.comments.list, { postId });
   const [sort, setSort] = useState<Sort>("relevant");
@@ -58,12 +114,7 @@ export function CommentList({ postId }: { postId: Id<"posts"> }) {
     if (!threads) return undefined;
     const t = [...threads];
     if (sort === "newest") t.sort((a, b) => b.createdAt - a.createdAt);
-    else if (sort === "relevant")
-      t.sort(
-        (a, b) =>
-          b.reactions.count + b.replies.length * 2 - (a.reactions.count + a.replies.length * 2) ||
-          a.createdAt - b.createdAt,
-      );
+    else if (sort === "relevant") t.sort(byRelevance);
     return t;
   }, [threads, sort]);
 
@@ -410,11 +461,14 @@ export function CommentComposer({
   autoFocus,
   onDone,
   onCancel,
+  inline,
 }: {
   postId: Id<"posts">;
   parentId?: Id<"comments">;
   placeholder?: string;
   size?: number;
+  /** One-row pill with the icons on the right until the viewer starts typing. */
+  inline?: boolean;
   /** Bump to move focus into the composer (Comment button). */
   focusKey?: number;
   autoFocus?: boolean;
@@ -435,6 +489,7 @@ export function CommentComposer({
   }, [focusKey]);
 
   const canSend = (text.trim().length > 0 || photo !== null) && !busy;
+  const compact = inline && !text && !photo;
   const submit = async () => {
     if (!canSend) return;
     setBusy(true);
@@ -459,8 +514,10 @@ export function CommentComposer({
         <Avatar src={viewer.avatar} size={size} />
       </span>
       <div className="min-w-0 flex-1">
-        <div className="rounded-2xl bg-comment">
-          <div className="px-3 pt-2">
+        <div
+          className={cn("bg-comment", compact ? "flex items-center rounded-[18px]" : "rounded-2xl")}
+        >
+          <div className={cn("px-3", compact ? "min-w-0 flex-1 py-2" : "pt-2")}>
             <AutoTextarea
               ref={ref}
               value={text}
@@ -484,7 +541,7 @@ export function CommentComposer({
               </button>
             </div>
           )}
-          <div className="flex items-center px-2 pt-1 pb-1.5">
+          <div className={cn("flex items-center", compact ? "pr-2" : "px-2 pt-1 pb-1.5")}>
             <div className="flex items-center text-icon-secondary">
               <ComposerIcon label="Comment with an avatar sticker">
                 <AvatarStickerOutline />
@@ -542,9 +599,10 @@ export function CommentComposer({
                 }}
               />
             </div>
-            <div className="flex-1" />
+            {!compact && <div className="flex-1" />}
             <button
               type="button"
+              hidden={compact}
               aria-label={parentId ? "Post reply" : "Post comment"}
               disabled={!canSend}
               onClick={() => void submit()}

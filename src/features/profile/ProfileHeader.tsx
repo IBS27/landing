@@ -20,8 +20,34 @@ import { Avatar, Button, Spinner, VerifiedBadge } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import { columnPad, useProfile } from "./context";
 import { EditProfileModal } from "./EditProfileModal";
+import { NoteBubble } from "./NoteBubble";
 import { ChoosePhotoDialog, ImageLightbox, pickImage, useSetProfilePhoto } from "./photos";
 import { Recommendations } from "./Recommendations";
+
+const RECS_KEY = "fb-clone:profileRecs";
+
+/**
+ * People You May Know under your own header starts open, as on Facebook;
+ * the chevron toggles it and the choice is remembered per browser.
+ */
+function useRecsOpen(defaultOpen: boolean) {
+  const [open, setOpen] = useState(() => {
+    try {
+      const v = localStorage.getItem(RECS_KEY);
+      return v === null ? defaultOpen : v === "1";
+    } catch {
+      return defaultOpen;
+    }
+  });
+  const toggle = () =>
+    setOpen((o) => {
+      try {
+        localStorage.setItem(RECS_KEY, o ? "0" : "1");
+      } catch {}
+      return !o;
+    });
+  return [open, toggle] as const;
+}
 
 /**
  * Facebook's 2026 profile header: full-width cover (1250 max, bottom corners
@@ -30,8 +56,12 @@ import { Recommendations } from "./Recommendations";
  */
 export function ProfileHeader() {
   const { profile, embedded } = useProfile();
-  const { user } = profile;
-  const [showRecs, setShowRecs] = useState(false);
+  const { user, isSelf } = profile;
+  const [recsOpen, toggleRecs] = useRecsOpen(true);
+  // Remembered state applies to your own profile; others' start collapsed.
+  const [othersRecs, setOthersRecs] = useState(false);
+  const showRecs = isSelf && !embedded ? recsOpen : othersRecs;
+  const onToggleRecs = isSelf && !embedded ? toggleRecs : () => setOthersRecs((s) => !s);
 
   return (
     <div className="relative overflow-hidden bg-card">
@@ -60,7 +90,7 @@ export function ProfileHeader() {
           <ProfilePicture />
           <div className="flex min-w-0 flex-1 flex-wrap items-start justify-between gap-x-4 gap-y-3">
             <NameBlock />
-            <Actions showRecs={showRecs} onToggleRecs={() => setShowRecs((s) => !s)} />
+            <Actions showRecs={showRecs} onToggleRecs={onToggleRecs} />
           </div>
         </div>
         {showRecs && <Recommendations />}
@@ -151,6 +181,7 @@ function ProfilePicture() {
 
   return (
     <div className="relative shrink-0">
+      <NoteBubble />
       <Menu>
         <MenuTrigger asChild>
           <button

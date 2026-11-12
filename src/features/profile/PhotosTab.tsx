@@ -1,4 +1,4 @@
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, Search, X } from "lucide-react";
 import { useState } from "react";
 import { useQ } from "@/app/viewer";
 import { CreatePostModal } from "@/features/posts";
@@ -41,6 +41,10 @@ export function PhotosCard() {
   const [album, setAlbum] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [viewing, setViewing] = useState<string | null>(null);
+  const [filtering, setFiltering] = useState(false);
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const matches = (text: string) => !q || text.toLowerCase().includes(q);
   const first = user.firstName;
   const tabs: { key: Tab; label: string }[] = [
     { key: "of", label: isSelf ? "Photos of you" : `Photos of ${first}` },
@@ -55,10 +59,12 @@ export function PhotosCard() {
       const a = data.albums.find((x) => x.key === album);
       const items =
         album === "timeline"
-          ? data.yours.map((p) => ({
-              key: `${p.postId}-${p.index}`,
-              node: <PhotoTile photo={p} className="rounded-lg" />,
-            }))
+          ? data.yours
+              .filter((p) => p.postId)
+              .map((p) => ({
+                key: `${p.postId}-${p.index}`,
+                node: <PhotoTile photo={p} className="rounded-lg" />,
+              }))
           : [
               {
                 key: album,
@@ -109,33 +115,35 @@ export function PhotosCard() {
               </span>
             </button>
           )}
-          {data.albums.map((a) => (
-            <button
-              key={a.key}
-              type="button"
-              onClick={() => setAlbum(a.key)}
-              className="block w-full text-left align-top"
-            >
-              <span className="block aspect-square overflow-hidden rounded-lg bg-wash">
-                {a.cover && (
-                  <img
-                    src={a.cover}
-                    alt=""
-                    className="h-full w-full object-cover hover:brightness-95"
-                  />
-                )}
-              </span>
-              <span className="mt-2 block font-semibold text-[15px] text-primary">{a.name}</span>
-              <span className="block text-[13px] text-secondary">{plural(a.count, "item")}</span>
-            </button>
-          ))}
+          {data.albums
+            .filter((a) => matches(a.name))
+            .map((a) => (
+              <button
+                key={a.key}
+                type="button"
+                onClick={() => setAlbum(a.key)}
+                className="block w-full text-left align-top"
+              >
+                <span className="block aspect-square overflow-hidden rounded-lg bg-wash">
+                  {a.cover && (
+                    <img
+                      src={a.cover}
+                      alt=""
+                      className="h-full w-full object-cover hover:brightness-95"
+                    />
+                  )}
+                </span>
+                <span className="mt-2 block font-semibold text-[15px] text-primary">{a.name}</span>
+                <span className="block text-[13px] text-secondary">{plural(a.count, "item")}</span>
+              </button>
+            ))}
         </div>
       );
     } else {
-      const list = tab === "of" ? data.ofYou : data.yours;
+      const list = (tab === "of" ? data.ofYou : data.yours).filter((p) => matches(p.searchText));
       body =
         list.length === 0 ? (
-          <CardEmpty>No photos to show</CardEmpty>
+          <CardEmpty>{q ? "No results" : "No photos to show"}</CardEmpty>
         ) : (
           <div className={grid}>
             {list.map((p) => (
@@ -179,6 +187,43 @@ export function PhotosCard() {
           setTab(k);
           setAlbum(null);
         }}
+        trailing={
+          filtering ? (
+            <label className="flex h-9 w-[205px] items-center gap-2 rounded-full bg-input px-3 text-secondary">
+              <Search size={16} strokeWidth={2.4} className="shrink-0" />
+              <input
+                // biome-ignore lint/a11y/noAutofocus: opened by the search button
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    setQuery("");
+                    setFiltering(false);
+                  }
+                }}
+                placeholder="Search"
+                aria-label="Filter photos"
+                className="min-w-0 flex-1 bg-transparent text-[15px] text-primary outline-none placeholder:text-secondary"
+              />
+              <button
+                type="button"
+                aria-label="Clear search"
+                onClick={() => {
+                  setQuery("");
+                  setFiltering(false);
+                }}
+                className="shrink-0 rounded-full hover:text-primary"
+              >
+                <X size={16} strokeWidth={2.4} />
+              </button>
+            </label>
+          ) : (
+            <IconButton label="Filter photos" variant="ghost" onClick={() => setFiltering(true)}>
+              <Search size={20} strokeWidth={2.6} className="text-link" />
+            </IconButton>
+          )
+        }
       />
       {body}
       {isSelf && <CreatePostModal open={adding} onOpenChange={setAdding} initialPanel="photo" />}

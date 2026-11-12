@@ -65,10 +65,10 @@ export function BrowsePage() {
   const { data, onMore } = useBrowse({ search: {} });
   return (
     <MpShell rail={<MainRail active="browse" />}>
-      <div className="pt-2 pb-1">
+      <div className="pb-3">
         <PicksHeader />
       </div>
-      <div className="pt-1">
+      <div>
         <ListingGrid data={data} onMore={onMore} />
       </div>
     </MpShell>
@@ -101,12 +101,7 @@ function FilterRail({
     <>
       <CrumbHeader crumbs={crumbs} title={title} />
       <div className="mt-2.5">
-        <RailSearch
-          key={search.q ?? ""}
-          initial={search.q ?? ""}
-          category={meta?.slug}
-          placeholder={meta && !searchMode ? `Search ${meta.label}` : "Search Marketplace"}
-        />
+        <RailSearch key={search.q ?? ""} initial={search.q ?? ""} category={meta?.slug} />
       </div>
       <div className="mt-4 min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         {meta && !searchMode && <NotifyMe slug={meta.slug} />}
@@ -179,10 +174,9 @@ function NotifyMe({ slug }: { slug: string }) {
 const SHOP_CHIPS: Record<string, { label: string; patch: Partial<MpSearch> }[]> = {
   propertyrentals: [
     { label: "Apartments for Rent", patch: { type: "apartment" } },
+    { label: "Condos for Rent", patch: { type: "condo" } },
     { label: "Houses for Rent", patch: { type: "house" } },
     { label: "Townhouses for Rent", patch: { type: "townhouse" } },
-    { label: "Rooms for Rent", patch: { type: "room" } },
-    { label: "Studios for Rent", patch: { type: "studio" } },
   ],
   propertyforsale: [
     { label: "Houses for Sale", patch: { type: "house" } },
@@ -200,9 +194,9 @@ function ShopByCategory({ slug, search }: { slug: string; search: MpSearch }) {
   const chips = SHOP_CHIPS[slug];
   if (!chips) return null;
   return (
-    <section className="mt-5 rounded-xl border border-divider bg-card px-4 pt-4 pb-4 shadow-base">
+    <section className="mt-5 rounded-xl border border-divider bg-card px-4 pt-4 pb-6 shadow-base">
       <h2 className="font-bold text-[20px] text-primary leading-6">Shop by Category</h2>
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-[15px] flex flex-wrap gap-2">
         {chips.map((c) => {
           const [k, v] = Object.entries(c.patch)[0] as [keyof MpSearch, string];
           const active = search[k] === v;
@@ -270,11 +264,11 @@ export function CategoryPage({ slug, search }: { slug: string; search: MpSearch 
       {chips ? (
         <ShopByCategory slug={slug} search={search} />
       ) : (
-        <div className="pt-2 pb-1">
+        <div className="pb-3">
           <PicksHeader />
         </div>
       )}
-      <div className={chips ? "pt-6" : "pt-1"}>
+      <div className={chips ? "pt-[26px]" : undefined}>
         <ListingGrid data={data} onMore={onMore} />
       </div>
     </MpShell>
@@ -297,7 +291,7 @@ export function SearchPage({ search }: { search: MpSearch }) {
         />
       }
     >
-      <div className="pt-2 pb-1">
+      <div className="pb-3">
         <PicksHeader
           title={
             search.q
@@ -306,7 +300,7 @@ export function SearchPage({ search }: { search: MpSearch }) {
           }
         />
       </div>
-      <div className="pt-1">
+      <div>
         <ListingGrid
           data={search.q ? data : { items: [], hasMore: false }}
           onMore={onMore}

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useQ } from "@/app/viewer";
+import { cn } from "@/lib/format";
 import { Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import { CardButton, PersonGridCard } from "./cards";
@@ -45,7 +46,10 @@ export function FriendsHome() {
         <div className="mx-auto w-full max-w-[1040px] px-4">
           {loading && <GridSkeleton />}
           {empty && (
-            <EmptyPane text="When you have friend requests or suggestions, you'll see them here." />
+            <EmptyPane
+              text="When you have friend requests or suggestions, you'll see them here."
+              className="min-h-[calc(100vh-56px-80px)]"
+            />
           )}
           {reqs && reqs.length > 0 && (
             <section aria-label="Friend requests" className="mb-4">
@@ -158,7 +162,7 @@ function SectionHeader({
   link: { to: "/friends/requests" | "/friends/suggestions"; label: string; aria: string };
 }) {
   return (
-    <div className="flex items-center justify-between pt-[15px] pb-[11px]">
+    <div className="flex items-center justify-between pt-[13px] pb-[7px]">
       <h2 className="font-bold text-[20px] text-primary leading-6">{title}</h2>
       <Link
         to={link.to}
@@ -185,11 +189,16 @@ function GridSkeleton() {
 }
 
 /** Grey centered illustration + message on an empty right pane. */
-export function EmptyPane({ text }: { text: string }) {
+export function EmptyPane({ text, className }: { text: string; className?: string }) {
   return (
-    <div className="flex min-h-[calc(100vh-56px-40px)] flex-col items-center justify-center px-6 text-center">
+    <div
+      className={cn(
+        "flex min-h-[calc(100vh-56px)] flex-col items-center justify-center px-6 text-center",
+        className,
+      )}
+    >
       <PeopleIllustration />
-      <h2 className="mt-5 max-w-[700px] font-bold text-[20px] text-secondary leading-6">{text}</h2>
+      <h2 className="mt-4 max-w-[700px] font-bold text-[20px] text-secondary leading-6">{text}</h2>
     </div>
   );
 }

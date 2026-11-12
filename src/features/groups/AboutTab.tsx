@@ -6,7 +6,7 @@ import { Avatar, Button, Card } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import { type GroupView, useGroup } from "./context";
 import { Description, InfoRow, PrivacyRows } from "./DiscussionTab";
-import { ChatGlyph, ClockGlyph, PeopleGlyph, PinGlyph, TagGlyph } from "./icons";
+import { ChatGlyph, ClockGlyph, PeopleGlyph, PinGlyph } from "./icons";
 import { ageLabel, formatLongDate, memberCount } from "./util";
 
 /** About: description and privacy, members (admins), activity, rules. */
@@ -63,25 +63,6 @@ function AboutCard({ group }: { group: GroupView }) {
           sub={`Group created on ${formatLongDate(group.createdAt)}`}
         />
         {group.location && <InfoRow muted icon={<PinGlyph />} title={group.location} />}
-        {group.tags.length > 0 && (
-          <InfoRow
-            muted
-            icon={<TagGlyph />}
-            title="Tags"
-            sub={
-              <span className="mt-1 flex flex-wrap gap-1.5">
-                {group.tags.map((t) => (
-                  <span
-                    key={t}
-                    className="rounded-full bg-btn px-3 py-1 font-semibold text-[13px] text-btn-text"
-                  >
-                    {t}
-                  </span>
-                ))}
-              </span>
-            }
-          />
-        )}
       </div>
     </SectionCard>
   );

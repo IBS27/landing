@@ -151,7 +151,7 @@ export function ActionBar({
             type="button"
             aria-label="See who reacted to this"
             onClick={() => setWhoOpen(true)}
-            className="mr-2 flex h-8 items-center rounded-md px-1"
+            className="mr-1.5 flex h-8 items-center rounded-md px-1"
           >
             <ReactionIcons types={rx.top} />
           </button>
@@ -182,7 +182,7 @@ function BarButton({
       aria-label={label}
       onClick={onClick}
       style={style}
-      className="flex h-8 items-center gap-1.5 rounded-md px-2 text-icon-secondary transition-colors hover:bg-hover active:bg-pressed"
+      className="flex h-8 items-center gap-2 rounded-md px-3 text-icon-secondary transition-colors hover:bg-hover active:bg-pressed"
     >
       {children}
     </button>

@@ -1,14 +1,20 @@
 import { useQ } from "@/app/viewer";
-import { Composer, PostFeed } from "@/features/posts";
+import { Composer, PostCard, PostFeed } from "@/features/posts";
 import { api } from "../../../convex/_generated/api";
 import { LeftRail } from "./LeftRail";
 import { todayKey } from "./links";
+import { ReelsShelf } from "./ReelsShelf";
 import { RightRail } from "./RightRail";
 import { StoriesTray } from "./StoriesTray";
+
+/** Feed slots, as on Facebook: the Reels shelf after the 3rd post, an ad after every 6th. */
+const REELS_AFTER = 2;
+const AD_EVERY = 6;
 
 /** Home: left shortcuts rail, 680px feed column, right contacts rail. */
 export function HomePage() {
   const rails = useQ(api.feed.rails, { today: todayKey() });
+  const ads = useQ(api.feed.ads, {});
   return (
     <div className="flex min-h-[calc(100vh-56px)] items-start justify-between">
       <LeftRail groups={rails?.groups} />
@@ -16,7 +22,14 @@ export function HomePage() {
         <div className="flex w-full max-w-[680px] flex-col gap-3">
           <Composer />
           <StoriesTray />
-          <PostFeed source={{ kind: "home" }} />
+          <PostFeed
+            source={{ kind: "home" }}
+            interleave={(i) => {
+              if (i === REELS_AFTER) return <ReelsShelf />;
+              const ad = (i + 1) % AD_EVERY === 0 ? ads?.[(i + 1) / AD_EVERY - 1] : undefined;
+              return ad ? <PostCard post={ad} /> : null;
+            }}
+          />
         </div>
       </main>
       <RightRail data={rails} />

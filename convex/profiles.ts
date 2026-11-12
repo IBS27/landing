@@ -74,18 +74,22 @@ async function visibleTimelinePosts(ctx: QueryCtx, a: Audience, userId: Id<"user
   return out;
 }
 
-export type PhotoItem = {
+type MediaItem = {
   postId: Id<"posts">;
   index: number;
   url: string;
   kind: "image" | "video";
   width: number | null;
   height: number | null;
+  /** Alt text plus the post's text, for "Filter photos". */
+  searchText: string;
   createdAt: number;
 };
+/** A photo in a grid; `postId` is null for the profile picture / cover photo. */
+export type PhotoItem = Omit<MediaItem, "postId"> & { postId: Id<"posts"> | null };
 
-function mediaOf(posts: Doc<"posts">[], kind?: "image" | "video"): PhotoItem[] {
-  const out: PhotoItem[] = [];
+function mediaOf(posts: Doc<"posts">[], kind?: "image" | "video"): MediaItem[] {
+  const out: MediaItem[] = [];
   for (const p of posts)
     p.media.forEach((m, index) => {
       if (kind && m.kind !== kind) return;
@@ -96,11 +100,41 @@ function mediaOf(posts: Doc<"posts">[], kind?: "image" | "video"): PhotoItem[] {
         kind: m.kind,
         width: m.width ?? null,
         height: m.height ?? null,
+        searchText: [m.alt, p.text].filter(Boolean).join(" "),
         createdAt: p.createdAt,
       });
     });
   return out;
 }
+
+/**
+ * The current profile picture and cover photo. Facebook keeps these public,
+ * so they show in Photos for everyone, friend or not. Skips URLs already
+ * present in `seen` (a profile picture that was also posted).
+ */
+function profilePhotos(u: Doc<"users">, seen: PhotoItem[]): PhotoItem[] {
+  const urls = new Set(seen.map((p) => p.url));
+  const out: PhotoItem[] = [];
+  for (const url of [u.avatar, u.cover])
+    if (url && !urls.has(url) && !url.startsWith("data:")) {
+      urls.add(url);
+      out.push({
+        postId: null,
+        index: out.length,
+        url,
+        kind: "image",
+        width: null,
+        height: null,
+        searchText: url === u.avatar ? "Profile picture" : "Cover photo",
+        createdAt: u.joinedAt,
+      });
+    }
+  return out;
+}
+
+/** A note is visible for 24 hours after it was shared. */
+const NOTE_TTL = 24 * 60 * 60 * 1000;
+export const NOTE_MAX = 60;
 
 async function followerTotal(ctx: QueryCtx, u: Doc<"users">) {
   const rows = await ctx.db
@@ -141,6 +175,11 @@ export const get = viewerQuery({
           .first()
       : null;
     const showBirthday = isSelf || relation === "friend";
+    // Notes are shared with friends (Facebook's default audience).
+    const note =
+      u.note && Date.now() - u.note.createdAt < NOTE_TTL && (isSelf || relation === "friend")
+        ? u.note
+        : null;
     return {
       user: {
         ...userSummary(u),
@@ -155,6 +194,7 @@ export const get = viewerQuery({
         birthday: showBirthday ? (u.birthday ?? null) : null,
         joinedAt: u.joinedAt,
         pageCategory: u.pageCategory ?? null,
+        note,
       },
       isSelf,
       isPage,
@@ -173,7 +213,8 @@ export const overview = viewerQuery({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
     const a = await loadAudience(ctx, ctx.viewer._id);
-    const [posts, theirFriends] = await Promise.all([
+    const [u, posts, theirFriends] = await Promise.all([
+      ctx.db.get(userId),
       visibleTimelinePosts(ctx, a, userId),
       ctx.db
         .query("friendships")
@@ -181,7 +222,8 @@ export const overview = viewerQuery({
         .order("desc")
         .collect(),
     ]);
-    const photos = mediaOf(posts, "image");
+    const timelinePhotos: PhotoItem[] = mediaOf(posts, "image");
+    const photos = u ? [...timelinePhotos, ...profilePhotos(u, timelinePhotos)] : timelinePhotos;
     // Facebook leads with mutual friends, then everyone else.
     const ids = theirFriends.map((r) => r.friendId);
     const ordered = [
@@ -223,17 +265,18 @@ export const photos = viewerQuery({
         (await canView(ctx, p, a))
       )
         tagged.push(p);
-    const yours = mediaOf(posts, "image");
+    const timelinePhotos = mediaOf(posts, "image");
+    const yours = [...timelinePhotos, ...profilePhotos(u, timelinePhotos)];
     const albums: { key: string; name: string; cover: string | null; count: number }[] = [
       { key: "profile", name: "Profile pictures", cover: u.avatar, count: 1 },
     ];
     if (u.cover) albums.push({ key: "cover", name: "Cover photos", cover: u.cover, count: 1 });
-    if (yours.length)
+    if (timelinePhotos.length)
       albums.push({
         key: "timeline",
         name: "Timeline photos",
-        cover: yours[0].url,
-        count: yours.length,
+        cover: timelinePhotos[0].url,
+        count: timelinePhotos.length,
       });
     return {
       yours,
@@ -407,5 +450,17 @@ export const setFollow = viewerMutation({
     if (follow && !row)
       await ctx.db.insert("follows", { userId: viewerId, targetId, createdAt: Date.now() });
     if (!follow && row) await ctx.db.delete(row._id);
+  },
+});
+
+/** Share, replace or clear (empty text) your profile note. */
+export const setNote = viewerMutation({
+  args: { text: v.string() },
+  handler: async (ctx, { text: raw }) => {
+    const text = raw.trim();
+    if (text.length > NOTE_MAX) throw new ConvexError(`Notes can be up to ${NOTE_MAX} characters`);
+    await ctx.db.patch(ctx.viewer._id, {
+      note: text ? { text, createdAt: Date.now() } : undefined,
+    });
   },
 });

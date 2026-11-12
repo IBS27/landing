@@ -492,7 +492,7 @@ function Timeline({
       {view === "list" ? (
         <div className="flex flex-col gap-4">
           {posts.map((p) => (
-            <PostCard key={p._id} post={p} />
+            <PostCard key={p._id} post={p} hideable={false} />
           ))}
         </div>
       ) : (

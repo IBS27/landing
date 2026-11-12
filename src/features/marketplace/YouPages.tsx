@@ -1,17 +1,13 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
 import {
-  Archive,
   BadgeDollarSign,
-  BellRing,
   Check,
-  CircleDollarSign,
   Eye,
   MessageCircle,
   MoreHorizontal,
   Package,
   Pencil,
-  Store,
   Trash2,
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
@@ -25,13 +21,18 @@ import { api } from "../../../convex/_generated/api";
 import { Accordion, RadioRow } from "./filters";
 import { gridClass, ListingCardView, priceLabel } from "./grid";
 import {
+  AlertBellIcon,
+  ArchiveIcon,
   BarsIcon,
   BookmarkFill,
   ChartIcon,
   ClockIcon,
+  FollowingIcon,
   ListDoc,
   MegaphoneIcon,
+  OfferJarIcon,
   PaperPlane,
+  SellingTagIcon,
   ShareArrow,
   ShieldIcon,
   TagIcon,
@@ -114,25 +115,25 @@ function BuyingRail({ active }: { active: BuyingTab | "saved" }) {
           to="/marketplace/saved"
         />
         <RailRow
-          icon={<Archive size={20} strokeWidth={2.25} />}
+          icon={<ArchiveIcon />}
           label="Purchased orders"
           active={active === "orders"}
           {...tab("orders")}
         />
         <RailRow
-          icon={<CircleDollarSign size={20} strokeWidth={2.25} />}
+          icon={<OfferJarIcon />}
           label="Submitted offers"
           active={active === "offers"}
           {...tab("offers")}
         />
         <RailRow
-          icon={<BellRing size={20} strokeWidth={2.25} />}
+          icon={<AlertBellIcon />}
           label="Your alerts"
           active={active === "alerts"}
           {...tab("alerts")}
         />
         <RailRow
-          icon={<Store size={20} strokeWidth={2.25} />}
+          icon={<FollowingIcon />}
           label="Following"
           active={active === "following"}
           {...tab("following")}
@@ -319,7 +320,7 @@ export function SellingPage({ tab }: { tab: SellingTab }) {
             {...tabLink("dashboard")}
           />
           <RailRow
-            icon={<TagIcon />}
+            icon={tab === "listings" ? <TagIcon /> : <SellingTagIcon />}
             label="Your listings"
             active={tab === "listings"}
             {...tabLink("listings")}
@@ -730,48 +731,61 @@ export function InboxPage({ role }: { role: "selling" | "buying" }) {
                   <button
                     type="button"
                     onClick={() => openChat(r.conversationId)}
-                    className="flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-hover"
+                    className="flex min-h-[76px] w-full items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-hover"
                   >
                     <span className="relative shrink-0">
                       {r.listing?.photo ? (
                         <img
                           src={r.listing.photo}
                           alt=""
-                          className="h-14 w-14 rounded-lg object-cover"
+                          className="h-[60px] w-[60px] rounded-lg object-cover"
                         />
                       ) : (
-                        <span className="block h-14 w-14 rounded-lg bg-input" />
+                        <span className="block h-[60px] w-[60px] rounded-lg bg-input" />
                       )}
                       {r.other && (
                         <Avatar
                           src={r.other.avatar}
-                          size={24}
-                          className="absolute! -right-1 -bottom-1 rounded-full ring-2 ring-card"
+                          size={28}
+                          className="absolute! -right-1.5 -bottom-1.5 rounded-full ring-2 ring-card"
                         />
                       )}
                     </span>
-                    <span className="min-w-0 flex-1">
+                    <span className="ml-1 min-w-0 flex-1">
                       <span
                         className={cn(
-                          "block truncate text-[15px] text-primary",
-                          r.unread ? "font-bold" : "font-medium",
+                          "block truncate text-[15px] text-primary leading-5",
+                          r.unread ? "font-bold" : "font-semibold",
                         )}
                       >
                         {r.other?.name ?? "Facebook user"} · {r.listing?.title ?? "Listing removed"}
                       </span>
                       <span
                         className={cn(
-                          "block truncate text-[13px]",
+                          "mt-0.5 flex min-w-0 text-[13px] leading-4",
                           r.unread ? "font-semibold text-primary" : "text-secondary",
                         )}
                       >
-                        {r.lastMessage
-                          ? `${r.lastMessage.fromViewer ? "You: " : ""}${r.lastMessage.text}`
-                          : ""}
-                        {r.lastMessage ? ` · ${shortAge(r.lastMessage.createdAt)}` : ""}
+                        <span className="truncate">
+                          {r.lastMessage
+                            ? `${r.lastMessage.fromViewer ? "You: " : ""}${r.lastMessage.text}`
+                            : ""}
+                        </span>
+                        {r.lastMessage && (
+                          <span className="shrink-0 whitespace-pre">
+                            {` · ${shortAge(r.lastMessage.createdAt)}`}
+                          </span>
+                        )}
                       </span>
                       {r.listing && r.listing.status !== "active" && (
-                        <span className="block text-[13px] text-secondary">
+                        <span
+                          className={cn(
+                            "mt-1 inline-block rounded px-1.5 font-semibold text-[12px] leading-[18px]",
+                            r.listing.status === "sold"
+                              ? "bg-btn text-secondary"
+                              : "bg-[#F7B928]/25 text-[#8a6100] dark:text-[#F7B928]",
+                          )}
+                        >
                           {r.listing.status === "sold" ? "Sold" : "Pending"}
                         </span>
                       )}

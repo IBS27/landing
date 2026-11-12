@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   BookOpen,
   ChevronDown,
-  ChevronRight,
   CircleAlert,
   FileText,
   Inbox,
@@ -70,26 +69,45 @@ function ReportFilled() {
 function LogoutFilled() {
   return (
     <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor" aria-hidden>
-      <path d="M3 3.5A1.5 1.5 0 0 1 4.5 2h7A1.5 1.5 0 0 1 13 3.5V7h-2V4H5v12h6v-3h2v3.5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 16.5Z" />
-      <path d="M14.3 6.3a1 1 0 0 1 1.4 0l3 3a1 1 0 0 1 0 1.4l-3 3a1 1 0 0 1-1.4-1.4l1.3-1.3H9a1 1 0 1 1 0-2h6.6l-1.3-1.3a1 1 0 0 1 0-1.4Z" />
+      <path d="M4 1.8h6.6c.8 0 1.4.6 1.4 1.4V8.6H9.4a1.4 1.4 0 0 0 0 2.8H12v5.4c0 .8-.6 1.4-1.4 1.4H4c-.8 0-1.4-.6-1.4-1.4V3.2c0-.8.6-1.4 1.4-1.4Z" />
+      <path
+        d="M9.4 10h8M15 7.2l2.8 2.8-2.8 2.8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
 function ProfilesGlyph() {
   return (
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden>
+      <circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="8" cy="6.4" r="2.4" />
+      <path d="M3.9 12.3c.8-1.6 2.3-2.5 4.1-2.5s3.3.9 4.1 2.5A6 6 0 0 1 8 14a6 6 0 0 1-4.1-1.7Z" />
+    </svg>
+  );
+}
+
+/** Facebook's heavier submenu chevron. */
+function Chevron() {
+  return (
     <svg
-      viewBox="0 0 16 16"
-      width="16"
-      height="16"
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.6"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="text-icon-secondary"
       aria-hidden
     >
-      <circle cx="8" cy="8" r="6.6" />
-      <circle cx="8" cy="6.6" r="2.2" />
-      <path d="M4.2 12.4c.9-1.5 2.2-2.2 3.8-2.2s2.9.7 3.8 2.2" />
+      <path d="M8.5 4 16.5 12l-8 8" />
     </svg>
   );
 }
@@ -123,7 +141,7 @@ function Row({
         <span className="block font-medium text-[15px] text-primary leading-5">{label}</span>
         {sub && <span className="block text-[13px] text-primary leading-4">{sub}</span>}
       </span>
-      {chevron && <ChevronRight size={24} strokeWidth={2} className="text-icon-secondary" />}
+      {chevron && <Chevron />}
     </>
   );
   if (to)
@@ -157,7 +175,7 @@ function SubHeader({ title, onBack }: { title: string; onBack: () => void }) {
 
 function Footer() {
   return (
-    <p className="mt-2 px-2 text-[13px] text-secondary leading-4">
+    <p className="mt-3 text-[13px] text-secondary leading-4">
       {FOOTER_LINKS.map((l, i) => (
         <span key={l}>
           {i > 0 && " · "}
@@ -167,7 +185,6 @@ function Footer() {
           </button>
         </span>
       ))}
-      {" · Meta © 2026"}
     </p>
   );
 }
@@ -236,13 +253,13 @@ export function AccountMenu() {
                   to="/$username"
                   params={{ username: viewer.username }}
                   onClick={close}
-                  className="flex h-[60px] items-center gap-3 rounded-lg px-3 hover:bg-hover"
+                  className="flex h-[60px] items-center gap-2 rounded-lg px-2 hover:bg-hover"
                 >
                   <Avatar src={viewer.avatar} size={36} />
                   <span className="font-semibold text-[17px] text-primary">{viewer.name}</span>
                 </Link>
                 <div className="mx-3 my-1 h-px bg-divider" />
-                <div className="p-3 pt-2">
+                <div className="px-2 pt-2 pb-2">
                   <button
                     type="button"
                     onClick={() => setView("profiles")}
@@ -252,7 +269,7 @@ export function AccountMenu() {
                   </button>
                 </div>
               </div>
-              <div className="mt-4 flex flex-col">
+              <div className="-mx-2 mt-4 flex flex-col">
                 <Row
                   icon={<GearFilled />}
                   label="Settings & privacy"

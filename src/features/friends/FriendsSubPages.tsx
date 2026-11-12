@@ -55,7 +55,7 @@ function useSelect(page: SubPage) {
 
 function RailHeading({ children }: { children: ReactNode }) {
   return (
-    <h2 className="px-4 pt-[18px] pb-[2px] font-semibold text-[17px] text-primary leading-5">
+    <h2 className="px-4 pt-[11px] pb-[2px] font-semibold text-[17px] text-primary leading-5">
       {children}
     </h2>
   );

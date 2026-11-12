@@ -8,13 +8,12 @@ import { GroupCard, type GroupCardData } from "./GroupCard";
 import { GroupsRail } from "./GroupsRail";
 import { ChevronLeftGlyph, ChevronRightGlyph } from "./icons";
 
-/** /groups/discover: carousels of suggested groups, categories, and a grid of more. */
+/** /groups/discover: Suggested and Popular carousels, then a grid of more suggestions. */
 export function DiscoverPage() {
   // Groups joined after this page opened stay listed (with "View group").
   const [since] = useState(() => Date.now());
   const data = useQ(api.groups.discover, { since });
   const [hidden, setHidden] = useState<Set<Id<"groups">>>(new Set());
-  const [category, setCategory] = useState<string | null>(null);
   const hide = (id: Id<"groups">) => setHidden((s) => new Set(s).add(id));
   const keep = (list: GroupCardData[]) => list.filter((g) => !hidden.has(g._id));
 
@@ -33,14 +32,6 @@ export function DiscoverPage() {
                 groups={keep(data.suggested)}
                 onHide={hide}
               />
-              {data.friends.length > 0 && (
-                <CarouselSection
-                  title="Friends' groups"
-                  subtitle="Groups your friends are in"
-                  groups={keep(data.friends)}
-                  onHide={hide}
-                />
-              )}
               {data.popular.length > 0 && (
                 <CarouselSection
                   title="Popular near you"
@@ -49,28 +40,11 @@ export function DiscoverPage() {
                   onHide={hide}
                 />
               )}
-              <Section
-                title={category ?? "More suggestions"}
-                last
-                header={
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <Chip active={category === null} onClick={() => setCategory(null)}>
-                      All
-                    </Chip>
-                    {data.categories.map((c) => (
-                      <Chip key={c} active={category === c} onClick={() => setCategory(c)}>
-                        {c}
-                      </Chip>
-                    ))}
-                  </div>
-                }
-              >
+              <Section title="More suggestions" last>
                 <div className="flex flex-wrap gap-2">
-                  {keep(data.more)
-                    .filter((g) => !category || g.category === category)
-                    .map((g) => (
-                      <GroupCard key={g._id} group={g} onHide={() => hide(g._id)} />
-                    ))}
+                  {keep(data.more).map((g) => (
+                    <GroupCard key={g._id} group={g} onHide={() => hide(g._id)} />
+                  ))}
                 </div>
               </Section>
             </>
@@ -126,56 +100,27 @@ function CarouselSection({
 function Section({
   title,
   subtitle,
-  header,
   action,
   last,
   children,
 }: {
   title: string;
   subtitle?: string;
-  header?: React.ReactNode;
   action?: React.ReactNode;
   last?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <section className={cn(!last && "mb-6 border-divider border-b pb-6")}>
+    <section className={cn(!last && "mb-8 border-divider border-b pb-14")}>
       <div className="mb-4">
         <div className="flex items-start justify-between gap-4">
           <h2 className="font-bold text-[20px] text-primary leading-6">{title}</h2>
           {action}
         </div>
         {subtitle && <p className="text-[17px] text-secondary leading-[22px]">{subtitle}</p>}
-        {header}
       </div>
       {children}
     </section>
-  );
-}
-
-function Chip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        "h-9 rounded-full px-3 font-semibold text-[15px] transition-colors",
-        active
-          ? "bg-highlight text-link"
-          : "bg-btn text-btn-text hover:brightness-95 dark:hover:brightness-125",
-      )}
-    >
-      {children}
-    </button>
   );
 }
 
@@ -208,10 +153,10 @@ function Carousel({
       <div
         ref={ref}
         onScroll={update}
-        className="scrollbar-none flex snap-x snap-mandatory items-start gap-2 overflow-x-auto pb-1"
+        className="scrollbar-none flex items-start gap-2 overflow-x-auto pb-1"
       >
         {groups.map((g) => (
-          <div key={g._id} className="snap-start">
+          <div key={g._id}>
             <GroupCard group={g} onHide={() => onHide(g._id)} />
           </div>
         ))}

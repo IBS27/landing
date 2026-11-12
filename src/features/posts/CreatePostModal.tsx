@@ -25,7 +25,7 @@ import { mediaSize, uploadFile } from "./util";
 export type ComposerPanel = "photo" | "feeling" | "tag" | "checkin";
 type View = "main" | "feeling" | "tag" | "checkin";
 
-const FEELINGS: [string, string][] = [
+export const FEELINGS: [string, string][] = [
   ["😀", "happy"],
   ["🥰", "loved"],
   ["😍", "lovely"],

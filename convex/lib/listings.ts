@@ -81,6 +81,7 @@ export const conditionLabel = (c: Condition) => CONDITIONS.find((x) => x.value =
 export type PropertyType = NonNullable<Doc<"listings">["rental"]>["propertyType"];
 export const PROPERTY_TYPES: readonly { value: PropertyType; label: string }[] = [
   { value: "apartment", label: "Apartment" },
+  { value: "condo", label: "Condo" },
   { value: "house", label: "House" },
   { value: "townhouse", label: "Townhouse" },
   { value: "room", label: "Room only" },
@@ -88,6 +89,11 @@ export const PROPERTY_TYPES: readonly { value: PropertyType; label: string }[] =
 ];
 export const propertyTypeLabel = (t: PropertyType) =>
   PROPERTY_TYPES.find((x) => x.value === t)?.label ?? t;
+
+/** Property-type filter: "Apartments" also covers studios. */
+export function matchesPropertyType(actual: PropertyType, wanted: PropertyType) {
+  return actual === wanted || (wanted === "apartment" && actual === "studio");
+}
 
 export type Meetup = NonNullable<Doc<"listings">["meetup"]>[number];
 export const MEETUPS: readonly { value: Meetup; label: string; sub: string }[] = [
@@ -168,7 +174,12 @@ export type ListingCard = {
   category: ListingCategory;
   createdAt: number;
   justListed: boolean;
-  rental: { bedrooms: number; bathrooms: number; listingType: "rent" | "sublet" | "sale" } | null;
+  rental: {
+    propertyType: PropertyType;
+    bedrooms: number;
+    bathrooms: number;
+    listingType: "rent" | "sublet" | "sale";
+  } | null;
   mileage: number | null;
 };
 
@@ -186,6 +197,7 @@ export function toCard(l: Doc<"listings">, now = Date.now()): ListingCard {
     justListed: now - l.createdAt < DAY / 4,
     rental: l.rental
       ? {
+          propertyType: l.rental.propertyType,
           bedrooms: l.rental.bedrooms,
           bathrooms: l.rental.bathrooms,
           listingType: l.rental.listingType,
@@ -219,4 +231,36 @@ export function listedAgo(ts: number, now = Date.now()) {
 export function bedsBaths(r: { bedrooms: number; bathrooms: number }) {
   const beds = r.bedrooms === 0 ? "Studio" : `${r.bedrooms} ${r.bedrooms === 1 ? "bed" : "beds"}`;
   return `${beds} ${r.bathrooms} ${r.bathrooms === 1 ? "bath" : "baths"}`;
+}
+
+/**
+ * Facebook's generated home-listing title: "2 Beds 1 Bath Apartment",
+ * "Studio 1 Bath Apartment". Rooms keep the seller's own title.
+ */
+export function homeTitle(
+  r: { propertyType: PropertyType; bedrooms: number; bathrooms: number },
+  fallback: string,
+) {
+  if (r.propertyType === "room") return fallback;
+  const beds = r.bedrooms === 0 ? "Studio" : `${r.bedrooms} ${r.bedrooms === 1 ? "Bed" : "Beds"}`;
+  const baths = `${r.bathrooms} ${r.bathrooms === 1 ? "Bath" : "Baths"}`;
+  const type = r.propertyType === "studio" ? "Apartment" : propertyTypeLabel(r.propertyType);
+  return `${beds} ${baths} ${type}`;
+}
+
+/**
+ * A seller's Marketplace rating, derived deterministically from their id
+ * (there are no buyer reviews in the clone). About one seller in six has none.
+ */
+export function sellerRating(sellerId: string): { stars: number; count: number } | null {
+  let h = 2166136261;
+  for (let i = 0; i < sellerId.length; i++) {
+    h ^= sellerId.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const u = h >>> 0;
+  if (u % 6 === 0) return null;
+  const stars = [5, 5, 5, 4.5, 4.5, 4][(u >>> 3) % 6] ?? 5;
+  const count = 1 + ((u >>> 7) % 48);
+  return { stars, count };
 }

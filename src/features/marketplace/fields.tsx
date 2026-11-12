@@ -93,7 +93,7 @@ export function TextArea({
         onFocus={() => setFocus(true)}
         onBlur={() => setFocus(false)}
         onChange={(e) => onChange(e.target.value)}
-        className="block min-h-[114px] w-full resize-y rounded-xl bg-transparent px-4 pt-[26px] pb-[10px] text-[16px] text-primary leading-5 outline-none"
+        className="block min-h-[114px] w-full resize-none rounded-xl bg-transparent px-4 pt-[26px] pb-[10px] text-[16px] text-primary leading-5 outline-none"
       />
     </div>
   );

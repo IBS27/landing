@@ -16,6 +16,7 @@ import { type ReactNode, useState } from "react";
 import { useM, useQ, useViewer } from "@/app/viewer";
 import { PostCard, PostSkeleton } from "@/features/posts";
 import { FriendsAudienceIcon, GlobeIcon } from "@/features/posts/icons";
+import { PageUnavailable } from "@/layout/PageUnavailable";
 import { cn, compactCount } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from "@/ui/overlays";
 import { Avatar, Button, Card, EmptyState, Skeleton } from "@/ui/primitives";
@@ -44,6 +45,8 @@ type Tab = "about" | "discussion";
 /** /events/$eventId — the event permalink. */
 export function EventPage({ eventId, tab }: { eventId: string; tab: Tab }) {
   const event = useQ(api.events.get, { eventId });
+  // Facebook shows a missing event full-width, without the Events rail.
+  if (event === null) return <PageUnavailable />;
   return (
     <ToastProvider>
       <EventsLayout
@@ -55,56 +58,9 @@ export function EventPage({ eventId, tab }: { eventId: string; tab: Tab }) {
           />
         }
       >
-        {event === undefined ? (
-          <HeaderSkeleton />
-        ) : event === null ? (
-          <Unavailable />
-        ) : (
-          <EventBody event={event} tab={tab} />
-        )}
+        {event === undefined ? <HeaderSkeleton /> : <EventBody event={event} tab={tab} />}
       </EventsLayout>
     </ToastProvider>
-  );
-}
-
-function Unavailable() {
-  return (
-    <div className="flex flex-col items-center px-4 pt-[180px] text-center">
-      <svg viewBox="0 0 112 112" width="112" height="112" className="text-secondary" aria-hidden>
-        <rect
-          x="16"
-          y="24"
-          width="80"
-          height="64"
-          rx="8"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="4"
-        />
-        <path
-          d="M40 52l32 16M72 52 40 68"
-          stroke="currentColor"
-          strokeWidth="4"
-          strokeLinecap="round"
-        />
-      </svg>
-      <h1 className="mt-4 font-bold text-[20px] text-secondary leading-6">
-        This Page Isn't Available
-      </h1>
-      <p className="mt-2 max-w-[452px] text-[17px] text-secondary leading-5">
-        The link may be broken, or the page may have been removed. Check to see if the link you're
-        trying to open is correct.
-      </p>
-      <Link
-        to="/"
-        className="mt-6 flex h-10 items-center rounded-lg bg-btn-primary px-12 font-semibold text-[17px] text-white hover:bg-btn-primary-hover"
-      >
-        Go to Feed
-      </Link>
-      <Link to="/events" className="mt-4 font-semibold text-[17px] text-link hover:underline">
-        Go back
-      </Link>
-    </div>
   );
 }
 

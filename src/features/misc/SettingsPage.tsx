@@ -301,10 +301,10 @@ export function SettingsPage({ tab }: { tab?: string }) {
         aria-label="Navigation within settings"
         className="sticky top-14 hidden h-[calc(100vh-56px)] w-[360px] shrink-0 flex-col bg-card shadow-[1px_0_0_var(--shadow-1)] min-[900px]:flex"
       >
-        <div className="px-4 pt-[11px] pb-2">
+        <div className="px-4 pt-[15px] pb-[19px]">
           <h1 className="font-bold text-[24px] text-primary leading-7">Settings &amp; privacy</h1>
         </div>
-        <label className="mx-4 mb-2 flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-input pr-2 pl-2.5">
+        <label className="mx-4 flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-input pr-2 pl-2.5">
           <Search size={16} strokeWidth={2.5} className="text-icon-secondary" />
           <input
             value={railQ}
@@ -314,7 +314,7 @@ export function SettingsPage({ tab }: { tab?: string }) {
             className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-primary outline-none placeholder:text-placeholder"
           />
         </label>
-        <div className="min-h-0 flex-1 overflow-y-auto px-2 pt-4 pb-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-2 pt-[39px] pb-6">
           {filtered ? (
             filtered.length === 0 ? (
               <p className="px-3 py-6 text-center text-[15px] text-secondary">No results found</p>
@@ -325,7 +325,7 @@ export function SettingsPage({ tab }: { tab?: string }) {
             )
           ) : (
             <>
-              <h2 className="px-3 pb-3 font-bold text-[20px] text-primary leading-6">
+              <h2 className="px-3 pb-[15px] font-bold text-[20px] text-primary leading-6">
                 Settings &amp; privacy
               </h2>
               <h2 className="px-3 font-bold text-[20px] text-primary leading-6">Your account</h2>
@@ -333,7 +333,7 @@ export function SettingsPage({ tab }: { tab?: string }) {
                 type="button"
                 onClick={() => open("accounts-center")}
                 className={cn(
-                  "mt-1 mb-4 flex w-full gap-3 rounded-lg px-3 py-2 text-left",
+                  "mb-[15px] flex w-full gap-3 rounded-lg px-3 py-2 text-left",
                   tab === "accounts-center" ? "bg-wash dark:bg-hover" : "hover:bg-hover",
                 )}
               >
@@ -350,7 +350,7 @@ export function SettingsPage({ tab }: { tab?: string }) {
                 <div key={s.title} className="pb-4">
                   <h2 className="px-3 font-bold text-[20px] text-primary leading-6">{s.title}</h2>
                   {s.description && (
-                    <p className="px-3 pt-1 pb-2 text-[17px] text-secondary leading-5">
+                    <p className="px-3 pt-0.5 pb-2 text-[17px] text-secondary leading-5">
                       {s.description}
                     </p>
                   )}
@@ -384,11 +384,10 @@ function RailRow({ item, active, onClick }: { item: Item; active: boolean; onCli
       onClick={onClick}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2 text-left",
+        "flex min-h-11 w-full items-center rounded-lg py-2 pr-3 pl-12 text-left",
         active ? "bg-wash dark:bg-hover" : "hover:bg-hover",
       )}
     >
-      <item.Icon size={24} strokeWidth={1.8} className="shrink-0 text-icon" />
       <span className="font-medium text-[17px] text-primary leading-5">{item.label}</span>
     </button>
   );
@@ -403,8 +402,8 @@ function Landing({ onOpen }: { onOpen: (id: string) => void }) {
     : [];
   return (
     <>
-      <Card className="rounded-xl px-10 py-4">
-        <h2 className="pt-6 pb-1 font-bold text-[20px] text-primary leading-6">
+      <Card className="rounded-xl px-10 pt-8 pb-[19px]">
+        <h2 className="px-4 pb-[7px] font-bold text-[20px] text-primary leading-6">
           Find the setting you need
         </h2>
         <label className="relative flex h-9 items-center gap-2 rounded-full bg-input px-2">
@@ -432,14 +431,13 @@ function Landing({ onOpen }: { onOpen: (id: string) => void }) {
             ))}
           </div>
         )}
-        <div className="h-4" />
       </Card>
 
-      <div className="mt-4 rounded-xl bg-card px-10 py-4">
-        <h2 className="pt-6 pb-3 font-bold text-[20px] text-primary leading-6">
+      <div className="mt-[17px] rounded-xl bg-card px-10 pt-[27px] pb-4">
+        <h2 className="px-4 pb-3 font-bold text-[20px] text-primary leading-6">
           Most visited settings
         </h2>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-4 px-4">
           <Tile
             art={<BlockingArt />}
             title="Blocking"
@@ -454,10 +452,10 @@ function Landing({ onOpen }: { onOpen: (id: string) => void }) {
           />
           <Tile art={<DarkModeArt />} title="Dark mode" onClick={() => onOpen("dark-mode")} />
         </div>
-        <h2 className="pt-8 pb-3 font-bold text-[20px] text-primary leading-6">
+        <h2 className="px-4 pt-8 pb-[19px] font-bold text-[20px] text-primary leading-6">
           Looking for something else?
         </h2>
-        <div className="flex flex-col gap-4 pb-6">
+        <div className="flex flex-col gap-4 px-4 pb-6">
           <WideRow
             art={<PrivacyCenterArt />}
             title="Privacy Center"
@@ -491,10 +489,12 @@ function Tile({
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[282px] flex-col rounded-xl bg-wash px-4 pt-6 text-left transition-[filter] hover:brightness-[0.97] dark:hover:brightness-125"
+      className="flex h-[282px] flex-col rounded-xl bg-wash px-4 pt-[31px] text-left transition-[filter] hover:brightness-[0.97] dark:hover:brightness-125"
     >
       <span className="mx-auto">{art}</span>
-      <span className="mt-12 block font-semibold text-[17px] text-primary leading-5">{title}</span>
+      <span className="mt-[35px] block font-semibold text-[17px] text-primary leading-5">
+        {title}
+      </span>
       {body && <span className="mt-1 block text-[15px] text-secondary leading-5">{body}</span>}
     </button>
   );

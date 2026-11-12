@@ -41,6 +41,8 @@ export function ChatDock() {
 
   // The Messenger page replaces the dock.
   if (path.startsWith("/messages")) return null;
+  // Facebook drops the floating "New message" button on Reels and the listing composer.
+  const showCompose = !path.startsWith("/reel") && !path.startsWith("/marketplace/create");
 
   const slots: ({ kind: "composer" } | { kind: "chat"; id: Id<"conversations"> })[] = [
     ...(dock.composerOpen ? [{ kind: "composer" as const }] : []),
@@ -65,16 +67,18 @@ export function ChatDock() {
         ))}
       </div>
       <div className="fixed right-4 bottom-4 z-30 flex flex-col-reverse items-center gap-2.5">
-        <Tooltip content="New message" side="left">
-          <button
-            type="button"
-            aria-label="New message"
-            onClick={() => dock.setComposerOpen(true)}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-btn-floating text-icon shadow-[0_2px_4px_var(--shadow-1),0_12px_28px_var(--shadow-2)] transition-[filter] hover:brightness-95 dark:hover:brightness-125"
-          >
-            <ComposeIcon size={20} />
-          </button>
-        </Tooltip>
+        {showCompose && (
+          <Tooltip content="New message" side="left">
+            <button
+              type="button"
+              aria-label="New message"
+              onClick={() => dock.setComposerOpen(true)}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-btn-floating text-icon shadow-[0_2px_4px_var(--shadow-1),0_12px_28px_var(--shadow-2)] transition-[filter] hover:brightness-95 dark:hover:brightness-125"
+            >
+              <ComposeIcon size={20} />
+            </button>
+          </Tooltip>
+        )}
         {dock.minimized.map((id) => (
           <Bubble key={id} id={id} />
         ))}
