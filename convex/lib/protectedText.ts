@@ -132,6 +132,95 @@ const DEMONYMS = [
   "yemeni",
 ];
 
+const COUNTRIES = [
+  "afghanistan",
+  "africa",
+  "argentina",
+  "armenia",
+  "asia",
+  "australia",
+  "bangladesh",
+  "brazil",
+  "burma",
+  "cambodia",
+  "canada",
+  "central america",
+  "chile",
+  "china",
+  "colombia",
+  "cuba",
+  "dominican republic",
+  "ecuador",
+  "egypt",
+  "el salvador",
+  "england",
+  "eritrea",
+  "ethiopia",
+  "europe",
+  "france",
+  "germany",
+  "ghana",
+  "greece",
+  "guatemala",
+  "haiti",
+  "honduras",
+  "hong kong",
+  "india",
+  "indonesia",
+  "iran",
+  "iraq",
+  "ireland",
+  "israel",
+  "italy",
+  "jamaica",
+  "japan",
+  "kenya",
+  "korea",
+  "laos",
+  "latin america",
+  "lebanon",
+  "malaysia",
+  "mexico",
+  "middle east",
+  "mongolia",
+  "morocco",
+  "myanmar",
+  "nepal",
+  "netherlands",
+  "new zealand",
+  "nicaragua",
+  "nigeria",
+  "norway",
+  "pakistan",
+  "palestine",
+  "peru",
+  "philippines",
+  "poland",
+  "portugal",
+  "puerto rico",
+  "romania",
+  "russia",
+  "saudi arabia",
+  "scotland",
+  "singapore",
+  "somalia",
+  "south america",
+  "spain",
+  "sri lanka",
+  "sudan",
+  "sweden",
+  "syria",
+  "taiwan",
+  "thailand",
+  "the caribbean",
+  "tibet",
+  "turkey",
+  "uganda",
+  "ukraine",
+  "venezuela",
+  "vietnam",
+];
+
 /** Words that state a protected trait wherever they appear. */
 const TERMS: string[] = [
   // Age
@@ -158,6 +247,8 @@ const TERMS: string[] = [
   "ethnicity|ethnic|racial|my race|nationality|citizenship|immigrants?|immigrated|refugees?|undocumented|green card",
   "h-?1b|(?:work|student) visa|on an? (?:\\w+ )?visa|visa status",
   "people of colou?r|poc|bipoc",
+  // Countries and regions someone may come from (not "Russian Hill" or "Chinatown").
+  `(?:${COUNTRIES.join("|")})`,
   // Gender and orientation
   "wom[ae]n|females?|males?|girls?|boys?|lad(?:y|ies)|gentlem[ae]n|gals?|guys?|dudes?",
   "non[\\s-]?binary|enby|trans(?:gender|man|woman)?|cis(?:gender)?|genderqueer|genderfluid|gender",
@@ -166,7 +257,11 @@ const TERMS: string[] = [
   // Disability and health
   "disabled|disabilit(?:y|ies)|handicapped|wheelchair|deaf|blind|hard of hearing|visually impaired",
   "autis(?:tic|m)|adhd|dyslexi[ac]|bipolar|schizophreni[ac]|depress(?:ed|ion)|anxiety|ptsd|ocd",
-  "chronic(?: illness| pain| fatigue)?|diabet(?:ic|es)|cancer|hiv|epilep(?:sy|tic)|asthma|celiac",
+  "chronic(?: illness| pain| fatigue)?|diabet(?:ic|es)|cancer|hiv|aids|epilep(?:sy|tic)|asthma|celiac",
+  "(?:multiple )?sclerosis|lupus|crohn['’]?s|arthritis|migraines?|seizures?|dementia|alzheimer['’]?s|parkinson['’]?s",
+  "hepatitis|cerebral palsy|down syndrome|disease|disorder|syndrome|(?:medical|health|heart|chronic) condition",
+  "neurodivergent|neurodiverse|hearing aids?|cochlear|prosthe\\w+|amputee|paraly[sz]ed|service (?:dog|animal)|guide dog",
+  "mobility (?:issues?|aid|scooter)|cane",
   "sober|sobriety|in recovery|addict(?:ed|ion)?|alcoholic|mental health|therap(?:y|ist)|medications?",
   "immunocompromised|illness|chronically ill|surgery|injur(?:y|ed)|pregnan(?:t|cy)",
   "expecting (?:a baby|a child|twins|our first|my first)",
@@ -181,6 +276,32 @@ const TERMS: string[] = [
   "democrats?|republicans?|conservative|liberal|progressive|libertarian|socialist|maga",
 ];
 
+/**
+ * Phrases that disclose a protected trait whatever words follow ("I was born
+ * in …", "I have lupus", "my family is from …"). The cue and the rest of its
+ * clause are removed, so no word list has to know every country or condition.
+ */
+const CLAUSE_END =
+  "[^,;:.!?()\\n]*?(?=\\s*(?:[,;:.!?()\\n]|$|\\b(?:and|but|so|who|which|while|where|because|though|although|plus)\\b))";
+const DISCLOSURE_CUES = [
+  // Origin and identity
+  "born\\b",
+  "raised (?:in|by)\\b",
+  "grew up\\b",
+  "(?:i['’]?m|i am|we['’]?re|we are|originally|(?:my|our) (?:family|parents|folks)(?: (?:is|are|was|were|came))?|came here|came over|moved here|immigrated|emigrated) from\\b",
+  "(?:citizen|native|national) of\\b",
+  "(?:my |our )?(?:heritage|descent|ancestry|ancestors|roots)\\b",
+  "(?:first|second|third)[\\s-]gen(?:eration)?\\b",
+  "identify as\\b",
+  "(?:native|first|mother) (?:language|tongue)\\b",
+  "(?:grew up )?speak(?:s|ing)? \\w+ at home",
+  // Health
+  "(?:diagnosed with|living with|suffer(?:s|ing)? from|struggl(?:e|es|ing) with|recovering from|(?:being )?treated for|in treatment for|on (?:meds|medication) for)\\b",
+  // "I have lupus", not "I have a car", "I have two cats" or "I have always loved hiking".
+  "(?:i|we) (?:have|['’]ve got|['’]ve had|had|got) (?!(?:a|an|the|my|our|no|some|any|two|three|four|five|\\d+|lots|plenty|been|to|always|never|just|also|really|still|already|recently|only|ever|time|fun|friends|roommates|experience|pets?|cats?|dogs?|bikes?|plans?|money|savings|enough|\\w+ed)\\b)",
+];
+const DISCLOSURE = new RegExp(`\\b(?:${DISCLOSURE_CUES.join("|")})${CLAUSE_END}`, "gi");
+
 /** "I'm black", "a white woman": color words only when they describe a person. */
 const CONTEXTUAL =
   "(?:(?:i['’]?m|i am|as an?|being)\\s+(?:an?\\s+)?(?:black|white|brown)\\b)|(?:\\b(?:black|white|brown)\\s+(?=(?:wom[ae]n|m[ae]n|person|people|folks?|family|community)\\b))|\\bm[ae]n\\b";
@@ -189,13 +310,17 @@ const PROTECTED = new RegExp(`(?:\\b(?:${TERMS.join("|")})\\b)|${CONTEXTUAL}`, "
 
 /** "I'm a", "as a", "my" just before a removed trait go with it. */
 const LEAD_IN =
-  /\b(?:i['’]?m|i am|we['’]?re|we are|as|being|my|our)\s+(?:(?:an?|the|one|of)\s+)*(?=\[removed\])/gi;
+  /\b(?:i['’]?m|i am|i was|i|we['’]?re|we are|we were|we|as|being|my|our)\s+(?:(?:an?|the|one|of)\s+)*(?=\[removed\])/gi;
 /** Removed words next to each other ("a 30-year-old Muslim woman") collapse into one. */
 const RUNS = /\[removed\](?:[\s,/-]+(?:(?:and|or|&|an?)\s+)*\[removed\])+/gi;
 
 /** The text with every protected-trait statement replaced by `REDACTED`. */
 export function redactProtected(text: string): string {
-  return text.replace(PROTECTED, REDACTED).replace(LEAD_IN, "").replace(RUNS, REDACTED);
+  return text
+    .replace(DISCLOSURE, REDACTED)
+    .replace(PROTECTED, REDACTED)
+    .replace(LEAD_IN, "")
+    .replace(RUNS, REDACTED);
 }
 
 /** Whether `text` says anything about a protected trait (or still carries a redaction). */

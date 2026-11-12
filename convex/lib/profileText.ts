@@ -55,10 +55,10 @@ type Part = { text: string; negated: [number, number][] };
 type Hit = { part: Part; start: number; end: number };
 
 const NEGATION =
-  /\b(?:don['’]?t|do not|doesn['’]?t|does not|didn['’]?t|did not|never|not|no longer|no|nor|neither|hate[sd]?|dislike[sd]?|can['’]?t stand|avoid(?:s|ing)?|isn['’]?t|aren['’]?t|wasn['’]?t|won['’]?t|wouldn['’]?t|without|quit|stopped|gave up)\b/gi;
+  /\b(?:don['’]?t|do not|doesn['’]?t|does not|didn['’]?t|did not|never|not|no longer|no|nor|neither|hate[sd]?|dislike[sd]?|can(?:not|['’]?t) stand|avoid(?:s|ing)?|isn['’]?t|aren['’]?t|wasn['’]?t|won['’]?t|wouldn['’]?t|without|quit|stopped|gave up)\b/gi;
 /** Where a negation stops: a contrast, a new clause about the person, or punctuation. */
 const NEGATION_END =
-  /\b(?:but|though|although|however|except|yet|whereas|while|instead|so|because)\b|[;:—–()]|(?:,|\band)\s+(?=(?:i|we)\b)/i;
+  /\b(?:but|though|although|however|except|yet|whereas|while|instead|so|because)\b|[;:—–]|(?:,|\band)\s+(?=(?:i|we)\b)/i;
 
 /**
  * The spans of `text` a negation covers, from the end of the negating word to
@@ -113,18 +113,30 @@ function firstHit(parts: Part[], re: RegExp, negatable = true): Hit | null {
 
 const QUOTE_MAX = 120;
 const LEADING_FILLER = /^(?:[\s,.;:–—-]|\b(?:and|or|but|who|that|which|also|so)\b)+/i;
+/** Where one phrase ends and the next starts: a redaction, punctuation or a joining word. */
+const PHRASE_BREAK = new RegExp(
+  `${REDACTED.replace(/[[\]]/g, "\\$&")}|[,;:()]|\\b(?:and|but|or|so|who|which|while|because|though|although|plus)\\b`,
+  "gi",
+);
 
 /**
- * The words around a match, as the quote for a proposal: the stretch of its
- * clause between redactions (so never a removed protected trait), without
- * leading filler, at most about `QUOTE_MAX` characters, copied exactly.
+ * The words around a match, as the quote for a proposal: just the phrase that
+ * contains it ("love hiking", not the rest of the sentence), so a quote never
+ * carries anything else the person said, at most about `QUOTE_MAX`
+ * characters, copied exactly.
  */
 function quoteOf({ part, start, end }: Hit): string {
   const t = part.text;
-  const before = t.lastIndexOf(REDACTED, start);
-  let from = before === -1 ? 0 : before + REDACTED.length;
-  const after = t.indexOf(REDACTED, end);
-  let to = after === -1 ? t.length : after;
+  let from = 0;
+  let to = t.length;
+  for (const m of t.matchAll(PHRASE_BREAK)) {
+    const mEnd = m.index + m[0].length;
+    if (mEnd <= start) from = mEnd;
+    else if (m.index >= end) {
+      to = m.index;
+      break;
+    }
+  }
   if (to - from > QUOTE_MAX) {
     // A window around the match, widened to whole words.
     from = Math.max(from, start - 50);
@@ -391,7 +403,10 @@ function scheduleFrom(parts: Part[]): ProposedFact | null {
   const hit = hours?.hit ?? place?.hit;
   if (!hit) return null;
   const workHours = hours?.hours ?? "day";
-  const weekendsFree = firstHit(parts, WORKS_WEEKENDS) === null;
+  // "Work remote, not weekends": the weekend word itself mustn't be negated either.
+  const weekendsFree = !hits(parts, WORKS_WEEKENDS).some(
+    (h) => !isNegated(h.part, h.start + h.part.text.slice(h.start, h.end).search(/weekend/i)),
+  );
   const entry: FactEntry = {
     key: "schedule",
     value: place

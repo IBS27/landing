@@ -61,6 +61,34 @@ describe("protected traits", () => {
     for (const p of out) expect(hasProtected(p.quote)).toBe(false);
   });
 
+  test("disclosures are removed whatever country or condition they name", () => {
+    const R = REDACTED;
+    for (const [text, redacted, quote] of [
+      ["I was born in Mexico and love hiking.", `${R} and love hiking.`, "love hiking."],
+      ["I have multiple sclerosis and like coffee.", `${R} and like coffee.`, "like coffee."],
+      ["I have lupus, love climbing", `${R}, love climbing`, "love climbing"],
+      ["My family is from Lagos and I love trivia.", `${R} and I love trivia.`, "I love trivia."],
+      ["Originally from Oaxaca, I love surfing.", `${R}, I love surfing.`, "I love surfing."],
+      ["I identify as nonbinary and love trivia.", `${R} and love trivia.`, "love trivia."],
+    ]) {
+      expect(profileInput(text).text).toBe(redacted);
+      const out = facts(text);
+      expect(out.map((p) => p.quote)).toEqual([quote]);
+      // The whole sentence is never an acceptable quote.
+      expect(modelProblems(text, [{ entry: out[0].entry, quote: text }])).not.toEqual([]);
+    }
+  });
+
+  test("ordinary plans and belongings aren't disclosures", () => {
+    for (const text of [
+      "I have a car and two cats.",
+      "I have always loved hiking.",
+      "Moving from Chicago in March, budget $2k.",
+      "Living in Chinatown, near Russian Hill.",
+    ])
+      expect(redactProtected(text)).toBe(text);
+  });
+
   test("an identity statement proposes nothing", () => {
     expect(facts(HINDU)).toEqual([]);
     expect(facts("As a gay Black woman and a mom, I want to meet people.")).toEqual([
@@ -238,16 +266,40 @@ describe("evidence after an edit", () => {
       proposal({ key: "employer", value: { name: "Figma" } }, "at Figma"),
       proposal({ key: "transport", value: { modes: ["bart"] } }, "BART"),
     ]);
+    // "BART" backs [bart], not [bike, bart] once merged into what was ticked.
+    expect(liveQuote(form, "transport")).toBeNull();
+    const fresh = applyProposals({ ...base, transport: [] }, [
+      proposal({ key: "transport", value: { modes: ["bart", "bike"] } }, "BART"),
+    ]);
     expect(liveQuote(form, "moveIn")).toBe("April");
     expect(liveQuote({ ...form, moveInMonth: "2027-05" }, "moveIn")).toBeNull();
     expect(liveQuote({ ...form, weekendsFree: false }, "schedule")).toBeNull();
     expect(liveQuote({ ...form, employer: "Stripe" }, "employer")).toBeNull();
-    expect(liveQuote(form, "transport")).toBe("BART");
+    expect(liveQuote(fresh, "transport")).toBe("BART");
     // Modes are a set: order doesn't matter, but adding one does.
-    expect(liveQuote({ ...form, transport: [...form.transport].reverse() }, "transport")).toBe(
+    expect(liveQuote({ ...fresh, transport: [...fresh.transport].reverse() }, "transport")).toBe(
       "BART",
     );
-    expect(liveQuote({ ...form, transport: [...form.transport, "walk"] }, "transport")).toBeNull();
+    expect(
+      liveQuote({ ...fresh, transport: [...fresh.transport, "walk"] }, "transport"),
+    ).toBeNull();
+  });
+
+  test("a new employer doesn't inherit the old work area or its evidence", () => {
+    const old: BriefForm = { ...base, employer: "Figma", workArea: "SoMa" };
+    const form = applyProposals(old, [
+      proposal({ key: "employer", value: { name: "Google" } }, "I work at Google"),
+    ]);
+    expect([form.employer, form.workArea]).toEqual(["Google", ""]);
+    expect(liveQuote(form, "employer")).toBe("I work at Google");
+    expect(toSaveArgs(form).brief.employer).toEqual({ name: "Google" });
+  });
+
+  test("a merged schedule keeps the quote only if it's what was proposed", () => {
+    const form = applyProposals({ ...base, workplace: "hybrid" }, [
+      proposal({ key: "schedule", value: { workHours: "night", weekendsFree: true } }, "nights"),
+    ]);
+    expect(liveQuote(form, "schedule")).toBeNull();
   });
 
   test("a removed interest takes its quote with it", () => {
@@ -288,6 +340,8 @@ describe("negations", () => {
     expect(labels("I don't like climbing, but I love hiking.")).toEqual(["interest:Hiking"]);
     expect(labels("Not into the Tenderloin, love Hayes Valley")).toEqual([]);
     expect(labels("I never drink coffee. I love climbing.")).toEqual(["interest:Climbing"]);
+    expect(facts("I do not like (climbing or coffee).")).toEqual([]);
+    expect(facts("I cannot stand climbing.")).toEqual([]);
   });
 
   test("negation phrases that are the fact itself still count", () => {
@@ -298,6 +352,12 @@ describe("negations", () => {
     expect(labels("I work nights and don't work weekends.")).toEqual([
       "schedule:Works nights · weekends free",
     ]);
+    expect(labels("I work remote, not weekends.")).toEqual([
+      "schedule:Works daytime · remote · weekends free",
+    ]);
+    expect(labels("I work remote and work weekends.")).toEqual([
+      "schedule:Works daytime · remote · works some weekends",
+    ]);
   });
 
   test("the model check rejects a negated interest quote", () => {
@@ -307,6 +367,8 @@ describe("negations", () => {
       [],
     );
     expect(modelProblems(text, [{ entry: climbing, quote: "climbing" }])).not.toEqual([]);
+    for (const negated of ["I do not like (climbing or coffee).", "I cannot stand climbing."])
+      expect(modelProblems(negated, [{ entry: climbing, quote: "climbing" }])).not.toEqual([]);
     const mixed = "I don't like coffee, but I love climbing.";
     expect(modelProblems(mixed, [{ entry: climbing, quote: "climbing" }])).toEqual([]);
   });

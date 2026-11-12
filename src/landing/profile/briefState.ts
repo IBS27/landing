@@ -234,7 +234,8 @@ export function applyProposals(f: BriefForm, picked: Proposal[]): BriefForm {
         };
         break;
       case "employer":
-        next = { ...next, employer: e.value.name, workArea: e.value.workArea ?? next.workArea };
+        // A new employer's work area is whatever the proposal says, not the old one's.
+        next = { ...next, employer: e.value.name, workArea: e.value.workArea ?? "" };
         break;
       case "interest":
         next = { ...next, interests: add(next.interests, e.value.id) };
@@ -243,11 +244,21 @@ export function applyProposals(f: BriefForm, picked: Proposal[]): BriefForm {
         next = { ...next, goals: add(next.goals, e.value.id) };
         break;
     }
+    // The quote backs the proposed value only. If merging made the form's value
+    // something else (modes added to ones already ticked), it backs nothing.
     const slot = factSlot(e);
-    const value = briefEntries(next).find((x) => factSlot(x) === slot)?.value;
-    if (value !== undefined) next.quotes[slot] = { quote: p.quote, value: valueKey(value) };
+    const merged = briefEntries(next).find((x) => factSlot(x) === slot)?.value;
+    if (merged !== undefined && valueKey(merged) === valueKey(proposedValue(e, p.carFree)))
+      next.quotes[slot] = { quote: p.quote, value: valueKey(merged) };
+    else delete next.quotes[slot];
   }
   return next;
+}
+
+/** A proposal's value as the form stores it (a car-free proposal never has a car). */
+function proposedValue(e: FactEntry, carFree?: boolean): unknown {
+  if (e.key === "transport" && carFree) return { modes: e.value.modes.filter((m) => m !== "car") };
+  return e.value;
 }
 
 export function toggle<T>(list: T[], item: T): T[] {
