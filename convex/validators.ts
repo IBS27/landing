@@ -275,3 +275,28 @@ export const aiRun = v.object({
   jobId: v.optional(v.id("aiJobs")),
   createdAt: v.number(),
 });
+
+/**
+ * A citation source: a reference to a real record, never free text. Snippets,
+ * counts and ages are read from the record when it's shown (see
+ * `convex/lib/citations.ts`), so they stay current and can't be invented.
+ * A `post` source also covers Group threads (a Group post and its comments).
+ */
+export const source = v.union(
+  v.object({ kind: v.literal("post"), postId: v.id("posts") }),
+  v.object({ kind: v.literal("comment"), commentId: v.id("comments") }),
+  v.object({ kind: v.literal("event"), eventId: v.id("events") }),
+  v.object({ kind: v.literal("listing"), listingId: v.id("listings") }),
+  v.object({ kind: v.literal("group"), groupId: v.id("groups") }),
+  v.object({ kind: v.literal("external"), externalSourceId: v.id("externalSources") }),
+);
+export type Source = Infer<typeof source>;
+
+/**
+ * The sources behind a score, recommendation or proposal. The `{ first, rest }`
+ * shape means a value can't be stored without at least one source: TypeScript
+ * rejects it at the insert, and schema validation rejects it at runtime.
+ * Build it with `cite()` / `tryCite()` from `convex/lib/citations.ts`.
+ */
+export const citations = v.object({ first: source, rest: v.array(source) });
+export type Citations = Infer<typeof citations>;

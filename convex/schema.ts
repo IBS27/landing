@@ -524,6 +524,19 @@ export default defineSchema({
     .index("by_user_unseen", ["userId", "seen"])
     .index("by_post", ["postId"]),
 
+  /**
+   * Citations: an external page (DataSF, SFMTA...) as fetched at `fetchedAt`.
+   * Insert-only, so a score keeps citing the snapshot it was built from.
+   */
+  externalSources: defineTable({
+    url: v.string(),
+    title: v.string(),
+    /** Who published it: "DataSF", "SFMTA". */
+    publisher: v.string(),
+    snippet: v.string(),
+    fetchedAt: v.number(),
+  }).index("by_url", ["url", "fetchedAt"]),
+
   /** Settings & privacy choices, one row per user. Missing fields mean Facebook's defaults. */
   userSettings: defineTable({
     userId: v.id("users"),
