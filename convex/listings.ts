@@ -793,7 +793,8 @@ export const update = viewerMutation({
       video: listingVideo(args.video),
       location,
       neighborhoodId: await neighborhoodIdAt(ctx, locationPoint(location)),
-      rental: args.rental,
+      // The listing form has no views picker yet (#13), so keep the lister's stated views.
+      rental: args.rental && { ...args.rental, views: args.rental.views ?? l.rental?.views },
       vehicle: args.vehicle,
       meetup: args.meetup,
       groupIds: args.groupIds?.length ? args.groupIds : undefined,
