@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
+import type { MutationCtx } from "../convex/_generated/server";
+import * as events from "../convex/events";
+import * as groups from "../convex/groups";
 import {
   decodePolyline,
   distanceMeters,
@@ -15,6 +18,7 @@ import {
 import { BOUNDARIES, BOUNDARY_SOURCE } from "../convex/lib/neighborhoodBoundaries";
 import {
   isNeighborhoodSlug,
+  neighborhoodIdAt,
   neighborhoodShape,
   neighborhoodShapes,
   neighborhoodSlugAt,
@@ -27,6 +31,7 @@ import { neighborhoodGroups } from "../convex/seed/world/neighborhoods/groups";
 import { NEIGHBORHOOD_PLACES } from "../convex/seed/world/neighborhoods/places";
 import { people } from "../convex/seed/world/people";
 import { neighborhoodPosts } from "../convex/seed/world/posts/neighborhoods";
+import { fakeCtx, type Row } from "./fakeDb";
 
 const NOW = Date.UTC(2026, 10, 12, 20, 0, 0);
 const plan = buildPlan(NOW);
@@ -178,6 +183,85 @@ describe("neighborhood boundaries", () => {
   test("garbage coordinates don't match", () => {
     expect(neighborhoodSlugAt({ lat: Number.NaN, lng: -122.4 })).toBeNull();
     expect(neighborhoodSlugAt({ lat: 0, lng: 0 })).toBeNull();
+  });
+});
+
+/* ---------- Assignment ---------- */
+
+describe("neighborhoodId assignment", () => {
+  const VALENCIA = { lat: 37.7617, lng: -122.4216 };
+  const IRVING = { lat: 37.76405, lng: -122.46633 };
+  const BERKELEY = { lat: 37.8719, lng: -122.2585 };
+  type Handler = (ctx: MutationCtx, args: Record<string, unknown>) => Promise<unknown>;
+  const call = (fn: unknown, ctx: MutationCtx, args: Record<string, unknown>) =>
+    (fn as { _handler: Handler })._handler(ctx, { viewerId: "users:v", ...args });
+  const world = () => {
+    const tables: Record<string, Row[]> = {
+      users: [{ _id: "users:v", city: "San Francisco, CA" }],
+      neighborhoods: SF_NEIGHBORHOODS.map((n) => ({
+        _id: `neighborhoods:${n.slug}`,
+        slug: n.slug,
+      })),
+      events: [],
+      eventResponses: [],
+      groups: [],
+      groupMembers: [],
+    };
+    return { tables, ctx: fakeCtx(tables) };
+  };
+  const event = {
+    title: "Trivia",
+    description: "",
+    category: "Games",
+    startAt: 1,
+    privacy: "public",
+  };
+
+  test("neighborhoodIdAt looks up the row for the point's neighborhood", async () => {
+    const { ctx } = world();
+    expect(await neighborhoodIdAt(ctx, VALENCIA)).toBe("neighborhoods:mission" as never);
+    expect(await neighborhoodIdAt(ctx, BERKELEY)).toBeUndefined();
+    expect(await neighborhoodIdAt(ctx, undefined)).toBeUndefined();
+  });
+
+  test("events: set on create, kept, moved or cleared on update", async () => {
+    const { tables, ctx } = world();
+    const id = await call(events.create, ctx, {
+      ...event,
+      online: false,
+      venue: "Zeitgeist",
+      point: VALENCIA,
+    });
+    const row = () => tables.events.find((e) => e._id === id);
+    expect(row()?.neighborhoodId).toBe("neighborhoods:mission");
+    const update = (a: Record<string, unknown>) =>
+      call(events.update, ctx, { ...event, eventId: id, online: false, venue: "Zeitgeist", ...a });
+    await update({});
+    expect(row()?.neighborhoodId).toBe("neighborhoods:mission");
+    await update({ point: IRVING });
+    expect(row()?.neighborhoodId).toBe("neighborhoods:inner-sunset");
+    await update({ venue: "Somewhere else" });
+    expect([row()?.point, row()?.neighborhoodId]).toEqual([undefined, undefined]);
+    await update({ point: VALENCIA });
+    await update({ point: null });
+    expect([row()?.point, row()?.neighborhoodId]).toEqual([undefined, undefined]);
+    await update({ point: VALENCIA, online: true });
+    expect([row()?.point, row()?.neighborhoodId]).toEqual([undefined, undefined]);
+    const online = await call(events.create, ctx, { ...event, online: true, point: VALENCIA });
+    expect(tables.events.find((e) => e._id === online)?.neighborhoodId).toBeUndefined();
+  });
+
+  test("groups: set from the point on create", async () => {
+    const { tables, ctx } = world();
+    const based = await call(groups.create, ctx, {
+      name: "Irving St",
+      privacy: "public",
+      point: IRVING,
+    });
+    const none = await call(groups.create, ctx, { name: "Anywhere", privacy: "public" });
+    const nb = (r: unknown) =>
+      tables.groups.find((g) => g._id === (r as { groupId: string }).groupId)?.neighborhoodId;
+    expect([nb(based), nb(none)]).toEqual(["neighborhoods:inner-sunset", undefined]);
   });
 });
 
