@@ -47,6 +47,7 @@ export function sourceText(source: FactSource, evidence: FactEvidence): string {
   if (evidence.kind === "free_text") return "From your words";
   if (evidence.kind === "edit") return "You confirmed";
   if (evidence.kind === "place") return "Your place";
+  if (evidence.kind === "chat") return "From chat";
   return "You said";
 }
 

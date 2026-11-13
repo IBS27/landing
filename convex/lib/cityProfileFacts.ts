@@ -267,9 +267,10 @@ export const factEvidence = v.object({
    * brief: the onboarding form · free_text: the "Tell us about you" box ·
    * activity: inferred from RSVPs, joins, likes, skips and pins (#4) ·
    * edit: an inferred fact the person kept on "What Muse knows about you" (#5) ·
-   * place: kept in sync with the place they set on My Place (convex/myPlace.ts).
+   * place: kept in sync with the place they set on My Place (convex/myPlace.ts) ·
+   * chat: the move plan they told Muse in Landing Home's chat (convex/homeChat.ts, #150).
    */
-  kind: literals("brief", "free_text", "activity", "edit", "place"),
+  kind: literals("brief", "free_text", "activity", "edit", "place", "chat"),
   /** Shown to the person: "You said so in your brief", "RSVP'd to 3 climbing events". */
   summary: v.string(),
   /** free_text: the person's own words this fact came from. */

@@ -360,6 +360,54 @@ export async function syncStatedFact(
   return id;
 }
 
+/**
+ * Records what the person just told Landing (Home's chat, #150): it becomes
+ * their stated fact for that slot.
+ * - It replaces the value they stated before (the brief, their own words) and
+ *   one that was inferred: their newest statement wins.
+ * - It undoes a removal (#5): saying it again is a new statement. They can
+ *   remove it again on "What Muse knows about you".
+ * - A row kept in step with their place (`syncStatedFact`) isn't touched.
+ * Returns false when the profile already says so (nothing is written).
+ */
+export async function restateFact(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  entry: FactEntry,
+  evidence: FactEvidence,
+): Promise<boolean> {
+  const slot = factSlot(entry);
+  const [row, ...extra] = (await rowsFor(ctx, userId, entry.key)).filter(
+    (r) => factSlot(r) === slot && r.evidence.kind !== "place",
+  );
+  for (const r of extra) await ctx.db.delete(r._id);
+  const now = Date.now();
+  if (!row) {
+    await ctx.db.insert("cityProfileFacts", {
+      userId,
+      ...entry,
+      source: "stated",
+      evidence,
+      confidence: 1,
+      updatedAt: now,
+    });
+    await touchProfile(ctx, userId);
+    return true;
+  }
+  if (row.source === "stated" && row.removedAt === undefined && sameValue(row.value, entry.value))
+    return false;
+  await ctx.db.patch(row._id, {
+    value: entry.value,
+    source: "stated",
+    evidence,
+    confidence: 1,
+    updatedAt: now,
+    removedAt: undefined,
+  } as Partial<FactDoc>);
+  await touchProfile(ctx, userId);
+  return true;
+}
+
 /** Removes a fact for good (#5): it disappears from the profile and isn't inferred again. */
 export async function removeFact(
   ctx: MutationCtx,

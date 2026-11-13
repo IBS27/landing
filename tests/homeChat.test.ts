@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { type FunctionReference, getFunctionName } from "convex/server";
-import type { ActionCtx } from "../convex/_generated/server";
+import type { ActionCtx, MutationCtx } from "../convex/_generated/server";
 import { MODEL } from "../convex/ai/model";
 import { agentSources } from "../convex/ai/sources";
 import {
@@ -12,9 +12,14 @@ import {
   homeChatProblems,
   homeChatTask,
   rulesOutput,
+  saveStatedPlan,
   toReply,
 } from "../convex/homeChat";
-import { CHAT_RECENT_MAX } from "../convex/lib/homeChatRules";
+import { getProfile, removeFact } from "../convex/lib/cityProfile";
+import { todayInSF } from "../convex/lib/cityProfileFacts";
+import { CHAT_RECENT_MAX, type ChatRentalCard } from "../convex/lib/homeChatRules";
+import { type MovePlan, NO_PLAN } from "../convex/lib/movePlan";
+import { manualScene } from "../convex/lib/unitScene";
 import { fakeCtx, type Row } from "./fakeDb";
 
 /* ---------- A stubbed Meta Model API: replies are queued, requests recorded ---------- */
@@ -173,8 +178,9 @@ function actionCtx(tables: Record<string, Row[]>) {
       }
       throw new Error(`Unexpected query ${getFunctionName(ref)}`);
     },
-    runMutation: async (ref: Ref, args: Record<string, unknown>) => {
-      // The chat's only write is runAgent's run log.
+    runMutation: async (ref: Ref, args: Record<string, never>) => {
+      // The chat's only writes: the plan the person stated, and runAgent's run log.
+      if (getFunctionName(ref) === "homeChat:savePlan") return saveStatedPlan(db, args);
       expect(getFunctionName(ref)).toBe("ai/runs:log");
       const _id = `run${runs.length}`;
       runs.push({ _id, ...args });
@@ -184,7 +190,11 @@ function actionCtx(tables: Record<string, Row[]>) {
   return { ctx: ctx as unknown as ActionCtx, runs };
 }
 
-const ask = (message: string, tables = world(), extra: { neighborhood?: string } = {}) => {
+const ask = (
+  message: string,
+  tables = world(),
+  extra: { neighborhood?: string; view?: "map" | "apartment" } = {},
+) => {
   const { ctx, runs } = actionCtx(tables);
   return answer(ctx, {
     viewerId: "V" as never,
@@ -194,7 +204,42 @@ const ask = (message: string, tables = world(), extra: { neighborhood?: string }
 };
 
 const muse = (out: Partial<HomeChatOutput> & Pick<HomeChatOutput, "command">) =>
-  JSON.stringify({ text: "Here you go.", sourceIds: [], ...out });
+  JSON.stringify({ text: "Here you go.", sourceIds: [], plan: NO_PLAN, ...out });
+
+/** V took `lCheap` as their place; `scene` is its 3D model, if built. */
+function withPlace(tables: Record<string, Row[]>, scene?: "starter" | "built") {
+  tables.places = [
+    {
+      _id: "p1",
+      userId: "V",
+      listingId: "lCheap",
+      neighborhoodId: "neighborhoods:mission",
+      moveIn: "2027-01-10",
+      status: "moving_in",
+      createdAt: NOW,
+      updatedAt: NOW,
+    },
+  ];
+  if (scene)
+    tables.unitScenes = [
+      {
+        _id: "u1",
+        ownerId: "V",
+        listingId: "lCheap",
+        scene: scene === "starter" ? manualScene(4, 5, "Unit") : manualScene(6, 7, "Unit"),
+        placements: scene === "starter" ? [] : [{ id: "a" }, { id: "b" }],
+        sources: [],
+        description: "",
+        revision: 1,
+        createdAt: NOW,
+        updatedAt: NOW,
+      },
+    ];
+  return tables;
+}
+
+const facts = (tables: Record<string, Row[]>, key: string) =>
+  tables.cityProfileFacts.filter((f) => f.key === key && f.removedAt === undefined);
 
 /* ---------- Context ---------- */
 
@@ -224,7 +269,9 @@ describe("homeChatContext", () => {
     });
     expect(c.links["event:ePublic"].href).toBe("/events/ePublic");
     // An unknown slug from the client is dropped.
-    expect(c.input.map).toEqual({ stage: "hood", neighborhood: null });
+    expect(c.input.map).toEqual({ stage: "hood", neighborhood: null, view: "map" });
+    expect(c.input.today).toBe(todayInSF());
+    expect(c.input.you.apartment).toBeNull();
     expect(c.input.you.budget).toEqual({ min: null, max: 2000 });
     expect(c.input.you.crew).toEqual({ joined: false, members: 0, neighborhoods: [] });
     const json = JSON.stringify(c.input);
@@ -247,6 +294,83 @@ describe("homeChatContext", () => {
     expect(c.input.protectedRemoved).toBe(true);
     expect(c.input.recent).toHaveLength(CHAT_RECENT_MAX);
     expect(c.input.recent.at(-1)?.text).not.toMatch(/gay/i);
+  });
+
+  test("the apartment: no place, a place without a model, a starter scene, a built one", async () => {
+    const read = async (tables: Record<string, Row[]>) =>
+      (
+        await homeChatContext(fakeCtx(tables), {
+          viewerId: "V" as never,
+          message: "furnish it",
+          context: { stage: "city", view: "apartment" },
+          recent: [],
+        })
+      ).input;
+    expect((await read(world())).you.apartment).toBeNull();
+    expect((await read(withPlace(world()))).you.apartment).toEqual({
+      hasModel: false,
+      ready: false,
+      items: 0,
+    });
+    expect((await read(withPlace(world(), "starter"))).you.apartment).toEqual({
+      hasModel: true,
+      ready: false,
+      items: 0,
+    });
+    const built = await read(withPlace(world(), "built"));
+    expect(built.you.apartment).toEqual({ hasModel: true, ready: true, items: 2 });
+    expect(built.map.view).toBe("apartment");
+    // Someone else's model of the same listing is not the viewer's.
+    const theirs = withPlace(world(), "built");
+    theirs.unitScenes[0].ownerId = "S";
+    expect((await read(theirs)).you.apartment?.hasModel).toBe(false);
+  });
+
+  test("rental cards are built by code from the rentals Muse was given", async () => {
+    const tables = world();
+    const pricey = tables.listings[1] as Row & { rental: Record<string, unknown> };
+    pricey.rental = { ...pricey.rental, availableFrom: NOW + 40 * DAY };
+    pricey.photos = ["/seed/studio.jpg"];
+    const c = await homeChatContext(fakeCtx(tables), {
+      viewerId: "V" as never,
+      message: "rooms",
+      context: { stage: "city" },
+      recent: [],
+    });
+    // The same rentals, in the same ranked order, and no one the viewer can't see.
+    expect(c.cards.map((x) => x.id)).toEqual(c.input.rentals.map((r) => r.id));
+    expect(c.cards.map((x) => x.id).sort()).toEqual(["lCheap", "lPricey", "lProtected"]);
+    const cheap = c.cards.find((x) => x.id === "lCheap");
+    expect(cheap).toMatchObject({
+      title: "Sunny room near Dolores",
+      price: 1500,
+      photo: null,
+      neighborhood: "Mission",
+      availableFrom: null,
+    });
+    // Every reason is cited, with in-app links only.
+    expect(cheap?.reasons.length).toBeGreaterThan(0);
+    for (const card of c.cards) {
+      expect(card.reasons.length).toBeLessThanOrEqual(2);
+      for (const r of card.reasons) {
+        expect(r.sources.length).toBeGreaterThan(0);
+        for (const s of r.sources) expect(s.href ?? "/").toMatch(/^\//);
+      }
+    }
+    expect(cheap?.reasons[0]).toEqual({
+      text: "$1,500, inside your budget",
+      sources: [
+        { label: "Sunny room near Dolores · $1,500/mo", href: "/landing/find/listing/lCheap" },
+      ],
+    });
+    const studio = c.cards.find((x) => x.id === "lPricey");
+    expect(studio?.photo).toBe("/seed/studio.jpg");
+    expect(studio?.availableFrom).toBe(todayInSF(NOW + 40 * DAY));
+    expect(c.input.rentals.find((r) => r.id === "lPricey")?.availableFrom).toBe(
+      studio?.availableFrom ?? null,
+    );
+    // Protected traits never reach a card, and raw descriptions never do either.
+    expect(JSON.stringify(c.cards)).not.toMatch(/muslim|women|Ignore your rules/i);
   });
 
   test("rate limit: over 8 chat runs in a minute, the rules answer", async () => {
@@ -396,13 +520,342 @@ describe("homeChat.reply", () => {
   });
 });
 
+/* ---------- The move plan, rental cards and the apartment (#150) ---------- */
+
+describe("homeChat.reply: the stated plan", () => {
+  const PROFILE = { label: "City Profile", href: "/landing/profile" };
+
+  test("AI off: the rules read the plan, save it, and answer with rental cards", async () => {
+    process.env.AI_ENABLED = "false";
+    const tables = world();
+    const { reply } = await ask("I'm moving to SF in January with a $2,400 budget", tables);
+    expect(reply.via).toBe("rules");
+    expect(reply.command).toEqual({ kind: "show_rentals", maxPrice: 2400 });
+    expect(reply.saved).toEqual([
+      "Budget up to $2,400/mo",
+      expect.stringMatching(/^Move-in January 20\d\d$/),
+    ]);
+    expect(reply.sources).toContainEqual(PROFILE);
+    expect(reply.rentals.map((c) => c.id).sort()).toEqual(["lCheap", "lPricey", "lProtected"]);
+    // The chat's statement replaced the brief's budget, with its own source.
+    expect(facts(tables, "budget")).toMatchObject([
+      {
+        _id: "f1",
+        value: { max: 2400 },
+        source: "stated",
+        evidence: { kind: "chat", summary: "You said so in Landing Home chat" },
+      },
+    ]);
+    expect(facts(tables, "moveIn")).toMatchObject([
+      { value: { month: expect.stringMatching(/^20\d\d-01$/) }, evidence: { kind: "chat" } },
+    ]);
+    expect(requests).toHaveLength(0);
+  });
+
+  test("Muse's plan is saved once it matches the message", async () => {
+    const tables = world();
+    replies.push(
+      muse({
+        text: "Here are rentals within $2,400.",
+        command: { kind: "show_rentals", maxPrice: 2400 },
+        plan: { budgetMax: 2400, moveIn: null, neighborhoods: ["mission"] },
+      }),
+    );
+    const { reply } = await ask("My budget is $2,400 and I'd love the Mission", tables);
+    expect(reply.via).toBe("muse");
+    expect(reply.saved).toEqual(["Budget up to $2,400/mo", "Looking in Mission"]);
+    expect(reply.sources).toContainEqual(PROFILE);
+    expect(reply.rentals).toHaveLength(3);
+    expect(facts(tables, "budget")[0].value).toEqual({ max: 2400 });
+    expect(facts(tables, "neighborhood")).toMatchObject([
+      { value: { slug: "mission" }, source: "stated", evidence: { kind: "chat" } },
+    ]);
+    // The model was told today's date and that nothing is in the plan it didn't read.
+    const prompt = requests[0].messages.map((m) => m.content).join("\n");
+    expect(prompt).toContain(todayInSF());
+  });
+
+  test("a plan the message doesn't state is rejected, and nothing is saved", async () => {
+    const tables = world();
+    const invented: MovePlan = { budgetMax: 3000, moveIn: null, neighborhoods: [] };
+    replies.push(
+      muse({ command: { kind: "show_move" }, plan: invented }),
+      muse({
+        command: { kind: "show_move" },
+        plan: { budgetMax: null, moveIn: "2027-01", neighborhoods: ["noe-valley"] },
+      }),
+    );
+    const { reply, runs } = await ask("show me the move", tables);
+    expect(requests).toHaveLength(2);
+    expect(requests[1].messages.at(-1)?.content).toContain("plan.budgetMax");
+    expect(reply).toMatchObject({ via: "rules", command: { kind: "show_move" }, saved: [] });
+    expect(reply.sources).not.toContainEqual(PROFILE);
+    expect(runs.map((r) => r.fallbackReason)).toEqual(["invalid_output"]);
+    expect(facts(tables, "budget")).toMatchObject([
+      { value: { max: 2000 }, evidence: { kind: "brief" } },
+    ]);
+    expect(facts(tables, "moveIn")).toEqual([]);
+    expect(facts(tables, "neighborhood")).toEqual([]);
+  });
+
+  test("a search states no plan: nothing is saved", async () => {
+    process.env.AI_ENABLED = "false";
+    const tables = world();
+    const { reply } = await ask("rooms under $1,600", tables);
+    expect(reply.command).toEqual({ kind: "show_rentals", maxPrice: 1600 });
+    expect(reply.saved).toEqual([]);
+    expect(reply.rentals.map((c) => c.id)).toEqual(["lCheap"]);
+    expect(facts(tables, "budget")[0].value).toEqual({ max: 2000 });
+  });
+
+  test("over the rate limit the rules still save the plan", async () => {
+    const tables = world();
+    tables.aiRuns = Array.from({ length: 8 }, (_, i) => ({
+      _id: `r${i}`,
+      userId: "V",
+      task: HOME_CHAT_TASK,
+      createdAt: NOW - 1000 * i,
+    }));
+    const { reply } = await ask("my budget is $1,800", tables);
+    expect(reply).toMatchObject({ via: "rules", saved: ["Budget up to $1,800/mo"] });
+    expect(requests).toHaveLength(0);
+  });
+
+  test("with a current place, the chat doesn't touch the move-in", async () => {
+    process.env.AI_ENABLED = "false";
+    const tables = withPlace(world());
+    const { reply } = await ask("I'm moving in January, budget $2,200", tables);
+    expect(reply.saved).toEqual(["Budget up to $2,200/mo"]);
+    expect(facts(tables, "moveIn")).toEqual([]);
+  });
+});
+
+describe("homeChat.reply: the apartment", () => {
+  const apartment = { view: "apartment" as const };
+
+  test("furnish runs when the 3D model exists, and records no rent budget", async () => {
+    const tables = withPlace(world(), "built");
+    replies.push(
+      muse({
+        text: "Picking warm, cozy pieces within $800 for you to review.",
+        command: { kind: "furnish", vibe: "  warm and   cozy ", budget: 800 },
+      }),
+    );
+    const { reply } = await ask("make it warm and cozy for $800", tables, apartment);
+    expect(reply.via).toBe("muse");
+    expect(reply.command).toEqual({ kind: "furnish", vibe: "warm and cozy", budget: 800 });
+    expect(reply.saved).toEqual([]);
+    expect(reply.rentals).toEqual([]);
+    expect(facts(tables, "budget")[0].value).toEqual({ max: 2000 });
+  });
+
+  test("a furniture budget passed off as rent is rejected", async () => {
+    const tables = withPlace(world(), "built");
+    const asRent = muse({
+      command: { kind: "furnish", vibe: "warm and cozy", budget: 800 },
+      plan: { budgetMax: 800, moveIn: null, neighborhoods: [] },
+    });
+    replies.push(asRent, asRent);
+    const { reply } = await ask("make it warm and cozy for $800", tables, apartment);
+    expect(requests[1].messages.at(-1)?.content).toContain("not the rent budget");
+    // The rules furnish instead, and still record nothing.
+    expect(reply).toMatchObject({
+      via: "rules",
+      command: { kind: "furnish", budget: 800 },
+      saved: [],
+    });
+    expect(facts(tables, "budget")[0].value).toEqual({ max: 2000 });
+  });
+
+  test("no model, no furnishing: Muse's furnish is rejected and the rules say what's next", async () => {
+    const furnish = muse({ command: { kind: "furnish", vibe: "boho" } });
+    replies.push(furnish, furnish);
+    const building = await ask("decorate it boho", withPlace(world()), apartment);
+    expect(requests[1].messages.at(-1)?.content).toContain("3D model isn't built yet");
+    expect(building.reply).toMatchObject({ via: "rules", command: { kind: "show_apartment" } });
+    expect(building.reply.text).toContain("still being built");
+
+    replies.push(furnish, furnish);
+    const none = await ask("decorate it boho", world(), apartment);
+    expect(none.reply).toMatchObject({ via: "rules", command: { kind: "show_rentals" } });
+    expect(none.reply.text).toContain("Choose a place first");
+    expect(none.reply.rentals.length).toBeGreaterThan(0);
+  });
+
+  test("show_apartment needs a place", async () => {
+    const show = muse({ command: { kind: "show_apartment" } });
+    replies.push(show);
+    const mine = await ask("show my apartment", withPlace(world(), "starter"));
+    expect(mine.reply).toMatchObject({ via: "muse", command: { kind: "show_apartment" } });
+    expect(mine.reply.sources).toEqual([{ label: "Your place", href: "/landing/place" }]);
+
+    replies.push(show, show);
+    const none = await ask("show my apartment", world());
+    expect(none.reply).toMatchObject({ via: "rules", command: { kind: "show_rentals" } });
+    expect(none.reply.text).toContain("haven't chosen a place");
+  });
+
+  test("protected traits never reach the model or the vibe", async () => {
+    const tables = withPlace(world(), "built");
+    const biased = muse({ command: { kind: "furnish", vibe: "decor for a Muslim family" } });
+    replies.push(biased, biased);
+    const { reply } = await ask("cozy decor for a Muslim family", tables, apartment);
+    expect(requests[0].messages.map((m) => m.content).join("\n")).not.toMatch(/muslim/i);
+    expect(requests[1].messages.at(-1)?.content).toContain("command.vibe");
+    expect(reply.via).toBe("rules");
+    expect(reply.command.kind).toBe("furnish");
+    expect(JSON.stringify(reply)).not.toMatch(/muslim|\[removed\]/i);
+  });
+});
+
+/* ---------- Saving the plan ---------- */
+
+describe("saveStatedPlan", () => {
+  const V = "V" as never;
+  const save = (tables: Record<string, Row[]>, plan: Partial<MovePlan>) =>
+    saveStatedPlan(fakeCtx(tables), { viewerId: V, plan: { ...NO_PLAN, ...plan } });
+  /** "YYYY-MM", `n` months from this one. */
+  const monthAhead = (n: number) => {
+    const today = todayInSF();
+    const i = Number(today.slice(0, 4)) * 12 + Number(today.slice(5, 7)) - 1 + n;
+    return `${Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, "0")}`;
+  };
+  const fact = (key: string, value: unknown, kind = "brief", extra: Partial<Row> = {}): Row => ({
+    _id: `f:${key}:${JSON.stringify(value)}`,
+    userId: "V",
+    key,
+    value,
+    source: "stated",
+    evidence: { kind, summary: kind === "brief" ? "You said so in your brief" : "Your place" },
+    confidence: 1,
+    updatedAt: NOW - DAY,
+    ...extra,
+  });
+
+  test("the budget's top is replaced, keeping a low end that still fits", async () => {
+    const tables = world();
+    tables.cityProfileFacts = [fact("budget", { min: 1500, max: 2000 })];
+    expect(await save(tables, { budgetMax: 2400 })).toEqual(["Budget $1,500–$2,400/mo"]);
+    expect(facts(tables, "budget")).toMatchObject([
+      { value: { min: 1500, max: 2400 }, evidence: { kind: "chat" } },
+    ]);
+    // A top below the low end drops the low end.
+    expect(await save(tables, { budgetMax: 1200 })).toEqual(["Budget up to $1,200/mo"]);
+    expect(facts(tables, "budget")).toMatchObject([{ value: { max: 1200 } }]);
+    expect(tables.cityProfileFacts).toHaveLength(1);
+  });
+
+  test("saying what the profile already says writes nothing", async () => {
+    const tables = world();
+    expect(await save(tables, { budgetMax: 2000 })).toEqual([]);
+    expect(facts(tables, "budget")).toMatchObject([
+      { value: { max: 2000 }, evidence: { kind: "brief" } },
+    ]);
+  });
+
+  test("values out of range are skipped", async () => {
+    const tables = world();
+    expect(
+      await save(tables, {
+        budgetMax: 50,
+        moveIn: "2020-01",
+        neighborhoods: ["atlantis", "golden-gate-park"],
+      }),
+    ).toEqual([]);
+    expect(await save(tables, { moveIn: monthAhead(30) })).toEqual([]);
+    expect(await save(tables, { moveIn: "soon" })).toEqual([]);
+    expect(tables.cityProfileFacts).toHaveLength(1);
+  });
+
+  test("the move-in replaces the brief's, but a month keeps a day given in it", async () => {
+    const tables = world();
+    const [soon, later] = [monthAhead(2), monthAhead(4)];
+    tables.cityProfileFacts.push(fact("moveIn", { month: soon, date: `${soon}-15` }));
+    expect(await save(tables, { moveIn: soon })).toEqual([]);
+    expect(facts(tables, "moveIn")[0].value).toEqual({ month: soon, date: `${soon}-15` });
+    expect(await save(tables, { moveIn: later })).toEqual([
+      expect.stringMatching(/^Move-in [A-Z][a-z]+ 20\d\d$/),
+    ]);
+    expect(facts(tables, "moveIn")).toMatchObject([
+      { value: { month: later }, evidence: { kind: "chat" } },
+    ]);
+    expect(await save(tables, { moveIn: `${later}-09` })).toEqual([
+      expect.stringMatching(/^Move-in [A-Z][a-z]+ 9, 20\d\d$/),
+    ]);
+    expect(facts(tables, "moveIn")[0].value).toEqual({ month: later, date: `${later}-09` });
+    // What features plan on is the chat's move-in.
+    expect((await getProfile(fakeCtx(tables), V)).moveIn?.value.date).toBe(`${later}-09`);
+  });
+
+  test("the place's move-in wins while they have a place", async () => {
+    const tables = withPlace(world());
+    tables.cityProfileFacts.push(fact("moveIn", { month: "2027-01", date: "2027-01-10" }, "place"));
+    expect(await save(tables, { moveIn: monthAhead(3), budgetMax: 2100 })).toEqual([
+      "Budget up to $2,100/mo",
+    ]);
+    expect(facts(tables, "moveIn")).toMatchObject([
+      { value: { date: "2027-01-10" }, evidence: { kind: "place" } },
+    ]);
+  });
+
+  test("neighborhoods are added, never removed, and capped at ten", async () => {
+    const tables = world();
+    tables.cityProfileFacts.push(
+      fact("neighborhood", { slug: "mission" }),
+      fact("neighborhood", { slug: "marina" }, "activity", { source: "inferred", confidence: 0.6 }),
+    );
+    expect(await save(tables, { neighborhoods: ["mission", "noe-valley", "marina"] })).toEqual([
+      "Looking in Noe Valley",
+      "Looking in Marina",
+    ]);
+    const wanted = facts(tables, "neighborhood");
+    expect(wanted.map((f) => (f.value as { slug: string }).slug).sort()).toEqual([
+      "marina",
+      "mission",
+      "noe-valley",
+    ]);
+    // The brief's stays the brief's; the inferred one is now something they said.
+    expect(wanted.map((f) => [f.source, (f.evidence as { kind: string }).kind])).toEqual([
+      ["stated", "brief"],
+      ["stated", "chat"],
+      ["stated", "chat"],
+    ]);
+    const more = ["bernal-heights", "chinatown", "excelsior", "glen-park", "japantown"];
+    await save(tables, { neighborhoods: more });
+    expect(await save(tables, { neighborhoods: ["nob-hill", "north-beach", "portola"] })).toEqual([
+      "Looking in Nob Hill",
+      "Looking in North Beach",
+    ]);
+    expect(facts(tables, "neighborhood")).toHaveLength(10);
+  });
+
+  test("What Muse knows shows the fact with its source, and removing it sticks until they say it again", async () => {
+    const tables = world();
+    const ctx = fakeCtx(tables);
+    await save(tables, { budgetMax: 2400 });
+    const shown = (await getProfile(ctx, V)).facts.find((f) => f.key === "budget");
+    expect(shown).toMatchObject({
+      value: { max: 2400 },
+      source: "stated",
+      evidence: { kind: "chat", summary: "You said so in Landing Home chat" },
+    });
+    expect(await removeFact(ctx as MutationCtx, V, shown?._id as never)).toBe(true);
+    expect((await getProfile(ctx, V)).budget).toBeNull();
+    // Saying it again in the chat is a new statement: it comes back.
+    expect(await save(tables, { budgetMax: 2400 })).toEqual(["Budget up to $2,400/mo"]);
+    expect((await getProfile(ctx, V)).budget?.value).toEqual({ max: 2400 });
+    expect(tables.cityProfileFacts).toHaveLength(1);
+  });
+});
+
 /* ---------- Pure helpers ---------- */
 
 const input = (over: Partial<HomeChatInput> = {}): HomeChatInput => ({
   message: "hi",
   protectedRemoved: false,
   recent: [],
-  map: { stage: "city", neighborhood: null },
+  today: "2026-11-13",
+  map: { stage: "city", neighborhood: null, view: "map" },
   you: {
     cityProfileSetUp: true,
     budget: null,
@@ -411,6 +864,7 @@ const input = (over: Partial<HomeChatInput> = {}): HomeChatInput => ({
     gettingAround: [],
     moveIn: null,
     place: null,
+    apartment: null,
     crew: { joined: false, members: 0, neighborhoods: [] },
   },
   neighborhoods: [{ slug: "mission", name: "Mission", shortName: null }],
@@ -421,6 +875,7 @@ const input = (over: Partial<HomeChatInput> = {}): HomeChatInput => ({
       title: "Sunny room near Dolores",
       price: 1500,
       neighborhood: "mission",
+      availableFrom: null,
     },
   ],
   events: [],
@@ -433,6 +888,7 @@ describe("homeChatProblems", () => {
     text: "Flying to the Mission.",
     command: { kind: "fly_neighborhood", slug: "mission" },
     sourceIds: [],
+    plan: NO_PLAN,
   } as HomeChatOutput;
   test("accepts a grounded answer", () => {
     expect(homeChatProblems(ok, input())).toEqual([]);
@@ -465,6 +921,67 @@ describe("homeChatProblems", () => {
       [],
     );
   });
+  test("the plan is held to the message", () => {
+    const stated = input({ message: "my budget is $2,400, moving in January to the Mission" });
+    const plan = { budgetMax: 2400, moveIn: "2027-01", neighborhoods: ["mission"] };
+    expect(homeChatProblems({ ...ok, plan }, stated)).toEqual([]);
+    expect(homeChatProblems({ ...ok, plan }, input())).toHaveLength(3);
+    // Never from earlier turns.
+    const earlier = input({ recent: [{ who: "you", text: "my budget is $2,400" }] });
+    expect(homeChatProblems({ ...ok, plan: { ...NO_PLAN, budgetMax: 2400 } }, earlier)).toEqual([
+      "plan.budgetMax: only an amount the person wrote in this message, or null",
+    ]);
+  });
+  test("furnish needs a model, a clean vibe and a budget the person wrote", () => {
+    const model = { hasModel: true, ready: true, items: 0 };
+    const you = (apartment: HomeChatInput["you"]["apartment"]) => ({ ...input().you, apartment });
+    const furnish = (
+      command: Partial<Extract<HomeChatOutput["command"], { kind: "furnish" }>>,
+      over: Partial<HomeChatInput> = {},
+      plan = NO_PLAN,
+    ) =>
+      homeChatProblems(
+        { ...ok, command: { kind: "furnish", vibe: "warm and cozy", ...command }, plan },
+        input({ message: "make it warm and cozy for $800", you: you(model), ...over }),
+      );
+    expect(furnish({})).toEqual([]);
+    expect(furnish({ budget: 800 })).toEqual([]);
+    expect(furnish({}, { you: you(null) })[0]).toContain("no place to furnish");
+    expect(furnish({}, { you: you({ ...model, hasModel: false }) })[0]).toContain(
+      "3D model isn't built yet",
+    );
+    expect(furnish({ vibe: " " })[0]).toContain("command.vibe");
+    expect(furnish({ vibe: "x".repeat(201) })[0]).toContain("command.vibe");
+    expect(furnish({ vibe: "like www.example.com" })[0]).toContain("command.vibe");
+    expect(furnish({ vibe: "for a Christian couple" })[0]).toContain("protected traits");
+    expect(furnish({ budget: 900 })).toEqual([
+      "command.budget: only an amount the person wrote, or leave it out",
+    ]);
+    expect(furnish({ budget: 0 })[0]).toContain("whole dollars");
+    expect(furnish({ budget: 800.5 })[0]).toContain("whole dollars");
+    // A budget from an earlier turn counts for furniture.
+    expect(
+      furnish(
+        { budget: 1500 },
+        { message: "boho please", recent: [{ who: "you", text: "I have 1.5k for furniture" }] },
+      ),
+    ).toEqual([]);
+    expect(furnish({ budget: 800 }, {}, { ...NO_PLAN, budgetMax: 800 })).toEqual([
+      "plan.budgetMax: a furniture budget is not the rent budget; use null",
+    ]);
+    // Even when the message doesn't read as a furnish request.
+    expect(
+      furnish({ budget: 800 }, { message: "$800 for the lot" }, { ...NO_PLAN, budgetMax: 800 }),
+    ).toEqual(["plan.budgetMax: a furniture budget is not the rent budget; use null"]);
+  });
+  test("show_apartment needs a place", () => {
+    const show = { ...ok, command: { kind: "show_apartment" } } as HomeChatOutput;
+    expect(homeChatProblems(show, input())[0]).toContain("no place to show");
+    const placed = input({
+      you: { ...input().you, apartment: { hasModel: false, ready: false, items: 0 } },
+    });
+    expect(homeChatProblems(show, placed)).toEqual([]);
+  });
 });
 
 describe("toReply", () => {
@@ -475,6 +992,7 @@ describe("toReply", () => {
         text: "Room near a mosque.",
         command: { kind: "open_listing", listingId: "l1" as never },
         sourceIds: ["listing:l1", "listing:l1", "event:nope", "__proto__"],
+        plan: NO_PLAN,
       },
       "muse",
       input(),
@@ -484,6 +1002,99 @@ describe("toReply", () => {
       { label: "Sunny room near Dolores · $1,500/mo", href: "/landing/find/listing/l1" },
     ]);
     expect(r.text).not.toMatch(/mosque/i);
+    expect(r.rentals).toEqual([]);
+    expect(r.saved).toEqual([]);
+  });
+
+  const card = (id: string, price: number): ChatRentalCard => ({
+    id,
+    title: `Rental ${id}`,
+    price,
+    photo: null,
+    neighborhood: "Mission",
+    reasons: [],
+  });
+  const cards = [card("l2", 2600), card("l1", 1500), card("l3", 1900), card("l4", 2000)];
+
+  test("cards come only from the rentals it was given: cited first, then ranked within the price", () => {
+    const out: HomeChatOutput = {
+      text: "Here are rentals under $2,000.",
+      command: { kind: "show_rentals", maxPrice: 2000 },
+      sourceIds: ["listing:l4", "listing:made-up", "event:e1"],
+      plan: NO_PLAN,
+    };
+    const r = toReply(out, "muse", input(), {}, { cards });
+    expect(r.rentals.map((c) => c.id)).toEqual(["l4", "l1", "l3"]);
+    expect(r.rentals[0]).toBe(cards[3]);
+    // Without cards (or a cited id that isn't one of them) there is nothing to show.
+    expect(toReply(out, "muse", input(), {}).rentals).toEqual([]);
+    const cited = toReply(
+      { ...out, command: { kind: "none" }, sourceIds: ["listing:nope"] },
+      "muse",
+      input(),
+      {},
+      { cards },
+    );
+    expect(cited.rentals).toEqual([]);
+  });
+
+  test("what was saved comes with a link to the City Profile", () => {
+    const out: HomeChatOutput = {
+      text: "Rentals within $2,400.",
+      command: { kind: "show_rentals", maxPrice: 2400 },
+      sourceIds: [],
+      plan: { budgetMax: 2400, moveIn: null, neighborhoods: [] },
+    };
+    const r = toReply(out, "rules", input(), {}, { saved: ["Budget up to $2,400/mo"] });
+    expect(r.saved).toEqual(["Budget up to $2,400/mo"]);
+    expect(r.sources).toEqual([
+      { label: "Find a place", href: "/landing/find" },
+      { label: "City Profile", href: "/landing/profile" },
+    ]);
+    // The plan alone saves nothing: only what the mutation reports is shown.
+    expect(toReply(out, "rules", input(), {}).sources).toHaveLength(1);
+  });
+
+  test("a furnish vibe is cleaned again on the way out", () => {
+    const furnish = (vibe: string) =>
+      toReply(
+        {
+          text: "Picking items.",
+          command: { kind: "furnish", vibe },
+          sourceIds: [],
+          plan: NO_PLAN,
+        },
+        "muse",
+        input(),
+        {},
+      ).command;
+    expect(furnish("  warm   and cozy ")).toEqual({ kind: "furnish", vibe: "warm and cozy" });
+    expect(furnish("decor for Muslim women, warm")).toEqual({
+      kind: "furnish",
+      vibe: expect.not.stringMatching(/muslim|women/i),
+    });
+    expect(furnish("see www.example.com")).toEqual({ kind: "none" });
+  });
+
+  test("the rules read the plan with the rest of the answer", () => {
+    const out = rulesOutput(input({ message: "I'm moving in January with a $2,400 budget" }));
+    expect(out).toMatchObject({
+      command: { kind: "show_rentals", maxPrice: 2400 },
+      plan: { budgetMax: 2400, moveIn: "2027-01", neighborhoods: [] },
+    });
+    expect(
+      homeChatProblems(out, input({ message: "I'm moving in January, budget $2,400" })),
+    ).toEqual([]);
+    // A furnish request never records a rent budget.
+    const furnish = rulesOutput(
+      input({
+        message: "make it cozy, my budget is $800",
+        map: { stage: "city", neighborhood: null, view: "apartment" },
+        you: { ...input().you, apartment: { hasModel: true, ready: true, items: 0 } },
+      }),
+    );
+    expect(furnish.command).toMatchObject({ kind: "furnish", budget: 800 });
+    expect(furnish.plan).toEqual(NO_PLAN);
   });
 
   test("rules cite the rentals they name", () => {

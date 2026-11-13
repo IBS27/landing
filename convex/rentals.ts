@@ -121,6 +121,8 @@ async function card(l: Doc<"listings">, areaOf: ReturnType<typeof areaLookup>) {
     /** The neighborhood's page, from the listing's `neighborhoodId` (never the typed name). */
     area: await areaOf(l.neighborhoodId),
     listingType: l.rental?.listingType ?? "rent",
+    /** `rental.availableFrom` (ms); null means available now. */
+    availableFrom: l.rental?.availableFrom ?? null,
     verified: l.badges.some(
       (b) => b.kind === "identity_verified" || b.kind === "property_verified",
     ),

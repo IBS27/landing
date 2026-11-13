@@ -241,6 +241,9 @@ export function LandingHome() {
         case "open_neighborhood_page":
           navigate({ to: "/landing/find/neighborhoods/$slug", params: { slug: cmd.slug } });
           return;
+        // The Apartment tab runs these (#150).
+        case "show_apartment":
+        case "furnish":
         case "none":
           return;
       }
@@ -541,6 +544,12 @@ const PAGE_PATHS = {
   moveout: "/landing/move-out",
   profile: "/landing/profile",
   inbox: "/landing/inbox",
+  roommates: "/landing/place/roommates",
+  house: "/landing/place/house",
+  room: "/landing/place/room",
+  unit: "/landing/place/unit",
+  neighborhoods: "/landing/find/neighborhoods",
+  welcome: "/landing/welcome",
 } as const;
 
 /** Map queries snap outward to a grid, so small pans reuse the last result. */
