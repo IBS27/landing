@@ -51,6 +51,11 @@ import { listings as goodsSeeds } from "./world/listings";
 import { conversations as conversationSeeds } from "./world/messages";
 import { CAMPUSES, CORRIDORS, LANDMARK_SOURCES } from "./world/neighborhoods/facts";
 import { neighborhoodGroups } from "./world/neighborhoods/groups";
+import {
+  NEIGHBORHOOD_SERVICE,
+  SERVICE_SOURCES,
+  STREETLIGHT_REQUESTS,
+} from "./world/neighborhoods/service";
 import { TRANSIT_LINES, TRANSIT_SOURCES, TRANSIT_STATIONS } from "./world/neighborhoods/transit";
 import { pages } from "./world/pages";
 import { MAIN, people } from "./world/people";
@@ -1461,6 +1466,36 @@ export function buildPlan(now: number) {
         institution: c.institution,
         detail: c.detail,
         point: { ...c.point },
+      },
+    });
+  }
+  for (const sv of NEIGHBORHOOD_SERVICE) {
+    const where = `transit service in ${sv.neighborhood}`;
+    facts.push({
+      neighborhood: sv.neighborhood,
+      sources: sv.sources.map((k) => takeSource(k, SERVICE_SOURCES, where)),
+      row: {
+        key: `service:${sv.neighborhood}`,
+        kind: "transit_service",
+        name: "Transit service",
+        tripsPerHour: sv.tripsPerHour,
+        routes: sv.routes.map((r) => ({ ...r })),
+        lastTrains: sv.lastTrains.map((t) => ({ ...t })),
+      },
+    });
+  }
+  for (const l of STREETLIGHT_REQUESTS) {
+    const where = `311 streetlights in ${l.neighborhood}`;
+    facts.push({
+      neighborhood: l.neighborhood,
+      sources: l.sources.map((k) => takeSource(k, SERVICE_SOURCES, where)),
+      row: {
+        key: `311-streetlights:${l.neighborhood}`,
+        kind: "streetlight_requests",
+        name: "Streetlight repair requests",
+        count: l.count,
+        since: l.since,
+        until: l.until,
       },
     });
   }

@@ -25,6 +25,7 @@ import {
   negotiationMove,
   negotiationStatus,
   neighborhoodFact,
+  neighborhoodScoreKind,
   notificationCategory,
   notificationKind,
   postAttachment,
@@ -600,6 +601,27 @@ export default defineSchema({
   neighborhoodFacts: defineTable(neighborhoodFact)
     .index("by_neighborhood", ["neighborhoodId", "kind"])
     .index("by_key", ["key"]),
+
+  /**
+   * Shared neighborhood scores (#17), computed by code from public data and rewritten by
+   * `internal.neighborhoodScores.recompute` (seed and daily cron). Interest fit is personal and
+   * computed at read time, never stored.
+   */
+  neighborhoodScores: defineTable({
+    neighborhoodId: v.id("neighborhoods"),
+    kind: neighborhoodScoreKind,
+    /** 0–10: the neighborhood's percentile among SF's 41 neighborhoods on `raw`. */
+    score: v.number(),
+    /** The weighted count the percentile ranks. */
+    raw: v.number(),
+    /** "Lots to do". */
+    label: v.string(),
+    /** "5 Events in the next 30 days (4 kinds), 2 active Groups, 9 places locals recommend". */
+    breakdown: v.string(),
+    /** Public sources only (`assertCitable(..., "everyone")`). */
+    citations,
+    computedAt: v.number(),
+  }).index("by_neighborhood", ["neighborhoodId", "kind"]),
 
   /** Settings & privacy choices, one row per user. Missing fields mean Facebook's defaults. */
   userSettings: defineTable({

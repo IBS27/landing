@@ -370,8 +370,60 @@ export const neighborhoodFact = v.union(
     point: latLng,
     citations,
   }),
+  /** How often transit runs here and what runs late, from the GTFS feeds (#17). */
+  v.object({
+    neighborhoodId: v.id("neighborhoods"),
+    key: v.string(),
+    kind: v.literal("transit_service"),
+    name: v.string(),
+    /** Weekday trips an hour, 7am–7pm, by Muni, BART and Caltrain stopping here. */
+    tripsPerHour: v.number(),
+    /** Muni lines stopping here; `allNight` ones run 1:30–3:30am (Owl and 24-hour lines). */
+    routes: v.array(
+      v.object({
+        line: v.string(),
+        name: v.string(),
+        mode: v.union(
+          v.literal("bus"),
+          v.literal("metro"),
+          v.literal("streetcar"),
+          v.literal("cable_car"),
+        ),
+        allNight: v.boolean(),
+      }),
+    ),
+    /** Last departures, in minutes after the service day's midnight (past 1440 is after midnight). */
+    lastTrains: v.array(
+      v.object({
+        system: v.union(v.literal("bart"), v.literal("caltrain")),
+        station: v.string(),
+        weekday: v.optional(v.number()),
+        saturday: v.optional(v.number()),
+        sunday: v.optional(v.number()),
+      }),
+    ),
+    citations,
+  }),
+  /** 311 streetlight repair requests over a window (DataSF): requests, not confirmed outages (#17). */
+  v.object({
+    neighborhoodId: v.id("neighborhoods"),
+    key: v.string(),
+    kind: v.literal("streetlight_requests"),
+    name: v.string(),
+    count: v.number(),
+    since: v.number(),
+    until: v.number(),
+    citations,
+  }),
 );
 export type NeighborhoodFact = Infer<typeof neighborhoodFact>;
+
+export const neighborhoodScoreKind = v.union(
+  v.literal("things_to_do"),
+  v.literal("food"),
+  v.literal("transit"),
+);
+export type NeighborhoodScoreKind = Infer<typeof neighborhoodScoreKind>;
 
 /* ---------- Landing: network vouching (see convex/vouches.ts) ---------- */
 

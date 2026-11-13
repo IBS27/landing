@@ -390,6 +390,9 @@ describe("seed plan: facts", () => {
             true,
           ]);
         }
+      } else if (r.kind === "transit_service" || r.kind === "streetlight_requests") {
+        // Aggregates per neighborhood (filed by the build script with the same 40 m rule).
+        expect([where, isNeighborhoodSlug(f.neighborhood)]).toEqual([where, true]);
       } else {
         const shape = neighborhoodShape(f.neighborhood);
         const near = r.path.some(

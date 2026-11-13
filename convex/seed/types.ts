@@ -419,3 +419,40 @@ export type PlaceSeed = {
   readonly point: LatLng;
   readonly note: string;
 };
+
+/** A Muni line stopping in a neighborhood (generated from GTFS). */
+export type ServiceRouteSeed = {
+  readonly line: string;
+  readonly name: string;
+  readonly mode: "bus" | "metro" | "streetcar" | "cable_car";
+  /** Runs in the middle of the night, 1:30–3:30am (Owl and 24-hour lines). */
+  readonly allNight: boolean;
+};
+
+/** Last BART or Caltrain departure from a station, in minutes after the service day's midnight. */
+export type LastTrainSeed = {
+  readonly system: "bart" | "caltrain";
+  readonly station: string;
+  readonly weekday?: number;
+  readonly saturday?: number;
+  readonly sunday?: number;
+};
+
+/** Transit service in a neighborhood (generated from GTFS). `sources` are `SERVICE_SOURCES` keys. */
+export type ServiceSeed = {
+  readonly neighborhood: NeighborhoodSlug;
+  /** Weekday trips an hour, 7am–7pm, by Muni, BART and Caltrain stopping here. */
+  readonly tripsPerHour: number;
+  readonly routes: readonly ServiceRouteSeed[];
+  readonly lastTrains: readonly LastTrainSeed[];
+  readonly sources: readonly string[];
+};
+
+/** 311 streetlight repair requests in a neighborhood over a window (DataSF). */
+export type StreetlightSeed = {
+  readonly neighborhood: NeighborhoodSlug;
+  readonly count: number;
+  readonly since: number;
+  readonly until: number;
+  readonly sources: readonly string[];
+};
