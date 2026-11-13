@@ -1044,7 +1044,11 @@ export const unitDetails = viewerQuery({
     if (!l?.rental) return null;
     const views = l.rental.views ?? [];
     const { lat, lng } = l.location;
-    if (!l.neighborhoodId || lat === undefined || lng === undefined) return { views, noise: null };
+    const point =
+      lat === undefined || lng === undefined
+        ? null
+        : { lat, lng, neighborhood: l.location.neighborhood ?? null };
+    if (!l.neighborhoodId || !point) return { views, point, noise: null };
     const facts = await ctx.db.query("neighborhoodFacts").collect();
     const places: NoisePlace[] = [];
     const byKey = new Map<string, Doc<"neighborhoodFacts">>();
@@ -1056,7 +1060,7 @@ export const unitDetails = viewerQuery({
       else continue;
       byKey.set(f._id, f);
     }
-    const risk = noiseRisk({ lat, lng }, places);
+    const risk = noiseRisk(point, places);
     const audience = await loadAudience(ctx, ctx.viewer._id);
     const reasons: { text: string; sources: NonEmpty<CitedSource> | null }[] = [];
     for (const r of risk.reasons) {
@@ -1065,6 +1069,6 @@ export const unitDetails = viewerQuery({
         fact && "citations" in fact ? await resolveCitations(ctx, fact.citations, audience) : null;
       reasons.push({ text: r.text, sources });
     }
-    return { views, noise: { level: risk.level, reasons } };
+    return { views, point, noise: { level: risk.level, reasons } };
   },
 });
