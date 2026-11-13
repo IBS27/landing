@@ -42,10 +42,12 @@ export function LifestyleView({
   // `latest` is the newest draft even before React re-renders, so every change builds on it.
   const [draft, setDraft] = useState<LifestyleAnswers>({});
   const latest = useRef<LifestyleAnswers>({});
+  // Saves still in flight: until they land, `state` is older than `latest`.
+  const pending = useRef(0);
   const [saveError, setSaveError] = useState(false);
 
   const edit = (at: number) => {
-    latest.current = state?.answers ?? {};
+    if (pending.current === 0) latest.current = state?.answers ?? {};
     setDraft(latest.current);
     setStep(at);
   };
@@ -57,7 +59,11 @@ export function LifestyleView({
     latest.current = next as LifestyleAnswers;
     setDraft(latest.current);
     setSaveError(false);
-    actions.save(latest.current).catch(() => setSaveError(true));
+    pending.current++;
+    actions
+      .save(latest.current)
+      .catch(() => setSaveError(true))
+      .finally(() => pending.current--);
   };
 
   if (step !== null)
