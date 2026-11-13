@@ -115,3 +115,38 @@ export function toUnit(
 ) {
   return linkOptions({ to: "/landing/place/unit", search: unit });
 }
+
+/** The City Profile onboarding brief (#3). */
+export function toWelcome() {
+  return linkOptions({ to: "/landing/welcome" });
+}
+
+/** Apartment search (#10). */
+export function toFind() {
+  return linkOptions({ to: "/landing/find" });
+}
+
+/** Every neighborhood (#16). */
+export function toNeighborhoods() {
+  return linkOptions({ to: "/landing/find/neighborhoods" });
+}
+
+/** The person's Move-in Crew (#30). */
+export function toCrew() {
+  return linkOptions({ to: "/landing/crew" });
+}
+
+/** Journeys and the weekly check-in (#32, #33). */
+export function toJourneys() {
+  return linkOptions({ to: "/landing/crew/journeys" });
+}
+
+/** Move out: sell tracked items and sublet (#43, #45). */
+export function toMoveOut() {
+  return linkOptions({ to: "/landing/move-out" });
+}
+
+/** Landing Inbox: Muse's drafts waiting for the person's OK (#6). */
+export function toInbox() {
+  return linkOptions({ to: "/landing/inbox" });
+}

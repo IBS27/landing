@@ -1,5 +1,6 @@
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
+import { isBlockedEitherWay } from "./blocks";
 import { clockLabel, remindAt, sfDate, sfTime } from "./chatPlans";
 
 /**
@@ -114,4 +115,66 @@ export async function fromChatPlan(ctx: QueryCtx, e: Doc<"events">): Promise<boo
     if (p?.result?.kind === "event" && p.result.eventId === e._id) return true;
   }
   return false;
+}
+
+/* ---------- Coming up (Reminders, Home timeline) ---------- */
+
+/** Going RSVPs read for `upcomingReminders`, newest first. */
+const UPCOMING_SCAN = 200;
+
+export type UpcomingReminder = {
+  event: {
+    _id: Id<"events">;
+    title: string;
+    startAt: number;
+    venue: string | null;
+    online: boolean;
+    cover: string;
+  };
+  /** When the day-of reminder goes out. */
+  remindAt: number;
+  /** "chat": a chat-plan Event, reminded in its chat instead. */
+  via: "notification" | "chat";
+  sentAt: number | null;
+};
+
+/**
+ * A person's Events in the next 7 days that they're going to, soonest first
+ * (at most `max`), with when each one's reminder goes out and whether it has.
+ * Hosts blocked either way drop out. Call it only with the viewer's own id.
+ */
+export async function upcomingReminders(
+  ctx: QueryCtx,
+  userId: Id<"users">,
+  now: number,
+  max = Number.POSITIVE_INFINITY,
+): Promise<UpcomingReminder[]> {
+  const going = await ctx.db
+    .query("eventResponses")
+    .withIndex("by_user", (q) => q.eq("userId", userId).eq("status", "going"))
+    .order("desc")
+    .take(UPCOMING_SCAN);
+  const soon: Doc<"events">[] = [];
+  for (const r of going) {
+    const e = await ctx.db.get(r.eventId);
+    if (!e || e.startAt <= now || e.startAt > now + 7 * DAY) continue;
+    if (await isBlockedEitherWay(ctx, userId, e.hostId)) continue;
+    soon.push(e);
+  }
+  soon.sort((a, b) => a.startAt - b.startAt);
+  return Promise.all(
+    soon.slice(0, max).map(async (e) => ({
+      event: {
+        _id: e._id,
+        title: e.title,
+        startAt: e.startAt,
+        venue: e.venue ?? null,
+        online: e.online,
+        cover: e.cover,
+      },
+      remindAt: dayOfReminderAt(e.startAt),
+      via: (await fromChatPlan(ctx, e)) ? ("chat" as const) : ("notification" as const),
+      sentAt: (await sentReminder(ctx, userId, eventReminderKey(e._id)))?.sentAt ?? null,
+    })),
+  );
 }

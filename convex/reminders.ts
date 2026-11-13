@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
-import type { Doc, Id } from "./_generated/dataModel";
+import type { Doc } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx } from "./_generated/server";
 import { isBlockedEitherWay } from "./lib/blocks";
 import { viewerQuery } from "./lib/functions";
@@ -15,6 +15,8 @@ import {
   fromChatPlan,
   recordReminder,
   sentReminder,
+  type UpcomingReminder,
+  upcomingReminders,
 } from "./lib/reminders";
 
 /**
@@ -161,59 +163,12 @@ export const draftsReady = internalMutation({
 
 /* ---------- For the Home timeline ---------- */
 
-/** Going RSVPs read for `upcoming`, newest first. */
-const UPCOMING_SCAN = 200;
-
-export type UpcomingReminder = {
-  event: {
-    _id: Id<"events">;
-    title: string;
-    startAt: number;
-    venue: string | null;
-    online: boolean;
-    cover: string;
-  };
-  /** When the day-of reminder goes out. */
-  remindAt: number;
-  /** "chat": a chat-plan Event, reminded in its chat instead. */
-  via: "notification" | "chat";
-  sentAt: number | null;
-};
-
 /**
  * The viewer's Events in the next 7 days that they're going to, soonest
  * first, with when each one's reminder goes out and whether it has.
  */
 export const upcoming = viewerQuery({
   args: {},
-  handler: async (ctx): Promise<UpcomingReminder[]> => {
-    const now = Date.now();
-    const viewerId = ctx.viewer._id;
-    const going = await ctx.db
-      .query("eventResponses")
-      .withIndex("by_user", (q) => q.eq("userId", viewerId).eq("status", "going"))
-      .order("desc")
-      .take(UPCOMING_SCAN);
-    const out: UpcomingReminder[] = [];
-    for (const r of going) {
-      const e = await ctx.db.get(r.eventId);
-      if (!e || e.startAt <= now || e.startAt > now + 7 * DAY) continue;
-      if (await isBlockedEitherWay(ctx, viewerId, e.hostId)) continue;
-      const sent = await sentReminder(ctx, viewerId, eventReminderKey(e._id));
-      out.push({
-        event: {
-          _id: e._id,
-          title: e.title,
-          startAt: e.startAt,
-          venue: e.venue ?? null,
-          online: e.online,
-          cover: e.cover,
-        },
-        remindAt: dayOfReminderAt(e.startAt),
-        via: (await fromChatPlan(ctx, e)) ? "chat" : "notification",
-        sentAt: sent?.sentAt ?? null,
-      });
-    }
-    return out.sort((a, b) => a.event.startAt - b.event.startAt);
-  },
+  handler: async (ctx): Promise<UpcomingReminder[]> =>
+    upcomingReminders(ctx, ctx.viewer._id, Date.now()),
 });

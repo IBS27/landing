@@ -1,67 +1,85 @@
-import { Link } from "@tanstack/react-router";
-import { ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useQ, useViewer } from "@/app/viewer";
-import { Card } from "@/ui/primitives";
+import { ComingUp } from "@/landing/timeline/ComingUp";
+import { MoveTimeline } from "@/landing/timeline/MoveTimeline";
+import { NextStep } from "@/landing/timeline/NextStep";
+import { Card, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
-import { BmLanding } from "./icons";
+import { todayInSF } from "../../../convex/lib/cityProfileFacts";
+import type { Stage } from "../../../convex/lib/homeTimeline";
 import { LandingPage } from "./LandingPage";
-import { SECTIONS } from "./sections";
 
-/** Landing Home (`/landing`). A stub until the dashboard is built. */
+const HEADLINES: Record<Stage, string> = {
+  not_started: "Find a place, meet people before you land and settle into San Francisco.",
+  searching: "You're looking for a place. Here's what to do next.",
+  moving_in: "You're moving in. Here's what to do next.",
+  settling_in: "You're settling in. Here's what to do next.",
+  settled: "You're settled in San Francisco. Here's what's next.",
+  moving_out: "You're moving out. Here's what to do next.",
+};
+
+/** The time, refreshed every minute, so countdowns and "coming up" roll over on their own. */
+function useNow() {
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(t);
+  }, []);
+  return now;
+}
+
+/**
+ * Landing Home (`/landing`, #142): where the person is in their move and
+ * what to do next. Their stage on a timeline, one next step with why it's
+ * shown, a few more, and what's coming up. All from `api.home.timeline`
+ * (plain rules, so it's the same with AI off). Only the viewer sees it.
+ */
 export function HomePage() {
   const viewer = useViewer();
-  const profile = useQ(api.cityProfile.get, {});
-  const onboarded = Boolean(profile?.briefCompletedAt);
+  const now = useNow();
+  const t = useQ(api.home.timeline, { today: todayInSF(now) });
   return (
     <LandingPage
       title={`Welcome to Landing, ${viewer.firstName}`}
-      description="Find a place, meet people before you land and settle into San Francisco."
+      description={t ? HEADLINES[t.stage] : " "}
     >
-      <Card className="flex items-center gap-4 p-4">
-        <BmLanding size={48} />
-        <div className="min-w-0 flex-1">
-          <h2 className="font-bold text-[17px] text-primary leading-5">
-            {onboarded ? "Your City Profile is set" : "Set up your City Profile"}
-          </h2>
-          <p className="mt-0.5 text-[15px] text-secondary leading-5">
-            {onboarded
-              ? "Search, neighborhoods and crews are tuned to it. Change it any time."
-              : "Tell Landing your interests, schedule and budget. Everything else builds on it."}
-          </p>
+      {t === undefined ? (
+        <Loading />
+      ) : (
+        <div className="flex flex-col gap-4">
+          <MoveTimeline stage={t.stage} place={t.place} moveIn={t.moveIn} moveOut={t.moveOut} />
+          <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <NextStep step={t.nextStep} also={t.alsoSteps} />
+            <ComingUp data={t.comingUp} now={now} />
+          </div>
         </div>
-        {profile !== undefined && (
-          <Link
-            to={onboarded ? "/landing/profile" : "/landing/welcome"}
-            className={
-              onboarded
-                ? "flex h-9 shrink-0 items-center rounded-md bg-btn px-3 font-semibold text-[15px] text-btn-text hover:brightness-95 dark:hover:brightness-125"
-                : "flex h-9 shrink-0 items-center rounded-md bg-btn-primary px-3 font-semibold text-[15px] text-white hover:bg-btn-primary-hover"
-            }
-          >
-            {onboarded ? "View" : "Get started"}
-          </Link>
-        )}
-      </Card>
-
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        {SECTIONS.filter((s) => s.to !== "/landing").map(({ label, to, Icon, description }) => (
-          <Link key={to} to={to} className="rounded-lg bg-card shadow-base">
-            {/* The hover wash is translucent, so it sits on top of the card's fill. */}
-            <span className="flex items-center gap-3 rounded-lg p-4 transition-colors hover:bg-hover">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-highlight text-accent">
-                <Icon size={22} strokeWidth={2.2} />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block font-semibold text-[15px] text-primary leading-5">
-                  {label}
-                </span>
-                <span className="block text-[13px] text-secondary leading-4">{description}</span>
-              </span>
-              <ChevronRight size={20} className="shrink-0 text-icon-secondary" />
-            </span>
-          </Link>
-        ))}
-      </div>
+      )}
     </LandingPage>
+  );
+}
+
+function Loading() {
+  return (
+    <div className="flex flex-col gap-4" aria-busy>
+      <Card className="p-4">
+        <Skeleton className="h-5 w-28" />
+        <Skeleton className="mt-5 h-6 w-full" />
+        <Skeleton className="mt-5 h-4 w-48" />
+      </Card>
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <Card className="flex gap-3 p-4">
+          <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
+          <div className="flex flex-1 flex-col gap-2">
+            <Skeleton className="h-6 w-56" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-9 w-32" />
+          </div>
+        </Card>
+        <Card className="p-4">
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="mt-3 h-10 w-full" />
+        </Card>
+      </div>
+    </div>
   );
 }
