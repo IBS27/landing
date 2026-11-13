@@ -59,6 +59,7 @@ import { Route as GroupsFeedRouteImport } from './routes/groups/feed'
 import { Route as GroupsJoinsRouteImport } from './routes/groups/joins'
 import { Route as LandingIndexRouteImport } from './routes/landing/index'
 import { Route as LandingSplatRouteImport } from './routes/landing/$'
+import { Route as LandingWelcomeRouteImport } from './routes/landing/welcome'
 import { Route as LiveProducerRouteImport } from './routes/live.producer'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace/index'
 import { Route as MarketplaceGroupsRouteImport } from './routes/marketplace/groups'
@@ -355,6 +356,11 @@ const LandingSplatRoute = LandingSplatRouteImport.update({
   path: '/$',
   getParentRoute: () => LandingRouteRoute,
 } as any)
+const LandingWelcomeRoute = LandingWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
 const LiveProducerRoute = LiveProducerRouteImport.update({
   id: '/live/producer',
   path: '/live/producer',
@@ -632,6 +638,7 @@ export interface FileRoutesByFullPath {
   '/groups/feed': typeof GroupsFeedRoute
   '/groups/joins': typeof GroupsJoinsRoute
   '/landing/$': typeof LandingSplatRoute
+  '/landing/welcome': typeof LandingWelcomeRoute
   '/live/producer': typeof LiveProducerRoute
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
@@ -726,6 +733,7 @@ export interface FileRoutesByTo {
   '/groups/feed': typeof GroupsFeedRoute
   '/groups/joins': typeof GroupsJoinsRoute
   '/landing/$': typeof LandingSplatRoute
+  '/landing/welcome': typeof LandingWelcomeRoute
   '/live/producer': typeof LiveProducerRoute
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
@@ -824,6 +832,7 @@ export interface FileRoutesById {
   '/groups/feed': typeof GroupsFeedRoute
   '/groups/joins': typeof GroupsJoinsRoute
   '/landing/$': typeof LandingSplatRoute
+  '/landing/welcome': typeof LandingWelcomeRoute
   '/live/producer': typeof LiveProducerRoute
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
@@ -923,6 +932,7 @@ export interface FileRouteTypes {
     | '/groups/feed'
     | '/groups/joins'
     | '/landing/$'
+    | '/landing/welcome'
     | '/live/producer'
     | '/marketplace/groups'
     | '/marketplace/inbox'
@@ -1017,6 +1027,7 @@ export interface FileRouteTypes {
     | '/groups/feed'
     | '/groups/joins'
     | '/landing/$'
+    | '/landing/welcome'
     | '/live/producer'
     | '/marketplace/groups'
     | '/marketplace/inbox'
@@ -1114,6 +1125,7 @@ export interface FileRouteTypes {
     | '/groups/feed'
     | '/groups/joins'
     | '/landing/$'
+    | '/landing/welcome'
     | '/live/producer'
     | '/marketplace/groups'
     | '/marketplace/inbox'
@@ -1593,6 +1605,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LandingSplatRouteImport
       parentRoute: typeof LandingRouteRoute
     }
+    '/landing/welcome': {
+      id: '/landing/welcome'
+      path: '/welcome'
+      fullPath: '/landing/welcome'
+      preLoaderRoute: typeof LandingWelcomeRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
     '/live/producer': {
       id: '/live/producer'
       path: '/live/producer'
@@ -1939,6 +1958,7 @@ const UsernameRouteRouteWithChildren = UsernameRouteRoute._addFileChildren(
 
 interface LandingRouteRouteChildren {
   LandingSplatRoute: typeof LandingSplatRoute
+  LandingWelcomeRoute: typeof LandingWelcomeRoute
   LandingIndexRoute: typeof LandingIndexRoute
   LandingCrewIndexRoute: typeof LandingCrewIndexRoute
   LandingFindIndexRoute: typeof LandingFindIndexRoute
@@ -1951,6 +1971,7 @@ interface LandingRouteRouteChildren {
 
 const LandingRouteRouteChildren: LandingRouteRouteChildren = {
   LandingSplatRoute: LandingSplatRoute,
+  LandingWelcomeRoute: LandingWelcomeRoute,
   LandingIndexRoute: LandingIndexRoute,
   LandingCrewIndexRoute: LandingCrewIndexRoute,
   LandingFindIndexRoute: LandingFindIndexRoute,
