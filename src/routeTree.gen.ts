@@ -91,6 +91,7 @@ import { Route as LandingFindIndexRouteImport } from './routes/landing/find/inde
 import { Route as LandingInboxIndexRouteImport } from './routes/landing/inbox/index'
 import { Route as LandingMoveOutIndexRouteImport } from './routes/landing/move-out/index'
 import { Route as LandingPlaceIndexRouteImport } from './routes/landing/place/index'
+import { Route as LandingPlaceRoomRouteImport } from './routes/landing/place/room'
 import { Route as LandingProfileIndexRouteImport } from './routes/landing/profile/index'
 import { Route as MarketplaceCategoryCategoryRouteImport } from './routes/marketplace/category/$category'
 import { Route as MarketplaceCreateIndexRouteImport } from './routes/marketplace/create/index'
@@ -515,6 +516,11 @@ const LandingPlaceIndexRoute = LandingPlaceIndexRouteImport.update({
   path: '/place/',
   getParentRoute: () => LandingRouteRoute,
 } as any)
+const LandingPlaceRoomRoute = LandingPlaceRoomRouteImport.update({
+  id: '/place/room',
+  path: '/place/room',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
 const LandingProfileIndexRoute = LandingProfileIndexRouteImport.update({
   id: '/profile/',
   path: '/profile/',
@@ -657,6 +663,7 @@ export interface FileRoutesByFullPath {
   '/groups/$groupId/files': typeof GroupsGroupIdFilesRoute
   '/groups/$groupId/media': typeof GroupsGroupIdMediaRoute
   '/groups/$groupId/members': typeof GroupsGroupIdMembersRoute
+  '/landing/place/room': typeof LandingPlaceRoomRoute
   '/marketplace/category/$category': typeof MarketplaceCategoryCategoryRoute
   '/marketplace/create/item': typeof MarketplaceCreateItemRoute
   '/marketplace/create/rental': typeof MarketplaceCreateRentalRoute
@@ -750,6 +757,7 @@ export interface FileRoutesByTo {
   '/groups/$groupId/files': typeof GroupsGroupIdFilesRoute
   '/groups/$groupId/media': typeof GroupsGroupIdMediaRoute
   '/groups/$groupId/members': typeof GroupsGroupIdMembersRoute
+  '/landing/place/room': typeof LandingPlaceRoomRoute
   '/marketplace/category/$category': typeof MarketplaceCategoryCategoryRoute
   '/marketplace/create/item': typeof MarketplaceCreateItemRoute
   '/marketplace/create/rental': typeof MarketplaceCreateRentalRoute
@@ -847,6 +855,7 @@ export interface FileRoutesById {
   '/groups/$groupId/files': typeof GroupsGroupIdFilesRoute
   '/groups/$groupId/media': typeof GroupsGroupIdMediaRoute
   '/groups/$groupId/members': typeof GroupsGroupIdMembersRoute
+  '/landing/place/room': typeof LandingPlaceRoomRoute
   '/marketplace/category/$category': typeof MarketplaceCategoryCategoryRoute
   '/marketplace/create/item': typeof MarketplaceCreateItemRoute
   '/marketplace/create/rental': typeof MarketplaceCreateRentalRoute
@@ -945,6 +954,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId/files'
     | '/groups/$groupId/media'
     | '/groups/$groupId/members'
+    | '/landing/place/room'
     | '/marketplace/category/$category'
     | '/marketplace/create/item'
     | '/marketplace/create/rental'
@@ -1038,6 +1048,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId/files'
     | '/groups/$groupId/media'
     | '/groups/$groupId/members'
+    | '/landing/place/room'
     | '/marketplace/category/$category'
     | '/marketplace/create/item'
     | '/marketplace/create/rental'
@@ -1134,6 +1145,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId/files'
     | '/groups/$groupId/media'
     | '/groups/$groupId/members'
+    | '/landing/place/room'
     | '/marketplace/category/$category'
     | '/marketplace/create/item'
     | '/marketplace/create/rental'
@@ -1804,6 +1816,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LandingPlaceIndexRouteImport
       parentRoute: typeof LandingRouteRoute
     }
+    '/landing/place/room': {
+      id: '/landing/place/room'
+      path: '/place/room'
+      fullPath: '/landing/place/room'
+      preLoaderRoute: typeof LandingPlaceRoomRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
     '/landing/profile/': {
       id: '/landing/profile/'
       path: '/profile'
@@ -1920,6 +1939,7 @@ const UsernameRouteRouteWithChildren = UsernameRouteRoute._addFileChildren(
 interface LandingRouteRouteChildren {
   LandingSplatRoute: typeof LandingSplatRoute
   LandingIndexRoute: typeof LandingIndexRoute
+  LandingPlaceRoomRoute: typeof LandingPlaceRoomRoute
   LandingCrewIndexRoute: typeof LandingCrewIndexRoute
   LandingFindIndexRoute: typeof LandingFindIndexRoute
   LandingInboxIndexRoute: typeof LandingInboxIndexRoute
@@ -1931,6 +1951,7 @@ interface LandingRouteRouteChildren {
 const LandingRouteRouteChildren: LandingRouteRouteChildren = {
   LandingSplatRoute: LandingSplatRoute,
   LandingIndexRoute: LandingIndexRoute,
+  LandingPlaceRoomRoute: LandingPlaceRoomRoute,
   LandingCrewIndexRoute: LandingCrewIndexRoute,
   LandingFindIndexRoute: LandingFindIndexRoute,
   LandingInboxIndexRoute: LandingInboxIndexRoute,
