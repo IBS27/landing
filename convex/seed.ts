@@ -668,12 +668,19 @@ export const reset = internalAction({
     const cityProfileFacts: number = await ctx.runMutation(internal.seed.insertCityProfiles, {
       now: Date.now(),
     });
+    // Learn from the seeded activity (#4), so personas start with inferred interests.
+    const learners: Id<"users">[] = await ctx.runMutation(internal.profileSignals.backfill, {});
+    for (const userId of learners)
+      await ctx.runMutation(internal.profileSignals.recompute, { userId });
 
     // Demo rentals for "Things to check" (#11).
     await ctx.runMutation(internal.trust.seedDemo, {});
 
     // Muse proposals for the demo inbox (#6).
     await ctx.runMutation(internal.proposals.seedDemo, {});
+
+    // Move-in Crew opt-ins (#30), after City Profiles.
+    await ctx.runMutation(internal.crews.seedDemo, {});
 
     const reactionRows =
       plan.posts.reduce((s, p) => s + p.reactions.length + p.commentReactions.length, 0) +
