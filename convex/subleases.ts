@@ -5,6 +5,7 @@ import { internalAction, internalMutation, internalQuery } from "./_generated/se
 import { defineTask, runAgent } from "./ai/agent";
 import { cite } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
+import { neighborhoodIdAt } from "./lib/neighborhoods";
 import { dropDraft, logEvent, propose } from "./lib/proposals";
 import {
   type SubletInput,
@@ -59,6 +60,7 @@ export const create = viewerMutation({
     if (a.availableTo <= a.availableFrom)
       throw new ConvexError("The end date must be after the start date");
     const now = Date.now();
+    const location = placeFor(a.neighborhood);
     const listingId = await ctx.db.insert("listings", {
       sellerId: ownerId,
       title: a.title.trim(),
@@ -66,7 +68,8 @@ export const create = viewerMutation({
       category: "propertyrentals",
       description: a.description.trim(),
       photos,
-      location: placeFor(a.neighborhood),
+      location,
+      neighborhoodId: await neighborhoodIdAt(ctx, location),
       status: "active",
       rental: {
         propertyType: a.propertyType,

@@ -58,8 +58,8 @@ export const mayaRecentFriends = {
 /**
  * Social circles. Pairs inside a circle become friends with probability
  * `density` (seeded). Pairs involving Maya are skipped: see `mayaFriends`.
- * A circle's `name` seeds that RNG, so names are legacy labels kept stable on purpose:
- * renaming one reshuffles the friend graph.
+ * A circle's `name` seeds that RNG, so renaming one reshuffles that circle's friendships.
+ * Check the friend graph (and persona friend counts) when you rename one.
  */
 export const circles = [
   {
@@ -97,7 +97,7 @@ export const circles = [
   { name: "dorm", density: 1, members: ["ana.torres", "hannah.lee", "priya.raman"] },
   { name: "hometown", density: 1, members: ["jessica.huang", "kevin.tran", "emily.chen"] },
   {
-    name: "microsoft",
+    name: "google",
     density: 0.85,
     members: ["rachel.goldberg", "chris.adeyemi", "nina.petrova", "grace.liu", "marcus.bell"],
   },
@@ -179,12 +179,12 @@ export const circles = [
     ],
   },
   {
-    name: "mariners",
+    name: "oracle-park",
     density: 0.6,
     members: ["isaiah.thompson", "jamal.wilson", "luis.hernandez", "ryan.oconnor", "kevin.tran"],
   },
   {
-    name: "ballard",
+    name: "clement-street",
     density: 0.8,
     members: [
       "derek.holloway",

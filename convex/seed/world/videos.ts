@@ -90,18 +90,19 @@ const baseVideoPosts: readonly PostSeed[] = [
   {
     by: "foglineoutdoor",
     at: daysAgo(4, "11:00"),
-    video: "mowich-rain-wide",
+    video: "glen-ellen-rain-wide",
     privacy: "public",
-    text: "Rainy day at Lake Lagunitas is still a good day at Lake Lagunitas. Tag the friend you're dragging up Mount Tam before the creeks dry up again.",
+    place: "Glen Ellen, California",
+    text: "Highway 12 through Glen Ellen this morning 🌧️ Storm days are still trail days at Jack London State Park. Tag the friend you're dragging up there before the creeks drop again.",
     reactions: 24,
   },
   {
     by: "kevin.tran",
     at: daysAgo(5, "15:30"),
-    video: "ocean-shores-wide",
+    video: "half-moon-bay-wide",
     privacy: "public",
-    place: "Stinson Beach, California",
-    text: "drove out to stinson for the day. the wind almost took my hat and my will to live",
+    place: "Half Moon Bay, California",
+    text: "drove down to half moon bay for the day. the wind almost took my hat and my will to live",
     reactions: 19,
     mood: "haha",
   },
@@ -251,9 +252,9 @@ const baseVideoPosts: readonly PostSeed[] = [
   {
     by: "tara.singh",
     at: hoursAgo(6),
-    video: "myrtle-falls-tall",
+    video: "yosemite-falls-tall",
     privacy: "public",
-    text: "Lower Yosemite Fall with the granite peeking through 🏔️ 1 mile loop from the shuttle stop, no excuses #yosemite #sierra",
+    text: "Upper Yosemite Fall from the valley floor, all that granite 🏔️ the Lower Fall loop is 1 mile from the shuttle stop, no excuses #yosemite #sierra",
     reactions: 34,
     likedBy: ["maya.chen"],
   },
@@ -293,7 +294,7 @@ const baseVideoPosts: readonly PostSeed[] = [
   {
     by: "foglineoutdoor",
     at: daysAgo(2, "10:30"),
-    video: "mowich-rain-tall",
+    video: "eldridge-rain-tall",
     privacy: "public",
     text: "Bay Area rainy season is officially here. Gear up before the next storm 🌧️ #bayarea #rainseason",
     reactions: 16,
@@ -426,7 +427,7 @@ const threads: Partial<Record<VideoClip, readonly CommentSeed[]>> = {
     c("maya.chen", "ok I'm finally trying lead this month"),
     c("tara.singh", "need a rest day from looking at this"),
   ],
-  "myrtle-falls-tall": [
+  "yosemite-falls-tall": [
     c("erin.mcallister", "PEAK yosemite content"),
     c("arjun.mehta", "the valley showed up for you 🥹"),
     c("sofia.alvarez", "was the drive in icy at all?", [
@@ -491,7 +492,7 @@ const threads: Partial<Record<VideoClip, readonly CommentSeed[]>> = {
     c("sophie.dubois", "they pay me to look at water (sometimes)"),
     c("maya.chen", "so calming 🌊"),
   ],
-  "mowich-rain-tall": [
+  "eldridge-rain-tall": [
     c("erin.mcallister", "accurate"),
     c("owen.murphy", "my rain jacket is from 2014 and it shows", [
       r("foglineoutdoor", "Time for an upgrade 😉 Bring it in for 20% off a trade-in this month."),
@@ -501,7 +502,7 @@ const threads: Partial<Record<VideoClip, readonly CommentSeed[]>> = {
     c("jordan.kim", "forecast: fog until june, rain until march"),
     c("chloe.wright", "I moved here for the sunshine and got this. no regrets"),
     c("ryan.oconnor", "the drip off the trees 🌧️"),
-    c("amara.diallo", "rain in the redwoods hits different"),
+    c("amara.diallo", "rain in wine country hits different"),
   ],
   "puppies-tall": [
     c("olivia.brooks", "THEY'VE CHOSEN VIOLENCE 😭"),
@@ -629,11 +630,11 @@ const threads: Partial<Record<VideoClip, readonly CommentSeed[]>> = {
     c("will.foster", "I'm in. I'll regret it but I'm in"),
     c("olivia.brooks", "we did it last year and I still think about it"),
   ],
-  "mowich-rain-wide": [
+  "glen-ellen-rain-wide": [
     c("tara.singh", "the falls are flowing after this storm, go now!"),
-    c("lena.fischer", "rainy mount tam is the best mount tam"),
+    c("lena.fischer", "rainy sonoma is the best sonoma"),
   ],
-  "ocean-shores-wide": [
+  "half-moon-bay-wide": [
     c("emily.chen", "the hat 😭"),
     c("jessica.huang", "we used to go every summer as kids"),
   ],
@@ -665,12 +666,12 @@ const shares: readonly { clip: VideoClip; by: Handle; at: TimeSpec; text?: strin
   },
   { clip: "indoor-climbing-tall", by: "andre.silva", at: hoursAgo(1) },
   {
-    clip: "myrtle-falls-tall",
+    clip: "yosemite-falls-tall",
     by: "erin.mcallister",
     at: hoursAgo(4),
     text: "adding this to the list",
   },
-  { clip: "myrtle-falls-tall", by: "will.foster", at: hoursAgo(3) },
+  { clip: "yosemite-falls-tall", by: "will.foster", at: hoursAgo(3) },
   { clip: "body-surf-tall", by: "jamal.wilson", at: hoursAgo(8), text: "luis you are not well" },
   {
     clip: "espresso-macro-tall",
@@ -703,7 +704,7 @@ const shares: readonly { clip: VideoClip; by: Handle; at: TimeSpec; text?: strin
   },
   { clip: "guitar-solo-tall", by: "sam.rivera", at: daysAgo(3, "10:00") },
   {
-    clip: "mowich-rain-tall",
+    clip: "eldridge-rain-tall",
     by: "tara.singh",
     at: daysAgo(2, "12:00"),
     text: "gear check before you go",

@@ -251,6 +251,8 @@ export const factEvidence = v.object({
   summary: v.string(),
   /** free_text: the person's own words this fact came from. */
   quote: v.optional(v.string()),
+  /** activity: the signals behind it, so #5 can link each Event and Group (#4). */
+  signalIds: v.optional(v.array(v.id("profileSignals"))),
 });
 export type FactEvidence = Infer<typeof factEvidence>;
 

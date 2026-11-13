@@ -17,6 +17,7 @@ import {
   withinRadius,
 } from "./lib/listings";
 import { afterChatMessage } from "./lib/negotiations";
+import { neighborhoodIdAt } from "./lib/neighborhoods";
 import { notify } from "./lib/notify";
 import { isSaved } from "./lib/posts";
 import { badgesAfterEdit } from "./lib/trust";
@@ -739,6 +740,7 @@ export const create = viewerMutation({
     const photos = await resolvePhotos(ctx, args.photos);
     validate(args, photos.length);
     const now = Date.now();
+    const location = placeFor(args.neighborhood);
     return ctx.db.insert("listings", {
       sellerId: ctx.viewer._id,
       title: args.title.trim(),
@@ -749,7 +751,8 @@ export const create = viewerMutation({
       description: args.description.trim(),
       photos,
       video: listingVideo(args.video),
-      location: placeFor(args.neighborhood),
+      location,
+      neighborhoodId: await neighborhoodIdAt(ctx, location),
       status: "active",
       rental: args.rental,
       vehicle: args.vehicle,
@@ -773,6 +776,7 @@ export const update = viewerMutation({
     // Facebook shows a price drop struck through: remember the highest earlier price.
     const before = l.originalPrice ?? l.price;
     const originalPrice = price < before ? before : undefined;
+    const location = placeFor(args.neighborhood);
     await ctx.db.patch(listingId, {
       title: args.title.trim(),
       price,
@@ -783,7 +787,8 @@ export const update = viewerMutation({
       description: args.description.trim(),
       photos,
       video: listingVideo(args.video),
-      location: placeFor(args.neighborhood),
+      location,
+      neighborhoodId: await neighborhoodIdAt(ctx, location),
       rental: args.rental,
       vehicle: args.vehicle,
       meetup: args.meetup,

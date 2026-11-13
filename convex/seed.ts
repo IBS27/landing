@@ -17,12 +17,15 @@ import {
   internalQuery,
   type MutationCtx,
 } from "./_generated/server";
+import type { LatLng } from "./lib/geo";
+import { neighborhoodSlugAt } from "./lib/neighborhoods";
 import schema from "./schema";
 import { seedCityProfiles } from "./seed/cityProfiles";
 import { DAY } from "./seed/lib/time";
 import { buildPlan } from "./seed/plan";
 import { roommateLifestyles } from "./seed/world/roommateLifestyles";
-import { reactionType } from "./validators";
+import { roomSeeds } from "./seed/world/rooms";
+import { type Citations, reactionType } from "./validators";
 
 const T = schema.tables;
 const TABLES = Object.keys(T) as TableNames[];
@@ -60,6 +63,33 @@ export const insertUsers = internalMutation({
   args: { rows: v.array(T.users.validator) },
   handler: (ctx, { rows }) => insertAll(ctx, "users", rows),
 });
+/** Landing rooms (#25) for the personas in `seed/world/rooms.ts`. */
+export const insertRooms = internalMutation({
+  args: { now: v.number() },
+  handler: async (ctx, { now }) => {
+    let n = 0;
+    for (const r of roomSeeds) {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_username", (q) => q.eq("username", r.username))
+        .unique();
+      if (!user) continue; // Persona renamed or removed: skip rather than fail the seed.
+      const at = now - r.daysAgo * DAY;
+      await ctx.db.insert("rooms", {
+        userId: user._id,
+        name: r.name,
+        kind: r.kind,
+        photos: r.photos.map((url) => ({ url, addedAt: at })),
+        size: r.size,
+        vibe: r.vibe ? { ...r.vibe, origin: "typed", updatedAt: at } : undefined,
+        createdAt: at,
+        updatedAt: at,
+      });
+      n++;
+    }
+    return n;
+  },
+});
 export const insertFriendships = internalMutation({
   args: { rows: v.array(T.friendships.validator) },
   handler: (ctx, { rows }) => insertAll(ctx, "friendships", rows),
@@ -84,6 +114,18 @@ export const insertFollows = internalMutation({
 export const insertFriendRequests = internalMutation({
   args: { rows: v.array(T.friendRequests.validator) },
   handler: (ctx, { rows }) => insertAll(ctx, "friendRequests", rows),
+});
+export const insertExternalSources = internalMutation({
+  args: { rows: v.array(T.externalSources.validator) },
+  handler: (ctx, { rows }) => insertAll(ctx, "externalSources", rows),
+});
+export const insertNeighborhoods = internalMutation({
+  args: { rows: v.array(T.neighborhoods.validator) },
+  handler: (ctx, { rows }) => insertAll(ctx, "neighborhoods", rows),
+});
+export const insertNeighborhoodFacts = internalMutation({
+  args: { rows: v.array(T.neighborhoodFacts.validator) },
+  handler: (ctx, { rows }) => insertAll(ctx, "neighborhoodFacts", rows),
 });
 export const insertVouches = internalMutation({
   args: { rows: v.array(T.vouches.validator) },
@@ -332,6 +374,40 @@ export const reset = internalAction({
     U.set(first.handle, firstIds[0]);
     for (const [i, u] of rest.entries()) U.set(u.handle, restIds[i]);
     const uid = (h: string) => lookup(U, h, "user");
+    const rooms: number = await ctx.runMutation(internal.seed.insertRooms, { now: Date.now() });
+
+    // 3b. Neighborhoods, their cited facts and the external sources they cite (#15).
+    const NB = new Map<string, Id<"neighborhoods">>();
+    {
+      const sourceIds: Id<"externalSources">[] = await ctx.runMutation(
+        internal.seed.insertExternalSources,
+        { rows: plan.externalSources.map((s) => s.row) },
+      );
+      const SRC = new Map(plan.externalSources.map((s, i) => [s.key, sourceIds[i]]));
+      const cite = (keys: string[]): Citations => {
+        const [first, ...rest] = keys.map((k) => ({
+          kind: "external" as const,
+          externalSourceId: lookup(SRC, k, "external source"),
+        }));
+        if (!first) throw new Error("[seed] a neighborhood row without sources");
+        return { first, rest };
+      };
+      const ids: Id<"neighborhoods">[] = await ctx.runMutation(internal.seed.insertNeighborhoods, {
+        rows: plan.neighborhoods.map((n) => ({ ...n.row, citations: cite(n.sources) })),
+      });
+      for (const [i, n] of plan.neighborhoods.entries()) NB.set(n.slug, ids[i]);
+      for (const batch of chunks(plan.neighborhoodFacts, 100)) {
+        await ctx.runMutation(internal.seed.insertNeighborhoodFacts, {
+          rows: batch.map((f) => ({
+            ...f.row,
+            neighborhoodId: lookup(NB, f.neighborhood, "neighborhood"),
+            citations: cite(f.sources),
+          })),
+        });
+      }
+    }
+    const nbid = (slug: string | undefined) =>
+      slug ? lookup(NB, slug, "neighborhood") : undefined;
 
     // 4. Social graph and groups.
     const G = new Map<string, Id<"groups">>();
@@ -392,7 +468,11 @@ export const reset = internalAction({
       }),
       (async () => {
         const ids: Id<"groups">[] = await ctx.runMutation(internal.seed.insertGroups, {
-          rows: plan.groups.map((g) => ({ ...g.row, createdBy: uid(g.createdBy) })),
+          rows: plan.groups.map((g) => ({
+            ...g.row,
+            createdBy: uid(g.createdBy),
+            neighborhoodId: nbid(g.neighborhood),
+          })),
         });
         for (const [i, g] of plan.groups.entries()) G.set(g.slug, ids[i]);
       })(),
@@ -418,6 +498,7 @@ export const reset = internalAction({
             ...l.row,
             sellerId: uid(l.seller),
             groupIds: l.groups.length ? l.groups.map(gid) : undefined,
+            neighborhoodId: nbid(l.neighborhood),
           })),
         });
         for (const [i, l] of plan.listings.entries()) L.set(l.key, ids[i]);
@@ -428,6 +509,7 @@ export const reset = internalAction({
             ...e.row,
             hostId: uid(e.host),
             groupId: e.group ? gid(e.group) : undefined,
+            neighborhoodId: nbid(e.neighborhood),
           })),
         });
         for (const [i, e] of plan.events.entries()) E.set(e.key, ids[i]);
@@ -586,6 +668,10 @@ export const reset = internalAction({
     const cityProfileFacts: number = await ctx.runMutation(internal.seed.insertCityProfiles, {
       now: Date.now(),
     });
+    // Learn from the seeded activity (#4), so personas start with inferred interests.
+    const learners: Id<"users">[] = await ctx.runMutation(internal.profileSignals.backfill, {});
+    for (const userId of learners)
+      await ctx.runMutation(internal.profileSignals.recompute, { userId });
 
     // Demo rentals for "Things to check" (#11).
     await ctx.runMutation(internal.trust.seedDemo, {});
@@ -602,6 +688,9 @@ export const reset = internalAction({
     return {
       ms: Date.now() - started,
       counts: {
+        neighborhoods: plan.neighborhoods.length,
+        neighborhoodFacts: plan.neighborhoodFacts.length,
+        externalSources: plan.externalSources.length,
         users: plan.users.length,
         friendships: plan.friendships.length * 2,
         friendRequests: plan.friendRequests.length,
@@ -612,6 +701,7 @@ export const reset = internalAction({
         listings: plan.listings.length,
         events: plan.events.length,
         cityProfileFacts,
+        rooms,
         eventResponses: plan.eventResponses.length,
         posts: plan.posts.length,
         comments: plan.posts.reduce((s, p) => s + p.comments.length, 0),
@@ -651,6 +741,9 @@ export const stats = internalQuery({
       events,
       eventResponses,
       notifications,
+      neighborhoods,
+      neighborhoodFacts,
+      externalSources,
     ] = await Promise.all([
       all("users"),
       all("friendships"),
@@ -669,6 +762,9 @@ export const stats = internalQuery({
       all("events"),
       all("eventResponses"),
       all("notifications"),
+      all("neighborhoods"),
+      all("neighborhoodFacts"),
+      all("externalSources"),
     ]);
     const problems: string[] = [];
     const ids = (docs: { _id: string }[]) => new Set<string>(docs.map((d) => d._id));
@@ -681,6 +777,8 @@ export const stats = internalQuery({
       conversations: ids(conversations),
       messages: ids(messages),
       events: ids(events),
+      neighborhoods: ids(neighborhoods),
+      externalSources: ids(externalSources),
     };
     const ref = (set: keyof typeof has, id: string | undefined, where: string) => {
       if (id !== undefined && !has[set].has(id)) problems.push(`dangling ${set} id in ${where}`);
@@ -821,6 +919,36 @@ export const stats = internalQuery({
       ref("conversations", n.conversationId, w);
     }
 
+    // Neighborhoods (#15): facts and boundaries cite real sources, and every neighborhoodId
+    // matches the neighborhood its record's coordinates fall in.
+    const citesOk = (c: Citations, w: string) => {
+      for (const src of [c.first, ...c.rest]) {
+        if (src.kind !== "external") problems.push(`${w} cites a ${src.kind}`);
+        else ref("externalSources", src.externalSourceId, w);
+      }
+    };
+    for (const n of neighborhoods) citesOk(n.citations, `neighborhood ${n.slug}`);
+    for (const f of neighborhoodFacts) {
+      const w = `fact ${f.key} (${f._id})`;
+      ref("neighborhoods", f.neighborhoodId, w);
+      citesOk(f.citations, w);
+    }
+    const slugOf = new Map<string, string>(neighborhoods.map((n) => [n._id, n.slug]));
+    const placed = (p: LatLng | undefined, id: string | undefined, w: string) => {
+      const want = p ? neighborhoodSlugAt(p) : null;
+      const got = id ? (slugOf.get(id) ?? "dangling") : null;
+      if (want !== got) problems.push(`${w} neighborhoodId is ${got}, coordinates say ${want}`);
+    };
+    for (const l of listings) {
+      const p =
+        l.location.lat !== undefined && l.location.lng !== undefined
+          ? { lat: l.location.lat, lng: l.location.lng }
+          : undefined;
+      placed(p, l.neighborhoodId, `listing ${l._id}`);
+    }
+    for (const e of events) placed(e.point, e.neighborhoodId, `event ${e._id}`);
+    for (const g of groups) placed(g.point, g.neighborhoodId, `group ${g.slug}`);
+
     // Main-persona overview.
     const personas = users
       .filter((u) => u.isPersona)
@@ -842,6 +970,9 @@ export const stats = internalQuery({
     const now = Date.now();
     return {
       counts: {
+        neighborhoods: neighborhoods.length,
+        neighborhoodFacts: neighborhoodFacts.length,
+        externalSources: externalSources.length,
         users: users.length,
         people: users.filter((u) => u.kind !== "page").length,
         pages: users.filter((u) => u.kind === "page").length,
