@@ -733,6 +733,9 @@ export const reset = internalAction({
     // Maya's place (#132): the Mission rental she took, after City Profiles.
     await ctx.runMutation(internal.myPlace.seedDemo, { listingId: lid("derek-mission-1br") });
 
+    // Priya moving out (#141): her sublet linked to her place, with a renter's chat.
+    await ctx.runMutation(internal.subleases.seedDemo, { listingId: lid("priya-elmwood-room") });
+
     // Move-in Crew opt-ins (#30), after City Profiles.
     await ctx.runMutation(internal.crews.seedDemo, {});
 

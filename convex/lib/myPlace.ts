@@ -50,3 +50,33 @@ export async function placeListingId(
   const listingId = (await currentPlace(ctx, userId))?.listingId;
   return listingId && (await canSeeListing(ctx, userId, listingId)) ? listingId : undefined;
 }
+
+/** Marketplace chats read when counting a sublet's renters. */
+const SUBLET_CHATS_MAX = 100;
+
+/**
+ * The newest sublet the owner listed from this place (#141), with its
+ * listing's state, or null. Call it only with the place owner's id.
+ */
+export async function placeSublet(ctx: QueryCtx, userId: Id<"users">, placeId: Id<"places">) {
+  const rows = await ctx.db
+    .query("sublets")
+    .withIndex("by_place", (q) => q.eq("placeId", placeId))
+    .collect();
+  const s = rows.filter((r) => r.ownerId === userId).sort((a, b) => b.createdAt - a.createdAt)[0];
+  const listing = s ? await ctx.db.get(s.listingId) : null;
+  if (!s || !listing) return null;
+  const chats = await ctx.db
+    .query("conversations")
+    .withIndex("by_listing", (q) => q.eq("listingId", listing._id))
+    .take(SUBLET_CHATS_MAX);
+  return {
+    _id: s._id,
+    listingId: listing._id,
+    title: listing.title,
+    rent: listing.price,
+    /** active: listed; pending: a renter is lined up; sold: subleased. */
+    status: listing.status,
+    chats: chats.length,
+  };
+}

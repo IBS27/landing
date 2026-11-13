@@ -16,6 +16,7 @@ import {
 import { type ReactNode, useEffect, useState } from "react";
 import { useM } from "@/app/viewer";
 import { toConversation, toEvent, toGroup, toListing } from "@/landing/links";
+import { RenterTrust } from "@/landing/move-out/RenterTrust";
 import { PollPreview } from "@/landing/plans/ChatPoll";
 import { cn, price, shortAge } from "@/lib/format";
 import { SourcesChip } from "@/ui/Citations";
@@ -592,6 +593,10 @@ export function ProposalCard({ p }: { p: ProposalView }) {
 
       <div className="flex flex-col gap-3 px-4 pt-3">
         {draft ? <EditForm p={p} draft={draft} onChange={setDraft} /> : <Preview p={p} />}
+        {/* A reply to a renter about the owner's sublet: who the renter is, with sources (#141). */}
+        {p.origin.task === "spark.subletReply" &&
+          (p.kind === "message" || p.kind === "offer") &&
+          p.conversation && <RenterTrust conversationId={p.conversation._id} />}
         <WhyBox p={p} />
       </div>
 

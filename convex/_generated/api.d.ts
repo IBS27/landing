@@ -80,6 +80,7 @@ import type * as lib_protectedText from "../lib/protectedText.js";
 import type * as lib_reminders from "../lib/reminders.js";
 import type * as lib_rentalFit from "../lib/rentalFit.js";
 import type * as lib_rentalMedia from "../lib/rentalMedia.js";
+import type * as lib_renterTrust from "../lib/renterTrust.js";
 import type * as lib_reports from "../lib/reports.js";
 import type * as lib_roomVibeTask from "../lib/roomVibeTask.js";
 import type * as lib_roommates from "../lib/roommates.js";
@@ -259,6 +260,7 @@ declare const fullApi: ApiFromModules<{
   "lib/reminders": typeof lib_reminders;
   "lib/rentalFit": typeof lib_rentalFit;
   "lib/rentalMedia": typeof lib_rentalMedia;
+  "lib/renterTrust": typeof lib_renterTrust;
   "lib/reports": typeof lib_reports;
   "lib/roomVibeTask": typeof lib_roomVibeTask;
   "lib/roommates": typeof lib_roommates;

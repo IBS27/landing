@@ -905,11 +905,18 @@ export default defineSchema({
     notes: v.optional(v.string()),
     /** Whether Muse drafts replies to renters. */
     museReplies: v.union(v.literal("active"), v.literal("paused")),
+    /**
+     * The lister's place (`places`) this sublet is for, when listed from My
+     * Place. Unset for a sublet made from the blank form. Private like the
+     * place: read it only for the place's owner.
+     */
+    placeId: v.optional(v.id("places")),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_listing", ["listingId"])
-    .index("by_owner", ["ownerId", "createdAt"]),
+    .index("by_owner", ["ownerId", "createdAt"])
+    .index("by_place", ["placeId"]),
 
   /** One renter's chat about a sublet: Muse's waiting draft and last move there. */
   subletChats: defineTable({

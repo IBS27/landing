@@ -1,13 +1,21 @@
 import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
-import { internalAction, internalMutation, internalQuery } from "./_generated/server";
+import {
+  internalAction,
+  internalMutation,
+  internalQuery,
+  type QueryCtx,
+} from "./_generated/server";
 import { defineTask, runAgent } from "./ai/agent";
 import { cite } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
+import { NEIGHBORHOODS } from "./lib/listings";
+import { canSeeListing, currentPlace, placeSublet } from "./lib/myPlace";
 import { locationPoint, neighborhoodIdAt } from "./lib/neighborhoods";
 import { dropDraft, logEvent, propose } from "./lib/proposals";
 import { redactProtected } from "./lib/protectedText";
+import { factsForModel, renterTrust } from "./lib/renterTrust";
 import {
   type SubletInput,
   type SubletMove,
@@ -16,6 +24,8 @@ import {
 } from "./lib/subleases";
 import { BADGE } from "./lib/trust";
 import { photoInput, placeFor, resolvePhotos, validate } from "./listings";
+import { insertMessage } from "./messenger";
+import { syncProfile } from "./myPlace";
 import { negotiationMove } from "./validators";
 
 /**
@@ -23,6 +33,11 @@ import { negotiationMove } from "./validators";
  * `listingType: "sublet"`, so #11's verified badges and scam signals and #12's
  * vouching apply on its Landing listing view. The lister sets a lowest rent and
  * Muse (Spark) drafts replies to renters; every reply is a proposal (#6).
+ *
+ * Move out as one flow (#141): a sublet can start from the lister's place
+ * (`fromPlace` prefills the form, `placeId` links them), and Muse's replies
+ * and the lister's view of each chat carry cited trust facts about the renter
+ * (`renterTrust`).
  */
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -48,9 +63,19 @@ export const create = viewerMutation({
     availableTo: v.number(),
     furnished: v.boolean(),
     notes: v.optional(v.string()),
+    /** The viewer's current place, when listed from My Place. */
+    placeId: v.optional(v.id("places")),
   },
   handler: async (ctx, a) => {
     const ownerId = ctx.viewer._id;
+    if (a.placeId) {
+      const place = await ctx.db.get(a.placeId);
+      if (!place || place.userId !== ownerId || place.endedAt !== undefined)
+        throw new ConvexError("Place not found");
+      const open = await placeSublet(ctx, ownerId, place._id);
+      if (open && open.status !== "sold")
+        throw new ConvexError("You've already listed a sublet for this place");
+    }
     const photos = await resolvePhotos(ctx, a.photos);
     validate({ title: a.title, price: a.rent, description: a.description }, photos.length);
     const rent = Math.round(a.rent);
@@ -95,6 +120,7 @@ export const create = viewerMutation({
       minRent,
       notes: a.notes?.trim() || undefined,
       museReplies: "active",
+      placeId: a.placeId,
       createdAt: now,
       updatedAt: now,
     });
@@ -176,6 +202,7 @@ export const mine = viewerQuery({
       out.push({
         _id: s._id,
         listingId: l._id,
+        placeId: s.placeId ?? null,
         title: l.title,
         rent: l.price,
         status: l.status,
@@ -191,6 +218,89 @@ export const mine = viewerQuery({
       });
     }
     return out;
+  },
+});
+
+/** The sublet form's neighborhood (a NEIGHBORHOODS name) for a place, or null. */
+function formNeighborhood(names: (string | undefined)[]): string | null {
+  for (const name of names) if (name && NEIGHBORHOODS.some((n) => n.name === name)) return name;
+  return null;
+}
+
+/**
+ * The sublet form filled in from the viewer's current place, or null with no
+ * place. Listing facts (type, rooms, furnished, rent, photos) come from the
+ * rental they took, while they can still see it; a place found elsewhere has
+ * only its neighborhood and dates. Nothing is listed until they submit.
+ */
+export const fromPlace = viewerQuery({
+  args: {},
+  handler: async (ctx) => {
+    const userId = ctx.viewer._id;
+    const place = await currentPlace(ctx, userId);
+    if (!place) return null;
+    const [hood, listing, open] = await Promise.all([
+      ctx.db.get(place.neighborhoodId),
+      place.listingId && (await canSeeListing(ctx, userId, place.listingId))
+        ? ctx.db.get(place.listingId)
+        : null,
+      placeSublet(ctx, userId, place._id),
+    ]);
+    const r = listing?.rental;
+    const propertyType =
+      r?.propertyType === "room" || r?.propertyType === "studio"
+        ? r.propertyType
+        : r
+          ? ("apartment" as const)
+          : null;
+    const hoodName = hood ? (hood.shortName ?? hood.name) : null;
+    return {
+      placeId: place._id,
+      status: place.status,
+      title: hoodName ? `Sublet in ${hoodName}` : "",
+      neighborhood: formNeighborhood([listing?.location.neighborhood, hood?.shortName, hood?.name]),
+      propertyType,
+      bedrooms: r ? r.bedrooms : null,
+      bathrooms: r ? r.bathrooms : null,
+      furnished: r?.furnished ?? null,
+      rent: listing?.price ?? null,
+      photos: listing?.photos ?? [],
+      /** "YYYY-MM-DD": the planned move-out. */
+      availableFrom: place.moveOut ?? null,
+      /** The sublet already listed for this place and not yet taken. */
+      open: open && open.status !== "sold" ? open : null,
+    };
+  },
+});
+
+/** The sublet a Marketplace chat is about, when `viewerId` is its lister, and the renter. */
+async function listerChat(
+  ctx: QueryCtx,
+  viewerId: Id<"users">,
+  conversationId: Id<"conversations">,
+) {
+  const conv = await ctx.db.get(conversationId);
+  if (conv?.kind !== "marketplace" || !conv.listingId || !conv.memberIds.includes(viewerId))
+    return null;
+  const listingId = conv.listingId;
+  const sublet = await ctx.db
+    .query("sublets")
+    .withIndex("by_listing", (q) => q.eq("listingId", listingId))
+    .unique();
+  const renterId = conv.memberIds.find((id) => id !== viewerId);
+  if (sublet?.ownerId !== viewerId || !renterId) return null;
+  return { sublet, renterId };
+}
+
+/**
+ * Trust facts about the renter in a sublet chat, each with its sources. Only
+ * for the sublet's lister, and shown whether or not AI is on.
+ */
+export const renterTrustFor = viewerQuery({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, { conversationId }) => {
+    const chat = await listerChat(ctx, ctx.viewer._id, conversationId);
+    return chat ? renterTrust(ctx, ctx.viewer._id, chat.renterId) : null;
   },
 });
 
@@ -213,6 +323,7 @@ Answer only from the listing facts given. Pick one move:
 - accept: the renter offered a rent at or above limits.minRent; agree (amount = that rent, capped at askingRent) and suggest seeing the place first.
 - walk_away: the renter won't go up to limits.minRent; decline politely (amount = 0).
 Be friendly and brief (one to three sentences). Use the lister's notes.
+renter lists what the lister's network says about the renter, each fact with its source. Use those facts only in rationale, naming the source ("Identity verified, per their Facebook profile"). Never put them in text: the renter doesn't see them. They never change the rent rules. Say nothing else about who the renter is.
 Never write a rent under limits.minRent, not even to quote the renter. Never share the street address, never ask for a deposit or any payment before a viewing and a signed sublease, and never mention payment apps.
 rationale: one sentence to the lister on why this reply.`,
   output: replyOutput,
@@ -264,6 +375,8 @@ export const context = internalQuery({
         p.payload.kind === "offer" &&
         p.payload.conversationId === conversationId,
     );
+    const renterId = conv.memberIds.find((id) => id !== sublet.ownerId);
+    const trust = renterId ? await renterTrust(ctx, sublet.ownerId, renterId) : null;
     const r = listing.rental;
     const input: SubletInput = {
       listing: {
@@ -287,6 +400,7 @@ export const context = internalQuery({
           ? Math.min(listing.price, Math.max(sublet.minRent, lastSent.payload.amount))
           : null,
       chat,
+      renter: trust ? factsForModel(trust.facts) : [],
     };
     return {
       sublet,
@@ -414,3 +528,69 @@ async function retire(ctx: Parameters<typeof dropDraft>[0], row: Doc<"subletChat
   await ctx.db.patch(p._id, { status: "expired", decidedAt: now, updatedAt: now });
   await logEvent(ctx, p._id, p.ownerId, "expired", "system", now);
 }
+
+/* ── Demo seed ────────────────────────────────────────────────────────── */
+
+const byUsername = (ctx: QueryCtx, username: string) =>
+  ctx.db
+    .query("users")
+    .withIndex("by_username", (q) => q.eq("username", username))
+    .unique();
+
+/**
+ * Priya is moving out of her place in January (#141): her room's sublet is
+ * linked to it, and a renter has written, so Muse drafts a reply with the
+ * renter's trust facts. Maya's story (moving in) is untouched. Run by `seed:reset`.
+ */
+export const seedDemo = internalMutation({
+  args: { listingId: v.id("listings") },
+  handler: async (ctx, { listingId }) => {
+    const [priya, renter, listing] = await Promise.all([
+      byUsername(ctx, "priya.raman"),
+      byUsername(ctx, "theo.grant"),
+      ctx.db.get(listingId),
+    ]);
+    if (!priya || !renter || listing?.sellerId !== priya._id || !listing.neighborhoodId) return;
+    if (await currentPlace(ctx, priya._id)) return;
+    const now = Date.now();
+    const placeId = await ctx.db.insert("places", {
+      userId: priya._id,
+      neighborhoodId: listing.neighborhoodId,
+      moveIn: "2025-08-20",
+      moveOut: "2027-01-04",
+      status: "moving_out",
+      createdAt: now,
+      updatedAt: now,
+    });
+    await syncProfile(ctx, priya._id);
+    await ctx.db.insert("sublets", {
+      listingId,
+      ownerId: priya._id,
+      minRent: Math.round((listing.price * 0.92) / 25) * 25,
+      notes: "Leaving for Copenhagen in early January. Flexible on the start date.",
+      museReplies: "active",
+      placeId,
+      createdAt: now,
+      updatedAt: now,
+    });
+    const conversationId = await ctx.db.insert("conversations", {
+      kind: "marketplace",
+      listingId,
+      memberIds: [renter._id, priya._id],
+      createdAt: now,
+      lastMessageAt: now,
+    });
+    for (const userId of [renter._id, priya._id])
+      await ctx.db.insert("conversationMembers", {
+        conversationId,
+        userId,
+        lastReadAt: userId === renter._id ? now : 0,
+        lastMessageAt: now,
+      });
+    // Through Messenger's own path, so Muse drafts Priya's reply as it would live.
+    await insertMessage(ctx, conversationId, renter._id, {
+      text: "Hi Priya! Is your room still available from January? I'm starting a co-op in the city then.",
+      attachments: [],
+    });
+  },
+});
