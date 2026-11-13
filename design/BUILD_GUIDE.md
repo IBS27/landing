@@ -8,6 +8,7 @@ The goal is a faithful, working clone of desktop facebook.com (1440×900, light 
 - Dev servers are already running. **Do not start or stop them.**
   - Vite: http://127.0.0.1:5173
   - `bunx convex dev` (`bun run dev:convex`) auto-pushes every change in `convex/`. Watch its output after Convex edits: a type error there blocks pushes for everyone sharing the deployment, so fix it immediately.
+- **Agent worktrees never touch a shared Convex deployment.** From a PR branch or worktree, don't run `convex dev`, `convex deploy`, `convex codegen`, `convex run` with writes, or `bun run seed`. `convex codegen` uploads your branch's functions to typecheck them, which changes the live code and indexes for everyone using that deployment. When a branch adds or removes a Convex module, edit `convex/_generated/api.d.ts` by hand in the format codegen writes (one import and one `fullApi` entry per module). The next `convex dev` on `main` regenerates it. Test backend code with `bun run test` and the in-memory `tests/fakeDb.ts`.
 - Checks: `bun run typecheck` and `bun run lint` (Biome; `bun run format` auto-fixes). Leave both clean for your files. Never use `any`.
 
 ## Conventions
