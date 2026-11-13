@@ -1338,7 +1338,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "bay-area-climbers",
     at: daysAgo(4, "20:30"),
     text: "Castle Rock on Sunday: rock was dry until about 2, then the fog rolled up the ridge and everything went greasy. Goat Rock had damp streaks in the usual spots. Parking lot was empty, which tells you everything about November",
-    photos: ["granite cliff", "climbing gear"],
+    photos: ["castle rock", "climbing gear"],
     reactions: 16,
     comments: [
       {
@@ -1492,7 +1492,6 @@ export const groupPosts: readonly PostSeed[] = [
     in: "bay-area-hikers",
     at: daysAgo(4, "19:45"),
     text: "Castle Pass + Round Valley, Sunday. Snow from the trailhead, packed but icy on the climb to the pass, microspikes absolutely needed. Frog Lake partially frozen. Castle Peak lot was half full by 9. Anything toward the peak crosses avalanche terrain so check the Sierra Avalanche Center before you go.",
-    photos: ["snowy lake", "snowy trail"],
     reactions: 33,
     comments: [
       {
@@ -1533,7 +1532,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "bay-area-hikers",
     at: hoursAgo(11),
     text: "Tahoe got 8 inches overnight. If you're heading up 80: chains in the car, check Caltrans before you leave, keep dogs leashed near the plows",
-    photos: ["snowy mountains"],
+    photos: ["posts/snowy-mountains-01.jpg"],
     reactions: 29,
     mood: "wow",
     comments: [

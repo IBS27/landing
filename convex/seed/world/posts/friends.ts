@@ -1483,7 +1483,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "grace.liu",
     at: daysAgo(19, "18:00"),
     text: "probably the last dry weekend at castle rock. sandstone szn is over (never climb it wet) 😔 see you in april",
-    photos: ["granite cliff", "granite cliff", "forest river"],
+    photos: ["castle rock", "castle rock", "forest river"],
     place: "Castle Rock State Park",
     tagged: ["arjun.mehta"],
     reactions: 23,
@@ -1556,7 +1556,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "ben.carter",
     at: daysAgo(3, "18:00"),
     text: "first real snow in tahoe and the ski tune line is out the door. bring us coffee and we'll move you up",
-    photos: ["ski shop", "snowy mountains"],
+    photos: ["ski shop"],
     reactions: 19,
     comments: [
       {
