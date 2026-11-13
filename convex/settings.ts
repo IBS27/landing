@@ -126,7 +126,7 @@ export const blockSearch = viewerQuery({
     const [users, mine, friends] = await Promise.all([
       ctx.db
         .query("users")
-        .withSearchIndex("search_name", (s) => s.search("name", term))
+        .withSearchIndex("search_name", (s) => s.search("name", term).eq("isDemo", undefined))
         .take(20),
       ctx.db
         .query("blocks")

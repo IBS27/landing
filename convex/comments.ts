@@ -2,6 +2,7 @@ import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { isBlockedEitherWay } from "./lib/blocks";
+import { deleteCommentTree } from "./lib/cascade";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { notify } from "./lib/notify";
 import { canView, loadAudience } from "./lib/posts";
@@ -286,38 +287,7 @@ export const remove = viewerMutation({
       (!!post && (await actsAsAuthor(ctx, ctx.viewer._id, post.authorId)));
     if (!allowed) throw new ConvexError("You can't delete this comment");
     // Remove the comment and its whole reply subtree.
-    const doomed: Id<"comments">[] = [commentId];
-    for (let i = 0; i < doomed.length; i++) {
-      const children = await ctx.db
-        .query("comments")
-        .withIndex("by_parent", (q) => q.eq("parentId", doomed[i]))
-        .collect();
-      doomed.push(...children.map((ch) => ch._id));
-    }
-    for (const id of doomed) {
-      const rx = await ctx.db
-        .query("reactions")
-        .withIndex("by_target", (q) => q.eq("targetType", "comment").eq("targetId", id))
-        .collect();
-      for (const r of rx) await ctx.db.delete(r._id);
-      await ctx.db.delete(id);
-    }
-    // Comment and reply notifications quote the text, so they go with it.
-    const gone = new Set<Id<"comments">>(doomed);
-    const notes = await ctx.db
-      .query("notifications")
-      .withIndex("by_post", (q) => q.eq("postId", c.postId))
-      .collect();
-    for (const n of notes) if (n.commentId && gone.has(n.commentId)) await ctx.db.delete(n._id);
-    if (c.parentId) {
-      const parent = await ctx.db.get(c.parentId);
-      if (parent)
-        await ctx.db.patch(parent._id, { replyCount: Math.max(0, parent.replyCount - 1) });
-    }
-    if (post)
-      await ctx.db.patch(post._id, {
-        commentCount: Math.max(0, post.commentCount - doomed.length),
-      });
+    await deleteCommentTree(ctx, c);
   },
 });
 

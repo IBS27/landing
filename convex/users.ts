@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
 import { viewerMutation, viewerQuery } from "./lib/functions";
-import { userSummary } from "./lib/users";
+import { ACTIVE_WRITE_MS, userSummary } from "./lib/users";
 
 /** Demo accounts shown in the account switcher. Public: needed before a viewer exists. */
 export const personas = query({
@@ -31,11 +31,18 @@ export const byUsername = query({
   },
 });
 
-/** Presence heartbeat; the client calls this every minute while the tab is open. */
+/**
+ * Presence heartbeat; the client calls this every minute while the tab is open.
+ * It writes at most every `ACTIVE_WRITE_MS`: each write re-runs every query
+ * that reads the user (all of the viewer's own), and demo cleanup only needs
+ * to know about days of inactivity.
+ */
 export const heartbeat = viewerMutation({
   args: {},
   handler: async (ctx) => {
-    await ctx.db.patch(ctx.viewer._id, { lastActiveAt: Date.now() });
+    const now = Date.now();
+    if (now - ctx.viewer.lastActiveAt < ACTIVE_WRITE_MS) return;
+    await ctx.db.patch(ctx.viewer._id, { lastActiveAt: now });
   },
 });
 

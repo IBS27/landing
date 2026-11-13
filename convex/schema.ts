@@ -122,11 +122,18 @@ export default defineSchema({
     mutedStoryAuthorIds: v.optional(v.array(v.id("users"))),
     /** Contacts → Options → "Turn off active status": others see the user as offline. */
     activeStatusOff: v.optional(v.boolean()),
+    /**
+     * A private demo user, made per browser by `demo.start` from a starting
+     * template. `lastActiveAt` tracks activity for a later cleanup.
+     */
+    isDemo: v.optional(v.boolean()),
   })
     .index("by_username", ["username"])
     .index("by_persona", ["isPersona"])
     .index("by_page_owner", ["pageOwnerId"])
-    .searchIndex("search_name", { searchField: "name" }),
+    .index("by_demo_active", ["isDemo", "lastActiveAt"])
+    .index("by_demo_joined", ["isDemo", "joinedAt"])
+    .searchIndex("search_name", { searchField: "name", filterFields: ["isDemo"] }),
 
   /** Stored in both directions once accepted, so lookups are a single index read. */
   friendships: defineTable({
@@ -181,6 +188,7 @@ export default defineSchema({
     .index("by_slug", ["slug"])
     .index("by_activity", ["lastActivityAt"])
     .index("by_neighborhood", ["neighborhoodId", "lastActivityAt"])
+    .index("by_creator", ["createdBy"])
     .searchIndex("search_name", { searchField: "name" }),
 
   groupMembers: defineTable({
@@ -257,14 +265,17 @@ export default defineSchema({
     replyCount: v.number(),
   })
     .index("by_post", ["postId", "createdAt"])
-    .index("by_parent", ["parentId", "createdAt"]),
+    .index("by_parent", ["parentId", "createdAt"])
+    .index("by_author", ["authorId"]),
 
   /** Private comment downvotes (only the voter sees their own). */
   commentDownvotes: defineTable({
     commentId: v.id("comments"),
     userId: v.id("users"),
     createdAt: v.number(),
-  }).index("by_comment_user", ["commentId", "userId"]),
+  })
+    .index("by_comment_user", ["commentId", "userId"])
+    .index("by_user", ["userId"]),
 
   reactions: defineTable({
     targetType: reactionTarget,
@@ -297,7 +308,8 @@ export default defineSchema({
     viewedAt: v.number(),
   })
     .index("by_story", ["storyId", "viewedAt"])
-    .index("by_story_viewer", ["storyId", "viewerId"]),
+    .index("by_story_viewer", ["storyId", "viewerId"])
+    .index("by_viewer", ["viewerId"]),
 
   saved: defineTable({
     userId: v.id("users"),
@@ -580,7 +592,8 @@ export default defineSchema({
   })
     .index("by_user", ["userId", "createdAt"])
     .index("by_user_unseen", ["userId", "seen"])
-    .index("by_post", ["postId"]),
+    .index("by_post", ["postId"])
+    .index("by_actor", ["actorId"]),
 
   /**
    * Citations: an external page (DataSF, SFMTA...) as fetched at `fetchedAt`.
@@ -960,7 +973,9 @@ export default defineSchema({
     createdAt: v.number(),
     startedAt: v.optional(v.number()),
     finishedAt: v.optional(v.number()),
-  }).index("by_kind_key", ["kind", "key", "createdAt"]),
+  })
+    .index("by_kind_key", ["kind", "key", "createdAt"])
+    .index("by_user", ["userId"]),
 
   /* ---------------- Landing ---------------- */
 
@@ -1179,7 +1194,11 @@ export default defineSchema({
     matchBy,
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_user", ["userId"]),
+    /** A demo user's opt-in: they see a crew, but stay out of everyone else's. */
+    demo: v.optional(v.boolean()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_demo", ["demo"]),
 
   /**
    * Landing Weekend Routes (#18): one shared route per neighborhood, built from

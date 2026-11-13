@@ -159,7 +159,11 @@ export const suggestions = viewerQuery({
         .query("friendRequests")
         .withIndex("by_from", (q) => q.eq("fromId", viewerId))
         .collect(),
-      ctx.db.query("users").collect(),
+      // Everyone but the private demo users (one per browser).
+      ctx.db
+        .query("users")
+        .withIndex("by_demo_active", (q) => q.eq("isDemo", undefined))
+        .collect(),
       blockedSet(ctx, viewerId),
     ]);
     const friendSet = new Set(friends);

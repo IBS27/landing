@@ -249,7 +249,7 @@ export const typeahead = viewerQuery({
     const [users, groups, events] = await Promise.all([
       ctx.db
         .query("users")
-        .withSearchIndex("search_name", (s) => s.search("name", q))
+        .withSearchIndex("search_name", (s) => s.search("name", q).eq("isDemo", undefined))
         .take(12),
       ctx.db
         .query("groups")
@@ -395,7 +395,7 @@ export const results = viewerQuery({
       const users = (
         await ctx.db
           .query("users")
-          .withSearchIndex("search_name", (s) => s.search("name", q))
+          .withSearchIndex("search_name", (s) => s.search("name", q).eq("isDemo", undefined))
           .take(100)
       ).filter((u) => !a.blocked.has(u._id));
       if (want.has("people")) {
@@ -507,7 +507,7 @@ export const peopleCities = viewerQuery({
     if (!q) return [];
     const users = await ctx.db
       .query("users")
-      .withSearchIndex("search_name", (s) => s.search("name", q))
+      .withSearchIndex("search_name", (s) => s.search("name", q).eq("isDemo", undefined))
       .take(100);
     const a = await loadAudience(ctx, ctx.viewer._id);
     const cities = await Promise.all(
