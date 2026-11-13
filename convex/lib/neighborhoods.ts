@@ -96,6 +96,13 @@ export function neighborhoodSlugAt(p: LatLng): NeighborhoodSlug | null {
   return best;
 }
 
+/** A listing `location`'s point, when it has coordinates. */
+export function locationPoint(loc: { lat?: number; lng?: number }): LatLng | undefined {
+  return loc.lat !== undefined && loc.lng !== undefined
+    ? { lat: loc.lat, lng: loc.lng }
+    : undefined;
+}
+
 /** A client-supplied point, checked: finite, on Earth, rounded to ~1 m. */
 export function checkPoint(p: LatLng): LatLng {
   if (
@@ -107,6 +114,21 @@ export function checkPoint(p: LatLng): LatLng {
     throw new ConvexError("That location isn't valid");
   }
   return { lat: Math.round(p.lat * 1e5) / 1e5, lng: Math.round(p.lng * 1e5) / 1e5 };
+}
+
+/**
+ * Every neighborhood containing `p` or within `meters` of it, in slug order. For things that
+ * serve both sides of a boundary street, like a station on Market Street.
+ */
+export function neighborhoodsNear(p: LatLng, meters: number): NeighborhoodSlug[] {
+  if (!Number.isFinite(p.lat) || !Number.isFinite(p.lng)) return [];
+  return neighborhoodShapes()
+    .filter(
+      (s) =>
+        inBBox(p, s.bbox, meters) &&
+        (pointInMultiPolygon(p, s.polygon) || edgeDistanceMeters(p, s.polygon) <= meters),
+    )
+    .map((s) => s.slug);
 }
 
 /** The `neighborhoods` row for the point's neighborhood, if it's in San Francisco. */

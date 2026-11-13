@@ -4,6 +4,7 @@ import { join } from "node:path";
 import type { MutationCtx } from "../convex/_generated/server";
 import * as events from "../convex/events";
 import * as groups from "../convex/groups";
+import { snippet } from "../convex/lib/citations";
 import {
   decodePolyline,
   distanceMeters,
@@ -22,8 +23,10 @@ import {
   neighborhoodShape,
   neighborhoodShapes,
   neighborhoodSlugAt,
+  neighborhoodsNear,
   SF_NEIGHBORHOODS,
 } from "../convex/lib/neighborhoods";
+import * as listings from "../convex/listings";
 import { neighborhoods as places } from "../convex/seed/lib/places";
 import { buildPlan } from "../convex/seed/plan";
 import type { CommentSeed, ReplySeed } from "../convex/seed/types";
@@ -263,6 +266,34 @@ describe("neighborhoodId assignment", () => {
       tables.groups.find((g) => g._id === (r as { groupId: string }).groupId)?.neighborhoodId;
     expect([nb(based), nb(none)]).toEqual(["neighborhoods:inner-sunset", undefined]);
   });
+
+  test("listings: set on create; an edit in the same place keeps the point and badges", async () => {
+    const { tables, ctx } = world();
+    tables.listings = [];
+    const fields = {
+      title: "Room near Valencia",
+      price: 1800,
+      category: "propertyrentals",
+      description: "",
+      photos: [{ url: "/seed/a.jpg" }],
+      neighborhood: "Mission",
+    };
+    const id = await call(listings.create, ctx, fields);
+    const row = () => tables.listings.find((l) => l._id === id);
+    expect(row()?.neighborhoodId).toBe("neighborhoods:mission");
+    // A rental at its cross streets, verified: a price edit keeps both.
+    const badges = [{ kind: "property_verified", label: "Property verified" }];
+    const location = { city: "San Francisco, CA", neighborhood: "Mission", ...VALENCIA };
+    Object.assign(row() ?? {}, { location, badges });
+    await call(listings.update, ctx, { ...fields, listingId: id, price: 1700 });
+    expect([row()?.location, row()?.badges, row()?.neighborhoodId]).toEqual([
+      location,
+      badges,
+      "neighborhoods:mission",
+    ]);
+    await call(listings.update, ctx, { ...fields, listingId: id, neighborhood: "Inner Sunset" });
+    expect([row()?.badges, row()?.neighborhoodId]).toEqual([[], "neighborhoods:inner-sunset"]);
+  });
 });
 
 /* ---------- Seed plan ---------- */
@@ -340,16 +371,25 @@ describe("seed plan: facts", () => {
     }
   });
 
-  test("facts sit inside the neighborhood they're filed under", () => {
+  test("facts sit inside (or, for stations, beside) the neighborhood they're filed under", () => {
     for (const f of plan.neighborhoodFacts) {
       const where = `${f.row.key} in ${f.neighborhood}`;
       const r = f.row;
-      if (r.kind === "transit_station" || r.kind === "campus") {
+      if (r.kind === "campus") {
         expect([where, neighborhoodSlugAt(r.point)]).toEqual([where, f.neighborhood]);
+      } else if (r.kind === "transit_station") {
+        expect([where, neighborhoodsNear(r.point, 40).includes(f.neighborhood)]).toEqual([
+          where,
+          true,
+        ]);
       } else if (r.kind === "transit_line") {
         expect(r.stops.length).toBeGreaterThan(0);
-        for (const s of r.stops)
-          expect([where, neighborhoodSlugAt(s.point)]).toEqual([where, f.neighborhood]);
+        for (const s of r.stops) {
+          expect([where, neighborhoodsNear(s.point, 40).includes(f.neighborhood)]).toEqual([
+            where,
+            true,
+          ]);
+        }
       } else {
         const shape = neighborhoodShape(f.neighborhood);
         const near = r.path.some(
@@ -358,6 +398,74 @@ describe("seed plan: facts", () => {
         );
         expect([where, near]).toEqual([where, true]);
       }
+    }
+  });
+
+  test("a station and the line stops at it are filed under the same neighborhoods", () => {
+    const filed = new Map<string, Set<string>>();
+    for (const f of plan.neighborhoodFacts) {
+      const names =
+        f.row.kind === "transit_station"
+          ? [`station:${f.row.system}:${f.row.name}`]
+          : f.row.kind === "transit_line"
+            ? f.row.stops.map((s) => `stop:${f.row.key}:${s.name}`)
+            : [];
+      for (const n of names) filed.set(n, new Set([...(filed.get(n) ?? []), f.neighborhood]));
+    }
+    for (const f of plan.neighborhoodFacts) {
+      if (f.row.kind !== "transit_line") continue;
+      for (const s of f.row.stops) {
+        const station = filed.get(`station:${f.row.system}:${s.name}`);
+        if (!station) continue;
+        const stops = filed.get(`stop:${f.row.key}:${s.name}`);
+        expect([f.row.key, s.name, [...(stops ?? [])].sort()]).toEqual([
+          f.row.key,
+          s.name,
+          [...station].sort(),
+        ]);
+      }
+    }
+    // Glen Park BART sits just outside DataSF's Glen Park polygon (Bosworth St is the line).
+    const glen = plan.neighborhoodFacts
+      .filter((f) => f.row.key === "bart:glen")
+      .map((f) => f.neighborhood);
+    expect(glen).toContain("glen-park");
+  });
+
+  test("a line's stops in one neighborhood are distinct stops", () => {
+    for (const f of plan.neighborhoodFacts) {
+      if (f.row.kind !== "transit_line") continue;
+      const stops = f.row.stops;
+      for (let i = 0; i < stops.length; i++) {
+        for (let j = i + 1; j < stops.length; j++) {
+          const close = distanceMeters(stops[i].point, stops[j].point) < 40;
+          expect([f.row.key, stops[i].name, stops[j].name, close]).toEqual([
+            f.row.key,
+            stops[i].name,
+            stops[j].name,
+            false,
+          ]);
+        }
+      }
+    }
+  });
+
+  test("line stops follow the route, even past the backbone's last stop", () => {
+    // The M's first direction ends at Niagra; Geneva (the terminal) comes from the other one.
+    const m = plan.neighborhoodFacts
+      .flatMap((f) => (f.row.kind === "transit_line" && f.row.key === "muni:m" ? f.row.stops : []))
+      .map((s) => s.name)
+      .filter((n) => /^San Jose Ave & (Lakeview|Niagra|Geneva) Ave$/.test(n));
+    expect(m).toEqual([
+      "San Jose Ave & Lakeview Ave",
+      "San Jose Ave & Niagra Ave",
+      "San Jose Ave & Geneva Ave",
+    ]);
+  });
+
+  test("snippets fit the citation chip, so the supporting words show", () => {
+    for (const { key, row } of plan.externalSources) {
+      expect([key, snippet(row.snippet)]).toEqual([key, row.snippet]);
     }
   });
 

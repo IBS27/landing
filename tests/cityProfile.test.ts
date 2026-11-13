@@ -1135,3 +1135,114 @@ describe("round 6", () => {
     expect(modelProblems("I work at Figma in SoMa.", employer("SoMa"))).toEqual([]);
   });
 });
+
+/* ---------- #77: follow-ups from the #63 reviews ---------- */
+
+describe("#77 places: where they're going, not where they're from", () => {
+  const places = (text: string) =>
+    entries(text).flatMap((e) => (e.key === "neighborhood" ? [e.value.slug] : []));
+
+  test("the destination is kept and the origin dropped", () => {
+    expect(places("I'm moving from the Mission to SoMa in March.")).toEqual(["south-of-market"]);
+    expect(places("Moving out of the Marina into North Beach.")).toEqual(["north-beach"]);
+    expect(places("I'm leaving Oakland for the Outer Sunset.")).toEqual(["sunset-parkside"]);
+    expect(places("Relocating from Chicago to the Haight in April.")).toEqual(["haight-ashbury"]);
+  });
+
+  test("someone else's place isn't one they'd consider", () => {
+    expect(places("My sister lives in the Mission, but I want to live in Noe Valley.")).toEqual([
+      "noe-valley",
+    ]);
+  });
+
+  test("Muse's check agrees: the origin is rejected, the destination accepted", () => {
+    const text = "I'm moving from the Mission to SoMa in March.";
+    const origin = {
+      entry: { key: "neighborhood", value: { slug: "mission" } } as FactEntry,
+      quote: "the Mission",
+    };
+    const destination = {
+      entry: { key: "neighborhood", value: { slug: "south-of-market" } } as FactEntry,
+      quote: "SoMa",
+    };
+    expect(modelProblems(text, [origin])).toHaveLength(1);
+    expect(modelProblems(text, [destination])).toEqual([]);
+  });
+});
+
+describe("#77 budget: each exclusion belongs to its own amount", () => {
+  test("an expense inside the budget sentence doesn't drop the budget", () => {
+    expect(entries("My budget is $2,500 including $300 for utilities.")).toContainEqual({
+      key: "budget",
+      value: { max: 2500 },
+    });
+    expect(entries("My budget is $2,500 including $200 for utilities.")).toContainEqual({
+      key: "budget",
+      value: { max: 2500 },
+    });
+    expect(entries("Rent up to $2,200, not counting $150 for parking.")).toContainEqual({
+      key: "budget",
+      value: { max: 2200 },
+    });
+  });
+
+  test("Muse's check rejects the expense as the budget and accepts the rent", () => {
+    const text = "My budget is $2,500 including $300 for utilities.";
+    const expense = { entry: { key: "budget", value: { max: 300 } } as FactEntry, quote: "$300" };
+    const rent = { entry: { key: "budget", value: { max: 2500 } } as FactEntry, quote: "$2,500" };
+    expect(modelProblems(text, [expense]).length).toBeGreaterThan(0);
+    expect(modelProblems(text, [rent])).toEqual([]);
+  });
+});
+
+describe("#77 numeric move dates", () => {
+  const moveIn = (text: string) => entries(text).find((e) => e.key === "moveIn")?.value ?? null;
+
+  test("US month/day and ISO dates", () => {
+    expect(moveIn("Moving in on 3/15/2027.")).toEqual({ month: "2027-03", date: "2027-03-15" });
+    expect(moveIn("Moving in on 3/15/27.")).toEqual({ month: "2027-03", date: "2027-03-15" });
+    expect(moveIn("My move-in date is 2027-03-15.")).toEqual({
+      month: "2027-03",
+      date: "2027-03-15",
+    });
+    // No year: the next such date.
+    expect(moveIn("Arriving 03/01.")).toEqual({ month: "2027-03", date: "2027-03-01" });
+  });
+
+  test("past or impossible dates propose no day", () => {
+    expect(moveIn("Moving in on 1/5/2026.")).toBeNull();
+    expect(moveIn("Moving in on 2/31/2027.")).toEqual({ month: "2027-02" });
+  });
+
+  test("Muse's check accepts a numeric date quote", () => {
+    const fact = {
+      entry: { key: "moveIn", value: { month: "2027-03", date: "2027-03-15" } } as FactEntry,
+      quote: "3/15/2027",
+    };
+    expect(modelProblems("Moving in on 3/15/2027.", [fact])).toEqual([]);
+  });
+});
+
+describe("#77 wider aliases", () => {
+  const interests = (text: string) =>
+    entries(text).flatMap((e) => (e.key === "interest" ? [e.value.id] : []));
+
+  test("everyday phrasings map to interests", () => {
+    expect(interests("I train jiu jitsu and do muay thai.")).toContain("martial_arts");
+    expect(interests("I do muay thai.")).toContain("martial_arts");
+    expect(interests("Total foodie.")).toContain("restaurants");
+    expect(interests("I'm in two book clubs.")).toContain("books");
+    expect(interests("I love flea markets.")).toContain("thrifting");
+    expect(interests("I love cats.")).toContain("pets");
+  });
+});
+
+describe("#77 what reaches the model", () => {
+  test("only sentences with profile vocabulary, after redaction", () => {
+    const text = profileInput(
+      "I'm 24 and recently divorced. Moving to SF in March. I love the color blue. I boulder.",
+    ).text;
+    expect(text.split("\n")).toEqual(["Moving to SF in March.", "I boulder."]);
+    expect(text).not.toMatch(/24|divorced|blue/);
+  });
+});
