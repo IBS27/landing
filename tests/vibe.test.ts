@@ -340,6 +340,8 @@ describe("vibe input", () => {
       _id: id,
       authorId: "users:a",
       text,
+      attachments: [],
+      media: [],
       createdAt: 1,
       ...extra,
     });
@@ -367,13 +369,16 @@ describe("vibe input", () => {
         post("posts:loved", "Walnut credenza, mid-century"),
         post("posts:angry", "I hate this industrial steel room"),
         post("posts:church", "Rattan chair for sale", { groupId: "groups:g" }),
+        post("posts:link", "", {
+          attachments: [{ kind: "link", title: "Christian church interior decor" }],
+        }),
       ],
       reactions: [
         react("reactions:1", "posts:loved", "love"),
         react("reactions:2", "posts:angry", "angry"),
         react("reactions:3", "posts:church", "like"),
       ],
-      saved: [],
+      saved: [{ _id: "saved:1", userId: me, kind: "post", refId: "posts:link", createdAt: 1 }],
       cityProfiles: [],
       cityProfileFacts: [],
     });

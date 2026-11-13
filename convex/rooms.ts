@@ -278,10 +278,11 @@ const TASTE_REACTIONS = new Set<Doc<"reactions">["type"]>(["like", "love", "care
 /** Whether none of these texts names a protected trait; anything that does never reaches Muse. */
 const safeText = (...texts: (string | undefined)[]) => !texts.some((t) => t && hasProtected(t));
 
-/** Whether a post's words (and its Group's name, which the model also sees) are safe to send. */
+/** Whether a post's words, link titles (its text when it has none) and Group name are safe to send. */
 async function safePost(ctx: QueryCtx, post: Doc<"posts">) {
   const group = post.groupId ? await ctx.db.get(post.groupId) : null;
-  return safeText(post.text, group?.name);
+  const links = post.attachments.flatMap((a) => (a.kind === "link" ? [a.title] : []));
+  return safeText(post.text, group?.name, ...links);
 }
 
 /** City Profile interests (#3): what they stated, plus inferences Landing is fairly sure of. */
