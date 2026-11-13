@@ -201,22 +201,23 @@ export function SearchBox({
   return (
     <>
       {/* Resting pill (or icon); while open, the overlay below draws its own copy on top. */}
-      {collapsed ? (
-        <button
-          type="button"
-          aria-label="Search Facebook"
-          onClick={() => setOpen(true)}
-          className={cn(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-input text-icon-secondary hover:brightness-95",
-            open && "invisible",
-          )}
-        >
-          <Search size={16} strokeWidth={2.4} />
-        </button>
-      ) : (
+      {/* Below 1024px the header has no room for the pill, so it's always the icon. */}
+      <button
+        type="button"
+        aria-label="Search Facebook"
+        onClick={() => setOpen(true)}
+        className={cn(
+          "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-input text-icon-secondary hover:brightness-95",
+          !collapsed && "lg:hidden",
+          open && "invisible",
+        )}
+      >
+        <Search size={16} strokeWidth={2.4} />
+      </button>
+      {!collapsed && (
         <div
           className={cn(
-            "flex h-10 shrink-0 items-center rounded-full bg-input pl-3",
+            "hidden h-10 shrink-0 items-center rounded-full bg-input pl-3 lg:flex",
             wide ? "w-[280px]" : "w-[240px]",
             open && "invisible",
           )}

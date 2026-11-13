@@ -81,6 +81,7 @@ export function CreatePostModal({
   initialPanel,
   groupId,
   groupName,
+  groupPrivacy,
   timelineUser,
   editing,
 }: {
@@ -89,6 +90,8 @@ export function CreatePostModal({
   initialPanel?: ComposerPanel;
   groupId?: Id<"groups">;
   groupName?: string;
+  /** Only public groups get Facebook's "Create a public post..." prompt. */
+  groupPrivacy?: "public" | "private";
   /** Posting on a friend's timeline. */
   timelineUser?: { _id: Id<"users">; firstName: string };
   editing?: PostView;
@@ -159,7 +162,14 @@ export function CreatePostModal({
     }
   };
 
-  const hasContent = text.trim().length > 0 || media.length > 0 || !!editing;
+  // An edit may clear the text only while the post keeps its photos, attachments or share.
+  const keepsContent =
+    !!editing &&
+    (editing.media.length > 0 ||
+      editing.attachments.length > 0 ||
+      editing.shared !== null ||
+      editing.live !== null);
+  const hasContent = text.trim().length > 0 || media.length > 0 || keepsContent;
   const bgAllowed = media.length === 0 && !showDrop && text.length <= 130 && !editing?.media.length;
   const bg = bgAllowed ? backgroundFor(background) : null;
   const large = !bg && text.length < 85 && media.length === 0 && !showDrop;
@@ -225,7 +235,9 @@ export function CreatePostModal({
   const placeholder = timelineUser
     ? `Write something to ${timelineUser.firstName}...`
     : groupId
-      ? "Create a public post..."
+      ? groupPrivacy === "public"
+        ? "Create a public post..."
+        : "Write something..."
       : `What's on your mind, ${viewer.firstName}?`;
 
   return (

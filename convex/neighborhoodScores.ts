@@ -333,12 +333,14 @@ export const get = viewerQuery({
     const weights = interestWeights(await getProfile(ctx, ctx.viewer));
     let fit:
       | { state: "no_profile" }
+      /** Nothing here matches the viewer's interests yet: no score, since there's nothing to cite. */
+      | { state: "no_match"; missing: string[] }
       | {
           state: "ok";
           score: number;
           matched: string[];
           missing: string[];
-          sources: CitedSource[];
+          sources: NonEmpty<CitedSource>;
         };
     if (weights.size === 0) {
       fit = { state: "no_profile" };
@@ -376,17 +378,23 @@ export const get = viewerQuery({
       const items = candidates.filter((c) => seen.has(sourceKey(c.source)));
       const result = interestFit(weights, items);
       const matched = new Set(result?.matched.map((m) => m.interest) ?? []);
-      fit = {
-        state: "ok",
-        score: result?.score ?? 0,
-        matched: [...matched].map((id) => getInterest(id).label),
-        missing: [...weights.keys()]
-          .filter((id) => !matched.has(id))
-          .map((id) => getInterest(id).label),
-        sources: (result?.sources ?? [])
-          .flatMap((s) => seen.get(sourceKey(s)) ?? [])
-          .slice(0, MAX_SOURCES),
-      };
+      const missing = [...weights.keys()]
+        .filter((id) => !matched.has(id))
+        .map((id) => getInterest(id).label);
+      const [first, ...rest] = (result?.sources ?? [])
+        .flatMap((s) => seen.get(sourceKey(s)) ?? [])
+        .slice(0, MAX_SOURCES);
+      // A score cites what it counted; with nothing here for these interests there's no score.
+      fit =
+        result && first
+          ? {
+              state: "ok",
+              score: result.score,
+              matched: [...matched].map((id) => getInterest(id).label),
+              missing,
+              sources: [first, ...rest],
+            }
+          : { state: "no_match", missing };
     }
 
     // Getting around at night: cited facts and locals' words, no score.

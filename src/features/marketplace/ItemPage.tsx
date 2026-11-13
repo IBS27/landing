@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
+import { ConvexError } from "convex/values";
 import {
   BedDouble,
   Building2,
@@ -130,28 +131,37 @@ function Related({ listingId }: { listingId: Id<"listings"> }) {
 
 function ItemContainer({ l }: { l: Detail }) {
   const toast = useToast();
+  // Side by side while the column fits the 356px details panel and a usable gallery;
+  // narrower (phones), the gallery stacks above the details at a square-ish height.
   return (
-    <div className="flex h-[calc(100vh-132px)] min-h-[560px] overflow-hidden bg-card">
-      <ListingGallery
-        key={l._id}
-        photos={l.photos}
-        video={l.video}
-        title={l.title}
-        rentalMedia={l.rentalMedia}
-      />
-      <aside className="flex w-[356px] shrink-0 flex-col">
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-[11px] pb-5">
-          <Header l={l} toast={toast.show} />
-          {l.isOwner && l.stats && <Insights stats={l.stats} />}
-          <Details l={l} />
-          <LocationMap l={l} />
-          <SellerInfo l={l} />
-          {!l.isOwner && <SponsoredAd listingId={l._id} toast={toast.show} />}
+    <>
+      <div className="@container">
+        <div className="flex h-[calc(100vh-132px)] min-h-[560px] overflow-hidden bg-card @max-[712px]:h-auto @max-[712px]:min-h-0 @max-[712px]:flex-col">
+          <div className="flex min-w-0 flex-1 @max-[712px]:h-[min(100cqw,560px)] @max-[712px]:flex-none">
+            <ListingGallery
+              key={l._id}
+              photos={l.photos}
+              video={l.video}
+              title={l.title}
+              rentalMedia={l.rentalMedia}
+            />
+          </div>
+          <aside className="flex w-[356px] shrink-0 flex-col @max-[712px]:w-full">
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-[11px] pb-5">
+              <Header l={l} toast={toast.show} />
+              {l.isOwner && l.stats && <Insights stats={l.stats} />}
+              <Details l={l} />
+              <LocationMap l={l} />
+              <SellerInfo l={l} />
+              {!l.isOwner && <SponsoredAd listingId={l._id} toast={toast.show} />}
+            </div>
+            {!l.isOwner && <MessageBar l={l} />}
+          </aside>
         </div>
-        {!l.isOwner && <MessageBar l={l} />}
-      </aside>
+      </div>
+      {/* Outside the query container, which would otherwise anchor the fixed toast. */}
       {toast.node}
-    </div>
+    </>
   );
 }
 
@@ -801,13 +811,19 @@ function SponsoredAd({
 
 /* ───────────── Messaging ───────────── */
 
+/** Sends a message to the seller and opens the chat; resolves to an error to show, or null. */
 function useSendToSeller(l: Detail) {
   const send = useM(api.listings.messageSeller);
   const { openChat } = useChatDock();
-  return async (text: string) => {
-    const conversationId = await send({ listingId: l._id, text });
-    openChat(conversationId);
-    return conversationId;
+  return async (text: string): Promise<string | null> => {
+    try {
+      openChat(await send({ listingId: l._id, text }));
+      return null;
+    } catch (e) {
+      return e instanceof ConvexError && typeof e.data === "string"
+        ? e.data
+        : "Couldn't send. Try again.";
+    }
   };
 }
 
@@ -817,16 +833,17 @@ function MessageBar({ l }: { l: Detail }) {
   const [text, setText] = useState(DEFAULT_MESSAGE);
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const submit = async () => {
     if (!text.trim() || busy) return;
     setBusy(true);
-    try {
-      await send(text);
+    const problem = await send(text);
+    setError(problem);
+    if (!problem) {
       setSent(true);
       setText("");
-    } finally {
-      setBusy(false);
     }
+    setBusy(false);
   };
   return (
     <div className="shrink-0 border-divider border-t-[0.5px] px-4 pt-[14px] pb-[14px]">
@@ -865,6 +882,7 @@ function MessageBar({ l }: { l: Detail }) {
           {busy ? <Spinner size={16} className="text-white" /> : "Send"}
         </button>
       </form>
+      {error && <p className="mt-2 text-[13px] text-negative">{error}</p>}
     </div>
   );
 }
@@ -873,6 +891,7 @@ function MessageDialog({ l, onClose }: { l: Detail; onClose: () => void }) {
   const send = useSendToSeller(l);
   const [text, setText] = useState(DEFAULT_MESSAGE);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   return (
     <Modal open onOpenChange={(o) => !o && onClose()} title="Message seller" width={548}>
       <div className="p-4">
@@ -901,16 +920,15 @@ function MessageDialog({ l, onClose }: { l: Detail; onClose: () => void }) {
           disabled={!text.trim() || busy}
           onClick={async () => {
             setBusy(true);
-            try {
-              await send(text);
-              onClose();
-            } finally {
-              setBusy(false);
-            }
+            const problem = await send(text);
+            setBusy(false);
+            setError(problem);
+            if (!problem) onClose();
           }}
         >
           Send message
         </Button>
+        {error && <p className="mt-2 text-[13px] text-negative">{error}</p>}
       </div>
     </Modal>
   );

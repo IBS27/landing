@@ -79,7 +79,8 @@ export function GroupCard({ group, onHide }: { group: GroupCardData; onHide?: ()
             </span>
           </div>
         )}
-        {group.viewerJoined ? (
+        {/* Private groups admit people a member invited: the group page shows any invite. */}
+        {group.viewerJoined || group.privacy === "private" ? (
           <Link
             {...to}
             onClick={(e) => e.stopPropagation()}

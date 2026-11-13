@@ -169,11 +169,26 @@ type EventViewer = Pick<Audience, "viewerId" | "friends" | "groups">;
 
 /** Facebook audience rules for events; `responded` means the viewer was invited or has RSVP'd. */
 export function eventVisible(e: Doc<"events">, a: EventViewer, responded: boolean) {
-  if (e.hostId === a.viewerId || responded) return true;
-  if (e.privacy === "public") return true;
-  if (e.privacy === "friends") return a.friends.has(e.hostId);
+  if (e.hostId === a.viewerId) return true;
+  // A members-only event stays members-only: an invitation or RSVP doesn't open it to others.
   if (e.privacy === "group") return e.groupId !== undefined && a.groups.has(e.groupId);
+  if (responded || e.privacy === "public") return true;
+  if (e.privacy === "friends") return a.friends.has(e.hostId);
   return false;
+}
+
+/**
+ * Whether a listing shows to the viewer while browsing or searching: never
+ * across a block (either way), and not to the seller's friends when it's
+ * hidden from them ("Hide from friends").
+ */
+export function listingShownTo(
+  l: Doc<"listings">,
+  a: Pick<Audience, "viewerId" | "friends" | "blocked">,
+) {
+  if (l.sellerId === a.viewerId) return true;
+  if (a.blocked.has(l.sellerId)) return false;
+  return !(l.hideFromFriends && a.friends.has(l.sellerId));
 }
 
 /** `eventVisible` for one event, looking up the viewer's response. */
@@ -183,7 +198,7 @@ export async function canSeeEvent(ctx: QueryCtx, e: Doc<"events">, a: EventViewe
     .query("eventResponses")
     .withIndex("by_event_user", (q) => q.eq("eventId", e._id).eq("userId", a.viewerId))
     .first();
-  return row !== null;
+  return eventVisible(e, a, row !== null);
 }
 
 async function resolveAttachment(

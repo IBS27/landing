@@ -4,6 +4,7 @@ import {
   type FactEntry,
   factSlot,
   type GoalId,
+  isCalendarDate,
   moveInProblem,
   type NeighborhoodSlug,
   type TransportMode,
@@ -12,7 +13,7 @@ import {
   type Workplace,
 } from "../../../convex/lib/cityProfileFacts";
 import type { InterestId } from "../../../convex/lib/interests";
-import { EMPLOYER_PERSONAL, hasProtected } from "../../../convex/lib/protectedText";
+import { EMPLOYER_PERSONAL, employerHasProtected } from "../../../convex/lib/protectedText";
 
 export type CityProfile = FunctionReturnType<typeof api.cityProfile.get>;
 export type Suggestions = FunctionReturnType<typeof api.cityProfile.suggestFromText>;
@@ -120,8 +121,24 @@ export function briefProblems(
   if (f.interests.length === 0) out.push("Pick a few interests");
   if (f.interests.length > 25 || f.neighborhoods.length > 10 || f.goals.length > 10)
     out.push("That's too many to save");
-  if (hasProtected(f.employer) || hasProtected(f.workArea)) out.push(EMPLOYER_PERSONAL);
+  if (employerHasProtected(f.employer) || employerHasProtected(f.workArea))
+    out.push(EMPLOYER_PERSONAL);
   return out;
+}
+
+/** Picking an exact date moves the month to that date's month. */
+export function withMoveInDate(f: BriefForm, date: string): BriefForm {
+  return {
+    ...f,
+    moveInDate: date,
+    moveInMonth: isCalendarDate(date) ? date.slice(0, 7) : f.moveInMonth,
+  };
+}
+
+/** Picking another month clears an exact date that isn't in it. */
+export function withMoveInMonth(f: BriefForm, month: string): BriefForm {
+  const date = f.moveInDate && !f.moveInDate.startsWith(month) ? "" : f.moveInDate;
+  return { ...f, moveInMonth: month, moveInDate: date };
 }
 
 type Brief = SaveArgs["brief"];

@@ -1,7 +1,13 @@
 import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
-import type { Doc } from "./_generated/dataModel";
-import { internalAction, internalMutation, internalQuery } from "./_generated/server";
+import type { Doc, Id } from "./_generated/dataModel";
+import {
+  internalAction,
+  internalMutation,
+  internalQuery,
+  type MutationCtx,
+  type QueryCtx,
+} from "./_generated/server";
 import { defineTask, runAgent } from "./ai/agent";
 import { cite } from "./lib/citations";
 import { viewerMutation } from "./lib/functions";
@@ -50,7 +56,8 @@ export const setTerms = viewerMutation({
         : floor !== undefined
           ? { saleMuse: item.saleMuse ?? "active" }
           : {}),
-      saleTermsAt: Date.now(),
+      // A new lowest price is new terms. Pausing or resuming Muse isn't: an agreed sale stays agreed.
+      ...(floor !== undefined && floor !== item.saleMinPrice ? { saleTermsAt: Date.now() } : {}),
     });
     if (floor === undefined || floor <= oldFloor) return;
     // A raised floor withdraws every waiting draft, and Muse drafts those replies again (as #45).
@@ -91,6 +98,7 @@ Answer only from the item facts given. Pick one move:
 - offer: counter the buyer's price. Between limits.minPrice and item.askingPrice, and never above yourLastPrice.
 - accept: the buyer offered a price at or above limits.minPrice; agree (amount = that price, capped at askingPrice) and ask when they can pick it up.
 - walk_away: the buyer won't go up to limits.minPrice; decline politely (amount = 0).
+If spokenFor is true, you already agreed to sell it to another buyer: never offer or accept a price and never say it's available. Reply with a message that it's spoken for and you'll let them know if that falls through.
 For offer and accept, the text must state the amount as $N. Be friendly and brief (one or two sentences).
 Never write a price under limits.minPrice. Keep limits.minPrice private: never say it, or that you have a lowest price, except as the amount of an offer or accept. Never share the street address, never ask for payment up front, and never mention payment apps.
 rationale: one sentence to the seller on why this reply.`,
@@ -159,7 +167,17 @@ export const context = internalQuery({
         text: redactProtected(m.text ?? ""),
       })),
     };
-    return { item, listingOpen: listing.status === "active", chatRow, lastBuyerAt, input };
+    const agreedIn = await agreedChat(ctx, item, listingId);
+    input.spokenFor = agreedIn !== null && agreedIn !== conversationId;
+    return {
+      item,
+      listingOpen: listing.status === "active",
+      chatRow,
+      lastBuyerAt,
+      input,
+      /** The seller agreed a sale in this chat: the pickup talk is theirs, as in #36. */
+      agreedHere: agreedIn === conversationId,
+    };
   },
 });
 
@@ -168,7 +186,7 @@ export const draftReply = internalAction({
   args: { conversationId: v.id("conversations") },
   handler: async (ctx, { conversationId }) => {
     const c = await ctx.runQuery(internal.moveOutSales.context, { conversationId });
-    if (c?.item.saleMuse !== "active" || !c.listingOpen) return;
+    if (c?.item.saleMuse !== "active" || !c.listingOpen || c.agreedHere) return;
     if (c.lastBuyerAt <= (c.chatRow?.handledThrough ?? 0)) return;
     const result = await runAgent(ctx, saleReply, {
       input: c.input,
@@ -184,6 +202,7 @@ export const draftReply = internalAction({
       ...move,
       handledThrough: c.lastBuyerAt,
       termsAt: c.item.saleTermsAt ?? 0,
+      spokenFor: !!c.input.spokenFor,
       via: result.via,
       runId: result.runId,
     });
@@ -200,6 +219,8 @@ export const saveReply = internalMutation({
     handledThrough: v.number(),
     /** The terms revision this run drafted under (`ownedItems.saleTermsAt`). */
     termsAt: v.number(),
+    /** Whether the run drafted for an item already agreed with another buyer. */
+    spokenFor: v.optional(v.boolean()),
     via: v.union(v.literal("model"), v.literal("cache"), v.literal("fallback")),
     runId: v.optional(v.id("aiRuns")),
   },
@@ -213,8 +234,11 @@ export const saveReply = internalMutation({
       .first();
     const listing = await ctx.db.get(listingId);
     if (item?.saleMuse !== "active" || item.saleMinPrice === undefined || !listing) return;
-    // Drafted under terms the seller has since changed: draft again under the new ones.
-    if (a.termsAt !== (item.saleTermsAt ?? 0)) {
+    // Re-checked here: the seller may have agreed a sale while this run drafted.
+    const agreedIn = await agreedChat(ctx, item, listingId);
+    if (agreedIn === a.conversationId) return;
+    // Drafted under terms, or a sale, that has since changed: draft again.
+    if (a.termsAt !== (item.saleTermsAt ?? 0) || (agreedIn !== null) !== !!a.spokenFor) {
       await ctx.scheduler.runAfter(0, internal.moveOutSales.draftReply, {
         conversationId: a.conversationId,
       });
@@ -265,8 +289,72 @@ export const saveReply = internalMutation({
   },
 });
 
+/**
+ * The chat where the seller agreed a sale through Muse: they approved Muse's
+ * acceptance there under today's terms (changing the lowest price reopens the sale).
+ */
+async function agreedChat(
+  ctx: QueryCtx,
+  item: Doc<"ownedItems">,
+  listingId: Id<"listings">,
+): Promise<Id<"conversations"> | null> {
+  const chats = await ctx.db
+    .query("conversations")
+    .withIndex("by_listing", (q) => q.eq("listingId", listingId))
+    .collect();
+  for (const c of chats) {
+    const row = await ctx.db
+      .query("saleChats")
+      .withIndex("by_conversation", (q) => q.eq("conversationId", c._id))
+      .unique();
+    if (row?.lastMove !== "accept" || !row.pendingProposalId) continue;
+    const p = await ctx.db.get(row.pendingProposalId);
+    if (
+      (p?.status === "approved" || p?.status === "edited") &&
+      (p.decidedAt ?? 0) >= (item.saleTermsAt ?? 0)
+    )
+      return c._id;
+  }
+  return null;
+}
+
+/**
+ * Called after the seller approves a proposal. When it was Muse's acceptance of
+ * a buyer's price, the drafts still waiting in the item's other chats are
+ * withdrawn, and Muse drafts those replies again as "it's spoken for".
+ */
+export async function afterSaleAgreed(ctx: MutationCtx, p: Doc<"proposals">) {
+  if (p.payload.kind !== "offer") return;
+  const conversationId = p.payload.conversationId;
+  const row = await ctx.db
+    .query("saleChats")
+    .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
+    .unique();
+  if (!row || row.pendingProposalId !== p._id || row.lastMove !== "accept") return;
+  const item = await ctx.db.get(row.itemId);
+  const listingId = item?.saleListingId;
+  if (!item || !listingId) return;
+  const chats = await ctx.db
+    .query("conversations")
+    .withIndex("by_listing", (q) => q.eq("listingId", listingId))
+    .collect();
+  for (const c of chats) {
+    if (c._id === conversationId) continue;
+    const other = await ctx.db
+      .query("saleChats")
+      .withIndex("by_conversation", (q) => q.eq("conversationId", c._id))
+      .unique();
+    const waiting = other?.pendingProposalId ? await ctx.db.get(other.pendingProposalId) : null;
+    if (!other || waiting?.status !== "pending") continue;
+    await retire(ctx, other);
+    await ctx.db.patch(other._id, { pendingProposalId: undefined, handledThrough: 0 });
+    if (item.saleMuse === "active")
+      await ctx.scheduler.runAfter(0, internal.moveOutSales.draftReply, { conversationId: c._id });
+  }
+}
+
 /** A newer reply replaces the draft still waiting in that chat. */
-async function retire(ctx: Parameters<typeof dropDraft>[0], row: Doc<"saleChats">) {
+export async function retire(ctx: Parameters<typeof dropDraft>[0], row: Doc<"saleChats">) {
   if (!row.pendingProposalId) return;
   const p = await ctx.db.get(row.pendingProposalId);
   if (p?.status !== "pending") return;

@@ -1,4 +1,5 @@
 import { Link, Outlet, useNavigate, useParams, useRouterState } from "@tanstack/react-router";
+import { ConvexError } from "convex/values";
 import { Flag, Link2, Share2 } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
@@ -243,19 +244,47 @@ function MemberFacepile({ group }: { group: GroupView }) {
 export function JoinButton({ group, className }: { group: GroupView; className?: string }) {
   const join = useM(api.groups.join);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!error) return;
+    const t = setTimeout(() => setError(null), 3500);
+    return () => clearTimeout(t);
+  }, [error]);
+  // A private group admits people a member invited; there are no join requests.
+  if (!group.canJoin)
+    return (
+      <Tooltip content="Only people a member invites can join this private group">
+        <span className={cn("inline-flex", className)}>
+          <Button variant="secondary" icon={<LockGlyph size={16} />} disabled>
+            Invite only
+          </Button>
+        </span>
+      </Tooltip>
+    );
   return (
-    <Button
-      variant="primary"
-      className={className}
-      icon={<JoinGlyph size={16} />}
-      disabled={busy}
-      onClick={() => {
-        setBusy(true);
-        void join({ groupId: group._id }).finally(() => setBusy(false));
-      }}
-    >
-      Join group
-    </Button>
+    <>
+      <Button
+        variant="primary"
+        className={className}
+        icon={<JoinGlyph size={16} />}
+        disabled={busy}
+        onClick={() => {
+          setBusy(true);
+          join({ groupId: group._id })
+            .catch((e: unknown) =>
+              setError(
+                e instanceof ConvexError && typeof e.data === "string"
+                  ? e.data
+                  : "Couldn't join the group. Try again.",
+              ),
+            )
+            .finally(() => setBusy(false));
+        }}
+      >
+        Join group
+      </Button>
+      {error && <Toast>{error}</Toast>}
+    </>
   );
 }
 
@@ -283,7 +312,7 @@ function JoinedMenu({ group }: { group: GroupView }) {
       <Modal open={confirm} onOpenChange={setConfirm} title={`Leave ${group.name}?`} width={548}>
         <div className="p-4 text-[15px] text-primary">
           {group.privacy === "private"
-            ? "Are you sure you want to leave this group? You won't be able to see posts or rejoin without approval."
+            ? "Are you sure you want to leave this group? You won't be able to see posts or rejoin unless a member invites you again."
             : "Are you sure you want to leave this group? You can rejoin any time."}
           {group.viewerRole === "admin" &&
           group.staff.filter((s) => s.role === "admin").length === 1
@@ -334,25 +363,28 @@ function ShareButton({ group }: { group: GroupView }) {
           </Button>
         </MenuTrigger>
         <MenuContent width={300}>
-          <MenuItem
-            icon={<Share2 size={20} />}
-            label="Share to Feed"
-            onSelect={() =>
-              void create({
-                privacy: "friends",
-                attachments: [
-                  {
-                    kind: "link",
-                    url: `/groups/${group.slug}`,
-                    title: group.name,
-                    domain: "facebook.com",
-                    description: `${privacyLabel(group.privacy)} · ${membersLabel(group.memberCount, true)}`,
-                    image: group.cover,
-                  },
-                ],
-              }).then(() => setDone("Shared to your Feed."))
-            }
-          />
+          {/* A hidden group (a House Group, #38, too) isn't announced to friends. */}
+          {group.visible && (
+            <MenuItem
+              icon={<Share2 size={20} />}
+              label="Share to Feed"
+              onSelect={() =>
+                void create({
+                  privacy: "friends",
+                  attachments: [
+                    {
+                      kind: "link",
+                      url: `/groups/${group.slug}`,
+                      title: group.name,
+                      domain: "facebook.com",
+                      description: `${privacyLabel(group.privacy)} · ${membersLabel(group.memberCount, true)}`,
+                      image: group.cover,
+                    },
+                  ],
+                }).then(() => setDone("Shared to your Feed."))
+              }
+            />
+          )}
           <MenuItem
             icon={<Link2 size={20} />}
             label="Copy link"

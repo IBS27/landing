@@ -4,6 +4,7 @@ import { Pencil, RefreshCw, Sparkles } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useM, useViewerContext } from "@/app/viewer";
 import { useToast } from "@/features/marketplace/toast";
+import { errorText } from "@/landing/errorText";
 import { SourcesChip } from "@/ui/Citations";
 import { Button, Card, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -21,10 +22,6 @@ const ORIGIN_TEXT = {
   generated: "Suggested by Muse",
   edited: "Suggested by Muse, edited by you",
 } as const;
-
-function errorText(e: unknown) {
-  return e instanceof Error ? e.message.replace(/^.*ConvexError:\s*/, "") : "Something went wrong";
-}
 
 /**
  * The room's style vibe (#25): typed by the person, or suggested by Muse from

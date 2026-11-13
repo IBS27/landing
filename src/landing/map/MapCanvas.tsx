@@ -35,6 +35,7 @@ import {
   pillPrice,
   StopMarker,
 } from "./pins";
+import { STOP_LEVELS, stopOffsets, stopZ } from "./stops";
 import type { Bounds, LandingMapProps, LatLng, MapFocus } from "./types";
 import { useIsDark, useReducedMotion, useWidth } from "./useEnv";
 
@@ -44,8 +45,19 @@ setWorkerUrl(workerUrl);
 /** Below this map width the preview card becomes a bottom sheet. */
 const COMPACT = 640;
 const EDGE = 16;
-/** Pin z-order: quiet price pills under avatars and dates, route stops on top. */
-const Z = { listing: 1, group: 2, event: 3, cluster: 4, stop: 5, hover: 8, card: 10 } as const;
+/**
+ * Pin z-order: quiet price pills under avatars and dates, route stops on top (a band of
+ * `STOP_LEVELS`, lower numbers higher), then the hovered pin and the card.
+ */
+const Z = {
+  listing: 1,
+  group: 2,
+  event: 3,
+  cluster: 4,
+  stop: 5,
+  hover: 6 + STOP_LEVELS,
+  card: 8 + STOP_LEVELS,
+} as const;
 
 type Visible =
   | { id: string; kind: "pin"; pin: Pin }
@@ -90,6 +102,7 @@ export default function MapCanvas({
 
   const data = useMemo(() => overlayData(layers), [layers]);
   const pinsByKey = useMemo(() => new Map(data.pins.map((p) => [p.key, p])), [data.pins]);
+  const stopNudge = useMemo(() => stopOffsets(data.stops.map((s) => s.point)), [data.stops]);
   const latest = useRef({ data, pinsByKey, dark, onBoundsChange, insets, focus, onMapReady });
   latest.current = { data, pinsByKey, dark, onBoundsChange, insets, focus, onMapReady };
 
@@ -516,7 +529,8 @@ export default function MapCanvas({
                 map={map}
                 lng={s.point.lng}
                 lat={s.point.lat}
-                z={isSel ? Z.card - 1 : hovered === key ? Z.hover : Z.stop}
+                offset={stopNudge[i]}
+                z={isSel ? Z.card - 1 : hovered === key ? Z.hover : stopZ(Z.stop, i)}
               >
                 <StopMarker
                   {...unreachable(!isSel && offscreen(s.point.lng, s.point.lat))}

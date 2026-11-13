@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  buyerNamedPrice,
   comparableMedian,
   ladderMove,
   type MoveOutput,
@@ -132,6 +133,37 @@ describe("ladderMove", () => {
       input({ yourLastOffer: 170, chat: [seller("still available")] }),
     ])
       expect(moveProblems(ladderMove(i), i)).toEqual([]);
+  });
+});
+
+describe("the opening move reads the chat so far", () => {
+  test("a price the seller already named at or under the opening is accepted, not outbid", () => {
+    const i = input({ chat: [you("Hi, is this available?"), seller("Yes! I could do 150")] });
+    const m = ladderMove(i);
+    expect(m).toMatchObject({ move: "accept", amount: 150 });
+    expect(moveProblems(m, i)).toEqual([]);
+    const outbid: MoveOutput = {
+      move: "offer",
+      amount: 170,
+      text: "Would you take $170?",
+      rationale: "Ideal price.",
+    };
+    expect(moveProblems(outbid, i)).toContain(
+      "the seller already offered 150; accept that rather than offering more",
+    );
+  });
+
+  test("buyerNamedPrice reads the buyer's own last offer, below asking", () => {
+    expect(buyerNamedPrice([you("Would you take 190?"), seller("Let me think")], 250)).toBe(190);
+    expect(buyerNamedPrice([you("Is it still $250?")], 250)).toBeNull();
+    expect(buyerNamedPrice([seller("could you do 220?")], 250)).toBeNull();
+  });
+
+  test("with the buyer's own offer as the last offer, Muse never opens lower", () => {
+    const i = input({ yourLastOffer: 190, chat: [you("Would you take 190?")] });
+    const m = ladderMove(i);
+    expect(m.amount === 0 || m.amount >= 190).toBe(true);
+    expect(moveProblems(m, i)).toEqual([]);
   });
 });
 

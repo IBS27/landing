@@ -392,6 +392,45 @@ describe("hooks and recompute", () => {
     }
   });
 
+  test("a post in a neighborhood Group counts only what it says, not the Group's tags", async () => {
+    const { ctx, tables } = world({
+      groups: [
+        {
+          _id: "groups:hood",
+          name: "Mission District Locals",
+          category: "Neighborhood",
+          tags: ["Mission District", "Local recs", "Food", "Nightlife"],
+          location: "Mission District, San Francisco",
+          neighborhoodId: "neighborhoods:1",
+        },
+        {
+          _id: "groups:1",
+          name: "Bay Area Climbers",
+          category: "Sports",
+          tags: ["Climbing"],
+          location: "San Francisco Bay Area",
+        },
+      ],
+      posts: [
+        { _id: "posts:power", groupId: "groups:hood", text: "Who else lost power last night?" },
+        { _id: "posts:noise", groupId: "groups:hood", text: "Construction on Valencia again" },
+        { _id: "posts:brunch", groupId: "groups:hood", text: "Best brunch near Dolores?" },
+        { _id: "posts:climb", groupId: "groups:1", text: "Anyone free Saturday?" },
+      ],
+    });
+    expect(await describeTarget(ctx, "post", "posts:power")).toBeNull();
+    expect(await describeTarget(ctx, "post", "posts:brunch")).toEqual({
+      interestIds: ["restaurants"],
+      neighborhoodSlug: "mission",
+    });
+    // A Group about one activity still speaks for its posts.
+    expect((await describeTarget(ctx, "post", "posts:climb"))?.interestIds).toEqual(["climbing"]);
+    // Likes on its everyday posts record nothing, so they never add "Trying restaurants".
+    await recordSignal(ctx, USER, "like", "post", "posts:power");
+    await recordSignal(ctx, USER, "like", "post", "posts:noise");
+    expect(tables.profileSignals).toEqual([]);
+  });
+
   test("online Events have no neighborhood, even with a neighborhoodId", async () => {
     const { ctx } = world({
       events: [

@@ -12,6 +12,7 @@ import { isBlockedEitherWay } from "./lib/blocks";
 import { cite } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import {
+  buyerNamedPrice,
   ladderMove,
   type MoveOutput,
   moveProblems,
@@ -206,8 +207,9 @@ const negotiate = defineTask<NegotiationInput, typeof moveOutput>({
   name: "spark.negotiate",
   instructions: `You negotiate a Facebook Marketplace purchase for the buyer ("you"), writing the buyer's next chat message to the seller.
 Pick one move:
-- offer: propose a price below asking. Never above limits.maxPrice, and never below yourLastOffer. Aim for limits.targetPrice when given.
-- accept: the seller named a price at or under limits.maxPrice; agree to it (amount = that price) and ask about pickup.
+- offer: propose a price below asking. Never above limits.maxPrice, and never below yourLastOffer (the most the buyer has already offered, by Muse or in their own messages). Aim for limits.targetPrice when given.
+- accept: the seller named a price at or under limits.maxPrice; agree to it (amount = that price) and ask about pickup. Never offer more than a price the seller already named.
+Read the whole chat first: the buyer may have been talking with the seller before you took over.
 - message: a short follow-up or answer that doesn't change the price (amount = 0).
 - walk_away: the seller won't go within the max; thank them politely (amount = 0).
 comparables are similar listings (also in <sources>); use them to judge a fair price.
@@ -282,7 +284,12 @@ export const context = internalQuery({
         p.payload.kind === "offer" &&
         p.payload.conversationId === n.conversationId,
     );
-    const yourLastOffer = lastSent?.payload.kind === "offer" ? lastSent.payload.amount : null;
+    // A price the buyer typed before Muse took over counts too: Muse never offers less.
+    const offered = [
+      lastSent?.payload.kind === "offer" ? lastSent.payload.amount : null,
+      buyerNamedPrice(chat, listing.price),
+    ].filter((n): n is number => n !== null);
+    const yourLastOffer = offered.length ? Math.max(...offered) : null;
     const comps = await comparableListings(ctx, listing, n.buyerId);
     const input: NegotiationInput = {
       listing: {

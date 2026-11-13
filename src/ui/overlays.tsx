@@ -4,6 +4,15 @@ import { type ReactNode, useRef } from "react";
 import { cn } from "@/lib/format";
 import { IconButton } from "./primitives";
 
+/*
+ * Stacking order (z-index), bottom to top:
+ *   header 40 · photo/story viewers 45 · modal scrim 60 and panel 61 · toasts and
+ *   full-screen viewers 70 · call screen 80 · call dialogs 90/91 ·
+ *   menus and popovers 95 · tooltips 100.
+ * Menus and popovers sit above every modal, since they open from inside dialogs
+ * (a post's "…" menu, the audience picker in Create post and Share).
+ */
+
 /* ---------- Tooltip (Facebook's frosted bubble: white in light mode, black in dark) ---------- */
 
 export function Tooltip({
@@ -148,7 +157,7 @@ export function PopoverPanel({
           sideOffset={arrow ? 15 : 4}
           collisionPadding={8}
           className={cn(
-            "group z-50 flex max-h-[calc(100vh-72px)] flex-col rounded-xl bg-popover outline-none data-[state=open]:animate-[fade-in_120ms_ease-out]",
+            "group z-[95] flex max-h-[calc(100vh-72px)] flex-col rounded-xl bg-popover outline-none data-[state=open]:animate-[fade-in_120ms_ease-out]",
             arrow ? ARROW_CORNER[align] : "shadow-elevated",
             className,
           )}
@@ -195,7 +204,7 @@ export function MenuContent({
         sideOffset={arrow ? 15 : 6}
         collisionPadding={8}
         className={cn(
-          "group z-50 rounded-xl bg-popover p-2 outline-none",
+          "group z-[95] rounded-xl bg-popover p-2 outline-none",
           arrow ? ARROW_CORNER[align] : "shadow-elevated",
           className,
         )}

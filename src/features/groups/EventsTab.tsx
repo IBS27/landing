@@ -39,6 +39,7 @@ export function EventsTab() {
           {isMember(group) && (
             <Link
               to="/events/create"
+              search={{ group: group._id }}
               className="flex h-9 items-center rounded-md bg-btn-soft px-3 font-semibold text-[15px] text-btn-soft-text hover:brightness-95 dark:hover:brightness-125"
             >
               Create event

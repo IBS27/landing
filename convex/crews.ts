@@ -9,6 +9,7 @@ import {
   type QueryCtx,
 } from "./_generated/server";
 import { runAgent } from "./ai/agent";
+import { standingInvites } from "./groups";
 import { cite, sourceKey } from "./lib/citations";
 import { getProfile } from "./lib/cityProfile";
 import { crewFor, crewOptIn } from "./lib/crewMembers";
@@ -23,6 +24,7 @@ import {
   crewMeetupTask,
   crewRationale,
   meetupIdea,
+  meetupRationale,
   pickMeetup,
 } from "./lib/crewTasks";
 import { viewerMutation, viewerQuery } from "./lib/functions";
@@ -241,15 +243,71 @@ export async function crewGroupState(ctx: QueryCtx, ownerId: Id<"users">) {
 }
 export type CrewGroupState = Awaited<ReturnType<typeof crewGroupState>>;
 
-/** The viewer's crew Group, its proposal and the first meetup, for the Crew page. */
+/**
+ * Crew Groups someone else in the viewer's crew started that invited the
+ * viewer or that they joined, so the crew page points them there instead of
+ * asking them to start their own. Read from those people's own proposals: at
+ * most `CREW_MAX` of them.
+ */
+export async function crewGroupsFromCrew(ctx: QueryCtx, viewerId: Id<"users">) {
+  const crew = await crewFor(ctx, viewerId);
+  const out: {
+    _id: Id<"groups">;
+    slug: string;
+    name: string;
+    memberCount: number;
+    owner: UserSummary;
+    joined: boolean;
+  }[] = [];
+  for (const m of crew?.matches ?? []) {
+    const ownerId = m.userId as Id<"users">;
+    const rows = await ctx.db
+      .query("proposals")
+      .withIndex("by_owner", (q) => q.eq("ownerId", ownerId))
+      .order("desc")
+      .take(100);
+    const p = rows.find((r) => r.origin.task === GROUP_TASK && r.result?.kind === "group");
+    if (p?.result?.kind !== "group" || p.payload.kind !== "group") continue;
+    const group = await ctx.db.get(p.result.groupId);
+    if (!group) continue;
+    const joined =
+      (await ctx.db
+        .query("groupMembers")
+        .withIndex("by_group_user", (q) => q.eq("groupId", group._id).eq("userId", viewerId))
+        .unique()) !== null;
+    if (!joined && (await standingInvites(ctx, viewerId, group._id)).length === 0) continue;
+    const owner = (await getSummaries(ctx, [ownerId])).get(ownerId);
+    if (!owner) continue;
+    out.push({
+      _id: group._id,
+      slug: group.slug,
+      name: group.name,
+      memberCount: group.memberCount,
+      owner,
+      joined,
+    });
+  }
+  return out;
+}
+
+/**
+ * The viewer's crew Group, its proposal and the first meetup, and crew
+ * Groups others in their crew started for them, for the Crew page.
+ */
 export const crewGroup = viewerQuery({
   args: {},
-  handler: (ctx) => crewGroupState(ctx, ctx.viewer._id),
+  handler: async (ctx) => ({
+    ...(await crewGroupState(ctx, ctx.viewer._id)),
+    fromCrew: await crewGroupsFromCrew(ctx, ctx.viewer._id),
+  }),
 });
 
 export const groupState = internalQuery({
   args: { ownerId: v.id("users") },
-  handler: (ctx, { ownerId }) => crewGroupState(ctx, ownerId),
+  handler: async (ctx, { ownerId }) => ({
+    ...(await crewGroupState(ctx, ownerId)),
+    fromCrew: await crewGroupsFromCrew(ctx, ownerId),
+  }),
 });
 
 export const groupContext = internalQuery({
@@ -259,10 +317,19 @@ export const groupContext = internalQuery({
 
 const OPEN: ProposalStatus[] = ["pending"];
 
-function assertCanStartGroup(state: CrewGroupState) {
+type GroupStateWithCrew = CrewGroupState & {
+  fromCrew: Awaited<ReturnType<typeof crewGroupsFromCrew>>;
+};
+
+function assertCanStartGroup(state: GroupStateWithCrew) {
   if (state.group) throw new ConvexError("Your crew already has a Group");
   if (state.groupProposal && OPEN.includes(state.groupProposal.status))
     throw new ConvexError("Your crew Group is waiting for your OK in Landing Inbox");
+  const theirs = state.fromCrew[0];
+  if (theirs)
+    throw new ConvexError(
+      `${theirs.owner.name} already started ${theirs.name} for your crew. ${theirs.joined ? "You're in it." : "You're invited."}`,
+    );
 }
 
 /**
@@ -275,7 +342,7 @@ export const proposeGroup = action({
   args: { viewerId: v.id("users") },
   // Explicit types: this action calls functions in its own module.
   handler: async (ctx, { viewerId }): Promise<Id<"proposals">> => {
-    const state: CrewGroupState = await ctx.runQuery(internal.crews.groupState, {
+    const state: GroupStateWithCrew = await ctx.runQuery(internal.crews.groupState, {
       ownerId: viewerId,
     });
     assertCanStartGroup(state);
@@ -319,7 +386,7 @@ export const proposeGroup = action({
 export const proposeMeetup = action({
   args: { viewerId: v.id("users") },
   handler: async (ctx, { viewerId }): Promise<Id<"proposals">> => {
-    const state: CrewGroupState = await ctx.runQuery(internal.crews.groupState, {
+    const state: GroupStateWithCrew = await ctx.runQuery(internal.crews.groupState, {
       ownerId: viewerId,
     });
     if (!state.group) throw new ConvexError("Start your crew's Group first");
@@ -331,7 +398,11 @@ export const proposeMeetup = action({
     });
     const options = c?.input.meetupOptions.filter((o) => o.kind === "event") ?? [];
     if (!c || options.length === 0)
-      throw new ConvexError("Muse couldn't find an upcoming event for a first meetup yet");
+      throw new ConvexError(
+        c?.arrivesAt
+          ? "Muse couldn't find an event your crew would enjoy for after you arrive yet. Try again closer to move day."
+          : "Muse couldn't find an upcoming event your crew would enjoy yet. Try again soon.",
+      );
     const input: CrewMeetupInput = {
       groupName: state.group.name,
       members: c.input.members.map((m) => m.firstName),
@@ -340,7 +411,8 @@ export const proposeMeetup = action({
     const sources = c.sources.filter((s) => s.kind === "event");
     const r = await runAgent(ctx, crewMeetupTask, { input, sources, shownTo: viewerId });
     const event = c.events[r.output.eventSource];
-    if (!event || !r.cited)
+    const option = options.find((o) => o.source === r.output.eventSource);
+    if (!event || !option || !r.cited)
       throw new ConvexError("Muse couldn't ground the meetup. Try again soon.");
     return ctx.runMutation(internal.proposals.propose, {
       ownerId: viewerId,
@@ -353,7 +425,7 @@ export const proposeMeetup = action({
         groupId: state.group._id,
         inviteIds: c.inviteIds,
       },
-      rationale: `The first meetup for ${state.group.name}, at an upcoming event that fits what your crew shares.`,
+      rationale: meetupRationale(state.group.name, option),
       citations: r.cited,
       origin: { agent: "muse", task: MEETUP_TASK, runId: r.runId, via: r.via },
       byOwner: true,
@@ -371,7 +443,7 @@ async function proposeCrewGroupFromTemplate(ctx: MutationCtx, ownerId: Id<"users
     ownerId,
     payload: {
       kind: "group",
-      name: crewGroupName(c.input.owner.moving, c.input.commonPlace),
+      name: crewGroupName(c.input.commonMonth, c.input.commonPlace),
       description: `${crewIntro(c.input)}\n\nFirst meetup idea: ${meetupIdea(pick)}`,
       privacy: "private",
       inviteIds: c.inviteIds,

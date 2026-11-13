@@ -337,6 +337,17 @@ describe("listingTrust", () => {
     expect(t?.signals.map((s) => s.kind).sort()).toEqual(["lister_far_away", "new_account"]);
   });
 
+  test("a lister blocked either way hides the listing view", async () => {
+    for (const block of [
+      { _id: "bl3", userId: "V", blockedId: "L", createdAt: 0 },
+      { _id: "bl3", userId: "L", blockedId: "V", createdAt: 0 },
+    ]) {
+      const w = world();
+      (w.blocks as Row[]).push(block);
+      expect(await listingTrust(fakeCtx(w), id("V"), id("lst"))).toBeNull();
+    }
+  });
+
   test("toured badge: shown for the viewer's network, hidden when blocked or unconnected", async () => {
     const w = world();
     const t = await listingTrust(fakeCtx(w), id("V"), id("lst"));

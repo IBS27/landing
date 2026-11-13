@@ -1,11 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
-import { Home, ImagePlus, Sparkles, X } from "lucide-react";
+import { Home, Sparkles, X } from "lucide-react";
 import { useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { uploadFile } from "@/features/posts/util";
+import { AddPhotoTile } from "@/landing/move-in/AddPhotoTile";
+import { today } from "@/landing/move-in/OwnedItems";
 import { price } from "@/lib/format";
-import { Button, Card, Skeleton, Spinner } from "@/ui/primitives";
+import { Button, Card, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { NEIGHBORHOODS } from "../../../convex/lib/listings";
@@ -14,8 +16,23 @@ const field =
   "w-full rounded-lg border border-divider bg-input px-3 py-2 text-[15px] text-primary outline-none placeholder:text-placeholder focus:border-fb";
 
 const toDay = (s: string) => (s ? new Date(`${s}T12:00:00`).getTime() : Number.NaN);
-const shortDate = (ts: number | null) =>
-  ts ? new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "";
+/** "Jun 1 to Aug 31, 2027", or "Dec 1, 2026 to Feb 28, 2027" across a new year. */
+function dateRange(from: number | null, to: number | null) {
+  if (!from || !to) return "";
+  const a = new Date(from);
+  const b = new Date(to);
+  const fmt = (d: Date, year: boolean) =>
+    d.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      ...(year && { year: "numeric" }),
+    });
+  return `${fmt(a, a.getFullYear() !== b.getFullYear())} to ${fmt(b, true)}`;
+}
+const errorText = (e: unknown, fallback: string) => {
+  const data = (e as { data?: unknown }).data;
+  return typeof data === "string" ? data : fallback;
+};
 
 type Prefill = NonNullable<FunctionReturnType<typeof api.subleases.fromPlace>>;
 
@@ -49,8 +66,8 @@ export function Sublets({
         <div className="min-w-[240px] flex-1">
           <h2 className="font-bold text-[17px] text-primary leading-5">Sublease your place</h2>
           <p className="mt-0.5 text-[13px] text-secondary leading-[18px]">
-            Your sublet is listed on Marketplace. Muse drafts replies to renters, never under your
-            lowest rent, and you approve each one in your Inbox.
+            List your place on Marketplace while you're away. Muse drafts replies to renters, never
+            under your lowest rent, and you approve each one in your Inbox.
           </p>
         </div>
         {!open && (
@@ -89,6 +106,26 @@ function SubletRow({ r }: { r: Row }) {
   const update = useM(api.subleases.updateTerms);
   const [minRent, setMinRent] = useState(String(r.minRent));
   const [editing, setEditing] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const save = async () => {
+    const n = Number(minRent);
+    if (!minRent.trim() || !Number.isFinite(n) || n <= 0 || n > r.rent) {
+      setError(`Enter a lowest rent from $1 to ${price(r.rent)}`);
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await update({ subletId: r._id, minRent: n });
+      setEditing(false);
+    } catch (e) {
+      setError(errorText(e, "Couldn't save. Try again."));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <li className="px-4 py-3">
@@ -98,7 +135,7 @@ function SubletRow({ r }: { r: Row }) {
         ) : (
           <div className="h-14 w-14 shrink-0 rounded-md bg-wash" />
         )}
-        <div className="min-w-0 flex-1">
+        <div className="min-w-[180px] flex-1">
           <Link
             to="/landing/find/listing/$listingId"
             params={{ listingId: r.listingId }}
@@ -107,8 +144,9 @@ function SubletRow({ r }: { r: Row }) {
             {r.title}
           </Link>
           <div className="text-[13px] text-secondary leading-[18px]">
-            {price(r.rent)}/mo · {shortDate(r.availableFrom)} to {shortDate(r.availableTo)}
+            {price(r.rent)}/mo · {dateRange(r.availableFrom, r.availableTo)}
             {r.neighborhood ? ` · ${r.neighborhood}` : ""}
+            {r.status !== "active" ? ` · Marked as ${r.status}` : ""}
           </div>
           <div className="flex flex-wrap items-center gap-x-2 text-[13px] leading-[18px]">
             <span className="text-secondary">
@@ -129,9 +167,17 @@ function SubletRow({ r }: { r: Row }) {
             {r.museReplies === "paused" && <span className="text-secondary">· Muse paused</span>}
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 max-sm:pl-[68px]">
           {!editing && (
-            <Button variant="secondary" size="sm" onClick={() => setEditing(true)}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setMinRent(String(r.minRent));
+                setError(null);
+                setEditing(true);
+              }}
+            >
               Edit lowest rent
             </Button>
           )}
@@ -150,31 +196,32 @@ function SubletRow({ r }: { r: Row }) {
         </div>
       </div>
       {editing && (
-        <div className="mt-3 flex items-end gap-2 rounded-lg bg-wash p-3 dark:bg-hover">
-          <label className="flex flex-col gap-1">
-            <span className="font-semibold text-[13px] text-secondary">Lowest rent</span>
-            <input
-              type="number"
-              min={1}
-              step={25}
-              className={`${field} w-36`}
-              value={minRent}
-              onChange={(e) => setMinRent(e.target.value)}
-            />
-          </label>
-          <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={async () => {
-              await update({ subletId: r._id, minRent: Number(minRent) });
-              setEditing(false);
-            }}
-          >
-            Save
-          </Button>
+        <div className="mt-3 rounded-lg bg-wash p-3 dark:bg-hover">
+          <div className="flex flex-wrap items-end gap-2">
+            <label className="flex flex-col gap-1">
+              <span className="font-semibold text-[13px] text-secondary">Lowest rent</span>
+              <input
+                type="number"
+                min={1}
+                max={r.rent}
+                step={25}
+                className={`${field} w-36`}
+                value={minRent}
+                onChange={(e) => setMinRent(e.target.value)}
+              />
+            </label>
+            <Button variant="ghost" size="sm" onClick={() => setEditing(false)} disabled={busy}>
+              Cancel
+            </Button>
+            <Button variant="primary" size="sm" onClick={save} disabled={busy}>
+              Save
+            </Button>
+          </div>
+          {error && (
+            <p role="alert" className="mt-2 text-[13px] text-[#E41E3F]">
+              {error}
+            </p>
+          )}
         </div>
       )}
     </li>
@@ -214,8 +261,7 @@ function SubletForm({ prefill, onDone }: { prefill?: Prefill; onDone: () => void
   const [error, setError] = useState<string | null>(null);
   const set = (patch: Partial<typeof f>) => setF((x) => ({ ...x, ...patch }));
 
-  const addPhotos = async (files: FileList | null) => {
-    if (!files?.length) return;
+  const addPhotos = async (files: File[]) => {
     setUploading(true);
     try {
       const added: Photo[] = [];
@@ -253,8 +299,7 @@ function SubletForm({ prefill, onDone }: { prefill?: Prefill; onDone: () => void
       });
       onDone();
     } catch (e) {
-      const data = (e as { data?: unknown }).data;
-      setError(typeof data === "string" ? data : "Check the details and try again.");
+      setError(errorText(e, "Check the details and try again."));
     } finally {
       setBusy(false);
     }
@@ -318,6 +363,7 @@ function SubletForm({ prefill, onDone }: { prefill?: Prefill; onDone: () => void
           {label("Available to")}
           <input
             type="date"
+            min={today()}
             className={field}
             value={f.to}
             onChange={(e) => set({ to: e.target.value })}
@@ -422,16 +468,12 @@ function SubletForm({ prefill, onDone }: { prefill?: Prefill; onDone: () => void
               </span>
             ))}
             {photos.length < 10 && (
-              <label className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-md border border-divider border-dashed text-secondary hover:bg-hover">
-                {uploading ? <Spinner size={18} /> : <ImagePlus size={20} />}
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => addPhotos(e.target.files)}
-                />
-              </label>
+              <AddPhotoTile
+                label="Add photos"
+                busy={uploading}
+                onFiles={addPhotos}
+                className="h-16 w-16"
+              />
             )}
           </div>
         </div>

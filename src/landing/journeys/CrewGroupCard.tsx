@@ -4,21 +4,14 @@ import { CalendarDays, Inbox, Sparkles, UsersRound } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useQ, useViewerContext } from "@/app/viewer";
 import { useToast } from "@/features/marketplace/toast";
+import { errorText } from "@/landing/errorText";
 import { toEvent, toGroup } from "@/landing/links";
+import { SF_DAY_TIME } from "@/landing/sfTime";
 import { Button, Card, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 
-function errorText(e: unknown) {
-  return e instanceof Error ? e.message.replace(/^.*ConvexError:\s*/, "") : "Something went wrong";
-}
-
-const WHEN = new Intl.DateTimeFormat("en-US", {
-  weekday: "short",
-  month: "short",
-  day: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-});
+const openGroupCls =
+  "inline-flex h-9 shrink-0 items-center rounded-md bg-btn px-3 font-semibold text-[15px] text-btn-text hover:brightness-95 dark:hover:brightness-125";
 
 function InboxLink() {
   return (
@@ -87,7 +80,30 @@ export function CrewGroupCard({ crewSize }: { crewSize: number }) {
   const meetupPending = state.meetup?.status === "pending";
 
   let body: ReactNode;
-  if (!state.group) {
+  if (!state.group && !groupPending && state.fromCrew.length > 0) {
+    // Someone in the crew already started one: join theirs rather than start another.
+    body = (
+      <div className="divide-y divide-divider">
+        {state.fromCrew.map((g) => (
+          <Row
+            key={g._id}
+            icon={<UsersRound size={20} />}
+            title={
+              <Link {...toGroup(g)} className="hover:underline">
+                {g.name}
+              </Link>
+            }
+            body={`Started by ${g.owner.name} for your crew · ${g.memberCount} member${g.memberCount === 1 ? "" : "s"}. ${g.joined ? "You're a member." : "You're invited."}`}
+            action={
+              <Link {...toGroup(g)} className={openGroupCls}>
+                {g.joined ? "Open Group" : "View invite"}
+              </Link>
+            }
+          />
+        ))}
+      </div>
+    );
+  } else if (!state.group) {
     body = groupPending ? (
       <Row
         icon={<UsersRound size={20} />}
@@ -135,10 +151,7 @@ export function CrewGroupCard({ crewSize }: { crewSize: number }) {
           }
           body={`Private Group · ${state.group.memberCount} member${state.group.memberCount === 1 ? "" : "s"} so far. Your crew was invited.`}
           action={
-            <Link
-              {...toGroup(state.group)}
-              className="inline-flex h-9 shrink-0 items-center rounded-md bg-btn px-3 font-semibold text-[15px] text-btn-text hover:brightness-95 dark:hover:brightness-125"
-            >
+            <Link {...toGroup(state.group)} className={openGroupCls}>
               Open Group
             </Link>
           }
@@ -151,7 +164,7 @@ export function CrewGroupCard({ crewSize }: { crewSize: number }) {
                 {event.title}
               </Link>
             }
-            body={`First meetup · ${WHEN.format(event.startAt)}`}
+            body={`First meetup · ${SF_DAY_TIME.format(event.startAt)}`}
           />
         ) : meetupPending ? (
           <Row

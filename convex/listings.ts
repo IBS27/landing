@@ -22,7 +22,7 @@ import {
 import { afterChatMessage } from "./lib/negotiations";
 import { locationPoint, neighborhoodIdAt } from "./lib/neighborhoods";
 import { notify } from "./lib/notify";
-import { isSaved, loadAudience } from "./lib/posts";
+import { isSaved, listingShownTo, loadAudience } from "./lib/posts";
 import { badgesAfterEdit } from "./lib/trust";
 import { type NoisePlace, noiseRisk } from "./lib/unitDetails";
 import { getSummaries, getSummary, type UserSummary } from "./lib/users";
@@ -110,6 +110,8 @@ const listingFields = {
   vehicle: v.optional(vehicleDetails),
   meetup: v.optional(meetup),
   groupIds: v.optional(v.array(v.id("groups"))),
+  /** "Hide from friends": keep it out of the seller's friends' Marketplace browsing. */
+  hideFromFriends: v.optional(v.boolean()),
 };
 
 /* ───────────────────────── Browse / search ───────────────────────── */
@@ -219,7 +221,9 @@ export const browse = viewerQuery({
     const sort = args.sort ?? "recommended";
     const limit = Math.max(1, Math.min(args.limit, 240));
     const now = Date.now();
-    const accept = (l: Doc<"listings">) => matches(l, meta, f, args.near, now);
+    const a = await loadAudience(ctx, ctx.viewer._id);
+    const accept = (l: Doc<"listings">) =>
+      matches(l, meta, f, args.near, now) && listingShownTo(l, a);
     const single = meta && meta.categories.length === 1 && !meta.includeFree;
     const q = args.q?.trim();
 
@@ -332,6 +336,8 @@ export const get = viewerQuery({
     if (!l) return null;
     const viewerId = ctx.viewer._id;
     const isOwner = l.sellerId === viewerId;
+    // Blocking hides the other person's listings.
+    if (!isOwner && (await isBlockedEitherWay(ctx, viewerId, l.sellerId))) return null;
     const [sellerDoc, viewerSaved, thread, stats] = await Promise.all([
       ctx.db.get(l.sellerId),
       isSaved(ctx, viewerId, "listing", l._id),
@@ -360,6 +366,7 @@ export const get = viewerQuery({
       rental: l.rental ?? null,
       vehicle: l.vehicle ?? null,
       meetup: l.meetup ?? [],
+      hideFromFriends: isOwner ? (l.hideFromFriends ?? false) : false,
       createdAt: l.createdAt,
       updatedAt: l.updatedAt,
       seller: {
@@ -379,7 +386,8 @@ export const get = viewerQuery({
 export const related = viewerQuery({
   args: { listingId: v.id("listings"), limit: v.number(), near: v.optional(near) },
   handler: async (ctx, { listingId, limit, near }) => {
-    const rows = await relatedListings(ctx, listingId, limit, near);
+    const a = await loadAudience(ctx, ctx.viewer._id);
+    const rows = await relatedListings(ctx, listingId, limit, near, (l) => listingShownTo(l, a));
     const now = Date.now();
     return rows.map((r) => toCard(r, now));
   },
@@ -394,6 +402,7 @@ export async function relatedListings(
   listingId: Id<"listings">,
   limit: number,
   nearBy: Near | undefined,
+  shown: (l: Doc<"listings">) => boolean = () => true,
 ) {
   const max = Math.max(1, Math.min(limit, 240));
   const l = await ctx.db.get(listingId);
@@ -405,7 +414,7 @@ export async function relatedListings(
     if (out.length >= max || budget <= 0) return;
     for await (const r of rows) {
       budget--;
-      if (!seen.has(r._id) && r.status === "active" && withinRadius(r, nearBy)) {
+      if (!seen.has(r._id) && r.status === "active" && withinRadius(r, nearBy) && shown(r)) {
         seen.add(r._id);
         out.push(r);
       }
@@ -484,12 +493,13 @@ export const saved = viewerQuery({
       .order("desc")
       .collect();
     const now = Date.now();
+    const a = await loadAudience(ctx, ctx.viewer._id);
     const out: ListingCard[] = [];
     for (const r of rows) {
       if (r.kind !== "listing") continue;
       const id = ctx.db.normalizeId("listings", r.refId);
       const l = id ? await ctx.db.get(id) : null;
-      if (l) out.push(toCard(l, now));
+      if (l && !a.blocked.has(l.sellerId)) out.push(toCard(l, now));
     }
     return out;
   },
@@ -768,6 +778,7 @@ export const create = viewerMutation({
       meetup: args.meetup,
       badges: [],
       groupIds: await listableGroupIds(ctx, args.groupIds),
+      hideFromFriends: args.hideFromFriends || undefined,
       createdAt: now,
       updatedAt: now,
       viewCount: 0,
@@ -816,6 +827,7 @@ export const update = viewerMutation({
       vehicle: args.vehicle,
       meetup: args.meetup,
       groupIds: await listableGroupIds(ctx, args.groupIds),
+      hideFromFriends: args.hideFromFriends || undefined,
       // A different unit loses the badges about the old one (#11).
       badges: badgesAfterEdit(l, {
         location,

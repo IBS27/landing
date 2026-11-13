@@ -12,14 +12,36 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { CATEGORIES, RailShell } from "./EventsRail";
 import { longDate } from "./format";
 
-type Privacy = "public" | "friends" | "private";
+type Privacy = "public" | "friends" | "private" | "group";
 type EventView = NonNullable<FunctionReturnType<typeof api.events.get>>;
+/** The Group an event is created in (from its Events tab) or already belongs to. */
+type EventGroup = { _id: Id<"groups">; name: string; privacy: "public" | "private" };
+type PrivacyOption = { value: Privacy; label: string; sub: string };
 
-const PRIVACY: { value: Privacy; label: string; sub: string }[] = [
+const PRIVACY: PrivacyOption[] = [
   { value: "private", label: "Private", sub: "Only people who are invited" },
   { value: "public", label: "Public", sub: "Anyone on or off Facebook" },
   { value: "friends", label: "Friends", sub: "Your Facebook friends" },
 ];
+
+/**
+ * An event in a Group is for the Group's members, or public in a public Group.
+ * An audience the event already has stays on the list.
+ */
+function privacyOptions(group: EventGroup | null, current?: Privacy): PrivacyOption[] {
+  if (!group) return PRIVACY;
+  const members: PrivacyOption = {
+    value: "group",
+    label: "Members",
+    sub: `Members of ${group.name}`,
+  };
+  return [members, ...PRIVACY].filter(
+    (p) =>
+      p.value === "group" ||
+      p.value === current ||
+      (p.value === "public" && group.privacy === "public"),
+  );
+}
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const dateValue = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -42,7 +64,7 @@ type Form = {
   category: string;
 };
 
-function initialForm(e?: EventView): Form {
+function initialForm(e?: EventView, group?: EventGroup | null): Form {
   if (!e) {
     // Pre-fill tomorrow at noon.
     const d = new Date(Date.now() + 86_400_000);
@@ -58,7 +80,7 @@ function initialForm(e?: EventView): Form {
       venue: "",
       address: "",
       description: "",
-      privacy: "",
+      privacy: group ? "group" : "",
       category: "",
     };
   }
@@ -75,39 +97,54 @@ function initialForm(e?: EventView): Form {
     venue: e.venue ?? "",
     address: e.address ?? "",
     description: e.description,
-    privacy: e.privacy === "group" ? "friends" : e.privacy,
+    privacy: e.privacy,
     category: e.category,
   };
 }
 
-/** /events/create (and ?edit=<id>): form rail + live desktop preview. */
-export function CreateEvent({ editId }: { editId?: string }) {
+/**
+ * /events/create (?edit=<id> edits; ?group=<id> creates in a Group): form rail
+ * + live desktop preview.
+ */
+export function CreateEvent({ editId, groupId }: { editId?: string; groupId?: string }) {
   const existing = useQ(api.events.get, editId ? { eventId: editId } : "skip");
-  if (editId && existing === undefined)
+  const inGroup = useQ(api.groups.get, !editId && groupId ? { idOrSlug: groupId } : "skip");
+  if ((editId && existing === undefined) || (!editId && groupId && inGroup === undefined))
     return (
       <div className="flex justify-center pt-24">
         <Spinner />
       </div>
     );
-  if (editId && !existing?.isHost)
-    return (
-      <div className="px-4 pt-24 text-center">
-        <p className="font-bold text-[20px] text-secondary">You can't edit this event</p>
-        <Link to="/events" className="mt-3 inline-block font-semibold text-link hover:underline">
-          Go to Events
-        </Link>
-      </div>
-    );
-  return <CreateForm existing={existing ?? undefined} />;
+  if (editId && !existing?.isHost) return <CantCreate title="You can't edit this event" />;
+  if (!editId && groupId && !inGroup?.viewerRole)
+    return <CantCreate title="Join the group to create events in it" />;
+  const group = existing
+    ? existing.group
+    : inGroup
+      ? { _id: inGroup._id, name: inGroup.name, privacy: inGroup.privacy }
+      : null;
+  return <CreateForm existing={existing ?? undefined} group={group} />;
 }
 
-function CreateForm({ existing }: { existing?: EventView }) {
+function CantCreate({ title }: { title: string }) {
+  return (
+    <div className="px-4 pt-24 text-center">
+      <p className="font-bold text-[20px] text-secondary">{title}</p>
+      <Link to="/events" className="mt-3 inline-block font-semibold text-link hover:underline">
+        Go to Events
+      </Link>
+    </div>
+  );
+}
+
+function CreateForm({ existing, group }: { existing?: EventView; group: EventGroup | null }) {
   const viewer = useViewer();
   const navigate = useNavigate();
   const create = useM(api.events.create);
   const update = useM(api.events.update);
   const getUploadUrl = useM(api.posts.generateUploadUrl);
-  const [f, setF] = useState<Form>(() => initialForm(existing));
+  const [f, setF] = useState<Form>(() => initialForm(existing, group));
+  const privacyChoices = privacyOptions(group, existing?.privacy);
   const [cover, setCover] = useState<{ file: File; url: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -152,7 +189,7 @@ function CreateForm({ existing }: { existing?: EventView }) {
         await update({ eventId: existing._id, ...fields });
         void navigate({ to: "/events/$eventId", params: { eventId: existing._id } });
       } else {
-        const id = await create(fields);
+        const id = await create({ ...fields, groupId: group?._id });
         void navigate({ to: "/events/$eventId", params: { eventId: id } });
       }
     } catch (e) {
@@ -183,7 +220,9 @@ function CreateForm({ existing }: { existing?: EventView }) {
             <Avatar src={viewer.avatar} size={40} />
             <div>
               <p className="font-semibold text-[15px] text-primary leading-5">{viewer.name}</p>
-              <p className="text-[13px] text-secondary leading-4">Host · Your profile</p>
+              <p className="text-[13px] text-secondary leading-4">
+                Host · {group ? group.name : "Your profile"}
+              </p>
             </div>
           </div>
 
@@ -357,7 +396,7 @@ function CreateForm({ existing }: { existing?: EventView }) {
                   className={inputCls}
                 >
                   <option value="" disabled hidden />
-                  {PRIVACY.map((p) => (
+                  {privacyChoices.map((p) => (
                     <option key={p.value} value={p.value}>
                       {p.label} · {p.sub}
                     </option>
@@ -387,7 +426,13 @@ function CreateForm({ existing }: { existing?: EventView }) {
       </RailShell>
 
       <main className="min-w-0 flex-1 px-4 py-4 min-[900px]:px-8">
-        <Preview form={f} startAt={startAt} endAt={endAt} cover={coverUrl} />
+        <Preview
+          form={f}
+          startAt={startAt}
+          endAt={endAt}
+          cover={coverUrl}
+          privacyChoices={privacyChoices}
+        />
       </main>
     </div>
   );
@@ -496,14 +541,16 @@ function Preview({
   startAt,
   endAt,
   cover,
+  privacyChoices,
 }: {
   form: Form;
   startAt: number | null;
   endAt: number | null;
   cover: string | null;
+  privacyChoices: PrivacyOption[];
 }) {
   const viewer = useViewer();
-  const privacy = PRIVACY.find((p) => p.value === form.privacy);
+  const privacy = privacyChoices.find((p) => p.value === form.privacy);
   return (
     <section className="mx-auto max-w-[1000px] rounded-lg bg-card p-4 shadow-base">
       <h2 className="font-semibold text-[17px] text-primary leading-5">Desktop preview</h2>

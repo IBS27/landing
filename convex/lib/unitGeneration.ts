@@ -39,6 +39,28 @@ export function refreshedSources(sources: SceneSource[], listing: Doc<"listings"
   return [...imported.slice(0, MAX_SOURCES - personal.length), ...personal];
 }
 
+/** A room's scan photos as sources, keyed by their file so a key keeps naming the same photo. */
+export function roomSources(room: Doc<"rooms">): SceneSource[] {
+  return room.photos.slice(0, 18).map((p, i) => ({
+    key: p.storageId ? `room-${p.storageId}` : `room-photo-${i + 1}`,
+    kind: "photo",
+    label: `Photo ${i + 1}`,
+    url: p.url,
+    ...(p.storageId ? { storageId: p.storageId } : {}),
+    imported: true,
+  }));
+}
+
+/**
+ * A room unit's sources with the room's current photos: what the person added
+ * in the unit itself stays, and the room photos it was made from (from before
+ * provenance too: `photo-N`) are replaced by the room's scan as it is now.
+ */
+export function refreshedRoomSources(sources: SceneSource[], room: Doc<"rooms">) {
+  const personal = sources.filter((s) => s.imported === false || s.key.startsWith("source-"));
+  return [...roomSources(room).slice(0, MAX_SOURCES - personal.length), ...personal];
+}
+
 /** Snapshot only evidence cited by saved geometry, independently of current generation inputs. */
 export function savedSceneSources(scene: UnitScene, sources: SceneSource[]) {
   const keys = new Set([

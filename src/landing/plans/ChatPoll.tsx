@@ -1,6 +1,7 @@
 import { Check, ListChecks } from "lucide-react";
 import { useState } from "react";
 import { useM } from "@/app/viewer";
+import { errorText } from "@/landing/errorText";
 import { cn } from "@/lib/format";
 import { Avatar } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -27,10 +28,6 @@ const CLOSES = new Intl.DateTimeFormat("en-US", {
 function closesLabel(closesAt: number | null, now: number) {
   if (closesAt === null) return null;
   return closesAt <= now ? "Poll closed" : `Closes ${CLOSES.format(closesAt).replace(":00", "")}`;
-}
-
-function errorText(e: unknown) {
-  return e instanceof Error ? e.message.replace(/^.*ConvexError:\s*/, "") : "Something went wrong";
 }
 
 function Header({ question }: { question: string }) {

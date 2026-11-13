@@ -238,7 +238,7 @@ describe("For you", () => {
     expect(keys(r.forYou.items)).toEqual([`group:${climb._id}`, `event:${games._id}`]);
     expect(r.forYou.items.map((i) => `${i.reason.label} · ${i.reason.because}`)).toEqual([
       "Climbing · from your brief",
-      "Board games · you RSVP'd to 2 board games Events",
+      "Board games · from Events you've RSVP'd to",
     ]);
   });
 
@@ -489,8 +489,20 @@ describe("helpers", () => {
   test("becauseOf says where the fact came from", () => {
     expect(becauseOf(f({ kind: "brief", summary: "" }))).toBe("from your brief");
     expect(becauseOf(f({ kind: "free_text", summary: "" }))).toBe("you mentioned it");
+    // Activity says how the interest was learned, never another Event or Group by name: on a
+    // card for something else, "you joined Bay Area Climbers" reads as this card's reason.
     expect(becauseOf(f({ kind: "activity", summary: "Joined Bay Area Climbers" }))).toBe(
-      "you joined Bay Area Climbers",
+      "from Groups you've joined",
+    );
+    expect(
+      becauseOf(f({ kind: "activity", summary: "RSVP'd to Bouldering Night and joined Crux" })),
+    ).toBe("from Events you've RSVP'd to");
+    // Not "you interested in 2 climbing Events".
+    expect(becauseOf(f({ kind: "activity", summary: "Interested in 2 climbing Events" }))).toBe(
+      "from Events you're interested in",
+    );
+    expect(becauseOf(f({ kind: "activity", summary: "Liked 3 related posts" }))).toBe(
+      "from posts you've liked",
     );
     expect(becauseOf(f({ kind: "activity", summary: "From your activity" }))).toBe(
       "from your activity",

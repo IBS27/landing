@@ -404,6 +404,25 @@ describe("buildRoute", () => {
     expect(stops.map((s) => s.eventId).filter(Boolean)).toEqual(["events:show"]);
   });
 
+  test("Saturday's Events win over a bigger Sunday one, so it stays a Saturday route", () => {
+    const sundayFair: RouteEvent = {
+      ...show,
+      eventId: id("events:fair"),
+      title: "Street fair",
+      startAt: at(1, 12),
+      going: 400,
+      sourceKey: "event:events:fair",
+    };
+    const stops = buildRoute(all, [sundayFair, show]);
+    expect(stops.map((s) => s.eventId).filter(Boolean)).toEqual(["events:show"]);
+    // With nothing on Saturday (it's Sunday, or Saturday has no Events), Sunday's are used.
+    expect(
+      buildRoute(all, [sundayFair])
+        .map((s) => s.eventId)
+        .filter(Boolean),
+    ).toEqual(["events:fair"]);
+  });
+
   test("an unlisted place stays on the route without a pin", () => {
     const stops = buildRoute(
       [

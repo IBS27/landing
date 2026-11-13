@@ -5,6 +5,7 @@ import { CalendarCheck, Inbox, MessageCircle, Sparkles } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useM, useQ, useViewerContext } from "@/app/viewer";
 import { useToast } from "@/features/marketplace/toast";
+import { errorText } from "@/landing/errorText";
 import { toConversation, toEvent } from "@/landing/links";
 import { shortAge } from "@/lib/format";
 import { Button, Card, Spinner } from "@/ui/primitives";
@@ -22,10 +23,6 @@ const WHEN = new Intl.DateTimeFormat("en-US", {
   minute: "2-digit",
 });
 const when = (t: number) => WHEN.format(t).replace(":00", "");
-
-function errorText(e: unknown) {
-  return e instanceof Error ? e.message.replace(/^.*ConvexError:\s*/, "") : "Something went wrong";
-}
 
 const linkButton =
   "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-btn px-3 font-semibold text-[15px] text-btn-text hover:brightness-95 dark:hover:brightness-125";

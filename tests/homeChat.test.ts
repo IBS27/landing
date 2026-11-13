@@ -74,6 +74,8 @@ const user = (_id: string) => ({
   avatar: `/seed/${_id}.jpg`,
   verified: false,
   lastActiveAt: 0,
+  // Long-standing accounts, so listings carry no "new account" trust warning.
+  joinedAt: 0,
 });
 const hood = (slug: string, name: string, shortName?: string) => ({
   _id: `neighborhoods:${slug}`,

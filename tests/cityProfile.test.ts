@@ -10,16 +10,23 @@ import {
   saveStatedFacts,
 } from "../convex/lib/cityProfile";
 import {
+  earliestMoveInMonth,
   type FactEntry,
   factSlot,
   isCalendarDate,
   moveInLabel,
   moveInProblem,
+  upcomingMoveInProblem,
   valueKey,
 } from "../convex/lib/cityProfileFacts";
 import { profileFromText, profileInput, tidyProposals } from "../convex/lib/profileFromText";
 import { extractFacts, narrowQuote } from "../convex/lib/profileText";
-import { hasProtected, REDACTED, redactProtected } from "../convex/lib/protectedText";
+import {
+  employerHasProtected,
+  hasProtected,
+  REDACTED,
+  redactProtected,
+} from "../convex/lib/protectedText";
 import {
   applyProposals,
   type BriefForm,
@@ -28,6 +35,8 @@ import {
   liveQuote,
   type Proposal,
   toSaveArgs,
+  withMoveInDate,
+  withMoveInMonth,
 } from "../src/landing/profile/briefState";
 import { fakeCtx, type Row } from "./fakeDb";
 
@@ -228,6 +237,23 @@ describe("protected traits", () => {
     );
   });
 
+  test("transit and street names aren't protected traits", () => {
+    for (const text of [
+      "Good transit matters to me",
+      "close to public transportation",
+      "transfer at Embarcadero",
+      "Sunny room near Church St",
+      "1BR on Church St. & Market",
+      "Church & 18th",
+      "Brazil St in the Excelsior",
+      "Persia Ave",
+      "Temple St",
+    ])
+      expect([text, hasProtected(text)]).toEqual([text, false]);
+    for (const text of ["I'm trans", "trans woman", "near my church", "I'm from Brazil", "Mosque"])
+      expect([text, hasProtected(text)]).toEqual([text, true]);
+  });
+
   test("redaction keeps places, activities and plans", () => {
     expect(redactProtected("Moving to Russian Hill in March.")).toBe(
       "Moving to Russian Hill in March.",
@@ -328,14 +354,46 @@ describe("move-in dates", () => {
     expect(moveInProblem({ month: "2027-13" }, TODAY)).not.toBeNull();
   });
 
-  test("one past-date policy, with saved move-ins kept editable", () => {
-    expect(moveInProblem({ month: "2026-10" }, TODAY)).not.toBeNull();
-    expect(moveInProblem({ month: "2026-11" }, TODAY)).toBeNull();
-    expect(moveInProblem({ month: "2026-11", date: "2026-11-03" }, TODAY)).not.toBeNull();
-    expect(moveInProblem({ month: "2026-11", date: "2026-11-12" }, TODAY)).toBeNull();
-    // Already saved before it passed: still fine; a different past one isn't.
-    expect(moveInProblem({ month: "2026-10" }, TODAY, { month: "2026-10" })).toBeNull();
-    expect(moveInProblem({ month: "2026-09" }, TODAY, { month: "2026-10" })).not.toBeNull();
+  test("people who already moved can enter when, back to a year ago; saved ones stay editable", () => {
+    expect(moveInProblem({ month: "2026-10" }, TODAY)).toBeNull();
+    expect(moveInProblem({ month: "2026-11", date: "2026-11-03" }, TODAY)).toBeNull();
+    expect(moveInProblem({ month: "2025-11", date: "2025-11-01" }, TODAY)).toBeNull();
+    expect(moveInProblem({ month: "2025-10" }, TODAY)).toContain("more than a year ago");
+    expect(earliestMoveInMonth(TODAY)).toBe("2025-11");
+    expect(earliestMoveInMonth("2026-01-05")).toBe("2025-01");
+    // Already saved: still fine however old; a different old one isn't.
+    expect(moveInProblem({ month: "2024-10" }, TODAY, { month: "2024-10" })).toBeNull();
+    expect(moveInProblem({ month: "2024-09" }, TODAY, { month: "2024-10" })).not.toBeNull();
+  });
+
+  test("text about moving is about a move to come", () => {
+    expect(upcomingMoveInProblem({ month: "2026-10" }, TODAY)).not.toBeNull();
+    expect(upcomingMoveInProblem({ month: "2026-11" }, TODAY)).toBeNull();
+    expect(upcomingMoveInProblem({ month: "2026-11", date: "2026-11-03" }, TODAY)).not.toBeNull();
+    expect(upcomingMoveInProblem({ month: "2026-11", date: "2026-11-12" }, TODAY)).toBeNull();
+  });
+
+  test("the brief's exact date sets the month; another month clears a date outside it", () => {
+    const f: BriefForm = { ...EMPTY_BRIEF, moveInMonth: "2027-01" };
+    const dated = withMoveInDate(f, "2026-12-15");
+    expect(dated).toMatchObject({ moveInMonth: "2026-12", moveInDate: "2026-12-15" });
+    expect(briefProblems(dated, TODAY).join()).not.toContain("move-in");
+    expect(withMoveInMonth(dated, "2026-12").moveInDate).toBe("2026-12-15");
+    expect(withMoveInMonth(dated, "2027-01")).toMatchObject({
+      moveInMonth: "2027-01",
+      moveInDate: "",
+    });
+    // A half-typed date leaves the month alone.
+    expect(withMoveInDate(f, "").moveInMonth).toBe("2027-01");
+  });
+
+  test("move-in errors say what's wrong", () => {
+    expect(moveInProblem({ month: "2027-02", date: "2027-02-31" }, TODAY)).toBe(
+      "Pick a real move-in date",
+    );
+    expect(moveInProblem({ month: "2027-03", date: "2027-02-28" }, TODAY)).toBe(
+      "Your move-in date isn't in your move-in month",
+    );
   });
 
   test("extraction never proposes what the checks reject", () => {
@@ -391,7 +449,9 @@ describe("move-in dates", () => {
     expect(
       briefProblems({ ...form, moveInMonth: "2027-02", moveInDate: "2027-02-31" }, TODAY),
     ).toHaveLength(1);
-    expect(briefProblems({ ...form, moveInMonth: "2026-08" }, TODAY)).toHaveLength(1);
+    expect(briefProblems({ ...form, moveInMonth: "2025-08" }, TODAY)).toHaveLength(1);
+    // Already moved: fine.
+    expect(briefProblems({ ...form, moveInMonth: "2026-08" }, TODAY)).toEqual([]);
     expect(briefProblems({ ...form, moveInMonth: "2027-02" }, TODAY)).toEqual([]);
   });
 
@@ -825,6 +885,18 @@ describe("common phrasings", () => {
       "south-of-market",
     ]);
     expect(slugs("I want to live near my office in SoMa.")).toEqual(["south-of-market"]);
+    // Moving for a job: the job's place isn't one they're considering.
+    expect(slugs("I'm moving to SF for a new job in SoMa.")).toEqual([]);
+    expect(slugs("Moving in March for my job in SoMa, want to live in the Mission.")).toEqual([
+      "mission",
+    ]);
+    expect(slugs("Moving for work in SoMa, looking for an apartment near work in SoMa.")).toEqual([
+      "south-of-market",
+    ]);
+    const soma: FactEntry = { key: "neighborhood", value: { slug: "south-of-market" } };
+    expect(
+      modelProblems("I'm moving to SF for a new job in SoMa.", [{ entry: soma, quote: "SoMa" }]),
+    ).not.toEqual([]);
     const mission: FactEntry = { key: "neighborhood", value: { slug: "mission" } };
     const text = "My office will be in the Mission. I want to live in SoMa.";
     expect(modelProblems(text, [{ entry: mission, quote: "the Mission" }])).not.toEqual([]);
@@ -1031,6 +1103,64 @@ describe("round 6", () => {
       briefProblems({ ...form, employer: "Figma", workArea: "near my church" }, TODAY),
     ).toHaveLength(1);
     expect(briefProblems({ ...form, employer: "Figma", workArea: "SoMa" }, TODAY)).toEqual([]);
+  });
+
+  test("real employers named for a nationality or children pass; statements about you don't", () => {
+    for (const name of [
+      "American Express",
+      "UCSF Benioff Children's Hospital",
+      "Korean Air",
+      "Chinese Hospital",
+      "Boys & Girls Clubs of San Francisco",
+      "Women's Building",
+      "Bank of America",
+      "Air India",
+      "American Eagle Outfitters",
+      "American Red Cross",
+      "British Petroleum",
+      "American Medical Student Association",
+      "American College of Nurse-Midwives",
+    ])
+      expect([name, employerHasProtected(name)]).toEqual([name, false]);
+    for (const text of [
+      "Retired",
+      "Stay-at-home mom",
+      "Korean",
+      "Korean American",
+      "Korean woman",
+      "Korean engineer",
+      "Chinese person",
+      "Korean Engineer",
+      "Korean Chef",
+      "Indian Accountant",
+      "Indian medical student",
+      "Korean bank employee",
+      "Korean engineer at Google",
+      "Indian student in medical school",
+      "Korean working in insurance",
+      "Indian, unemployed",
+      "I'm Korean",
+      "my kids",
+      "Children's Hospital, pregnant",
+      "Korean Air (I'm 30)",
+      "US Army",
+      "near my church",
+    ])
+      expect([text, employerHasProtected(text)]).toEqual([text, true]);
+  });
+
+  test("saveBrief and the profile keep employers like American Express", async () => {
+    const tables: Record<string, Row[]> = { cityProfiles: [], cityProfileFacts: [] };
+    const ctx = writableCtx(tables);
+    const user = "users:derek" as Id<"users">;
+    const brief = { kind: "brief" as const, summary: "You said so in your brief" };
+    await saveStatedFacts(
+      ctx,
+      user,
+      ["employer"],
+      [{ entry: { key: "employer", value: { name: "American Express" } }, evidence: brief }],
+    );
+    expect((await getProfile(ctx, user)).employer?.value.name).toBe("American Express");
   });
 
   test("employer values can't carry a protected trait, typed or proposed", async () => {

@@ -11,7 +11,7 @@ import {
 } from "./cityProfileFacts";
 import { getInterest, type InterestId } from "./interests";
 import { narrowQuote } from "./profileText";
-import { hasProtected } from "./protectedText";
+import { employerHasProtected, hasProtected } from "./protectedText";
 
 /**
  * The City Profile's only read path and its only writers. Features call
@@ -63,7 +63,8 @@ function safeEvidence(e: FactEvidence): FactEvidence {
 /** A typed value (an employer, a work area) that names a protected trait is never read back. */
 function protectedValue(d: FactDoc): boolean {
   return (
-    d.key === "employer" && (hasProtected(d.value.name) || hasProtected(d.value.workArea ?? ""))
+    d.key === "employer" &&
+    (employerHasProtected(d.value.name) || employerHasProtected(d.value.workArea ?? ""))
   );
 }
 

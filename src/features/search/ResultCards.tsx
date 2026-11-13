@@ -239,14 +239,15 @@ export function GroupRow({ g }: { g: GroupResult }) {
       meta={[
         [
           g.privacy === "public" ? "Public" : "Private",
-          `${compactCount(g.memberCount)} members`,
+          `${compactCount(g.memberCount)} ${g.memberCount === 1 ? "member" : "members"}`,
           g.activity,
         ]
           .filter(Boolean)
           .join(" · "),
       ]}
       action={
-        g.joined ? (
+        // Private groups admit people a member invited (the group page shows any invite).
+        g.joined || g.privacy === "private" ? (
           <Button
             onClick={() => void navigate({ to: "/groups/$groupId", params: { groupId: g.slug } })}
           >

@@ -18,8 +18,9 @@ function activityFactor(slug: string) {
   return 0.55 + ((h >>> 0) % 1000) / 1110;
 }
 
-/** "10+ posts a day", "4 posts a day", "3 posts a week", "8 posts a month". */
+/** "10+ posts a day", "4 posts a day", "3 posts a week", "8 posts a month", "No recent posts". */
 export function activityLabel(perDay: number) {
+  if (perDay <= 0) return "No recent posts";
   if (perDay >= 10) return "10+ posts a day";
   if (perDay >= 1) {
     const n = Math.round(perDay);

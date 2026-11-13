@@ -2,15 +2,20 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import type { Doc } from "../convex/_generated/dataModel";
 import { moveItem, removeItem } from "../convex/apartment";
 import { retainValidAppearance } from "../convex/lib/unitAppearancePartial";
-import { isStarterScene, refreshedSources } from "../convex/lib/unitGeneration";
+import {
+  isStarterScene,
+  refreshedRoomSources,
+  refreshedSources,
+} from "../convex/lib/unitGeneration";
 import {
   manualScene,
   type Placement,
   sceneProblems,
   type UnitScene,
 } from "../convex/lib/unitScene";
-import { addSource, saveCandidate } from "../convex/unitScenes";
+import { addSource, saveCandidate, syncRoomUnit } from "../convex/unitScenes";
 import invalidDetails from "../scripts/unit-scenes/heathmead-detailed-initial.result.json";
+import { fakeCtx, type Row } from "./fakeDb";
 import {
   generationAppearance,
   generationHarness,
@@ -477,4 +482,47 @@ test("retains validated detail from the real rejected Muse fixture without relax
   expect(result.appearance!.objects.length).toBeGreaterThan(0);
   expect(result.appearance!.objects.length).toBeLessThan(scene.appearance!.objects.length);
   expect(sceneProblems({ ...scene, appearance: result.appearance! }, keys)).toEqual([]);
+});
+
+test("a room's 3D unit follows the room's scan, keeping what was added in the unit", async () => {
+  const mine = {
+    key: "source-1",
+    kind: "photo" as const,
+    label: "Mine",
+    url: "https://x.co/a.jpg",
+    imported: false,
+  };
+  const tables: Record<string, Row[]> = {
+    unitScenes: [
+      {
+        _id: "unitScenes:u",
+        ownerId: "users:maya",
+        roomId: "rooms:r",
+        revision: 3,
+        // Made before provenance: the room's first photo as `photo-1`.
+        sources: [{ key: "photo-1", kind: "photo", label: "Photo 1", url: "/old.jpg" }, mine],
+      },
+    ],
+  };
+  const room = {
+    _id: "rooms:r",
+    userId: "users:maya",
+    photos: [
+      { url: "/old.jpg", storageId: "s1", addedAt: 1 },
+      { url: "/new.jpg", storageId: "s2", addedAt: 2 },
+    ],
+  } as unknown as Doc<"rooms">;
+  await syncRoomUnit(fakeCtx(tables), room);
+  const unit = tables.unitScenes[0];
+  expect((unit.sources as { url?: string }[]).map((s) => s.url)).toEqual([
+    "/old.jpg",
+    "/new.jpg",
+    "https://x.co/a.jpg",
+  ]);
+  expect(unit.revision).toBe(4);
+  // Nothing changed: no new revision.
+  await syncRoomUnit(fakeCtx(tables), room);
+  expect(unit.revision).toBe(4);
+  const emptied = refreshedRoomSources(unit.sources as never, { ...room, photos: [] });
+  expect(emptied.map((s) => s.key)).toEqual(["source-1"]);
 });

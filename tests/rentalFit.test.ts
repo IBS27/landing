@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { MutationCtx } from "../convex/_generated/server";
 import {
+  availableLabel,
   budgetPart,
   type FitPlace,
   type FitProfile,
@@ -11,6 +12,7 @@ import {
   neighborhoodPart,
   rankRentals,
   transitPart,
+  trustPart,
   walkMinutes,
   weights,
 } from "../convex/lib/rentalFit";
@@ -33,7 +35,8 @@ const maya: FitProfile = {
   moveIn: null,
 };
 const NOW = Date.UTC(2026, 10, 1);
-const DAY = 24 * 60 * 60 * 1000;
+const HOUR = 60 * 60 * 1000;
+const DAY = 24 * HOUR;
 
 // 24th St BART, and a Caltrain stop Maya doesn't use.
 const STOPS: FitStop[] = [
@@ -84,6 +87,20 @@ describe("budgetPart", () => {
     expect(reason).toMatchObject({ text: "$200 over your $2,400 max", tone: "bad" });
     expect(budgetPart({ id: "a", price: 3000 }, maya.budget)[0]).toBe(0);
   });
+  test("below the minimum is still affordable, but never called inside the budget", () => {
+    expect(budgetPart({ id: "a", price: 1200 }, maya.budget)).toEqual([
+      1,
+      {
+        kind: "budget",
+        text: "$1,200, under your $1,800 minimum",
+        tone: "good",
+        sources: ["listing:a"],
+      },
+    ]);
+    expect(budgetPart({ id: "a", price: 1200 }, { max: 2400 })[1]?.text).toBe(
+      "$1,200, inside your budget",
+    );
+  });
   test("no budget, no part", () => {
     expect(budgetPart({ id: "a", price: 2000 }, null)).toEqual([0, null]);
   });
@@ -113,6 +130,75 @@ describe("transitPart", () => {
       0,
       null,
     ]);
+  });
+});
+
+describe("transitPart with Muni buses", () => {
+  const buses = (...lines: string[]) => ({ factKey: "f:svc", lines });
+  test("Muni buses in the neighborhood count for someone who rides Muni", () => {
+    const sunset = { id: "a", price: 0, ...SUNSET, buses: buses("29", "18", "48", "28") };
+    expect(transitPart(sunset, STOPS, maya.modes)).toEqual([
+      0.75,
+      {
+        kind: "transit",
+        text: "Muni 18, 28, 29 and 1 more bus line stop in the neighborhood",
+        tone: "good",
+        sources: ["f:svc"],
+      },
+    ]);
+    // Unknown modes include Muni.
+    expect(transitPart(sunset, STOPS, null)[0]).toBe(0.75);
+    // Without a point, the neighborhood's buses still count.
+    const noPoint = { id: "a", price: 0, lat: null, lng: null, buses: buses("29") };
+    expect(transitPart(noPoint, STOPS, maya.modes)[1]?.text).toBe(
+      "Muni 29 bus stops in the neighborhood",
+    );
+    expect(transitPart({ ...noPoint, buses: buses("29", "18") }, STOPS, maya.modes)[1]?.text).toBe(
+      "Muni 18 and 29 buses stop in the neighborhood",
+    );
+  });
+  test("only for Muni riders, and a short walk to rail still wins", () => {
+    const sunset = { id: "a", price: 0, ...SUNSET, buses: buses("29", "18", "48") };
+    expect(transitPart(sunset, STOPS, ["bart"])[1]).toMatchObject({
+      text: "No BART stop within walking distance",
+      tone: "bad",
+    });
+    const mission = { id: "a", price: 0, ...MISSION, buses: buses("14", "49", "67") };
+    const [score, reason] = transitPart(mission, STOPS, maya.modes);
+    expect(score).toBe(1);
+    expect(reason?.sources).toEqual(["f:24th"]);
+  });
+});
+
+describe("trustPart", () => {
+  const signal = (text: string, ...sources: string[]) => ({ text, sources });
+  test("nothing stood out: no penalty and no warning", () => {
+    expect(trustPart({ id: "a" })).toEqual([0, null]);
+    expect(trustPart({ id: "a", trust: { reported: false, signals: [] } })).toEqual([0, null]);
+  });
+  test("signals cost points and lead with a warning citing their evidence and the listing", () => {
+    const [penalty, reason] = trustPart({
+      id: "a",
+      trust: {
+        reported: false,
+        signals: [
+          signal("Price is 45% below similar listings", "listing:c1", "listing:c2"),
+          signal("New account with no one you know"),
+        ],
+      },
+    });
+    expect(penalty).toBeCloseTo(0.4);
+    expect(reason).toEqual({
+      kind: "trust",
+      text: "Price is 45% below similar listings, and 1 more to check",
+      tone: "bad",
+      sources: ["listing:c1", "listing:c2", "listing:a"],
+    });
+  });
+  test("a listing the viewer reported says so and drops below the rest", () => {
+    const [penalty, reason] = trustPart({ id: "a", trust: { reported: true, signals: [] } });
+    expect(penalty).toBe(1);
+    expect(reason).toMatchObject({ text: "You reported this listing", sources: ["listing:a"] });
   });
 });
 
@@ -164,12 +250,13 @@ describe("neighborhoodPart", () => {
 });
 
 describe("moveInPart", () => {
+  // Noon in San Francisco on the day, as the listing composer stores a picked date.
   const at = (days: number | null) => ({
     id: "a",
     price: 0,
     lat: null,
     lng: null,
-    availableFrom: days === null ? null : NOW + days * DAY,
+    availableFrom: days === null ? null : NOW + days * DAY + 20 * HOUR,
   });
   const moveIn = NOW + 30 * DAY;
   test("free around the move-in day is full marks", () => {
@@ -190,6 +277,16 @@ describe("moveInPart", () => {
   });
   test("a move-in day that has passed counts as today", () => {
     expect(moveInPart(at(null), NOW - 90 * DAY, NOW)[0]).toBe(1);
+  });
+  test("dates are San Francisco days, whatever the viewer's or server's time zone", () => {
+    // 9pm in San Francisco on Dec 5 is already Dec 6 in UTC.
+    const late = Date.UTC(2026, 11, 6, 5);
+    expect(availableLabel(late, NOW)).toBe("Available Dec 5");
+    expect(availableLabel(null, NOW)).toBe("Available now");
+    // Later today in San Francisco is available now, not "Available Oct 31".
+    expect(availableLabel(NOW + 2 * HOUR, NOW)).toBe("Available now");
+    const [, reason] = moveInPart({ ...at(null), availableFrom: late }, Date.UTC(2026, 11, 5), NOW);
+    expect(reason?.text).toBe("Available Dec 5, around your move-in");
   });
   test("no move-in, no part", () => {
     expect(moveInPart(at(0), null, NOW)).toEqual([0, null]);
@@ -245,6 +342,32 @@ describe("rankRentals", () => {
     expect(first.id).toBe("mission-b");
     expect(first.reasons.map((r) => r.kind)).toContain("neighborhood");
   });
+  test("things to check demote a listing, and one the viewer reported goes last", () => {
+    const flags = { reported: false, signals: [{ text: "Price is 45% below", sources: [] }] };
+    const ranked = rankRentals(
+      maya,
+      [
+        { id: "mission-reported", price: 2200, ...MISSION, trust: { reported: true, signals: [] } },
+        { id: "mission-flagged", price: 2200, ...MISSION, trust: flags },
+        { id: "mission-fit", price: 2200, ...MISSION },
+        ...listings.filter((l) => l.id !== "mission-fit"),
+      ],
+      ctx,
+    );
+    // The same rental without the signal ranks first; the reported one, last.
+    expect(ranked.map((f) => f.id)).toEqual([
+      "mission-fit",
+      "mission-flagged",
+      "mission-over",
+      "sunset-cheap",
+      "mission-reported",
+    ]);
+    expect(ranked[1].score).toBeCloseTo(ranked[0].score - 0.2);
+    const flagged = ranked.find((f) => f.id === "mission-flagged");
+    expect(flagged?.reasons[0]).toMatchObject({ kind: "trust", tone: "bad" });
+    expect(flagged?.reasons.length).toBe(3);
+    expect(ranked.at(-1)?.reasons[0].text).toBe("You reported this listing");
+  });
 });
 
 describe("rentals.search", () => {
@@ -253,7 +376,7 @@ describe("rentals.search", () => {
     needsBrief: boolean;
     results: {
       _id: string;
-      reasons: { kind: string; sources: unknown }[];
+      reasons: { kind: string; text: string; tone: string; sources: unknown }[];
       pin: unknown;
       area: { slug: string; label: string } | null;
     }[];
@@ -293,12 +416,15 @@ describe("rentals.search", () => {
     ...(hood && { neighborhoodId: `neighborhoods:${hood}` }),
     rental: { propertyType: "apartment", listingType: "rent", bedrooms: 1, bathrooms: 1, ...extra },
   });
-  const world = (facts: Row[]) =>
+  const local = { joinedAt: 0, city: "San Francisco, CA" };
+  const world = (facts: Row[], extra: { listings?: Row[]; users?: Row[]; reports?: Row[] } = {}) =>
     fakeCtx({
       users: [
-        { _id: "users:v", name: "v", username: "v" },
-        { _id: "users:s", name: "s", username: "s" },
+        { _id: "users:v", name: "v", username: "v", ...local },
+        { _id: "users:s", name: "s", username: "s", ...local },
+        ...(extra.users ?? []),
       ],
+      reports: extra.reports ?? [],
       cityProfiles: [],
       cityProfileFacts: facts,
       neighborhoods: [
@@ -310,6 +436,7 @@ describe("rentals.search", () => {
         rental("r1", 2200, { petsAllowed: true }, "mission"),
         rental("r2", 2200, {}, "bernal-heights"),
         rental("r3", 2300, { bedrooms: 2 }),
+        ...(extra.listings ?? []),
       ],
       groups: [],
       events: [],
@@ -353,5 +480,84 @@ describe("rentals.search", () => {
     expect(pets.results.map((x) => x._id)).toEqual(["listings:r1"]);
     const big = await search(ctx, { filters: { bedrooms: 2 } });
     expect(big.results.map((x) => x._id)).toEqual(["listings:r3"]);
+  });
+
+  test("listings with things to check rank lower and say why, even without a City Profile", async () => {
+    // A brand-new lister far away, on a rental priced well under the three like it.
+    const newcomer = {
+      _id: "users:m",
+      name: "m",
+      username: "m",
+      joinedAt: Date.now() - 6 * DAY,
+      city: "Phoenix, Arizona",
+    };
+    const scam = { ...rental("r9", 1100, {}, "mission"), sellerId: "users:m" };
+    const extra = { users: [newcomer], listings: [rental("r4", 2200, {}, "mission"), scam] };
+    for (const facts of [[], [fact("budget", { max: 2400 }, 1)]]) {
+      const r = await search(world(facts, extra));
+      const ids = r.results.map((x) => x._id);
+      expect(ids.at(-1)).toBe("listings:r9");
+      const [warning] = r.results[ids.length - 1].reasons;
+      expect(warning).toMatchObject({
+        kind: "trust",
+        tone: "bad",
+        text: "Price is 50% below similar listings, and 2 more to check",
+      });
+      expect(warning.sources).not.toBeNull();
+      // The others have nothing to check.
+      for (const x of r.results.slice(0, -1))
+        expect(x.reasons.map((y) => y.kind)).not.toContain("trust");
+    }
+  });
+
+  test("a listing the viewer reported goes last, saying they reported it", async () => {
+    const reports = [
+      {
+        _id: "reports:1",
+        userId: "users:v",
+        targetType: "listing",
+        targetId: "listings:r2",
+        reason: "Scam",
+        createdAt: 1,
+      },
+    ];
+    const ctx = world(
+      [fact("budget", { max: 2400 }, 1), fact("neighborhood", { slug: "bernal-heights" }, 2)],
+      { reports },
+    );
+    const r = await search(ctx);
+    expect(r.results.map((x) => x._id)).toEqual(["listings:r1", "listings:r3", "listings:r2"]);
+    expect(r.results[2].reasons[0]).toMatchObject({
+      kind: "trust",
+      text: "You reported this listing",
+    });
+  });
+
+  test("Muni bus lines in the listing's neighborhood are a cited transit reason", async () => {
+    const ctx = world([fact("transport", { modes: ["muni"] }, 1)]);
+    const facts = (ctx.db as unknown as { insert: (t: string, r: object) => Promise<string> })
+      .insert;
+    await facts("neighborhoodFacts", {
+      neighborhoodId: "neighborhoods:bernal-heights",
+      key: "service:bernal-heights",
+      kind: "transit_service",
+      name: "Transit service",
+      tripsPerHour: 20,
+      routes: [
+        { line: "24", name: "24 Divisadero", mode: "bus", allNight: true },
+        { line: "67", name: "67 Bernal Heights", mode: "bus", allNight: false },
+        { line: "J", name: "J Church", mode: "metro", allNight: false },
+      ],
+      lastTrains: [],
+      citations: { first: { kind: "listing", listingId: "listings:r1" }, rest: [] },
+    });
+    const r = await search(ctx);
+    const bernal = r.results.find((x) => x._id === "listings:r2");
+    expect(bernal?.reasons).toContainEqual(
+      expect.objectContaining({
+        kind: "transit",
+        text: "Muni 24 and 67 buses stop in the neighborhood",
+      }),
+    );
   });
 });

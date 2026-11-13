@@ -71,7 +71,7 @@ const ALL: readonly LandingSection[] = [...SECTIONS, ...YOU_SECTIONS];
 /** The section a Landing path belongs to (longest matching prefix). */
 export function sectionFor(path: string): LandingSection | undefined {
   // The City Brief (`/landing/welcome`) sets up the City Profile.
-  if (path === "/landing/welcome") return YOU_SECTIONS[0];
+  if (path.replace(/(.)\/$/, "$1") === "/landing/welcome") return YOU_SECTIONS[0];
   return ALL.filter((s) => path === s.to || path.startsWith(`${s.to}/`)).sort(
     (a, b) => b.to.length - a.to.length,
   )[0];

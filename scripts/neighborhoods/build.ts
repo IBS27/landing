@@ -35,6 +35,7 @@ import {
   ringAreaMeters,
   simplifyRing,
 } from "../../convex/lib/geo";
+import { scheduleWindow } from "../../convex/lib/scheduleWindow";
 import { neighborhoods as places } from "../../convex/seed/lib/places";
 import { rentals } from "../../convex/seed/world/rentals";
 
@@ -192,6 +193,8 @@ type Gtfs = {
   url: string;
   files: Map<string, Uint8Array>;
   fetchedAt: number;
+  /** First service date in the feed's calendar ("2026-07-23"). */
+  serviceFrom: string;
   /** Last service date in the feed's calendar ("2026-08-28"). Stop locations outlive it. */
   serviceThrough: string;
 };
@@ -218,14 +221,22 @@ function table(feed: Gtfs, name: string): { rows: Record<string, string>[]; line
 
 async function loadFeed(url: string): Promise<Gtfs> {
   const fetchedAt = Date.now();
-  const feed: Gtfs = { url, files: unzip(await fetchBytes(url)), fetchedAt, serviceThrough: "" };
+  const feed: Gtfs = { url, files: unzip(await fetchBytes(url)), fetchedAt, serviceFrom: "", serviceThrough: "" };
+  const starts: string[] = [];
   const ends: string[] = [];
-  if (feed.files.has("calendar.txt")) ends.push(...table(feed, "calendar.txt").rows.map((r) => r.end_date));
-  if (feed.files.has("calendar_dates.txt")) {
-    ends.push(...table(feed, "calendar_dates.txt").rows.map((r) => r.date));
+  if (feed.files.has("calendar.txt")) {
+    const rows = table(feed, "calendar.txt").rows;
+    starts.push(...rows.map((r) => r.start_date));
+    ends.push(...rows.map((r) => r.end_date));
   }
-  const last = ends.filter((d) => /^\d{8}$/.test(d)).sort().at(-1) ?? "";
-  feed.serviceThrough = last ? `${last.slice(0, 4)}-${last.slice(4, 6)}-${last.slice(6)}` : "";
+  if (feed.files.has("calendar_dates.txt")) {
+    const dates = table(feed, "calendar_dates.txt").rows.map((r) => r.date);
+    starts.push(...dates);
+    ends.push(...dates);
+  }
+  const ymdDash = (d: string) => (d ? `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)}` : "");
+  feed.serviceFrom = ymdDash(starts.filter((d) => /^\d{8}$/.test(d)).sort()[0] ?? "");
+  feed.serviceThrough = ymdDash(ends.filter((d) => /^\d{8}$/.test(d)).sort().at(-1) ?? "");
   if (feed.serviceThrough && new Date(`${feed.serviceThrough}T23:59:59Z`).getTime() < fetchedAt) {
     console.warn(`  ! ${url}: schedule ended ${feed.serviceThrough}; stop locations still used`);
   }
@@ -385,21 +396,32 @@ const pt = (lat: string, lng: string): LatLng => ({
   lng: Math.round(Number(lng) * 1e6) / 1e6,
 });
 
-function feedSnapshot(
-  feed: Gtfs,
-  publisher: string,
-  title: string,
-  rowText: string,
-): Snapshot {
-  // Say which schedule the row comes from, so an expired feed is visible in the citation.
-  const window = feed.serviceThrough ? `, schedule through ${feed.serviceThrough}` : "";
+/**
+ * A citation of one fact read from a GTFS feed, in words ("Muni 38 Geary · stops at Geary Blvd &
+ * Masonic Ave"), not the spreadsheet row: the same words are the same source, so facts read
+ * from different rows don't cite duplicates. The title says which schedule it's from and the
+ * service days it covers ("SFMTA Muni schedule, Jul 23 – Aug 28, 2026"), so people can see it,
+ * and the app marks it as maybe out of date once that window ends (`convex/lib/scheduleWindow.ts`).
+ */
+function feedSnapshot(feed: Gtfs, publisher: string, name: string, text: string): Snapshot {
+  const window =
+    feed.serviceFrom && feed.serviceThrough
+      ? `, ${scheduleWindow(feed.serviceFrom, feed.serviceThrough)}`
+      : "";
   return {
     url: feed.url,
-    title: `${title}${window}`,
+    title: `${name} schedule${window}`,
     publisher,
-    snippet: cut(rowText),
+    snippet: cut(text),
     fetchedAt: feed.fetchedAt,
   };
+}
+
+/** "1:09 AM" from seconds after the service day's midnight (past 24:00 is after midnight). */
+function clock(seconds: number): string {
+  const m = Math.round(seconds / 60) % 1440;
+  const h = Math.floor(m / 60);
+  return `${h % 12 === 0 ? 12 : h % 12}:${String(m % 60).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
 }
 
 async function buildTransit(boundaries: Boundary[]) {
@@ -456,7 +478,7 @@ async function buildTransit(boundaries: Boundary[]) {
           )
         : null;
       const feedKey = rowSource(
-        feedSnapshot(bart, "BART", "BART GTFS schedule feed (stops.txt)", stopsTable.lines[i]),
+        feedSnapshot(bart, "BART", "BART", `BART · ${s.stop_name} station`),
       );
       stations.push({
         key: `bart:${s.stop_id.toLowerCase()}`,
@@ -530,7 +552,12 @@ async function buildTransit(boundaries: Boundary[]) {
         (p) => p.meta["og:description"] ?? p.meta.description ?? null,
       );
       const feedKey = rowSource(
-        feedSnapshot(muni, "SFMTA", "SFMTA Muni GTFS schedule feed (routes.txt)", r.line),
+        feedSnapshot(
+          muni,
+          "SFMTA",
+          "SFMTA Muni",
+          `Muni ${r.route_short_name} ${titleCase(r.route_long_name)} · Muni Metro line`,
+        ),
       );
       // Longest trip per direction gives the full ordered stop list.
       const longest = new Map<string, { seq: number; stop: string }[]>();
@@ -590,7 +617,7 @@ async function buildTransit(boundaries: Boundary[]) {
       const point = stationPoint.get(name);
       if (!point || !inSf(point, boundaries)) continue;
       const feedKey = rowSource(
-        feedSnapshot(muni, "SFMTA", "SFMTA Muni GTFS schedule feed (stops.txt)", p.rows[0]),
+        feedSnapshot(muni, "SFMTA", "SFMTA Muni", `Muni Metro · ${name} · ${served.join(", ")} lines`),
       );
       const linePages = lines
         .filter((l) => served.includes(l.line))
@@ -637,7 +664,7 @@ async function buildTransit(boundaries: Boundary[]) {
         p.text.find((l) => /^\d+ .+, San Francisco,? (CA )?\d{5}$/.test(l)) ?? null,
       );
       const feedKey = rowSource(
-        feedSnapshot(caltrain, "Caltrain", "Caltrain GTFS schedule feed (stops.txt)", stopsTable.lines[i]),
+        feedSnapshot(caltrain, "Caltrain", "Caltrain", `Caltrain · ${name} station`),
       );
       stations.push({
         key: `caltrain:${s.stop_id}`,
@@ -954,7 +981,7 @@ async function buildService() {
       (Object.keys(dates) as DayType[]).map((d) => [d, servicesOn(feed, dates[d])]),
     ) as Record<DayType, Set<string>>;
     console.log(`  ${f.name}: reference days ${JSON.stringify(dates)}`);
-    const { trips, lines } = tripsOf(feed, new Set(Object.values(byDay).flatMap((s) => [...s])));
+    const { trips } = tripsOf(feed, new Set(Object.values(byDay).flatMap((s) => [...s])));
     const stopsTable = table(feed, "stops.txt");
     const stopById = new Map(stopsTable.rows.map((s, i) => [s.stop_id, { ...s, line: stopsTable.lines[i] }]));
     const routesTable = table(feed, "routes.txt");
@@ -1013,12 +1040,24 @@ async function buildService() {
               r.allNight = true;
               // Cite the night run itself: a route's description may not say it runs all night here.
               r.nightKey ??= cite(
-                feedSnapshot(feed, f.publisher, `${f.name} GTFS schedule feed (stop_times.txt)`, lines[e.row]),
+                feedSnapshot(
+                  feed,
+                  f.publisher,
+                  f.name,
+                  `Muni ${r.name} · runs all night: ${clock(e.t)} at ${stopById.get(e.stop)?.stop_name ?? e.stop}`,
+                ),
               );
             }
             if (weekday) r.trips++;
             if (!r.rowKey) {
-              r.rowKey = cite(feedSnapshot(feed, f.publisher, `${f.name} GTFS schedule feed (routes.txt)`, route.line));
+              r.rowKey = cite(
+                feedSnapshot(
+                  feed,
+                  f.publisher,
+                  f.name,
+                  `Muni ${r.name} · stops at ${stopById.get(e.stop)?.stop_name ?? e.stop}`,
+                ),
+              );
             }
             h.routes.set(route.route_id, r);
             if (!h.stopRow.has(route.route_id)) h.stopRow.set(route.route_id, stopById.get(e.stop)?.line ?? "");
@@ -1040,7 +1079,12 @@ async function buildService() {
                 if (d === "weekday" || !last.rowKey) {
                   last.toward = destination(trip);
                   last.rowKey = cite(
-                    feedSnapshot(feed, f.publisher, `${f.name} GTFS schedule feed (stop_times.txt)`, lines[e.row]),
+                    feedSnapshot(
+                      feed,
+                      f.publisher,
+                      f.name,
+                      `${f.name} · last ${d === "weekday" ? "weekday" : titleCase(d)} departure from ${station.stop_name}${last.toward ? ` toward ${last.toward}` : ""} · ${clock(e.t)}`,
+                    ),
                   );
                 }
               }

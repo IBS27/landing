@@ -160,6 +160,10 @@ describe("sectionFor", () => {
     expect(sectionFor("/landing/find/listing-1")?.label).toBe("Find");
     expect(sectionFor("/landing/inbox")?.label).toBe("Inbox");
   });
+  test("onboarding selects City Profile, not Home", () => {
+    expect(sectionFor("/landing/welcome")?.label).toBe("City Profile");
+    expect(sectionFor("/landing/welcome/")?.label).toBe("City Profile");
+  });
   test("a lookalike prefix doesn't match", () => {
     expect(sectionFor("/landing/findings")?.label).toBe("Home");
     expect(sectionFor("/landingpage")).toBeUndefined();

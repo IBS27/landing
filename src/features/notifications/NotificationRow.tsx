@@ -56,6 +56,8 @@ export function useOpenTarget() {
         return void navigate({
           to: "/$username/posts/$postId",
           params: { username: t.username, postId: t.postId },
+          // Comment and reply notifications open the post at that comment.
+          search: { comment_id: t.commentId ?? undefined },
         });
       case "profile":
         return void navigate({ to: "/$username", params: { username: t.username } });

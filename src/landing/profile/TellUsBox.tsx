@@ -2,6 +2,7 @@ import { useAction } from "convex/react";
 import { Check, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useViewerContext } from "@/app/viewer";
+import { errorText } from "@/landing/errorText";
 import { cn } from "@/lib/format";
 import { Button, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -35,9 +36,7 @@ export function TellUsBox({ onAdd }: { onAdd: (picked: Proposal[]) => void }) {
       setVia(res.via);
       setPicked(new Set(res.proposals.map((p) => factSlot(p.entry))));
     } catch (e) {
-      setError(
-        e instanceof Error ? e.message.replace(/^.*ConvexError:\s*/, "") : "Something went wrong",
-      );
+      setError(errorText(e));
     } finally {
       setBusy(false);
     }

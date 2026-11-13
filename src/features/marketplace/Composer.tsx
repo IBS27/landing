@@ -6,7 +6,7 @@ import { useM, useQ, useViewer, useViewerContext } from "@/app/viewer";
 import { uploadFile } from "@/features/posts/util";
 import { PlayGlyph } from "@/features/posts/VideoPlayer";
 import { captureVideoPoster, probeVideo } from "@/features/posts/videoUpload";
-import { cn, price as fmtPrice } from "@/lib/format";
+import { cn, price as fmtPrice, plural } from "@/lib/format";
 import { Avatar, Button, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -182,6 +182,7 @@ function fromListing(l: Detail): FormState {
     description: l.description,
     neighborhood: l.location.neighborhood ?? "Mission",
     meetup: l.meetup,
+    hideFromFriends: l.hideFromFriends,
     vehicleType: l.vehicle?.vehicleType ?? "",
     year: l.vehicle ? String(l.vehicle.year) : "",
     make: l.vehicle?.make ?? "",
@@ -315,6 +316,7 @@ export function ListingComposer({ kind, editing }: { kind: ComposerKind; editing
       neighborhood: f.neighborhood,
       meetup: kind === "item" ? f.meetup : undefined,
       groupIds: f.groupIds,
+      hideFromFriends: f.hideFromFriends,
       vehicle:
         kind === "vehicle"
           ? {
@@ -1130,7 +1132,7 @@ function PlacesStep({ f, set }: StepProps) {
                   {g.name}
                 </span>
                 <span className="block text-[13px] text-secondary">
-                  {g.memberCount.toLocaleString("en-US")} members
+                  {plural(g.memberCount, "member")}
                 </span>
               </span>
               <input

@@ -54,6 +54,26 @@ export function sellerPrice(chat: NegotiationInput["chat"], askingPrice: number)
   return null;
 }
 
+/**
+ * The last price the buyer named themselves, in any of their messages ("would
+ * you take 90?"), below asking. Muse's approved offers are in the chat too, so
+ * this also covers offers the buyer typed before Muse took over.
+ */
+export function buyerNamedPrice(
+  chat: NegotiationInput["chat"],
+  askingPrice: number,
+): number | null {
+  for (let i = chat.length - 1; i >= 0; i--) {
+    const m = chat[i];
+    if (m.from !== "you") continue;
+    const amounts = [...m.text.matchAll(AMOUNT)]
+      .map((a) => Number(a[1].replace(/,/g, "")))
+      .filter((n) => n >= askingPrice / 5 && n < askingPrice);
+    if (amounts.length) return amounts[amounts.length - 1];
+  }
+  return null;
+}
+
 /** The median price of the comparable listings, or null with fewer than MIN_COMPS. */
 export function comparableMedian(input: NegotiationInput): number | null {
   return input.comparables.length >= MIN_COMPS
@@ -94,6 +114,9 @@ export function moveProblems(out: MoveOutput, input: NegotiationInput): string[]
       p.push("an offer must be below the asking price (use accept to agree)");
     if (input.yourLastOffer !== null && out.amount < input.yourLastOffer)
       p.push(`an offer can't go below your last offer of ${input.yourLastOffer}`);
+    const theirs = sellerPrice(input.chat, input.listing.askingPrice);
+    if (theirs !== null && out.amount >= theirs)
+      p.push(`the seller already offered ${theirs}; accept that rather than offering more`);
   }
   // Any move, priced or not, must not name a price over the max (asking aside).
   const named = [...out.text.matchAll(/\$\s?(\d{1,3}(?:,\d{3})+|\d+)/g)].map((m) =>
@@ -128,6 +151,14 @@ export function ladderMove(input: NegotiationInput): MoveOutput {
       : med !== null && med < ask
         ? `about 75% of the $${med} median for ${input.comparables.length} similar listings`
         : "about 75% of asking";
+    // The seller already named a price at or under the opening: take it, don't offer more.
+    if (theirs !== null && theirs <= open)
+      return {
+        move: "accept",
+        amount: theirs,
+        text: `$${theirs} works for me. When's a good time to pick it up?`,
+        rationale: `The seller already offered $${theirs}, at or under what Muse would open with.`,
+      };
     return {
       move: "offer",
       amount: open,

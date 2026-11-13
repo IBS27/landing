@@ -37,9 +37,9 @@ export function HiddenCards() {
       <div className="px-4 pt-4 pb-3">
         <h2 className="font-bold text-[17px] text-primary leading-[22px]">Cards you hid</h2>
         <p className="mt-0.5 text-[13px] text-secondary leading-4">
-          Events, Groups and listings you marked "Not for me" stay out of your recommendations.
-          Showing one again lets it come back. It doesn't change your interests: remove those above,
-          or clear your activity, which keeps these hidden.
+          Events and Groups you marked "Not for me" stay out of your recommendations. Showing one
+          again lets it come back. It doesn't change your interests: remove those above, or clear
+          your activity, which keeps these hidden.
         </p>
         {error && (
           <p role="alert" className="mt-2 text-[13px] text-negative">

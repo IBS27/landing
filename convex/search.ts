@@ -3,7 +3,7 @@ import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { viewerQuery } from "./lib/functions";
 import { activityLabel, externalPostsPerDay } from "./lib/groupActivity";
-import { type Audience, canView, enrichPosts, loadAudience } from "./lib/posts";
+import { type Audience, canView, enrichPosts, listingShownTo, loadAudience } from "./lib/posts";
 import { visibleDetails } from "./lib/settings";
 import { friendIds } from "./lib/users";
 
@@ -223,6 +223,7 @@ function listingResult(l: Doc<"listings">): ListingResult {
 
 function canSeeEvent(e: Doc<"events">, a: Audience) {
   if (e.hostId === a.viewerId) return true;
+  if (a.blocked.has(e.hostId)) return false;
   if (e.privacy === "public") return true;
   if (e.privacy === "friends") return a.friends.has(e.hostId);
   if (e.privacy === "group") return !!e.groupId && a.groups.has(e.groupId);
@@ -312,7 +313,7 @@ export const typeahead = viewerQuery({
         image: g.cover,
         sub: a.groups.has(g._id)
           ? "Group · Joined"
-          : `${g.privacy === "public" ? "Public" : "Private"} group · ${compact(g.memberCount)} members`,
+          : `${g.privacy === "public" ? "Public" : "Private"} group · ${compact(g.memberCount)} ${g.memberCount === 1 ? "member" : "members"}`,
         key: g.slug,
         verified: false,
       }));
@@ -463,6 +464,7 @@ export const results = viewerQuery({
         .query("listings")
         .withSearchIndex("search_title", (s) => s.search("title", q).eq("status", "active"))
         .take(60);
+      listings = listings.filter((l) => listingShownTo(l, a));
       if (f.maxPrice !== undefined) {
         const max = f.maxPrice;
         listings = listings.filter((l) => l.price <= max);

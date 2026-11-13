@@ -24,6 +24,7 @@ import {
 } from "./lib/citations";
 import { getProfile, interestWeights } from "./lib/cityProfile";
 import { crewProfile } from "./lib/crews";
+import { isDismissed } from "./lib/dismissals";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { getInterest } from "./lib/interests";
 import {
@@ -138,7 +139,13 @@ async function weekendPlans(
   }
   const out: Plan[] = [];
   for (const p of found.values())
-    if (!a.blocked.has(p.event.hostId) && (await ctx.db.get(p.event.hostId))) out.push(p);
+    if (
+      !a.blocked.has(p.event.hostId) &&
+      (await ctx.db.get(p.event.hostId)) &&
+      // "Not for me" (#100) keeps an Event off their plans too.
+      !(await isDismissed(ctx, a.viewerId, p.event._id))
+    )
+      out.push(p);
   return out;
 }
 
@@ -438,6 +445,8 @@ async function viewStop(
   const against = disagreement && (await resolveCitations(ctx, disagreement.citations, v.a));
   const event = stop.eventId ? await ctx.db.get(stop.eventId) : null;
   if (stop.eventId && (!event || !(await canSeeEvent(ctx, event, v.a)))) return null;
+  // Hidden with "Not for me" after this week's Journey was built: gone at once.
+  if (event && (await isDismissed(ctx, v.a.viewerId, event._id))) return null;
   const summaries = (ids: Id<"users">[]) => ids.flatMap((id) => v.people.get(id) ?? []);
 
   let group: JourneyStopView["group"] = null;

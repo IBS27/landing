@@ -512,6 +512,29 @@ describe("thisWeek", () => {
     expect(hike?.crew.going).toEqual([]);
   });
 
+  test('"Not for me" takes an Event off the Journey at once, and out of the next build', async () => {
+    const { tables, db } = world();
+    await journeys.buildJourney(db, "users:v" as never, NOW, { force: false });
+    tables.dismissals = [
+      {
+        _id: "dismissals:1",
+        userId: "users:v",
+        targetKind: "event",
+        targetId: "events:hike",
+        at: NOW,
+      },
+    ];
+    const r = await thisWeek(db);
+    const shown = [...(r.journey?.stops ?? []), ...(r.journey?.more ?? [])].map((s) => s.eventId);
+    expect(shown).not.toContain("events:hike");
+    expect(shown).toContain("events:sketch");
+    await journeys.buildJourney(db, "users:v" as never, NOW + HOUR, { force: true });
+    const row = tables.journeys?.[0] as Row & { stops: WeekendStop[]; more: WeekendStop[] };
+    const built = [...row.stops, ...row.more].map((s) => s.eventId);
+    expect(built).not.toContain("events:hike");
+    expect(built).toContain("events:sketch");
+  });
+
   test("the viewer leaving the crew hides all overlap", async () => {
     const { tables, db } = world();
     await journeys.buildJourney(db, "users:v" as never, NOW, { force: false });

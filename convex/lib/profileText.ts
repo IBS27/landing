@@ -4,10 +4,10 @@ import {
   factLabel,
   factSlot,
   type GoalId,
-  moveInProblem,
   type NeighborhoodSlug,
   TRANSPORT_MODES,
   type TransportMode,
+  upcomingMoveInProblem,
   type WorkHours,
   type Workplace,
 } from "./cityProfileFacts";
@@ -357,17 +357,35 @@ function isOrigin(part: Part, at: number): boolean {
   return origin !== -1 && lastIndex(DESTINATION_CUE, before) < origin;
 }
 
+const WORK_CUE = new RegExp(WORK_PLACE.source, "gi");
+const HOME_CUE = new RegExp(HOME_PLACE.source, "gi");
+/** "near my office in SoMa": the work cue says where they'd like to live. */
+const NEAR =
+  /\b(?:near|close to|next to|by|walk(?:ing|able)? (?:distance )?(?:to|of|from))\s+(?:(?:my|our|the|a|an|new)\s+)*$/i;
+
+/**
+ * Whether the place at `at` belongs to their work: the nearest cue before it
+ * in its phrase is about work, not home. "Moving to SF for a new job in SoMa"
+ * names where the job is; "I want to live near my office in SoMa" doesn't.
+ */
+function isWorkPlace(part: Part, at: number): boolean {
+  const before = part.text.slice(placeSpan(part, at).from, at);
+  const work = lastIndex(WORK_CUE, before);
+  return work !== -1 && work > lastIndex(HOME_CUE, before) && !NEAR.test(before.slice(0, work));
+}
+
 /**
  * Whether a place named at `at` is somewhere they'd consider living: not
  * where they work, study, do an activity, are coming from or used to live ("I
  * work at Google in SoMa", "I climb in the Mission", "moving out of the
- * Mission"), unless the same phrase is about living there. In "moving from
- * the Mission to SoMa" only SoMa counts.
+ * Mission", "moving for a job in SoMa"), unless the same phrase is about
+ * living there. In "moving from the Mission to SoMa" only SoMa counts.
  */
 function isHomePlace(part: Part, at: number): boolean {
   const phrase = placePhrase(part, at);
   // "My sister lives in the Mission" is her place, not one they'd consider.
   if (PAST_PLACE.test(phrase) || OTHERS.test(phrase) || isOrigin(part, at)) return false;
+  if (isWorkPlace(part, at)) return false;
   if (HOME_PLACE.test(phrase)) return true;
   if (WORK_PLACE.test(phrase)) return false;
   // "I climb in the Mission": an activity's location.
@@ -641,7 +659,7 @@ function monthsIn(parts: Part[], negatable: boolean): MonthMention[] {
  * The move-in month (and day, when given). A month in a phrase about moving
  * ("but move in April") beats one in a clause that only mentions starting
  * ("I start work in March"). Without a year it's the next such month. Uses the
- * same rules as Muse's checks and `saveBrief` (`moveInProblem`): an impossible
+ * same rules as Muse's checks (`upcomingMoveInProblem`): an impossible
  * or past date drops the day, and a past month proposes nothing.
  */
 function moveInFrom(parts: Part[], today: string): ProposedFact | null {
@@ -656,7 +674,7 @@ function moveInFrom(parts: Part[], today: string): ProposedFact | null {
     const candidates: { month: string; date?: string }[] = m.day
       ? [{ month: mm, date: `${mm}-${String(m.day).padStart(2, "0")}` }, { month: mm }]
       : [{ month: mm }];
-    const value = candidates.find((c) => moveInProblem(c, today) === null);
+    const value = candidates.find((c) => upcomingMoveInProblem(c, today) === null);
     if (value) found.push({ value, hit: m.hit, score });
   }
   const best = found.find((f) => f.score === 2) ?? found[0];

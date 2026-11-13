@@ -275,6 +275,7 @@ function NameBlock() {
               <Link
                 to="/$username"
                 params={{ username: f.username }}
+                aria-label={f.name}
                 className="-ml-2 flex rounded-full ring-2 ring-card hover:brightness-95"
                 style={{ zIndex: 10 - i }}
               >

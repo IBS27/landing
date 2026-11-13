@@ -4,13 +4,14 @@ import { Building2, CalendarDays, Lock, MapPin, UsersRound } from "lucide-react"
 import { type ReactNode, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { useToast } from "@/features/marketplace/toast";
+import { errorText } from "@/landing/errorText";
 import { toProfile } from "@/landing/links";
 import { ChatPlansCard } from "@/landing/plans/ChatPlansCard";
 import { cn } from "@/lib/format";
 import { Modal } from "@/ui/overlays";
 import { Avatar, Button, Card, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
-import { moveInLabel, neighborhoodLabel } from "../../../convex/lib/cityProfileFacts";
+import { moveInLabel, neighborhoodLabel, todayInSF } from "../../../convex/lib/cityProfileFacts";
 import type { Anchor, MatchBy } from "../../../convex/lib/crews";
 import { getInterest, type InterestId } from "../../../convex/lib/interests";
 import { CrewGroupCard } from "./CrewGroupCard";
@@ -18,11 +19,10 @@ import { CrewGroupCard } from "./CrewGroupCard";
 type Status = NonNullable<FunctionReturnType<typeof api.crews.status>>;
 type Crew = NonNullable<FunctionReturnType<typeof api.crews.myCrew>>;
 
-function errorText(e: unknown) {
-  return e instanceof Error ? e.message.replace(/^.*ConvexError:\s*/, "") : "Something went wrong";
-}
-
 const monthLabel = (month: string) => moveInLabel({ month });
+/** "Arriving February 2027", or "Arrived October 2026" once that month has passed. */
+const arrival = (month: string) =>
+  `${month < todayInSF().slice(0, 7) ? "Arrived" : "Arriving"} ${monthLabel(month)}`;
 const placesLabel = (slugs: string[]) =>
   slugs.map((s) => neighborhoodLabel(s as Parameters<typeof neighborhoodLabel>[0])).join(", ");
 
@@ -204,7 +204,7 @@ function JoinCard({ status }: { status: Status }) {
 function anchorText(a: Anchor) {
   switch (a.kind) {
     case "month":
-      return { icon: <CalendarDays size={14} />, text: `Arriving ${monthLabel(a.month)}` };
+      return { icon: <CalendarDays size={14} />, text: arrival(a.month) };
     case "neighborhood":
       return { icon: <MapPin size={14} />, text: `Both looking in ${placesLabel(a.slugs)}` };
     case "employer":
@@ -217,8 +217,8 @@ function CrewList({ crew, status }: { crew: Crew | null | undefined; status: Sta
     <Card className="p-4">
       <h2 className="font-bold text-[17px] text-primary leading-5">Your Move-in Crew</h2>
       <p className="mt-0.5 mb-1 text-[13px] text-secondary leading-4">
-        {status.values.month ? `Arriving ${monthLabel(status.values.month)}. ` : ""}Matched on what
-        you share, best first.
+        {status.values.month ? `${arrival(status.values.month)}. ` : ""}Matched on what you share,
+        best first.
       </p>
       {crew === undefined ? (
         <div className="flex justify-center py-8">

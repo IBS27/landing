@@ -673,6 +673,7 @@ function EditComment({ comment, onDone }: { comment: CommentView; onDone: () => 
         <AutoTextarea
           value={text}
           onChange={setText}
+          label="Edit comment"
           autoFocus
           onSubmit={() => {
             if (!text.trim()) return;
@@ -855,6 +856,7 @@ function CommentForm({
               indent={tag ? tagWidth + 4 : 0}
               onBackspaceAtStart={tag ? () => setTag(null) : undefined}
               placeholder={tag ? undefined : placeholder}
+              label={tag ? `Reply to ${tag.name}` : placeholder.replace(/…$/, "")}
               autoFocus={autoFocus || !!parentId}
               onSubmit={() => void submit()}
               onEscape={onCancel}
@@ -1003,7 +1005,7 @@ function CommentAsMenu({
           side="top"
           sideOffset={6}
           collisionPadding={8}
-          className="z-[70] w-[320px] rounded-xl bg-popover p-2 shadow-elevated outline-none"
+          className="z-[95] w-[320px] rounded-xl bg-popover p-2 shadow-elevated outline-none"
         >
           <DM.Label className="px-2 pt-1 pb-2 font-bold text-[17px] text-primary leading-5">
             Comment as
@@ -1080,6 +1082,7 @@ function AutoTextarea({
   onBackspaceAtStart,
   indent = 0,
   placeholder,
+  label,
   autoFocus,
   ref,
 }: {
@@ -1092,6 +1095,8 @@ function AutoTextarea({
   /** First-line indent in px, leaving room for a tag drawn before the text. */
   indent?: number;
   placeholder?: string;
+  /** Accessible name; a reply box shows no placeholder once its tag is in. */
+  label: string;
   autoFocus?: boolean;
   ref?: React.Ref<HTMLTextAreaElement>;
 }) {
@@ -1115,6 +1120,7 @@ function AutoTextarea({
       // biome-ignore lint/a11y/noAutofocus: Facebook focuses the comment box when it opens
       autoFocus={autoFocus}
       placeholder={placeholder}
+      aria-label={label}
       onChange={(e) => onChange(e.target.value)}
       onKeyDown={(e) => {
         if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {

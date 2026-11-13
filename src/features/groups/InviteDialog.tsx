@@ -48,6 +48,7 @@ export function InviteDialog({ group, onClose }: { group: GroupView; onClose: ()
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search for friends by name"
+            aria-label="Search for friends by name"
             className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-placeholder"
           />
         </label>
@@ -71,6 +72,7 @@ export function InviteDialog({ group, onClose }: { group: GroupView; onClose: ()
                 key={f._id}
                 type="button"
                 disabled={disabled}
+                aria-pressed={checked || f.state === "invited"}
                 onClick={() => toggle(f._id)}
                 className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-hover disabled:cursor-default disabled:hover:bg-transparent"
               >

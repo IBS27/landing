@@ -88,6 +88,8 @@ export const create = viewerMutation({
     if (a.availableTo <= a.availableFrom)
       throw new ConvexError("The end date must be after the start date");
     const now = Date.now();
+    // A day of slack for time zones: the form sends noon on the chosen day.
+    if (a.availableTo < now - DAY) throw new ConvexError("These dates have already passed");
     const location = placeFor(a.neighborhood);
     const listingId = await ctx.db.insert("listings", {
       sellerId: ownerId,

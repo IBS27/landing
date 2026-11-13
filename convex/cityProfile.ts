@@ -20,7 +20,7 @@ import { viewerMutation, viewerQuery } from "./lib/functions";
 import { interestId } from "./lib/interests";
 import { profileFromText, profileInput, tidyProposals } from "./lib/profileFromText";
 import { MAX_TEXT_LENGTH, proposalLabel } from "./lib/profileText";
-import { EMPLOYER_PERSONAL, hasProtected } from "./lib/protectedText";
+import { EMPLOYER_PERSONAL, employerHasProtected } from "./lib/protectedText";
 
 /**
  * Landing City Profile (#3). Other features read profiles with `getProfile`
@@ -92,7 +92,10 @@ export const saveBrief = viewerMutation({
     const employerName = b.employer?.name.trim().slice(0, 80);
     const workArea = b.employer?.workArea?.trim().slice(0, 80) || undefined;
     // Free text a person types is still never allowed to carry a protected trait ("Retired").
-    check(!hasProtected(employerName ?? "") && !hasProtected(workArea ?? ""), EMPLOYER_PERSONAL);
+    check(
+      !employerHasProtected(employerName ?? "") && !employerHasProtected(workArea ?? ""),
+      EMPLOYER_PERSONAL,
+    );
 
     const entries: FactEntry[] = [
       { key: "budget", value: b.budget },

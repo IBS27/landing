@@ -14,7 +14,7 @@ import {
   interestsForGroup,
   interestsInText,
 } from "./interests";
-import { pacificDate } from "./weekendRoute";
+import { pacificDate, pacificDateStart } from "./weekendRoute";
 
 /**
  * Crew Group, intros and first meetup (#31). Muse writes the crew's Group
@@ -53,6 +53,8 @@ export type MeetupOption = {
 export type CrewGroupInput = {
   /** `moving` is the move-in month ("February 2027"); `moved` once it has passed. */
   owner: { firstName: string; moving: string | null; moved: boolean };
+  /** The owner's move-in month when most of the crew shares it ("February 2027"), else null. */
+  commonMonth: string | null;
   /** The neighborhood most of the crew shares with the owner, if any ("Mission"). */
   commonPlace: string | null;
   members: {
@@ -73,6 +75,8 @@ export type CrewContext = {
   sources: Source[];
   /** Event options' times and venues, by source key, so the model can't invent them. */
   events: Record<string, { eventId: Id<"events">; startAt: number; venue: string | null }>;
+  /** When the owner arrives, if that's still ahead: meetups are only looked for from then on. */
+  arrivesAt: number | null;
 };
 
 const WHEN = new Intl.DateTimeFormat("en-US", {
@@ -110,13 +114,16 @@ export async function crewContext(
   const inviteIds: Id<"users">[] = [];
   const memberInterests: InterestId[][] = [];
   const places = new Map<NeighborhoodSlug, number>();
+  let sameMonth = 0;
   matches.forEach((m, i) => {
     const u = users[i];
     if (!u) return;
     const together: string[] = [];
     for (const a of m.anchors) {
-      if (a.kind === "month")
+      if (a.kind === "month") {
         together.push(`same move-in month (${moveInLabel({ month: a.month })})`);
+        sameMonth++;
+      }
       if (a.kind === "neighborhood") {
         together.push(`both looking in ${a.slugs.map(neighborhoodLabel).join(", ")}`);
         for (const s of a.slugs) places.set(s, (places.get(s) ?? 0) + 1);
@@ -135,15 +142,18 @@ export async function crewContext(
   });
   if (members.length === 0) return null;
 
+  // A first meetup is in San Francisco, so not before the owner gets there.
+  const moveIn = profile.moveIn?.source === "stated" ? profile.moveIn.value : null;
+  const arrival = moveIn ? pacificDateStart(moveIn.date ?? `${moveIn.month}-01`) : null;
+  const from = Math.max(now + MEETUP_LEAD_MS, arrival ?? 0);
+
   // Meetup options: upcoming public Events the crew's shared interests fit.
   const crewInterests = new Set(memberInterests.flat());
   const sharedByOf = (fits: InterestId[]) =>
     memberInterests.filter((ids) => ids.some((id) => fits.includes(id))).length;
   const upcoming = await ctx.db
     .query("events")
-    .withIndex("by_start", (q) =>
-      q.gt("startAt", now + MEETUP_LEAD_MS).lt("startAt", now + MEETUP_WINDOW_MS),
-    )
+    .withIndex("by_start", (q) => q.gt("startAt", from).lt("startAt", from + MEETUP_WINDOW_MS))
     .take(300);
   const publicEvents = [];
   // In the city they're moving to, public, in person, with a host they can see.
@@ -168,8 +178,8 @@ export async function crewContext(
       (a, b) =>
         b.sharedBy - a.sharedBy || Number(b.named) - Number(a.named) || a.e.startAt - b.e.startAt,
     );
-  let chosen = ranked.filter((r) => r.sharedBy > 0).slice(0, MEETUP_OPTIONS);
-  if (chosen.length === 0) chosen = ranked.slice(0, 4);
+  // Only Events something the crew shares fits: never a stand-in that fits nobody.
+  const chosen = ranked.filter((r) => r.sharedBy > 0).slice(0, MEETUP_OPTIONS);
 
   const meetupOptions: MeetupOption[] = [];
   const sources: Source[] = [];
@@ -190,7 +200,7 @@ export async function crewContext(
   }
 
   // No Event fits: public Groups about what the crew shares (a Group meetup idea needs no time).
-  if (!opts.eventsOnly && !chosen.some((c) => c.sharedBy > 0)) {
+  if (!opts.eventsOnly && chosen.length === 0) {
     const groups = await ctx.db.query("groups").withIndex("by_activity").order("desc").take(100);
     const fitting = groups
       .filter((g) => g.privacy === "public" && g.visible)
@@ -215,28 +225,27 @@ export async function crewContext(
     }
   }
 
-  const moveIn = profile.moveIn?.source === "stated" ? profile.moveIn.value : null;
   const today = pacificDate(now);
   const moved = moveIn
     ? moveIn.date
       ? moveIn.date <= today
       : moveIn.month < today.slice(0, 7)
     : false;
+  const moving = moveIn ? moveInLabel({ month: moveIn.month }) : null;
   const [place, count] = [...places.entries()].sort((a, b) => b[1] - a[1])[0] ?? [null, 0];
   return {
     input: {
-      owner: {
-        firstName: owner.firstName,
-        moving: moveIn ? moveInLabel({ month: moveIn.month }) : null,
-        moved,
-      },
+      owner: { firstName: owner.firstName, moving, moved },
       members,
       meetupOptions,
+      // The Group is named for a month only when it's most of the crew's, not just the owner's.
+      commonMonth: moving && sameMonth * 2 >= members.length ? moving : null,
       commonPlace: place && count * 2 >= members.length ? neighborhoodLabel(place) : null,
     },
     inviteIds,
     sources,
     events,
+    arrivesAt: arrival !== null && arrival > now ? arrival : null,
   };
 }
 
@@ -248,9 +257,12 @@ function list(names: string[]) {
     : (names[0] ?? "");
 }
 
-/** "February Move-in Crew · Mission" from "February 2027": at most 75 characters. */
-export function crewGroupName(moving: string | null, commonPlace: string | null): string {
-  const month = moving?.split(" ")[0];
+/**
+ * "February Move-in Crew · Mission" from the crew's common month ("February
+ * 2027") and place, or "SF Move-in Crew" without them: at most 75 characters.
+ */
+export function crewGroupName(commonMonth: string | null, commonPlace: string | null): string {
+  const month = commonMonth?.split(" ")[0];
   const base = month ? `${month} Move-in Crew` : "SF Move-in Crew";
   const name = commonPlace ? `${base} · ${commonPlace}` : base;
   return name.slice(0, 75);
@@ -317,6 +329,28 @@ export function crewRationale(input: CrewGroupInput): string {
   return `${parts.join("; ")}.`.slice(0, 200);
 }
 
+/** Why this Event for the first meetup: the shared interests it fits, and how many share them. */
+export function meetupRationale(groupName: string, o: MeetupOption): string {
+  const who =
+    o.sharedBy === 1 ? "1 person in your crew shares" : `${o.sharedBy} people in your crew share`;
+  return `The first meetup for ${groupName}: ${o.title} fits ${list(o.fits.map((f) => f.toLowerCase()))}, which ${who} with you.`;
+}
+
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
 /* ---------------- Muse tasks ---------------- */
 
 const groupOutput = v.object({
@@ -330,7 +364,7 @@ const groupOutput = v.object({
 const GROUP_INSTRUCTIONS = `Draft a private Facebook Group for a Move-in Crew: people arriving in San Francisco around the same time who opted in to meet each other. The owner ("owner" in <input>) will post it after reviewing your draft. <input> has the owner, the members (each with only the interests and anchors they share with the owner) and meetupOptions, which are also the <sources>.
 
 Return:
-- name: the Group's name, at most 75 characters, e.g. "February Move-in Crew · Mission".
+- name: the Group's name, at most 75 characters, e.g. "February Move-in Crew · Mission". Name a month only if it's commonMonth's (most of the crew arrives then), and a neighborhood only if it's commonPlace; otherwise "SF Move-in Crew".
 - intro: the Group's description in the owner's voice (first person, at most 600 characters). Say hi, say when they're moving (or, if owner.moved, when they moved), and say what people have in common, naming members only with interests listed for them ("Zoe, Daniel and I all climb"). Warm, plain, no hashtags.
 - meetupSource: the source key of the one meetup option that fits the most people.
 - meetupIdea: one line naming that option as a first meetup, with its day and time when it has one.
@@ -349,6 +383,14 @@ export const crewGroupTask = defineTask({
     const problems: string[] = [];
     const name = o.name.trim();
     if (name.length < 3 || name.length > 75) problems.push("name: 3–75 characters");
+    const month = input.commonMonth?.split(" ")[0];
+    const named = MONTHS.filter((m) => new RegExp(`\\b${m}\\b`, "i").test(name));
+    if (named.some((m) => m !== month))
+      problems.push(
+        month
+          ? `name: the only month to name is ${month}, most of the crew's`
+          : "name: don't name a month; the crew arrives in different months",
+      );
     if (o.intro.trim().length < 20 || o.intro.length > 600)
       problems.push("intro: 20–600 characters");
     if (!input.members.some((m) => o.intro.includes(m.firstName)))
@@ -364,7 +406,7 @@ export const crewGroupTask = defineTask({
   fallback: (input) => {
     const pick = pickMeetup(input.meetupOptions);
     return {
-      name: crewGroupName(input.owner.moving, input.commonPlace),
+      name: crewGroupName(input.commonMonth, input.commonPlace),
       intro: crewIntro(input),
       meetupSource: pick?.source ?? "",
       meetupIdea: pick ? meetupIdea(pick) : "",
