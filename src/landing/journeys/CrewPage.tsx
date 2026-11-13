@@ -72,8 +72,6 @@ export function CrewPage() {
         )}
         <ComingSoon
           items={[
-            "A new Weekend Route every week, built from real Events and Group plans",
-            "See which crew members are going, and join them",
             "Weekly check-ins and levels: Explore, Regular, Local",
             "Turn crew chat into real plans",
           ]}
