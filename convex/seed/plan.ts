@@ -59,6 +59,7 @@ import {
 import { TRANSIT_LINES, TRANSIT_SOURCES, TRANSIT_STATIONS } from "./world/neighborhoods/transit";
 import { pages } from "./world/pages";
 import { MAIN, people } from "./world/people";
+import { activityPosts } from "./world/posts/activity";
 import { friendPosts } from "./world/posts/friends";
 import { groupPosts } from "./world/posts/groups";
 import { neighborhoodPosts } from "./world/posts/neighborhoods";
@@ -527,7 +528,7 @@ export function buildPlan(now: number) {
   }[] = [];
   // Events must exist before any post shares them; their creation time isn't authored, so clamp it.
   const firstEventRef = new Map<string, number>();
-  for (const p of [...pagePosts, ...friendPosts, ...groupPosts]) {
+  for (const p of [...pagePosts, ...friendPosts, ...groupPosts, ...activityPosts]) {
     if (!p.event) continue;
     const t = clock.at(p.at);
     firstEventRef.set(p.event, Math.min(firstEventRef.get(p.event) ?? t, t));
@@ -638,6 +639,7 @@ export function buildPlan(now: number) {
     })),
     // Last, with explicit keys, so earlier posts keep their generated keys and random streams.
     ...neighborhoodPosts.map((seed) => ({ seed, kind: "group" as const })),
+    ...activityPosts.map((seed) => ({ seed, kind: "group" as const })),
   ];
   const persons = people.map((p) => p.username as Username);
   const posts: PlannedPost[] = [];

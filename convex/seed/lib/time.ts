@@ -15,6 +15,8 @@ export type TimeSpec =
       readonly days: number;
       readonly hm: string;
       readonly future?: boolean;
+      /** Next occurrence of this weekday (Sunday = 0); `days` adds whole weeks afterward. */
+      readonly weekday?: number;
       /** Whole calendar years back (same month and day), for "On this day" memories. */
       readonly years?: number;
       /** Counted from this weekend's Saturday (0) instead of today, as `weekendDay` does. */
@@ -50,8 +52,9 @@ export const weekendDay = (d: 0 | 1, hm: string): TimeSpec => ({
   weekend: true,
 });
 
-export const daysFromNow = (d: number, hm?: string): TimeSpec =>
-  hm ? { kind: "clock", days: d, hm, future: true } : { kind: "offset", ms: d * DAY };
+/** With a weekday, anchor to its next occurrence, then add `d` calendar days. */
+export const daysFromNow = (d: number, hm?: string, weekday?: number): TimeSpec =>
+  hm ? { kind: "clock", days: d, hm, future: true, weekday } : { kind: "offset", ms: d * DAY };
 
 const TZ = "America/Los_Angeles";
 
@@ -93,15 +96,27 @@ export class Clock {
     const [h, m] = spec.hm.split(":").map(Number);
     const local = new Date(this.now + this.offset);
     const weekday = local.getUTCDay();
-    const toSaturday = !spec.weekend ? 0 : weekday === 0 ? -1 : 6 - weekday;
-    const t =
+    const toDay =
+      spec.weekday !== undefined
+        ? (spec.weekday - weekday + 7) % 7
+        : !spec.weekend
+          ? 0
+          : weekday === 0
+            ? -1
+            : 6 - weekday;
+    let t =
       Date.UTC(
         local.getUTCFullYear() - (spec.years ?? 0),
         local.getUTCMonth(),
-        local.getUTCDate() + toSaturday + spec.days,
+        local.getUTCDate() + toDay + spec.days,
         h,
         m,
       ) - this.offset;
+    // Shift the shared occurrence before applying week offsets, so all dates
+    // in a recurring series stay two weeks apart even after today's time passes.
+    if (spec.weekday !== undefined && spec.future && t - spec.days * DAY <= this.now) {
+      t += 7 * DAY;
+    }
     if (spec.future) return t > this.now ? t : t + DAY;
     if (!spec.years && t > this.now - 2 * MINUTE) {
       return this.now - (3 + ((h * 60 + m) % 47)) * MINUTE;
