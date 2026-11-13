@@ -611,8 +611,11 @@ export const addGrocery = viewerMutation({
       .query("groceryItems")
       .withIndex("by_house", (q) => q.eq("houseId", house._id))
       .collect();
-    if (items.filter((i) => !i.checkedAt).length >= MAX_GROCERIES)
-      throw new ConvexError(`The list can hold up to ${MAX_GROCERIES} items`);
+    // Checked items count too, so the list (and every read of it) stays bounded.
+    if (items.length >= MAX_GROCERIES)
+      throw new ConvexError(
+        `The list can hold up to ${MAX_GROCERIES} items. Clear checked items to make room.`,
+      );
     return ctx.db.insert("groceryItems", {
       houseId: house._id,
       text,

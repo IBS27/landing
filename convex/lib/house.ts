@@ -44,7 +44,7 @@ export const MAX_PENDING_INVITES = 20;
 export const MAX_CHORES = 50;
 /** Unpaid bills per house. Paid ones are history and aren't capped. */
 export const MAX_OPEN_BILLS = 100;
-/** Unchecked grocery items per house. */
+/** Grocery items per house, checked ones included until they're cleared. */
 export const MAX_GROCERIES = 100;
 /** $100,000. */
 export const MAX_AMOUNT_CENTS = 10_000_000;

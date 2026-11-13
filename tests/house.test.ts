@@ -596,6 +596,20 @@ describe("bills and removals hold up", () => {
     expect(page.bills.morePaid).toBe(true);
   });
 
+  test("checked groceries count toward the cap until they're cleared", async () => {
+    const { ctx, tables, houseId } = await startHouse([]);
+    for (let i = 0; i < 100; i++) {
+      const itemId = await call(house.addGrocery, ctx, "maya", { houseId, text: "Old" });
+      await call(house.setGroceryChecked, ctx, "maya", { itemId, checked: true });
+    }
+    await expect(call(house.addGrocery, ctx, "maya", { houseId, text: "Eggs" })).rejects.toThrow(
+      "Clear checked items",
+    );
+    await call(house.clearChecked, ctx, "maya", { houseId });
+    await call(house.addGrocery, ctx, "maya", { houseId, text: "Eggs" });
+    expect(tables.groceryItems.map((g) => g.text)).toEqual(["Eggs"]);
+  });
+
   test("removing something twice (a double tap) is quiet", async () => {
     const { ctx, houseId } = await startHouse([]);
     const itemId = await call(house.addGrocery, ctx, "maya", { houseId, text: "Eggs" });
