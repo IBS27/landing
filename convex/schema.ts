@@ -28,6 +28,7 @@ import {
   messageAttachment,
   messageAuthor,
   messageStatus,
+  moveSize,
   multiPolygon,
   negotiationMove,
   negotiationStatus,
@@ -42,6 +43,7 @@ import {
   proposalPayload,
   proposalResult,
   proposalStatus,
+  rateCard,
   reactionTarget,
   reactionType,
   rentalDetails,
@@ -1068,6 +1070,41 @@ export default defineSchema({
     handledThrough: v.number(),
     updatedAt: v.number(),
   }).index("by_conversation", ["conversationId"]),
+
+  /** Mover quotes (#28): the move a user wants quotes for. One per user. */
+  moveRequests: defineTable({
+    userId: v.id("users"),
+    size: moveSize,
+    /** "YYYY-MM-DD" */
+    date: v.string(),
+    fromNeighborhood: v.string(),
+    toNeighborhood: v.string(),
+    stairs: v.boolean(),
+    /** When quotes were last requested; outreach drafts are tied to it. */
+    requestedAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  /** A moving company Page's rate card, read by Ember from its public posts (#28). Shared by everyone. */
+  moverRates: defineTable({
+    pageId: v.id("users"),
+    card: rateCard,
+    citations: v.optional(citations),
+    via: v.union(v.literal("model"), v.literal("cache"), v.literal("fallback")),
+    extractedAt: v.number(),
+  }).index("by_page", ["pageId"]),
+
+  /** One outreach to one mover for a user's move (#28): the draft and the chat it goes to. */
+  moverOutreach: defineTable({
+    userId: v.id("users"),
+    pageId: v.id("users"),
+    conversationId: v.id("conversations"),
+    proposalId: v.id("proposals"),
+    requestedAt: v.number(),
+  })
+    .index("by_user", ["userId", "requestedAt"])
+    .index("by_user_page", ["userId", "pageId"]),
 
   /**
    * Landing rooms (#25): a person's room scan (photos and optional floor size)

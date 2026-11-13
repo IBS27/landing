@@ -745,6 +745,9 @@ export const reset = internalAction({
     // Neighborhood scores (#17), from everything above. The daily cron keeps them fresh.
     const scores = await ctx.runAction(internal.neighborhoodScores.recompute, {});
 
+    // Moving company Pages for mover quotes (#28).
+    await ctx.runMutation(internal.moverQuotes.seedDemo, {});
+
     const reactionRows =
       plan.posts.reduce((s, p) => s + p.reactions.length + p.commentReactions.length, 0) +
       plan.conversations.reduce(

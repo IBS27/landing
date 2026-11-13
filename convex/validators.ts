@@ -682,3 +682,27 @@ export const journeyCheckIn = v.object({
   computedAt: v.number(),
 });
 export type JourneyCheckIn = Infer<typeof journeyCheckIn>;
+
+/* ── Mover quotes (#28) ────────────────────────────────────────────────── */
+
+export const moveSize = v.union(
+  v.literal("studio"),
+  v.literal("1br"),
+  v.literal("2br"),
+  v.literal("3br"),
+);
+
+/** A mover's rates as read from its Page posts. Code computes every estimate from it. */
+export const rateCard = v.object({
+  hourly: v.number(),
+  crew: v.number(),
+  minHours: v.number(),
+  truckFee: v.number(),
+  discounts: v.array(
+    v.object({
+      label: v.string(),
+      percent: v.number(),
+      when: v.union(v.literal("weekday"), v.literal("student"), v.literal("always")),
+    }),
+  ),
+});
