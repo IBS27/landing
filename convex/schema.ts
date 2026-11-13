@@ -1,6 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { cityProfileFact } from "./lib/cityProfileFacts";
+import { matchBy } from "./lib/crews";
 import { lifestyleAnswers } from "./lib/lifestyle";
 import { profileSignal } from "./lib/profileSignals";
 import { roomKind, roomVibe } from "./lib/vibe";
@@ -21,6 +22,8 @@ import {
   messageAuthor,
   messageStatus,
   multiPolygon,
+  negotiationMove,
+  negotiationStatus,
   neighborhoodFact,
   notificationCategory,
   notificationKind,
@@ -707,6 +710,37 @@ export default defineSchema({
     .index("by_user", ["userId", "lastPlayedAt"])
     .index("by_user_game", ["userId", "gameId"]),
   /**
+   * Marketplace negotiation (#36): the buyer's limits for one listing. Muse
+   * drafts each move as a proposal (#6); nothing is sent without approval, and
+   * no offer can go over `maxPrice`.
+   */
+  negotiations: defineTable({
+    buyerId: v.id("users"),
+    listingId: v.id("listings"),
+    conversationId: v.id("conversations"),
+    /** Hard limit, whole dollars. Enforced in code on every offer. */
+    maxPrice: v.number(),
+    /** Where Muse aims to land. */
+    targetPrice: v.optional(v.number()),
+    /** Anything Muse should know ("can pick up today"). */
+    notes: v.optional(v.string()),
+    status: negotiationStatus,
+    /** The draft waiting for the buyer, if any. */
+    pendingProposalId: v.optional(v.id("proposals")),
+    /** Muse's last drafted move and price (the price may not have been sent). */
+    lastMove: v.optional(negotiationMove),
+    lastOffer: v.optional(v.number()),
+    /** Time of the last seller message Muse has answered. */
+    handledThrough: v.number(),
+    /** When the buyer last set limits; drafts begun under older limits are dropped. */
+    limitsSetAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_buyer", ["buyerId", "updatedAt"])
+    .index("by_conversation", ["conversationId"]),
+
+  /**
    * Things to check in a Marketplace chat about a rental (#11): which of the
    * lister's messages Ember flagged, for one viewer. Refreshed when new
    * messages arrive.
@@ -723,11 +757,6 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_conversation_viewer", ["conversationId", "viewerId"]),
 
-  /**
-   * One row per model call made through `runAgent` (convex/ai/agent.ts), including
-   * calls that ended in the task's non-AI fallback. Model results are reused by
-   * `inputHash` while fresh, so shared outputs are generated once.
-   */
   /**
    * Muse proposals (#6): everything Muse wants to send or create on someone's
    * behalf. Nothing happens until the owner approves; see convex/lib/proposals.ts.
@@ -767,6 +796,11 @@ export default defineSchema({
     .index("by_proposal", ["proposalId", "at"])
     .index("by_owner", ["ownerId", "at"]),
 
+  /**
+   * One row per model call made through `runAgent` (convex/ai/agent.ts), including
+   * calls that ended in the task's non-AI fallback. Model results are reused by
+   * `inputHash` while fresh, so shared outputs are generated once.
+   */
   aiRuns: defineTable(aiRun)
     .index("by_hash", ["inputHash", "outcome", "createdAt"])
     .index("by_task", ["task", "createdAt"]),
@@ -874,4 +908,16 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_user", ["userId", "createdAt"]),
+
+  /**
+   * Landing Move-in Crew opt-ins (#30): one row per person who opted in, with
+   * what they agreed to be matched on. Crews are computed when read
+   * (convex/crews.ts), so leaving deletes the row and takes effect at once.
+   */
+  crewOptIns: defineTable({
+    userId: v.id("users"),
+    matchBy,
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
 });

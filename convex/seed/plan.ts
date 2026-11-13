@@ -13,6 +13,7 @@ import {
   type NeighborhoodSlug,
   neighborhoodShape,
   neighborhoodSlugAt,
+  neighborhoodsNear,
   SF_NEIGHBORHOODS,
 } from "../lib/neighborhoods";
 import type { NeighborhoodFact, ReactionType } from "../validators";
@@ -79,6 +80,11 @@ export type PlannedFact = DistributiveOmit<NeighborhoodFact, "neighborhoodId" | 
 
 /** Key of the DataSF boundary snapshot every neighborhood cites. */
 const BOUNDARY_SOURCE_KEY = "datasf:analysis-neighborhoods";
+/**
+ * Stations and stops serve both sides of the street they're on, and many sit on a boundary
+ * (Market Street, Bosworth): they're filed under every neighborhood within this distance.
+ */
+const STATION_REACH_METERS = 40;
 
 export type Plan = ReturnType<typeof buildPlan>;
 
@@ -1364,30 +1370,35 @@ export function buildPlan(now: number) {
   };
   for (const st of TRANSIT_STATIONS) {
     const where = `station ${st.key}`;
-    facts.push({
-      neighborhood: at(st.point, where),
-      sources: st.sources.map((k) => takeSource(k, TRANSIT_SOURCES, where)),
-      row: {
-        key: st.key,
-        kind: "transit_station",
-        system: st.system,
-        name: st.name,
-        lines: [...st.lines],
-        point: { ...st.point },
-      },
-    });
+    const hoods = neighborhoodsNear(st.point, STATION_REACH_METERS);
+    if (hoods.length === 0) fail(`${where} is not in San Francisco`);
+    const sources = st.sources.map((k) => takeSource(k, TRANSIT_SOURCES, where));
+    for (const slug of hoods) {
+      facts.push({
+        neighborhood: slug,
+        sources,
+        row: {
+          key: st.key,
+          kind: "transit_station",
+          system: st.system,
+          name: st.name,
+          lines: [...st.lines],
+          point: { ...st.point },
+        },
+      });
+    }
   }
   for (const line of TRANSIT_LINES) {
     const where = `line ${line.key}`;
     const sources = line.sources.map((k) => takeSource(k, TRANSIT_SOURCES, where));
     const byHood = new Map<NeighborhoodSlug, { name: string; point: LatLng }[]>();
     for (const stop of line.stops) {
-      const slug = neighborhoodSlugAt(stop.point);
-      if (!slug) continue;
-      byHood.set(slug, [
-        ...(byHood.get(slug) ?? []),
-        { name: stop.name, point: { ...stop.point } },
-      ]);
+      for (const slug of neighborhoodsNear(stop.point, STATION_REACH_METERS)) {
+        byHood.set(slug, [
+          ...(byHood.get(slug) ?? []),
+          { name: stop.name, point: { ...stop.point } },
+        ]);
+      }
     }
     for (const [slug, stops] of byHood) {
       facts.push({

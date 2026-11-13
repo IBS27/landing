@@ -14,6 +14,7 @@ import {
   interestsForEvent,
   interestsForGroup,
 } from "./interests";
+import { isNeighborhoodSlug } from "./neighborhoods";
 import {
   activitySummary,
   type Inference,
@@ -41,18 +42,19 @@ export const RECOMPUTE_DEBOUNCE_MS = 5_000;
 type Signal = Doc<"profileSignals">;
 export type TargetInfo = { interestIds: InterestId[]; neighborhoodSlug?: NeighborhoodSlug };
 
-function eventInfo(e: Doc<"events">): TargetInfo {
-  return {
-    interestIds: interestsForEvent({ category: e.category, title: e.title }),
-    neighborhoodSlug: e.online ? undefined : neighborhoodIn(e.address),
-  };
-}
-
-function groupInfo(g: Doc<"groups">): TargetInfo {
-  return {
-    interestIds: interestsForGroup({ category: g.category, tags: g.tags, name: g.name }),
-    neighborhoodSlug: neighborhoodIn(g.location),
-  };
+/**
+ * A target's neighborhood: the `neighborhoods` row its `neighborhoodId` (#15) points at,
+ * or, only when that's unset (Events from Facebook's composer), a name in its place text.
+ * Parks never count.
+ */
+async function neighborhoodOf(
+  ctx: QueryCtx,
+  neighborhoodId: Id<"neighborhoods"> | undefined,
+  place: string | undefined,
+): Promise<NeighborhoodSlug | undefined> {
+  if (!neighborhoodId) return neighborhoodIn(place);
+  const n = await ctx.db.get(neighborhoodId);
+  return n && !n.park && isNeighborhoodSlug(n.slug) ? n.slug : undefined;
 }
 
 /**
@@ -69,11 +71,23 @@ export async function describeTarget(
   if (targetKind === "event") {
     const id = ctx.db.normalizeId("events", targetId);
     const e = id && (await ctx.db.get(id));
-    info = e ? eventInfo(e) : null;
+    info = e
+      ? {
+          interestIds: interestsForEvent({ category: e.category, title: e.title }),
+          neighborhoodSlug: e.online
+            ? undefined
+            : await neighborhoodOf(ctx, e.neighborhoodId, e.address),
+        }
+      : null;
   } else if (targetKind === "group") {
     const id = ctx.db.normalizeId("groups", targetId);
     const g = id && (await ctx.db.get(id));
-    info = g ? groupInfo(g) : null;
+    info = g
+      ? {
+          interestIds: interestsForGroup({ category: g.category, tags: g.tags, name: g.name }),
+          neighborhoodSlug: await neighborhoodOf(ctx, g.neighborhoodId, g.location),
+        }
+      : null;
   } else if (targetKind === "post") {
     const id = ctx.db.normalizeId("posts", targetId);
     const p = id && (await ctx.db.get(id));
@@ -85,7 +99,7 @@ export async function describeTarget(
     info = l
       ? {
           interestIds: interestsForCategory(l.category),
-          neighborhoodSlug: neighborhoodIn(l.location.neighborhood),
+          neighborhoodSlug: await neighborhoodOf(ctx, l.neighborhoodId, l.location.neighborhood),
         }
       : null;
   }

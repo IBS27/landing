@@ -1932,7 +1932,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
       },
       {
         by: "kevin.tran",
-        text: "getting home late, concretely: Folsom and Howard are bright and there are people out til midnight. the little alleys (Natoma, Minna, Tehama) get dark after 6 this time of year, I just don't cut through them at night. BART stops around midnight for now, the late-night pilot starts Dec 5 (til 2am fri/sat), and after that it's owl buses, the 14 on Mission is mine",
+        text: "getting home late, concretely: Folsom and Howard are bright and there are people out til midnight. the little alleys (Natoma, Minna, Tehama) get dark after 6 this time of year, I just don't cut through them at night. BART stops around midnight, and after that it's owl buses, the 14 on Mission is mine",
         after: 130,
         likes: 15,
       },
@@ -2358,7 +2358,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
       },
       {
         by: "nora.kowalski",
-        text: "facts: the 22 Fillmore runs all night, and the 7 runs straight up Haight to the office. also the room I posted in SF Apartments is still open jan 1, just saying",
+        text: "facts: the 22 Fillmore runs all night, and the 7 runs straight up Haight to the office. also my roommate's moving out jan 1, just saying",
         after: 60,
         likes: 7,
         replies: [
@@ -3318,17 +3318,9 @@ export const neighborhoodPosts: readonly PostSeed[] = [
       },
       {
         by: "leo.novak",
-        text: "ok this is the most useful thread i've read since moving here. still waiting to hear back on the berkeley place so nothing's decided, but the inner sunset just moved way up the list",
+        text: "ok this is the most useful thread i've read since moving here. still looking at a few places so nothing's decided, but the inner sunset just moved way up the list",
         after: 300,
         likes: 9,
-        replies: [
-          {
-            by: "derek.holloway",
-            text: "Still in screening. I'll message you, not the group.",
-            after: 25,
-            likes: 8,
-          },
-        ],
       },
     ],
   },

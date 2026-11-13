@@ -221,8 +221,8 @@ const NEIGHBORHOOD_NAMES = new Map<string, NeighborhoodSlug>(
 /**
  * The SF neighborhood a place string names, from its comma-separated parts:
  * "Valencia St & 18th St, Mission" → mission, "Mission District, San Francisco"
- * → mission. Parks map to none. A lookup, not geocoding; #15's `neighborhoodId` replaces it once
- * Events and Groups carry one.
+ * → mission. Parks map to none. A lookup, not geocoding: the fallback for targets with no
+ * `neighborhoodId` (#15).
  */
 export function neighborhoodIn(place: string | undefined): NeighborhoodSlug | undefined {
   for (const part of (place ?? "").split(",")) {
