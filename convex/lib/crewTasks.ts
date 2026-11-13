@@ -3,6 +3,7 @@ import type { Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { defineTask } from "../ai/agent";
 import type { Source } from "../validators";
+import { blockedSet } from "./blocks";
 import { getProfile } from "./cityProfile";
 import { moveInLabel, type NeighborhoodSlug, neighborhoodLabel } from "./cityProfileFacts";
 import { crewFor } from "./crewMembers";
@@ -94,7 +95,11 @@ export async function crewContext(
   const now = opts.now ?? Date.now();
   const crew = await crewFor(ctx, ownerId);
   if (!crew || crew.matches.length === 0) return null;
-  const [owner, profile] = await Promise.all([ctx.db.get(ownerId), getProfile(ctx, ownerId)]);
+  const [owner, profile, blocked] = await Promise.all([
+    ctx.db.get(ownerId),
+    getProfile(ctx, ownerId),
+    blockedSet(ctx, ownerId),
+  ]);
   if (!owner) return null;
 
   const matches = crew.matches.slice(0, CREW_GROUP_INVITES);
@@ -138,11 +143,12 @@ export async function crewContext(
     )
     .take(300);
   const publicEvents = [];
-  // In the city they're moving to, public, in person, with a host.
+  // In the city they're moving to, public, in person, with a host they can see.
   for (const e of upcoming)
     if (
       e.privacy === "public" &&
       !e.online &&
+      !blocked.has(e.hostId) &&
       /san francisco/i.test(e.city) &&
       (await ctx.db.get(e.hostId))
     )
