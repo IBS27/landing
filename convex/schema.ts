@@ -14,6 +14,8 @@ import {
   messageAttachment,
   messageAuthor,
   messageStatus,
+  negotiationMove,
+  negotiationStatus,
   notificationCategory,
   notificationKind,
   postAttachment,
@@ -652,6 +654,35 @@ export default defineSchema({
   })
     .index("by_user", ["userId", "lastPlayedAt"])
     .index("by_user_game", ["userId", "gameId"]),
+  /**
+   * Marketplace negotiation (#36): the buyer's limits for one listing. Muse
+   * drafts each move as a proposal (#6); nothing is sent without approval, and
+   * no offer can go over `maxPrice`.
+   */
+  negotiations: defineTable({
+    buyerId: v.id("users"),
+    listingId: v.id("listings"),
+    conversationId: v.id("conversations"),
+    /** Hard limit, whole dollars. Enforced in code on every offer. */
+    maxPrice: v.number(),
+    /** Where Muse aims to land. */
+    targetPrice: v.optional(v.number()),
+    /** Anything Muse should know ("can pick up today"). */
+    notes: v.optional(v.string()),
+    status: negotiationStatus,
+    /** The draft waiting for the buyer, if any. */
+    pendingProposalId: v.optional(v.id("proposals")),
+    /** Muse's last drafted move and price (the price may not have been sent). */
+    lastMove: v.optional(negotiationMove),
+    lastOffer: v.optional(v.number()),
+    /** Time of the last seller message Muse has answered. */
+    handledThrough: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_buyer", ["buyerId", "updatedAt"])
+    .index("by_conversation", ["conversationId"]),
+
   /**
    * One row per model call made through `runAgent` (convex/ai/agent.ts), including
    * calls that ended in the task's non-AI fallback. Model results are reused by

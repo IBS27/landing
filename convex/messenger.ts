@@ -5,6 +5,7 @@ import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { dmBlockNotice } from "./lib/blocks";
 import { formatCallDuration } from "./lib/callFormat";
 import { viewerMutation, viewerQuery } from "./lib/functions";
+import { afterChatMessage } from "./lib/negotiations";
 import { friendIds, getSummaries, type UserSummary, userSummary } from "./lib/users";
 import type { ReactionType } from "./validators";
 
@@ -568,6 +569,8 @@ export async function insertMessage(
       ...(r.userId === senderId ? { lastReadAt: now } : {}),
     });
   await clearTyping(ctx, conversationId, senderId);
+  // A seller's reply in a Muse negotiation prompts the buyer's next draft (#36).
+  await afterChatMessage(ctx, conversationId, senderId);
   return messageId;
 }
 
