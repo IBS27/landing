@@ -2528,13 +2528,6 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
       w: 1280,
     },
     {
-      path: "/seed/posts/larches-02.jpg",
-      topic: "larches",
-      tags: ["larches", "ingalls pass at alpine lakes wilderness in washington 29"],
-      h: 720,
-      w: 1280,
-    },
-    {
       path: "/seed/posts/larches-03.jpg",
       topic: "larches",
       tags: ["larches", "tower mountain and golden horn"],
@@ -2871,13 +2864,6 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
         "se view of summit of mount tamalpais near mill valley, california",
       ],
       h: 960,
-      w: 1280,
-    },
-    {
-      path: "/seed/posts/mountain-lake-01.jpg",
-      topic: "mountain lake",
-      tags: ["mountain lake", "lake 22 - flickr - brewbooks"],
-      h: 868,
       w: 1280,
     },
     {
@@ -3388,13 +3374,6 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
       tags: ["ski shop", "berg's ski shop & snowboard shop in eugene, oregon"],
       h: 1400,
       w: 1050,
-    },
-    {
-      path: "/seed/posts/snowy-lake-01.jpg",
-      topic: "snowy lake",
-      tags: ["snowy lake", "lake twentytwo in early spring"],
-      h: 851,
-      w: 1280,
     },
     {
       path: "/seed/posts/snowy-mountains-01.jpg",

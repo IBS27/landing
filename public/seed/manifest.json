@@ -3803,20 +3803,6 @@
     "width": 1280,
     "height": 870
   },
-  "posts/larches-02.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:Ingalls_Pass_at_Alpine_Lakes_Wilderness_in_Washington_29.jpg",
-    "creator": "Jeffhollett",
-    "creator_url": null,
-    "license": "CC BY-SA 4.0",
-    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-    "title": "Ingalls Pass at Alpine Lakes Wilderness in Washington 29",
-    "tags": [
-      "larches"
-    ],
-    "provider": "wikimedia",
-    "width": 1280,
-    "height": 720
-  },
   "posts/larches-03.jpg": {
     "source_url": "https://commons.wikimedia.org/wiki/File:Tower_Mountain_and_Golden_Horn.jpg",
     "creator": "Ron Clausen",
@@ -4290,20 +4276,6 @@
     "provider": "wikimedia",
     "width": 1280,
     "height": 960
-  },
-  "posts/mountain-lake-01.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:Lake_22_-_Flickr_-_brewbooks.jpg",
-    "creator": "brewbooks from near Seattle, USA",
-    "creator_url": null,
-    "license": "CC BY-SA 2.0",
-    "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
-    "title": "Lake 22 - Flickr - brewbooks",
-    "tags": [
-      "mountain lake"
-    ],
-    "provider": "wikimedia",
-    "width": 1280,
-    "height": 868
   },
   "posts/mountain-lake-02.jpg": {
     "source_url": "https://commons.wikimedia.org/wiki/File:20150621_SnowLake_043b.jpg",
@@ -5388,20 +5360,6 @@
     "provider": "wikimedia",
     "width": 1050,
     "height": 1400
-  },
-  "posts/snowy-lake-01.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:Lake_Twentytwo_in_early_spring.jpg",
-    "creator": "SounderBruce",
-    "creator_url": null,
-    "license": "CC BY-SA 4.0",
-    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-    "title": "Lake Twentytwo in early spring",
-    "tags": [
-      "snowy lake"
-    ],
-    "provider": "wikimedia",
-    "width": 1280,
-    "height": 851
   },
   "posts/snowy-mountains-01.jpg": {
     "source_url": "https://commons.wikimedia.org/wiki/File:Camp_Richardson_Beach,_Lake_Tahoe.jpg",
