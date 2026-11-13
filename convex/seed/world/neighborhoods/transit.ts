@@ -12,7 +12,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
     title: "Embarcadero | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "298 Market Street, San Francisco, CA 94111",
-    fetchedAt: 1794530058224,
+    fetchedAt: 1794531142626,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"EMBR","901169","Embarcadero","","37.792762","-122.397037","EMBR","https://www.bart.gov/stations/embr","1","",""':
     {
@@ -21,14 +21,14 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "BART",
       snippet:
         '"EMBR","901169","Embarcadero","","37.792762","-122.397037","EMBR","https://www.bart.gov/stations/embr","1","",""',
-      fetchedAt: 1794530057983,
+      fetchedAt: 1794531142131,
     },
   "https://www.bart.gov/stations/mont": {
     url: "https://www.bart.gov/stations/mont",
     title: "Montgomery St. | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "598 Market Street, San Francisco, CA 94104",
-    fetchedAt: 1794530058301,
+    fetchedAt: 1794531142914,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"MONT","901209","Montgomery Street","","37.789173","-122.401587","MONT","https://www.bart.gov/stations/mont","1","",""':
     {
@@ -37,14 +37,14 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "BART",
       snippet:
         '"MONT","901209","Montgomery Street","","37.789173","-122.401587","MONT","https://www.bart.gov/stations/mont","1","",""',
-      fetchedAt: 1794530057983,
+      fetchedAt: 1794531142131,
     },
   "https://www.bart.gov/stations/powl": {
     url: "https://www.bart.gov/stations/powl",
     title: "Powell St. | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "899 Market Street, San Francisco, CA 94102",
-    fetchedAt: 1794530058377,
+    fetchedAt: 1794531143017,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"POWL","901309","Powell Street","","37.784606","-122.407331","POWL","https://www.bart.gov/stations/powl","1","",""':
     {
@@ -53,14 +53,14 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "BART",
       snippet:
         '"POWL","901309","Powell Street","","37.784606","-122.407331","POWL","https://www.bart.gov/stations/powl","1","",""',
-      fetchedAt: 1794530057983,
+      fetchedAt: 1794531142131,
     },
   "https://www.bart.gov/stations/civc": {
     url: "https://www.bart.gov/stations/civc",
     title: "Civic Center/UN Plaza | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "1150 Market Street, San Francisco, CA 94102",
-    fetchedAt: 1794530058429,
+    fetchedAt: 1794531143122,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"CIVC","901409","Civic Center / UN Plaza","","37.779408","-122.413826","CIVC","https://www.bart.gov/stations/civc","1","",""':
     {
@@ -69,14 +69,14 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "BART",
       snippet:
         '"CIVC","901409","Civic Center / UN Plaza","","37.779408","-122.413826","CIVC","https://www.bart.gov/stations/civc","1","",""',
-      fetchedAt: 1794530057983,
+      fetchedAt: 1794531142131,
     },
   "https://www.bart.gov/stations/16th": {
     url: "https://www.bart.gov/stations/16th",
     title: "16th St./Mission | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "2000 Mission Street, San Francisco, CA 94110",
-    fetchedAt: 1794530058502,
+    fetchedAt: 1794531143221,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"16TH","901509","16th Street / Mission","","37.765173","-122.419704","16TH","https://www.bart.gov/stations/16th","1","",""':
     {
@@ -85,14 +85,14 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "BART",
       snippet:
         '"16TH","901509","16th Street / Mission","","37.765173","-122.419704","16TH","https://www.bart.gov/stations/16th","1","",""',
-      fetchedAt: 1794530057983,
+      fetchedAt: 1794531142131,
     },
   "https://www.bart.gov/stations/24th": {
     url: "https://www.bart.gov/stations/24th",
     title: "24th St./Mission | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "2800 Mission Street, San Francisco, CA 94110",
-    fetchedAt: 1794530058556,
+    fetchedAt: 1794531143322,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"24TH","901609","24th Street / Mission","","37.752419","-122.418468","24TH","https://www.bart.gov/stations/24th","1","",""':
     {
@@ -101,14 +101,14 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "BART",
       snippet:
         '"24TH","901609","24th Street / Mission","","37.752419","-122.418468","24TH","https://www.bart.gov/stations/24th","1","",""',
-      fetchedAt: 1794530057983,
+      fetchedAt: 1794531142131,
     },
   "https://www.bart.gov/stations/glen": {
     url: "https://www.bart.gov/stations/glen",
     title: "Glen Park | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "2901 Diamond Street, San Francisco, CA 94131",
-    fetchedAt: 1794530058608,
+    fetchedAt: 1794531143441,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"GLEN","901709","Glen Park","","37.733235","-122.433515","GLEN","https://www.bart.gov/stations/glen","1","",""':
     {
@@ -117,14 +117,14 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "BART",
       snippet:
         '"GLEN","901709","Glen Park","","37.733235","-122.433515","GLEN","https://www.bart.gov/stations/glen","1","",""',
-      fetchedAt: 1794530057983,
+      fetchedAt: 1794531142131,
     },
   "https://www.bart.gov/stations/balb": {
     url: "https://www.bart.gov/stations/balb",
     title: "Balboa Park | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "401 Geneva Avenue, San Francisco, CA 94112",
-    fetchedAt: 1794530058659,
+    fetchedAt: 1794531143546,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"BALB","901809","Balboa Park","","37.721747","-122.447457","BALB","https://www.bart.gov/stations/balb","1","",""':
     {
@@ -133,7 +133,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "BART",
       snippet:
         '"BALB","901809","Balboa Park","","37.721747","-122.447457","BALB","https://www.bart.gov/stations/balb","1","",""',
-      fetchedAt: 1794530057983,
+      fetchedAt: 1794531142131,
     },
   "https://www.sfmta.com/routes/j-church": {
     url: "https://www.sfmta.com/routes/j-church",
@@ -141,7 +141,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
     publisher: "SFMTA",
     snippet:
       "Inbound to Embarcadero Station From San Jose & Geneva, north on San Jose, left on 30th St, right on Church, right onto Muni separated trackway from 22nd to…",
-    fetchedAt: 1794530059876,
+    fetchedAt: 1794531144973,
   },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#J,SFMTA,J,CHURCH,http://www.sfmta.com/J,5am-12 midnight daily,0,A96614 ,FFFFFF,":
     {
@@ -149,7 +149,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "J,SFMTA,J,CHURCH,http://www.sfmta.com/J,5am-12 midnight daily,0,A96614 ,FFFFFF,",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://www.sfmta.com/routes/k-ingleside": {
     url: "https://www.sfmta.com/routes/k-ingleside",
@@ -157,7 +157,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
     publisher: "SFMTA",
     snippet:
       "Northbound to Downtown From San Jose Avenue & Geneva, north on San Jose Avenue, left on Ocean, right on Junipero Serra, continue to West Portal Ave to West…",
-    fetchedAt: 1794530060437,
+    fetchedAt: 1794531147282,
   },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#K,SFMTA,K,INGLESIDE,http://www.sfmta.com/K,Weekdays 6am-12 midnight; weekends 8am-12 midnight,0,437C93 ,FFFFFF,":
     {
@@ -166,7 +166,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "K,SFMTA,K,INGLESIDE,http://www.sfmta.com/K,Weekdays 6am-12 midnight; weekends 8am-12 midnight,0,437C93 ,FFFFFF,",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://www.sfmta.com/routes/l-taraval": {
     url: "https://www.sfmta.com/routes/l-taraval",
@@ -174,7 +174,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
     publisher: "SFMTA",
     snippet:
       "This route serves Ocean Beach along 46th Ave. Inbound Wawona and 46th Avenue (San Francisco Zoo) via Wawona. 46th Avenue, Taraval, 15th Avenue, Ulloa to West…",
-    fetchedAt: 1794530063191,
+    fetchedAt: 1794531147634,
   },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#L,SFMTA,L,TARAVAL,http://www.sfmta.com/L,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,942D83 ,FFFFFF,":
     {
@@ -183,7 +183,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "L,SFMTA,L,TARAVAL,http://www.sfmta.com/L,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,942D83 ,FFFFFF,",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://www.sfmta.com/routes/m-ocean-view": {
     url: "https://www.sfmta.com/routes/m-ocean-view",
@@ -191,7 +191,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
     publisher: "SFMTA",
     snippet:
       "Inbound San Jose Avenue and Geneva (Balboa Park Muni Metro/BART) via San Jose Avenue, Broad, Orizaba, Randolph, 19th Avenue (San Francisco State University),…",
-    fetchedAt: 1794530067588,
+    fetchedAt: 1794531149980,
   },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#M,SFMTA,M,OCEAN VIEW,http://www.sfmta.com/M,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,008547 ,FFFFFF,":
     {
@@ -200,7 +200,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "M,SFMTA,M,OCEAN VIEW,http://www.sfmta.com/M,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,008547 ,FFFFFF,",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://www.sfmta.com/routes/n-judah": {
     url: "https://www.sfmta.com/routes/n-judah",
@@ -208,7 +208,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
     publisher: "SFMTA",
     snippet:
       "This route serves Ocean Beach at La Playa St. Inbound Judah and La Playa via Judah, 9th Avenue, Irving, Arguello (UCSF), Carl, Sunset tunnel, Duboce, Market…",
-    fetchedAt: 1794530068076,
+    fetchedAt: 1794531152745,
   },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#N,SFMTA,N,JUDAH,http://www.sfmta.com/N,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,005B95 ,FFFFFF,":
     {
@@ -217,7 +217,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "N,SFMTA,N,JUDAH,http://www.sfmta.com/N,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,005B95 ,FFFFFF,",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://www.sfmta.com/routes/t-third-street": {
     url: "https://www.sfmta.com/routes/t-third-street",
@@ -225,7 +225,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
     publisher: "SFMTA",
     snippet:
       "Southbound to Sunnydale From Chinatown Station, exit Central Subway, continue on 4th St, left on Channel, right on 3rd St to Bayshore Blvd to the terminal at…",
-    fetchedAt: 1794530068500,
+    fetchedAt: 1794531154944,
   },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#T,SFMTA,T,THIRD,http://www.sfmta.com/T,Weekends 8 am-11:30 pm,0,BF2B45 ,FFFFFF,":
     {
@@ -233,7 +233,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "T,SFMTA,T,THIRD,http://www.sfmta.com/T,Weekends 8 am-11:30 pm,0,BF2B45 ,FFFFFF,",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5728,15728,Metro Castro Station/Downtown,37.76262,-122.435231,0, ,https://www.sfmta.com/15728":
     {
@@ -242,7 +242,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "5728,15728,Metro Castro Station/Downtown,37.76262,-122.435231,0, ,https://www.sfmta.com/15728",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7876,17876,Chinatown - Rose Pak Station,37.794807,-122.408078,0, ,https://www.sfmta.com/17876":
     {
@@ -251,7 +251,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "7876,17876,Chinatown - Rose Pak Station,37.794807,-122.408078,0, ,https://www.sfmta.com/17876",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5726,15726,Metro Church Station/Downtown,37.767194,-122.429168,0, ,https://www.sfmta.com/15726":
     {
@@ -260,7 +260,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "5726,15726,Metro Church Station/Downtown,37.767194,-122.429168,0, ,https://www.sfmta.com/15726",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5727,15727,Metro Civic Center Station/Downtn,37.779712,-122.413347,0, ,https://www.sfmta.com/15727":
     {
@@ -269,7 +269,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "5727,15727,Metro Civic Center Station/Downtn,37.779712,-122.413347,0, ,https://www.sfmta.com/15727",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#6992,16992,Metro Embarcadero Station,37.793134,-122.396431,0, ,https://www.sfmta.com/16992":
     {
@@ -278,7 +278,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "6992,16992,Metro Embarcadero Station,37.793134,-122.396431,0, ,https://www.sfmta.com/16992",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5730,15730,Metro Forest Hill Station/Downtown,37.748351,-122.458623,0, ,https://www.sfmta.com/15730":
     {
@@ -287,7 +287,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "5730,15730,Metro Forest Hill Station/Downtown,37.748351,-122.458623,0, ,https://www.sfmta.com/15730",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5731,15731,Metro Montgomery Station/Downtown,37.789219,-122.401351,0, ,https://www.sfmta.com/15731":
     {
@@ -296,7 +296,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "5731,15731,Metro Montgomery Station/Downtown,37.789219,-122.401351,0, ,https://www.sfmta.com/15731",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5417,15417,Metro Powell Station/Downtown,37.784653,-122.407086,0, ,https://www.sfmta.com/15417":
     {
@@ -305,7 +305,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "5417,15417,Metro Powell Station/Downtown,37.784653,-122.407086,0, ,https://www.sfmta.com/15417",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7874,17874,Union Square/Market St Station Southbound,37.787133,-122.406523,0, ,https://www.sfmta.com/17874":
     {
@@ -314,7 +314,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "7874,17874,Union Square/Market St Station Southbound,37.787133,-122.406523,0, ,https://www.sfmta.com/17874",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5419,15419,Metro Van Ness Station,37.775127,-122.419252,0, ,https://www.sfmta.com/15419":
     {
@@ -323,7 +323,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "5419,15419,Metro Van Ness Station,37.775127,-122.419252,0, ,https://www.sfmta.com/15419",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#6739,16739,West Portal Station,37.741391,-122.46553,0, ,https://www.sfmta.com/16739":
     {
@@ -332,7 +332,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "6739,16739,West Portal Station,37.741391,-122.46553,0, ,https://www.sfmta.com/16739",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7873,17873,Yerba Buena/Moscone Station Southbound,37.78238,-122.40173,0, ,https://www.sfmta.com/17873":
     {
@@ -341,14 +341,14 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "7873,17873,Yerba Buena/Moscone Station Southbound,37.78238,-122.40173,0, ,https://www.sfmta.com/17873",
-      fetchedAt: 1794530058742,
+      fetchedAt: 1794531143656,
     },
   "https://www.caltrain.com/station/22ndstreet": {
     url: "https://www.caltrain.com/station/22ndstreet",
     title: "22nd Street | Caltrain",
     publisher: "Caltrain",
     snippet: "1149 22nd St., San Francisco 94107",
-    fetchedAt: 1794530069054,
+    fetchedAt: 1794531157814,
   },
   "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#22nd_street,22nd_street,,22nd Street Station,,37.756972,-122.392492,,,1,,America/Los_Angeles,,,0,twenty second street":
     {
@@ -357,14 +357,14 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "Caltrain",
       snippet:
         "22nd_street,22nd_street,,22nd Street Station,,37.756972,-122.392492,,,1,,America/Los_Angeles,,,0,twenty second street",
-      fetchedAt: 1794530068908,
+      fetchedAt: 1794531157206,
     },
   "https://www.caltrain.com/station/sanfrancisco": {
     url: "https://www.caltrain.com/station/sanfrancisco",
     title: "San Francisco | Caltrain",
     publisher: "Caltrain",
     snippet: "700 4th St., San Francisco 94107",
-    fetchedAt: 1794530069740,
+    fetchedAt: 1794531158433,
   },
   "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#san_francisco,san_francisco,,San Francisco Caltrain Station,,37.776404,-122.394911,,,1,,America/Los_Angeles,,,0,san francisco":
     {
@@ -373,7 +373,7 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "Caltrain",
       snippet:
         "san_francisco,san_francisco,,San Francisco Caltrain Station,,37.776404,-122.394911,,,1,,America/Los_Angeles,,,0,san francisco",
-      fetchedAt: 1794530068908,
+      fetchedAt: 1794531157206,
     },
 };
 
@@ -1046,17 +1046,17 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         },
       },
       {
-        name: "San Jose Ave & Geneva Ave",
-        point: {
-          lat: 37.721238,
-          lng: -122.446222,
-        },
-      },
-      {
         name: "Balboa Park BART/Mezzanine Level",
         point: {
           lat: 37.721809,
           lng: -122.447425,
+        },
+      },
+      {
+        name: "San Jose Ave & Geneva Ave",
+        point: {
+          lat: 37.721238,
+          lng: -122.446222,
         },
       },
     ],
@@ -1254,17 +1254,17 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         },
       },
       {
-        name: "Wawona/46th Ave /SF Zoo",
-        point: {
-          lat: 37.736125,
-          lng: -122.504351,
-        },
-      },
-      {
         name: "47th Ave & Cutler Ave",
         point: {
           lat: 37.736991,
           lng: -122.505413,
+        },
+      },
+      {
+        name: "Wawona/46th Ave /SF Zoo",
+        point: {
+          lat: 37.736125,
+          lng: -122.504351,
         },
       },
     ],
@@ -1455,17 +1455,17 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         },
       },
       {
-        name: "San Jose Ave & Geneva Ave",
-        point: {
-          lat: 37.720631,
-          lng: -122.446554,
-        },
-      },
-      {
         name: "San Jose Ave & Niagra Ave",
         point: {
           lat: 37.719421,
           lng: -122.447654,
+        },
+      },
+      {
+        name: "San Jose Ave & Geneva Ave",
+        point: {
+          lat: 37.720631,
+          lng: -122.446554,
         },
       },
     ],

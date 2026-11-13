@@ -554,15 +554,18 @@ async function buildTransit(boundaries: Boundary[]) {
             ordered.push(x);
             continue;
           }
-          let at = ordered.length;
-          let best = Infinity;
-          for (let i = 0; i + 1 < ordered.length; i++) {
-            const a = ordered[i].point;
-            const b = ordered[i + 1].point;
-            const d = edgeDistanceMeters(x.point, [[[[a.lng, a.lat], [b.lng, b.lat]]]]);
-            if (d < best) {
-              best = d;
-              at = i + 1;
+          // Cheapest insertion: the spot (either end included) that lengthens the path least.
+          const d = (i: number) => distanceMeters(ordered[i].point, x.point);
+          let at = 0;
+          let best = d(0);
+          for (let i = 1; i <= ordered.length; i++) {
+            const added =
+              i === ordered.length
+                ? d(i - 1)
+                : d(i - 1) + d(i) - distanceMeters(ordered[i - 1].point, ordered[i].point);
+            if (added < best) {
+              best = added;
+              at = i;
             }
           }
           ordered.splice(at, 0, x);

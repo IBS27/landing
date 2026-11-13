@@ -427,12 +427,12 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "…the college will be closing at the end of the 2026–2027 academic year, with Vanderbilt University taking over the campus.",
     fetchedAt: 1794526026000,
   },
-  "https://www.academyart.edu/facilities/#236240ee": {
+  "https://www.academyart.edu/facilities/#188b8f18": {
     url: "https://www.academyart.edu/facilities/",
     title: "Facilities - Academy of Art University",
     publisher: "Academy of Art University",
     snippet:
-      "…around our urban campus in San Francisco. Shuttle stops are located near all university buildings…",
+      "Free for all students and staff members, our shuttle service is designed to get you efficiently and safely around our urban campus in San Francisco.",
     fetchedAt: 1794526026000,
   },
   "https://en.wikipedia.org/wiki/Academy_of_Art_University#9831c3ff": {
@@ -926,7 +926,7 @@ export const CAMPUSES: readonly CampusSeed[] = [
       lng: -122.400781,
     },
     sources: [
-      "https://www.academyart.edu/facilities/#236240ee",
+      "https://www.academyart.edu/facilities/#188b8f18",
       "https://en.wikipedia.org/wiki/Academy_of_Art_University#9831c3ff",
     ],
   },

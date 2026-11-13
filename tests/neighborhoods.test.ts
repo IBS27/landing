@@ -450,6 +450,19 @@ describe("seed plan: facts", () => {
     }
   });
 
+  test("line stops follow the route, even past the backbone's last stop", () => {
+    // The M's first direction ends at Niagra; Geneva (the terminal) comes from the other one.
+    const m = plan.neighborhoodFacts
+      .flatMap((f) => (f.row.kind === "transit_line" && f.row.key === "muni:m" ? f.row.stops : []))
+      .map((s) => s.name)
+      .filter((n) => /^San Jose Ave & (Lakeview|Niagra|Geneva) Ave$/.test(n));
+    expect(m).toEqual([
+      "San Jose Ave & Lakeview Ave",
+      "San Jose Ave & Niagra Ave",
+      "San Jose Ave & Geneva Ave",
+    ]);
+  });
+
   test("snippets fit the citation chip, so the supporting words show", () => {
     for (const { key, row } of plan.externalSources) {
       expect([key, snippet(row.snippet)]).toEqual([key, row.snippet]);
