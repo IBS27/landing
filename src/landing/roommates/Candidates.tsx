@@ -260,15 +260,15 @@ function AskDialog({
     <Modal
       open
       onOpenChange={(o) => !o && !busy && onClose()}
-      title={saved ? "Draft saved to your Inbox" : `Ask ${first} to connect`}
+      title={saved ? "Draft saved" : `Ask ${first} to connect`}
       width={500}
     >
       <div className="px-4 pt-3 pb-4">
         {saved ? (
           <>
             <p className="px-2 text-[15px] text-primary leading-5">
-              Your message to {first} is waiting in Landing Inbox. It's sent once you approve it
-              there.
+              Draft saved to your Inbox. Your message to {first} is sent once you approve it in
+              Landing Inbox.
             </p>
             <div className="flex justify-end gap-2 px-2 pt-4">
               <Button variant="ghost" onClick={onClose}>
