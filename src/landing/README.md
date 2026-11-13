@@ -10,7 +10,7 @@ Landing is part of the Facebook clone: a section at `/landing`, like Marketplace
   - `LandingLayout.tsx`: Landing's 360px sidebar (the clone's `AppRail`) with the page beside it. Facebook's TopNav and ChatDock come from the root layout, as on every other page.
   - `sections.ts`: the nav. Add a section here.
   - `LandingPage.tsx`: `LandingPage` (title, description, actions, centered column) and the `ComingSoon` stub card.
-  - `HomePage.tsx`: Landing Home (`/landing`).
+  - Landing Home (`/landing`) is `home/LandingHome.tsx`: the map and chat, with the move timeline panel from `timeline/`.
   - `icons.tsx`: `BmLanding`, the app's mark.
 - **Links to Facebook objects:** always use `src/landing/links.ts`: `<Link {...toGroup(group)}>`, `toEvent`, `toProfile`, `toListing`, `toConversation`.
 - **Viewer:** `useViewer()`, `useQ` and `useM` from `src/app/viewer.tsx`, the same as the rest of the app. Persona switching and dark mode come from the account menu in Facebook's TopNav.

@@ -141,6 +141,15 @@ async function itemFacts(ctx: QueryCtx, userId: Id<"users">): Promise<StepInput[
   return { total: rows.length, unlisted };
 }
 
+/** Mover quotes (#28): whether the viewer has asked movers for quotes. */
+async function moverFacts(ctx: QueryCtx, userId: Id<"users">): Promise<StepInput["movers"]> {
+  const req = await ctx.db
+    .query("moveRequests")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .first();
+  return { requested: req?.requestedAt !== undefined };
+}
+
 /** Whether the viewer has a sublet listing that's still up. */
 async function hasSublet(ctx: QueryCtx, userId: Id<"users">) {
   const rows = await ctx.db
@@ -203,11 +212,12 @@ export const timeline = viewerQuery({
     const need = new Set<Need>(NEEDS[stage]);
     const when = <T>(n: Need, load: () => Promise<T>) =>
       need.has(n) ? load() : Promise.resolve(undefined);
-    const [saved, crew, rooms, unit, items, sublet, checkIn, events] = await Promise.all([
+    const [saved, crew, rooms, unit, movers, items, sublet, checkIn, events] = await Promise.all([
       when("saved", () => savedRentals(ctx, a)),
       when("crew", () => crewFacts(ctx, profile)),
       when("rooms", async () => (place ? roomCount(ctx, userId, place) : undefined)),
       when("unit", async () => (place ? hasUnit(ctx, userId, place) : undefined)),
+      when("movers", () => moverFacts(ctx, userId)),
       when("items", () => itemFacts(ctx, userId)),
       when("sublet", () => hasSublet(ctx, userId)),
       checkInFacts(ctx, profile, now),
@@ -227,8 +237,7 @@ export const timeline = viewerQuery({
       crew,
       rooms,
       unit,
-      // Mover quotes (#28) aren't on this deployment yet.
-      movers: null,
+      movers,
       checkIn,
       items,
       sublet,

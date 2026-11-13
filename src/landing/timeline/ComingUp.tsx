@@ -1,16 +1,9 @@
 import { Link, type LinkOptions } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
-import {
-  BellRing,
-  CalendarCheck,
-  CalendarDays,
-  ChevronRight,
-  Inbox,
-  MessageCircle,
-} from "lucide-react";
+import { BellRing, CalendarCheck, Inbox, MessageCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { toEvent, toInbox, toJourneys } from "@/landing/links";
-import { Card, CountBadge } from "@/ui/primitives";
+import { CountBadge } from "@/ui/primitives";
 import type { api } from "../../../convex/_generated/api";
 
 type ComingUpData = FunctionReturnType<typeof api.home.timeline>["comingUp"];
@@ -39,23 +32,26 @@ function Row({
   link: LinkOptions;
 }) {
   return (
-    <li className="px-2">
-      <Link
-        {...link}
-        className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-hover"
-      >
+    <li>
+      <Link {...link} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-hover">
         {icon}
         <span className="min-w-0 flex-1">
-          <span className="block font-semibold text-[15px] text-primary leading-5">{title}</span>
-          {meta && <span className="block text-[13px] text-secondary leading-4">{meta}</span>}
+          <span className="block truncate font-semibold text-[14px] text-primary leading-[18px]">
+            {title}
+          </span>
+          {meta && <span className="block text-[12px] text-secondary leading-4">{meta}</span>}
         </span>
-        {trailing ?? (
-          <ChevronRight size={20} className="shrink-0 text-icon-secondary" aria-hidden />
-        )}
+        {trailing}
       </Link>
     </li>
   );
 }
+
+const roundIcon = (node: ReactNode) => (
+  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-btn text-primary">
+    {node}
+  </span>
+);
 
 /** When the day-of reminder (#134) goes out, while it's still ahead. */
 function Reminder({
@@ -71,60 +67,52 @@ function Reminder({
 }) {
   if (via === "chat")
     return (
-      <span className="mt-0.5 flex items-center gap-1">
-        <MessageCircle size={12} aria-hidden /> Reminder in the plan's chat
+      <span className="flex items-center gap-1">
+        <MessageCircle size={11} aria-hidden /> Reminder in the plan's chat
       </span>
     );
   if (remindAt <= now) return null;
   const sameDay = DAY.format(remindAt) === DAY.format(startAt);
   return (
-    <span className="mt-0.5 flex items-center gap-1">
-      <BellRing size={12} aria-hidden /> Reminder {sameDay ? "that morning" : DAY.format(remindAt)}{" "}
-      at {time(remindAt)}
+    <span className="flex items-center gap-1">
+      <BellRing size={11} aria-hidden /> Reminder {sameDay ? "that day" : DAY.format(remindAt)} at{" "}
+      {time(remindAt)}
     </span>
   );
 }
 
-const roundIcon = (node: ReactNode) => (
-  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-btn text-primary">
-    {node}
-  </span>
-);
-
 /**
- * "Coming up": Events the person is going to this week (with when the day-of
- * reminder goes out), this week's check-in, and Muse drafts waiting in the
- * Landing Inbox.
+ * "Coming up": Muse drafts waiting in the Landing Inbox, this week's
+ * check-in, and Events the person is going to this week, with when each
+ * day-of reminder goes out.
  */
 export function ComingUp({ data, now }: { data: ComingUpData; now: number }) {
   // The query reruns when data changes, not as time passes: drop Events that started since.
   const events = data.events.filter((e) => e.startAt > now);
-  const empty = events.length === 0 && !data.checkIn && !data.drafts;
   return (
-    <Card className="py-2">
-      <h2 className="px-4 pt-1 pb-1 font-bold text-[17px] text-primary leading-5">Coming up</h2>
-      {empty ? (
-        <p className="flex items-start gap-2 px-4 pt-1 pb-2 text-[15px] text-secondary leading-5">
-          <CalendarDays size={18} className="mt-px shrink-0 text-icon-secondary" aria-hidden />
+    <section className="mt-3" aria-label="Coming up">
+      <h3 className="font-semibold text-[13px] text-secondary">Coming up</h3>
+      {events.length === 0 && !data.checkIn && !data.drafts ? (
+        <p className="mt-1 text-[13px] text-secondary leading-[18px]">
           Nothing this week. Events you're going to, check-ins and drafts waiting for your OK show
           up here.
         </p>
       ) : (
-        <ul>
+        <ul className="-mx-2 mt-1">
           {data.drafts && (
             <Row
               link={toInbox()}
-              icon={roundIcon(<Inbox size={20} aria-hidden />)}
+              icon={roundIcon(<Inbox size={16} aria-hidden />)}
               title={data.drafts.text}
-              meta="Nothing is sent until you approve it"
+              meta="Nothing is sent until you approve it."
               trailing={<CountBadge count={data.drafts.count} />}
             />
           )}
           {data.checkIn && (
             <Row
               link={toJourneys()}
-              icon={roundIcon(<CalendarCheck size={20} aria-hidden />)}
-              title={`Week ${data.checkIn.week} check-in`}
+              icon={roundIcon(<CalendarCheck size={16} aria-hidden />)}
+              title="This week's check-in"
               meta={data.checkIn.text}
             />
           )}
@@ -136,7 +124,7 @@ export function ComingUp({ data, now }: { data: ComingUpData; now: number }) {
                 <img
                   src={e.cover}
                   alt=""
-                  className="h-10 w-10 shrink-0 rounded-lg bg-btn object-cover"
+                  className="h-8 w-8 shrink-0 rounded-lg bg-btn object-cover"
                 />
               }
               title={e.title}
@@ -153,6 +141,6 @@ export function ComingUp({ data, now }: { data: ComingUpData; now: number }) {
           ))}
         </ul>
       )}
-    </Card>
+    </section>
   );
 }

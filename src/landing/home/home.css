@@ -1,6 +1,7 @@
 /* Landing Home: map + Muse chat. Light glass over the map; follows the app's tokens. */
 .lh-stage {
   position: relative;
+  container-type: inline-size;
   height: calc(100vh - 56px);
   overflow: hidden;
   background: radial-gradient(120% 90% at 50% 40%, #f7f8fb 0%, #eff2f7 60%, #e7ebf3 100%);
@@ -119,6 +120,50 @@
 .lh-history-open .lh-history {
   transform: none;
   opacity: 1;
+}
+
+/* "Your move" panel (#142): beside the chat when the map is wide, over it when it isn't. */
+.lh-move {
+  position: absolute;
+  inset: 8px;
+  z-index: 9;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgb(15 20 30 / 0.12);
+  animation: lh-rise 0.2s ease;
+}
+.lh-move-pill {
+  position: absolute;
+  top: 56px;
+  left: 12px;
+  right: 12px;
+  z-index: 5;
+  display: flex;
+  pointer-events: none;
+}
+.lh-move-pill > * {
+  pointer-events: auto;
+}
+@container (min-width: 900px) {
+  .lh-move {
+    inset: 60px auto auto 16px;
+    width: 340px;
+    max-height: calc(100% - 76px);
+    z-index: 7;
+  }
+  .lh-move-pill {
+    right: auto;
+    max-width: 340px;
+  }
+  .lh-move-open .lh-dock {
+    left: calc(50% + 178px);
+    width: min(560px, calc(100% - 420px));
+  }
+  .lh-move-open.lh-history-open .lh-dock {
+    left: calc(50% + 2px);
+    width: min(480px, calc(100% - 760px));
+  }
 }
 
 /* Move line endpoints and crew faces */

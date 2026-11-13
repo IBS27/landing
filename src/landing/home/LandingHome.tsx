@@ -15,6 +15,7 @@ import { toRentalCheck } from "@/landing/links";
 import { LandingMap } from "@/landing/map/LandingMap";
 import { MapMarker } from "@/landing/map/MapMarker";
 import type { Bounds, MapFocus, MapLayer, PinKind, RouteStop } from "@/landing/map/types";
+import { MovePanel } from "@/landing/timeline/MovePanel";
 import { cn } from "@/lib/format";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -65,6 +66,8 @@ export function LandingHome() {
   const [routeSlug, setRouteSlug] = useState<string | null>(null);
   const [showCrew, setShowCrew] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  // The "Your move" panel; null until it measures whether it fits beside the chat.
+  const [moveOpen, setMoveOpen] = useState<boolean | null>(null);
 
   const hoodBySlug = useMemo(() => new Map((hoods ?? []).map((h) => [h.slug, h])), [hoods]);
   const chatHoods = useMemo<ChatNeighborhood[]>(
@@ -360,7 +363,14 @@ export function LandingHome() {
   ];
 
   return (
-    <div className={cn("lh-stage", zoom < 5 && "lh-globe", historyOpen && "lh-history-open")}>
+    <div
+      className={cn(
+        "lh-stage",
+        zoom < 5 && "lh-globe",
+        historyOpen && "lh-history-open",
+        moveOpen && "lh-move-open",
+      )}
+    >
       <LandingMap
         world
         layers={layers}
@@ -370,7 +380,7 @@ export function LandingHome() {
           setArea(b);
           setZoom(z);
         }}
-        padding={{ top: 56, bottom: 220, right: historyOpen ? 352 : 0 }}
+        padding={{ top: 56, bottom: 220, right: historyOpen ? 352 : 0, left: moveOpen ? 372 : 0 }}
         label="Your move on a map"
         className="absolute inset-0"
       >
@@ -425,6 +435,8 @@ export function LandingHome() {
       >
         <History size={16} /> Chats
       </button>
+
+      <MovePanel open={moveOpen} onOpenChange={setMoveOpen} />
 
       {/* Hero over the globe */}
       <ChatDock

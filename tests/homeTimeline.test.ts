@@ -235,8 +235,8 @@ describe("pickSteps", () => {
       ).toEqual(["moverQuotes"]);
     });
 
-    test("no mover quotes when the feature isn't there or they asked already", () => {
-      expect(ids("moving_in", base(5, { movers: null }))).not.toContain("moverQuotes");
+    test("no mover quotes once they asked, or when it wasn't read", () => {
+      expect(ids("moving_in", base(5, { movers: undefined }))).not.toContain("moverQuotes");
       expect(ids("moving_in", base(5, { movers: { requested: true } }))).not.toContain(
         "moverQuotes",
       );
@@ -277,7 +277,7 @@ describe("pickSteps", () => {
         crew: { optedIn: false, canJoin: false },
         unit: true,
         rooms: 2,
-        movers: null,
+        movers: { requested: true },
       });
       expect(ids("moving_in", i)).toEqual(["setUpProfile"]);
     });
@@ -294,7 +294,7 @@ describe("pickSteps", () => {
     const { nextStep, alsoSteps } = pickSteps("settling_in", i);
     expect(nextStep).toMatchObject({
       id: "checkIn",
-      title: "Week 3 check-in",
+      title: "This week's check-in",
       reason: "2 weeks in: 2 events and 1 Group. Your check-in is ready.",
       link: { to: "journeys" },
     });
@@ -482,6 +482,7 @@ describe("home.timeline", () => {
       reminders: [],
       chatPlans: [],
       proposals: [],
+      moveRequests: [],
     };
     return tables;
   }
@@ -551,8 +552,18 @@ describe("home.timeline", () => {
       listingTitle: "Rental a",
     });
     expect(t.moveIn).toMatchObject({ days: 12, from: "place" });
-    expect(t.nextStep?.id).toBe("joinCrew");
-    expect(t.alsoSteps.map((s) => s.id)).toEqual(["planUnit", "addRoom"]);
+    expect(t.nextStep).toMatchObject({
+      id: "moverQuotes",
+      reason: "Move-in is in 12 days and you haven't asked movers for quotes.",
+    });
+    expect(t.alsoSteps.map((s) => s.id)).toEqual(["joinCrew", "planUnit", "addRoom"]);
+
+    tables.moveRequests = [
+      { _id: "moveRequests:1", userId: "users:maya", requestedAt: 1, date: day(12) },
+      // Zed's request never counts for Maya.
+    ];
+    const asked = await timeline(fakeCtx(tables), "maya");
+    expect(asked.nextStep?.id).toBe("joinCrew");
 
     const z = await timeline(fakeCtx(tables), "zed");
     expect(z.stage).toBe("moving_out");

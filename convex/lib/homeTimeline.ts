@@ -199,8 +199,8 @@ export type StepInput = StageInput & {
   rooms?: number;
   /** Whether the person has a 3D unit of their place. */
   unit?: boolean;
-  /** Mover quotes (#28): null when this deployment doesn't have them. */
-  movers?: { requested: boolean } | null;
+  /** Mover quotes (#28): whether they've asked movers for quotes. */
+  movers?: { requested: boolean };
   /** This week's check-in, once written. */
   checkIn?: { text: string; week: number } | null;
   items?: { total: number; unlisted: number };
@@ -369,7 +369,7 @@ const checkIn: Rule = (i) =>
   i.checkIn
     ? {
         id: "checkIn",
-        title: `Week ${i.checkIn.week} check-in`,
+        title: "This week's check-in",
         reason: i.checkIn.text,
         action: "See check-in",
         link: { to: "journeys" },
