@@ -197,9 +197,17 @@ export function namedNeighborhoods(question: string): NeighborhoodSlug[] {
   if (slugs.size < 2) {
     const gap = (x: Found, y: Found) =>
       x.end <= y.start ? text.slice(x.end, y.start) : text.slice(y.end, x.start);
-    const joined = (k: Found) => kept.some((o) => o !== k && JOINER.test(gap(k, o)));
-    const weak = kept.filter((k) => k.weak && !slugs.has(k.slug));
-    const ranked = [...weak.filter(joined), ...weak.filter((k) => !joined(k))];
+    // 0: joined by a word ("mission or noe"), 1: only by a comma or space, 2: not joined.
+    const join = (k: Found) =>
+      Math.min(
+        2,
+        ...kept
+          .filter((o) => o !== k && JOINER.test(gap(k, o)))
+          .map((o) => (/\p{L}/u.test(gap(k, o).replace(/\bthe\b/i, "")) ? 0 : 1)),
+      );
+    const ranked = kept
+      .filter((k) => k.weak && !slugs.has(k.slug))
+      .sort((x, y) => join(x) - join(y));
     for (const k of ranked) {
       if (slugs.size >= 2) break;
       if (slugs.has(k.slug)) continue;

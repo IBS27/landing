@@ -121,6 +121,15 @@ describe("namedNeighborhoods: everyday words", () => {
       "mission",
       "marina",
     ]);
+    // A word joining two names beats a comma: "sunset, mission" isn't the pair.
+    expect(namedNeighborhoods("Where can I watch the sunset, mission or Noe?")).toEqual([
+      "mission",
+      "noe-valley",
+    ]);
+    expect(namedNeighborhoods("Where can I watch the sunset, mission or marina?")).toEqual([
+      "mission",
+      "marina",
+    ]);
     expect(namedNeighborhoods("mission or noe? I like sunset walks")).toEqual([
       "mission",
       "noe-valley",
