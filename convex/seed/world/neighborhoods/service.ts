@@ -15,50 +15,121 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
     title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
     publisher: "BART",
     snippet: "1965220,25:09:00,25:10:00,M16-1,14,,,,",
-    fetchedAt: 1794534386380,
+    fetchedAt: 1794535193975,
+  },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:11:00,25:11:00,M20-1,15,,,,": {
+    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+    title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+    publisher: "BART",
+    snippet: "1965220,25:11:00,25:11:00,M20-1,15,,,,",
+    fetchedAt: 1794535193975,
   },
   "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:13:00,25:13:00,M30-1,16,,,,": {
     url: "https://www.bart.gov/dev/schedules/google_transit.zip",
     title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
     publisher: "BART",
     snippet: "1965220,25:13:00,25:13:00,M30-1,16,,,,",
-    fetchedAt: 1794534386380,
+    fetchedAt: 1794535193975,
   },
   "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:14:00,25:15:00,M40-1,17,,,,": {
     url: "https://www.bart.gov/dev/schedules/google_transit.zip",
     title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
     publisher: "BART",
     snippet: "1965220,25:14:00,25:15:00,M40-1,17,,,,",
-    fetchedAt: 1794534386380,
+    fetchedAt: 1794535193975,
   },
   "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:17:00,25:17:00,M50-1,18,,,,": {
     url: "https://www.bart.gov/dev/schedules/google_transit.zip",
     title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
     publisher: "BART",
     snippet: "1965220,25:17:00,25:17:00,M50-1,18,,,,",
-    fetchedAt: 1794534386380,
+    fetchedAt: 1794535193975,
   },
   "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:19:00,25:19:00,M60-1,19,,,,": {
     url: "https://www.bart.gov/dev/schedules/google_transit.zip",
     title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
     publisher: "BART",
     snippet: "1965220,25:19:00,25:19:00,M60-1,19,,,,",
-    fetchedAt: 1794534386380,
+    fetchedAt: 1794535193975,
   },
   "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:21:00,25:22:00,M70-1,20,,,,": {
     url: "https://www.bart.gov/dev/schedules/google_transit.zip",
     title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
     publisher: "BART",
     snippet: "1965220,25:21:00,25:22:00,M70-1,20,,,,",
-    fetchedAt: 1794534386380,
+    fetchedAt: 1794535193975,
   },
   "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:24:00,25:24:00,M80-1,21,,,,": {
     url: "https://www.bart.gov/dev/schedules/google_transit.zip",
     title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
     publisher: "BART",
     snippet: "1965220,25:24:00,25:24:00,M80-1,21,,,,",
-    fetchedAt: 1794534386380,
+    fetchedAt: 1794535193975,
   },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:17:00,24:17:00,M80-2,5,Antioch,,,":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      publisher: "BART",
+      snippet: "1965297,24:17:00,24:17:00,M80-2,5,Antioch,,,",
+      fetchedAt: 1794535193975,
+    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:19:00,24:19:00,M70-2,6,Antioch,,,":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      publisher: "BART",
+      snippet: "1965297,24:19:00,24:19:00,M70-2,6,Antioch,,,",
+      fetchedAt: 1794535193975,
+    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:22:00,24:22:00,M60-2,7,Antioch,,,":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      publisher: "BART",
+      snippet: "1965297,24:22:00,24:22:00,M60-2,7,Antioch,,,",
+      fetchedAt: 1794535193975,
+    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:24:00,24:24:00,M50-2,8,Antioch,,,":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      publisher: "BART",
+      snippet: "1965297,24:24:00,24:24:00,M50-2,8,Antioch,,,",
+      fetchedAt: 1794535193975,
+    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:26:00,24:26:00,M40-2,9,Antioch,,,":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      publisher: "BART",
+      snippet: "1965297,24:26:00,24:26:00,M40-2,9,Antioch,,,",
+      fetchedAt: 1794535193975,
+    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:28:00,24:28:00,M30-2,10,Antioch,,,":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      publisher: "BART",
+      snippet: "1965297,24:28:00,24:28:00,M30-2,10,Antioch,,,",
+      fetchedAt: 1794535193975,
+    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:29:00,24:30:00,M20-2,11,Antioch,,,":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      publisher: "BART",
+      snippet: "1965297,24:29:00,24:30:00,M20-2,11,Antioch,,,",
+      fetchedAt: 1794535193975,
+    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:31:00,24:31:00,M16-2,12,Antioch,,,":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      publisher: "BART",
+      snippet: "1965297,24:31:00,24:31:00,M16-2,12,Antioch,,,",
+      fetchedAt: 1794535193975,
+    },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
@@ -66,16 +137,47 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#14,SFMTA,14,MISSION,http://www.sfmta.com/14,24 hour service daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098087,25:30:00,25:30:00,5592,37,,6.2996578,1":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
-      snippet:
-        "14,SFMTA,14,MISSION,http://www.sfmta.com/14,24 hour service daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      snippet: "12098087,25:30:00,25:30:00,5592,37,,6.2996578,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098088,25:30:09,25:30:09,5597,27,,4.5907152,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12098088,25:30:09,25:30:09,5597,27,,4.5907152,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098089,25:30:00,25:30:00,5552,17,,2.5932208,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12098089,25:30:00,25:30:00,5552,17,,2.5932208,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098090,25:30:04,25:30:04,5532,6,,0.7241389,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12098090,25:30:04,25:30:04,5532,6,,0.7241389,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098090,25:31:09,25:31:09,5534,7,,0.880837,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12098090,25:31:09,25:31:09,5534,7,,0.880837,0",
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#14R,SFMTA,14R,MISSION RAPID,http://www.sfmta.com/14R,5am-10pm daily,3,BF2B45 ,FFFFFF,":
     {
@@ -84,7 +186,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "14R,SFMTA,14R,MISSION RAPID,http://www.sfmta.com/14R,5am-10pm daily,3,BF2B45 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#15,SFMTA,15,BAYVIEW HUNTERS POINT EXPRESS,http://www.sfmta.com/15,Weekdays 5am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,":
     {
@@ -93,7 +195,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "15,SFMTA,15,BAYVIEW HUNTERS POINT EXPRESS,http://www.sfmta.com/15,Weekdays 5am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#18,SFMTA,18,46TH AVENUE,http://www.sfmta.com/18,6am-10pm daily,3,005B95 ,FFFFFF,":
     {
@@ -101,7 +203,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "18,SFMTA,18,46TH AVENUE,http://www.sfmta.com/18,6am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#19,SFMTA,19,POLK,http://www.sfmta.com/19,5am-10pm daily,3,005B95 ,FFFFFF,":
     {
@@ -109,16 +211,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "19,SFMTA,19,POLK,http://www.sfmta.com/19,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
-    },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1X,SFMTA,1X,CALIFORNIA EXPRESS,http://www.sfmta.com/1X,Weekday peak hours only,3,BF2B45 ,FFFFFF,":
-    {
-      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
-      publisher: "SFMTA",
-      snippet:
-        "1X,SFMTA,1X,CALIFORNIA EXPRESS,http://www.sfmta.com/1X,Weekday peak hours only,3,BF2B45 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#2,SFMTA,2,SUTTER,http://www.sfmta.com/2,6:30am-7pm daily,3,005B95 ,FFFFFF,":
     {
@@ -126,42 +219,175 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "2,SFMTA,2,SUTTER,http://www.sfmta.com/2,6:30am-7pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#22,SFMTA,22,FILLMORE,http://www.sfmta.com/22,24 hour service daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064722,25:30:00,25:30:00,7765,43,,5.9602821,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12064722,25:30:00,25:30:00,7765,43,,5.9602821,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:30:51,25:30:51,4637,15,,1.6068415,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12064723,25:30:51,25:30:51,4637,15,,1.6068415,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:33:00,25:33:00,4641,17,,1.8944736,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12064723,25:33:00,25:33:00,4641,17,,1.8944736,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:34:00,25:34:00,4615,18,,1.9956456,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12064723,25:34:00,25:34:00,4615,18,,1.9956456,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:39:02,25:39:02,4617,23,,2.5218126,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12064723,25:39:02,25:39:02,4617,23,,2.5218126,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:43:12,25:43:12,4005,28,,3.0886086,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12064723,25:43:12,25:43:12,4005,28,,3.0886086,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:46:18,25:46:18,3285,31,,3.5652681,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12064723,25:46:18,25:46:18,3285,31,,3.5652681,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:57:07,25:57:07,7866,40,,5.4138267,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12064723,25:57:07,25:57:07,7866,40,,5.4138267,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064724,26:20:00,26:20:00,4603,1,,0.0,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12064724,26:20:00,26:20:00,4603,1,,0.0,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066112,27:26:00,27:26:00,4435,1,,0.0,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12066112,27:26:00,27:26:00,4435,1,,0.0,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066112,27:26:58,27:26:58,4422,2,,0.1467991,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12066112,27:26:58,27:26:58,4422,2,,0.1467991,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:00:50,27:00:50,4426,5,,0.7253621,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12066113,27:00:50,27:00:50,4426,5,,0.7253621,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:01:45,27:01:45,4432,6,,0.8539975,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12066113,27:01:45,27:01:45,4432,6,,0.8539975,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:04:02,27:04:02,4330,8,,1.1399355,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12066113,27:04:02,27:04:02,4330,8,,1.1399355,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:10:21,27:10:21,4321,16,,2.0486084,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12066113,27:10:21,27:10:21,4321,16,,2.0486084,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:18:21,27:18:21,5738,27,,3.1562703,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12066113,27:18:21,27:18:21,5738,27,,3.1562703,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:22:00,27:22:00,3541,31,,3.6477407,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12066113,27:22:00,27:22:00,3541,31,,3.6477407,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:27:00,27:27:00,4148,41,,4.6830859,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12066113,27:27:00,27:27:00,4148,41,,4.6830859,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066815,25:32:00,25:32:00,7917,1,,0.0,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12066815,25:32:00,25:32:00,7917,1,,0.0,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066815,25:42:00,25:42:00,8000,2,,3.9250904,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12066815,25:42:00,25:42:00,8000,2,,3.9250904,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#27,SFMTA,27,BRYANT,http://www.sfmta.com/27,5am-10pm daily,3,005B95 ,FFFFFF,":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
-      snippet:
-        "22,SFMTA,22,FILLMORE,http://www.sfmta.com/22,24 hour service daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
-    },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#23,SFMTA,23,MONTEREY,http://www.sfmta.com/23,6am-10pm daily,3,005B95 ,FFFFFF,":
-    {
-      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
-      publisher: "SFMTA",
-      snippet: "23,SFMTA,23,MONTEREY,http://www.sfmta.com/23,6am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
-    },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#24,SFMTA,24,DIVISADERO,http://www.sfmta.com/24,5am-12:30am daily (Between Sutter St. and Bayshore Bl. 24 hours daily),3,005B95 ,FFFFFF,":
-    {
-      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
-      publisher: "SFMTA",
-      snippet:
-        "24,SFMTA,24,DIVISADERO,http://www.sfmta.com/24,5am-12:30am daily (Between Sutter St. and Bayshore Bl. 24 hours daily),3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
-    },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#25,SFMTA,25,TREASURE ISLAND,http://www.sfmta.com/25,24 hour service daily,3,005B95 ,FFFFFF,":
-    {
-      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
-      publisher: "SFMTA",
-      snippet:
-        "25,SFMTA,25,TREASURE ISLAND,http://www.sfmta.com/25,24 hour service daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      snippet: "27,SFMTA,27,BRYANT,http://www.sfmta.com/27,5am-10pm daily,3,005B95 ,FFFFFF,",
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,":
     {
@@ -169,7 +395,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#30,SFMTA,30,STOCKTON,http://www.sfmta.com/30,Weekdays 5am-12am Weekends 6am-12am,3,005B95 ,FFFFFF,":
     {
@@ -178,7 +404,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "30,SFMTA,30,STOCKTON,http://www.sfmta.com/30,Weekdays 5am-12am Weekends 6am-12am,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#31,SFMTA,31,BALBOA,http://www.sfmta.com/31,5am-10pm daily,3,005B95 ,FFFFFF,":
     {
@@ -186,7 +412,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "31,SFMTA,31,BALBOA,http://www.sfmta.com/31,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#33,SFMTA,33,ASHBURY-18TH ST,http://www.sfmta.com/33,5am-10pm daily,3,005B95 ,FFFFFF,":
     {
@@ -195,7 +421,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "33,SFMTA,33,ASHBURY-18TH ST,http://www.sfmta.com/33,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#35,SFMTA,35,EUREKA,http://www.sfmta.com/35,7am-9pm daily,3,005B95 ,FFFFFF,":
     {
@@ -203,7 +429,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "35,SFMTA,35,EUREKA,http://www.sfmta.com/35,7am-9pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#36,SFMTA,36,TERESITA,http://www.sfmta.com/36,Weekdays 6am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,":
     {
@@ -212,7 +438,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "36,SFMTA,36,TERESITA,http://www.sfmta.com/36,Weekdays 6am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#37,SFMTA,37,CORBETT,http://www.sfmta.com/37,Weekdays 6am-9pm Weekends 9am-9pm,3,005B95 ,FFFFFF,":
     {
@@ -221,7 +447,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "37,SFMTA,37,CORBETT,http://www.sfmta.com/37,Weekdays 6am-9pm Weekends 9am-9pm,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38,SFMTA,38,GEARY,http://www.sfmta.com/38,24 hour service daily,3,005B95 ,FFFFFF,":
     {
@@ -229,7 +455,63 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "38,SFMTA,38,GEARY,http://www.sfmta.com/38,24 hour service daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071697,25:30:33,25:30:33,4259,27,,4.1592365,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12071697,25:30:33,25:30:33,4259,27,,4.1592365,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071697,25:32:00,25:32:00,4755,28,,4.441199,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12071697,25:32:00,25:32:00,4755,28,,4.441199,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:35:00,25:35:00,7916,1,,0.0,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12071698,25:35:00,25:35:00,7916,1,,0.0,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:41:00,25:41:00,4757,7,,0.8888597,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12071698,25:41:00,25:41:00,4757,7,,0.8888597,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:46:00,25:46:00,4768,12,,1.6177254,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12071698,25:46:00,25:46:00,4768,12,,1.6177254,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:47:17,25:47:17,4298,13,,1.8123337,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12071698,25:47:17,25:47:17,4298,13,,1.8123337,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:52:45,25:52:45,4289,19,,2.8047111,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12071698,25:52:45,25:52:45,4289,19,,2.8047111,0",
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38R,SFMTA,38R,GEARY RAPID,http://www.sfmta.com/38R,Weekdays 5am-10pm Weekends 6am-9pm,3,BF2B45 ,FFFFFF,":
     {
@@ -238,15 +520,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "38R,SFMTA,38R,GEARY RAPID,http://www.sfmta.com/38R,Weekdays 5am-10pm Weekends 6am-9pm,3,BF2B45 ,FFFFFF,",
-      fetchedAt: 1794534386832,
-    },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#39,SFMTA,39,COIT,http://www.sfmta.com/39,9am-7pm daily,3,005B95 ,FFFFFF,":
-    {
-      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
-      publisher: "SFMTA",
-      snippet: "39,SFMTA,39,COIT,http://www.sfmta.com/39,9am-7pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,":
     {
@@ -255,7 +529,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#44,SFMTA,44,O'SHAUGHNESSY,http://www.sfmta.com/44,5am-midnight daily (East of Glen Park BART 24 hours daily),3,005B95 ,FFFFFF,":
     {
@@ -264,7 +538,47 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "44,SFMTA,44,O'SHAUGHNESSY,http://www.sfmta.com/44,5am-midnight daily (East of Glen Park BART 24 hours daily),3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:22:00,27:22:00,3696,1,,0.0,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12074558,27:22:00,27:22:00,3696,1,,0.0,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:23:24,27:23:24,5330,2,,0.2816487,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12074558,27:23:24,27:23:24,5330,2,,0.2816487,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:25:00,27:25:00,6415,4,,0.5618627,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12074558,27:25:00,27:25:00,6415,4,,0.5618627,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:27:49,27:27:49,6399,8,,1.2207592,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12074558,27:27:49,27:27:49,6399,8,,1.2207592,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074559,27:01:24,27:01:24,6397,14,,2.0957776,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12074559,27:01:24,27:01:24,6397,14,,2.0957776,0",
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#45,SFMTA,45,UNION-STOCKTON,http://www.sfmta.com/45,5am-10pm daily,3,005B95 ,FFFFFF,":
     {
@@ -273,7 +587,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "45,SFMTA,45,UNION-STOCKTON,http://www.sfmta.com/45,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#48,SFMTA,48,QUINTARA-24TH STREET,http://www.sfmta.com/48,5am-midnight daily (East of Castro St. 24 hours daily),3,005B95 ,FFFFFF,":
     {
@@ -282,7 +596,39 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "48,SFMTA,48,QUINTARA-24TH STREET,http://www.sfmta.com/48,5am-midnight daily (East of Castro St. 24 hours daily),3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:02:00,27:02:00,3435,1,,0.0,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12076060,27:02:00,27:02:00,3435,1,,0.0,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:03:54,27:03:54,7524,3,,0.413545,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12076060,27:03:54,27:03:54,7524,3,,0.413545,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:08:56,27:08:56,3453,13,,1.4222223,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12076060,27:08:56,27:08:56,3453,13,,1.4222223,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:17:07,27:17:07,3466,22,,2.6328152,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12076060,27:17:07,27:17:07,3466,22,,2.6328152,0",
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,":
     {
@@ -291,16 +637,63 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5,SFMTA,5,FULTON,http://www.sfmta.com/5,5am-1am daily (West of Civic Center 24 hours daily),3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:30:33,25:30:33,5395,6,,1.2559085,0":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
-      snippet:
-        "5,SFMTA,5,FULTON,http://www.sfmta.com/5,5am-1am daily (West of Civic Center 24 hours daily),3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      snippet: "12055191,25:30:33,25:30:33,5395,6,,1.2559085,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:33:00,25:33:00,5404,8,,1.5340282,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12055191,25:33:00,25:33:00,5404,8,,1.5340282,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:40:21,25:40:21,5384,14,,2.6922472,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12055191,25:40:21,25:40:21,5384,14,,2.6922472,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:43:50,25:43:50,4236,18,,3.4901873,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12055191,25:43:50,25:43:50,4236,18,,3.4901873,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:44:38,25:44:38,4223,19,,3.6926135,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12055191,25:44:38,25:44:38,4223,19,,3.6926135,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:47:39,25:47:39,4231,24,,4.4504313,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12055191,25:47:39,25:47:39,4231,24,,4.4504313,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055192,25:54:00,25:54:00,3161,1,,0.0,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12055192,25:54:00,25:54:00,3161,1,,0.0,1",
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#52,SFMTA,52,EXCELSIOR,http://www.sfmta.com/52,Weekdays 6am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,":
     {
@@ -309,7 +702,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "52,SFMTA,52,EXCELSIOR,http://www.sfmta.com/52,Weekdays 6am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#54,SFMTA,54,FELTON,http://www.sfmta.com/54,5am-10pm daily,3,005B95 ,FFFFFF,":
     {
@@ -317,7 +710,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "54,SFMTA,54,FELTON,http://www.sfmta.com/54,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#55,SFMTA,55,DOGPATCH,http://www.sfmta.com/55,5am-10pm daily,3,005B95 ,FFFFFF,":
     {
@@ -325,7 +718,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "55,SFMTA,55,DOGPATCH,http://www.sfmta.com/55,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#56,SFMTA,56,RUTLAND,http://www.sfmta.com/56,7am-9pm daily,3,005B95 ,FFFFFF,":
     {
@@ -333,7 +726,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "56,SFMTA,56,RUTLAND,http://www.sfmta.com/56,7am-9pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#57,SFMTA,57,PARKMERCED,http://www.sfmta.com/57,5am-10pm daily,3,005B95 ,FFFFFF,":
     {
@@ -341,16 +734,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "57,SFMTA,57,PARKMERCED,http://www.sfmta.com/57,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
-    },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#58,SFMTA,58,LAKE MERCED,http://www.sfmta.com/58,Weekdays 5am-10pm Weekends 6am-10pm,3,005B95 ,FFFFFF,":
-    {
-      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
-      publisher: "SFMTA",
-      snippet:
-        "58,SFMTA,58,LAKE MERCED,http://www.sfmta.com/58,Weekdays 5am-10pm Weekends 6am-10pm,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5R,SFMTA,5R,FULTON RAPID,http://www.sfmta.com/5R,Weekdays 7am-7pm,3,BF2B45 ,FFFFFF,":
     {
@@ -359,7 +743,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "5R,SFMTA,5R,FULTON RAPID,http://www.sfmta.com/5R,Weekdays 7am-7pm,3,BF2B45 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#6,SFMTA,6,HAYES-PARNASSUS,http://www.sfmta.com/6,5am-10pm daily,3,005B95 ,FFFFFF,":
     {
@@ -367,7 +751,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "6,SFMTA,6,HAYES-PARNASSUS,http://www.sfmta.com/6,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#67,SFMTA,67,BERNAL HEIGHTS,http://www.sfmta.com/67,Weekdays 5am-10pm Weekends 6am-10pm,3,005B95 ,FFFFFF,":
     {
@@ -376,7 +760,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "67,SFMTA,67,BERNAL HEIGHTS,http://www.sfmta.com/67,Weekdays 5am-10pm Weekends 6am-10pm,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7,SFMTA,7,HAIGHT-NORIEGA,http://www.sfmta.com/7,5am-10pm daily,3,005B95 ,FFFFFF,":
     {
@@ -384,7 +768,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "7,SFMTA,7,HAIGHT-NORIEGA,http://www.sfmta.com/7,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#8,SFMTA,8,BAYSHORE,http://www.sfmta.com/8,5am-12 midnight daily,3,005B95 ,FFFFFF,":
     {
@@ -392,7 +776,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "8,SFMTA,8,BAYSHORE,http://www.sfmta.com/8,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#9,SFMTA,9,SAN BRUNO,http://www.sfmta.com/9,5am-12 midnight daily,3,005B95 ,FFFFFF,":
     {
@@ -400,34 +784,255 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "9,SFMTA,9,SAN BRUNO,http://www.sfmta.com/9,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#90,SFMTA,90,SAN BRUNO OWL,http://www.sfmta.com/90,12 midnight-5am daily,3,666666 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:47:00,26:47:00,7476,1,,0.0,1":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
-      snippet:
-        "90,SFMTA,90,SAN BRUNO OWL,http://www.sfmta.com/90,12 midnight-5am daily,3,666666 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      snippet: "12080176,26:47:00,26:47:00,7476,1,,0.0,1",
+      fetchedAt: 1794535194230,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:50:39,26:50:39,8098,4,,0.5688494,0":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
-      snippet:
-        "91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      snippet: "12080176,26:50:39,26:50:39,8098,4,,0.5688494,0",
+      fetchedAt: 1794535194230,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#9R,SFMTA,9R,SAN BRUNO RAPID,http://www.sfmta.com/9R,Weekdays 7am-6pm,3,BF2B45 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:53:05,26:53:05,8100,6,,0.9473609,0":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
-      snippet:
-        "9R,SFMTA,9R,SAN BRUNO RAPID,http://www.sfmta.com/9R,Weekdays 7am-6pm,3,BF2B45 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      snippet: "12080176,26:53:05,26:53:05,8100,6,,0.9473609,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:54:46,26:54:46,8101,7,,1.2098055,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080176,26:54:46,26:54:46,8101,7,,1.2098055,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:56:00,26:56:00,8102,8,,1.4059226,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080176,26:56:00,26:56:00,8102,8,,1.4059226,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:58:10,26:58:10,8104,10,,1.7334176,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080176,26:58:10,26:58:10,8104,10,,1.7334176,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:00:00,27:00:00,8105,11,,2.0783336,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080176,27:00:00,27:00:00,8105,11,,2.0783336,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:01:43,27:01:43,3243,12,,2.3740143,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080176,27:01:43,27:01:43,3243,12,,2.3740143,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:13:21,27:13:21,3768,23,,4.7671211,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080176,27:13:21,27:13:21,3768,23,,4.7671211,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:15:13,27:15:13,3771,26,,5.2636441,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080176,27:15:13,27:15:13,3771,26,,5.2636441,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:19:30,27:19:30,6369,35,,6.6507798,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080176,27:19:30,27:19:30,6369,35,,6.6507798,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:05:00,27:05:00,390,1,,0.0,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080245,27:05:00,27:05:00,390,1,,0.0,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:07:27,27:07:27,3355,3,,0.7075418,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080245,27:07:27,27:07:27,3355,3,,0.7075418,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:11:36,27:11:36,3383,8,,1.8989683,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080245,27:11:36,27:11:36,3383,8,,1.8989683,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:15:42,27:15:42,7758,14,,3.0763109,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080245,27:15:42,27:15:42,7758,14,,3.0763109,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:18:55,27:18:55,5950,15,,4.003325,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080245,27:18:55,27:18:55,5950,15,,4.003325,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:29:01,27:29:01,6181,19,,7.3989051,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080245,27:29:01,27:29:01,6181,19,,7.3989051,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:33:00,26:33:00,6800,25,,8.7855352,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080246,26:33:00,26:33:00,6800,25,,8.7855352,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:36:17,26:36:17,4100,30,,9.389843,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080246,26:36:17,26:36:17,4100,30,,9.389843,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:38:45,26:38:45,4105,34,,9.842496,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080246,26:38:45,26:38:45,4105,34,,9.842496,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:45:00,26:45:00,6524,40,,10.6913145,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080246,26:45:00,26:45:00,6524,40,,10.6913145,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:47:35,26:47:35,3161,42,,11.0364319,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080246,26:47:35,26:47:35,3161,42,,11.0364319,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:54:00,26:54:00,3164,46,,11.8639132,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080246,26:54:00,26:54:00,3164,46,,11.8639132,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:59:45,26:59:45,7382,50,,12.9333048,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080246,26:59:45,26:59:45,7382,50,,12.9333048,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:03:39,27:03:39,7378,53,,13.9774791,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080246,27:03:39,27:03:39,7378,53,,13.9774791,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:16:13,27:16:13,3792,68,,17.1840257,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080246,27:16:13,27:16:13,3792,68,,17.1840257,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:19:53,27:19:53,7026,76,,18.1016956,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080246,27:19:53,27:19:53,7026,76,,18.1016956,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:24:38,27:24:38,7300,79,,19.3583322,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080246,27:24:38,27:24:38,7300,79,,19.3583322,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:29:00,27:29:00,4886,86,,20.4562367,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080246,27:29:00,27:29:00,4886,86,,20.4562367,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080247,27:02:59,27:02:59,4881,89,,21.0981977,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080247,27:02:59,27:02:59,4881,89,,21.0981977,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080259,27:13:00,27:13:00,6523,58,,12.845818,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12080259,27:13:00,27:13:00,6523,58,,12.845818,1",
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#J,SFMTA,J,CHURCH,http://www.sfmta.com/J,5am-12 midnight daily,0,A96614 ,FFFFFF,":
     {
@@ -435,16 +1040,87 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "J,SFMTA,J,CHURCH,http://www.sfmta.com/J,5am-12 midnight daily,0,A96614 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#LOWL,SFMTA,LOWL,OWL TARAVAL,http://www.sfmta.com/LOWL,10pm-5am nightly,3,666666 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:31:32,25:31:32,6008,32,,6.3901605,0":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
-      snippet:
-        "LOWL,SFMTA,LOWL,OWL TARAVAL,http://www.sfmta.com/LOWL,10pm-5am nightly,3,666666 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      snippet: "12084110,25:31:32,25:31:32,6008,32,,6.3901605,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:32:51,25:32:51,6015,35,,6.7985353,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12084110,25:32:51,25:32:51,6015,35,,6.7985353,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:33:41,25:33:41,6937,36,,7.0576318,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12084110,25:33:41,25:33:41,6937,36,,7.0576318,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:39:34,25:39:34,6616,42,,8.7417899,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12084110,25:39:34,25:39:34,6616,42,,8.7417899,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:30:00,25:30:00,4726,11,,1.8031941,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12084111,25:30:00,25:30:00,4726,11,,1.8031941,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:36:36,25:36:36,5694,17,,2.7468561,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12084111,25:36:36,25:36:36,5694,17,,2.7468561,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:37:45,25:37:45,5655,18,,2.9126192,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12084111,25:37:45,25:37:45,5655,18,,2.9126192,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:44:00,25:44:00,5696,23,,3.7809068,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12084111,25:44:00,25:44:00,5696,23,,3.7809068,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:47:31,25:47:31,5659,26,,4.3100313,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12084111,25:47:31,25:47:31,5659,26,,4.3100313,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084112,25:45:00,25:45:00,5184,1,,0.0,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12084112,25:45:00,25:45:00,5184,1,,0.0,1",
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#M,SFMTA,M,OCEAN VIEW,http://www.sfmta.com/M,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,008547 ,FFFFFF,":
     {
@@ -453,7 +1129,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "M,SFMTA,M,OCEAN VIEW,http://www.sfmta.com/M,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,008547 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#N,SFMTA,N,JUDAH,http://www.sfmta.com/N,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,005B95 ,FFFFFF,":
     {
@@ -462,16 +1138,71 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "N,SFMTA,N,JUDAH,http://www.sfmta.com/N,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,005B95 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#NOWL,SFMTA,NOWL,OWL JUDAH,http://www.sfmta.com/NOWL,12 midnight-5am nightly,3,666666 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:30:00,25:30:00,7957,1,,0.0,1":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
-      snippet:
-        "NOWL,SFMTA,NOWL,OWL JUDAH,http://www.sfmta.com/NOWL,12 midnight-5am nightly,3,666666 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      snippet: "12085750,25:30:00,25:30:00,7957,1,,0.0,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:33:54,25:33:54,7447,4,,1.0050929,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12085750,25:33:54,25:33:54,7447,4,,1.0050929,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:44:12,25:44:12,5655,13,,2.9175299,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12085750,25:44:12,25:44:12,5655,13,,2.9175299,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:50:00,25:50:00,5696,17,,3.7858171,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12085750,25:50:00,25:50:00,5696,17,,3.7858171,1",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:52:56,25:52:56,5659,20,,4.3149415,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12085750,25:52:56,25:52:56,5659,20,,4.3149415,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:57:50,25:57:50,4960,24,,5.0867727,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12085750,25:57:50,25:57:50,4960,24,,5.0867727,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,26:04:02,26:04:02,3914,32,,6.4129684,0":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12085750,26:04:02,26:04:02,3914,32,,6.4129684,0",
+      fetchedAt: 1794535194230,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,26:11:00,26:11:00,5199,41,,7.9062754,1":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      publisher: "SFMTA",
+      snippet: "12085750,26:11:00,26:11:00,5199,41,,7.9062754,1",
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#PH,SFMTA,PH,POWELL-HYDE CABLE CAR,http://www.sfmta.com/PH,7 am-10 pm daily,5,B49A36 ,000000,":
     {
@@ -480,7 +1211,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "PH,SFMTA,PH,POWELL-HYDE CABLE CAR,http://www.sfmta.com/PH,7 am-10 pm daily,5,B49A36 ,000000,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#PM,SFMTA,PM,POWELL-MASON CABLE CAR,http://www.sfmta.com/PM,7 am-10 pm daily,5,B49A36 ,000000,":
     {
@@ -489,7 +1220,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       publisher: "SFMTA",
       snippet:
         "PM,SFMTA,PM,POWELL-MASON CABLE CAR,http://www.sfmta.com/PM,7 am-10 pm daily,5,B49A36 ,000000,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#T,SFMTA,T,THIRD,http://www.sfmta.com/T,Weekends 8 am-11:30 pm,0,BF2B45 ,FFFFFF,":
     {
@@ -497,7 +1228,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "T,SFMTA,T,THIRD,http://www.sfmta.com/T,Weekends 8 am-11:30 pm,0,BF2B45 ,FFFFFF,",
-      fetchedAt: 1794534386832,
+      fetchedAt: 1794535194230,
     },
   "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#173,24:42:00,24:42:00,70021,22,,0,0,75811.84903503713,1,,,,,1,1,,,,,,,,,,,":
     {
@@ -505,7 +1236,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "Caltrain GTFS schedule feed (stop_times.txt), schedule through 2027-01-31",
       publisher: "Caltrain",
       snippet: "173,24:42:00,24:42:00,70021,22,,0,0,75811.84903503713,1,,,,,1,1,,,,,,,,,,,",
-      fetchedAt: 1794534388597,
+      fetchedAt: 1794535195350,
     },
   "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#176,24:05:00,24:05:00,70012,1,,0,0,0,1,,,,,1,1,,,,,,,,,,,":
     {
@@ -513,7 +1244,15 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "Caltrain GTFS schedule feed (stop_times.txt), schedule through 2027-01-31",
       publisher: "Caltrain",
       snippet: "176,24:05:00,24:05:00,70012,1,,0,0,0,1,,,,,1,1,,,,,,,,,,,",
-      fetchedAt: 1794534388597,
+      fetchedAt: 1794535195350,
+    },
+  "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#176,24:10:00,24:10:00,70022,2,,0,0,2521.9493493333744,1,,,,,1,1,,,,,,,,,,,":
+    {
+      url: "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip",
+      title: "Caltrain GTFS schedule feed (stop_times.txt), schedule through 2027-01-31",
+      publisher: "Caltrain",
+      snippet: "176,24:10:00,24:10:00,70022,2,,0,0,2521.9493493333744,1,,,,,1,1,,,,,,,,,,,",
+      fetchedAt: 1794535195350,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Bayview%20Hunters%20Point\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Bayview Hunters Point","requests":"90"}]':
     {
@@ -521,7 +1260,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Bayview Hunters Point since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Bayview Hunters Point","requests":"90"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Bernal%20Heights\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Bernal Heights","requests":"38"}]':
     {
@@ -529,7 +1268,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Bernal Heights since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Bernal Heights","requests":"38"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Castro%2FUpper%20Market\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Castro/Upper Market","requests":"66"}]':
     {
@@ -537,7 +1276,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Castro/Upper Market since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Castro/Upper Market","requests":"66"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Chinatown\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Chinatown","requests":"18"}]':
     {
@@ -545,7 +1284,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Chinatown since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Chinatown","requests":"18"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Excelsior\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Excelsior","requests":"36"}]':
     {
@@ -553,7 +1292,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Excelsior since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Excelsior","requests":"36"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Financial%20District%2FSouth%20Beach\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Financial District/South Beach","requests":"88"}]':
     {
@@ -562,7 +1301,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
         "311 Cases: Streetlights requests in Financial District/South Beach since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Financial District/South Beach","requests":"88"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Glen%20Park\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Glen Park","requests":"19"}]':
     {
@@ -570,7 +1309,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Glen Park since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Glen Park","requests":"19"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Golden%20Gate%20Park\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Golden Gate Park","requests":"35"}]':
     {
@@ -578,7 +1317,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Golden Gate Park since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Golden Gate Park","requests":"35"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Haight%20Ashbury\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Haight Ashbury","requests":"21"}]':
     {
@@ -586,7 +1325,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Haight Ashbury since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Haight Ashbury","requests":"21"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Hayes%20Valley\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Hayes Valley","requests":"39"}]':
     {
@@ -594,7 +1333,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Hayes Valley since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Hayes Valley","requests":"39"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Inner%20Richmond\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Inner Richmond","requests":"19"}]':
     {
@@ -602,7 +1341,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Inner Richmond since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Inner Richmond","requests":"19"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Inner%20Sunset\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Inner Sunset","requests":"19"}]':
     {
@@ -610,7 +1349,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Inner Sunset since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Inner Sunset","requests":"19"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Japantown\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Japantown","requests":"7"}]':
     {
@@ -618,7 +1357,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Japantown since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Japantown","requests":"7"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Lakeshore\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Lakeshore","requests":"12"}]':
     {
@@ -626,7 +1365,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Lakeshore since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Lakeshore","requests":"12"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Lone%20Mountain%2FUSF\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Lone Mountain/USF","requests":"18"}]':
     {
@@ -634,7 +1373,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Lone Mountain/USF since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Lone Mountain/USF","requests":"18"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Marina\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Marina","requests":"25"}]':
     {
@@ -642,7 +1381,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Marina since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Marina","requests":"25"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'McLaren%20Park\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"McLaren Park","requests":"10"}]':
     {
@@ -650,7 +1389,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in McLaren Park since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"McLaren Park","requests":"10"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Mission\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Mission","requests":"140"}]':
     {
@@ -658,7 +1397,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Mission since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Mission","requests":"140"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Mission%20Bay\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Mission Bay","requests":"15"}]':
     {
@@ -666,7 +1405,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Mission Bay since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Mission Bay","requests":"15"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Nob%20Hill\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Nob Hill","requests":"32"}]':
     {
@@ -674,7 +1413,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Nob Hill since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Nob Hill","requests":"32"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Noe%20Valley\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Noe Valley","requests":"27"}]':
     {
@@ -682,7 +1421,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Noe Valley since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Noe Valley","requests":"27"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'North%20Beach\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"North Beach","requests":"25"}]':
     {
@@ -690,7 +1429,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in North Beach since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"North Beach","requests":"25"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Oceanview%2FMerced%2FIngleside\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Oceanview/Merced/Ingleside","requests":"33"}]':
     {
@@ -699,7 +1438,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
         "311 Cases: Streetlights requests in Oceanview/Merced/Ingleside since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Oceanview/Merced/Ingleside","requests":"33"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Outer%20Mission\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Outer Mission","requests":"36"}]':
     {
@@ -707,7 +1446,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Outer Mission since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Outer Mission","requests":"36"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Outer%20Richmond\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Outer Richmond","requests":"33"}]':
     {
@@ -715,7 +1454,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Outer Richmond since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Outer Richmond","requests":"33"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Pacific%20Heights\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Pacific Heights","requests":"15"}]':
     {
@@ -723,7 +1462,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Pacific Heights since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Pacific Heights","requests":"15"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Portola\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Portola","requests":"21"}]':
     {
@@ -731,7 +1470,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Portola since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Portola","requests":"21"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Potrero%20Hill\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Potrero Hill","requests":"21"}]':
     {
@@ -739,7 +1478,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Potrero Hill since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Potrero Hill","requests":"21"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Presidio\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Presidio","requests":"10"}]':
     {
@@ -747,7 +1486,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Presidio since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Presidio","requests":"10"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Presidio%20Heights\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Presidio Heights","requests":"11"}]':
     {
@@ -755,7 +1494,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Presidio Heights since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Presidio Heights","requests":"11"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Russian%20Hill\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Russian Hill","requests":"17"}]':
     {
@@ -763,7 +1502,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Russian Hill since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Russian Hill","requests":"17"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Seacliff\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Seacliff","requests":"4"}]':
     {
@@ -771,7 +1510,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Seacliff since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Seacliff","requests":"4"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'South%20of%20Market\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"South of Market","requests":"81"}]':
     {
@@ -779,7 +1518,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in South of Market since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"South of Market","requests":"81"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Sunset%2FParkside\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Sunset/Parkside","requests":"71"}]':
     {
@@ -787,7 +1526,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Sunset/Parkside since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Sunset/Parkside","requests":"71"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Tenderloin\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Tenderloin","requests":"50"}]':
     {
@@ -795,7 +1534,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Tenderloin since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Tenderloin","requests":"50"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Treasure%20Island\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Treasure Island","requests":"3"}]':
     {
@@ -803,7 +1542,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Treasure Island since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Treasure Island","requests":"3"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Twin%20Peaks\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Twin Peaks","requests":"5"}]':
     {
@@ -811,7 +1550,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Twin Peaks since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Twin Peaks","requests":"5"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Visitacion%20Valley\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Visitacion Valley","requests":"12"}]':
     {
@@ -819,7 +1558,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Visitacion Valley since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Visitacion Valley","requests":"12"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'West%20of%20Twin%20Peaks\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"West of Twin Peaks","requests":"158"}]':
     {
@@ -827,7 +1566,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in West of Twin Peaks since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"West of Twin Peaks","requests":"158"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Western%20Addition\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Western Addition","requests":"48"}]':
     {
@@ -835,7 +1574,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Western Addition since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Western Addition","requests":"48"}]',
-      fetchedAt: 1794534389262,
+      fetchedAt: 1794535195591,
     },
 };
 
@@ -955,14 +1694,13 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#44,SFMTA,44,O'SHAUGHNESSY,http://www.sfmta.com/44,5am-midnight daily (East of Glen Park BART 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#24,SFMTA,24,DIVISADERO,http://www.sfmta.com/24,5am-12:30am daily (Between Sutter St. and Bayshore Bl. 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#48,SFMTA,48,QUINTARA-24TH STREET,http://www.sfmta.com/48,5am-midnight daily (East of Castro St. 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#90,SFMTA,90,SAN BRUNO OWL,http://www.sfmta.com/90,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074559,27:01:24,27:01:24,6397,14,,2.0957776,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:27:00,27:27:00,4148,41,,4.6830859,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:03:54,27:03:54,7524,3,,0.413545,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:03:39,27:03:39,7378,53,,13.9774791,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:13:21,27:13:21,3768,23,,4.7671211,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#15,SFMTA,15,BAYVIEW HUNTERS POINT EXPRESS,http://www.sfmta.com/15,Weekdays 5am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#19,SFMTA,19,POLK,http://www.sfmta.com/19,5am-10pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#54,SFMTA,54,FELTON,http://www.sfmta.com/54,5am-10pm daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -1050,12 +1788,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#24,SFMTA,24,DIVISADERO,http://www.sfmta.com/24,5am-12:30am daily (Between Sutter St. and Bayshore Bl. 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#14,SFMTA,14,MISSION,http://www.sfmta.com/14,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#90,SFMTA,90,SAN BRUNO OWL,http://www.sfmta.com/90,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:22:00,27:22:00,3541,31,,3.6477407,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098088,25:30:09,25:30:09,5597,27,,4.5907152,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:13:21,27:13:21,3768,23,,4.7671211,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#67,SFMTA,67,BERNAL HEIGHTS,http://www.sfmta.com/67,Weekdays 5am-10pm Weekends 6am-10pm,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#23,SFMTA,23,MONTEREY,http://www.sfmta.com/23,6am-10pm daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -1161,13 +1898,12 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#24,SFMTA,24,DIVISADERO,http://www.sfmta.com/24,5am-12:30am daily (Between Sutter St. and Bayshore Bl. 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#22,SFMTA,22,FILLMORE,http://www.sfmta.com/22,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#LOWL,SFMTA,LOWL,OWL TARAVAL,http://www.sfmta.com/LOWL,10pm-5am nightly,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#NOWL,SFMTA,NOWL,OWL JUDAH,http://www.sfmta.com/NOWL,12 midnight-5am nightly,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:04:02,27:04:02,4330,8,,1.1399355,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:43:12,25:43:12,4005,28,,3.0886086,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:47:31,25:47:31,5659,26,,4.3100313,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:52:56,25:52:56,5659,20,,4.3149415,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#37,SFMTA,37,CORBETT,http://www.sfmta.com/37,Weekdays 6am-9pm Weekends 9am-9pm,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#33,SFMTA,33,ASHBURY-18TH ST,http://www.sfmta.com/33,5am-10pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#J,SFMTA,J,CHURCH,http://www.sfmta.com/J,5am-12 midnight daily,0,A96614 ,FFFFFF,",
     ],
   },
   {
@@ -1273,10 +2009,9 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:38:45,26:38:45,4105,34,,9.842496,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#PM,SFMTA,PM,POWELL-MASON CABLE CAR,http://www.sfmta.com/PM,7 am-10 pm daily,5,B49A36 ,000000,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#30,SFMTA,30,STOCKTON,http://www.sfmta.com/30,Weekdays 5am-12am Weekends 6am-12am,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -1352,12 +2087,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#14,SFMTA,14,MISSION,http://www.sfmta.com/14,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#44,SFMTA,44,O'SHAUGHNESSY,http://www.sfmta.com/44,5am-midnight daily (East of Glen Park BART 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098087,25:30:00,25:30:00,5592,37,,6.2996578,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:25:00,27:25:00,6415,4,,0.5618627,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:24:38,27:24:38,7300,79,,19.3583322,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#54,SFMTA,54,FELTON,http://www.sfmta.com/54,5am-10pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -1603,6 +2337,15 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       {
         system: "bart",
         station: "Embarcadero",
+        toward: "Antioch",
+        weekday: 1471,
+        saturday: 1471,
+        sunday: 1471,
+      },
+      {
+        system: "bart",
+        station: "Embarcadero",
+        toward: "Millbrae",
         weekday: 1510,
         saturday: 1510,
         sunday: 1510,
@@ -1610,6 +2353,15 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       {
         system: "bart",
         station: "Montgomery Street",
+        toward: "Antioch",
+        weekday: 1470,
+        saturday: 1470,
+        sunday: 1470,
+      },
+      {
+        system: "bart",
+        station: "Montgomery Street",
+        toward: "Millbrae",
         weekday: 1511,
         saturday: 1511,
         sunday: 1511,
@@ -1617,20 +2369,36 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       {
         system: "bart",
         station: "Powell Street",
+        toward: "Antioch",
+        weekday: 1468,
+        saturday: 1468,
+        sunday: 1468,
+      },
+      {
+        system: "bart",
+        station: "Powell Street",
+        toward: "Millbrae",
         weekday: 1513,
         saturday: 1513,
         sunday: 1513,
       },
     ],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#14,SFMTA,14,MISSION,http://www.sfmta.com/14,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38,SFMTA,38,GEARY,http://www.sfmta.com/38,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5,SFMTA,5,FULTON,http://www.sfmta.com/5,5am-1am daily (West of Civic Center 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#LOWL,SFMTA,LOWL,OWL TARAVAL,http://www.sfmta.com/LOWL,10pm-5am nightly,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#NOWL,SFMTA,NOWL,OWL JUDAH,http://www.sfmta.com/NOWL,12 midnight-5am nightly,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#25,SFMTA,25,TREASURE ISLAND,http://www.sfmta.com/25,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:31:00,24:31:00,M16-2,12,Antioch,,,",
       "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:09:00,25:10:00,M16-1,14,,,,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:29:00,24:30:00,M20-2,11,Antioch,,,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:11:00,25:11:00,M20-1,15,,,,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:28:00,24:28:00,M30-2,10,Antioch,,,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:13:00,25:13:00,M30-1,16,,,,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098090,25:30:04,25:30:04,5532,6,,0.7241389,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:35:00,25:35:00,7916,1,,0.0,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055192,25:54:00,25:54:00,3161,1,,0.0,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:30:00,25:30:00,4726,11,,1.8031941,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:33:54,25:33:54,7447,4,,1.0050929,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066815,25:32:00,25:32:00,7917,1,,0.0,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:45:00,26:45:00,6524,40,,10.6913145,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38R,SFMTA,38R,GEARY RAPID,http://www.sfmta.com/38R,Weekdays 5am-10pm Weekends 6am-9pm,3,BF2B45 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#14R,SFMTA,14R,MISSION RAPID,http://www.sfmta.com/14R,5am-10pm daily,3,BF2B45 ,FFFFFF,",
     ],
   },
   {
@@ -1708,19 +2476,28 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       {
         system: "bart",
         station: "Glen Park",
+        toward: "Antioch",
+        weekday: 1459,
+        saturday: 1459,
+        sunday: 1459,
+      },
+      {
+        system: "bart",
+        station: "Glen Park",
+        toward: "Millbrae",
         weekday: 1522,
         saturday: 1522,
         sunday: 1522,
       },
     ],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#44,SFMTA,44,O'SHAUGHNESSY,http://www.sfmta.com/44,5am-midnight daily (East of Glen Park BART 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#24,SFMTA,24,DIVISADERO,http://www.sfmta.com/24,5am-12:30am daily (Between Sutter St. and Bayshore Bl. 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#LOWL,SFMTA,LOWL,OWL TARAVAL,http://www.sfmta.com/LOWL,10pm-5am nightly,3,666666 ,FFFFFF,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:19:00,24:19:00,M70-2,6,Antioch,,,",
       "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:21:00,25:22:00,M70-1,20,,,,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:22:00,27:22:00,3696,1,,0.0,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:18:21,27:18:21,5738,27,,3.1562703,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:32:51,25:32:51,6015,35,,6.7985353,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#52,SFMTA,52,EXCELSIOR,http://www.sfmta.com/52,Weekdays 6am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#35,SFMTA,35,EUREKA,http://www.sfmta.com/35,7am-9pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#36,SFMTA,36,TERESITA,http://www.sfmta.com/36,Weekdays 6am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -1802,11 +2579,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5,SFMTA,5,FULTON,http://www.sfmta.com/5,5am-1am daily (West of Civic Center 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:43:50,25:43:50,4236,18,,3.4901873,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:15:42,27:15:42,7758,14,,3.0763109,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5R,SFMTA,5R,FULTON RAPID,http://www.sfmta.com/5R,Weekdays 7am-7pm,3,BF2B45 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7,SFMTA,7,HAIGHT-NORIEGA,http://www.sfmta.com/7,5am-10pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -1870,11 +2646,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#24,SFMTA,24,DIVISADERO,http://www.sfmta.com/24,5am-12:30am daily (Between Sutter St. and Bayshore Bl. 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#NOWL,SFMTA,NOWL,OWL JUDAH,http://www.sfmta.com/NOWL,12 midnight-5am nightly,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:01:45,27:01:45,4432,6,,0.8539975,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:57:50,25:57:50,4960,24,,5.0867727,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7,SFMTA,7,HAIGHT-NORIEGA,http://www.sfmta.com/7,5am-10pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#6,SFMTA,6,HAYES-PARNASSUS,http://www.sfmta.com/6,5am-10pm daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -1998,12 +2773,12 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#22,SFMTA,22,FILLMORE,http://www.sfmta.com/22,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#24,SFMTA,24,DIVISADERO,http://www.sfmta.com/24,5am-12:30am daily (Between Sutter St. and Bayshore Bl. 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5,SFMTA,5,FULTON,http://www.sfmta.com/5,5am-1am daily (West of Civic Center 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#NOWL,SFMTA,NOWL,OWL JUDAH,http://www.sfmta.com/NOWL,12 midnight-5am nightly,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#LOWL,SFMTA,LOWL,OWL TARAVAL,http://www.sfmta.com/LOWL,10pm-5am nightly,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#90,SFMTA,90,SAN BRUNO OWL,http://www.sfmta.com/90,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:39:02,25:39:02,4617,23,,2.5218126,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:00:50,27:00:50,4426,5,,0.7253621,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:33:00,25:33:00,5404,8,,1.5340282,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:50:00,25:50:00,5696,17,,3.7858171,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:44:00,25:44:00,5696,23,,3.7809068,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:58:10,26:58:10,8104,10,,1.7334176,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#6,SFMTA,6,HAYES-PARNASSUS,http://www.sfmta.com/6,5am-10pm daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7,SFMTA,7,HAIGHT-NORIEGA,http://www.sfmta.com/7,5am-10pm daily,3,005B95 ,FFFFFF,",
     ],
@@ -2087,12 +2862,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5,SFMTA,5,FULTON,http://www.sfmta.com/5,5am-1am daily (West of Civic Center 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38,SFMTA,38,GEARY,http://www.sfmta.com/38,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:44:38,25:44:38,4223,19,,3.6926135,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071697,25:30:33,25:30:33,4259,27,,4.1592365,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:18:55,27:18:55,5950,15,,4.003325,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#44,SFMTA,44,O'SHAUGHNESSY,http://www.sfmta.com/44,5am-midnight daily (East of Glen Park BART 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5R,SFMTA,5R,FULTON RAPID,http://www.sfmta.com/5R,Weekdays 7am-7pm,3,BF2B45 ,FFFFFF,",
     ],
   },
   {
@@ -2198,11 +2972,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#NOWL,SFMTA,NOWL,OWL JUDAH,http://www.sfmta.com/NOWL,12 midnight-5am nightly,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,26:04:02,26:04:02,3914,32,,6.4129684,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:11:36,27:11:36,3383,8,,1.8989683,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#6,SFMTA,6,HAYES-PARNASSUS,http://www.sfmta.com/6,5am-10pm daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#N,SFMTA,N,JUDAH,http://www.sfmta.com/N,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -2242,9 +3015,9 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38,SFMTA,38,GEARY,http://www.sfmta.com/38,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#22,SFMTA,22,FILLMORE,http://www.sfmta.com/22,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#24,SFMTA,24,DIVISADERO,http://www.sfmta.com/24,5am-12:30am daily (Between Sutter St. and Bayshore Bl. 24 hours daily),3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:47:17,25:47:17,4298,13,,1.8123337,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:33:00,25:33:00,4641,17,,1.8944736,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066112,27:26:00,27:26:00,4435,1,,0.0,1",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38R,SFMTA,38R,GEARY RAPID,http://www.sfmta.com/38R,Weekdays 5am-10pm Weekends 6am-9pm,3,BF2B45 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#2,SFMTA,2,SUTTER,http://www.sfmta.com/2,6:30am-7pm daily,3,005B95 ,FFFFFF,",
     ],
@@ -2310,10 +3083,9 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:05:00,27:05:00,390,1,,0.0,1",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#57,SFMTA,57,PARKMERCED,http://www.sfmta.com/57,5am-10pm daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#58,SFMTA,58,LAKE MERCED,http://www.sfmta.com/58,Weekdays 5am-10pm Weekends 6am-10pm,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -2349,7 +3121,6 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     sources: [
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#18,SFMTA,18,46TH AVENUE,http://www.sfmta.com/18,6am-10pm daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38,SFMTA,38,GEARY,http://www.sfmta.com/38,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -2407,11 +3178,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38,SFMTA,38,GEARY,http://www.sfmta.com/38,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5,SFMTA,5,FULTON,http://www.sfmta.com/5,5am-1am daily (West of Civic Center 24 hours daily),3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:52:45,25:52:45,4289,19,,2.8047111,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:40:21,25:40:21,5384,14,,2.6922472,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#31,SFMTA,31,BALBOA,http://www.sfmta.com/31,5am-10pm daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38R,SFMTA,38R,GEARY RAPID,http://www.sfmta.com/38R,Weekdays 5am-10pm Weekends 6am-9pm,3,BF2B45 ,FFFFFF,",
     ],
   },
   {
@@ -2475,12 +3245,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#22,SFMTA,22,FILLMORE,http://www.sfmta.com/22,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#90,SFMTA,90,SAN BRUNO OWL,http://www.sfmta.com/90,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064724,26:20:00,26:20:00,4603,1,,0.0,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:29:01,27:29:01,6181,19,,7.3989051,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:47:00,26:47:00,7476,1,,0.0,1",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#30,SFMTA,30,STOCKTON,http://www.sfmta.com/30,Weekdays 5am-12am Weekends 6am-12am,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#45,SFMTA,45,UNION-STOCKTON,http://www.sfmta.com/45,5am-10pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -2544,10 +3313,9 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:19:53,27:19:53,7026,76,,18.1016956,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#56,SFMTA,56,RUTLAND,http://www.sfmta.com/56,7am-9pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#9R,SFMTA,9R,SAN BRUNO RAPID,http://www.sfmta.com/9R,Weekdays 7am-6pm,3,BF2B45 ,FFFFFF,",
     ],
   },
   {
@@ -2721,6 +3489,15 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       {
         system: "bart",
         station: "16th Street / Mission",
+        toward: "Antioch",
+        weekday: 1464,
+        saturday: 1464,
+        sunday: 1464,
+      },
+      {
+        system: "bart",
+        station: "16th Street / Mission",
+        toward: "Millbrae",
         weekday: 1517,
         saturday: 1517,
         sunday: 1517,
@@ -2728,20 +3505,33 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       {
         system: "bart",
         station: "24th Street / Mission",
+        toward: "Antioch",
+        weekday: 1462,
+        saturday: 1462,
+        sunday: 1462,
+      },
+      {
+        system: "bart",
+        station: "24th Street / Mission",
+        toward: "Millbrae",
         weekday: 1519,
         saturday: 1519,
         sunday: 1519,
       },
     ],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#14,SFMTA,14,MISSION,http://www.sfmta.com/14,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#22,SFMTA,22,FILLMORE,http://www.sfmta.com/22,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#48,SFMTA,48,QUINTARA-24TH STREET,http://www.sfmta.com/48,5am-midnight daily (East of Castro St. 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#90,SFMTA,90,SAN BRUNO OWL,http://www.sfmta.com/90,12 midnight-5am daily,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#LOWL,SFMTA,LOWL,OWL TARAVAL,http://www.sfmta.com/LOWL,10pm-5am nightly,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#NOWL,SFMTA,NOWL,OWL JUDAH,http://www.sfmta.com/NOWL,12 midnight-5am nightly,3,666666 ,FFFFFF,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:24:00,24:24:00,M50-2,8,Antioch,,,",
       "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:17:00,25:17:00,M50-1,18,,,,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:22:00,24:22:00,M60-2,7,Antioch,,,",
       "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:19:00,25:19:00,M60-1,19,,,,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098089,25:30:00,25:30:00,5552,17,,2.5932208,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:46:18,25:46:18,3285,31,,3.5652681,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:08:56,27:08:56,3453,13,,1.4222223,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:00:00,27:00:00,8105,11,,2.0783336,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:44:00,25:44:00,5696,23,,3.7809068,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:50:00,25:50:00,5696,17,,3.7858171,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#27,SFMTA,27,BRYANT,http://www.sfmta.com/27,5am-10pm daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -2825,19 +3615,19 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       {
         system: "caltrain",
         station: "San Francisco Caltrain Station",
+        toward: "Tamien",
         weekday: 1445,
         saturday: 1445,
         sunday: 1445,
       },
     ],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#22,SFMTA,22,FILLMORE,http://www.sfmta.com/22,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#NOWL,SFMTA,NOWL,OWL JUDAH,http://www.sfmta.com/NOWL,12 midnight-5am nightly,3,666666 ,FFFFFF,",
       "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#176,24:05:00,24:05:00,70012,1,,0,0,0,1,,,,,1,1,,,,,,,,,,,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064722,25:30:00,25:30:00,7765,43,,5.9602821,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:54:00,26:54:00,3164,46,,11.8639132,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:30:00,25:30:00,7957,1,,0.0,1",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#19,SFMTA,19,POLK,http://www.sfmta.com/19,5am-10pm daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#T,SFMTA,T,THIRD,http://www.sfmta.com/T,Weekends 8 am-11:30 pm,0,BF2B45 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#N,SFMTA,N,JUDAH,http://www.sfmta.com/N,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -2931,11 +3721,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#90,SFMTA,90,SAN BRUNO OWL,http://www.sfmta.com/90,12 midnight-5am daily,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:53:05,26:53:05,8100,6,,0.9473609,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080259,27:13:00,27:13:00,6523,58,,12.845818,1",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#PH,SFMTA,PH,POWELL-HYDE CABLE CAR,http://www.sfmta.com/PH,7 am-10 pm daily,5,B49A36 ,000000,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#PM,SFMTA,PM,POWELL-MASON CABLE CAR,http://www.sfmta.com/PM,7 am-10 pm daily,5,B49A36 ,000000,",
     ],
   },
   {
@@ -2999,12 +3788,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#24,SFMTA,24,DIVISADERO,http://www.sfmta.com/24,5am-12:30am daily (Between Sutter St. and Bayshore Bl. 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#48,SFMTA,48,QUINTARA-24TH STREET,http://www.sfmta.com/48,5am-midnight daily (East of Castro St. 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#LOWL,SFMTA,LOWL,OWL TARAVAL,http://www.sfmta.com/LOWL,10pm-5am nightly,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:10:21,27:10:21,4321,16,,2.0486084,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:17:07,27:17:07,3466,22,,2.6328152,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:31:32,25:31:32,6008,32,,6.3901605,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#J,SFMTA,J,CHURCH,http://www.sfmta.com/J,5am-12 midnight daily,0,A96614 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#35,SFMTA,35,EUREKA,http://www.sfmta.com/35,7am-9pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#52,SFMTA,52,EXCELSIOR,http://www.sfmta.com/52,Weekdays 6am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -3092,11 +3880,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#LOWL,SFMTA,LOWL,OWL TARAVAL,http://www.sfmta.com/LOWL,10pm-5am nightly,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084112,25:45:00,25:45:00,5184,1,,0.0,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:36:17,26:36:17,4100,30,,9.389843,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#8,SFMTA,8,BAYSHORE,http://www.sfmta.com/8,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#30,SFMTA,30,STOCKTON,http://www.sfmta.com/30,Weekdays 5am-12am Weekends 6am-12am,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#39,SFMTA,39,COIT,http://www.sfmta.com/39,9am-7pm daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -3184,10 +3971,9 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080247,27:02:59,27:02:59,4881,89,,21.0981977,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#M,SFMTA,M,OCEAN VIEW,http://www.sfmta.com/M,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,008547 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#54,SFMTA,54,FELTON,http://www.sfmta.com/54,5am-10pm daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -3301,19 +4087,28 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       {
         system: "bart",
         station: "Balboa Park",
+        toward: "Antioch",
+        weekday: 1457,
+        saturday: 1457,
+        sunday: 1457,
+      },
+      {
+        system: "bart",
+        station: "Balboa Park",
+        toward: "Millbrae",
         weekday: 1524,
         saturday: 1524,
         sunday: 1524,
       },
     ],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#14,SFMTA,14,MISSION,http://www.sfmta.com/14,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#44,SFMTA,44,O'SHAUGHNESSY,http://www.sfmta.com/44,5am-midnight daily (East of Glen Park BART 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:17:00,24:17:00,M80-2,5,Antioch,,,",
       "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:24:00,25:24:00,M80-1,21,,,,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098087,25:30:00,25:30:00,5592,37,,6.2996578,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:23:24,27:23:24,5330,2,,0.2816487,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:29:00,27:29:00,4886,86,,20.4562367,1",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#14R,SFMTA,14R,MISSION RAPID,http://www.sfmta.com/14R,5am-10pm daily,3,BF2B45 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -3395,12 +4190,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38,SFMTA,38,GEARY,http://www.sfmta.com/38,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5,SFMTA,5,FULTON,http://www.sfmta.com/5,5am-1am daily (West of Civic Center 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071697,25:32:00,25:32:00,4755,28,,4.441199,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:47:39,25:47:39,4231,24,,4.4504313,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:18:55,27:18:55,5950,15,,4.003325,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38R,SFMTA,38R,GEARY RAPID,http://www.sfmta.com/38R,Weekdays 5am-10pm Weekends 6am-9pm,3,BF2B45 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5R,SFMTA,5R,FULTON RAPID,http://www.sfmta.com/5R,Weekdays 7am-7pm,3,BF2B45 ,FFFFFF,",
     ],
   },
   {
@@ -3464,12 +4258,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#22,SFMTA,22,FILLMORE,http://www.sfmta.com/22,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#24,SFMTA,24,DIVISADERO,http://www.sfmta.com/24,5am-12:30am daily (Between Sutter St. and Bayshore Bl. 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#90,SFMTA,90,SAN BRUNO OWL,http://www.sfmta.com/90,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:30:51,25:30:51,4637,15,,1.6068415,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066112,27:26:00,27:26:00,4435,1,,0.0,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:50:39,26:50:39,8098,4,,0.5688494,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#2,SFMTA,2,SUTTER,http://www.sfmta.com/2,6:30am-7pm daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -3539,11 +4332,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#44,SFMTA,44,O'SHAUGHNESSY,http://www.sfmta.com/44,5am-midnight daily (East of Glen Park BART 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#90,SFMTA,90,SAN BRUNO OWL,http://www.sfmta.com/90,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:27:49,27:27:49,6399,8,,1.2207592,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:15:13,27:15:13,3771,26,,5.2636441,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#9,SFMTA,9,SAN BRUNO,http://www.sfmta.com/9,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#8,SFMTA,8,BAYSHORE,http://www.sfmta.com/8,5am-12 midnight daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -3603,19 +4395,28 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       {
         system: "caltrain",
         station: "22nd Street Station",
+        toward: "San Francisco",
         weekday: 1482,
         saturday: 1484,
         sunday: 1484,
       },
+      {
+        system: "caltrain",
+        station: "22nd Street Station",
+        toward: "Tamien",
+        weekday: 1450,
+        saturday: 1450,
+        sunday: 1450,
+      },
     ],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#48,SFMTA,48,QUINTARA-24TH STREET,http://www.sfmta.com/48,5am-midnight daily (East of Castro St. 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#22,SFMTA,22,FILLMORE,http://www.sfmta.com/22,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
       "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#173,24:42:00,24:42:00,70021,22,,0,0,75811.84903503713,1,,,,,1,1,,,,,,,,,,,",
+      "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#176,24:10:00,24:10:00,70022,2,,0,0,2521.9493493333744,1,,,,,1,1,,,,,,,,,,,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:02:00,27:02:00,3435,1,,0.0,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:57:07,25:57:07,7866,40,,5.4138267,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:59:45,26:59:45,7382,50,,12.9333048,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#19,SFMTA,19,POLK,http://www.sfmta.com/19,5am-10pm daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#55,SFMTA,55,DOGPATCH,http://www.sfmta.com/55,5am-10pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#T,SFMTA,T,THIRD,http://www.sfmta.com/T,Weekends 8 am-11:30 pm,0,BF2B45 ,FFFFFF,",
     ],
   },
   {
@@ -3661,10 +4462,9 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:29:01,27:29:01,6181,19,,7.3989051,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#30,SFMTA,30,STOCKTON,http://www.sfmta.com/30,Weekdays 5am-12am Weekends 6am-12am,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -3722,10 +4522,9 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38,SFMTA,38,GEARY,http://www.sfmta.com/38,24 hour service daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:52:45,25:52:45,4289,19,,2.8047111,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38R,SFMTA,38R,GEARY RAPID,http://www.sfmta.com/38R,Weekdays 5am-10pm Weekends 6am-9pm,3,BF2B45 ,FFFFFF,",
     ],
   },
   {
@@ -3813,11 +4612,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#90,SFMTA,90,SAN BRUNO OWL,http://www.sfmta.com/90,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:33:00,26:33:00,6800,25,,8.7855352,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:47:00,26:47:00,7476,1,,0.0,1",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#PH,SFMTA,PH,POWELL-HYDE CABLE CAR,http://www.sfmta.com/PH,7 am-10 pm daily,5,B49A36 ,000000,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#30,SFMTA,30,STOCKTON,http://www.sfmta.com/30,Weekdays 5am-12am Weekends 6am-12am,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -3847,7 +4645,6 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     sources: [
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1X,SFMTA,1X,CALIFORNIA EXPRESS,http://www.sfmta.com/1X,Weekday peak hours only,3,BF2B45 ,FFFFFF,",
     ],
   },
   {
@@ -4069,6 +4866,15 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       {
         system: "bart",
         station: "Civic Center / UN Plaza",
+        toward: "Antioch",
+        weekday: 1466,
+        saturday: 1466,
+        sunday: 1466,
+      },
+      {
+        system: "bart",
+        station: "Civic Center / UN Plaza",
+        toward: "Millbrae",
         weekday: 1515,
         saturday: 1515,
         sunday: 1515,
@@ -4076,20 +4882,33 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       {
         system: "bart",
         station: "Powell Street",
+        toward: "Antioch",
+        weekday: 1468,
+        saturday: 1468,
+        sunday: 1468,
+      },
+      {
+        system: "bart",
+        station: "Powell Street",
+        toward: "Millbrae",
         weekday: 1513,
         saturday: 1513,
         sunday: 1513,
       },
     ],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#14,SFMTA,14,MISSION,http://www.sfmta.com/14,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5,SFMTA,5,FULTON,http://www.sfmta.com/5,5am-1am daily (West of Civic Center 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#LOWL,SFMTA,LOWL,OWL TARAVAL,http://www.sfmta.com/LOWL,10pm-5am nightly,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#NOWL,SFMTA,NOWL,OWL JUDAH,http://www.sfmta.com/NOWL,12 midnight-5am nightly,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#90,SFMTA,90,SAN BRUNO OWL,http://www.sfmta.com/90,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:26:00,24:26:00,M40-2,9,Antioch,,,",
       "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:14:00,25:15:00,M40-1,17,,,,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:28:00,24:28:00,M30-2,10,Antioch,,,",
       "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:13:00,25:13:00,M30-1,16,,,,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098090,25:31:09,25:31:09,5534,7,,0.880837,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055192,25:54:00,25:54:00,3161,1,,0.0,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:36:36,25:36:36,5694,17,,2.7468561,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:30:00,25:30:00,7957,1,,0.0,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:47:35,26:47:35,3161,42,,11.0364319,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:01:43,27:01:43,3243,12,,2.3740143,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#8,SFMTA,8,BAYSHORE,http://www.sfmta.com/8,5am-12 midnight daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#9,SFMTA,9,SAN BRUNO,http://www.sfmta.com/9,5am-12 midnight daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -4195,12 +5014,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#LOWL,SFMTA,LOWL,OWL TARAVAL,http://www.sfmta.com/LOWL,10pm-5am nightly,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#NOWL,SFMTA,NOWL,OWL JUDAH,http://www.sfmta.com/NOWL,12 midnight-5am nightly,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:39:34,25:39:34,6616,42,,8.7417899,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:07:27,27:07:27,3355,3,,0.7075418,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,26:11:00,26:11:00,5199,41,,7.9062754,1",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7,SFMTA,7,HAIGHT-NORIEGA,http://www.sfmta.com/7,5am-10pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#48,SFMTA,48,QUINTARA-24TH STREET,http://www.sfmta.com/48,5am-midnight daily (East of Castro St. 24 hours daily),3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -4374,6 +5192,15 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       {
         system: "bart",
         station: "Civic Center / UN Plaza",
+        toward: "Antioch",
+        weekday: 1466,
+        saturday: 1466,
+        sunday: 1466,
+      },
+      {
+        system: "bart",
+        station: "Civic Center / UN Plaza",
+        toward: "Millbrae",
         weekday: 1515,
         saturday: 1515,
         sunday: 1515,
@@ -4381,20 +5208,32 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       {
         system: "bart",
         station: "Powell Street",
+        toward: "Antioch",
+        weekday: 1468,
+        saturday: 1468,
+        sunday: 1468,
+      },
+      {
+        system: "bart",
+        station: "Powell Street",
+        toward: "Millbrae",
         weekday: 1513,
         saturday: 1513,
         sunday: 1513,
       },
     ],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38,SFMTA,38,GEARY,http://www.sfmta.com/38,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5,SFMTA,5,FULTON,http://www.sfmta.com/5,5am-1am daily (West of Civic Center 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#LOWL,SFMTA,LOWL,OWL TARAVAL,http://www.sfmta.com/LOWL,10pm-5am nightly,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#NOWL,SFMTA,NOWL,OWL JUDAH,http://www.sfmta.com/NOWL,12 midnight-5am nightly,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#90,SFMTA,90,SAN BRUNO OWL,http://www.sfmta.com/90,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:26:00,24:26:00,M40-2,9,Antioch,,,",
       "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:14:00,25:15:00,M40-1,17,,,,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:28:00,24:28:00,M30-2,10,Antioch,,,",
       "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:13:00,25:13:00,M30-1,16,,,,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:41:00,25:41:00,4757,7,,0.8888597,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:30:33,25:30:33,5395,6,,1.2559085,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:37:45,25:37:45,5655,18,,2.9126192,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:44:12,25:44:12,5655,13,,2.9175299,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:56:00,26:56:00,8102,8,,1.4059226,1",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#19,SFMTA,19,POLK,http://www.sfmta.com/19,5am-10pm daily,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -4410,7 +5249,7 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#25,SFMTA,25,TREASURE ISLAND,http://www.sfmta.com/25,24 hour service daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066815,25:42:00,25:42:00,8000,2,,3.9250904,1",
     ],
   },
   {
@@ -4492,10 +5331,9 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#LOWL,SFMTA,LOWL,OWL TARAVAL,http://www.sfmta.com/LOWL,10pm-5am nightly,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:31:32,25:31:32,6008,32,,6.3901605,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#44,SFMTA,44,O'SHAUGHNESSY,http://www.sfmta.com/44,5am-midnight daily (East of Glen Park BART 24 hours daily),3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#36,SFMTA,36,TERESITA,http://www.sfmta.com/36,Weekdays 6am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#37,SFMTA,37,CORBETT,http://www.sfmta.com/37,Weekdays 6am-9pm Weekends 9am-9pm,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -4565,11 +5403,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#90,SFMTA,90,SAN BRUNO OWL,http://www.sfmta.com/90,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:16:13,27:16:13,3792,68,,17.1840257,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:19:30,27:19:30,6369,35,,6.6507798,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#8,SFMTA,8,BAYSHORE,http://www.sfmta.com/8,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#9,SFMTA,9,SAN BRUNO,http://www.sfmta.com/9,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#9R,SFMTA,9R,SAN BRUNO RAPID,http://www.sfmta.com/9R,Weekdays 7am-6pm,3,BF2B45 ,FFFFFF,",
     ],
   },
   {
@@ -4737,19 +5574,28 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       {
         system: "bart",
         station: "Glen Park",
+        toward: "Antioch",
+        weekday: 1459,
+        saturday: 1459,
+        sunday: 1459,
+      },
+      {
+        system: "bart",
+        station: "Glen Park",
+        toward: "Millbrae",
         weekday: 1522,
         saturday: 1522,
         sunday: 1522,
       },
     ],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#44,SFMTA,44,O'SHAUGHNESSY,http://www.sfmta.com/44,5am-midnight daily (East of Glen Park BART 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#91,SFMTA,91,3RD-19TH AVE OWL,http://www.sfmta.com/91,12 midnight-5am daily,3,666666 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#LOWL,SFMTA,LOWL,OWL TARAVAL,http://www.sfmta.com/LOWL,10pm-5am nightly,3,666666 ,FFFFFF,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:19:00,24:19:00,M70-2,6,Antioch,,,",
       "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:21:00,25:22:00,M70-1,20,,,,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:22:00,27:22:00,3696,1,,0.0,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:05:00,27:05:00,390,1,,0.0,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:33:41,25:33:41,6937,36,,7.0576318,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#48,SFMTA,48,QUINTARA-24TH STREET,http://www.sfmta.com/48,5am-midnight daily (East of Castro St. 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#36,SFMTA,36,TERESITA,http://www.sfmta.com/36,Weekdays 6am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,",
     ],
   },
   {
@@ -4825,14 +5671,13 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38,SFMTA,38,GEARY,http://www.sfmta.com/38,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#22,SFMTA,22,FILLMORE,http://www.sfmta.com/22,24 hour service daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5,SFMTA,5,FULTON,http://www.sfmta.com/5,5am-1am daily (West of Civic Center 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#24,SFMTA,24,DIVISADERO,http://www.sfmta.com/24,5am-12:30am daily (Between Sutter St. and Bayshore Bl. 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#90,SFMTA,90,SAN BRUNO OWL,http://www.sfmta.com/90,12 midnight-5am daily,3,666666 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:46:00,25:46:00,4768,12,,1.6177254,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:34:00,25:34:00,4615,18,,1.9956456,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:33:00,25:33:00,5404,8,,1.5340282,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066112,27:26:58,27:26:58,4422,2,,0.1467991,0",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:54:46,26:54:46,8101,7,,1.2098055,0",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
       "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38R,SFMTA,38R,GEARY RAPID,http://www.sfmta.com/38R,Weekdays 5am-10pm Weekends 6am-9pm,3,BF2B45 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#31,SFMTA,31,BALBOA,http://www.sfmta.com/31,5am-10pm daily,3,005B95 ,FFFFFF,",
     ],
   },
 ];
@@ -4842,7 +5687,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "bayview-hunters-point",
     count: 90,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Bayview%20Hunters%20Point\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Bayview Hunters Point","requests":"90"}]',
     ],
@@ -4851,7 +5696,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "bernal-heights",
     count: 38,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Bernal%20Heights\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Bernal Heights","requests":"38"}]',
     ],
@@ -4860,7 +5705,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "castro-upper-market",
     count: 66,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Castro%2FUpper%20Market\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Castro/Upper Market","requests":"66"}]',
     ],
@@ -4869,7 +5714,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "chinatown",
     count: 18,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Chinatown\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Chinatown","requests":"18"}]',
     ],
@@ -4878,7 +5723,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "excelsior",
     count: 36,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Excelsior\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Excelsior","requests":"36"}]',
     ],
@@ -4887,7 +5732,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "financial-district-south-beach",
     count: 88,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Financial%20District%2FSouth%20Beach\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Financial District/South Beach","requests":"88"}]',
     ],
@@ -4896,7 +5741,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "glen-park",
     count: 19,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Glen%20Park\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Glen Park","requests":"19"}]',
     ],
@@ -4905,7 +5750,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "golden-gate-park",
     count: 35,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Golden%20Gate%20Park\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Golden Gate Park","requests":"35"}]',
     ],
@@ -4914,7 +5759,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "haight-ashbury",
     count: 21,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Haight%20Ashbury\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Haight Ashbury","requests":"21"}]',
     ],
@@ -4923,7 +5768,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "hayes-valley",
     count: 39,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Hayes%20Valley\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Hayes Valley","requests":"39"}]',
     ],
@@ -4932,7 +5777,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "inner-richmond",
     count: 19,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Inner%20Richmond\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Inner Richmond","requests":"19"}]',
     ],
@@ -4941,7 +5786,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "inner-sunset",
     count: 19,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Inner%20Sunset\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Inner Sunset","requests":"19"}]',
     ],
@@ -4950,7 +5795,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "japantown",
     count: 7,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Japantown\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Japantown","requests":"7"}]',
     ],
@@ -4959,7 +5804,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "lakeshore",
     count: 12,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Lakeshore\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Lakeshore","requests":"12"}]',
     ],
@@ -4968,7 +5813,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "lone-mountain-usf",
     count: 18,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Lone%20Mountain%2FUSF\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Lone Mountain/USF","requests":"18"}]',
     ],
@@ -4977,7 +5822,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "marina",
     count: 25,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Marina\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Marina","requests":"25"}]',
     ],
@@ -4986,7 +5831,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "mclaren-park",
     count: 10,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'McLaren%20Park\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"McLaren Park","requests":"10"}]',
     ],
@@ -4995,7 +5840,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "mission",
     count: 140,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Mission\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Mission","requests":"140"}]',
     ],
@@ -5004,7 +5849,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "mission-bay",
     count: 15,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Mission%20Bay\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Mission Bay","requests":"15"}]',
     ],
@@ -5013,7 +5858,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "nob-hill",
     count: 32,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Nob%20Hill\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Nob Hill","requests":"32"}]',
     ],
@@ -5022,7 +5867,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "noe-valley",
     count: 27,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Noe%20Valley\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Noe Valley","requests":"27"}]',
     ],
@@ -5031,7 +5876,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "north-beach",
     count: 25,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'North%20Beach\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"North Beach","requests":"25"}]',
     ],
@@ -5040,7 +5885,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "oceanview-merced-ingleside",
     count: 33,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Oceanview%2FMerced%2FIngleside\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Oceanview/Merced/Ingleside","requests":"33"}]',
     ],
@@ -5049,7 +5894,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "outer-mission",
     count: 36,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Outer%20Mission\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Outer Mission","requests":"36"}]',
     ],
@@ -5058,7 +5903,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "outer-richmond",
     count: 33,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Outer%20Richmond\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Outer Richmond","requests":"33"}]',
     ],
@@ -5067,7 +5912,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "pacific-heights",
     count: 15,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Pacific%20Heights\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Pacific Heights","requests":"15"}]',
     ],
@@ -5076,7 +5921,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "portola",
     count: 21,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Portola\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Portola","requests":"21"}]',
     ],
@@ -5085,7 +5930,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "potrero-hill",
     count: 21,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Potrero%20Hill\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Potrero Hill","requests":"21"}]',
     ],
@@ -5094,7 +5939,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "presidio",
     count: 10,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Presidio\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Presidio","requests":"10"}]',
     ],
@@ -5103,7 +5948,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "presidio-heights",
     count: 11,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Presidio%20Heights\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Presidio Heights","requests":"11"}]',
     ],
@@ -5112,7 +5957,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "russian-hill",
     count: 17,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Russian%20Hill\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Russian Hill","requests":"17"}]',
     ],
@@ -5121,7 +5966,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "seacliff",
     count: 4,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Seacliff\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Seacliff","requests":"4"}]',
     ],
@@ -5130,7 +5975,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "south-of-market",
     count: 81,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'South%20of%20Market\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"South of Market","requests":"81"}]',
     ],
@@ -5139,7 +5984,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "sunset-parkside",
     count: 71,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Sunset%2FParkside\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Sunset/Parkside","requests":"71"}]',
     ],
@@ -5148,7 +5993,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "tenderloin",
     count: 50,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Tenderloin\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Tenderloin","requests":"50"}]',
     ],
@@ -5157,7 +6002,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "treasure-island",
     count: 3,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Treasure%20Island\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Treasure Island","requests":"3"}]',
     ],
@@ -5166,7 +6011,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "twin-peaks",
     count: 5,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Twin%20Peaks\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Twin Peaks","requests":"5"}]',
     ],
@@ -5175,7 +6020,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "visitacion-valley",
     count: 12,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Visitacion%20Valley\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Visitacion Valley","requests":"12"}]',
     ],
@@ -5184,7 +6029,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "west-of-twin-peaks",
     count: 158,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'West%20of%20Twin%20Peaks\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"West of Twin Peaks","requests":"158"}]',
     ],
@@ -5193,7 +6038,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "western-addition",
     count: 48,
     since: 1786780800000,
-    until: 1794534389262,
+    until: 1794535195591,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Western%20Addition\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Western Addition","requests":"48"}]',
     ],
