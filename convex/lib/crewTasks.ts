@@ -14,6 +14,7 @@ import {
   interestsForGroup,
   interestsInText,
 } from "./interests";
+import { pacificDate } from "./weekendRoute";
 
 /**
  * Crew Group, intros and first meetup (#31). Muse writes the crew's Group
@@ -50,14 +51,15 @@ export type MeetupOption = {
 
 /** The model's input for `muse.crewGroup` (and the template's). */
 export type CrewGroupInput = {
-  owner: { firstName: string; moving: string | null };
+  /** `moving` is the move-in month ("February 2027"); `moved` once it has passed. */
+  owner: { firstName: string; moving: string | null; moved: boolean };
   /** The neighborhood most of the crew shares with the owner, if any ("Mission"). */
   commonPlace: string | null;
   members: {
     firstName: string;
     /** Interests they share with the owner. */
     sharedInterests: string[];
-    /** "arriving February 2027", "both looking in the Mission". */
+    /** "same move-in month (February 2027)", "both looking in the Mission". */
     together: string[];
   }[];
   meetupOptions: MeetupOption[];
@@ -113,7 +115,8 @@ export async function crewContext(
     if (!u) return;
     const together: string[] = [];
     for (const a of m.anchors) {
-      if (a.kind === "month") together.push(`arriving ${moveInLabel({ month: a.month })}`);
+      if (a.kind === "month")
+        together.push(`same move-in month (${moveInLabel({ month: a.month })})`);
       if (a.kind === "neighborhood") {
         together.push(`both looking in ${a.slugs.map(neighborhoodLabel).join(", ")}`);
         for (const s of a.slugs) places.set(s, (places.get(s) ?? 0) + 1);
@@ -213,12 +216,19 @@ export async function crewContext(
   }
 
   const moveIn = profile.moveIn?.source === "stated" ? profile.moveIn.value : null;
+  const today = pacificDate(now);
+  const moved = moveIn
+    ? moveIn.date
+      ? moveIn.date <= today
+      : moveIn.month < today.slice(0, 7)
+    : false;
   const [place, count] = [...places.entries()].sort((a, b) => b[1] - a[1])[0] ?? [null, 0];
   return {
     input: {
       owner: {
         firstName: owner.firstName,
         moving: moveIn ? moveInLabel({ month: moveIn.month }) : null,
+        moved,
       },
       members,
       meetupOptions,
@@ -271,7 +281,11 @@ export function crewIntro(input: CrewGroupInput): string {
         ? `${list([...names, "I"])} are all into ${list(labels)}`
         : `${names[0]} and I are both into ${list(labels)}`,
     );
-  const moving = input.owner.moving ? `, moving to SF in ${input.owner.moving}` : "";
+  const moving = !input.owner.moving
+    ? ""
+    : input.owner.moved
+      ? `. I moved to SF in ${input.owner.moving}`
+      : `, moving to SF in ${input.owner.moving}`;
   const why = lines.length ? `: ${lines.join(", and ")}` : "";
   return `Hi! I'm ${input.owner.firstName}${moving}. Muse matched us as a Move-in Crew${why}. Say hi, and let's plan a first meetup!`;
 }
@@ -291,13 +305,13 @@ export function meetupIdea(o: MeetupOption): string {
 export function crewRationale(input: CrewGroupInput): string {
   const names = input.members.map((m) => m.firstName);
   const sameMonth = input.members
-    .filter((m) => m.together.some((t) => t.startsWith("arriving")))
+    .filter((m) => m.together.some((t) => t.startsWith("same move-in month")))
     .map((m) => m.firstName);
   const interests = [...new Set(input.members.flatMap((m) => m.sharedInterests))].slice(0, 3);
   const parts = [`Your Move-in Crew: ${list(names)}`];
   if (sameMonth.length && input.owner.moving)
     parts.push(
-      `${list(sameMonth)} ${sameMonth.length > 1 ? "arrive" : "arrives"} in ${input.owner.moving} too`,
+      `${list(sameMonth)} ${sameMonth.length > 1 ? "share" : "shares"} your move-in month`,
     );
   if (interests.length) parts.push(`you share ${list(interests.map((i) => i.toLowerCase()))}`);
   return `${parts.join("; ")}.`.slice(0, 200);
@@ -317,7 +331,7 @@ const GROUP_INSTRUCTIONS = `Draft a private Facebook Group for a Move-in Crew: p
 
 Return:
 - name: the Group's name, at most 75 characters, e.g. "February Move-in Crew · Mission".
-- intro: the Group's description in the owner's voice (first person, at most 600 characters). Say hi, say when they're moving, and say what people have in common, naming members only with interests listed for them ("Zoe, Daniel and I all climb"). Warm, plain, no hashtags.
+- intro: the Group's description in the owner's voice (first person, at most 600 characters). Say hi, say when they're moving (or, if owner.moved, when they moved), and say what people have in common, naming members only with interests listed for them ("Zoe, Daniel and I all climb"). Warm, plain, no hashtags.
 - meetupSource: the source key of the one meetup option that fits the most people.
 - meetupIdea: one line naming that option as a first meetup, with its day and time when it has one.
 - rationale: one sentence for the owner on why these people (at most 200 characters).

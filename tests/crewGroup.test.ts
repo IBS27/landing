@@ -41,15 +41,19 @@ const coffee: MeetupOption = {
 };
 
 const input: CrewGroupInput = {
-  owner: { firstName: "Maya", moving: "February 2027" },
+  owner: { firstName: "Maya", moving: "February 2027", moved: false },
   commonPlace: "Mission",
   members: [
     {
       firstName: "Zoe",
       sharedInterests: ["Climbing", "Coffee"],
-      together: ["arriving February 2027", "both looking in Mission"],
+      together: ["same move-in month (February 2027)", "both looking in Mission"],
     },
-    { firstName: "Daniel", sharedInterests: ["Climbing"], together: ["arriving February 2027"] },
+    {
+      firstName: "Daniel",
+      sharedInterests: ["Climbing"],
+      together: ["same move-in month (February 2027)"],
+    },
     {
       firstName: "Sofia",
       sharedInterests: ["Climbing"],
@@ -69,6 +73,13 @@ describe("crew templates", () => {
     );
   });
 
+  test("once the move-in month has passed, the intro says so", () => {
+    const moved = { ...input, owner: { firstName: "Maya", moving: "October 2026", moved: true } };
+    expect(crewIntro(moved)).toStartWith(
+      "Hi! I'm Maya. I moved to SF in October 2026. Muse matched us as a Move-in Crew:",
+    );
+  });
+
   test("interests the same people share read as one line", () => {
     const pair: CrewGroupInput = {
       ...input,
@@ -85,10 +96,10 @@ describe("crew templates", () => {
     expect(crewGroupName("February 2027", "x".repeat(100)).length).toBeLessThanOrEqual(75);
   });
 
-  test("the rationale says 'arrive too' only for people who matched on the month", () => {
+  test("the rationale names a shared move-in month only for people who matched on it", () => {
     const why = crewRationale(input);
-    expect(why).toContain("Zoe and Daniel arrive in February 2027 too");
-    expect(why).not.toMatch(/Sofia[^;]*arrive/);
+    expect(why).toContain("Zoe and Daniel share your move-in month");
+    expect(why).not.toMatch(/Sofia[^;]*move-in month/);
   });
 
   test("the meetup the most people fit wins, and its idea names when and where", () => {
