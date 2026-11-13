@@ -410,6 +410,9 @@ describe("renter trust", () => {
       "Hi! We're in the same Group, SF Climbers.",
       "Hi! Nice, we have 2 Groups in common.",
       "Hi! Your identity is verified.",
+      "Hi! We are already Facebook friends.",
+      "Hi! We share a Group.",
+      "Hi! We have friends in common.",
     ])
       expect(subletMoveProblems(reply(leak), input)).toHaveLength(1);
     expect(subletMoveProblems(reply("Hi! Want to see it this week?"), input)).toEqual([]);
