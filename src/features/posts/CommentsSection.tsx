@@ -587,7 +587,7 @@ function CommentRow({
               <img
                 src={comment.media.url}
                 alt=""
-                {...commentPhotoBox(comment.media)}
+                style={commentPhotoBox(comment.media)}
                 className="mt-1.5 max-h-[200px] max-w-[260px] rounded-2xl border border-divider object-cover"
               />
             )}
