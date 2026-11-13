@@ -10,6 +10,7 @@ import {
   type LucideIcon,
   Map as MapIcon,
   MapPin,
+  MessageSquareText,
   PenLine,
   Tag,
   UserRound,
@@ -563,6 +564,7 @@ const KIND_ICON: Record<ChatCardKind, LucideIcon> = {
   person: UserRound,
   draft: PenLine,
   negotiation: Handshake,
+  post: MessageSquareText,
 };
 
 /** The glyph for a kind of card, where it has no photo and on its map marker. */
@@ -610,7 +612,8 @@ function InfoCard({
   // One of them ran (a draft approved, or discarded): the card says so instead of offering both again.
   const done = actions.find((a) => runner.outcomes?.[actionKey(a.action)] === "done");
   const [first, ...rest] = c.lines;
-  const { href, point } = c;
+  const { href, point, host } = c;
+  const hostHref = host?.href;
   // A card has room for one line of a draft: before "Approve" sends it, show all of it.
   if (reading && !done)
     return (
@@ -688,11 +691,28 @@ function InfoCard({
         </p>
       ) : (
         <div className="min-h-0 flex-1 overflow-hidden">
-          {rest.slice(0, 2).map((line) => (
+          {rest.slice(0, host ? 1 : 2).map((line) => (
             <p key={line} className="truncate text-[12px] text-secondary leading-4" title={line}>
               {line}
             </p>
           ))}
+          {host && (
+            <p className="flex min-w-0 gap-1 text-[12px] text-secondary leading-4">
+              <span className="shrink-0">Hosted by</span>
+              {hostHref ? (
+                <button
+                  type="button"
+                  title={host.label}
+                  className="lh-link lh-focus min-w-0 truncate rounded-sm"
+                  onClick={() => onSource(hostHref)}
+                >
+                  {host.label}
+                </button>
+              ) : (
+                <span className="truncate">{host.label}</span>
+              )}
+            </p>
+          )}
         </div>
       )}
       <div className="flex items-center gap-1.5">

@@ -270,6 +270,7 @@ function readCard(v: unknown): ChatCard | null {
     !(v.photo === undefined || v.photo === null || typeof v.photo === "string") ||
     !optional(v.price, num) ||
     !optional(v.href, str) ||
+    !optional(v.host, isSource) ||
     !optional(v.point, isPoint)
   )
     return null;
@@ -287,6 +288,12 @@ function readCard(v: unknown): ChatCard | null {
     ...(v.photo !== undefined && { photo: v.photo }),
     ...(v.price !== undefined && { price: v.price }),
     ...(v.href !== undefined && { href: v.href }),
+    ...(v.host && {
+      host: {
+        label: cut(v.host.label, 160),
+        ...(v.host.href !== undefined && { href: v.host.href }),
+      },
+    }),
     ...(v.point && { point: { lat: v.point.lat, lng: v.point.lng } }),
     ...(actions.length && { actions }),
   };

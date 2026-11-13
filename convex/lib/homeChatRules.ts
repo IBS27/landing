@@ -164,6 +164,7 @@ export const CHAT_CARD_KINDS = [
   "person",
   "draft",
   "negotiation",
+  "post",
 ] as const;
 export type ChatCardKind = (typeof CHAT_CARD_KINDS)[number];
 
@@ -185,6 +186,8 @@ export type ChatCard = {
   price?: number;
   /** A link inside the app to the thing itself. */
   href?: string;
+  /** The Group an Event or a post belongs to: "Hosted by …" or "In …", linked. */
+  host?: ChatSource;
   /** An approximate point, for showing it on the map. Never someone's address. */
   point?: { lat: number; lng: number };
   /** What the person can do from the card (at most two), each run only on their click. */
@@ -464,6 +467,31 @@ function withPrice(r: ChatRental): string {
 }
 
 type Routed = { text: string; command: ChatCommand; listingIds: string[] };
+
+/** "What's happening in …?" and its kin, with the words that name what it's in. */
+const GROUP_ASKS = [
+  /\bwhat(?:'|’)?s\s+(?:happening|going\s+on|new|up|planned)\s+(?:in|at|with|over\s+at)\s+(?:the\s+|my\s+|our\s+)?(.+?)[\s?.!]*$/i,
+  /\b(?:anything\s+(?:happening|going\s+on|new|planned)|any\s+(?:news|plans|posts|updates)|news|updates?|activity|recent\s+posts?)\s+(?:in|from|at)\s+(?:the\s+|my\s+|our\s+)?(.+?)[\s?.!]*$/i,
+];
+const NAMES_A_GROUP = /\b(?:groups?|clubs?|crews?)\b/i;
+
+/**
+ * The words naming the Group a message asks about ("what's happening in the
+ * climbing Group?" → "climbing"), or null when it asks nothing of the kind.
+ * "What's happening in the Mission?" asks about a neighborhood, not a Group,
+ * unless it says Group or club.
+ */
+export function groupAsked(message: string, neighborhoods: ChatNeighborhood[]): string | null {
+  const m = redactProtected(message).trim().slice(0, 300);
+  for (const ask of GROUP_ASKS) {
+    const phrase = ask.exec(m)?.[1]?.trim();
+    if (!phrase) continue;
+    if (!NAMES_A_GROUP.test(m) && findNeighborhoods(phrase, neighborhoods).length) return null;
+    const name = phrase.replace(/\s+(?:group|club)$/i, "").trim();
+    return name ? name.slice(0, 80) : null;
+  }
+  return null;
+}
 
 /**
  * The rules' answer, plus the listings it names (so the server can cite them).

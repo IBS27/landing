@@ -1107,6 +1107,60 @@ function withHouse(t: Record<string, Row[]>) {
 const EVENT_AT = new Date(NOW + 2 * DAY).toISOString();
 
 describe("homeChat.reply: Muse looks things up", () => {
+  test("informal plans: a Group post found, shown and cited, its Group named on the card", async () => {
+    const t = agentWorld();
+    t.posts = [
+      {
+        _id: "pHike",
+        authorId: "S",
+        groupId: "gPublic",
+        text: "Hike up Bernal Hill Saturday morning, all paces welcome",
+        media: [],
+        attachments: [],
+        privacy: "public",
+        createdAt: NOW - DAY,
+        reactionCount: 0,
+        commentCount: 2,
+        shareCount: 0,
+      },
+      {
+        _id: "pSecret",
+        authorId: "S",
+        groupId: "gPrivate",
+        text: "Members-only hike",
+        media: [],
+        attachments: [],
+        privacy: "public",
+        createdAt: NOW - DAY,
+        reactionCount: 0,
+        commentCount: 0,
+        shareCount: 0,
+      },
+    ];
+    replies.push(
+      [
+        { name: "search_events", args: { query: "hike" } },
+        { name: "search_group_posts", args: { query: "hike" } },
+      ],
+      muse({
+        text: "No hiking Event is planned, but FirstS posted in Mission Run Club about a hike up Bernal Hill on Saturday. It's a Group post, not an Event.",
+        show: ["post:pHike"],
+        sourceIds: ["group:gPublic"],
+      }),
+    );
+    const { reply, toolRuns } = await ask("any hikes planned this weekend?", t);
+    expect(toolRuns).toEqual(["search_events", "search_group_posts"]);
+    expect(reply.via).toBe("muse");
+    expect(reply.cards.map((c) => c.key)).toEqual(["post:pHike"]);
+    expect(reply.cards[0]).toMatchObject({ kind: "post", href: "/S/posts/pHike" });
+    expect(reply.sources).toContainEqual({ label: "Mission Run Club", href: "/groups/gpublic" });
+    expect(reply.sources).toContainEqual({
+      label: "FirstS's post in Mission Run Club",
+      href: "/S/posts/pHike",
+    });
+    expect(sent()).not.toContain("Members-only hike");
+  });
+
   test("a lookup, then an answer that shows what it found as a card code built", async () => {
     replies.push(
       [{ name: "search_marketplace", args: { vibe: "mid-century walnut", maxPrice: null } }],
@@ -1965,6 +2019,7 @@ const input = (over: Partial<HomeChatInput> = {}): HomeChatInput => ({
   rentals: [RENTAL],
   events: [],
   earlier: [],
+  group: null,
   pages: [],
   ...over,
 });

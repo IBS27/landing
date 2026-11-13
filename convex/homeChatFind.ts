@@ -18,6 +18,7 @@ import {
   type Found,
   type FoundKind,
   foundKey,
+  type GroupFacts,
   type HomeTool,
   type ListerFacts,
   listed,
@@ -37,7 +38,14 @@ import {
   placeSources,
   visibleGroups,
 } from "./lib/neighborhoodPage";
-import { type Audience, eventVisible, isSaved, listingShownTo, loadAudience } from "./lib/posts";
+import {
+  type Audience,
+  canView,
+  eventVisible,
+  isSaved,
+  listingShownTo,
+  loadAudience,
+} from "./lib/posts";
 import { redactProtected } from "./lib/protectedText";
 import { comparableLifestyles } from "./lib/roommates";
 import { hasTerm, matchListing } from "./lib/vibeMatch";
@@ -51,7 +59,7 @@ import type { Citations } from "./validators";
 /**
  * How Muse searches Landing in Landing Home's chat (#154): rentals, Marketplace
  * items, Events, Groups, places and landmarks, neighborhoods and Weekend
- * Routes. Every tool reads for the viewer only (blocks, privacy, membership),
+ * Routes, and posts in Groups (informal plans that aren't Events). Every tool reads for the viewer only (blocks, privacy, membership),
  * with bounded reads, and returns `Found` things (convex/lib/homeChatThings.ts):
  * the facts Muse reads, and the card and links code builds for the chat.
  *
@@ -87,6 +95,19 @@ const SOURCES_MAX = 3;
 const HOOD_THINGS = 3;
 /** The viewer's units read for a remembered look. */
 const UNITS_READ = 20;
+/** Groups whose posts one post search reads, and the newest posts read in each. */
+const POST_GROUPS_MAX = 12;
+const POSTS_PER_GROUP = 25;
+/** Members' Groups considered for a post search before the most active visible ones. */
+const MY_GROUPS_READ = 30;
+/** How far back posts are searched: the default, and the most. */
+const POST_DAYS = 14;
+const POST_DAYS_MAX = 60;
+/** A Group's upcoming Events, and its newest posts, read for its details. */
+const GROUP_EVENTS_SCAN = 40;
+const GROUP_THINGS = 3;
+const EXCERPT_MAX = 200;
+const CARD_EXCERPT_MAX = 140;
 const TITLE_MAX = 120;
 const ABOUT_MAX = 200;
 const DETAIL_MAX = 600;
@@ -695,9 +716,32 @@ async function eventOpen(s: Scope, e: Doc<"events">): Promise<boolean> {
   return (await s.ctx.db.get(e.hostId)) !== null;
 }
 
-/** An Event as Muse reads it and the chat shows it. */
-async function eventFound(s: Scope, e: Doc<"events">): Promise<Found> {
-  const [responses, going] = await Promise.all([s.responses(), goingCount(s, e)]);
+/**
+ * The Group hosting an Event, when the viewer can see that Group; null for
+ * one they can't (a hidden Group they aren't in stays unnamed).
+ */
+async function hostGroup(s: Scope, e: Doc<"events">): Promise<Doc<"groups"> | null> {
+  if (!e.groupId) return null;
+  const g = await s.ctx.db.get(e.groupId);
+  return g && groupOpen(s, g) ? g : null;
+}
+
+/**
+ * An Event as Muse reads it and the chat shows it, with the Group hosting it
+ * ("Hosted by …", linked, and cited with the Event). `host: false` leaves the
+ * Group out, for an Event listed under that Group's own details.
+ */
+async function eventFound(
+  s: Scope,
+  e: Doc<"events">,
+  { host: withHost = true }: { host?: boolean } = {},
+): Promise<Found> {
+  const [responses, going, host] = await Promise.all([
+    s.responses(),
+    goingCount(s, e),
+    withHost ? hostGroup(s, e) : null,
+  ]);
+  const hostFound = host && groupFound(s, host);
   const status = responses.get(e._id);
   const yourResponse = status === "going" || status === "interested" ? status : null;
   const title = cap(e.title, TITLE_MAX);
@@ -717,6 +761,7 @@ async function eventFound(s: Scope, e: Doc<"events">): Promise<Found> {
     online: e.online,
     going,
     category: cap(e.category, 40),
+    ...(host ? { hostedBy: groupRef(s, host) } : {}),
   };
   // A named venue is a public place; an address alone may be someone's home, so only its area.
   const point =
@@ -732,12 +777,19 @@ async function eventFound(s: Scope, e: Doc<"events">): Promise<Found> {
     ].filter(Boolean),
     photo: e.cover,
     href,
+    ...(hostFound?.link ? { host: hostFound.link } : {}),
     ...(point ? { point } : {}),
     ...(yourResponse || e.hostId === s.viewer._id
       ? {}
       : { actions: [rsvpAction({ id: e._id, title, startsAt }, "interested")] }),
   };
-  return { key, facts, link: { label: `${title} · ${eventDay(e.startAt)}`, href }, card };
+  return {
+    key,
+    facts,
+    link: { label: `${title} · ${eventDay(e.startAt)}`, href },
+    card,
+    ...(hostFound?.link ? { sources: [hostFound.link], related: [hostFound] } : {}),
+  };
 }
 
 type EventSearch = { neighborhood?: string; query?: string; withinDays?: number };
@@ -783,19 +835,33 @@ export async function findEvents(
 /** Visible Groups, plus hidden ones the viewer belongs to. */
 const groupOpen = (s: Scope, g: Doc<"groups">) => g.visible || s.audience.groups.has(g._id);
 
+/**
+ * Whether the viewer may read a Group's posts, as its Discussion feed decides:
+ * members always; others only in a public Group that isn't hidden.
+ */
+const postsOpen = (s: Scope, g: Doc<"groups">) =>
+  s.audience.groups.has(g._id) || (g.privacy === "public" && g.visible);
+
+/** A Group named by another thing's facts (an Event's host, a post's Group): the fields checks use. */
+function groupRef(s: Scope, g: Doc<"groups">): GroupFacts {
+  return {
+    kind: "group",
+    key: foundKey("group", g._id),
+    id: g._id,
+    name: cap(g.name, TITLE_MAX),
+    privacy: g.privacy,
+    joined: s.audience.groups.has(g._id),
+    neighborhood: slugOf(s, g.neighborhoodId),
+  };
+}
+
 function groupFound(s: Scope, g: Doc<"groups">): Found {
   const name = cap(g.name, TITLE_MAX);
   const joined = s.audience.groups.has(g._id);
   const key = foundKey("group", g._id);
   const href = `/groups/${g.slug}`;
   const facts: FactsOf<"group"> = {
-    kind: "group",
-    key,
-    id: g._id,
-    name,
-    privacy: g.privacy,
-    joined,
-    neighborhood: slugOf(s, g.neighborhoodId),
+    ...groupRef(s, g),
     members: g.memberCount,
     category: cap(g.category, 40),
     about: cap(g.description, ABOUT_MAX),
@@ -845,6 +911,278 @@ export async function findGroups(
   });
   matched.sort((x, y) => y.hits - x.hits || x.i - y.i);
   return matched.slice(0, TOOL_RESULTS_MAX).map(({ g }) => groupFound(s, g));
+}
+
+/* ───────────── Group posts ───────────── */
+
+const postDay = (ms: number) =>
+  new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: "America/Los_Angeles",
+  }).format(ms);
+
+const plural = (n: number, one: string) =>
+  `${n.toLocaleString("en-US")} ${one}${n === 1 ? "" : "s"}`;
+
+/**
+ * Whether a Group post shows to the viewer, as the Groups feed decides: a Group
+ * whose posts they may read, Facebook's audience rules (blocks either way,
+ * "only me"), an author still there, and some text to read.
+ */
+async function postOpen(s: Scope, p: Doc<"posts">, g: Doc<"groups">) {
+  if (p.groupId !== g._id || !postsOpen(s, g) || p.sponsored || !p.text?.trim()) return null;
+  if (!(await canView(s.ctx, p, s.audience))) return null;
+  const author = await s.ctx.db.get(p.authorId);
+  return author && author.kind !== "page" ? author : null;
+}
+
+/**
+ * A Group post as Muse reads it and the chat shows it: the Group, a short
+ * cleaned excerpt, the author's first name, when, how many comments, and a
+ * link to the post. Never where anyone is, nor how to reach them.
+ */
+function postFound(s: Scope, p: Doc<"posts">, g: Doc<"groups">, author: Doc<"users">): Found {
+  const group = groupFound(s, g);
+  const by = firstName(author);
+  const where = cap(g.name, 80);
+  const excerpt = cap(p.text ?? "", EXCERPT_MAX);
+  const key = foundKey("post", p._id);
+  const href = `/${encodeURIComponent(author.username)}/posts/${p._id}`;
+  const label = `${by}'s post in ${where}`;
+  const facts: FactsOf<"post"> = {
+    kind: "post",
+    key,
+    id: p._id,
+    group: groupRef(s, g),
+    author: by,
+    postedAt: new Date(p.createdAt).toISOString(),
+    excerpt,
+    comments: p.commentCount,
+  };
+  const card: ChatCard = {
+    key,
+    kind: "post",
+    title: label,
+    lines: [
+      `“${excerpt.length > CARD_EXCERPT_MAX ? `${excerpt.slice(0, CARD_EXCERPT_MAX - 1).trimEnd()}…` : excerpt}”`,
+      `Posted ${postDay(p.createdAt)} · ${plural(p.commentCount, "comment")}`,
+      "A Group post, not an Event",
+    ],
+    href,
+  };
+  return {
+    key,
+    facts,
+    link: { label, href },
+    card,
+    ...(group.link ? { sources: [group.link] } : {}),
+    related: [group],
+  };
+}
+
+/** A Group's newest posts the viewer may read, since `since`, newest first. */
+async function groupPosts(
+  s: Scope,
+  g: Doc<"groups">,
+  since: number,
+  take = POSTS_PER_GROUP,
+): Promise<Doc<"posts">[]> {
+  if (!postsOpen(s, g)) return [];
+  return s.ctx.db
+    .query("posts")
+    .withIndex("by_group", (q) => q.eq("groupId", g._id).gte("createdAt", since))
+    .order("desc")
+    .take(take);
+}
+
+/** A Group Muse named by id, slug or key, if the viewer may read its posts. */
+async function groupNamed(s: Scope, ref: string): Promise<Doc<"groups">> {
+  const raw = ref.startsWith("group:") ? ref.slice("group:".length) : ref;
+  const id = s.ctx.db.normalizeId("groups", raw);
+  const g =
+    (id && (await s.ctx.db.get(id))) ||
+    (await s.ctx.db
+      .query("groups")
+      .withIndex("by_slug", (q) => q.eq("slug", raw))
+      .first());
+  // The same answer for a Group that doesn't exist and one they can't read, so neither leaks.
+  if (!g || !groupOpen(s, g) || !postsOpen(s, g))
+    throw new ConvexError(
+      `There is no Group "${raw.slice(0, 60)}" whose posts they can read. Use a Group's id or slug from search_groups.`,
+    );
+  return g;
+}
+
+/**
+ * The Groups a post search reads, most relevant first: one Group, a
+ * neighborhood's Groups, or the viewer's own Groups and then the most active
+ * visible ones. At most `POST_GROUPS_MAX`, each one whose posts they may read.
+ */
+async function postGroups(
+  s: Scope,
+  a: { group?: string; neighborhood?: string },
+): Promise<Doc<"groups">[]> {
+  if (a.group !== undefined) return [await groupNamed(s, a.group)];
+  const out = new Map<Id<"groups">, Doc<"groups">>();
+  const add = (g: Doc<"groups"> | null) => {
+    if (g && out.size < POST_GROUPS_MAX && groupOpen(s, g) && postsOpen(s, g)) out.set(g._id, g);
+  };
+  if (a.neighborhood !== undefined) {
+    const hood = needHood(s, a.neighborhood);
+    const rows = await s.ctx.db
+      .query("groups")
+      .withIndex("by_neighborhood", (q) => q.eq("neighborhoodId", hood._id))
+      .order("desc")
+      .take(GROUP_SCAN);
+    for (const g of rows) add(g);
+    return [...out.values()];
+  }
+  const mine = await Promise.all(
+    [...s.audience.groups].slice(0, MY_GROUPS_READ).map((id) => s.ctx.db.get(id)),
+  );
+  for (const g of mine
+    .filter((g): g is Doc<"groups"> => g !== null)
+    .sort((x, y) => y.lastActivityAt - x.lastActivityAt))
+    add(g);
+  if (out.size < POST_GROUPS_MAX) {
+    const active = await s.ctx.db
+      .query("groups")
+      .withIndex("by_activity")
+      .order("desc")
+      .take(GROUP_SCAN);
+    for (const g of active) add(g);
+  }
+  return [...out.values()];
+}
+
+type PostSearch = { group?: string; neighborhood?: string; query?: string; withinDays?: number };
+
+/**
+ * Recent posts in Groups the viewer may read: informal plans and notes (a
+ * hike, a game night) that aren't Events. Newest first; with `query`, the
+ * best matches first. Reads are bounded: at most `POST_GROUPS_MAX` Groups and
+ * `POSTS_PER_GROUP` posts each, by index.
+ */
+export async function findGroupPosts(
+  ctx: QueryCtx,
+  viewer: ToolViewer,
+  a: PostSearch = {},
+): Promise<Found[]> {
+  const s = await scopeOf(ctx, viewer);
+  const groups = await postGroups(s, a);
+  const since = s.now - Math.min(a.withinDays ?? POST_DAYS, POST_DAYS_MAX) * DAY;
+  const words = terms(a.query);
+  const rows = await Promise.all(
+    groups.map(async (g) => ({ g, posts: await groupPosts(s, g, since) })),
+  );
+  const matched = rows.flatMap(({ g, posts }) =>
+    posts.flatMap((p) => {
+      const hits = named(p.text ?? "", words);
+      return words.length && hits.length === 0 ? [] : [{ p, g, hits: hits.length }];
+    }),
+  );
+  matched.sort((x, y) => y.hits - x.hits || y.p.createdAt - x.p.createdAt);
+  const found: Found[] = [];
+  for (const { p, g } of matched) {
+    if (found.length >= TOOL_RESULTS_MAX) break;
+    const author = await postOpen(s, p, g);
+    if (author) found.push(postFound(s, p, g, author));
+  }
+  return found;
+}
+
+/**
+ * What's happening in a Group, for the viewer: its next `GROUP_THINGS`
+ * upcoming Events they can see, and its newest `GROUP_THINGS` posts they may
+ * read (none when its posts are for members and they aren't one).
+ */
+async function groupActivity(
+  s: Scope,
+  g: Doc<"groups">,
+): Promise<{ events: Found[]; posts: Found[] }> {
+  const [eventRows, postRows] = await Promise.all([
+    s.ctx.db
+      .query("events")
+      .withIndex("by_group", (q) => q.eq("groupId", g._id).gt("startAt", s.now - EVENT_LOOKBACK_MS))
+      .take(GROUP_EVENTS_SCAN),
+    groupPosts(s, g, 0, POSTS_PER_GROUP),
+  ]);
+  const events: Found[] = [];
+  for (const e of eventRows) {
+    if (events.length >= GROUP_THINGS) break;
+    if (notOver(e, s.now) && (await eventOpen(s, e)))
+      events.push(await eventFound(s, e, { host: false }));
+  }
+  const posts: Found[] = [];
+  for (const p of postRows) {
+    if (posts.length >= GROUP_THINGS) break;
+    const author = await postOpen(s, p, g);
+    if (author) posts.push(postFound(s, p, g, author));
+  }
+  return { events, posts };
+}
+
+/** A Group with what's happening in it: the facts gain `upcomingEvents` and `recentPosts`. */
+async function groupInDepth(s: Scope, g: Doc<"groups">): Promise<Found> {
+  const found = groupFound(s, g);
+  const { events, posts } = await groupActivity(s, g);
+  return {
+    ...found,
+    facts: {
+      ...found.facts,
+      upcomingEvents: events.map((f) => f.facts as Json),
+      recentPosts: posts.map((f) => f.facts as Json),
+      ...(postsOpen(s, g) ? {} : { postsNote: "Its posts are for members only." }),
+    } as Found["facts"],
+    related: [...events, ...posts],
+  };
+}
+
+/** Words that only say a message is about a Group's activity, not which Group. */
+const ACTIVITY_WORDS = new Set(
+  "group groups club whats what happening going on new up planned plans lately latest posts post events event this week weekend".split(
+    " ",
+  ),
+);
+
+/**
+ * The Group a message asks about ("what's happening in the climbing Group?"),
+ * with its upcoming Events and recent posts, or null. `phrase` is the words
+ * naming it (`groupAsked` in convex/lib/homeChatRules.ts). Picks the Group the
+ * viewer can see whose name, category or tags hold every one of those words,
+ * their own Groups first, then the most active; reads are bounded.
+ */
+export async function groupAskedAbout(
+  ctx: QueryCtx,
+  viewer: ToolViewer,
+  phrase: string,
+): Promise<Found | null> {
+  const s = await scopeOf(ctx, viewer);
+  const words = terms(phrase).filter((w) => !ACTIVITY_WORDS.has(w));
+  if (!words.length) return null;
+  const mine = await Promise.all(
+    [...s.audience.groups].slice(0, MY_GROUPS_READ).map((id) => ctx.db.get(id)),
+  );
+  const active = await ctx.db
+    .query("groups")
+    .withIndex("by_activity")
+    .order("desc")
+    .take(GROUP_SCAN);
+  const all = (text: string) => named(text, words).length === words.length;
+  // Best first: the name says it all, then a Group they're in, then one whose posts they can read.
+  const rank = (g: Doc<"groups">) =>
+    (all(g.name) ? 4 : 0) + (s.audience.groups.has(g._id) ? 2 : 0) + (postsOpen(s, g) ? 1 : 0);
+  const seen = new Set<Id<"groups">>();
+  const candidates = [...mine, ...active].filter((g): g is Doc<"groups"> => {
+    if (!g || seen.has(g._id)) return false;
+    seen.add(g._id);
+    return groupOpen(s, g) && all(`${g.name} ${g.category} ${g.tags.join(" ")}`);
+  });
+  // A stable sort keeps the newest activity first among equals.
+  const g = candidates.sort((x, y) => rank(y) - rank(x))[0];
+  return g ? groupInDepth(s, g) : null;
 }
 
 /* ───────────── Places and landmarks ───────────── */
@@ -1381,7 +1719,7 @@ async function details(ctx: QueryCtx, viewer: ToolViewer, key: string): Promise<
   const id = ctx.db.normalizeId("groups", k.id);
   const g = id && (await ctx.db.get(id));
   if (!g || !groupOpen(s, g)) throw gone;
-  return more(groupFound(s, g), {
+  return more(await groupInDepth(s, g), {
     about: cap(g.description, DETAIL_MAX),
     rules: g.rules.slice(0, 6).map((r) => cap(r.title, 80)),
     tags: g.tags.slice(0, 8).map((t) => cap(t, 30)),
@@ -1454,7 +1792,7 @@ async function weekendRoute(ctx: QueryCtx, viewer: ToolViewer, slug: string) {
  */
 export const RECALL_FIND: Pick<
   Record<FoundKind, Recall>,
-  "listing" | "event" | "group" | "place" | "neighborhood"
+  "listing" | "event" | "group" | "place" | "neighborhood" | "post"
 > = {
   listing: async (ctx, viewer, id) => {
     const s = await scopeOf(ctx, viewer);
@@ -1475,6 +1813,15 @@ export const RECALL_FIND: Pick<
     const groupId = ctx.db.normalizeId("groups", id);
     const g = groupId && (await ctx.db.get(groupId));
     return g && groupOpen(s, g) ? groupFound(s, g) : null;
+  },
+  post: async (ctx, viewer, id) => {
+    const s = await scopeOf(ctx, viewer);
+    const postId = ctx.db.normalizeId("posts", id);
+    const p = postId && (await ctx.db.get(postId));
+    const g = p?.groupId && (await ctx.db.get(p.groupId));
+    if (!p || !g || !groupOpen(s, g)) return null;
+    const author = await postOpen(s, p, g);
+    return author && postFound(s, p, g, author);
   },
   place: async (ctx, viewer, id) => placeByKey(await scopeOf(ctx, viewer), id),
   neighborhood: async (ctx, viewer, id) => {
@@ -1556,7 +1903,7 @@ export const FIND_TOOLS: readonly HomeTool[] = [
   {
     name: "search_events",
     description:
-      'Upcoming Events the person can see, soonest first. neighborhood is a slug; query is words to look for ("run club", "trivia"); withinDays is how far ahead (default 30, at most 90). Each says whether they\'ve responded.',
+      'Upcoming Events the person can see, soonest first. neighborhood is a slug; query is words to look for ("run club", "trivia"); withinDays is how far ahead (default 30, at most 90). Each says whether they\'ve responded, and hostedBy is the Group hosting it, when there is one. Plans people post in a Group without making an Event are found with search_group_posts.',
     args: v.object({
       neighborhood: v.optional(v.string()),
       query: v.optional(v.string()),
@@ -1585,6 +1932,31 @@ export const FIND_TOOLS: readonly HomeTool[] = [
         query: text(a.query, 100),
       });
       return { result: listed(found), found };
+    },
+  },
+  {
+    name: "search_group_posts",
+    description:
+      'Recent posts in Groups the person can read: informal plans and news that aren\'t Events ("anyone up for a hike Saturday?", "board games at mine"). Newest first; with query, the best matches first. group is one Group\'s id or slug (from search_groups); neighborhood is a slug; query is words to look for ("hike", "board games"); withinDays is how far back (default 14, at most 60). Each post has its Group, the author\'s first name, when it was posted, a short excerpt and its comment count. A post is not an Event: there is nothing to RSVP to.',
+    args: v.object({
+      group: v.optional(v.string()),
+      neighborhood: v.optional(v.string()),
+      query: v.optional(v.string()),
+      withinDays: v.optional(v.number()),
+    }),
+    run: async (ctx, viewer, a) => {
+      const found = await findGroupPosts(ctx, viewer, {
+        group: text(a.group, 120),
+        neighborhood: text(a.neighborhood, 80),
+        query: text(a.query, 100),
+        withinDays: positive(a.withinDays, "withinDays", POST_DAYS_MAX),
+      });
+      return {
+        result: listed(found, {
+          note: "These are posts, not Events. Cite each post you mention by its key, and the Group's key when you name it.",
+        }),
+        found,
+      };
     },
   },
   {
@@ -1622,7 +1994,7 @@ export const FIND_TOOLS: readonly HomeTool[] = [
   {
     name: "get_details",
     description:
-      "More about one thing from earlier results, by its key (listing:…, event:… or group:…): the description; for a rental its details, lister and Landing's things to check; for an item its condition and seller; for an Event its host and counts; for a Group its rules.",
+      "More about one thing from earlier results, by its key (listing:…, event:… or group:…): the description; for a rental its details, lister and Landing's things to check; for an item its condition and seller; for an Event its host and counts; for a Group its rules, its next upcoming Events (upcomingEvents) and its newest posts (recentPosts). Use it on a Group for \"what's happening in <Group>\".",
     args: v.object({ key: v.string() }),
     run: async (ctx, viewer, a) => {
       const found = await details(ctx, viewer, text(a.key, 120) ?? "");
