@@ -5,6 +5,7 @@ import type { MutationCtx, QueryCtx } from "../_generated/server";
 import type { Citations, ProposalPayload } from "../validators";
 import { dmBlockNotice } from "./blocks";
 import { assertCitable, resolveCitations } from "./citations";
+import { crewMateIds } from "./crewMembers";
 import { notify } from "./notify";
 import { type Audience, loadAudience } from "./posts";
 import { friendIds } from "./users";
@@ -98,13 +99,13 @@ export async function assertPayload(
       if (p.startAt < Date.now()) throw new ConvexError("The event is in the past");
       if (p.groupId && !(await inGroup(ctx, p.groupId, ownerId)))
         throw new ConvexError("You're not in this group");
-      return assertFriends(ctx, ownerId, p.inviteIds);
+      return assertInvitable(ctx, ownerId, p.inviteIds);
     }
     case "group": {
       const name = p.name.trim();
       if (!name) throw new ConvexError("Name the group");
       if (name.length > 75) throw new ConvexError("Group names can be up to 75 characters");
-      return assertFriends(ctx, ownerId, p.inviteIds);
+      return assertInvitable(ctx, ownerId, p.inviteIds);
     }
   }
 }
@@ -160,9 +161,18 @@ export function statesAmount(text: string, amount: number): boolean {
   );
 }
 
-async function assertFriends(ctx: MutationCtx, ownerId: Id<"users">, ids: Id<"users">[]) {
+/**
+ * Muse invites only the owner's friends, or people in their Move-in Crew (#30,
+ * #31): crew members opted in to being matched, but aren't friends yet. Checked
+ * again on approval, so someone who left the crew can't be invited.
+ */
+async function assertInvitable(ctx: MutationCtx, ownerId: Id<"users">, ids: Id<"users">[]) {
   const friends = new Set(await friendIds(ctx, ownerId));
-  if (ids.some((id) => !friends.has(id))) throw new ConvexError("Muse can only invite friends");
+  const others = ids.filter((id) => !friends.has(id));
+  if (others.length === 0) return;
+  const crew = await crewMateIds(ctx, ownerId);
+  if (others.some((id) => !crew.has(id)))
+    throw new ConvexError("Muse can only invite your friends or your Move-in Crew");
 }
 
 /**
