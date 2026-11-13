@@ -4,6 +4,13 @@ import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { recordSignal, undoSignal } from "./lib/activity";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { activityLabel, externalPostsPerDay } from "./lib/groupActivity";
+import {
+  admitToHouse,
+  assertCanSeeGroupAsHouse,
+  canSeeGroupAsHouse,
+  declineHouseInvite,
+  inviteThroughHouse,
+} from "./lib/houseAccess";
 import { checkPoint, neighborhoodIdAt } from "./lib/neighborhoods";
 import { notify } from "./lib/notify";
 import { canView, enrichPosts, eventVisible, loadAudience } from "./lib/posts";
@@ -298,6 +305,8 @@ export const get = viewerQuery({
     const g = await resolveGroup(ctx, idOrSlug);
     if (!g) return null;
     const viewerId = ctx.viewer._id;
+    // A House Group (#38) shows only to the people who live there and those invited.
+    if (!(await canSeeGroupAsHouse(ctx, g._id, viewerId))) return null;
     const [members, friendList, stats, creator, invites] = await Promise.all([
       groupMembers(ctx, g._id),
       friendIds(ctx, viewerId),
@@ -434,6 +443,8 @@ export const members = viewerQuery({
   handler: async (ctx, { groupId, q }) => {
     const g = await requireGroup(ctx, groupId);
     const viewerId = ctx.viewer._id;
+    // Who lives in a House Group (#38) is for its members and invitees.
+    await assertCanSeeGroupAsHouse(ctx, groupId, viewerId);
     const rows = await groupMembers(ctx, groupId);
     const isMember = rows.some((m) => m.userId === viewerId);
     const friends = new Set(await friendIds(ctx, viewerId));
@@ -527,6 +538,9 @@ export const events = viewerQuery({
   args: { groupId: v.id("groups") },
   handler: async (ctx, { groupId }) => {
     await requireGroup(ctx, groupId);
+    // A House Group's (#38) Events are for the people who live there.
+    if (!(await canSeeGroupAsHouse(ctx, groupId, ctx.viewer._id, true)))
+      return { upcoming: [], past: [] };
     const rows = await ctx.db
       .query("events")
       .withIndex("by_group", (q) => q.eq("groupId", groupId))
@@ -571,6 +585,8 @@ export const events = viewerQuery({
 export const inviteCandidates = viewerQuery({
   args: { groupId: v.id("groups") },
   handler: async (ctx, { groupId }) => {
+    // Who's in or invited to a House Group (#38) is for the people who live there.
+    if (!(await canSeeGroupAsHouse(ctx, groupId, ctx.viewer._id, true))) return [];
     const ids = await friendIds(ctx, ctx.viewer._id);
     const summaries = await getSummaries(ctx, ids);
     const rows = await Promise.all(
@@ -666,6 +682,8 @@ export const join = viewerMutation({
     const g = await requireGroup(ctx, groupId);
     const viewerId = ctx.viewer._id;
     if (await membership(ctx, groupId, viewerId)) return;
+    // A House Group (#38) is invite-only; this uses the invite up.
+    await admitToHouse(ctx, groupId, viewerId);
     const now = Date.now();
     await ctx.db.insert("groupMembers", {
       groupId,
@@ -694,7 +712,11 @@ export const leave = viewerMutation({
 /** Decline an invitation (removes the invite notifications). */
 export const declineInvite = viewerMutation({
   args: { groupId: v.id("groups") },
-  handler: async (ctx, { groupId }) => clearInvites(ctx, ctx.viewer._id, groupId),
+  handler: async (ctx, { groupId }) => {
+    await clearInvites(ctx, ctx.viewer._id, groupId);
+    // Declining a House Group (#38) withdraws the house invite too.
+    await declineHouseInvite(ctx, groupId, ctx.viewer._id);
+  },
 });
 
 /** Stamp the viewer's last visit ("You last visited …"). Throttled to once a minute. */
@@ -715,6 +737,8 @@ export const invite = viewerMutation({
     const viewerId = ctx.viewer._id;
     if (!(await membership(ctx, groupId, viewerId)))
       throw new ConvexError("Join the group to invite friends");
+    // A House Group's (#38) invites follow the house's rules and are sent there.
+    if (await inviteThroughHouse(ctx, g, viewerId, userIds)) return;
     for (const userId of new Set(userIds)) {
       if (await membership(ctx, groupId, userId)) continue;
       if (await alreadyInvited(ctx, groupId, userId)) continue;

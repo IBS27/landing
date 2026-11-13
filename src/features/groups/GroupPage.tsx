@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { groupParams } from "@/features/feed/links";
 import { CoverWash } from "@/features/posts/CoverWash";
+import { HouseBanner } from "@/landing/living/HouseBanner";
 import { usePageTitle } from "@/layout/DocumentTitle";
 import { cn } from "@/lib/format";
 import {
@@ -58,6 +59,7 @@ export function GroupPage() {
         <GroupHeader group={group} />
         <div className="mx-auto w-full max-w-[1250px] px-4 pt-3 pb-10 min-[1250px]:px-8">
           {group.invite && <InviteBanner group={group} />}
+          <HouseBanner groupId={group._id} />
           <Outlet />
         </div>
       </div>
