@@ -42,7 +42,9 @@ export const unitScene = v.object({
 });
 export const placement = v.object({
   id: v.string(),
+  /** Where the item came from: a Marketplace listing or something the owner owns (#131). At most one. */
   listingId: v.optional(v.id("listings")),
+  ownedItemId: v.optional(v.id("ownedItems")),
   label: v.string(),
   kind: v.union(v.literal("sofa"), v.literal("bed"), v.literal("table"), v.literal("storage")),
   x: v.number(),
@@ -66,6 +68,16 @@ export type UnitScene = Infer<typeof unitScene>;
 export type Placement = Infer<typeof placement>;
 export type SceneSource = Infer<typeof sceneSource>;
 export type Point = Infer<typeof point>;
+export type ItemKind = Placement["kind"];
+export const ITEM_KINDS: readonly ItemKind[] = ["sofa", "bed", "table", "storage"];
+/** Placeholder proxy size in meters for an item without entered dimensions. */
+export function itemSize(kind: ItemKind) {
+  return {
+    width: kind === "sofa" ? 2 : 1.4,
+    depth: kind === "bed" ? 2 : 0.8,
+    height: kind === "table" ? 0.75 : 0.9,
+  };
+}
 export type Wall = UnitScene["walls"][number];
 export const MAX_SOURCES = 20;
 const EPS = 0.001;

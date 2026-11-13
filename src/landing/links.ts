@@ -99,9 +99,19 @@ export function toRoom(room: Ref<"rooms">) {
 }
 
 /**
- * The 3D unit (#37): a saved one, a new one started from a rental, or (neither
- * given) the start page, which begins from the person's place.
+ * The 3D unit (#37): a saved one, a new one started from a rental, or (none
+ * given) the start page, which begins from the person's place. With `room`,
+ * opens that room's unit (or offers to create it). `placeItem` or
+ * `placeListing` arrives with that item ready to place (#131).
  */
-export function toUnit(unit: { unit?: Id<"unitScenes">; listing?: Id<"listings"> } = {}) {
+export function toUnit(
+  unit: {
+    unit?: Id<"unitScenes">;
+    listing?: Id<"listings">;
+    room?: Id<"rooms">;
+    placeItem?: Id<"ownedItems">;
+    placeListing?: Id<"listings">;
+  } = {},
+) {
   return linkOptions({ to: "/landing/place/unit", search: unit });
 }

@@ -23,6 +23,7 @@ import schema from "./schema";
 import { seedCityProfiles } from "./seed/cityProfiles";
 import { DAY } from "./seed/lib/time";
 import { buildPlan } from "./seed/plan";
+import { ownedItemSeeds } from "./seed/world/ownedItems";
 import { roommateLifestyles } from "./seed/world/roommateLifestyles";
 import { roomSeeds } from "./seed/world/rooms";
 import { type Citations, reactionType } from "./validators";
@@ -88,6 +89,40 @@ export const insertRooms = internalMutation({
       n++;
     }
     return n;
+  },
+});
+/** Owned items (#27) for the personas in `seed/world/ownedItems.ts`, with listing photos. */
+export const insertOwnedItems = internalMutation({
+  args: {
+    now: v.number(),
+    rows: v.array(
+      v.object({
+        userId: v.id("users"),
+        bought: v.optional(
+          v.object({ listingId: v.id("listings"), conversationId: v.id("conversations") }),
+        ),
+        saleListingId: v.optional(v.id("listings")),
+      }),
+    ),
+  },
+  handler: async (ctx, { now, rows }) => {
+    for (const [i, r] of rows.entries()) {
+      const s = ownedItemSeeds[i];
+      const at = now - s.daysAgo * DAY;
+      const from = r.bought?.listingId ?? r.saleListingId;
+      const listing = from ? await ctx.db.get(from) : null;
+      await ctx.db.insert("ownedItems", {
+        userId: r.userId,
+        title: s.title,
+        price: s.price,
+        acquiredAt: at,
+        photos: listing?.photos.slice(0, 10) ?? [],
+        source: r.bought ? { kind: "marketplace", ...r.bought } : { kind: "manual" },
+        saleListingId: r.saleListingId,
+        createdAt: at,
+      });
+    }
+    return rows.length;
   },
 });
 export const insertFriendships = internalMutation({
@@ -664,6 +699,19 @@ export const reset = internalAction({
       }),
     ]);
 
+    // 8b. Owned items (#27), after listings and the chats purchases were agreed in.
+    const ownedItems: number = await ctx.runMutation(internal.seed.insertOwnedItems, {
+      now: Date.now(),
+      rows: ownedItemSeeds.map((o) => ({
+        userId: uid(o.username),
+        bought: o.bought && {
+          listingId: lid(o.bought.listing),
+          conversationId: lookup(CV, o.bought.conversation, "conversation"),
+        },
+        saleListingId: o.selling ? lid(o.selling) : undefined,
+      })),
+    });
+
     // 9. Landing City Profiles for the personas.
     const cityProfileFacts: number = await ctx.runMutation(internal.seed.insertCityProfiles, {
       now: Date.now(),
@@ -721,6 +769,7 @@ export const reset = internalAction({
         events: plan.events.length,
         cityProfileFacts,
         rooms,
+        ownedItems,
         eventResponses: plan.eventResponses.length,
         posts: plan.posts.length,
         comments: plan.posts.reduce((s, p) => s + p.comments.length, 0),

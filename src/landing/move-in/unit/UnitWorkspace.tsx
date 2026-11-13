@@ -1,7 +1,8 @@
 import { Component, type ErrorInfo, type ReactNode, useState } from "react";
 import { Button, Card, Spinner } from "@/ui/primitives";
-import type { Doc, Id } from "../../../../convex/_generated/dataModel";
+import type { Doc } from "../../../../convex/_generated/dataModel";
 import { isStarterScene } from "../../../../convex/lib/unitGeneration";
+import type { PickerItem } from "./ItemPicker";
 import { type UnitDraft, UnitEditor } from "./UnitEditor";
 
 type Job = {
@@ -17,6 +18,9 @@ export function UnitWorkspace({
   onAccept,
   onSave,
   items,
+  placing = false,
+  pick,
+  pickMissing,
   sources,
 }: {
   doc: Doc<"unitScenes">;
@@ -25,14 +29,22 @@ export function UnitWorkspace({
   onGenerate: (detailsOnly: boolean) => Promise<unknown>;
   onAccept: () => Promise<unknown>;
   onSave: (draft: UnitDraft, revision: number) => Promise<number>;
-  items?: { id: Id<"listings">; title: string }[];
+  /** What can be placed (#131); undefined while loading. */
+  items?: PickerItem[];
+  /** Opened from "Place in my room": skip the starter screen so the picker shows. */
+  placing?: boolean;
+  /** Picker key to start with, once resolved. */
+  pick?: string;
+  /** The linked item can't be placed. */
+  pickMissing?: boolean;
   sources: ReactNode;
 }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [dirty, setDirty] = useState(false);
-  const [manual, setManual] = useState(false);
-  const [showSaved, setShowSaved] = useState(false);
+  const [manual, setManual] = useState(placing);
+  // A linked pick opens the editable saved layout, not a generated preview.
+  const [showSaved, setShowSaved] = useState(placing);
   const running =
     job?.status === "queued" ||
     job?.status === "running" ||
@@ -162,6 +174,8 @@ export function UnitWorkspace({
             onDirtyChange={setDirty}
             onSave={preview || running ? undefined : onSave}
             items={items}
+            pick={pick}
+            pickMissing={pickMissing}
             sidebar={sources}
           />
         </ViewerBoundary>
