@@ -3817,6 +3817,13 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
       w: 1024,
     },
     {
+      path: "/seed/listings/bronze-lamp-01.jpg",
+      topic: "bronze lamp",
+      tags: ["lamp", "lighting", "household", "bronze lamp", "table lamp"],
+      h: 623,
+      w: 341,
+    },
+    {
       path: "/seed/listings/butcher-block-cart-01.jpg",
       topic: "butcher block cart",
       tags: ["butcher block cart", "butcher's block"],
@@ -4076,6 +4083,13 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
       tags: ["crash pad", "bouldering crash pad"],
       h: 927,
       w: 1280,
+    },
+    {
+      path: "/seed/listings/cypress-poster-01.jpg",
+      topic: "cypress poster",
+      tags: ["poster", "wall art", "print", "cypress poster", "wheat field with cypresses"],
+      h: 477,
+      w: 599,
     },
     {
       path: "/seed/listings/dell-monitor-01.jpg",
@@ -5073,6 +5087,26 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
       w: 1050,
     },
     {
+      path: "/seed/listings/portrait-poster-01.jpg",
+      topic: "portrait poster",
+      tags: [
+        "poster",
+        "wall art",
+        "print",
+        "portrait poster",
+        "self-portrait with a straw hat (obverse: the potato peeler)",
+      ],
+      h: 625,
+      w: 502,
+    },
+    {
+      path: "/seed/listings/pottery-lamp-01.jpg",
+      topic: "pottery lamp",
+      tags: ["lamp", "lighting", "household", "pottery lamp", "table lamp"],
+      h: 625,
+      w: 500,
+    },
+    {
       path: "/seed/listings/power-drill-01.jpg",
       topic: "power drill",
       tags: ["power drill", "dewalt dcd797 impact drill (51634743390)"],
@@ -5260,6 +5294,13 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
       w: 1280,
     },
     {
+      path: "/seed/listings/socrates-poster-01.jpg",
+      topic: "socrates poster",
+      tags: ["poster", "wall art", "print", "socrates poster", "the death of socrates"],
+      h: 399,
+      w: 599,
+    },
+    {
       path: "/seed/listings/sofa-01.jpg",
       topic: "sofa",
       tags: ["sofa", "burgundy leather sofa set"],
@@ -5391,6 +5432,13 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
       w: 1280,
     },
     {
+      path: "/seed/listings/sunflowers-poster-01.jpg",
+      topic: "sunflowers poster",
+      tags: ["poster", "wall art", "print", "sunflowers poster", "sunflowers"],
+      h: 423,
+      w: 599,
+    },
+    {
       path: "/seed/listings/switch-oled-01.jpg",
       topic: "switch oled",
       tags: ["switch oled", "nintendo switch oled model - 3"],
@@ -5490,6 +5538,19 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
       tags: ["velvet loveseat", "canapé à la reine (louvre, oa 10495)"],
       h: 960,
       w: 1280,
+    },
+    {
+      path: "/seed/listings/wave-poster-01.jpg",
+      topic: "wave poster",
+      tags: [
+        "poster",
+        "wall art",
+        "print",
+        "wave poster",
+        "under the wave off kanagawa (kanagawa oki nami ura), also known as the great wave, from the series thirty-six views of mount fuji (fugaku sanjūrokkei)",
+      ],
+      h: 403,
+      w: 600,
     },
     {
       path: "/seed/listings/weber-grill-01.jpg",

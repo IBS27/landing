@@ -1,7 +1,8 @@
 # Seed image attribution
 
 Images in `public/seed/` are used as fictional seed data. Each file below lists its
-source, creator and license. Images come from Flickr (via Openverse) and Wikimedia Commons
+source, creator and license. Images come from Flickr (via Openverse), Wikimedia Commons
+and The Metropolitan Museum of Art
 and are Creative Commons or public-domain licensed (CC0, CC BY, CC BY-SA, Public Domain);
 they were resized and re-encoded (EXIF stripped, and `pages/` center-cropped to square).
 Avatars come from [randomuser.me](https://randomuser.me/), which provides its portraits free
@@ -865,3 +866,16 @@ Game key art is original artwork rendered by `scripts/game-art`. These covers co
 ## Rental reference units
 
 The same-unit photo sets and published floor plans under `rentals/` are attributed separately in `rentals/ATTRIBUTION.md` and the per-unit source catalog `convex/seed/rentalMedia.json`. These references are distinct from the general stock-photo library above.
+
+## Apartment poster additions
+
+- `listings/wave-poster-01.jpg`: [Under the Wave off Kanagawa (Kanagawa oki nami ura), also known as The Great Wave, from the series Thirty-six Views of Mount Fuji (Fugaku sanjūrokkei)](https://www.metmuseum.org/art/collection/search/45434) by Katsushika Hokusai, [CC0](https://creativecommons.org/publicdomain/zero/1.0/). Resized and re-encoded.
+- `listings/cypress-poster-01.jpg`: [Wheat Field with Cypresses](https://www.metmuseum.org/art/collection/search/436535) by Vincent van Gogh, [CC0](https://creativecommons.org/publicdomain/zero/1.0/). Resized and re-encoded.
+- `listings/sunflowers-poster-01.jpg`: [Sunflowers](https://www.metmuseum.org/art/collection/search/436524) by Vincent van Gogh, [CC0](https://creativecommons.org/publicdomain/zero/1.0/). Resized and re-encoded.
+- `listings/socrates-poster-01.jpg`: [The Death of Socrates](https://www.metmuseum.org/art/collection/search/436105) by Jacques Louis David, [CC0](https://creativecommons.org/publicdomain/zero/1.0/). Resized and re-encoded.
+- `listings/portrait-poster-01.jpg`: [Self-Portrait with a Straw Hat (obverse: The Potato Peeler)](https://www.metmuseum.org/art/collection/search/436532) by Vincent van Gogh, [CC0](https://creativecommons.org/publicdomain/zero/1.0/). Resized and re-encoded.
+
+## Apartment lamp additions
+
+- `listings/bronze-lamp-01.jpg`: [Table lamp](https://www.metmuseum.org/art/collection/search/206596) by , [CC0](https://creativecommons.org/publicdomain/zero/1.0/). Resized and re-encoded.
+- `listings/pottery-lamp-01.jpg`: [Table lamp](https://www.metmuseum.org/art/collection/search/482371) by Pierre-Adrien Dalpayrat, [CC0](https://creativecommons.org/publicdomain/zero/1.0/). Resized and re-encoded.
