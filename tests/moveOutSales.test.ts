@@ -126,6 +126,9 @@ describe("the floor stays private", () => {
     expect(say("offer", 33, "Could you do $33? I can't go under 30.")).toContain(
       "text must not reveal the seller's lowest price",
     );
+    expect(say("offer", 35, "Could you do $35? My minimum is $30.00.")).toContain(
+      "text must not reveal the seller's lowest price",
+    );
     expect(say("offer", 30, "Could you do $30?")).toEqual([]);
   });
 });

@@ -35,8 +35,8 @@ export function buyerPrice(input: SaleInput): number | null {
 }
 
 const DOLLARS = /\$\s?(\d{1,3}(?:,\d{3})+|\d+)/g;
-/** Any whole number, with or without "$" ("my lowest is 30"). */
-const NUMBER = /(?<![\d,.])(\d{1,3}(?:,\d{3})+|\d+)(?![\d,]|\.\d)/g;
+/** Any number, with or without "$" or cents ("my lowest is 30", "$30.00"). */
+const NUMBER = /(?<![\d,.])((?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?)(?![\d,]|\.\d)/g;
 
 /** Code checks on any move, from the model or the fallback. */
 export function saleMoveProblems(out: SaleMove, input: SaleInput): string[] {
