@@ -183,7 +183,8 @@ export const INTERESTS = [
       "karate",
       "boxing",
       "kickboxing",
-      // "Thai" is redacted as a nationality before matching, so "muay" alone.
+      "muay thai",
+      // Profile text has "Thai" redacted as a nationality before matching.
       "muay",
       "taekwondo",
     ],
