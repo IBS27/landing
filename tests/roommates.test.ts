@@ -125,7 +125,7 @@ describe("comparableLifestyles", () => {
       id("Nobody"),
       id("A"),
     ]);
-    const none = { budget: null, workplace: null };
+    const none = { budget: null, workplace: null, moveInMonth: null, neighborhoods: [] };
     expect(r?.mine).toEqual({ answers: { sleep: "early" }, ...none });
     expect([...(r?.others.entries() ?? [])]).toEqual([
       ["A", { answers: { quietHours: "10pm", pets: ["cat", "dog"] }, ...none }],
@@ -161,11 +161,15 @@ describe("City Profile inputs", () => {
     updatedAt: 1,
   });
 
-  test("only stated budget and workday count; 'not working' is never compared", async () => {
+  test("only stated facts count; 'not working' is never compared", async () => {
     const tables: Record<string, Row[]> = {
       cityProfiles: [],
       cityProfileFacts: [
         fact("S", "budget", { min: 1800, max: 2400 }, "stated"),
+        fact("S", "moveIn", { month: "2027-03" }, "stated"),
+        { ...fact("S", "neighborhood", { slug: "mission" }, "stated"), _id: "f_S_mission" },
+        { ...fact("S", "neighborhood", { slug: "noe-valley" }, "inferred"), _id: "f_S_noe" },
+        fact("I", "moveIn", { month: "2027-04" }, "inferred"),
         fact(
           "S",
           "schedule",
@@ -191,8 +195,10 @@ describe("City Profile inputs", () => {
     expect(matchProfileInputs(await getProfile(ctx, id("S")))).toEqual({
       budget: { min: 1800, max: 2400 },
       workday: "hybrid",
+      moveInMonth: "2027-03",
+      neighborhoods: ["mission"],
     });
-    const nothing = { budget: null, workday: null };
+    const nothing = { budget: null, workday: null, moveInMonth: null, neighborhoods: [] };
     expect(matchProfileInputs(await getProfile(ctx, id("I")))).toEqual(nothing);
     expect(matchProfileInputs(await getProfile(ctx, id("N")))).toEqual(nothing);
   });
@@ -209,6 +215,8 @@ describe("City Profile inputs", () => {
       answers: { sleep: "early" },
       budget: { max: 2000 },
       workplace: null,
+      moveInMonth: null,
+      neighborhoods: [],
     });
   });
 });

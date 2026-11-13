@@ -1,13 +1,12 @@
 import { Check, Lock } from "lucide-react";
-import { useRef, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { Button, Card } from "@/ui/primitives";
 import {
   answeredCount,
-  type BudgetRange,
   type LifestyleAnswers,
   QUESTION_COUNT,
-  type Workday,
 } from "../../../convex/lib/lifestyle";
+import type { ProfileInputs } from "../../../convex/lib/roommates";
 import { LifestyleSummary, SharingCard } from "./LifestyleSummary";
 import { Questionnaire } from "./Questionnaire";
 import type { AnswerChange } from "./questions";
@@ -17,7 +16,7 @@ export type LifestyleState = {
   shared: boolean;
   sharedAt: number | null;
   /** The viewer's stated City Profile values that matching also compares. */
-  fromProfile: { budget: BudgetRange | null; workday: Workday | null };
+  fromProfile: ProfileInputs;
 } | null;
 
 export type LifestyleActions = {
@@ -27,15 +26,18 @@ export type LifestyleActions = {
 };
 
 /**
- * The roommate lifestyle page without its data source: an intro until the
- * person starts, the questionnaire, then their answers with the sharing switch.
+ * The roommates page without its data source: an intro until the person
+ * starts, the questionnaire, then (while sharing) their `candidates`, and
+ * their answers with the sharing switch.
  */
 export function LifestyleView({
   state,
   actions,
+  candidates,
 }: {
   state: LifestyleState;
   actions: LifestyleActions;
+  candidates?: ReactNode;
 }) {
   const [step, setStep] = useState<number | null>(null);
   // While answering, the form shows its own copy so quick taps never wait on the server.
@@ -85,6 +87,7 @@ export function LifestyleView({
 
   return (
     <div className="flex flex-col gap-3">
+      {state.shared && candidates}
       <SharingCard
         shared={state.shared}
         sharedAt={state.sharedAt}
