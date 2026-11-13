@@ -1,4 +1,5 @@
 import {
+  type BriefFactEntry,
   type FactEntry,
   factLabel,
   factSlot,
@@ -30,7 +31,7 @@ import { REDACTED, redactProtected } from "./protectedText";
  */
 
 export type ProposedFact = {
-  entry: FactEntry;
+  entry: BriefFactEntry;
   quote: string;
   label: string;
   /** Transport only: they said they have no car (otherwise car is simply not mentioned). */
@@ -863,6 +864,9 @@ function escapeRe(s: string): string {
 function factSpans(entry: FactEntry, parts: Part[], carFree?: boolean): Hit[] | null {
   const one = (h: Hit | null) => (h ? [h] : null);
   switch (entry.key) {
+    case "home":
+      // Where they live comes from their place, never from what they wrote.
+      return null;
     case "interest":
       return one(firstOf(parts, INTEREST_RES.get(entry.value.id) ?? [], false));
     case "neighborhood":

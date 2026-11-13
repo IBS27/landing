@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useM } from "@/app/viewer";
-import { toEvent, toGroup, toListing, toPost } from "@/landing/links";
+import { toEvent, toGroup, toListing, toMyPlace, toPost } from "@/landing/links";
 import { Button, Card, IconButton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -37,6 +37,7 @@ type RemovedFact = Known["removed"][number];
 const KEYS: readonly FactKey[] = [
   "budget",
   "moveIn",
+  "home",
   "transport",
   "schedule",
   "employer",
@@ -145,16 +146,24 @@ function FactSection({
         <h3 id={headingId} className="font-semibold text-[15px] text-primary leading-5">
           {title}
         </h3>
-        <Link
-          to="/landing/welcome"
-          search={onboarded ? { edit: true } : {}}
-          hash={briefAnchor(factKey)}
-          aria-label={`Edit ${title} in your brief`}
-          className="-mr-2 sm:-ml-2 inline-flex h-8 items-center gap-1.5 rounded-md px-2 font-semibold text-[13px] text-secondary hover:bg-hover sm:mr-0 sm:h-7"
-        >
-          <Pencil size={14} aria-hidden />
-          Edit
-        </Link>
+        {factKey === "home" ? (
+          // Where they live comes from their place, so it's changed on My Place.
+          <Link {...toMyPlace()} aria-label={`Edit ${title} on My Place`} className={editLink}>
+            <Pencil size={14} aria-hidden />
+            Edit
+          </Link>
+        ) : (
+          <Link
+            to="/landing/welcome"
+            search={onboarded ? { edit: true } : {}}
+            hash={briefAnchor(factKey)}
+            aria-label={`Edit ${title} in your brief`}
+            className={editLink}
+          >
+            <Pencil size={14} aria-hidden />
+            Edit
+          </Link>
+        )}
       </div>
       <div className="min-w-0 flex-1">
         {facts.length === 0 ? (
@@ -170,6 +179,9 @@ function FactSection({
     </section>
   );
 }
+
+const editLink =
+  "-mr-2 sm:-ml-2 inline-flex h-8 items-center gap-1.5 rounded-md px-2 font-semibold text-[13px] text-secondary hover:bg-hover sm:mr-0 sm:h-7";
 
 function FactRow({ fact: f, actions }: { fact: KnownFact; actions: FactActions }) {
   const { emoji, text } = display(f);
@@ -239,6 +251,15 @@ function Provenance({ fact: f }: { fact: KnownFact }) {
     return (
       <p className={line}>
         From your words: <q className="text-primary italic">{f.evidence.quote}</q>
+      </p>
+    );
+  if (f.evidence.kind === "place")
+    return (
+      <p className={line}>
+        From{" "}
+        <Link {...toMyPlace()} className="font-semibold text-primary hover:underline">
+          your place
+        </Link>
       </p>
     );
   return <p className={line}>{f.evidence.summary}</p>;

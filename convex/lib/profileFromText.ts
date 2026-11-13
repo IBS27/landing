@@ -1,8 +1,8 @@
 import { v } from "convex/values";
 import { defineTask } from "../ai/agent";
 import {
+  briefFactEntry,
   type FactEntry,
-  factEntry,
   factSlot,
   GOALS,
   moveInProblem,
@@ -55,7 +55,7 @@ export function profileInput(text: string, now = Date.now()): ProfileTextInput {
 }
 
 const proposedFact = v.object({
-  entry: factEntry,
+  entry: briefFactEntry,
   /** The shortest exact phrase from the text that supports this fact. */
   quote: v.string(),
   /** Transport only: true when they said they have no car. */

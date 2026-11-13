@@ -87,3 +87,26 @@ export function toPost(post: { postId: Id<"posts">; username: string }) {
     params: { username: post.username, postId: post.postId },
   });
 }
+
+/** A neighborhood's Landing page (#16), by its slug ("mission"). */
+export function toNeighborhood(slug: string) {
+  return linkOptions({ to: "/landing/find/neighborhoods/$slug", params: { slug } });
+}
+
+/** My Place: the person's place, rooms and house. */
+export function toMyPlace() {
+  return linkOptions({ to: "/landing/place" });
+}
+
+/** One of the person's rooms: its scan and vibe (#25). */
+export function toRoom(room: Ref<"rooms">) {
+  return linkOptions({ to: "/landing/place/room", search: { room: idOf(room) } });
+}
+
+/**
+ * The 3D unit (#37): a saved one, a new one started from a rental, or (neither
+ * given) the start page, which begins from the person's place.
+ */
+export function toUnit(unit: { unit?: Id<"unitScenes">; listing?: Id<"listings"> } = {}) {
+  return linkOptions({ to: "/landing/place/unit", search: unit });
+}

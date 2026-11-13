@@ -4,10 +4,10 @@ import { action } from "./_generated/server";
 import { runAgent } from "./ai/agent";
 import { briefFacts, getProfile, saveStatedFacts } from "./lib/cityProfile";
 import {
+  briefFactEntry,
   budgetValue,
   type FactEntry,
   type FactKey,
-  factEntry,
   goalId,
   moveInProblem,
   moveInValue,
@@ -122,7 +122,7 @@ export const saveBrief = viewerMutation({
 });
 
 const proposal = v.object({
-  entry: factEntry,
+  entry: briefFactEntry,
   quote: v.string(),
   label: v.string(),
   carFree: v.optional(v.boolean()),

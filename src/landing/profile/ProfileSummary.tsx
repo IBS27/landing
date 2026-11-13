@@ -64,6 +64,11 @@ export function ProfileSummary({
         <Row k="moveIn" fact={profile.moveIn}>
           {profile.moveIn && moveInLabel(profile.moveIn.value)}
         </Row>
+        {profile.home && (
+          <Row k="home" fact={profile.home}>
+            {neighborhoodLabel(profile.home.value.slug)}
+          </Row>
+        )}
         <ListRow k="neighborhood" facts={profile.neighborhoods}>
           {(f) => neighborhoodLabel(f.value.slug)}
         </ListRow>

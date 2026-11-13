@@ -682,6 +682,9 @@ export const reset = internalAction({
     // Maya, Ana and Hannah's House Group (#38): chores, bills and groceries.
     await ctx.runMutation(internal.house.seedDemo, {});
 
+    // Maya's place (#132): the Mission rental she took, after City Profiles.
+    await ctx.runMutation(internal.myPlace.seedDemo, { listingId: lid("derek-mission-1br") });
+
     // Move-in Crew opt-ins (#30), after City Profiles.
     await ctx.runMutation(internal.crews.seedDemo, {});
 

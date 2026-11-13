@@ -6,6 +6,7 @@ import { dismissal } from "./lib/dismissals";
 import { billCadence, choreCadence } from "./lib/house";
 import { interestId } from "./lib/interests";
 import { lifestyleAnswers } from "./lib/lifestyle";
+import { placeStatus } from "./lib/placeRules";
 import { profileSignal } from "./lib/profileSignals";
 import { rentalMedia } from "./lib/rentalMedia";
 import { unitSceneFields } from "./lib/unitSceneRecord";
@@ -1084,9 +1085,35 @@ export default defineSchema({
     /** Floor size in feet, when the person measured it. */
     size: v.optional(v.object({ widthFt: v.number(), lengthFt: v.number() })),
     vibe: v.optional(roomVibe),
+    /** The rental this room is in: the person's place (convex/myPlace.ts) when the room was added. */
+    listingId: v.optional(v.id("listings")),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_user", ["userId", "createdAt"]),
+
+  /**
+   * My place: the apartment a person chose, private to them (convex/myPlace.ts).
+   * The current place is the row with no `endedAt`, at most one per person;
+   * ended rows are the places they've left. Read it with `currentPlace` from
+   * convex/lib/myPlace.ts.
+   */
+  places: defineTable({
+    userId: v.id("users"),
+    /** The rental they took on Landing; unset when they found it elsewhere. */
+    listingId: v.optional(v.id("listings")),
+    neighborhoodId: v.id("neighborhoods"),
+    /** "YYYY-MM-DD". */
+    moveIn: v.string(),
+    /** "YYYY-MM-DD": planned while moving out, actual once moved out. */
+    moveOut: v.optional(v.string()),
+    status: placeStatus,
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    /** When it stopped being their current place. */
+    endedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId", "createdAt"])
+    .index("by_user_current", ["userId", "endedAt"]),
 
   /**
    * Landing Move-in Crew opt-ins (#30): one row per person who opted in, with

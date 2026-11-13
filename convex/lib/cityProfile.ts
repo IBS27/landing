@@ -6,6 +6,7 @@ import {
   type FactKey,
   type FactSource,
   factSlot,
+  type SingleKey,
   valueKey,
 } from "./cityProfileFacts";
 import { getInterest, type InterestId } from "./interests";
@@ -34,10 +35,17 @@ export type CityProfile = {
   /** When the onboarding brief was last submitted; null = not onboarded yet. */
   briefCompletedAt: number | null;
   budget: Fact<"budget"> | null;
+  /**
+   * The move-in features match and plan on (Crew, roommates, Journeys). One
+   * kept in step with the person's place is their private record: it's in
+   * `facts`, never here.
+   */
   moveIn: Fact<"moveIn"> | null;
   transport: Fact<"transport"> | null;
   schedule: Fact<"schedule"> | null;
   employer: Fact<"employer"> | null;
+  /** Where they live now, from their place on My Place. Never used for matching. */
+  home: Fact<"home"> | null;
   /** Stated first, then by confidence. */
   neighborhoods: Fact<"neighborhood">[];
   interests: Fact<"interest">[];
@@ -110,10 +118,11 @@ export async function getProfile(
     userId,
     briefCompletedAt: row?.briefCompletedAt ?? null,
     budget: only(facts, "budget")[0] ?? null,
-    moveIn: only(facts, "moveIn")[0] ?? null,
+    moveIn: only(facts, "moveIn").find((f) => f.evidence.kind !== "place") ?? null,
     transport: only(facts, "transport")[0] ?? null,
     schedule: only(facts, "schedule")[0] ?? null,
     employer: only(facts, "employer")[0] ?? null,
+    home: only(facts, "home")[0] ?? null,
     neighborhoods: only(facts, "neighborhood"),
     interests: only(facts, "interest"),
     goals: only(facts, "goal"),
@@ -285,6 +294,66 @@ export async function recordInferredFact(
     source: "inferred",
     evidence: opts.evidence,
     confidence,
+    updatedAt: now,
+  });
+  await touchProfile(ctx, userId);
+  return id;
+}
+
+/**
+ * Keeps one stated single-valued fact in step with something the person set
+ * elsewhere in Landing (their place: `evidence.kind` "place"). That origin owns
+ * the rows with its evidence kind; `entry: null` deletes them.
+ * - Never overrides what the person stated another way (brief, their own
+ *   words, a fact they confirmed): while one is live, this origin keeps no row.
+ * - Keeps a removal (#5) while the value is unchanged. A new value is a new
+ *   statement, so it shows again.
+ * Returns the fact id, or null when there's no fact from this origin.
+ */
+export async function syncStatedFact(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  key: SingleKey,
+  entry: Extract<FactEntry, { key: SingleKey }> | null,
+  evidence: FactEvidence,
+): Promise<Id<"cityProfileFacts"> | null> {
+  if (entry && entry.key !== key) throw new Error(`Expected a ${key} fact`);
+  const rows = await rowsFor(ctx, userId, key);
+  const owned = rows.filter((r) => r.evidence.kind === evidence.kind);
+  const statedElsewhere = rows.some(
+    (r) => r.evidence.kind !== evidence.kind && r.source === "stated" && r.removedAt === undefined,
+  );
+  if (!entry || statedElsewhere) {
+    for (const r of owned) await ctx.db.delete(r._id);
+    return null;
+  }
+  const [row, ...extra] = owned;
+  for (const r of extra) await ctx.db.delete(r._id);
+  const now = Date.now();
+  if (row) {
+    if (row.removedAt !== undefined && sameValue(row.value, entry.value)) return null;
+    const unchanged =
+      row.removedAt === undefined &&
+      row.source === "stated" &&
+      sameValue(row.value, entry.value) &&
+      sameValue(row.evidence, evidence);
+    if (!unchanged)
+      await ctx.db.patch(row._id, {
+        value: entry.value,
+        source: "stated",
+        evidence,
+        confidence: 1,
+        updatedAt: now,
+        removedAt: undefined,
+      } as Partial<FactDoc>);
+    return row._id;
+  }
+  const id = await ctx.db.insert("cityProfileFacts", {
+    userId,
+    ...entry,
+    source: "stated",
+    evidence,
+    confidence: 1,
     updatedAt: now,
   });
   await touchProfile(ctx, userId);

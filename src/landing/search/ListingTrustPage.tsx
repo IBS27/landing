@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { ListingGallery } from "@/features/marketplace/ListingGallery";
 import { toConversation, toListing, toProfile } from "@/landing/links";
+import { TakePlaceCard } from "@/landing/place/TakePlaceCard";
 import { LandingPage } from "@/landing/shell/LandingPage";
 import { price } from "@/lib/format";
 import { Avatar, Button, Card, EmptyState, Skeleton } from "@/ui/primitives";
@@ -140,6 +141,9 @@ export function ListingTrustPage({ listingId }: { listingId: Id<"listings"> }) {
         </div>
 
         <div className="flex flex-col gap-4">
+          {!data.isOwn && rental?.listingType !== "sale" && (
+            <TakePlaceCard listingId={listing._id} availableFrom={rental?.availableFrom} />
+          )}
           <UnitDetails listingId={listing._id} />
           {!data.isOwn && <ThingsToCheck signals={data.signals} lister={lister} />}
           {lister && (
