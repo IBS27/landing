@@ -928,9 +928,9 @@ const plural = (n: number, one: string) =>
  * Plans ("meet at Mission Cliffs Saturday") stay; "I'm in!" isn't a place.
  */
 const WHEREABOUTS = [
-  /\b(?:[Ii]['’]?m|I am|[Ww]e['’]?re|[Ww]e are)\s+(?:(?:currently|now|still|already|just|right)\s+)*(?:at|near|by|outside|around|on|in front of|in(?=\s+(?:the\s+)?[A-Z]))\b[^!?\n]*/g,
-  /\b(?:[Cc]urrently|[Rr]ight now)\s+(?:at|near|by|outside|around|on|in)\b[^!?\n]*/g,
-  /\b(?:I|[Ww]e)\s+(?:also\s+)?live\s+(?:at|on|in|near|by|off|around)\b[^!?\n]*/g,
+  /\b(?:i['’]?m|i am|we['’]?re|we are)\s+(?:(?:currently|now|still|already|just|right)\s+)*(?:at|near|by|outside|around|on|in front of|in(?!\s*(?:[!.,?;:)]|$)|\s+(?:for|too|if|with|as|but|and|so|on|this|that|it)\b))\b[^!?\n]*/gi,
+  /\b(?:currently|right now)\s+(?:at|near|by|outside|around|on|in)\b[^!?\n]*/gi,
+  /\b(?:i|we)\s+(?:also\s+)?live\s+(?:at|on|in|near|by|off|around)\b[^!?\n]*/gi,
 ];
 const withoutWhereabouts = (text: string) =>
   WHEREABOUTS.reduce((t, re) => t.replace(re, "…"), text);

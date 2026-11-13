@@ -261,9 +261,18 @@ describe("search_group_posts", () => {
       post("pPark", "gClimb", "S", "Bring chalk!\nI'm at Bernal Heights Park"),
       post("pHood", "gClimb", "S", "I live in the Mission near 20th and Valencia."),
       post("pIn", "gClimb", "S", "I'm in! Meet at Mission Cliffs Saturday at 7."),
+      post("pLowSaint", "gClimb", "S", "ok see you there\ni am at St. Mary's Playground right now"),
+      post("pLowHome", "gClimb", "S", "hi all\ni live in the Excelsior off Geneva and Mission"),
+      post("pLowIn", "gClimb", "S", "count me in\nim in the Sunset by Ocean Beach rn"),
     );
-    const out = await run("search_group_posts", { group: "gClimb" }, tables);
-    const text = JSON.stringify(out);
+    // Each post as Muse reads it and the card shows it (a search returns 8 at most).
+    const ctx = fakeCtx(tables);
+    const ids = ["pHere", "pNear", "pHome", "pSaint", "pPark", "pHood", "pIn"];
+    const all = await Promise.all(
+      [...ids, "pLowSaint", "pLowHome", "pLowIn"].map((id) => RECALL_FIND.post(ctx, V, id)),
+    );
+    expect(all.every((f) => f !== null)).toBe(true);
+    const text = JSON.stringify(all);
     for (const where of [
       "18th and Dolores",
       "Dolores Park",
@@ -271,6 +280,9 @@ describe("search_group_posts", () => {
       "Mary's Park",
       "Bernal Heights",
       "20th and Valencia",
+      "Playground",
+      "Geneva",
+      "Ocean Beach",
     ])
       expect(text).not.toContain(where);
     // The plans themselves stay, with where to meet.
@@ -278,6 +290,7 @@ describe("search_group_posts", () => {
     expect(text).toContain("Climbing later!");
     expect(text).toContain("Bring chalk!");
     expect(text).toContain("I'm in! Meet at Mission Cliffs Saturday at 7.");
+    expect(text).toContain("count me in");
   });
 
   test("arguments are checked", async () => {
