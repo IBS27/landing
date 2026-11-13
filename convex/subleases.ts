@@ -55,8 +55,10 @@ export const create = viewerMutation({
     const rent = Math.round(a.rent);
     const minRent = Math.round(a.minRent);
     if (rent <= 0) throw new ConvexError("Enter the monthly rent");
-    if (minRent <= 0 || minRent > rent)
+    if (!Number.isFinite(minRent) || minRent <= 0 || minRent > rent)
       throw new ConvexError("Your lowest rent must be above $0 and no more than the rent");
+    if (!Number.isFinite(a.availableFrom) || !Number.isFinite(a.availableTo))
+      throw new ConvexError("Choose the dates it's available");
     if (a.availableTo <= a.availableFrom)
       throw new ConvexError("The end date must be after the start date");
     const now = Date.now();
@@ -111,7 +113,10 @@ export const updateTerms = viewerMutation({
     const s = await ctx.db.get(subletId);
     if (!s || s.ownerId !== ctx.viewer._id) throw new ConvexError("Sublet not found");
     const listing = await ctx.db.get(s.listingId);
-    if (minRent !== undefined && (minRent <= 0 || (listing && minRent > listing.price)))
+    if (
+      minRent !== undefined &&
+      (!Number.isFinite(minRent) || minRent <= 0 || (listing && minRent > listing.price))
+    )
       throw new ConvexError("Your lowest rent must be above $0 and no more than the rent");
     await ctx.db.patch(s._id, {
       ...(minRent !== undefined ? { minRent: Math.round(minRent) } : {}),

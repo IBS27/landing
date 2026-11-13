@@ -5,6 +5,7 @@
  */
 
 import type { Move } from "./negotiations";
+import { statesAmount } from "./proposals";
 
 export type SubletInput = {
   listing: {
@@ -53,6 +54,8 @@ export function subletMoveProblems(out: SubletMove, input: SubletInput): string[
     if (out.amount < minRent)
       p.push(`amount ${out.amount} is under the lister's lowest rent of ${minRent}`);
     if (out.amount > ask) p.push(`amount ${out.amount} is over the asking rent of ${ask}`);
+    // The sent message carries the rent only in its text (#6's offer rule).
+    if (!statesAmount(out.text, out.amount)) p.push(`text must state the rent as $${out.amount}`);
   }
   if (out.move === "offer" && input.yourLastPrice !== null && out.amount > input.yourLastPrice)
     p.push(`a counter can't go above your last price of ${input.yourLastPrice}`);
