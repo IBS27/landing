@@ -62,7 +62,7 @@ export function checkInText(
     done.groups > 0 && count(done.groups, "Group", "Groups"),
     done.friends > 0 && count(done.friends, "new friend", "new friends"),
   ].filter((p): p is string => !!p);
-  const head = weeks >= 1 ? count(weeks, "week", "weeks") + " in" : "Your first week";
+  const head = weeks >= 1 ? `${count(weeks, "week", "weeks")} in` : "Your first week";
   if (parts.length) return `${head}: ${list(parts)}. Your check-in is ready.`;
   return weeks >= 1 ? `${head}: your check-in is ready.` : "Your first check-in is ready.";
 }

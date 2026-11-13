@@ -86,6 +86,7 @@ export const askToConnect = viewerMutation({
     const list = await roommateCandidates(ctx, viewerId);
     const candidate = list?.candidates.find((c) => c.user._id === userId);
     if (!candidate) throw new ConvexError("This person isn't one of your roommate matches anymore");
+    if (!text.trim()) throw new ConvexError("The message is empty");
     const conversationId = await dmThread(ctx, viewerId, userId);
     const payload = { kind: "message" as const, conversationId, text: text.trim() };
     const origin = { agent: "muse" as const, task: ASK_TO_CONNECT_TASK, via: "fallback" as const };
