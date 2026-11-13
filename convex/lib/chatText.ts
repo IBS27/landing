@@ -200,6 +200,28 @@ export function cleanVibe(text: string): string | null {
   return vibeProblem(v) === null ? v : null;
 }
 
+/**
+ * The look a furnish request describes, without the ask and the price around
+ * it: "make it cozy and warm, $1,500" is "cozy and warm".
+ */
+export function vibeWords(text: string): string {
+  return text
+    .replace(
+      /[,;]?\s*(?:(?:with|for|on|and)\s+)?(?:(?:a|my|our)\s+)?(?:(?:budget|max|maximum|under|below|up to|at most|less than|no more than|around|about|within)\s+(?:of\s+|is\s+)?)*\$?\s*\d[\d,]*(?:\.\d+)?\s*k?\b(?:\s*(?:budget|max|total|dollars|bucks))?/gi,
+      " ",
+    )
+    .replace(
+      /^\s*(?:please\s+)?(?:can you\s+|could you\s+)?(?:make|furnish|decorate|style|give|set up)\s+(?:it|me|(?:my|our|the) \w+)?\s*(?:up\s+)?(?:(?:with|in|like|as|to be|to feel|to look)\s+)?/i,
+      "",
+    )
+    .replace(
+      /^\s*(?:i(?:'d| would)? (?:want|like|love)|i'm (?:going|looking) for|go(?:ing)? for|something)\s+(?:it\s+)?(?:to (?:be|feel|look)\s+)?/i,
+      "",
+    )
+    .replace(/\s+/g, " ")
+    .replace(/^[\s,.;:-]+|[\s,.;:!?-]+$/g, "");
+}
+
 /** Words for a rental search ("rooms under $2k"), as opposed to the person's own apartment. */
 export const RENTAL_WORDS =
   / (rooms?|rentals?|rent|apartments?|apts?|studios?|1br|2br|places to live|listings?|housing|homes?|sublets?) /;

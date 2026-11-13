@@ -31,6 +31,9 @@ describe("planIn: rent budget", () => {
   });
   test("a search or a count is not a budget", () => {
     expect(plan("rooms under $2,000")).toEqual(NO_PLAN);
+    expect(plan("show rentals under $2,000/mo")).toEqual(NO_PLAN);
+    expect(plan("any apartments for $1,800 a month?")).toEqual(NO_PLAN);
+    expect(plan("find rooms, my budget is $2,100 a month").budgetMax).toBe(2100);
     expect(plan("rooms under $1,600 in my budget")).toEqual(NO_PLAN);
     expect(plan("rooms in my budget")).toEqual(NO_PLAN);
     expect(plan("I want to rent 2 rooms").budgetMax).toBeNull();
@@ -205,11 +208,37 @@ describe("planProblems", () => {
   test("neighborhoods must be known slugs the message names", () => {
     expect(problems({ neighborhoods: ["mission"] }, "I want to live in the Mission")).toEqual([]);
     expect(problems({ neighborhoods: ["marina"] }, "I want to live in the Mission")).toEqual([
-      "plan.neighborhoods: marina is not a slug from input.neighborhoods that this message names",
+      "plan.neighborhoods: marina is not a slug from input.neighborhoods the person says they want to live in",
     ]);
     expect(problems({ neighborhoods: ["atlantis"] }, "I want to live in Atlantis")).toHaveLength(1);
     expect(
       problems({ neighborhoods: ["mission", "mission"] }, "I want to live in the Mission"),
     ).toHaveLength(1);
+  });
+});
+
+describe("planProblems: only what the person states about their own move (#150)", () => {
+  const problems = (p: Partial<MovePlan>, message: string) =>
+    planProblems({ ...NO_PLAN, ...p }, message, ctx);
+  test("a price to search under is not a budget", () => {
+    expect(problems({ budgetMax: 2000 }, "show rentals under $2,000/mo")).not.toEqual([]);
+    expect(problems({ budgetMax: 2000 }, "I can do 2000 at most")).toEqual([]);
+  });
+  test("a date or a neighborhood named for something else is not their plan", () => {
+    const message = "events in the Mission on January 15";
+    expect(problems({ moveIn: "2027-01-15" }, message)).not.toEqual([]);
+    expect(problems({ neighborhoods: ["mission"] }, message)).not.toEqual([]);
+    expect(problems({ neighborhoods: ["mission"] }, "I'd like events in the Mission")).not.toEqual(
+      [],
+    );
+    expect(problems({ neighborhoods: ["mission"] }, "I'd love the Mission")).toEqual([]);
+  });
+  test("a bare date answers 'when are you moving?'", () => {
+    expect(problems({ moveIn: "2027-01-15" }, "January 15")).toEqual([]);
+    expect(problems({ moveIn: "2027-01" }, "probably in January")).toEqual([]);
+    expect(problems({ moveIn: "2027-01-15" }, "moving in on January 15")).toEqual([]);
+  });
+  test("a neighborhood they say they want to live in", () => {
+    expect(problems({ neighborhoods: ["mission"] }, "I want to live in the Mission")).toEqual([]);
   });
 });

@@ -180,7 +180,34 @@ const MOVING =
 const LEAVING =
   /\b(?:mov(?:e|ing|ed) out|move-?out|leaving|(?:sublet(?:ting)?|subleas(?:e|ing)|sell(?:ing)?) (?:my|our))\b/i;
 
+/** A date given as the whole answer ("January 15", "probably next month"), as after "when are you moving?". */
+const DATE_FILLER =
+  /^(?:in|on|by|around|about|probably|maybe|likely|early|late|mid|the|of|start|end|beginning|sometime|i|think|it|is|its|will|be)$/;
+function bareDate(message: string, today: string): boolean {
+  const { dates, rest } = scanDates(message, today);
+  return (
+    dates.length > 0 &&
+    words(rest)
+      .trim()
+      .split(" ")
+      .every((w) => !w || DATE_FILLER.test(w))
+  );
+}
+
+/** Whether a message states when the person moves in, rather than naming a date for something else. */
+function statesMoveIn(message: string, today: string): boolean {
+  return !LEAVING.test(message) && (MOVING.test(message) || bareDate(message, today));
+}
+
 /* ── Rent budget ── */
+
+/** A search ("show rentals under $2,000/mo") names a price to look at, not the person's budget. */
+const SEARCHING =
+  /\b(?:show|find|search|list|see|browse|any|are there|is there|what(?:'s| is| are)|which)\b[^.?!]*\b(?:rooms?|rentals?|apartments?|apts?|places|listings?|studios?|sublets?|homes?|housing)\b/i;
+const OWN_BUDGET = /\b(?:budget|afford)\b/i;
+function searchOnly(message: string): boolean {
+  return SEARCHING.test(message) && !OWN_BUDGET.test(message);
+}
 
 const AMOUNT = String.raw`\$?\s*(\d[\d,]*(?:\.\d+)?)\s*(k)?\b`;
 const ABOUT = String.raw`(?:(?:is|of|at|around|about|under|below|up to|at most|max|maximum|less than|no more than|roughly)\s+)`;
@@ -205,7 +232,7 @@ const BUDGET_RULES = [
 ];
 
 function rentBudgetIn(message: string, ctx: PlanContext): number | null {
-  if (LEAVING.test(message) || furnishAsk(message, ctx)) return null;
+  if (LEAVING.test(message) || furnishAsk(message, ctx) || searchOnly(message)) return null;
   // On the Apartment tab "my budget is $800" is for furniture unless it says rent.
   if (ctx.view === "apartment" && !/\b(?:rent|month|monthly|mo)\b/i.test(message)) return null;
   // Years are not dollars: read amounts from the text without its dates.
@@ -237,6 +264,20 @@ function wantedNeighborhoods(message: string, neighborhoods: ChatNeighborhood[])
       if (!found.includes(slug)) found.push(slug);
   }
   return found.slice(0, PLAN_NEIGHBORHOODS_MAX);
+}
+
+/** A looser cue than `WANTS`, for holding Muse's reading to the message ("I'd love the Mission"). */
+const PREFERS =
+  /\b(?:love|like|prefer|want|interested|looking|moving|live|living|stay|settle|ideally|hoping)\b/i;
+/** Asking what's in a neighborhood: naming it there isn't wanting to live there. */
+const ASKS_ABOUT =
+  /\b(?:events?|groups?|things to do|happening|weekend|route|compare|vs|versus|marketplace|crew|tell me about|show me|what(?:'s| is| are)\b.*\blike)\b/i;
+
+/** The neighborhoods a message says the person wants to live in, read as generously as Muse may. */
+function statedNeighborhoods(message: string, neighborhoods: ChatNeighborhood[]): Set<string> {
+  const strict = wantedNeighborhoods(message, neighborhoods);
+  if (!PREFERS.test(message) || ASKS_ABOUT.test(message)) return new Set(strict);
+  return new Set([...strict, ...findNeighborhoods(message, neighborhoods)]);
 }
 
 /* ── The plan ── */
@@ -278,6 +319,8 @@ export function planProblems(plan: MovePlan, message: string, ctx: PlanContext):
       problems.push("plan.budgetMax: only an amount the person wrote in this message, or null");
     else if (furnishAsk(message, ctx))
       problems.push("plan.budgetMax: a furniture budget is not the rent budget; use null");
+    else if (searchOnly(message))
+      problems.push("plan.budgetMax: a price to search under is not their budget; use null");
   }
   if (moveIn !== null) {
     const why = moveInDateProblem(moveIn, ctx.today);
@@ -288,9 +331,11 @@ export function planProblems(plan: MovePlan, message: string, ctx: PlanContext):
       )
     )
       problems.push("plan.moveIn: only a month or date the person wrote in this message, or null");
+    else if (!statesMoveIn(message, ctx.today))
+      problems.push("plan.moveIn: only when the message says when they move in; use null");
   }
   const known = new Set(ctx.neighborhoods.map((n) => n.slug));
-  const named = new Set(findNeighborhoods(message, ctx.neighborhoods));
+  const named = statedNeighborhoods(message, ctx.neighborhoods);
   if (
     plan.neighborhoods.length > PLAN_NEIGHBORHOODS_MAX ||
     new Set(plan.neighborhoods).size !== plan.neighborhoods.length
@@ -301,7 +346,7 @@ export function planProblems(plan: MovePlan, message: string, ctx: PlanContext):
   const strange = plan.neighborhoods.filter((s) => !known.has(s) || !named.has(s));
   if (strange.length)
     problems.push(
-      `plan.neighborhoods: ${strange.join(", ")} is not a slug from input.neighborhoods that this message names`,
+      `plan.neighborhoods: ${strange.join(", ")} is not a slug from input.neighborhoods the person says they want to live in`,
     );
   return problems;
 }

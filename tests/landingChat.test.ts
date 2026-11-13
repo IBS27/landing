@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { furnishAsk, numbersIn, spendIn, vibeProblem } from "../convex/lib/chatText";
+import { furnishAsk, numbersIn, spendIn, vibeProblem, vibeWords } from "../convex/lib/chatText";
 import { SF_NEIGHBORHOODS } from "../convex/lib/cityProfileFacts";
 import {
   CHAT_HELP,
@@ -220,12 +220,12 @@ describe("ruleReply", () => {
   test("furnishing needs the apartment's 3D model (#150)", () => {
     expect(cmd("make it cozy and warm, under $800", apartmentTab, built)).toEqual({
       kind: "furnish",
-      vibe: "make it cozy and warm, under $800",
+      vibe: "cozy and warm",
       budget: 800,
     });
     expect(cmd("furnish my place, mid-century with plants", city, built)).toEqual({
       kind: "furnish",
-      vibe: "furnish my place, mid-century with plants",
+      vibe: "mid-century with plants",
     });
     expect(cmd("a couch and a rug for my living room", city, built).kind).toBe("furnish");
     // On the Apartment tab a piece of furniture is enough; on the map it isn't.
@@ -441,5 +441,17 @@ describe("validCommand", () => {
     expect(furnish("warm", 100_001)).toBe(false);
     expect(furnish("warm", 99.5)).toBe(false);
     expect(validCommand({ kind: "show_apartment" }, d)).toBe(true);
+  });
+});
+
+describe("vibeWords (#150)", () => {
+  test("keeps the look and drops the ask and the price", () => {
+    expect(vibeWords("make it cozy and warm, $1,500")).toBe("cozy and warm");
+    expect(vibeWords("Make it cozy and warm under $1,500")).toBe("cozy and warm");
+    expect(vibeWords("furnish my place mid-century modern with a $2k budget")).toBe(
+      "mid-century modern",
+    );
+    expect(vibeWords("I'd like something bright and minimal")).toBe("something bright and minimal");
+    expect(vibeWords("add a reading lamp")).toBe("add a reading lamp");
   });
 });

@@ -546,6 +546,7 @@ export const addItem = viewerMutation({
     if (doc.placements.length >= MAX_ITEMS) throw new ConvexError(`At most ${MAX_ITEMS} items`);
     const kind = kindOf(listing) ?? "decor";
     const [placed] = await placeListings(ctx, doc, [{ listing, kind, ...sizeOf(kind, listing) }]);
+    if (!placed) throw new ConvexError("There's no free spot for this. Move or remove something.");
     return placed.id;
   },
 });
@@ -783,15 +784,24 @@ export const place = internalMutation({
     const placed = await placeListings(ctx, doc, accepted, {
       furnishing: { vibe, ...(budget === undefined ? {} : { budget }) },
     });
-    const items = accepted.map((a, i) => ({
-      itemId: placed[i].id,
-      listingId: a.listing._id,
-      title: a.listing.title,
-      price: a.listing.price,
-      photo: a.listing.photos[0] ?? null,
-      kind: a.kind,
-      reason: a.reason,
-    }));
+    // Only what found a spot: a pick that fits nowhere isn't placed or counted.
+    const idOf = new Map(placed.map((p) => [p.listingId, p.id]));
+    const items = accepted.flatMap((a) => {
+      const itemId = idOf.get(a.listing._id);
+      return itemId === undefined
+        ? []
+        : [
+            {
+              itemId,
+              listingId: a.listing._id,
+              title: a.listing.title,
+              price: a.listing.price,
+              photo: a.listing.photos[0] ?? null,
+              kind: a.kind,
+              reason: a.reason,
+            },
+          ];
+    });
     return { items, spent: before.spent + items.reduce((sum, i) => sum + i.price, 0) };
   },
 });

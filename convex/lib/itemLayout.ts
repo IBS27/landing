@@ -115,7 +115,7 @@ export function placementsOverlap(a: Placement, b: Placement): boolean {
  * Places `items` in the scene around what is already there, and returns the
  * new placements in the order the items were given. Deterministic: the same
  * scene, placements and items always give the same result. An item that fits
- * nowhere in its room goes at the room's centre for the person to move.
+ * nowhere in its room is left out: match the result to the items by `id`.
  */
 export function placeItems(
   scene: UnitScene,
@@ -132,9 +132,9 @@ export function placeItems(
         b.item.width * b.item.depth - a.item.width * a.item.depth ||
         a.i - b.i,
     );
-  const out: Placement[] = new Array(items.length);
+  const out: (Placement | null)[] = new Array(items.length).fill(null);
   for (const { item, i } of order) out[i] = layout.place(item);
-  return out;
+  return out.filter((p): p is Placement => p !== null);
 }
 
 class Layout {
@@ -158,7 +158,7 @@ class Layout {
     );
   }
 
-  place(item: LayoutItem): Placement {
+  place(item: LayoutItem): Placement | null {
     const room = this.chooseRoom(item);
     const base: Placement = {
       id: item.id,
@@ -197,14 +197,8 @@ class Layout {
       }
       if (chosen) break;
     }
-    const p: Placement = chosen ?? {
-      ...base,
-      ...center,
-      rotation: this.axis(room, base),
-      ...(item.kind === "art" ? { y: ART_Y } : {}),
-    };
-    this.placed.push(p);
-    return p;
+    if (chosen) this.placed.push(chosen);
+    return chosen ?? null;
   }
 
   /* ---------------- Rooms ---------------- */

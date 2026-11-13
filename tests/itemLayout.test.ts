@@ -188,9 +188,13 @@ describe("a studio", () => {
     expect(more.length).toBe(3);
     expectSound(scene, [...out, ...more]);
   });
-  test("an item that fits nowhere still gets a place at the centre of its room", () => {
-    const [huge] = placeItems(scene, [], [item("sofa", { width: 9, depth: 8 })]);
-    expect({ x: huge.x, z: huge.z }).toEqual(roomCenter(scene.rooms[0]));
+  test("an item that fits nowhere is left out, and the rest are still placed", () => {
+    const out = placeItems(
+      scene,
+      [],
+      [item("sofa", { id: "huge", width: 9, depth: 8 }), item("lamp", { id: "lamp" })],
+    );
+    expect(out.map((p) => p.id)).toEqual(["lamp"]);
     expect(placeItems(scene, [], [])).toEqual([]);
   });
 });

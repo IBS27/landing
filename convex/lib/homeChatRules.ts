@@ -10,6 +10,7 @@ import {
   spendIn,
   validFurnishBudget,
   vibeProblem,
+  vibeWords,
   words,
 } from "./chatText";
 import { todayInSF } from "./cityProfileFacts";
@@ -437,7 +438,7 @@ export function ruleRoute(
         command: { kind: "show_apartment" },
         listingIds: [],
       };
-    const vibe = cleanVibe(clean);
+    const vibe = cleanVibe(vibeWords(clean)) ?? cleanVibe(clean);
     if (!vibe) return none(VIBE_HELP);
     const budget = spendIn(clean);
     return {
