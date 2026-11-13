@@ -227,6 +227,15 @@ const COUNTRIES = [
 ];
 
 /** Words that state a protected trait wherever they appear. */
+/**
+ * Not when it names a street or stop: "Church St", "Brazil St", "Persia Ave",
+ * "Church & 18th". San Francisco has several. The street word must follow on
+ * the same line with no punctuation between ("church. Street parking" is two
+ * sentences), and "@"/"&" must lead to a numbered street ("church @ 9am" isn't).
+ */
+const NOT_A_STREET =
+  "(?![ \\t]+(?:st|street|ave|avenue|blvd|boulevard|rd|road|ln|lane|ter|terrace|pl|place|ct|court|dr|drive|station)\\b|[ \\t]*[&@][ \\t]*\\d+(?:st|nd|rd|th)\\b)";
+
 const TERMS: string[] = [
   // Age
   "\\d{1,3}[\\s-]*(?:years?|yrs?)[\\s-]*old|\\d{1,3}\\s?(?:yo|y\\/o)",
@@ -245,7 +254,7 @@ const TERMS: string[] = [
   "mormons?|lds|jews?|jewish|judaism|hindus?|hinduism|buddhists?|buddhism|sikhism",
   "jains?|jainism|atheists?|agnostics?|pagans?|wiccan|baptists?|methodists?|lutherans?|orthodox",
   "quakers?|scientologists?|baha'?is?|zoroastrian",
-  "church(?:goer|es)?|mosques?|synagogues?|temples?|gurdwaras?|masjid",
+  `(?:church(?:goer|es)?|mosques?|synagogues?|temples?|gurdwaras?|masjid)${NOT_A_STREET}`,
   "bible|quran|koran|torah|ramadan|shabbat|sabbath|halal|kosher|pray(?:s|ed|ing|er|ers)?",
   // Ethnicity, race and national origin
   `(?:${DEMONYMS.join("|")})(?:[\\s-]+american)?`,
@@ -253,7 +262,7 @@ const TERMS: string[] = [
   "h-?1b|(?:work|student) visa|on an? (?:\\w+ )?visa|visa status",
   "(?:people|persons?|folks?|wom[ae]n|m[ae]n|communit(?:y|ies)) of colou?r|poc|bipoc",
   // Countries and regions someone may come from (not "Russian Hill" or "Chinatown").
-  `(?:${COUNTRIES.join("|")})`,
+  `(?:${COUNTRIES.join("|")})${NOT_A_STREET}`,
   // Gender and orientation
   "wom[ae]n|females?|males?|girls?|boys?|lad(?:y|ies)|gentlem[ae]n|gals?|guys?|dudes?",
   "non[\\s-]?binary|enby|trans(?:gender|man|woman)?|cis(?:gender)?|genderqueer|genderfluid|gender",
@@ -318,7 +327,8 @@ const TERMS: string[] = [
   "on an? [\\w-]+ visa|[\\w-]+ visa holder",
   // Patterns rather than words, for whole families of disclosures
   "(?:she|he|they|xe|ze|it)\\/(?:her|hers|him|his|them|theirs|they|she|he|xem|zir|it)",
-  "afab|amab|trans\\w*|ace|aroace|\\w+romantic|polyamor\\w*|poly",
+  // Every "trans…" word ("transgirl", "transmen") except everyday ones: "transit", "transport", "transfer"…
+  "afab|amab|trans(?!it(?:s|ed|ing)?\\b|port|fer|lat|action|cript|crib|form|mit|missi|lucent|atlantic|pacific|parent|plant|ient|istor|cend|duc|fus|gress|ept|vers|ceiv|code|ship|bay\\b)\\w*|ace|aroace|\\w+romantic|polyamor\\w*|poly",
   "hubby|wifey|significant other|other half|partnered|custody|child(?:free|less)",
   "(?:we['’]?re|we are|as) a family",
   "(?:i['’]?m|i am|we['’]?re|we are)\\s+(?:half|part|mixed)\\s+\\w+|afro[\\s-]?\\w+",
@@ -388,4 +398,67 @@ export function redactProtected(text: string): string {
 /** Whether `text` says anything about a protected trait (or still carries a redaction). */
 export function hasProtected(text: string): boolean {
   return text.includes(REDACTED) || redactProtected(text) !== text;
+}
+
+/**
+ * Words that are part of many real organizations' names ("American Express",
+ * "Korean Air", "UCSF Benioff Children's Hospital", "Women's Building") and
+ * say nothing about the person who works there.
+ */
+const NAME_WORDS = new RegExp(
+  `\\b(?:${[
+    ...DEMONYMS,
+    ...COUNTRIES,
+    "children['’]?s",
+    "kids['’]?",
+    "women['’]?s",
+    "men['’]?s",
+    "boys (?:&|and) girls",
+  ].join("|")})(?![\\w'’])`,
+  "gi",
+);
+/**
+ * Words that end an organization's name ("Korean Air", "Children's Hospital",
+ * "Medical Student Association"). A phrase whose last word is something else
+ * ("Korean chef", "Indian medical student") describes a person. That fails
+ * safe: a real name this list misses is refused (the person can type it
+ * another way), while a description of someone is never stored as an employer.
+ */
+const ORG_WORD =
+  /^(?:air|airlines?|airways|express|bank|bancorp|hospital|clinic|health|medical|center|centre|university|college|school|academy|institute|museum|building|garden|club|clubs|foundation|society|association|council|consulate|embassy|chamber|bureau|company|co|corp|corporation|inc|llc|ltd|group|holdings|partners|studios?|labs?|services|network|media|news|times|bakery|restaurant|kitchen|market|grocery|motors|telecom|electric|energy|petroleum|oil|insurance|trust|capital|ventures|foods?|press|records|theat(?:er|re)|library|government|consulting|outfitters|apparel|cross)$/i;
+
+/**
+ * Whether a phrase reads as an organization's name: its head word (the last
+ * word before any "of", "for", "at", "in", "with" or "from", leaving out nationality and similar
+ * name words) is an organization word. "Bank of America" and "Air India" do;
+ * "Korean engineer at Google" doesn't.
+ */
+function namesAnOrganization(phrase: string): boolean {
+  const head = phrase.split(/\s+(?:of|for|at|in|with|from)\s+/i)[0].replace(NAME_WORDS, " ");
+  const words = head.match(/[\p{L}][\p{L}'’-]*/gu) ?? [];
+  const last = words.at(-1);
+  return last !== undefined && ORG_WORD.test(last);
+}
+
+/** Someone describing themselves rather than naming a workplace. */
+const FIRST_PERSON = /\b(?:i|i['’]m|im|i am|me|my|we|we['’]re|our)\b/i;
+
+/**
+ * Whether a typed employer or work area says something about who the person
+ * is. Stricter than "no protected word" would make sense for: a nationality or
+ * "Children's" may be part of the organization's name, as long as another word
+ * of the same phrase names the organization and nothing else is protected.
+ * "Korean" alone, "Korean woman", "my kids" or "Retired" are still personal.
+ * The employer is only ever compared whole (`employerKey`), never read for
+ * what its words say.
+ */
+export function employerHasProtected(text: string): boolean {
+  if (!hasProtected(text)) return false;
+  if (FIRST_PERSON.test(text)) return true;
+  // Each comma-separated phrase is checked on its own: "Indian, unemployed" is two statements.
+  return text.split(/[,;:/()|\n]+/).some((phrase) => {
+    if (!hasProtected(phrase)) return false;
+    const rest = phrase.replace(NAME_WORDS, " ");
+    return !namesAnOrganization(phrase) || hasProtected(rest);
+  });
 }

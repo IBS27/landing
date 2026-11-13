@@ -472,7 +472,7 @@ const WHEN_WEIGHT = 1.5;
 
 /**
  * Four to six stops in day order (empty when the threads don't support four).
- * Weekend Events take the slot their start time falls in; each other slot gets
+ * Weekend Events (Saturday's when there are any) take the slot their start time falls in; each other slot gets
  * the best unused candidate it takes, weighing how many locals agree against
  * the walk from the previous stop and when locals say to go. Slots still empty
  * then take a stand-in (brunch for coffee, a bar for dinner), never a park at
@@ -485,11 +485,13 @@ export function buildRoute(
   const filled: (BuiltStop | undefined)[] = SLOTS.map(() => undefined);
   const used = new Set<Candidate>();
 
-  // One day's Events only (the day of the best-ranked one), so the route stays in order.
+  // One day's Events only, so the route stays in order: Saturday's when there are any (the
+  // route is "your Saturday"), else the day of the best-ranked one (on Sunday, only Sunday is left).
   const eventsByPick = [...events].sort(
     (a, b) => (b.score ?? b.going) - (a.score ?? a.going) || a.startAt - b.startAt,
   );
-  const day = eventsByPick[0] && pacificDay(eventsByPick[0].startAt);
+  const first = eventsByPick.find((e) => pacific(e.startAt).weekday === 6) ?? eventsByPick[0];
+  const day = first && pacificDay(first.startAt);
   let eventCount = 0;
   for (const e of eventsByPick) {
     if (pacificDay(e.startAt) !== day) continue;

@@ -13,6 +13,8 @@ import {
   interestsForCategory,
   interestsForEvent,
   interestsForGroup,
+  interestsInText,
+  normalize,
 } from "./interests";
 import { isNeighborhoodSlug } from "./neighborhoods";
 import {
@@ -57,10 +59,16 @@ async function neighborhoodOf(
   return n && !n.park && isNeighborhoodSlug(n.slug) ? n.slug : undefined;
 }
 
+/** Group categories about a place rather than an activity: "Mission District Locals". */
+const PLACE_GROUP_CATEGORIES = new Set(["neighborhood", "local"]);
+const isPlaceGroup = (g: Pick<Doc<"groups">, "category">) =>
+  PLACE_GROUP_CATEGORIES.has(normalize(g.category));
+
 /**
  * The interests and neighborhood a target maps to, through #3's lookups only.
- * A post maps through its Group or Event. Null when the target is gone or maps
- * to no interest, which includes #3's excluded categories: those are never recorded.
+ * A post maps through its Group or Event, except in a neighborhood Group, where
+ * only the post's own words count. Null when the target is gone or maps to no
+ * interest, which includes #3's excluded categories: those are never recorded.
  */
 export async function describeTarget(
   ctx: QueryCtx,
@@ -91,7 +99,16 @@ export async function describeTarget(
   } else if (targetKind === "post") {
     const id = ctx.db.normalizeId("posts", targetId);
     const p = id && (await ctx.db.get(id));
-    if (p?.groupId) info = await describeTarget(ctx, "group", p.groupId);
+    const g = p?.groupId ? await ctx.db.get(p.groupId) : null;
+    if (p && g && isPlaceGroup(g)) {
+      // A neighborhood Group talks about everything, so a post there says only
+      // what its own words name ("Best brunch near Dolores?"), never the Group's tags.
+      const text = p.text ?? "";
+      info = {
+        interestIds: hasProtected(text) ? [] : interestsInText(text),
+        neighborhoodSlug: await neighborhoodOf(ctx, g.neighborhoodId, g.location),
+      };
+    } else if (p?.groupId) info = await describeTarget(ctx, "group", p.groupId);
     else if (p?.eventId) info = await describeTarget(ctx, "event", p.eventId);
   } else {
     const id = ctx.db.normalizeId("listings", targetId);

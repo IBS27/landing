@@ -295,7 +295,7 @@ export function breakdown(kind: NeighborhoodScoreKind, i: ScoreInputs): string {
   return [
     rail.length ? list(rail.map((s) => s.name)) : "",
     subway.length ? `Muni Metro at ${list(subway.map((s) => s.name))}` : "",
-    i.service ? plural(i.service.routes, "Muni line") : "",
+    i.service?.routes ? plural(i.service.routes, "Muni line") : "",
     i.service?.tripsPerHour ? `~${i.service.tripsPerHour} trips an hour on weekdays` : "",
     i.service?.allNight.length ? plural(i.service.allNight.length, "all-night line") : "",
   ]
@@ -309,7 +309,7 @@ export const HOW_CALCULATED = [
   "Things to do counts public Events in the next 30 days and how many kinds, Groups based here that posted in the last month, and places (parks, viewpoints, venues, museums…) that locals name in public neighborhood Groups. It needs an active Group or a place locals name.",
   "Food counts the food and drink spots locals name in public neighborhood Groups, how often they come up, and nightlife corridors. It needs at least one spot locals name.",
   "Transit counts BART, Caltrain and Muni Metro stations, Muni lines, weekday trips an hour and all-night lines, from the agencies' own schedules.",
-  "Interest fit is only yours: how many of the interests in your City Profile have a Group, Event or place here. It isn't shared or stored.",
+  "Interest fit is only yours: how many of the interests in your City Profile have Groups, Events or places here. Two of them meet an interest fully, and three interests met (or all of yours, if you have fewer) is a 10. With nothing here for your interests yet, there's no score. It isn't shared or stored.",
   "Things to do, Food and Transit count only public sources, and each shows them. Interest fit also counts what only you can see. There is no safety score.",
 ];
 
@@ -373,9 +373,19 @@ export function scoreSources(kind: NeighborhoodScoreKind, i: ScoreInputs): Sourc
 export type FitItem = { interests: InterestId[]; source: Source };
 
 /**
+ * Interest weight a neighborhood has to meet for a 10: three interests (or all
+ * of them, for someone with fewer). Nowhere has everything someone likes, so a
+ * long list of interests (with inferred ones on top) doesn't drag every
+ * neighborhood down to "Not much for you".
+ */
+export const FIT_FULL_WEIGHT = 3;
+
+/**
  * How well a neighborhood fits the viewer's interests, 0–10: each interest
  * counts by its weight (stated 1, inferred by confidence) and is fully met by
- * two matching Groups, Events or places. Null when the viewer has no interests.
+ * two matching Groups, Events or places; a 10 meets `FIT_FULL_WEIGHT` of it.
+ * Null when the viewer has no interests, and when nothing here matches them: a
+ * score needs something to cite.
  */
 export function interestFit(
   weights: ReadonlyMap<InterestId, number>,
@@ -393,7 +403,7 @@ export function interestFit(
       met += w * Math.min(1, count / 2);
     }
   }
-  if (total === 0) return null;
+  if (total === 0 || matched.length === 0) return null;
   matched.sort(
     (a, b) => (weights.get(b.interest) ?? 0) - (weights.get(a.interest) ?? 0) || b.count - a.count,
   );
@@ -407,7 +417,8 @@ export function interestFit(
     seen.add(k);
     sources.push(it.source);
   }
-  return { score: Math.round((met / total) * 100) / 10, matched, sources };
+  const share = Math.min(1, met / Math.min(total, FIT_FULL_WEIGHT));
+  return { score: Math.round(share * 100) / 10, matched, sources };
 }
 
 /* ---------- Getting around at night (no score) ---------- */

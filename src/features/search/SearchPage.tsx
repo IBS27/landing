@@ -323,7 +323,7 @@ export function SearchPage({ tab, params }: { tab: SearchTab; params: SearchPara
   const empty = !q || (!loading && (postFiltered ? 0 : entityCount) === 0 && postCount === 0);
 
   return (
-    <div className="flex min-h-[calc(100vh-56px)] items-start">
+    <div className="flex min-h-[calc(100vh-56px)] flex-col md:flex-row md:items-start">
       <SearchRail tab={tab} params={params} />
       <main className="flex min-w-0 flex-1 justify-center px-4 pt-8 pb-8">
         <div className="flex w-full max-w-[680px] flex-col gap-4">

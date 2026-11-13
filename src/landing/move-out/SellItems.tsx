@@ -3,6 +3,7 @@ import { Sparkles, Store } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { toListing } from "@/landing/links";
+import { AddItemPhoto, paidPrice } from "@/landing/move-in/OwnedItems";
 import { cn, price } from "@/lib/format";
 import { Button, Card, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -75,13 +76,15 @@ export function SellItems() {
             const disabled = !!listed || reviewing || it.photos.length === 0;
             return (
               <li key={it._id}>
-                <label
+                {/* The photo slot sits outside the label: without a photo it's an upload control. */}
+                <div
                   className={cn(
                     "flex items-center gap-3 px-4 py-2.5",
-                    !disabled && "cursor-pointer hover:bg-hover",
+                    !disabled && "hover:bg-hover",
                   )}
                 >
                   <input
+                    id={`sell-${it._id}`}
                     type="checkbox"
                     className="size-4 shrink-0 accent-[var(--accent)]"
                     disabled={disabled}
@@ -96,17 +99,17 @@ export function SellItems() {
                       className="h-12 w-12 shrink-0 rounded-md object-cover"
                     />
                   ) : (
-                    <div className="h-12 w-12 shrink-0 rounded-md bg-wash" />
+                    <AddItemPhoto itemId={it._id} title={it.title} />
                   )}
-                  <div className="min-w-0 flex-1">
+                  <label htmlFor={`sell-${it._id}`} className="min-w-0 flex-1 cursor-pointer">
                     <div className="truncate font-semibold text-[15px] text-primary">
                       {it.title}
                     </div>
                     <div className="text-[13px] text-secondary leading-[18px]">
-                      Paid {it.price === 0 ? "nothing" : price(it.price)}
-                      {it.photos.length === 0 ? " · No photo, so it can't be listed" : ""}
+                      Paid {it.price === 0 ? "nothing" : paidPrice(it.price)}
+                      {it.photos.length === 0 ? " · Add a photo to list it" : ""}
                     </div>
-                  </div>
+                  </label>
                   {listed && (
                     <Link
                       {...toListing(listed)}
@@ -115,7 +118,7 @@ export function SellItems() {
                       <Store size={13} aria-hidden /> Listed
                     </Link>
                   )}
-                </label>
+                </div>
                 {listed && <MuseTerms item={it} />}
               </li>
             );
@@ -228,7 +231,8 @@ function ReviewListings({
       drafts.map((d) => ({
         itemId: d.itemId,
         title: d.title,
-        price: String(d.price),
+        // Listings are whole dollars; what you paid may have cents.
+        price: String(Math.round(d.price)),
         category: d.category,
         minPrice: "",
       })),

@@ -2,11 +2,13 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { CircleCheck, Lock, Pencil, Sparkles } from "lucide-react";
 import { type ReactNode, useEffect, useId, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
+import { errorText } from "@/landing/errorText";
 import { cn } from "@/lib/format";
 import { Tooltip } from "@/ui/overlays";
 import { Button, Card, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import {
+  earliestMoveInMonth,
   type FactKey,
   factSlot,
   GOALS,
@@ -27,6 +29,8 @@ import {
   liveQuote,
   toggle,
   toSaveArgs,
+  withMoveInDate,
+  withMoveInMonth,
 } from "./briefState";
 import { Chip, confidenceText } from "./FactChip";
 import { ProfileSummary } from "./ProfileSummary";
@@ -135,7 +139,8 @@ function BriefEditor({
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const problems = briefProblems(form, todayInSF(), profile.moveIn);
+  const today = todayInSF();
+  const problems = briefProblems(form, today, profile.moveIn);
   const set = <K extends keyof BriefForm>(k: K, value: BriefForm[K]) =>
     setForm((f) => ({ ...f, [k]: value }));
 
@@ -163,9 +168,7 @@ function BriefEditor({
       await save(toSaveArgs(form));
       onSaved();
     } catch (e) {
-      setError(
-        e instanceof Error ? e.message.replace(/^.*ConvexError:\s*/, "") : "Something went wrong",
-      );
+      setError(errorText(e));
     } finally {
       setBusy(false);
     }
@@ -233,7 +236,7 @@ function BriefEditor({
       <Section
         id={briefAnchor("moveIn")}
         title="Move-in"
-        help="Crews match people arriving the same month."
+        help="Crews match people arriving the same month. Already moved? Pick when you did."
       >
         <div className="flex flex-wrap items-end gap-3">
           <LabeledInput label="Month">
@@ -241,8 +244,9 @@ function BriefEditor({
               <input
                 id={id}
                 type="month"
+                min={earliestMoveInMonth(today)}
                 value={form.moveInMonth}
-                onChange={(e) => set("moveInMonth", e.target.value)}
+                onChange={(e) => setForm((f) => withMoveInMonth(f, e.target.value))}
                 className={inputCls}
               />
             )}
@@ -252,8 +256,9 @@ function BriefEditor({
               <input
                 id={id}
                 type="date"
+                min={`${earliestMoveInMonth(today)}-01`}
                 value={form.moveInDate}
-                onChange={(e) => set("moveInDate", e.target.value)}
+                onChange={(e) => setForm((f) => withMoveInDate(f, e.target.value))}
                 className={inputCls}
               />
             )}

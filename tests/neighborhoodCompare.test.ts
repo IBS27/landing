@@ -63,6 +63,31 @@ describe("namedNeighborhoods", () => {
     ]);
   });
 
+  test("everyday names: the Richmond, Hayes, Civic Center, Union Square", () => {
+    expect(namedNeighborhoods("the Richmond vs the Sunset")).toEqual([
+      "inner-richmond",
+      "sunset-parkside",
+    ]);
+    expect(namedNeighborhoods("What's my Saturday like in the Richmond vs the Mission?")).toEqual([
+      "inner-richmond",
+      "mission",
+    ]);
+    // The longer name still wins over "Richmond".
+    expect(namedNeighborhoods("Outer Richmond or the Richmond District")).toEqual([
+      "outer-richmond",
+      "inner-richmond",
+    ]);
+    expect(namedNeighborhoods("Hayes vs Civic Center")).toEqual(["hayes-valley", "tenderloin"]);
+    expect(namedNeighborhoods("Union Square or Cole Valley")).toEqual([
+      "financial-district-south-beach",
+      "haight-ashbury",
+    ]);
+    expect(namedNeighborhoods("Lower Haight vs Dogpatch")).toEqual([
+      "hayes-valley",
+      "potrero-hill",
+    ]);
+  });
+
   test("each neighborhood once, in the order named", () => {
     expect(namedNeighborhoods("the Mission District vs Noe, or the Mission")).toEqual([
       "mission",
@@ -276,15 +301,16 @@ function scores(opts: {
       label: opts.label,
     },
     scores: shared,
-    interestFit: opts.fit
-      ? {
-          state: "ok",
-          ...opts.fit,
-          // Like the real Interest fit: nothing matched, nothing cited.
-          sources:
-            opts.fit.matched.length > 0 ? [src(`fit-${opts.slug}`), src("shared-group")] : [],
-        }
-      : { state: "no_profile" },
+    interestFit: !opts.fit
+      ? { state: "no_profile" }
+      : // Like the real Interest fit: nothing matched, so no score and nothing cited.
+        opts.fit.score === 0
+        ? { state: "no_match", missing: opts.fit.missing }
+        : {
+            state: "ok",
+            ...opts.fit,
+            sources: [src(`fit-${opts.slug}`), src("shared-group")],
+          },
     night: {
       transit: opts.noNightTransit
         ? null
@@ -404,6 +430,12 @@ describe("compareAnswer", () => {
     expect(line(none, "interests")?.text).toBe(
       "Groups, Events and places for your interests: neither has surfing yet.",
     );
+    // Only one side has anything: it isn't compared with a made-up 0.0.
+    const one = compareAnswer(mission(), zero(sunset()), rider);
+    expect(one.lead).toBe(
+      "The Mission fits your interests better (7.2 out of 10): we haven't found Groups, Events or places for them in the Inner Sunset yet.",
+    );
+    expect(one.leadSources.length).toBeGreaterThan(0);
   });
 
   test("Weekend Route stops that fit, citing every stop counted", () => {

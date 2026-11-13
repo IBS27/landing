@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import type { MutationCtx } from "../convex/_generated/server";
 import { statesAmount } from "../convex/lib/proposals";
 import {
   renterPrice,
@@ -6,6 +7,8 @@ import {
   subletLadder,
   subletMoveProblems,
 } from "../convex/lib/subleases";
+import { create } from "../convex/subleases";
+import { fakeCtx, type Row } from "./fakeDb";
 
 const input = (chat: SubletInput["chat"], yourLastPrice: number | null = null): SubletInput => ({
   listing: {
@@ -63,7 +66,7 @@ describe("subletLadder", () => {
   test("first message gets the basics and a tour invite", () => {
     const m = subletLadder(input([renter("Is this still available?")]));
     expect(m.move).toBe("message");
-    expect(m.text).toContain("$1600/month");
+    expect(m.text).toContain("$1,600/month");
   });
 
   test("stays between the lowest rent and asking, and every move passes the checks", () => {
@@ -125,4 +128,30 @@ describe("subletMoveProblems", () => {
       [],
     );
   });
+});
+
+test("a sublet can't be listed for dates that have passed", async () => {
+  const DAY = 24 * 60 * 60 * 1000;
+  const tables: Record<string, Row[]> = { users: [{ _id: "users:maya" }], listings: [] };
+  const handler = (
+    create as unknown as { _handler: (c: MutationCtx, a: object) => Promise<unknown> }
+  )._handler;
+  await expect(
+    handler(fakeCtx(tables), {
+      viewerId: "users:maya",
+      title: "Room in a Mission flat",
+      rent: 1600,
+      minRent: 1450,
+      description: "Sunny room.",
+      photos: [{ url: "/p/room.jpg" }],
+      neighborhood: "Mission",
+      propertyType: "room",
+      bedrooms: 1,
+      bathrooms: 1,
+      availableFrom: Date.now() - 60 * DAY,
+      availableTo: Date.now() - 30 * DAY,
+      furnished: true,
+    }),
+  ).rejects.toThrow("These dates have already passed");
+  expect(tables.listings).toHaveLength(0);
 });

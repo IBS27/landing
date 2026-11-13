@@ -6,6 +6,7 @@ import type { Citations, Poll, ProposalPayload } from "../validators";
 import { blockedSet, dmBlockNotice } from "./blocks";
 import { assertCitable, resolveCitations } from "./citations";
 import { CREW_TASKS, crewMateIds } from "./crewMembers";
+import { afterChatMessage } from "./negotiations";
 import { notify } from "./notify";
 import { type Audience, loadAudience } from "./posts";
 import { friendIds } from "./users";
@@ -406,6 +407,8 @@ export async function executeProposal(
       }
       if (!messageId) throw new ConvexError("Nothing to send");
       await bumpConversation(ctx, p.conversationId, ownerId, messageId, now);
+      // Like a typed message: the other side's Muse drafts its reply (#36, #44, #45).
+      await afterChatMessage(ctx, p.conversationId, ownerId);
       if (p.kind === "offer") {
         const listing = await ctx.db.get(p.listingId);
         if (listing && listing.sellerId !== ownerId)
@@ -481,7 +484,9 @@ export async function executeProposal(
         slug,
         cover: "/seed/covers/sf-01.jpg",
         privacy: p.privacy,
-        visible: true,
+        // A private Group Muse starts (a crew's, #31) names its members and what they
+        // share, so it stays out of search: only members and invitees can find it.
+        visible: p.privacy === "public",
         description: p.description.trim(),
         category: "Social",
         location: owner?.city,

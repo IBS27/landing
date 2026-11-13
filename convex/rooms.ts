@@ -25,6 +25,7 @@ import {
   vibeValue,
 } from "./lib/vibe";
 import { NOT_DECOR, rankVibeMatches } from "./lib/vibeMatch";
+import { syncRoomUnit } from "./unitScenes";
 import { type Citations, citations, type Source } from "./validators";
 
 /**
@@ -237,7 +238,9 @@ export const addPhotos = viewerMutation({
       if (!url) throw new ConvexError("A photo didn't finish uploading");
       added.push({ url, storageId, addedAt: now });
     }
-    await ctx.db.patch(roomId, { photos: [...room.photos, ...added], updatedAt: now });
+    const photos = [...room.photos, ...added];
+    await ctx.db.patch(roomId, { photos, updatedAt: now });
+    await syncRoomUnit(ctx, { ...room, photos });
   },
 });
 
@@ -247,10 +250,10 @@ export const removePhoto = viewerMutation({
     const room = await ownRoom(ctx, ctx.viewer._id, roomId);
     const gone = room.photos.filter((p) => p.url === url);
     await deletePhotoFiles(ctx, gone);
-    await ctx.db.patch(roomId, {
-      photos: room.photos.filter((p) => p.url !== url),
-      updatedAt: Date.now(),
-    });
+    const photos = room.photos.filter((p) => p.url !== url);
+    await ctx.db.patch(roomId, { photos, updatedAt: Date.now() });
+    // Its 3D unit drops the photo too, rather than keep a source whose file is gone.
+    await syncRoomUnit(ctx, { ...room, photos });
   },
 });
 

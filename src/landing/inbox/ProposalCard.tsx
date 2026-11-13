@@ -18,6 +18,7 @@ import { useM } from "@/app/viewer";
 import { toConversation, toEvent, toGroup, toListing } from "@/landing/links";
 import { RenterTrust } from "@/landing/move-out/RenterTrust";
 import { PollPreview } from "@/landing/plans/ChatPoll";
+import { fromSfInput, SF_MONTH, SF_WEEKDAY_TIME, sfParts, toSfInput } from "@/landing/sfTime";
 import { cn, price, shortAge } from "@/lib/format";
 import { SourcesChip } from "@/ui/Citations";
 import { Avatar, Button, Card } from "@/ui/primitives";
@@ -292,25 +293,22 @@ function Preview({ p }: { p: ProposalView }) {
     case "event": {
       const pay = p.payload.kind === "event" ? p.payload : null;
       if (!pay) return null;
-      const d = new Date(pay.startAt);
       return (
         <div className="flex gap-3 rounded-lg border border-divider p-3">
           <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center overflow-hidden rounded-lg bg-comment">
             <span className="font-semibold text-[12px] text-badge uppercase leading-4">
-              {d.toLocaleDateString(undefined, { month: "short" })}
+              {SF_MONTH.format(pay.startAt)}
             </span>
-            <span className="font-bold text-[22px] text-primary leading-6">{d.getDate()}</span>
+            <span className="font-bold text-[22px] text-primary leading-6">
+              {sfParts(pay.startAt).day}
+            </span>
           </div>
           <div className="min-w-0 flex-1">
             <div className="font-semibold text-[15px] text-primary leading-5">{pay.title}</div>
             <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[13px] text-secondary">
               <span className="inline-flex items-center gap-1">
                 <Clock size={13} aria-hidden />
-                {d.toLocaleString(undefined, {
-                  weekday: "short",
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}
+                {SF_WEEKDAY_TIME.format(pay.startAt)}
               </span>
               {pay.venue && (
                 <span className="inline-flex items-center gap-1">
@@ -361,12 +359,6 @@ function Preview({ p }: { p: ProposalView }) {
 
 const field =
   "w-full rounded-lg border border-divider bg-input px-3 py-2 text-[15px] text-primary outline-none placeholder:text-placeholder focus:border-fb";
-
-function toLocalInput(ts: number) {
-  const d = new Date(ts);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
 
 function EditForm({
   p,
@@ -462,14 +454,14 @@ function EditForm({
             value={draft.title}
             onChange={(e) => onChange({ ...draft, title: e.target.value })}
           />
-          <div className="flex gap-2">
+          <div className="grid gap-2 sm:grid-cols-2">
             <input
-              aria-label="Date and time"
+              aria-label="Date and time (San Francisco)"
               type="datetime-local"
               className={field}
-              value={toLocalInput(draft.startAt)}
+              value={toSfInput(draft.startAt)}
               onChange={(e) => {
-                const t = new Date(e.target.value).getTime();
+                const t = fromSfInput(e.target.value);
                 if (!Number.isNaN(t)) onChange({ ...draft, startAt: t });
               }}
             />
@@ -596,7 +588,7 @@ export function ProposalCard({ p }: { p: ProposalView }) {
           Nothing is sent until you approve
         </div>
         {draft ? (
-          <div className="flex items-center gap-2">
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
             <Button variant="ghost" size="sm" onClick={() => setDraft(null)} disabled={!!busy}>
               Cancel
             </Button>
@@ -621,7 +613,7 @@ export function ProposalCard({ p }: { p: ProposalView }) {
             </Button>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
             <Button
               variant="ghost"
               size="sm"

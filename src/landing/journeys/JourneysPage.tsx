@@ -12,6 +12,7 @@ import {
 import { type ReactNode, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { useToast } from "@/features/marketplace/toast";
+import { errorText } from "@/landing/errorText";
 import { CheckInCard, WeekActivity } from "@/landing/journeys/CheckInCard";
 import { toEvent, toGroup, toProfile } from "@/landing/links";
 import { LandingMap, type RouteStop } from "@/landing/map/LandingMap";
@@ -499,10 +500,6 @@ function CrewOverlap({
       )}
     </div>
   );
-}
-
-function errorText(e: unknown) {
-  return e instanceof Error ? e.message.replace(/^.*ConvexError:\s*/, "") : "Something went wrong";
 }
 
 /* ---------- Past weeks ---------- */

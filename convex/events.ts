@@ -70,6 +70,8 @@ type Ctx = {
   viewerId: Id<"users">;
   friends: Set<Id<"users">>;
   groups: Set<Id<"groups">>;
+  /** People the viewer blocked or who blocked the viewer. */
+  blocked: Set<Id<"users">>;
   /** The viewer's response per event. */
   mine: Map<Id<"events">, Doc<"eventResponses">>;
 };
@@ -86,13 +88,23 @@ async function loadCtx(ctx: QueryCtx, viewerId: Id<"users">): Promise<Ctx> {
     viewerId,
     friends: a.friends,
     groups: a.groups,
+    blocked: a.blocked,
     mine: new Map(rows.map((r) => [r.eventId, r])),
   };
 }
 
-/** Facebook audience rules for events. */
+/** Facebook audience rules for events. Blocking hides the other person's Events. */
 function canSee(e: Doc<"events">, c: Ctx) {
-  return eventVisible(e, c, c.mine.has(e._id));
+  return !c.blocked.has(e.hostId) && eventVisible(e, c, c.mine.has(e._id));
+}
+
+/** The event, when the viewer can see it; otherwise "Event not found". */
+async function visibleEvent(ctx: QueryCtx, eventId: Id<"events">, viewerId: Id<"users">) {
+  const e = await ctx.db.get(eventId);
+  const a = await loadAudience(ctx, viewerId);
+  if (!e || a.blocked.has(e.hostId) || !(await canSeeEvent(ctx, e, a)))
+    throw new ConvexError("Event not found");
+  return e;
 }
 
 async function responses(ctx: QueryCtx, eventId: Id<"events">, status: Status) {
@@ -274,7 +286,7 @@ export const yours = viewerQuery({
       .collect();
     const responded = (
       await Promise.all([...c.mine.values()].map((r) => ctx.db.get(r.eventId)))
-    ).filter((e): e is Doc<"events"> => e !== null);
+    ).filter((e): e is Doc<"events"> => e !== null && !c.blocked.has(e.hostId));
     let evs: Doc<"events">[];
     if (tab === "hosting") evs = hosted.filter((e) => isUpcoming(e, now));
     else if (tab === "past") {
@@ -362,7 +374,9 @@ export const get = viewerQuery({
             price: e.ticketPrice ?? null,
           }
         : null,
-      group: group ? { _id: group._id, name: group.name, slug: group.slug } : null,
+      group: group
+        ? { _id: group._id, name: group.name, slug: group.slug, privacy: group.privacy }
+        : null,
       host,
       hostInfo: {
         bio: hostDoc.bio ?? null,
@@ -534,9 +548,7 @@ export const respond = viewerMutation({
     status: v.union(v.literal("going"), v.literal("interested"), v.literal("none")),
   },
   handler: async (ctx, { eventId, status }) => {
-    const e = await ctx.db.get(eventId);
-    if (!e || !(await canSeeEvent(ctx, e, await loadAudience(ctx, ctx.viewer._id))))
-      throw new ConvexError("Event not found");
+    const e = await visibleEvent(ctx, eventId, ctx.viewer._id);
     const viewerId = ctx.viewer._id;
     const row = await ctx.db
       .query("eventResponses")
@@ -575,14 +587,22 @@ export const respond = viewerMutation({
 export const invite = viewerMutation({
   args: { eventId: v.id("events"), userIds: v.array(v.id("users")) },
   handler: async (ctx, { eventId, userIds }) => {
-    const e = await ctx.db.get(eventId);
-    if (!e || !(await canSeeEvent(ctx, e, await loadAudience(ctx, ctx.viewer._id))))
-      throw new ConvexError("Event not found");
+    const e = await visibleEvent(ctx, eventId, ctx.viewer._id);
     const viewerId = ctx.viewer._id;
     const friends = new Set(await friendIds(ctx, viewerId));
+    const groupId = e.privacy === "group" ? e.groupId : undefined;
     let sent = 0;
     for (const userId of new Set(userIds)) {
       if (!friends.has(userId) || userId === e.hostId) continue;
+      // Members-only events can only be shared with the Group's members.
+      if (
+        groupId &&
+        !(await ctx.db
+          .query("groupMembers")
+          .withIndex("by_group_user", (q) => q.eq("groupId", groupId).eq("userId", userId))
+          .first())
+      )
+        continue;
       const row = await ctx.db
         .query("eventResponses")
         .withIndex("by_event_user", (q) => q.eq("eventId", eventId).eq("userId", userId))
@@ -617,7 +637,13 @@ const eventFields = {
   venue: v.optional(v.string()),
   address: v.optional(v.string()),
   city: v.optional(v.string()),
-  privacy: v.union(v.literal("public"), v.literal("friends"), v.literal("private")),
+  /** "group" (members of the event's Group) is for events in a Group, and only for them. */
+  privacy: v.union(
+    v.literal("public"),
+    v.literal("friends"),
+    v.literal("private"),
+    v.literal("group"),
+  ),
   coverStorageId: v.optional(v.id("_storage")),
   /**
    * The venue's coordinates, when the caller knows them (Landing flows do; Facebook's composer
@@ -635,15 +661,51 @@ function validate(a: { title: string; startAt: number; endAt?: number }) {
     throw new ConvexError("End time must be after the start time");
 }
 
+/**
+ * Checks an event's audience. An event in a Group is for the Group's members,
+ * or public when the Group is; "group" means nothing outside a Group.
+ */
+async function checkPrivacy(
+  ctx: QueryCtx,
+  privacy: Doc<"events">["privacy"],
+  groupId: Id<"groups"> | undefined,
+) {
+  if (!groupId) {
+    if (privacy === "group") throw new ConvexError("Choose who can see your event");
+    return;
+  }
+  const g = await ctx.db.get(groupId);
+  if (!g) throw new ConvexError("Group not found");
+  if (privacy === "group" || (privacy === "public" && g.privacy === "public")) return;
+  throw new ConvexError(
+    g.privacy === "public"
+      ? "Events in a group are public or for its members"
+      : "Events in a private group are for its members",
+  );
+}
+
 export const create = viewerMutation({
-  args: eventFields,
-  handler: async (ctx, { coverStorageId, point: pointArg, ...a }) => {
+  args: {
+    ...eventFields,
+    /** Create the event in this Group (its Events tab); the host must be a member. */
+    groupId: v.optional(v.id("groups")),
+  },
+  handler: async (ctx, { coverStorageId, point: pointArg, groupId, ...a }) => {
     validate(a);
+    if (groupId) {
+      const member = await ctx.db
+        .query("groupMembers")
+        .withIndex("by_group_user", (q) => q.eq("groupId", groupId).eq("userId", ctx.viewer._id))
+        .unique();
+      if (!member) throw new ConvexError("Join the group to create events in it");
+    }
+    await checkPrivacy(ctx, a.privacy, groupId);
     const cover = coverStorageId ? await ctx.storage.getUrl(coverStorageId) : null;
     const now = Date.now();
     const point = a.online || !pointArg ? undefined : checkPoint(pointArg);
     const eventId = await ctx.db.insert("events", {
       hostId: ctx.viewer._id,
+      groupId,
       title: a.title.trim(),
       cover: cover ?? DEFAULT_COVER,
       description: a.description.trim(),
@@ -677,6 +739,8 @@ export const update = viewerMutation({
     const e = await ctx.db.get(eventId);
     if (!e || e.hostId !== ctx.viewer._id) throw new ConvexError("Only the host can edit");
     validate(a);
+    // An event in a Group stays a Group event (an audience it already had stays allowed).
+    if (a.privacy !== e.privacy) await checkPrivacy(ctx, a.privacy, e.groupId);
     const cover = coverStorageId ? await ctx.storage.getUrl(coverStorageId) : null;
     const venue = a.online ? undefined : a.venue?.trim() || undefined;
     const address = a.online ? undefined : a.address?.trim() || undefined;
@@ -711,9 +775,7 @@ export const update = viewerMutation({
 export const post = viewerMutation({
   args: { eventId: v.id("events"), text: v.string() },
   handler: async (ctx, { eventId, text }) => {
-    const e = await ctx.db.get(eventId);
-    if (!e || !(await canSeeEvent(ctx, e, await loadAudience(ctx, ctx.viewer._id))))
-      throw new ConvexError("Event not found");
+    const e = await visibleEvent(ctx, eventId, ctx.viewer._id);
     const body = text.trim();
     if (!body) throw new ConvexError("A post needs some content");
     const postId = await ctx.db.insert("posts", {

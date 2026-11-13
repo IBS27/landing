@@ -1,5 +1,6 @@
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
+import { afterSaleAgreed } from "../moveOutSales";
 
 /**
  * Owned items (#27). Marketplace has no record of who bought a listing, so the
@@ -42,6 +43,8 @@ export async function addPurchase(
  */
 export async function afterProposalApproved(ctx: MutationCtx, p: Doc<"proposals">, at: number) {
   if (p.payload.kind !== "offer") return;
+  // A seller's agreed move-out sale takes the item off the table for other buyers (#44).
+  await afterSaleAgreed(ctx, p);
   const payload = p.payload;
   const n = await ctx.db
     .query("negotiations")

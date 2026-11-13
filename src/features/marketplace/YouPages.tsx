@@ -955,7 +955,7 @@ export function BuySellGroupsPage() {
                   </Link>
                   <p className="mt-1 text-[13px] text-secondary">
                     {g.privacy === "public" ? "Public" : "Private"} group ·{" "}
-                    {g.memberCount.toLocaleString("en-US")} members
+                    {plural(g.memberCount, "member")}
                   </p>
                   <p className="text-[13px] text-secondary">
                     {g.listingCount} {g.listingCount === 1 ? "listing" : "listings"} for sale

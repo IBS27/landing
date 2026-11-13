@@ -121,6 +121,7 @@ function GroupComposer({ group }: { group: GroupView }) {
         initialPanel={panel}
         groupId={group._id}
         groupName={group.name}
+        groupPrivacy={group.privacy}
       />
       <AnonymousDialog
         group={group}

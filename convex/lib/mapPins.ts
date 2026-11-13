@@ -1,6 +1,6 @@
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
-import { eventVisible, loadAudience } from "./posts";
+import { eventVisible, listingShownTo, loadAudience } from "./posts";
 
 /**
  * Pins for the Landing map (#56): what `map.inBounds` returns and what
@@ -141,7 +141,7 @@ export async function pinsInBounds(
     let scanned = 0;
     for await (const l of ctx.db.query("listings").withIndex("by_created").order("desc")) {
       if (++scanned > LISTING_SCAN_MAX || out.listings.length >= PINS_MAX) break;
-      if (l.status !== "active" || audience.blocked.has(l.sellerId)) continue;
+      if (l.status !== "active" || !listingShownTo(l, audience)) continue;
       if (!want.has(l.rental ? "homes" : "items")) continue;
       const pin = listingPin(l);
       // Bounds are tested on the approximate point, so panning can't narrow down the real one.

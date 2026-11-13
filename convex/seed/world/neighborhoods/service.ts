@@ -10,1249 +10,1580 @@
 import type { ServiceSeed, SourceSnapshot, StreetlightSeed } from "../../types";
 
 export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:09:00,25:10:00,M16-1,14,,,,": {
-    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-    title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
-    publisher: "BART",
-    snippet: "1965220,25:09:00,25:10:00,M16-1,14,,,,",
-    fetchedAt: 1794535193975,
-  },
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:11:00,25:11:00,M20-1,15,,,,": {
-    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-    title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
-    publisher: "BART",
-    snippet: "1965220,25:11:00,25:11:00,M20-1,15,,,,",
-    fetchedAt: 1794535193975,
-  },
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:13:00,25:13:00,M30-1,16,,,,": {
-    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-    title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
-    publisher: "BART",
-    snippet: "1965220,25:13:00,25:13:00,M30-1,16,,,,",
-    fetchedAt: 1794535193975,
-  },
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:14:00,25:15:00,M40-1,17,,,,": {
-    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-    title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
-    publisher: "BART",
-    snippet: "1965220,25:14:00,25:15:00,M40-1,17,,,,",
-    fetchedAt: 1794535193975,
-  },
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:17:00,25:17:00,M50-1,18,,,,": {
-    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-    title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
-    publisher: "BART",
-    snippet: "1965220,25:17:00,25:17:00,M50-1,18,,,,",
-    fetchedAt: 1794535193975,
-  },
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:19:00,25:19:00,M60-1,19,,,,": {
-    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-    title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
-    publisher: "BART",
-    snippet: "1965220,25:19:00,25:19:00,M60-1,19,,,,",
-    fetchedAt: 1794535193975,
-  },
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:21:00,25:22:00,M70-1,20,,,,": {
-    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-    title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
-    publisher: "BART",
-    snippet: "1965220,25:21:00,25:22:00,M70-1,20,,,,",
-    fetchedAt: 1794535193975,
-  },
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:24:00,25:24:00,M80-1,21,,,,": {
-    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-    title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
-    publisher: "BART",
-    snippet: "1965220,25:24:00,25:24:00,M80-1,21,,,,",
-    fetchedAt: 1794535193975,
-  },
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:17:00,24:17:00,M80-2,5,Antioch,,,":
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Embarcadero toward Millbrae · 1:10 AM":
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
       publisher: "BART",
-      snippet: "1965297,24:17:00,24:17:00,M80-2,5,Antioch,,,",
-      fetchedAt: 1794535193975,
+      snippet: "BART · last weekday departure from Embarcadero toward Millbrae · 1:10 AM",
+      fetchedAt: 1794559936393,
     },
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:19:00,24:19:00,M70-2,6,Antioch,,,":
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Montgomery Street toward Millbrae · 1:11 AM":
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
       publisher: "BART",
-      snippet: "1965297,24:19:00,24:19:00,M70-2,6,Antioch,,,",
-      fetchedAt: 1794535193975,
+      snippet: "BART · last weekday departure from Montgomery Street toward Millbrae · 1:11 AM",
+      fetchedAt: 1794559936393,
     },
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:22:00,24:22:00,M60-2,7,Antioch,,,":
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Powell Street toward Millbrae · 1:13 AM":
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
       publisher: "BART",
-      snippet: "1965297,24:22:00,24:22:00,M60-2,7,Antioch,,,",
-      fetchedAt: 1794535193975,
+      snippet: "BART · last weekday departure from Powell Street toward Millbrae · 1:13 AM",
+      fetchedAt: 1794559936393,
     },
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:24:00,24:24:00,M50-2,8,Antioch,,,":
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Civic Center / UN Plaza toward Millbrae · 1:15 AM":
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
       publisher: "BART",
-      snippet: "1965297,24:24:00,24:24:00,M50-2,8,Antioch,,,",
-      fetchedAt: 1794535193975,
+      snippet:
+        "BART · last weekday departure from Civic Center / UN Plaza toward Millbrae · 1:15 AM",
+      fetchedAt: 1794559936393,
     },
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:26:00,24:26:00,M40-2,9,Antioch,,,":
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from 16th Street / Mission toward Millbrae · 1:17 AM":
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
       publisher: "BART",
-      snippet: "1965297,24:26:00,24:26:00,M40-2,9,Antioch,,,",
-      fetchedAt: 1794535193975,
+      snippet: "BART · last weekday departure from 16th Street / Mission toward Millbrae · 1:17 AM",
+      fetchedAt: 1794559936393,
     },
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:28:00,24:28:00,M30-2,10,Antioch,,,":
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from 24th Street / Mission toward Millbrae · 1:19 AM":
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
       publisher: "BART",
-      snippet: "1965297,24:28:00,24:28:00,M30-2,10,Antioch,,,",
-      fetchedAt: 1794535193975,
+      snippet: "BART · last weekday departure from 24th Street / Mission toward Millbrae · 1:19 AM",
+      fetchedAt: 1794559936393,
     },
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:29:00,24:30:00,M20-2,11,Antioch,,,":
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Glen Park toward Millbrae · 1:22 AM":
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
       publisher: "BART",
-      snippet: "1965297,24:29:00,24:30:00,M20-2,11,Antioch,,,",
-      fetchedAt: 1794535193975,
+      snippet: "BART · last weekday departure from Glen Park toward Millbrae · 1:22 AM",
+      fetchedAt: 1794559936393,
     },
-  "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:31:00,24:31:00,M16-2,12,Antioch,,,":
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Balboa Park toward Millbrae · 1:24 AM":
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stop_times.txt), schedule through 2027-01-10",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
       publisher: "BART",
-      snippet: "1965297,24:31:00,24:31:00,M16-2,12,Antioch,,,",
-      fetchedAt: 1794535193975,
+      snippet: "BART · last weekday departure from Balboa Park toward Millbrae · 1:24 AM",
+      fetchedAt: 1794559936393,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,":
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Balboa Park toward Antioch · 12:17 AM":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+      publisher: "BART",
+      snippet: "BART · last weekday departure from Balboa Park toward Antioch · 12:17 AM",
+      fetchedAt: 1794559936393,
+    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Glen Park toward Antioch · 12:19 AM":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+      publisher: "BART",
+      snippet: "BART · last weekday departure from Glen Park toward Antioch · 12:19 AM",
+      fetchedAt: 1794559936393,
+    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from 24th Street / Mission toward Antioch · 12:22 AM":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+      publisher: "BART",
+      snippet: "BART · last weekday departure from 24th Street / Mission toward Antioch · 12:22 AM",
+      fetchedAt: 1794559936393,
+    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from 16th Street / Mission toward Antioch · 12:24 AM":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+      publisher: "BART",
+      snippet: "BART · last weekday departure from 16th Street / Mission toward Antioch · 12:24 AM",
+      fetchedAt: 1794559936393,
+    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Civic Center / UN Plaza toward Antioch · 12:26 AM":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+      publisher: "BART",
+      snippet:
+        "BART · last weekday departure from Civic Center / UN Plaza toward Antioch · 12:26 AM",
+      fetchedAt: 1794559936393,
+    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Powell Street toward Antioch · 12:28 AM":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+      publisher: "BART",
+      snippet: "BART · last weekday departure from Powell Street toward Antioch · 12:28 AM",
+      fetchedAt: 1794559936393,
+    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Montgomery Street toward Antioch · 12:30 AM":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+      publisher: "BART",
+      snippet: "BART · last weekday departure from Montgomery Street toward Antioch · 12:30 AM",
+      fetchedAt: 1794559936393,
+    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Embarcadero toward Antioch · 12:31 AM":
+    {
+      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+      title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+      publisher: "BART",
+      snippet: "BART · last weekday departure from Embarcadero toward Antioch · 12:31 AM",
+      fetchedAt: 1794559936393,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 1 California · stops at Sacramento St & Battery St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 1 California · stops at Sacramento St & Battery St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 1 California · stops at Sacramento St & Powell St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 1 California · stops at Sacramento St & Powell St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 1 California · stops at Sacramento St & Van Ness Ave":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 1 California · stops at Sacramento St & Van Ness Ave",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 1 California · stops at California St & Baker St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 1 California · stops at California St & Baker St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 1 California · stops at California St & Arguello Blvd":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 1 California · stops at California St & Arguello Blvd",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 1 California · stops at California St & Park Presidio Blvd":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 1 California · stops at California St & Park Presidio Blvd",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 1 California · stops at California St & 28th Ave":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 1 California · stops at California St & 28th Ave",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 14 Mission · runs all night: 1:30 AM at Mission St & Geneva Ave":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 14 Mission · runs all night: 1:30 AM at Mission St & Geneva Ave",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 14 Mission · runs all night: 1:30 AM at Mission St & Highland Ave":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 14 Mission · runs all night: 1:30 AM at Mission St & Highland Ave",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 14 Mission · runs all night: 1:30 AM at Mission St & 16th St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 14 Mission · runs all night: 1:30 AM at Mission St & 16th St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 14 Mission · runs all night: 1:30 AM at Mission St & 3rd St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 14 Mission · runs all night: 1:30 AM at Mission St & 3rd St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 14 Mission · runs all night: 1:31 AM at Mission St & 4th St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 14 Mission · runs all night: 1:31 AM at Mission St & 4th St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 14R Mission Rapid · stops at Mission St & Main St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 14R Mission Rapid · stops at Mission St & Main St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 14R Mission Rapid · stops at Mission St & Silver Ave":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 14R Mission Rapid · stops at Mission St & Silver Ave",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 15 Bayview Hunters Point Express · stops at Third St & Marin St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 15 Bayview Hunters Point Express · stops at Third St & Marin St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 18 46th Avenue · stops at Legion of Honor":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 18 46th Avenue · stops at Legion of Honor",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 19 Polk · stops at Polk St & O'Farrell St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 19 Polk · stops at Polk St & O'Farrell St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 19 Polk · stops at Division St & Rhode Island St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 19 Polk · stops at Division St & Rhode Island St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 19 Polk · stops at Rhode Island St & 17th St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 19 Polk · stops at Rhode Island St & 17th St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 19 Polk · stops at Rhode Island St & 26th St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 19 Polk · stops at Rhode Island St & 26th St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 2 Sutter · stops at Sutter St & Gough St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 2 Sutter · stops at Sutter St & Gough St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:30 AM at Mission Bay North & 4th St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 22 Fillmore · runs all night: 1:30 AM at Mission Bay North & 4th St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:31 AM at Fillmore St & Sacramento St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 22 Fillmore · runs all night: 1:31 AM at Fillmore St & Sacramento St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:33 AM at Fillmore St & Sutter St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 22 Fillmore · runs all night: 1:33 AM at Fillmore St & Sutter St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:34 AM at Fillmore St & Geary Blvd":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 22 Fillmore · runs all night: 1:34 AM at Fillmore St & Geary Blvd",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:39 AM at Fillmore St & Grove St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 22 Fillmore · runs all night: 1:39 AM at Fillmore St & Grove St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:43 AM at Church St & Duboce Ave":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 22 Fillmore · runs all night: 1:43 AM at Church St & Duboce Ave",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:46 AM at 16th St & Dolores St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 22 Fillmore · runs all night: 1:46 AM at 16th St & Dolores St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:57 AM at 16th St & Owen St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 22 Fillmore · runs all night: 1:57 AM at 16th St & Owen St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 2:20 AM at Fillmore St & Bay St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 22 Fillmore · runs all night: 2:20 AM at Fillmore St & Bay St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:26 AM at Divisadero St & Sutter St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 24 Divisadero · runs all night: 3:26 AM at Divisadero St & Sutter St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:27 AM at Divisadero St & Geary Blvd":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 24 Divisadero · runs all night: 3:27 AM at Divisadero St & Geary Blvd",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:01 AM at Divisadero St & Hayes St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 24 Divisadero · runs all night: 3:01 AM at Divisadero St & Hayes St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:02 AM at Divisadero St & Oak St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 24 Divisadero · runs all night: 3:02 AM at Divisadero St & Oak St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:04 AM at Castro St & Duboce Ave":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 24 Divisadero · runs all night: 3:04 AM at Castro St & Duboce Ave",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:10 AM at Castro St & 21st St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 24 Divisadero · runs all night: 3:10 AM at Castro St & 21st St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:18 AM at Noe St & 30th St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 24 Divisadero · runs all night: 3:18 AM at Noe St & 30th St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:22 AM at 30th St & Mission St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 24 Divisadero · runs all night: 3:22 AM at 30th St & Mission St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:27 AM at Cortland Ave & Bayshore Blvd":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 24 Divisadero · runs all night: 3:27 AM at Cortland Ave & Bayshore Blvd",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 25 Treasure Island · runs all night: 1:32 AM at Transit Center Bay E":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni 25 Treasure Island · runs all night: 1:32 AM at Transit Center Bay E",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 25 Treasure Island · runs all night: 1:42 AM at Clipper Cove Way & Treasure Island Rd":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
       snippet:
-        "1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+        "Muni 25 Treasure Island · runs all night: 1:42 AM at Clipper Cove Way & Treasure Island Rd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098087,25:30:00,25:30:00,5592,37,,6.2996578,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 27 Bryant · stops at 11th St & Harrison St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12098087,25:30:00,25:30:00,5592,37,,6.2996578,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 27 Bryant · stops at 11th St & Harrison St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098088,25:30:09,25:30:09,5597,27,,4.5907152,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 29 Sunset · stops at Bowley St & Lincoln Blvd":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12098088,25:30:09,25:30:09,5597,27,,4.5907152,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 29 Sunset · stops at Bowley St & Lincoln Blvd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098089,25:30:00,25:30:00,5552,17,,2.5932208,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 29 Sunset · stops at 25th Ave & El Camino Del Mar":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12098089,25:30:00,25:30:00,5552,17,,2.5932208,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 29 Sunset · stops at 25th Ave & El Camino Del Mar",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098090,25:30:04,25:30:04,5532,6,,0.7241389,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 29 Sunset · stops at Lincoln Way & 19th Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12098090,25:30:04,25:30:04,5532,6,,0.7241389,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 29 Sunset · stops at Lincoln Way & 19th Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098090,25:31:09,25:31:09,5534,7,,0.880837,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 29 Sunset · stops at Lake Merced & Middlefield Dr":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12098090,25:31:09,25:31:09,5534,7,,0.880837,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 29 Sunset · stops at Lake Merced & Middlefield Dr",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#14R,SFMTA,14R,MISSION RAPID,http://www.sfmta.com/14R,5am-10pm daily,3,BF2B45 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 29 Sunset · stops at Holloway Ave & Junipero Serra Blvd":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "14R,SFMTA,14R,MISSION RAPID,http://www.sfmta.com/14R,5am-10pm daily,3,BF2B45 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 29 Sunset · stops at Holloway Ave & Junipero Serra Blvd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#15,SFMTA,15,BAYVIEW HUNTERS POINT EXPRESS,http://www.sfmta.com/15,Weekdays 5am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 29 Sunset · stops at Persia Ave & Brazil Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "15,SFMTA,15,BAYVIEW HUNTERS POINT EXPRESS,http://www.sfmta.com/15,Weekdays 5am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 29 Sunset · stops at Persia Ave & Brazil Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#18,SFMTA,18,46TH AVENUE,http://www.sfmta.com/18,6am-10pm daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 29 Sunset · stops at Mansell St & Dartmouth St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "18,SFMTA,18,46TH AVENUE,http://www.sfmta.com/18,6am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 29 Sunset · stops at Mansell St & Dartmouth St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#19,SFMTA,19,POLK,http://www.sfmta.com/19,5am-10pm daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 30 Stockton · stops at Stockton St & Columbus Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "19,SFMTA,19,POLK,http://www.sfmta.com/19,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 30 Stockton · stops at Stockton St & Columbus Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#2,SFMTA,2,SUTTER,http://www.sfmta.com/2,6:30am-7pm daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 30 Stockton · stops at Van Ness Ave & North Point St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "2,SFMTA,2,SUTTER,http://www.sfmta.com/2,6:30am-7pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 30 Stockton · stops at Van Ness Ave & North Point St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064722,25:30:00,25:30:00,7765,43,,5.9602821,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 31 Balboa · stops at Turk St & Baker St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12064722,25:30:00,25:30:00,7765,43,,5.9602821,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 31 Balboa · stops at Turk St & Baker St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:30:51,25:30:51,4637,15,,1.6068415,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 33 Ashbury-18th St · stops at Clayton St & Twin Peaks Blvd":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12064723,25:30:51,25:30:51,4637,15,,1.6068415,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 33 Ashbury-18th St · stops at Clayton St & Twin Peaks Blvd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:33:00,25:33:00,4641,17,,1.8944736,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 35 Eureka · stops at Eureka St & 21st St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12064723,25:33:00,25:33:00,4641,17,,1.8944736,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 35 Eureka · stops at Eureka St & 21st St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:34:00,25:34:00,4615,18,,1.9956456,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 35 Eureka · stops at Diamond St & 29th St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12064723,25:34:00,25:34:00,4615,18,,1.9956456,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 35 Eureka · stops at Diamond St & 29th St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:39:02,25:39:02,4617,23,,2.5218126,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 36 Teresita · stops at Laguna Honda Blvd/Forest Hill Sta":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12064723,25:39:02,25:39:02,4617,23,,2.5218126,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 36 Teresita · stops at Laguna Honda Blvd/Forest Hill Sta",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:43:12,25:43:12,4005,28,,3.0886086,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 37 Corbett · stops at Carmel St & Twin Peaks Blvd":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12064723,25:43:12,25:43:12,4005,28,,3.0886086,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 37 Corbett · stops at Carmel St & Twin Peaks Blvd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:46:18,25:46:18,3285,31,,3.5652681,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · stops at 42nd Ave & Clement St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12064723,25:46:18,25:46:18,3285,31,,3.5652681,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 38 Geary · stops at 42nd Ave & Clement St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:57:07,25:57:07,7866,40,,5.4138267,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · runs all night: 1:31 AM at Geary Blvd & 9th Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12064723,25:57:07,25:57:07,7866,40,,5.4138267,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 38 Geary · runs all night: 1:31 AM at Geary Blvd & 9th Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064724,26:20:00,26:20:00,4603,1,,0.0,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · runs all night: 1:32 AM at Geary Blvd & Park Presidio Blvd":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12064724,26:20:00,26:20:00,4603,1,,0.0,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 38 Geary · runs all night: 1:32 AM at Geary Blvd & Park Presidio Blvd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066112,27:26:00,27:26:00,4435,1,,0.0,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · runs all night: 1:35 AM at Transit Center Bay D":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12066112,27:26:00,27:26:00,4435,1,,0.0,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 38 Geary · runs all night: 1:35 AM at Transit Center Bay D",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066112,27:26:58,27:26:58,4422,2,,0.1467991,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · runs all night: 1:41 AM at Geary St & Powell St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12066112,27:26:58,27:26:58,4422,2,,0.1467991,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 38 Geary · runs all night: 1:41 AM at Geary St & Powell St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:00:50,27:00:50,4426,5,,0.7253621,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · runs all night: 1:46 AM at Geary Blvd & Van Ness Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12066113,27:00:50,27:00:50,4426,5,,0.7253621,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 38 Geary · runs all night: 1:46 AM at Geary Blvd & Van Ness Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:01:45,27:01:45,4432,6,,0.8539975,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · runs all night: 1:47 AM at Geary Blvd & Gough St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12066113,27:01:45,27:01:45,4432,6,,0.8539975,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 38 Geary · runs all night: 1:47 AM at Geary Blvd & Gough St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:04:02,27:04:02,4330,8,,1.1399355,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · runs all night: 1:53 AM at Geary Blvd & Baker St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12066113,27:04:02,27:04:02,4330,8,,1.1399355,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 38 Geary · runs all night: 1:53 AM at Geary Blvd & Baker St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:10:21,27:10:21,4321,16,,2.0486084,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38R Geary Rapid · stops at Transit Center Bay C":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12066113,27:10:21,27:10:21,4321,16,,2.0486084,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 38R Geary Rapid · stops at Transit Center Bay C",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:18:21,27:18:21,5738,27,,3.1562703,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38R Geary Rapid · stops at Geary Blvd & Van Ness Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12066113,27:18:21,27:18:21,5738,27,,3.1562703,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 38R Geary Rapid · stops at Geary Blvd & Van Ness Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:22:00,27:22:00,3541,31,,3.6477407,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38R Geary Rapid · stops at Geary Blvd & Laguna St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12066113,27:22:00,27:22:00,3541,31,,3.6477407,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 38R Geary Rapid · stops at Geary Blvd & Laguna St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:27:00,27:27:00,4148,41,,4.6830859,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38R Geary Rapid · stops at Geary Blvd & Park Presidio Blvd":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12066113,27:27:00,27:27:00,4148,41,,4.6830859,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 38R Geary Rapid · stops at Geary Blvd & Park Presidio Blvd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066815,25:32:00,25:32:00,7917,1,,0.0,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 43 Masonic · stops at Lombard St & Lyon St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12066815,25:32:00,25:32:00,7917,1,,0.0,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 43 Masonic · stops at Lombard St & Lyon St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066815,25:42:00,25:42:00,8000,2,,3.9250904,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 43 Masonic · stops at Presidio Ave & Jackson St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12066815,25:42:00,25:42:00,8000,2,,3.9250904,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 43 Masonic · stops at Presidio Ave & Jackson St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#27,SFMTA,27,BRYANT,http://www.sfmta.com/27,5am-10pm daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 43 Masonic · stops at Presidio Ave & Geary Blvd":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "27,SFMTA,27,BRYANT,http://www.sfmta.com/27,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 43 Masonic · stops at Presidio Ave & Geary Blvd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 43 Masonic · stops at Masonic Ave & Oak St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 43 Masonic · stops at Masonic Ave & Oak St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#30,SFMTA,30,STOCKTON,http://www.sfmta.com/30,Weekdays 5am-12am Weekends 6am-12am,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 43 Masonic · stops at Laguna Honda Blvd & Clarendon Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "30,SFMTA,30,STOCKTON,http://www.sfmta.com/30,Weekdays 5am-12am Weekends 6am-12am,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 43 Masonic · stops at Laguna Honda Blvd & Clarendon Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#31,SFMTA,31,BALBOA,http://www.sfmta.com/31,5am-10pm daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 43 Masonic · stops at Geneva Ave & Mission St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "31,SFMTA,31,BALBOA,http://www.sfmta.com/31,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 43 Masonic · stops at Geneva Ave & Mission St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#33,SFMTA,33,ASHBURY-18TH ST,http://www.sfmta.com/33,5am-10pm daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 44 O'Shaughnessy · stops at California St & 6th Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "33,SFMTA,33,ASHBURY-18TH ST,http://www.sfmta.com/33,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 44 O'Shaughnessy · stops at California St & 6th Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#35,SFMTA,35,EUREKA,http://www.sfmta.com/35,7am-9pm daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 44 O'Shaughnessy · stops at Laguna Honda Blvd & Clarendon Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "35,SFMTA,35,EUREKA,http://www.sfmta.com/35,7am-9pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 44 O'Shaughnessy · stops at Laguna Honda Blvd & Clarendon Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#36,SFMTA,36,TERESITA,http://www.sfmta.com/36,Weekdays 6am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 44 O'Shaughnessy · runs all night: 3:22 AM at Bosworth St & Diamond St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "36,SFMTA,36,TERESITA,http://www.sfmta.com/36,Weekdays 6am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 44 O'Shaughnessy · runs all night: 3:22 AM at Bosworth St & Diamond St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#37,SFMTA,37,CORBETT,http://www.sfmta.com/37,Weekdays 6am-9pm Weekends 9am-9pm,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 44 O'Shaughnessy · runs all night: 3:23 AM at Lyell St & Alemany Blvd":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "37,SFMTA,37,CORBETT,http://www.sfmta.com/37,Weekdays 6am-9pm Weekends 9am-9pm,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 44 O'Shaughnessy · runs all night: 3:23 AM at Lyell St & Alemany Blvd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38,SFMTA,38,GEARY,http://www.sfmta.com/38,24 hour service daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 44 O'Shaughnessy · runs all night: 3:25 AM at Silver Ave & Mission St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "38,SFMTA,38,GEARY,http://www.sfmta.com/38,24 hour service daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 44 O'Shaughnessy · runs all night: 3:25 AM at Silver Ave & Mission St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071697,25:30:33,25:30:33,4259,27,,4.1592365,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 44 O'Shaughnessy · runs all night: 3:28 AM at Silver Ave & Cambridge St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12071697,25:30:33,25:30:33,4259,27,,4.1592365,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 44 O'Shaughnessy · runs all night: 3:28 AM at Silver Ave & Cambridge St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071697,25:32:00,25:32:00,4755,28,,4.441199,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 44 O'Shaughnessy · runs all night: 3:01 AM at Silver Ave & Bay Shore Blvd":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12071697,25:32:00,25:32:00,4755,28,,4.441199,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 44 O'Shaughnessy · runs all night: 3:01 AM at Silver Ave & Bay Shore Blvd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:35:00,25:35:00,7916,1,,0.0,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 45 Union-Stockton · stops at Union St & Van Ness Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12071698,25:35:00,25:35:00,7916,1,,0.0,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 45 Union-Stockton · stops at Union St & Van Ness Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:41:00,25:41:00,4757,7,,0.8888597,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 48 Quintara-24th Street · stops at Portola Dr & Woodside Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12071698,25:41:00,25:41:00,4757,7,,0.8888597,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 48 Quintara-24th Street · stops at Portola Dr & Woodside Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:46:00,25:46:00,4768,12,,1.6177254,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 48 Quintara-24th Street · runs all night: 3:02 AM at 22nd St & Iowa St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12071698,25:46:00,25:46:00,4768,12,,1.6177254,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 48 Quintara-24th Street · runs all night: 3:02 AM at 22nd St & Iowa St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:47:17,25:47:17,4298,13,,1.8123337,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 48 Quintara-24th Street · runs all night: 3:04 AM at Pennsylvania Avenue & 25th Street":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
-      publisher: "SFMTA",
-      snippet: "12071698,25:47:17,25:47:17,4298,13,,1.8123337,0",
-      fetchedAt: 1794535194230,
-    },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:52:45,25:52:45,4289,19,,2.8047111,0":
-    {
-      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
-      publisher: "SFMTA",
-      snippet: "12071698,25:52:45,25:52:45,4289,19,,2.8047111,0",
-      fetchedAt: 1794535194230,
-    },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38R,SFMTA,38R,GEARY RAPID,http://www.sfmta.com/38R,Weekdays 5am-10pm Weekends 6am-9pm,3,BF2B45 ,FFFFFF,":
-    {
-      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
       snippet:
-        "38R,SFMTA,38R,GEARY RAPID,http://www.sfmta.com/38R,Weekdays 5am-10pm Weekends 6am-9pm,3,BF2B45 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+        "Muni 48 Quintara-24th Street · runs all night: 3:04 AM at Pennsylvania Avenue & 25th Street",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 48 Quintara-24th Street · runs all night: 3:09 AM at 23rd St & Utah St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 48 Quintara-24th Street · runs all night: 3:09 AM at 23rd St & Utah St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#44,SFMTA,44,O'SHAUGHNESSY,http://www.sfmta.com/44,5am-midnight daily (East of Glen Park BART 24 hours daily),3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 48 Quintara-24th Street · runs all night: 3:17 AM at 24th St & Dolores St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "44,SFMTA,44,O'SHAUGHNESSY,http://www.sfmta.com/44,5am-midnight daily (East of Glen Park BART 24 hours daily),3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 48 Quintara-24th Street · runs all night: 3:17 AM at 24th St & Dolores St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:22:00,27:22:00,3696,1,,0.0,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 49 Van Ness-Mission · stops at Van Ness Ave & North Point St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12074558,27:22:00,27:22:00,3696,1,,0.0,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 49 Van Ness-Mission · stops at Van Ness Ave & North Point St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:23:24,27:23:24,5330,2,,0.2816487,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 49 Van Ness-Mission · stops at Van Ness Ave & Vallejo St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12074558,27:23:24,27:23:24,5330,2,,0.2816487,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 49 Van Ness-Mission · stops at Van Ness Ave & Vallejo St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:25:00,27:25:00,6415,4,,0.5618627,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 49 Van Ness-Mission · stops at Van Ness Ave & Sutter St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12074558,27:25:00,27:25:00,6415,4,,0.5618627,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 49 Van Ness-Mission · stops at Van Ness Ave & Sutter St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:27:49,27:27:49,6399,8,,1.2207592,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 49 Van Ness-Mission · stops at Van Ness Ave & O'Farrell St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12074558,27:27:49,27:27:49,6399,8,,1.2207592,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 49 Van Ness-Mission · stops at Van Ness Ave & O'Farrell St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074559,27:01:24,27:01:24,6397,14,,2.0957776,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 49 Van Ness-Mission · stops at Van Ness Ave & Market St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12074559,27:01:24,27:01:24,6397,14,,2.0957776,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 49 Van Ness-Mission · stops at Van Ness Ave & Market St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#45,SFMTA,45,UNION-STOCKTON,http://www.sfmta.com/45,5am-10pm daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 49 Van Ness-Mission · stops at Mission St & Valencia St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "45,SFMTA,45,UNION-STOCKTON,http://www.sfmta.com/45,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 49 Van Ness-Mission · stops at Mission St & Valencia St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#48,SFMTA,48,QUINTARA-24TH STREET,http://www.sfmta.com/48,5am-midnight daily (East of Castro St. 24 hours daily),3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 49 Van Ness-Mission · stops at Mission St & Bosworth St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "48,SFMTA,48,QUINTARA-24TH STREET,http://www.sfmta.com/48,5am-midnight daily (East of Castro St. 24 hours daily),3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 49 Van Ness-Mission · stops at Mission St & Bosworth St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:02:00,27:02:00,3435,1,,0.0,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:31 AM at Mcallister St & Hyde St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12076060,27:02:00,27:02:00,3435,1,,0.0,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 5 Fulton · runs all night: 1:31 AM at Mcallister St & Hyde St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:03:54,27:03:54,7524,3,,0.413545,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:33 AM at Mcallister St & Van Ness Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12076060,27:03:54,27:03:54,7524,3,,0.413545,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 5 Fulton · runs all night: 1:33 AM at Mcallister St & Van Ness Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:08:56,27:08:56,3453,13,,1.4222223,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:40 AM at Mcallister St & Baker St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12076060,27:08:56,27:08:56,3453,13,,1.4222223,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 5 Fulton · runs all night: 1:40 AM at Mcallister St & Baker St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:17:07,27:17:07,3466,22,,2.6328152,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:44 AM at Fulton St & Stanyan StW":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12076060,27:17:07,27:17:07,3466,22,,2.6328152,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 5 Fulton · runs all night: 1:44 AM at Fulton St & Stanyan StW",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:45 AM at Fulton St & Arguello Blvd":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 5 Fulton · runs all night: 1:45 AM at Fulton St & Arguello Blvd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:30:33,25:30:33,5395,6,,1.2559085,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:48 AM at Fulton St & Park Presidio Blvd":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12055191,25:30:33,25:30:33,5395,6,,1.2559085,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 5 Fulton · runs all night: 1:48 AM at Fulton St & Park Presidio Blvd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:33:00,25:33:00,5404,8,,1.5340282,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:54 AM at 4th St & Market St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12055191,25:33:00,25:33:00,5404,8,,1.5340282,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 5 Fulton · runs all night: 1:54 AM at 4th St & Market St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:40:21,25:40:21,5384,14,,2.6922472,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 52 Excelsior · stops at Portola Dr & Glenview Dr":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12055191,25:40:21,25:40:21,5384,14,,2.6922472,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 52 Excelsior · stops at Portola Dr & Glenview Dr",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:43:50,25:43:50,4236,18,,3.4901873,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 54 Felton · stops at University St & Felton St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12055191,25:43:50,25:43:50,4236,18,,3.4901873,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 54 Felton · stops at University St & Felton St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:44:38,25:44:38,4223,19,,3.6926135,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 55 Dogpatch · stops at Connecticut St & 17th St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12055191,25:44:38,25:44:38,4223,19,,3.6926135,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 55 Dogpatch · stops at Connecticut St & 17th St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:47:39,25:47:39,4231,24,,4.4504313,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 56 Rutland · stops at Visitacion Valley Middle School":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12055191,25:47:39,25:47:39,4231,24,,4.4504313,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 56 Rutland · stops at Visitacion Valley Middle School",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055192,25:54:00,25:54:00,3161,1,,0.0,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 57 Parkmerced · stops at Eucalyptus Dr & 19th Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12055192,25:54:00,25:54:00,3161,1,,0.0,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 57 Parkmerced · stops at Eucalyptus Dr & 19th Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#52,SFMTA,52,EXCELSIOR,http://www.sfmta.com/52,Weekdays 6am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5R Fulton Rapid · stops at Fulton St & Arguello Blvd":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "52,SFMTA,52,EXCELSIOR,http://www.sfmta.com/52,Weekdays 6am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 5R Fulton Rapid · stops at Fulton St & Arguello Blvd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#54,SFMTA,54,FELTON,http://www.sfmta.com/54,5am-10pm daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 6 Hayes-Parnassus · stops at Hayes St & Van Ness Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "54,SFMTA,54,FELTON,http://www.sfmta.com/54,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 6 Hayes-Parnassus · stops at Hayes St & Van Ness Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#55,SFMTA,55,DOGPATCH,http://www.sfmta.com/55,5am-10pm daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 6 Hayes-Parnassus · stops at Parnassus Ave & Stanyan St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "55,SFMTA,55,DOGPATCH,http://www.sfmta.com/55,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 6 Hayes-Parnassus · stops at Parnassus Ave & Stanyan St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#56,SFMTA,56,RUTLAND,http://www.sfmta.com/56,7am-9pm daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 67 Bernal Heights · stops at Folsom St & Cesar Chavez St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "56,SFMTA,56,RUTLAND,http://www.sfmta.com/56,7am-9pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 67 Bernal Heights · stops at Folsom St & Cesar Chavez St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#57,SFMTA,57,PARKMERCED,http://www.sfmta.com/57,5am-10pm daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 7 Haight-Noriega · stops at Market St & Van Ness Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "57,SFMTA,57,PARKMERCED,http://www.sfmta.com/57,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 7 Haight-Noriega · stops at Market St & Van Ness Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5R,SFMTA,5R,FULTON RAPID,http://www.sfmta.com/5R,Weekdays 7am-7pm,3,BF2B45 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 7 Haight-Noriega · stops at Haight St & Pierce St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "5R,SFMTA,5R,FULTON RAPID,http://www.sfmta.com/5R,Weekdays 7am-7pm,3,BF2B45 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 7 Haight-Noriega · stops at Haight St & Pierce St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#6,SFMTA,6,HAYES-PARNASSUS,http://www.sfmta.com/6,5am-10pm daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 7 Haight-Noriega · stops at Stanyan St & Waller St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "6,SFMTA,6,HAYES-PARNASSUS,http://www.sfmta.com/6,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 7 Haight-Noriega · stops at Stanyan St & Waller St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#67,SFMTA,67,BERNAL HEIGHTS,http://www.sfmta.com/67,Weekdays 5am-10pm Weekends 6am-10pm,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 7 Haight-Noriega · stops at Lincoln Way & 19th Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "67,SFMTA,67,BERNAL HEIGHTS,http://www.sfmta.com/67,Weekdays 5am-10pm Weekends 6am-10pm,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 7 Haight-Noriega · stops at Lincoln Way & 19th Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7,SFMTA,7,HAIGHT-NORIEGA,http://www.sfmta.com/7,5am-10pm daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 8 Bayshore · stops at Kearny St & North Point St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "7,SFMTA,7,HAIGHT-NORIEGA,http://www.sfmta.com/7,5am-10pm daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 8 Bayshore · stops at Kearny St & North Point St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#8,SFMTA,8,BAYSHORE,http://www.sfmta.com/8,5am-12 midnight daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 8 Bayshore · stops at 4th St & Market St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "8,SFMTA,8,BAYSHORE,http://www.sfmta.com/8,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 8 Bayshore · stops at 4th St & Market St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#9,SFMTA,9,SAN BRUNO,http://www.sfmta.com/9,5am-12 midnight daily,3,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 8 Bayshore · stops at San Bruno Ave & Ward St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "9,SFMTA,9,SAN BRUNO,http://www.sfmta.com/9,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 8 Bayshore · stops at San Bruno Ave & Ward St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:47:00,26:47:00,7476,1,,0.0,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 9 San Bruno · stops at Market St & Stockton St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080176,26:47:00,26:47:00,7476,1,,0.0,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 9 San Bruno · stops at Market St & Stockton St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:50:39,26:50:39,8098,4,,0.5688494,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 9 San Bruno · stops at Bayshore Blvd & Alemany Blvd":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080176,26:50:39,26:50:39,8098,4,,0.5688494,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 9 San Bruno · stops at Bayshore Blvd & Alemany Blvd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:53:05,26:53:05,8100,6,,0.9473609,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 9 San Bruno · stops at San Bruno Ave & Ward St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080176,26:53:05,26:53:05,8100,6,,0.9473609,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 9 San Bruno · stops at San Bruno Ave & Ward St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:54:46,26:54:46,8101,7,,1.2098055,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 2:47 AM at Van Ness Ave & North Point St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080176,26:54:46,26:54:46,8101,7,,1.2098055,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni San Bruno Owl · runs all night: 2:47 AM at Van Ness Ave & North Point St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:56:00,26:56:00,8102,8,,1.4059226,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 2:51 AM at Van Ness Ave & Vallejo St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080176,26:56:00,26:56:00,8102,8,,1.4059226,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni San Bruno Owl · runs all night: 2:51 AM at Van Ness Ave & Vallejo St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:58:10,26:58:10,8104,10,,1.7334176,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 2:53 AM at Van Ness Ave & Sacramento St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080176,26:58:10,26:58:10,8104,10,,1.7334176,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni San Bruno Owl · runs all night: 2:53 AM at Van Ness Ave & Sacramento St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:00:00,27:00:00,8105,11,,2.0783336,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 2:55 AM at Van Ness Ave & Sutter St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080176,27:00:00,27:00:00,8105,11,,2.0783336,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni San Bruno Owl · runs all night: 2:55 AM at Van Ness Ave & Sutter St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:01:43,27:01:43,3243,12,,2.3740143,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 2:56 AM at Van Ness Ave & O'Farrell St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080176,27:01:43,27:01:43,3243,12,,2.3740143,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni San Bruno Owl · runs all night: 2:56 AM at Van Ness Ave & O'Farrell St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:13:21,27:13:21,3768,23,,4.7671211,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 2:58 AM at Van Ness Ave & McAllister St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080176,27:13:21,27:13:21,3768,23,,4.7671211,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni San Bruno Owl · runs all night: 2:58 AM at Van Ness Ave & McAllister St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:15:13,27:15:13,3771,26,,5.2636441,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 3:00 AM at Van Ness Ave & Market St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080176,27:15:13,27:15:13,3771,26,,5.2636441,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni San Bruno Owl · runs all night: 3:00 AM at Van Ness Ave & Market St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:19:30,27:19:30,6369,35,,6.6507798,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 3:02 AM at 11th St & Mission St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080176,27:19:30,27:19:30,6369,35,,6.6507798,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni San Bruno Owl · runs all night: 3:02 AM at 11th St & Mission St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:05:00,27:05:00,390,1,,0.0,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 3:13 AM at 240 Bayshore Blvd":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080245,27:05:00,27:05:00,390,1,,0.0,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni San Bruno Owl · runs all night: 3:13 AM at 240 Bayshore Blvd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:07:27,27:07:27,3355,3,,0.7075418,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 3:15 AM at Bayshore Blvd & Alemany Blvd":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080245,27:07:27,27:07:27,3355,3,,0.7075418,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni San Bruno Owl · runs all night: 3:15 AM at Bayshore Blvd & Alemany Blvd",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:11:36,27:11:36,3383,8,,1.8989683,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 3:20 AM at San Bruno Ave & Ward St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080245,27:11:36,27:11:36,3383,8,,1.8989683,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni San Bruno Owl · runs all night: 3:20 AM at San Bruno Ave & Ward St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:15:42,27:15:42,7758,14,,3.0763109,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:05 AM at 19th Avenue & Holloway St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080245,27:15:42,27:15:42,7758,14,,3.0763109,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 3:05 AM at 19th Avenue & Holloway St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:18:55,27:18:55,5950,15,,4.003325,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:07 AM at 19th Ave & Eucalyptus Dr":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080245,27:18:55,27:18:55,5950,15,,4.003325,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 3:07 AM at 19th Ave & Eucalyptus Dr",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:29:01,27:29:01,6181,19,,7.3989051,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:12 AM at 19th Ave & Quintara St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080245,27:29:01,27:29:01,6181,19,,7.3989051,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 3:12 AM at 19th Ave & Quintara St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:33:00,26:33:00,6800,25,,8.7855352,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:16 AM at Crossover Dr & Lincoln St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080246,26:33:00,26:33:00,6800,25,,8.7855352,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 3:16 AM at Crossover Dr & Lincoln St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:36:17,26:36:17,4100,30,,9.389843,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:19 AM at Park Presidio Blvd & Fulton St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080246,26:36:17,26:36:17,4100,30,,9.389843,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 3:19 AM at Park Presidio Blvd & Fulton St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:38:45,26:38:45,4105,34,,9.842496,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:29 AM at Richardson Ave & Francisco St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080246,26:38:45,26:38:45,4105,34,,9.842496,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 3:29 AM at Richardson Ave & Francisco St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:45:00,26:45:00,6524,40,,10.6913145,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 2:33 AM at Van Ness Ave & Chestnut St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080246,26:45:00,26:45:00,6524,40,,10.6913145,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 2:33 AM at Van Ness Ave & Chestnut St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:47:35,26:47:35,3161,42,,11.0364319,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 2:36 AM at Columbus Ave & Bay St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080246,26:47:35,26:47:35,3161,42,,11.0364319,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 2:36 AM at Columbus Ave & Bay St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:54:00,26:54:00,3164,46,,11.8639132,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 2:39 AM at Columbus Ave & Filbert St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080246,26:54:00,26:54:00,3164,46,,11.8639132,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 2:39 AM at Columbus Ave & Filbert St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:59:45,26:59:45,7382,50,,12.9333048,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 2:45 AM at Stockton St & Sutter St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080246,26:59:45,26:59:45,7382,50,,12.9333048,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 2:45 AM at Stockton St & Sutter St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:03:39,27:03:39,7378,53,,13.9774791,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 2:48 AM at 4th St & Market St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080246,27:03:39,27:03:39,7378,53,,13.9774791,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 2:48 AM at 4th St & Market St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:16:13,27:16:13,3792,68,,17.1840257,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 2:54 AM at 4th St & Townsend St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080246,27:16:13,27:16:13,3792,68,,17.1840257,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 2:54 AM at 4th St & Townsend St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:19:53,27:19:53,7026,76,,18.1016956,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:00 AM at Third St & Mariposa St.":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080246,27:19:53,27:19:53,7026,76,,18.1016956,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 3:00 AM at Third St & Mariposa St.",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:24:38,27:24:38,7300,79,,19.3583322,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:04 AM at Third St & Marin St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080246,27:24:38,27:24:38,7300,79,,19.3583322,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 3:04 AM at Third St & Marin St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:29:00,27:29:00,4886,86,,20.4562367,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:16 AM at Bayshore Blvd & Tunnel Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080246,27:29:00,27:29:00,4886,86,,20.4562367,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 3:16 AM at Bayshore Blvd & Tunnel Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080247,27:02:59,27:02:59,4881,89,,21.0981977,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:20 AM at Hahn St & Visitacion Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080247,27:02:59,27:02:59,4881,89,,21.0981977,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 3:20 AM at Hahn St & Visitacion Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080259,27:13:00,27:13:00,6523,58,,12.845818,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:25 AM at Geneva Ave & Carter St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12080259,27:13:00,27:13:00,6523,58,,12.845818,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 3:25 AM at Geneva Ave & Carter St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#J,SFMTA,J,CHURCH,http://www.sfmta.com/J,5am-12 midnight daily,0,A96614 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:29 AM at Geneva Ave & Mission St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "J,SFMTA,J,CHURCH,http://www.sfmta.com/J,5am-12 midnight daily,0,A96614 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 3:29 AM at Geneva Ave & Mission St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:31:32,25:31:32,6008,32,,6.3901605,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:03 AM at Geneva Ave & Howth St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12084110,25:31:32,25:31:32,6008,32,,6.3901605,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 3:03 AM at Geneva Ave & Howth St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:32:51,25:32:51,6015,35,,6.7985353,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:13 AM at Stockton St & Sutter St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12084110,25:32:51,25:32:51,6015,35,,6.7985353,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni 3rd-19th Ave Owl · runs all night: 3:13 AM at Stockton St & Sutter St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:33:41,25:33:41,6937,36,,7.0576318,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni J Church · stops at Right Of Way/21st St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12084110,25:33:41,25:33:41,6937,36,,7.0576318,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni J Church · stops at Right Of Way/21st St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:39:34,25:39:34,6616,42,,8.7417899,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:32 AM at 6 Portola Dr":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12084110,25:39:34,25:39:34,6616,42,,8.7417899,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Taraval · runs all night: 1:32 AM at 6 Portola Dr",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:30:00,25:30:00,4726,11,,1.8031941,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:33 AM at Portola Dr & Glenview Dr":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12084111,25:30:00,25:30:00,4726,11,,1.8031941,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Taraval · runs all night: 1:33 AM at Portola Dr & Glenview Dr",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:36:36,25:36:36,5694,17,,2.7468561,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:34 AM at Woodside Ave & Portola Dr":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12084111,25:36:36,25:36:36,5694,17,,2.7468561,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Taraval · runs all night: 1:34 AM at Woodside Ave & Portola Dr",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:37:45,25:37:45,5655,18,,2.9126192,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:40 AM at Taraval St & 19th Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12084111,25:37:45,25:37:45,5655,18,,2.9126192,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Taraval · runs all night: 1:40 AM at Taraval St & 19th Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:44:00,25:44:00,5696,23,,3.7809068,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:30 AM at Don Chee Way/Steuart St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12084111,25:44:00,25:44:00,5696,23,,3.7809068,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Taraval · runs all night: 1:30 AM at Don Chee Way/Steuart St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:47:31,25:47:31,5659,26,,4.3100313,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:37 AM at Market St & Stockton St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12084111,25:47:31,25:47:31,5659,26,,4.3100313,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Taraval · runs all night: 1:37 AM at Market St & Stockton St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084112,25:45:00,25:45:00,5184,1,,0.0,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:38 AM at Market St & 5th St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12084112,25:45:00,25:45:00,5184,1,,0.0,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Taraval · runs all night: 1:38 AM at Market St & 5th St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#M,SFMTA,M,OCEAN VIEW,http://www.sfmta.com/M,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,008547 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:44 AM at Market St & Van Ness Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "M,SFMTA,M,OCEAN VIEW,http://www.sfmta.com/M,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,008547 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Taraval · runs all night: 1:44 AM at Market St & Van Ness Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#N,SFMTA,N,JUDAH,http://www.sfmta.com/N,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,005B95 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:48 AM at Market St & Buchanan St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "N,SFMTA,N,JUDAH,http://www.sfmta.com/N,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,005B95 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Taraval · runs all night: 1:48 AM at Market St & Buchanan St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:30:00,25:30:00,7957,1,,0.0,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:45 AM at Jones St & Beach St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12085750,25:30:00,25:30:00,7957,1,,0.0,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Taraval · runs all night: 1:45 AM at Jones St & Beach St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:33:54,25:33:54,7447,4,,1.0050929,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni M Ocean View · stops at 19th Ave & Randolph St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12085750,25:33:54,25:33:54,7447,4,,1.0050929,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni M Ocean View · stops at 19th Ave & Randolph St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:44:12,25:44:12,5655,13,,2.9175299,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni N Judah · stops at Carl St & Stanyan St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12085750,25:44:12,25:44:12,5655,13,,2.9175299,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni N Judah · stops at Carl St & Stanyan St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:50:00,25:50:00,5696,17,,3.7858171,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 1:30 AM at Townsend St & 5th St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12085750,25:50:00,25:50:00,5696,17,,3.7858171,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Judah · runs all night: 1:30 AM at Townsend St & 5th St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:52:56,25:52:56,5659,20,,4.3149415,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 1:34 AM at The Embarcadero & Brannan St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12085750,25:52:56,25:52:56,5659,20,,4.3149415,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Judah · runs all night: 1:34 AM at The Embarcadero & Brannan St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:57:50,25:57:50,4960,24,,5.0867727,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 1:44 AM at Market St & 5th St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12085750,25:57:50,25:57:50,4960,24,,5.0867727,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Judah · runs all night: 1:44 AM at Market St & 5th St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,26:04:02,26:04:02,3914,32,,6.4129684,0":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 1:50 AM at Market St & Van Ness Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12085750,26:04:02,26:04:02,3914,32,,6.4129684,0",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Judah · runs all night: 1:50 AM at Market St & Van Ness Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,26:11:00,26:11:00,5199,41,,7.9062754,1":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 1:53 AM at Market St & Buchanan St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stop_times.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "12085750,26:11:00,26:11:00,5199,41,,7.9062754,1",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Judah · runs all night: 1:53 AM at Market St & Buchanan St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#PH,SFMTA,PH,POWELL-HYDE CABLE CAR,http://www.sfmta.com/PH,7 am-10 pm daily,5,B49A36 ,000000,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 1:58 AM at Haight St & Pierce St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "PH,SFMTA,PH,POWELL-HYDE CABLE CAR,http://www.sfmta.com/PH,7 am-10 pm daily,5,B49A36 ,000000,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Judah · runs all night: 1:58 AM at Haight St & Pierce St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#PM,SFMTA,PM,POWELL-MASON CABLE CAR,http://www.sfmta.com/PM,7 am-10 pm daily,5,B49A36 ,000000,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 2:04 AM at Carl St & Stanyan St":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "PM,SFMTA,PM,POWELL-MASON CABLE CAR,http://www.sfmta.com/PM,7 am-10 pm daily,5,B49A36 ,000000,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Judah · runs all night: 2:04 AM at Carl St & Stanyan St",
+      fetchedAt: 1794559936686,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#T,SFMTA,T,THIRD,http://www.sfmta.com/T,Weekends 8 am-11:30 pm,0,BF2B45 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 2:11 AM at Judah St & 19th Ave":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "T,SFMTA,T,THIRD,http://www.sfmta.com/T,Weekends 8 am-11:30 pm,0,BF2B45 ,FFFFFF,",
-      fetchedAt: 1794535194230,
+      snippet: "Muni Owl Judah · runs all night: 2:11 AM at Judah St & 19th Ave",
+      fetchedAt: 1794559936686,
     },
-  "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#173,24:42:00,24:42:00,70021,22,,0,0,75811.84903503713,1,,,,,1,1,,,,,,,,,,,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni PH Powell-Hyde Cable Car · stops at Powell St & Post St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni PH Powell-Hyde Cable Car · stops at Powell St & Post St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni PH Powell-Hyde Cable Car · stops at Jackson St & Leavenworth St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni PH Powell-Hyde Cable Car · stops at Jackson St & Leavenworth St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni PM Powell-Mason Cable Car · stops at Powell St & California St":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni PM Powell-Mason Cable Car · stops at Powell St & California St",
+      fetchedAt: 1794559936686,
+    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni T Third · stops at UCSF / Chase Center (16th St)":
+    {
+      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+      publisher: "SFMTA",
+      snippet: "Muni T Third · stops at UCSF / Chase Center (16th St)",
+      fetchedAt: 1794559936686,
+    },
+  "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#Caltrain · last weekday departure from 22nd Street Station toward San Francisco · 12:42 AM":
     {
       url: "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip",
-      title: "Caltrain GTFS schedule feed (stop_times.txt), schedule through 2027-01-31",
+      title: "Caltrain schedule, Jan 31, 2026 – Jan 31, 2027",
       publisher: "Caltrain",
-      snippet: "173,24:42:00,24:42:00,70021,22,,0,0,75811.84903503713,1,,,,,1,1,,,,,,,,,,,",
-      fetchedAt: 1794535195350,
+      snippet:
+        "Caltrain · last weekday departure from 22nd Street Station toward San Francisco · 12:42 AM",
+      fetchedAt: 1794559938015,
     },
-  "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#176,24:05:00,24:05:00,70012,1,,0,0,0,1,,,,,1,1,,,,,,,,,,,":
+  "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#Caltrain · last weekday departure from San Francisco Caltrain Station toward Tamien · 12:05 AM":
     {
       url: "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip",
-      title: "Caltrain GTFS schedule feed (stop_times.txt), schedule through 2027-01-31",
+      title: "Caltrain schedule, Jan 31, 2026 – Jan 31, 2027",
       publisher: "Caltrain",
-      snippet: "176,24:05:00,24:05:00,70012,1,,0,0,0,1,,,,,1,1,,,,,,,,,,,",
-      fetchedAt: 1794535195350,
+      snippet:
+        "Caltrain · last weekday departure from San Francisco Caltrain Station toward Tamien · 12:05 AM",
+      fetchedAt: 1794559938015,
     },
-  "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#176,24:10:00,24:10:00,70022,2,,0,0,2521.9493493333744,1,,,,,1,1,,,,,,,,,,,":
+  "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#Caltrain · last weekday departure from 22nd Street Station toward Tamien · 12:10 AM":
     {
       url: "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip",
-      title: "Caltrain GTFS schedule feed (stop_times.txt), schedule through 2027-01-31",
+      title: "Caltrain schedule, Jan 31, 2026 – Jan 31, 2027",
       publisher: "Caltrain",
-      snippet: "176,24:10:00,24:10:00,70022,2,,0,0,2521.9493493333744,1,,,,,1,1,,,,,,,,,,,",
-      fetchedAt: 1794535195350,
+      snippet:
+        "Caltrain · last weekday departure from 22nd Street Station toward Tamien · 12:10 AM",
+      fetchedAt: 1794559938015,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Bayview%20Hunters%20Point\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Bayview Hunters Point","requests":"90"}]':
     {
@@ -1260,7 +1591,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Bayview Hunters Point since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Bayview Hunters Point","requests":"90"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Bernal%20Heights\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Bernal Heights","requests":"38"}]':
     {
@@ -1268,7 +1599,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Bernal Heights since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Bernal Heights","requests":"38"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Castro%2FUpper%20Market\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Castro/Upper Market","requests":"66"}]':
     {
@@ -1276,7 +1607,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Castro/Upper Market since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Castro/Upper Market","requests":"66"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Chinatown\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Chinatown","requests":"18"}]':
     {
@@ -1284,7 +1615,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Chinatown since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Chinatown","requests":"18"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Excelsior\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Excelsior","requests":"36"}]':
     {
@@ -1292,7 +1623,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Excelsior since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Excelsior","requests":"36"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Financial%20District%2FSouth%20Beach\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Financial District/South Beach","requests":"88"}]':
     {
@@ -1301,7 +1632,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
         "311 Cases: Streetlights requests in Financial District/South Beach since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Financial District/South Beach","requests":"88"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Glen%20Park\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Glen Park","requests":"19"}]':
     {
@@ -1309,7 +1640,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Glen Park since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Glen Park","requests":"19"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Golden%20Gate%20Park\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Golden Gate Park","requests":"35"}]':
     {
@@ -1317,7 +1648,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Golden Gate Park since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Golden Gate Park","requests":"35"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Haight%20Ashbury\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Haight Ashbury","requests":"21"}]':
     {
@@ -1325,7 +1656,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Haight Ashbury since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Haight Ashbury","requests":"21"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Hayes%20Valley\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Hayes Valley","requests":"39"}]':
     {
@@ -1333,7 +1664,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Hayes Valley since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Hayes Valley","requests":"39"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Inner%20Richmond\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Inner Richmond","requests":"19"}]':
     {
@@ -1341,7 +1672,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Inner Richmond since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Inner Richmond","requests":"19"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Inner%20Sunset\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Inner Sunset","requests":"19"}]':
     {
@@ -1349,7 +1680,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Inner Sunset since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Inner Sunset","requests":"19"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Japantown\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Japantown","requests":"7"}]':
     {
@@ -1357,7 +1688,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Japantown since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Japantown","requests":"7"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Lakeshore\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Lakeshore","requests":"12"}]':
     {
@@ -1365,7 +1696,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Lakeshore since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Lakeshore","requests":"12"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Lone%20Mountain%2FUSF\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Lone Mountain/USF","requests":"18"}]':
     {
@@ -1373,7 +1704,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Lone Mountain/USF since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Lone Mountain/USF","requests":"18"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Marina\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Marina","requests":"25"}]':
     {
@@ -1381,7 +1712,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Marina since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Marina","requests":"25"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'McLaren%20Park\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"McLaren Park","requests":"10"}]':
     {
@@ -1389,7 +1720,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in McLaren Park since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"McLaren Park","requests":"10"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Mission\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Mission","requests":"140"}]':
     {
@@ -1397,7 +1728,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Mission since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Mission","requests":"140"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Mission%20Bay\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Mission Bay","requests":"15"}]':
     {
@@ -1405,7 +1736,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Mission Bay since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Mission Bay","requests":"15"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Nob%20Hill\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Nob Hill","requests":"32"}]':
     {
@@ -1413,7 +1744,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Nob Hill since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Nob Hill","requests":"32"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Noe%20Valley\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Noe Valley","requests":"27"}]':
     {
@@ -1421,7 +1752,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Noe Valley since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Noe Valley","requests":"27"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'North%20Beach\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"North Beach","requests":"25"}]':
     {
@@ -1429,7 +1760,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in North Beach since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"North Beach","requests":"25"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Oceanview%2FMerced%2FIngleside\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Oceanview/Merced/Ingleside","requests":"33"}]':
     {
@@ -1438,7 +1769,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
         "311 Cases: Streetlights requests in Oceanview/Merced/Ingleside since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Oceanview/Merced/Ingleside","requests":"33"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Outer%20Mission\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Outer Mission","requests":"36"}]':
     {
@@ -1446,7 +1777,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Outer Mission since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Outer Mission","requests":"36"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Outer%20Richmond\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Outer Richmond","requests":"33"}]':
     {
@@ -1454,7 +1785,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Outer Richmond since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Outer Richmond","requests":"33"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Pacific%20Heights\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Pacific Heights","requests":"15"}]':
     {
@@ -1462,7 +1793,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Pacific Heights since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Pacific Heights","requests":"15"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Portola\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Portola","requests":"21"}]':
     {
@@ -1470,7 +1801,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Portola since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Portola","requests":"21"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Potrero%20Hill\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Potrero Hill","requests":"21"}]':
     {
@@ -1478,7 +1809,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Potrero Hill since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Potrero Hill","requests":"21"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Presidio\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Presidio","requests":"10"}]':
     {
@@ -1486,7 +1817,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Presidio since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Presidio","requests":"10"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Presidio%20Heights\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Presidio Heights","requests":"11"}]':
     {
@@ -1494,7 +1825,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Presidio Heights since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Presidio Heights","requests":"11"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Russian%20Hill\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Russian Hill","requests":"17"}]':
     {
@@ -1502,7 +1833,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Russian Hill since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Russian Hill","requests":"17"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Seacliff\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Seacliff","requests":"4"}]':
     {
@@ -1510,7 +1841,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Seacliff since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Seacliff","requests":"4"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'South%20of%20Market\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"South of Market","requests":"81"}]':
     {
@@ -1518,7 +1849,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in South of Market since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"South of Market","requests":"81"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Sunset%2FParkside\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Sunset/Parkside","requests":"71"}]':
     {
@@ -1526,7 +1857,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Sunset/Parkside since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Sunset/Parkside","requests":"71"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Tenderloin\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Tenderloin","requests":"50"}]':
     {
@@ -1534,7 +1865,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Tenderloin since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Tenderloin","requests":"50"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Treasure%20Island\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Treasure Island","requests":"3"}]':
     {
@@ -1542,7 +1873,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Treasure Island since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Treasure Island","requests":"3"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Twin%20Peaks\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Twin Peaks","requests":"5"}]':
     {
@@ -1550,7 +1881,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Twin Peaks since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Twin Peaks","requests":"5"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Visitacion%20Valley\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Visitacion Valley","requests":"12"}]':
     {
@@ -1558,7 +1889,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Visitacion Valley since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Visitacion Valley","requests":"12"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'West%20of%20Twin%20Peaks\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"West of Twin Peaks","requests":"158"}]':
     {
@@ -1566,7 +1897,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in West of Twin Peaks since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"West of Twin Peaks","requests":"158"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
   'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Western%20Addition\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Western Addition","requests":"48"}]':
     {
@@ -1574,7 +1905,7 @@ export const SERVICE_SOURCES: Record<string, SourceSnapshot> = {
       title: "311 Cases: Streetlights requests in Western Addition since 2026-08-15 | DataSF",
       publisher: "DataSF",
       snippet: '[{"analysis_neighborhood":"Western Addition","requests":"48"}]',
-      fetchedAt: 1794535195591,
+      fetchedAt: 1794559938306,
     },
 };
 
@@ -1694,13 +2025,13 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074559,27:01:24,27:01:24,6397,14,,2.0957776,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:27:00,27:27:00,4148,41,,4.6830859,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:03:54,27:03:54,7524,3,,0.413545,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:03:39,27:03:39,7378,53,,13.9774791,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:13:21,27:13:21,3768,23,,4.7671211,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#15,SFMTA,15,BAYVIEW HUNTERS POINT EXPRESS,http://www.sfmta.com/15,Weekdays 5am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#19,SFMTA,19,POLK,http://www.sfmta.com/19,5am-10pm daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 44 O'Shaughnessy · runs all night: 3:01 AM at Silver Ave & Bay Shore Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:27 AM at Cortland Ave & Bayshore Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 48 Quintara-24th Street · runs all night: 3:04 AM at Pennsylvania Avenue & 25th Street",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:04 AM at Third St & Marin St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 3:13 AM at 240 Bayshore Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 15 Bayview Hunters Point Express · stops at Third St & Marin St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 19 Polk · stops at Rhode Island St & 26th St",
     ],
   },
   {
@@ -1788,11 +2119,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:22:00,27:22:00,3541,31,,3.6477407,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098088,25:30:09,25:30:09,5597,27,,4.5907152,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:13:21,27:13:21,3768,23,,4.7671211,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#67,SFMTA,67,BERNAL HEIGHTS,http://www.sfmta.com/67,Weekdays 5am-10pm Weekends 6am-10pm,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:22 AM at 30th St & Mission St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 14 Mission · runs all night: 1:30 AM at Mission St & Highland Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 3:13 AM at 240 Bayshore Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 49 Van Ness-Mission · stops at Mission St & Valencia St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 67 Bernal Heights · stops at Folsom St & Cesar Chavez St",
     ],
   },
   {
@@ -1898,12 +2229,12 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:04:02,27:04:02,4330,8,,1.1399355,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:43:12,25:43:12,4005,28,,3.0886086,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:47:31,25:47:31,5659,26,,4.3100313,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:52:56,25:52:56,5659,20,,4.3149415,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#37,SFMTA,37,CORBETT,http://www.sfmta.com/37,Weekdays 6am-9pm Weekends 9am-9pm,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#33,SFMTA,33,ASHBURY-18TH ST,http://www.sfmta.com/33,5am-10pm daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:04 AM at Castro St & Duboce Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:43 AM at Church St & Duboce Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:48 AM at Market St & Buchanan St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 1:53 AM at Market St & Buchanan St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 37 Corbett · stops at Carmel St & Twin Peaks Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 33 Ashbury-18th St · stops at Clayton St & Twin Peaks Blvd",
     ],
   },
   {
@@ -2009,9 +2340,9 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:38:45,26:38:45,4105,34,,9.842496,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#PM,SFMTA,PM,POWELL-MASON CABLE CAR,http://www.sfmta.com/PM,7 am-10 pm daily,5,B49A36 ,000000,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 2:39 AM at Columbus Ave & Filbert St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 1 California · stops at Sacramento St & Battery St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni PM Powell-Mason Cable Car · stops at Powell St & California St",
     ],
   },
   {
@@ -2087,11 +2418,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098087,25:30:00,25:30:00,5592,37,,6.2996578,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:25:00,27:25:00,6415,4,,0.5618627,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:24:38,27:24:38,7300,79,,19.3583322,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#54,SFMTA,54,FELTON,http://www.sfmta.com/54,5am-10pm daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 14 Mission · runs all night: 1:30 AM at Mission St & Geneva Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 44 O'Shaughnessy · runs all night: 3:25 AM at Silver Ave & Mission St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:25 AM at Geneva Ave & Carter St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 43 Masonic · stops at Geneva Ave & Mission St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 54 Felton · stops at University St & Felton St",
     ],
   },
   {
@@ -2384,21 +2715,21 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       },
     ],
     sources: [
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:31:00,24:31:00,M16-2,12,Antioch,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:09:00,25:10:00,M16-1,14,,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:29:00,24:30:00,M20-2,11,Antioch,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:11:00,25:11:00,M20-1,15,,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:28:00,24:28:00,M30-2,10,Antioch,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:13:00,25:13:00,M30-1,16,,,,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098090,25:30:04,25:30:04,5532,6,,0.7241389,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:35:00,25:35:00,7916,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055192,25:54:00,25:54:00,3161,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:30:00,25:30:00,4726,11,,1.8031941,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:33:54,25:33:54,7447,4,,1.0050929,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066815,25:32:00,25:32:00,7917,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:45:00,26:45:00,6524,40,,10.6913145,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38R,SFMTA,38R,GEARY RAPID,http://www.sfmta.com/38R,Weekdays 5am-10pm Weekends 6am-9pm,3,BF2B45 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#14R,SFMTA,14R,MISSION RAPID,http://www.sfmta.com/14R,5am-10pm daily,3,BF2B45 ,FFFFFF,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Embarcadero toward Antioch · 12:31 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Embarcadero toward Millbrae · 1:10 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Montgomery Street toward Antioch · 12:30 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Montgomery Street toward Millbrae · 1:11 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Powell Street toward Antioch · 12:28 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Powell Street toward Millbrae · 1:13 AM",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 14 Mission · runs all night: 1:30 AM at Mission St & 3rd St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · runs all night: 1:35 AM at Transit Center Bay D",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:54 AM at 4th St & Market St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:30 AM at Don Chee Way/Steuart St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 1:34 AM at The Embarcadero & Brannan St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 25 Treasure Island · runs all night: 1:32 AM at Transit Center Bay E",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 2:45 AM at Stockton St & Sutter St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38R Geary Rapid · stops at Transit Center Bay C",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 14R Mission Rapid · stops at Mission St & Main St",
     ],
   },
   {
@@ -2491,13 +2822,13 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       },
     ],
     sources: [
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:19:00,24:19:00,M70-2,6,Antioch,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:21:00,25:22:00,M70-1,20,,,,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:22:00,27:22:00,3696,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:18:21,27:18:21,5738,27,,3.1562703,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:32:51,25:32:51,6015,35,,6.7985353,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#52,SFMTA,52,EXCELSIOR,http://www.sfmta.com/52,Weekdays 6am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#35,SFMTA,35,EUREKA,http://www.sfmta.com/35,7am-9pm daily,3,005B95 ,FFFFFF,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Glen Park toward Antioch · 12:19 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Glen Park toward Millbrae · 1:22 AM",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 44 O'Shaughnessy · runs all night: 3:22 AM at Bosworth St & Diamond St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:18 AM at Noe St & 30th St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:33 AM at Portola Dr & Glenview Dr",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 52 Excelsior · stops at Portola Dr & Glenview Dr",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 35 Eureka · stops at Diamond St & 29th St",
     ],
   },
   {
@@ -2579,10 +2910,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:43:50,25:43:50,4236,18,,3.4901873,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:15:42,27:15:42,7758,14,,3.0763109,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5R,SFMTA,5R,FULTON RAPID,http://www.sfmta.com/5R,Weekdays 7am-7pm,3,BF2B45 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7,SFMTA,7,HAIGHT-NORIEGA,http://www.sfmta.com/7,5am-10pm daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:44 AM at Fulton St & Stanyan StW",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:16 AM at Crossover Dr & Lincoln St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5R Fulton Rapid · stops at Fulton St & Arguello Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 7 Haight-Noriega · stops at Stanyan St & Waller St",
     ],
   },
   {
@@ -2646,10 +2977,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:01:45,27:01:45,4432,6,,0.8539975,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:57:50,25:57:50,4960,24,,5.0867727,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7,SFMTA,7,HAIGHT-NORIEGA,http://www.sfmta.com/7,5am-10pm daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:02 AM at Divisadero St & Oak St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 1:58 AM at Haight St & Pierce St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 43 Masonic · stops at Masonic Ave & Oak St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 7 Haight-Noriega · stops at Haight St & Pierce St",
     ],
   },
   {
@@ -2773,14 +3104,14 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:39:02,25:39:02,4617,23,,2.5218126,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:00:50,27:00:50,4426,5,,0.7253621,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:33:00,25:33:00,5404,8,,1.5340282,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:50:00,25:50:00,5696,17,,3.7858171,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:44:00,25:44:00,5696,23,,3.7809068,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:58:10,26:58:10,8104,10,,1.7334176,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#6,SFMTA,6,HAYES-PARNASSUS,http://www.sfmta.com/6,5am-10pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7,SFMTA,7,HAIGHT-NORIEGA,http://www.sfmta.com/7,5am-10pm daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:39 AM at Fillmore St & Grove St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:01 AM at Divisadero St & Hayes St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:33 AM at Mcallister St & Van Ness Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 1:50 AM at Market St & Van Ness Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:44 AM at Market St & Van Ness Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 2:58 AM at Van Ness Ave & McAllister St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 6 Hayes-Parnassus · stops at Hayes St & Van Ness Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 7 Haight-Noriega · stops at Market St & Van Ness Ave",
     ],
   },
   {
@@ -2862,11 +3193,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:44:38,25:44:38,4223,19,,3.6926135,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071697,25:30:33,25:30:33,4259,27,,4.1592365,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:18:55,27:18:55,5950,15,,4.003325,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#44,SFMTA,44,O'SHAUGHNESSY,http://www.sfmta.com/44,5am-midnight daily (East of Glen Park BART 24 hours daily),3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:45 AM at Fulton St & Arguello Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · runs all night: 1:31 AM at Geary Blvd & 9th Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:19 AM at Park Presidio Blvd & Fulton St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 1 California · stops at California St & Arguello Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 44 O'Shaughnessy · stops at California St & 6th Ave",
     ],
   },
   {
@@ -2972,10 +3303,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,26:04:02,26:04:02,3914,32,,6.4129684,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:11:36,27:11:36,3383,8,,1.8989683,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#6,SFMTA,6,HAYES-PARNASSUS,http://www.sfmta.com/6,5am-10pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#N,SFMTA,N,JUDAH,http://www.sfmta.com/N,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 2:04 AM at Carl St & Stanyan St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:12 AM at 19th Ave & Quintara St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 6 Hayes-Parnassus · stops at Parnassus Ave & Stanyan St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni N Judah · stops at Carl St & Stanyan St",
     ],
   },
   {
@@ -3015,11 +3346,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:47:17,25:47:17,4298,13,,1.8123337,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:33:00,25:33:00,4641,17,,1.8944736,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066112,27:26:00,27:26:00,4435,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38R,SFMTA,38R,GEARY RAPID,http://www.sfmta.com/38R,Weekdays 5am-10pm Weekends 6am-9pm,3,BF2B45 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#2,SFMTA,2,SUTTER,http://www.sfmta.com/2,6:30am-7pm daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · runs all night: 1:47 AM at Geary Blvd & Gough St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:33 AM at Fillmore St & Sutter St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:26 AM at Divisadero St & Sutter St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38R Geary Rapid · stops at Geary Blvd & Laguna St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 2 Sutter · stops at Sutter St & Gough St",
     ],
   },
   {
@@ -3083,9 +3414,9 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:05:00,27:05:00,390,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#57,SFMTA,57,PARKMERCED,http://www.sfmta.com/57,5am-10pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:05 AM at 19th Avenue & Holloway St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 57 Parkmerced · stops at Eucalyptus Dr & 19th Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 29 Sunset · stops at Lake Merced & Middlefield Dr",
     ],
   },
   {
@@ -3119,8 +3450,8 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#18,SFMTA,18,46TH AVENUE,http://www.sfmta.com/18,6am-10pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38,SFMTA,38,GEARY,http://www.sfmta.com/38,24 hour service daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 18 46th Avenue · stops at Legion of Honor",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · stops at 42nd Ave & Clement St",
     ],
   },
   {
@@ -3178,10 +3509,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:52:45,25:52:45,4289,19,,2.8047111,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:40:21,25:40:21,5384,14,,2.6922472,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#31,SFMTA,31,BALBOA,http://www.sfmta.com/31,5am-10pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · runs all night: 1:53 AM at Geary Blvd & Baker St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:40 AM at Mcallister St & Baker St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 31 Balboa · stops at Turk St & Baker St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 43 Masonic · stops at Presidio Ave & Geary Blvd",
     ],
   },
   {
@@ -3245,11 +3576,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064724,26:20:00,26:20:00,4603,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:29:01,27:29:01,6181,19,,7.3989051,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:47:00,26:47:00,7476,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#30,SFMTA,30,STOCKTON,http://www.sfmta.com/30,Weekdays 5am-12am Weekends 6am-12am,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#45,SFMTA,45,UNION-STOCKTON,http://www.sfmta.com/45,5am-10pm daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 2:20 AM at Fillmore St & Bay St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:29 AM at Richardson Ave & Francisco St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 2:47 AM at Van Ness Ave & North Point St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 30 Stockton · stops at Van Ness Ave & North Point St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 45 Union-Stockton · stops at Union St & Van Ness Ave",
     ],
   },
   {
@@ -3313,9 +3644,9 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:19:53,27:19:53,7026,76,,18.1016956,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#56,SFMTA,56,RUTLAND,http://www.sfmta.com/56,7am-9pm daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:20 AM at Hahn St & Visitacion Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 29 Sunset · stops at Persia Ave & Brazil Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 56 Rutland · stops at Visitacion Valley Middle School",
     ],
   },
   {
@@ -3520,18 +3851,18 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       },
     ],
     sources: [
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:24:00,24:24:00,M50-2,8,Antioch,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:17:00,25:17:00,M50-1,18,,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:22:00,24:22:00,M60-2,7,Antioch,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:19:00,25:19:00,M60-1,19,,,,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098089,25:30:00,25:30:00,5552,17,,2.5932208,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:46:18,25:46:18,3285,31,,3.5652681,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:08:56,27:08:56,3453,13,,1.4222223,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:00:00,27:00:00,8105,11,,2.0783336,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:44:00,25:44:00,5696,23,,3.7809068,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:50:00,25:50:00,5696,17,,3.7858171,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#27,SFMTA,27,BRYANT,http://www.sfmta.com/27,5am-10pm daily,3,005B95 ,FFFFFF,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from 16th Street / Mission toward Antioch · 12:24 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from 16th Street / Mission toward Millbrae · 1:17 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from 24th Street / Mission toward Antioch · 12:22 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from 24th Street / Mission toward Millbrae · 1:19 AM",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 14 Mission · runs all night: 1:30 AM at Mission St & 16th St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:46 AM at 16th St & Dolores St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 48 Quintara-24th Street · runs all night: 3:09 AM at 23rd St & Utah St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 3:00 AM at Van Ness Ave & Market St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:44 AM at Market St & Van Ness Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 1:50 AM at Market St & Van Ness Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 49 Van Ness-Mission · stops at Van Ness Ave & Market St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 27 Bryant · stops at 11th St & Harrison St",
     ],
   },
   {
@@ -3622,12 +3953,12 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       },
     ],
     sources: [
-      "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#176,24:05:00,24:05:00,70012,1,,0,0,0,1,,,,,1,1,,,,,,,,,,,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064722,25:30:00,25:30:00,7765,43,,5.9602821,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:54:00,26:54:00,3164,46,,11.8639132,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:30:00,25:30:00,7957,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#19,SFMTA,19,POLK,http://www.sfmta.com/19,5am-10pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#T,SFMTA,T,THIRD,http://www.sfmta.com/T,Weekends 8 am-11:30 pm,0,BF2B45 ,FFFFFF,",
+      "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#Caltrain · last weekday departure from San Francisco Caltrain Station toward Tamien · 12:05 AM",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:30 AM at Mission Bay North & 4th St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 2:54 AM at 4th St & Townsend St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 1:30 AM at Townsend St & 5th St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 19 Polk · stops at Division St & Rhode Island St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni T Third · stops at UCSF / Chase Center (16th St)",
     ],
   },
   {
@@ -3721,10 +4052,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:53:05,26:53:05,8100,6,,0.9473609,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080259,27:13:00,27:13:00,6523,58,,12.845818,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#PH,SFMTA,PH,POWELL-HYDE CABLE CAR,http://www.sfmta.com/PH,7 am-10 pm daily,5,B49A36 ,000000,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 2:53 AM at Van Ness Ave & Sacramento St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:13 AM at Stockton St & Sutter St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 1 California · stops at Sacramento St & Powell St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni PH Powell-Hyde Cable Car · stops at Powell St & Post St",
     ],
   },
   {
@@ -3788,11 +4119,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066113,27:10:21,27:10:21,4321,16,,2.0486084,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:17:07,27:17:07,3466,22,,2.6328152,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:31:32,25:31:32,6008,32,,6.3901605,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#J,SFMTA,J,CHURCH,http://www.sfmta.com/J,5am-12 midnight daily,0,A96614 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#35,SFMTA,35,EUREKA,http://www.sfmta.com/35,7am-9pm daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:10 AM at Castro St & 21st St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 48 Quintara-24th Street · runs all night: 3:17 AM at 24th St & Dolores St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:32 AM at 6 Portola Dr",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni J Church · stops at Right Of Way/21st St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 35 Eureka · stops at Eureka St & 21st St",
     ],
   },
   {
@@ -3880,10 +4211,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084112,25:45:00,25:45:00,5184,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:36:17,26:36:17,4100,30,,9.389843,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#8,SFMTA,8,BAYSHORE,http://www.sfmta.com/8,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#30,SFMTA,30,STOCKTON,http://www.sfmta.com/30,Weekdays 5am-12am Weekends 6am-12am,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:45 AM at Jones St & Beach St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 2:36 AM at Columbus Ave & Bay St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 8 Bayshore · stops at Kearny St & North Point St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 30 Stockton · stops at Stockton St & Columbus Ave",
     ],
   },
   {
@@ -3971,9 +4302,9 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080247,27:02:59,27:02:59,4881,89,,21.0981977,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#M,SFMTA,M,OCEAN VIEW,http://www.sfmta.com/M,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,008547 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:03 AM at Geneva Ave & Howth St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 29 Sunset · stops at Holloway Ave & Junipero Serra Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni M Ocean View · stops at 19th Ave & Randolph St",
     ],
   },
   {
@@ -4102,13 +4433,13 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       },
     ],
     sources: [
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:17:00,24:17:00,M80-2,5,Antioch,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:24:00,25:24:00,M80-1,21,,,,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098087,25:30:00,25:30:00,5592,37,,6.2996578,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:23:24,27:23:24,5330,2,,0.2816487,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:29:00,27:29:00,4886,86,,20.4562367,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#14R,SFMTA,14R,MISSION RAPID,http://www.sfmta.com/14R,5am-10pm daily,3,BF2B45 ,FFFFFF,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Balboa Park toward Antioch · 12:17 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Balboa Park toward Millbrae · 1:24 AM",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 14 Mission · runs all night: 1:30 AM at Mission St & Geneva Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 44 O'Shaughnessy · runs all night: 3:23 AM at Lyell St & Alemany Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:29 AM at Geneva Ave & Mission St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 49 Van Ness-Mission · stops at Mission St & Bosworth St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 14R Mission Rapid · stops at Mission St & Silver Ave",
     ],
   },
   {
@@ -4190,11 +4521,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071697,25:32:00,25:32:00,4755,28,,4.441199,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:47:39,25:47:39,4231,24,,4.4504313,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:18:55,27:18:55,5950,15,,4.003325,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38R,SFMTA,38R,GEARY RAPID,http://www.sfmta.com/38R,Weekdays 5am-10pm Weekends 6am-9pm,3,BF2B45 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · runs all night: 1:32 AM at Geary Blvd & Park Presidio Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:48 AM at Fulton St & Park Presidio Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:19 AM at Park Presidio Blvd & Fulton St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38R Geary Rapid · stops at Geary Blvd & Park Presidio Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 1 California · stops at California St & Park Presidio Blvd",
     ],
   },
   {
@@ -4258,11 +4589,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:30:51,25:30:51,4637,15,,1.6068415,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066112,27:26:00,27:26:00,4435,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:50:39,26:50:39,8098,4,,0.5688494,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:31 AM at Fillmore St & Sacramento St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:26 AM at Divisadero St & Sutter St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 2:51 AM at Van Ness Ave & Vallejo St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 1 California · stops at Sacramento St & Van Ness Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 49 Van Ness-Mission · stops at Van Ness Ave & Vallejo St",
     ],
   },
   {
@@ -4332,10 +4663,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:27:49,27:27:49,6399,8,,1.2207592,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:15:13,27:15:13,3771,26,,5.2636441,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#9,SFMTA,9,SAN BRUNO,http://www.sfmta.com/9,5am-12 midnight daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 44 O'Shaughnessy · runs all night: 3:28 AM at Silver Ave & Cambridge St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 3:15 AM at Bayshore Blvd & Alemany Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 29 Sunset · stops at Mansell St & Dartmouth St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 9 San Bruno · stops at Bayshore Blvd & Alemany Blvd",
     ],
   },
   {
@@ -4410,13 +4741,13 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       },
     ],
     sources: [
-      "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#173,24:42:00,24:42:00,70021,22,,0,0,75811.84903503713,1,,,,,1,1,,,,,,,,,,,",
-      "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#176,24:10:00,24:10:00,70022,2,,0,0,2521.9493493333744,1,,,,,1,1,,,,,,,,,,,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12076060,27:02:00,27:02:00,3435,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:57:07,25:57:07,7866,40,,5.4138267,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:59:45,26:59:45,7382,50,,12.9333048,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#19,SFMTA,19,POLK,http://www.sfmta.com/19,5am-10pm daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#55,SFMTA,55,DOGPATCH,http://www.sfmta.com/55,5am-10pm daily,3,005B95 ,FFFFFF,",
+      "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#Caltrain · last weekday departure from 22nd Street Station toward San Francisco · 12:42 AM",
+      "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#Caltrain · last weekday departure from 22nd Street Station toward Tamien · 12:10 AM",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 48 Quintara-24th Street · runs all night: 3:02 AM at 22nd St & Iowa St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:57 AM at 16th St & Owen St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:00 AM at Third St & Mariposa St.",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 19 Polk · stops at Rhode Island St & 17th St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 55 Dogpatch · stops at Connecticut St & 17th St",
     ],
   },
   {
@@ -4462,9 +4793,9 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:29:01,27:29:01,6181,19,,7.3989051,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:29 AM at Richardson Ave & Francisco St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 43 Masonic · stops at Lombard St & Lyon St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 29 Sunset · stops at Bowley St & Lincoln Blvd",
     ],
   },
   {
@@ -4522,9 +4853,9 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:52:45,25:52:45,4289,19,,2.8047111,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · runs all night: 1:53 AM at Geary Blvd & Baker St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 1 California · stops at California St & Baker St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 43 Masonic · stops at Presidio Ave & Jackson St",
     ],
   },
   {
@@ -4612,10 +4943,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:33:00,26:33:00,6800,25,,8.7855352,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:47:00,26:47:00,7476,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#PH,SFMTA,PH,POWELL-HYDE CABLE CAR,http://www.sfmta.com/PH,7 am-10 pm daily,5,B49A36 ,000000,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 2:33 AM at Van Ness Ave & Chestnut St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 2:47 AM at Van Ness Ave & North Point St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni PH Powell-Hyde Cable Car · stops at Jackson St & Leavenworth St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 49 Van Ness-Mission · stops at Van Ness Ave & North Point St",
     ],
   },
   {
@@ -4643,8 +4974,8 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#1,SFMTA,1,CALIFORNIA,http://www.sfmta.com/1,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 1 California · stops at California St & 28th Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 29 Sunset · stops at 25th Ave & El Camino Del Mar",
     ],
   },
   {
@@ -4897,18 +5228,18 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       },
     ],
     sources: [
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:26:00,24:26:00,M40-2,9,Antioch,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:14:00,25:15:00,M40-1,17,,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:28:00,24:28:00,M30-2,10,Antioch,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:13:00,25:13:00,M30-1,16,,,,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12098090,25:31:09,25:31:09,5534,7,,0.880837,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055192,25:54:00,25:54:00,3161,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:36:36,25:36:36,5694,17,,2.7468561,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:30:00,25:30:00,7957,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,26:47:35,26:47:35,3161,42,,11.0364319,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:01:43,27:01:43,3243,12,,2.3740143,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#8,SFMTA,8,BAYSHORE,http://www.sfmta.com/8,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#9,SFMTA,9,SAN BRUNO,http://www.sfmta.com/9,5am-12 midnight daily,3,005B95 ,FFFFFF,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Civic Center / UN Plaza toward Antioch · 12:26 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Civic Center / UN Plaza toward Millbrae · 1:15 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Powell Street toward Antioch · 12:28 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Powell Street toward Millbrae · 1:13 AM",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 14 Mission · runs all night: 1:31 AM at Mission St & 4th St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:54 AM at 4th St & Market St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:37 AM at Market St & Stockton St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 1:30 AM at Townsend St & 5th St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 2:48 AM at 4th St & Market St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 3:02 AM at 11th St & Mission St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 8 Bayshore · stops at 4th St & Market St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 9 San Bruno · stops at Market St & Stockton St",
     ],
   },
   {
@@ -5014,11 +5345,11 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:39:34,25:39:34,6616,42,,8.7417899,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:07:27,27:07:27,3355,3,,0.7075418,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,26:11:00,26:11:00,5199,41,,7.9062754,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#29,SFMTA,29,SUNSET,http://www.sfmta.com/29,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7,SFMTA,7,HAIGHT-NORIEGA,http://www.sfmta.com/7,5am-10pm daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:40 AM at Taraval St & 19th Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:07 AM at 19th Ave & Eucalyptus Dr",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 2:11 AM at Judah St & 19th Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 29 Sunset · stops at Lincoln Way & 19th Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 7 Haight-Noriega · stops at Lincoln Way & 19th Ave",
     ],
   },
   {
@@ -5223,17 +5554,17 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       },
     ],
     sources: [
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:26:00,24:26:00,M40-2,9,Antioch,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:14:00,25:15:00,M40-1,17,,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:28:00,24:28:00,M30-2,10,Antioch,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:13:00,25:13:00,M30-1,16,,,,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:41:00,25:41:00,4757,7,,0.8888597,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:30:33,25:30:33,5395,6,,1.2559085,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084111,25:37:45,25:37:45,5655,18,,2.9126192,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12085750,25:44:12,25:44:12,5655,13,,2.9175299,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:56:00,26:56:00,8102,8,,1.4059226,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#19,SFMTA,19,POLK,http://www.sfmta.com/19,5am-10pm daily,3,005B95 ,FFFFFF,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Civic Center / UN Plaza toward Antioch · 12:26 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Civic Center / UN Plaza toward Millbrae · 1:15 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Powell Street toward Antioch · 12:28 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Powell Street toward Millbrae · 1:13 AM",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · runs all night: 1:41 AM at Geary St & Powell St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:31 AM at Mcallister St & Hyde St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:38 AM at Market St & 5th St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Judah · runs all night: 1:44 AM at Market St & 5th St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 2:56 AM at Van Ness Ave & O'Farrell St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 49 Van Ness-Mission · stops at Van Ness Ave & O'Farrell St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 19 Polk · stops at Polk St & O'Farrell St",
     ],
   },
   {
@@ -5249,7 +5580,7 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066815,25:42:00,25:42:00,8000,2,,3.9250904,1",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 25 Treasure Island · runs all night: 1:42 AM at Clipper Cove Way & Treasure Island Rd",
     ],
   },
   {
@@ -5331,9 +5662,9 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:31:32,25:31:32,6008,32,,6.3901605,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#44,SFMTA,44,O'SHAUGHNESSY,http://www.sfmta.com/44,5am-midnight daily (East of Glen Park BART 24 hours daily),3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#36,SFMTA,36,TERESITA,http://www.sfmta.com/36,Weekdays 6am-10pm Weekends 8am-10pm,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:32 AM at 6 Portola Dr",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 44 O'Shaughnessy · stops at Laguna Honda Blvd & Clarendon Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 36 Teresita · stops at Laguna Honda Blvd/Forest Hill Sta",
     ],
   },
   {
@@ -5403,10 +5734,10 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080246,27:16:13,27:16:13,3792,68,,17.1840257,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,27:19:30,27:19:30,6369,35,,6.6507798,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#8,SFMTA,8,BAYSHORE,http://www.sfmta.com/8,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#9,SFMTA,9,SAN BRUNO,http://www.sfmta.com/9,5am-12 midnight daily,3,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:16 AM at Bayshore Blvd & Tunnel Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 3:20 AM at San Bruno Ave & Ward St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 8 Bayshore · stops at San Bruno Ave & Ward St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 9 San Bruno · stops at San Bruno Ave & Ward St",
     ],
   },
   {
@@ -5589,13 +5920,13 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
       },
     ],
     sources: [
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965297,24:19:00,24:19:00,M70-2,6,Antioch,,,",
-      "https://www.bart.gov/dev/schedules/google_transit.zip#1965220,25:21:00,25:22:00,M70-1,20,,,,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12074558,27:22:00,27:22:00,3696,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080245,27:05:00,27:05:00,390,1,,0.0,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12084110,25:33:41,25:33:41,6937,36,,7.0576318,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#43,SFMTA,43,MASONIC,http://www.sfmta.com/43,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#48,SFMTA,48,QUINTARA-24TH STREET,http://www.sfmta.com/48,5am-midnight daily (East of Castro St. 24 hours daily),3,005B95 ,FFFFFF,",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Glen Park toward Antioch · 12:19 AM",
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · last weekday departure from Glen Park toward Millbrae · 1:22 AM",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 44 O'Shaughnessy · runs all night: 3:22 AM at Bosworth St & Diamond St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 3rd-19th Ave Owl · runs all night: 3:05 AM at 19th Avenue & Holloway St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Owl Taraval · runs all night: 1:34 AM at Woodside Ave & Portola Dr",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 43 Masonic · stops at Laguna Honda Blvd & Clarendon Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 48 Quintara-24th Street · stops at Portola Dr & Woodside Ave",
     ],
   },
   {
@@ -5671,13 +6002,13 @@ export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = [
     ],
     lastTrains: [],
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12071698,25:46:00,25:46:00,4768,12,,1.6177254,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12064723,25:34:00,25:34:00,4615,18,,1.9956456,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12055191,25:33:00,25:33:00,5404,8,,1.5340282,1",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12066112,27:26:58,27:26:58,4422,2,,0.1467991,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#12080176,26:54:46,26:54:46,8101,7,,1.2098055,0",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#49,SFMTA,49,VAN NESS-MISSION,http://www.sfmta.com/49,5am-12 midnight daily,3,005B95 ,FFFFFF,",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#38R,SFMTA,38R,GEARY RAPID,http://www.sfmta.com/38R,Weekdays 5am-10pm Weekends 6am-9pm,3,BF2B45 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38 Geary · runs all night: 1:46 AM at Geary Blvd & Van Ness Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 22 Fillmore · runs all night: 1:34 AM at Fillmore St & Geary Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 5 Fulton · runs all night: 1:33 AM at Mcallister St & Van Ness Ave",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 24 Divisadero · runs all night: 3:27 AM at Divisadero St & Geary Blvd",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni San Bruno Owl · runs all night: 2:55 AM at Van Ness Ave & Sutter St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 49 Van Ness-Mission · stops at Van Ness Ave & Sutter St",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni 38R Geary Rapid · stops at Geary Blvd & Van Ness Ave",
     ],
   },
 ];
@@ -5687,7 +6018,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "bayview-hunters-point",
     count: 90,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Bayview%20Hunters%20Point\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Bayview Hunters Point","requests":"90"}]',
     ],
@@ -5696,7 +6027,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "bernal-heights",
     count: 38,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Bernal%20Heights\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Bernal Heights","requests":"38"}]',
     ],
@@ -5705,7 +6036,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "castro-upper-market",
     count: 66,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Castro%2FUpper%20Market\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Castro/Upper Market","requests":"66"}]',
     ],
@@ -5714,7 +6045,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "chinatown",
     count: 18,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Chinatown\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Chinatown","requests":"18"}]',
     ],
@@ -5723,7 +6054,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "excelsior",
     count: 36,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Excelsior\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Excelsior","requests":"36"}]',
     ],
@@ -5732,7 +6063,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "financial-district-south-beach",
     count: 88,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Financial%20District%2FSouth%20Beach\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Financial District/South Beach","requests":"88"}]',
     ],
@@ -5741,7 +6072,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "glen-park",
     count: 19,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Glen%20Park\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Glen Park","requests":"19"}]',
     ],
@@ -5750,7 +6081,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "golden-gate-park",
     count: 35,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Golden%20Gate%20Park\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Golden Gate Park","requests":"35"}]',
     ],
@@ -5759,7 +6090,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "haight-ashbury",
     count: 21,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Haight%20Ashbury\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Haight Ashbury","requests":"21"}]',
     ],
@@ -5768,7 +6099,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "hayes-valley",
     count: 39,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Hayes%20Valley\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Hayes Valley","requests":"39"}]',
     ],
@@ -5777,7 +6108,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "inner-richmond",
     count: 19,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Inner%20Richmond\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Inner Richmond","requests":"19"}]',
     ],
@@ -5786,7 +6117,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "inner-sunset",
     count: 19,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Inner%20Sunset\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Inner Sunset","requests":"19"}]',
     ],
@@ -5795,7 +6126,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "japantown",
     count: 7,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Japantown\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Japantown","requests":"7"}]',
     ],
@@ -5804,7 +6135,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "lakeshore",
     count: 12,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Lakeshore\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Lakeshore","requests":"12"}]',
     ],
@@ -5813,7 +6144,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "lone-mountain-usf",
     count: 18,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Lone%20Mountain%2FUSF\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Lone Mountain/USF","requests":"18"}]',
     ],
@@ -5822,7 +6153,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "marina",
     count: 25,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Marina\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Marina","requests":"25"}]',
     ],
@@ -5831,7 +6162,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "mclaren-park",
     count: 10,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'McLaren%20Park\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"McLaren Park","requests":"10"}]',
     ],
@@ -5840,7 +6171,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "mission",
     count: 140,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Mission\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Mission","requests":"140"}]',
     ],
@@ -5849,7 +6180,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "mission-bay",
     count: 15,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Mission%20Bay\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Mission Bay","requests":"15"}]',
     ],
@@ -5858,7 +6189,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "nob-hill",
     count: 32,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Nob%20Hill\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Nob Hill","requests":"32"}]',
     ],
@@ -5867,7 +6198,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "noe-valley",
     count: 27,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Noe%20Valley\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Noe Valley","requests":"27"}]',
     ],
@@ -5876,7 +6207,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "north-beach",
     count: 25,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'North%20Beach\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"North Beach","requests":"25"}]',
     ],
@@ -5885,7 +6216,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "oceanview-merced-ingleside",
     count: 33,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Oceanview%2FMerced%2FIngleside\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Oceanview/Merced/Ingleside","requests":"33"}]',
     ],
@@ -5894,7 +6225,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "outer-mission",
     count: 36,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Outer%20Mission\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Outer Mission","requests":"36"}]',
     ],
@@ -5903,7 +6234,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "outer-richmond",
     count: 33,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Outer%20Richmond\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Outer Richmond","requests":"33"}]',
     ],
@@ -5912,7 +6243,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "pacific-heights",
     count: 15,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Pacific%20Heights\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Pacific Heights","requests":"15"}]',
     ],
@@ -5921,7 +6252,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "portola",
     count: 21,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Portola\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Portola","requests":"21"}]',
     ],
@@ -5930,7 +6261,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "potrero-hill",
     count: 21,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Potrero%20Hill\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Potrero Hill","requests":"21"}]',
     ],
@@ -5939,7 +6270,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "presidio",
     count: 10,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Presidio\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Presidio","requests":"10"}]',
     ],
@@ -5948,7 +6279,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "presidio-heights",
     count: 11,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Presidio%20Heights\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Presidio Heights","requests":"11"}]',
     ],
@@ -5957,7 +6288,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "russian-hill",
     count: 17,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Russian%20Hill\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Russian Hill","requests":"17"}]',
     ],
@@ -5966,7 +6297,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "seacliff",
     count: 4,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Seacliff\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Seacliff","requests":"4"}]',
     ],
@@ -5975,7 +6306,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "south-of-market",
     count: 81,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'South%20of%20Market\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"South of Market","requests":"81"}]',
     ],
@@ -5984,7 +6315,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "sunset-parkside",
     count: 71,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Sunset%2FParkside\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Sunset/Parkside","requests":"71"}]',
     ],
@@ -5993,7 +6324,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "tenderloin",
     count: 50,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Tenderloin\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Tenderloin","requests":"50"}]',
     ],
@@ -6002,7 +6333,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "treasure-island",
     count: 3,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Treasure%20Island\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Treasure Island","requests":"3"}]',
     ],
@@ -6011,7 +6342,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "twin-peaks",
     count: 5,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Twin%20Peaks\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Twin Peaks","requests":"5"}]',
     ],
@@ -6020,7 +6351,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "visitacion-valley",
     count: 12,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Visitacion%20Valley\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Visitacion Valley","requests":"12"}]',
     ],
@@ -6029,7 +6360,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "west-of-twin-peaks",
     count: 158,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'West%20of%20Twin%20Peaks\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"West of Twin Peaks","requests":"158"}]',
     ],
@@ -6038,7 +6369,7 @@ export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = [
     neighborhood: "western-addition",
     count: 48,
     since: 1786780800000,
-    until: 1794535195591,
+    until: 1794559938306,
     sources: [
       'https://data.sf.gov/resource/vw6y-z8j6.json?$select=analysis_neighborhood%2C%20count(*)%20AS%20requests&$where=service_name%3D\'Streetlights\'%20AND%20requested_datetime%20%3E%3D%20\'2026-08-15T00%3A00%3A00\'%20AND%20analysis_neighborhood%3D\'Western%20Addition\'&$group=analysis_neighborhood#[{"analysis_neighborhood":"Western Addition","requests":"48"}]',
     ],

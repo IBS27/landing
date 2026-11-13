@@ -228,15 +228,17 @@ export const add = viewerMutation({
         });
       }
     }
-    await notify(ctx, {
-      userId: post.authorId,
-      actorId: authorId,
-      kind: "comment",
-      text: `commented on your post: "${snippet}"`,
-      postId,
-      commentId,
-      groupId: post.groupId,
-    });
+    // A reply to the post owner's own comment already told them ("replied to your comment").
+    if (answered?.authorId !== post.authorId)
+      await notify(ctx, {
+        userId: post.authorId,
+        actorId: authorId,
+        kind: "comment",
+        text: `commented on your post: "${snippet}"`,
+        postId,
+        commentId,
+        groupId: post.groupId,
+      });
     // Everyone who turned on notifications for this post (and wasn't notified above).
     const subs = await ctx.db
       .query("postSubscriptions")
@@ -300,6 +302,13 @@ export const remove = viewerMutation({
       for (const r of rx) await ctx.db.delete(r._id);
       await ctx.db.delete(id);
     }
+    // Comment and reply notifications quote the text, so they go with it.
+    const gone = new Set<Id<"comments">>(doomed);
+    const notes = await ctx.db
+      .query("notifications")
+      .withIndex("by_post", (q) => q.eq("postId", c.postId))
+      .collect();
+    for (const n of notes) if (n.commentId && gone.has(n.commentId)) await ctx.db.delete(n._id);
     if (c.parentId) {
       const parent = await ctx.db.get(c.parentId);
       if (parent)

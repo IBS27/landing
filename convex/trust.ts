@@ -17,14 +17,11 @@ import { neighborhoodIdAt } from "./lib/neighborhoods";
 import type { Audience } from "./lib/posts";
 import {
   BADGE,
-  farAwaySignal,
   type ListingSignal,
-  lowPriceSignal,
-  type NetworkEvidence,
-  newAccountSignal,
+  listingSignals,
+  networkEvidence,
   phraseFlags,
   RENTAL_SCAN_MAX,
-  reusedPhotosSignal,
 } from "./lib/trust";
 import { getSummary, type UserSummary, userSummary } from "./lib/users";
 import { BLOCK_READ_MAX, listerNetwork } from "./lib/vouches";
@@ -78,12 +75,6 @@ function olderRentals(ctx: QueryCtx, before: number) {
     .withIndex("by_category", (q) => q.eq("category", "propertyrentals").lt("createdAt", before))
     .order("desc")
     .take(RENTAL_SCAN_MAX);
-}
-
-function networkEvidence(n: Awaited<ReturnType<typeof listerNetwork>>): NetworkEvidence | null {
-  return n
-    ? { relation: n.relation, mutualFriendCount: n.mutualFriendCount, vouchTotal: n.vouchTotal }
-    : null;
 }
 
 async function verifiedBadges(
@@ -269,17 +260,20 @@ export async function listingTrust(
       .first(),
     listingAudience(ctx, viewerId),
   ]);
+  // A lister blocked either way is hidden, like their listing on Marketplace.
+  if (audience.blocked.has(lister._id)) return null;
   // Evidence the viewer can't see (blocked sellers) doesn't count.
   const visible = (ls: Doc<"listings">[]) => ls.filter((l) => !audience.blocked.has(l.sellerId));
 
   const raw: ListingSignal[] = isOwn
     ? []
-    : [
-        lowPriceSignal(listing, visible(recent), hood),
-        newAccountSignal(lister, networkEvidence(network)),
-        reusedPhotosSignal(listing, visible(older)),
-        farAwaySignal(listing, lister),
-      ].filter((s): s is ListingSignal => s !== null);
+    : listingSignals(
+        listing,
+        lister,
+        { recent: visible(recent), older: visible(older) },
+        networkEvidence(network),
+        hood,
+      );
   const signals = (await Promise.all(raw.map((s) => signalView(ctx, s, audience)))).filter(
     (s): s is SignalView => s !== null,
   );

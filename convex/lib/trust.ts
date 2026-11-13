@@ -178,6 +178,13 @@ export type NetworkEvidence = {
   vouchTotal: number;
 };
 
+/** Just the evidence fields of a `listerNetwork` result; null stays null. */
+export function networkEvidence(n: NetworkEvidence | null): NetworkEvidence | null {
+  return n
+    ? { relation: n.relation, mutualFriendCount: n.mutualFriendCount, vouchTotal: n.vouchTotal }
+    : null;
+}
+
 /**
  * A new account with no one the viewer knows: not a friend, no mutual friends
  * and no vouches from the viewer's network. `network` is null when the lister
@@ -234,6 +241,49 @@ export function farAwaySignal(
   if (!lister.city?.trim() || !isBayArea(listing.location.city) || isBayArea(lister.city))
     return null;
   return { kind: "lister_far_away", listerCity: lister.city, listingCity: listing.location.city };
+}
+
+/**
+ * Every signal on a rental for a viewer who isn't its lister. `pools` are
+ * rentals the viewer can see: `recent` for the median, `older` for photo
+ * matches. `network` is how the viewer knows the lister, null when hidden or
+ * unknown. The listing view and Find's ranking both use it, so they agree.
+ */
+export function listingSignals(
+  listing: Doc<"listings">,
+  lister: Doc<"users">,
+  pools: { recent: Doc<"listings">[]; older: Doc<"listings">[] },
+  network: NetworkEvidence | null,
+  hood?: { name: string; shortName?: string } | null,
+  now = Date.now(),
+): ListingSignal[] {
+  return [
+    lowPriceSignal(listing, pools.recent, hood),
+    newAccountSignal(lister, network, now),
+    reusedPhotosSignal(listing, pools.older),
+    farAwaySignal(listing, lister),
+  ].filter((s): s is ListingSignal => s !== null);
+}
+
+/** A signal in a few words, as titled under "Things to check". */
+export function signalTitle(s: ListingSignal): string {
+  switch (s.kind) {
+    case "low_price":
+      return `Price is ${s.percentBelow}% below similar listings`;
+    case "new_account":
+      return "New account with no one you know";
+    case "reused_photos":
+      return "Photos also appear on another listing";
+    case "lister_far_away":
+      return "Lister lives outside the Bay Area";
+  }
+}
+
+/** The other listings a signal's evidence comes from; none for profile-based ones. */
+export function signalListingIds(s: ListingSignal): Id<"listings">[] {
+  if (s.kind === "low_price") return s.compIds;
+  if (s.kind === "reused_photos") return s.listingIds;
+  return [];
 }
 
 /* ── Chat phrases ──────────────────────────────────────────────────────── */

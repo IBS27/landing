@@ -95,18 +95,24 @@ const collapsedSearch = (p: string) =>
 const hideMessenger = (p: string) =>
   p.startsWith("/messages") || p.startsWith("/marketplace/create/");
 
+/**
+ * Facebook's header: logo and search, the section tabs, then Menu … Account.
+ * From 1024px the side clusters are 320px each; narrower, they shrink to their
+ * contents (search becomes the round icon), and below 768px the tabs give way
+ * so the right cluster stays on screen.
+ */
 export function TopNav() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   return (
     <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center bg-nav shadow-[0_1px_2px_var(--shadow-1)] dark:shadow-[0_1px_0_var(--divider)]">
-      <div className="flex w-[320px] shrink-0 items-center gap-2 pl-4">
+      <div className="flex shrink-0 items-center gap-2 pl-4 lg:w-[320px]">
         <Link to="/" aria-label="Facebook" className="shrink-0">
           <FacebookLogo size={40} />
         </Link>
         <SearchBox collapsed={collapsedSearch(path)} wide={path !== "/"} />
       </div>
 
-      <nav aria-label="Facebook" className="flex h-full min-w-0 flex-1 justify-center">
+      <nav aria-label="Facebook" className="hidden h-full min-w-0 flex-1 justify-center md:flex">
         <ul className="flex h-full w-full max-w-[680px] items-stretch gap-[7.5px]">
           {tabsFor(path).map(({ to, label, Icon, match }, i) => {
             const active = match(path);
@@ -136,7 +142,7 @@ export function TopNav() {
         </ul>
       </nav>
 
-      <div className="flex w-[320px] shrink-0 items-center justify-end gap-2 pr-4">
+      <div className="ml-auto flex shrink-0 items-center justify-end gap-2 pr-4 lg:w-[320px]">
         <MenuDropdown />
         {!hideMessenger(path) && <MessengerDropdown />}
         <NotificationsDropdown />

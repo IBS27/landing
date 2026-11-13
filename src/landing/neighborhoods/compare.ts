@@ -6,6 +6,7 @@ import {
   type TransportMode,
   type WorkHours,
 } from "../../../convex/lib/cityProfileFacts";
+import { NEIGHBORHOOD_NAMES } from "../../../convex/lib/neighborhoodNames";
 import type { WeekendStopView } from "../../../convex/weekendRoutes";
 import type { ScoresData } from "./NeighborhoodScores";
 
@@ -89,45 +90,11 @@ export function suggestedPairs(
 /* ───────────── Reading the question ───────────── */
 
 /**
- * Everyday names beyond each neighborhood's name and short name, each mapped to
- * the DataSF neighborhood whose boundary holds it (checked with
- * `neighborhoodSlugAt`): Alamo Square is in Hayes Valley, Cow Hollow in the
- * Marina, Telegraph Hill in North Beach.
- */
-const EVERYDAY_NAMES: readonly (readonly [string, NeighborhoodSlug])[] = [
-  ["Mission District", "mission"],
-  ["Sunset District", "sunset-parkside"],
-  ["Upper Haight", "haight-ashbury"],
-  ["Haight-Ashbury", "haight-ashbury"],
-  ["Cole Valley", "haight-ashbury"],
-  ["Duboce Triangle", "castro-upper-market"],
-  ["Noe", "noe-valley"],
-  ["Bernal", "bernal-heights"],
-  ["Potrero", "potrero-hill"],
-  ["Dogpatch", "potrero-hill"],
-  ["Financial District", "financial-district-south-beach"],
-  ["NoPa", "western-addition"],
-  ["Fillmore", "western-addition"],
-  ["Alamo Square", "hayes-valley"],
-  ["Cow Hollow", "marina"],
-  ["Telegraph Hill", "north-beach"],
-  ["West Portal", "west-of-twin-peaks"],
-  ["Forest Hill", "west-of-twin-peaks"],
-  ["Hunters Point", "bayview-hunters-point"],
-  ["Hunter's Point", "bayview-hunters-point"],
-  ["Merced Heights", "oceanview-merced-ingleside"],
-  ["Lake Merced", "lakeshore"],
-  ["Sea Cliff", "seacliff"],
-  ["Pacific Heights", "pacific-heights"],
-  ["GG Park", "golden-gate-park"],
-];
-
-/**
  * Names that are also everyday words ("watch the sunset", "my mission"). They
  * count as a neighborhood when capitalized mid-sentence ("in the Mission");
  * otherwise only to make up a pair, joined to another name ("mission vs noe").
  */
-const COMMON_WORDS = new Set(["mission", "sunset", "marina"]);
+const COMMON_WORDS = new Set(["mission", "sunset", "marina", "downtown"]);
 
 /** What may sit between two names that are being compared: "vs", "or the", ", ". */
 const JOINER =
@@ -135,34 +102,19 @@ const JOINER =
 
 type Alias = { re: RegExp; slug: NeighborhoodSlug; common: boolean };
 
-const ALIASES: readonly Alias[] = (() => {
-  const seen = new Set<string>();
-  const out: Alias[] = [];
-  const add = (name: string, slug: NeighborhoodSlug) => {
-    const text = name.trim();
-    const key = text.toLowerCase();
-    if (text.length < 3 || seen.has(key)) return;
-    seen.add(key);
-    // Spaces and hyphens are interchangeable ("Haight Ashbury", "Haight-Ashbury").
-    const body = text
-      .split(/[\s-]+/)
-      .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-      .join("[\\s-]+");
-    out.push({
-      re: new RegExp(`(?<![\\p{L}\\p{N}])${body}(?![\\p{L}\\p{N}])`, "giu"),
-      slug,
-      common: COMMON_WORDS.has(key),
-    });
+/** Every name for every neighborhood (`convex/lib/neighborhoodNames.ts`), as a whole-word pattern. */
+const ALIASES: readonly Alias[] = NEIGHBORHOOD_NAMES.map(({ name, slug }) => {
+  // Spaces and hyphens are interchangeable ("Haight Ashbury", "Haight-Ashbury").
+  const body = name
+    .split(/[\s-]+/)
+    .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .join("[\\s-]+");
+  return {
+    re: new RegExp(`(?<![\\p{L}\\p{N}])${body}(?![\\p{L}\\p{N}])`, "giu"),
+    slug,
+    common: COMMON_WORDS.has(name.toLowerCase()),
   };
-  for (const n of SF_NEIGHBORHOODS) {
-    add(n.name, n.slug);
-    if ("short" in n) add(n.short, n.slug);
-    // "Castro/Upper Market" is also "Castro" and "Upper Market".
-    if (n.name.includes("/")) for (const part of n.name.split("/")) add(part, n.slug);
-  }
-  for (const [name, slug] of EVERYDAY_NAMES) add(name, slug);
-  return out;
-})();
+});
 
 type Found = { start: number; end: number; slug: NeighborhoodSlug; weak: boolean };
 
@@ -331,6 +283,23 @@ function merge(...lists: readonly (readonly CitedSource[])[]): CitedSource[] {
   return out;
 }
 
+/**
+ * A side's Interest fit for the answer: `score` is null when nothing there
+ * matches the viewer's interests (no score, nothing cited). Null without
+ * interests in the City Profile, or while loading.
+ */
+function fitOf(side: CompareSide): {
+  score: number | null;
+  matched: readonly string[];
+  missing: readonly string[];
+  sources: readonly CitedSource[];
+} | null {
+  const f = side.scores?.interestFit;
+  if (f?.state === "ok") return f;
+  if (f?.state === "no_match") return { score: null, matched: [], missing: f.missing, sources: [] };
+  return null;
+}
+
 function okScore(side: CompareSide, kind: ScoreKind) {
   const s = side.scores?.scores.find((x) => x.kind === kind);
   return s?.state === "ok" ? s : null;
@@ -362,19 +331,23 @@ export function compareAnswer(
   const nameB = (start = false) => inSentence(b, start);
 
   // Interest fit, and which interests each neighborhood has.
-  const fa = a.scores?.interestFit;
-  const fb = b.scores?.interestFit;
+  const fa = fitOf(a);
+  const fb = fitOf(b);
   let lead: string | null = null;
   let leadSources: CitedSource[] = [];
-  const fitOk = fa?.state === "ok" && fb?.state === "ok";
-  if (fa?.state === "ok" && fb?.state === "ok") {
-    const diff = apart(fa.score, fb.score);
-    // Nothing matched, so there's nothing to cite: say what wasn't found.
-    if (fa.score === 0 && fb.score === 0)
+  const fitOk = fa !== null && fb !== null;
+  if (fa && fb) {
+    // Without anything matched there's no score and nothing to cite: say what wasn't found.
+    if (fa.score === null && fb.score === null)
       lead = "We haven't found Groups, Events or places for your interests in either yet.";
-    else if (diff === 0)
+    else if (fa.score === null)
+      lead = `${nameB(true)} fits your interests better (${one(fb.score ?? 0)} out of 10): we haven't found Groups, Events or places for them in ${nameA()} yet.`;
+    else if (fb.score === null)
+      lead = `${nameA(true)} fits your interests better (${one(fa.score)} out of 10): we haven't found Groups, Events or places for them in ${nameB()} yet.`;
+    else if (apart(fa.score, fb.score) === 0)
       lead = `Both fit your interests about the same: ${one(fa.score)} and ${one(fb.score)} out of 10.`;
     else {
+      const diff = apart(fa.score, fb.score);
       const [w, l] = diff > 0 ? [nameA, nameB] : [nameB, nameA];
       const [ws, ls] = diff > 0 ? [fa.score, fb.score] : [fb.score, fa.score];
       lead = `${w(true)} fits your interests better: ${one(ws)} vs ${one(ls)} for ${l()}.`;

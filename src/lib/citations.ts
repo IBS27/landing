@@ -1,4 +1,5 @@
 import type { CitedSource, NonEmpty } from "../../convex/lib/citations";
+import { scheduleEndedOn } from "../../convex/lib/scheduleWindow";
 import { compactCount, plural, price } from "./format";
 
 /** Text for citation sources. Pure, so ages are computed at render and stay current. */
@@ -89,8 +90,28 @@ export function sourceMeta(s: CitedSource, now = Date.now()) {
         `active ${timeAgo(s.lastActivityAt, now)}`,
       );
     case "external":
-      return join(s.publisher, `fetched ${dateFmt.format(s.fetchedAt)}`);
+      // A transit schedule whose window has ended still backs its facts, but may be out of date.
+      return join(
+        s.publisher,
+        scheduleEndedOn(s.title, now)
+          ? "schedule may be out of date"
+          : `fetched ${dateFmt.format(s.fetchedAt)}`,
+      );
   }
+}
+
+/**
+ * "Schedule may be out of date (ended Aug 28, 2026)" when any of `sources` is a transit
+ * schedule whose window has ended (the earliest end), else null.
+ */
+export function outdatedSchedule(sources: readonly CitedSource[], now = Date.now()) {
+  const ended = sources.flatMap((s) => {
+    if (s.kind !== "external") return [];
+    const on = scheduleEndedOn(s.title, now);
+    return on ? [{ on, t: Date.parse(on) }] : [];
+  });
+  const first = ended.sort((a, b) => a.t - b.t)[0];
+  return first ? `Schedule may be out of date (ended ${first.on})` : null;
 }
 
 /** The chip's text: one source's meta, or "3 sources". */

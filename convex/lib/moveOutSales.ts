@@ -15,6 +15,8 @@ export type SaleInput = {
   /** The last price the seller actually sent in this chat, if any. */
   yourLastPrice: number | null;
   chat: { from: "you" | "buyer"; text: string }[];
+  /** The seller already agreed a sale with another buyer through Muse: it's spoken for. */
+  spokenFor?: boolean;
 };
 
 export type SaleMove = { move: Move; amount: number; text: string; rationale: string };
@@ -56,6 +58,12 @@ export function saleMoveProblems(out: SaleMove, input: SaleInput): string[] {
   }
   if (out.move === "offer" && input.yourLastPrice !== null && out.amount > input.yourLastPrice)
     p.push(`a counter can't go above your last price of ${input.yourLastPrice}`);
+  if (input.spokenFor) {
+    if (out.move === "offer" || out.move === "accept")
+      p.push("it's spoken for: don't offer or accept a price");
+    if (/\bstill available\b/i.test(out.text))
+      p.push("it's spoken for: don't say it's still available");
+  }
   for (const m of out.text.matchAll(DOLLARS)) {
     const n = Number(m[1].replace(/,/g, ""));
     if (n < minPrice) p.push(`text names $${n}, under the seller's lowest price of ${minPrice}`);
@@ -87,6 +95,14 @@ export function saleLadder(input: SaleInput): SaleMove {
   const theirs = buyerPrice(input);
   const item = input.item.title.split(",")[0];
 
+  if (input.spokenFor)
+    return {
+      move: "message",
+      amount: 0,
+      text: `Thanks for asking! Someone else is picking up the ${item}, but I'll let you know if that falls through.`,
+      rationale:
+        "You already agreed a sale with another buyer, so Muse doesn't offer it to anyone else.",
+    };
   if (theirs === null)
     return {
       move: "message",

@@ -20,7 +20,9 @@ import { unitAppearanceTask } from "./lib/unitAppearanceTask";
 import {
   isStarterScene,
   listingSources,
+  refreshedRoomSources,
   refreshedSources,
+  roomSources,
   savedSceneSources,
 } from "./lib/unitGeneration";
 import {
@@ -81,6 +83,28 @@ export async function checkPlacementSources(
     }
     if (p.listingId && !known.has(p.listingId)) await accessibleListing(ctx, p.listingId, ownerId);
   }
+}
+/**
+ * Keeps a room's 3D unit in step with its scan: called after the room's photos
+ * change, as `addSource` would be for each one (a new revision, any stale
+ * generation dropped).
+ */
+export async function syncRoomUnit(ctx: MutationCtx, room: Doc<"rooms">) {
+  const doc = await ctx.db
+    .query("unitScenes")
+    .withIndex("by_owner_room", (q) => q.eq("ownerId", room.userId).eq("roomId", room._id))
+    .first();
+  if (!doc) return;
+  const sources = refreshedRoomSources(doc.sources, room);
+  if (canonicalJson(sources) === canonicalJson(doc.sources)) return;
+  await ctx.db.patch(doc._id, {
+    sources,
+    generation: undefined,
+    jobId: undefined,
+    candidate: undefined,
+    revision: doc.revision + 1,
+    updatedAt: Date.now(),
+  });
 }
 export function assertRevision(doc: { revision: number }, revision: number) {
   if (doc.revision !== revision)
@@ -163,17 +187,11 @@ export async function createScene(
       : null;
   if (existing) return existing._id;
   const title = (room?.name ?? listing?.title ?? "Your unit").slice(0, 120);
-  const photos: { url: string; storageId?: Id<"_storage"> }[] =
-    room?.photos ?? listing?.photos.map((url) => ({ url })) ?? [];
   const sources: Doc<"unitScenes">["sources"] = listing
     ? listingSources(listing)
-    : photos.slice(0, 18).map((p, i) => ({
-        key: `photo-${i + 1}`,
-        label: `Photo ${i + 1}`,
-        kind: "photo",
-        url: p.url,
-        ...(p.storageId ? { storageId: p.storageId } : {}),
-      }));
+    : room
+      ? roomSources(room)
+      : [];
   const now = Date.now();
   return ctx.db.insert("unitScenes", {
     ownerId,
@@ -307,7 +325,12 @@ export function publicMediaUrl(value: string) {
 /** The sources and description a generation reads: the listing's current media plus the owner's own. */
 export async function generationInputs(ctx: QueryCtx, doc: Doc<"unitScenes">) {
   const listing = doc.listingId ? await accessibleListing(ctx, doc.listingId, doc.ownerId) : null;
-  const sources = listing ? refreshedSources(doc.sources, listing) : doc.sources;
+  const room = doc.roomId ? await ctx.db.get(doc.roomId) : null;
+  const sources = listing
+    ? refreshedSources(doc.sources, listing)
+    : room
+      ? refreshedRoomSources(doc.sources, room)
+      : doc.sources;
   const description = listing?.description.slice(0, 8000) ?? doc.description;
   const changed =
     canonicalJson(sources) !== canonicalJson(doc.sources) || description !== doc.description;

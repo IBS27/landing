@@ -3,6 +3,7 @@ import { Box, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { useToast } from "@/features/marketplace/toast";
+import { errorText } from "@/landing/errorText";
 import { LandingPage } from "@/landing/shell/LandingPage";
 import { cn } from "@/lib/format";
 import { Modal } from "@/ui/overlays";
@@ -16,10 +17,6 @@ import { VibeMatches } from "./VibeMatches";
 
 const inputCls =
   "h-10 w-full rounded-md border border-divider bg-card px-3 text-[15px] text-primary outline-none placeholder:text-placeholder focus:border-fb focus:shadow-[0_0_0_1px_var(--fb-blue)]";
-
-function errorText(e: unknown) {
-  return e instanceof Error ? e.message.replace(/^.*ConvexError:\s*/, "") : "Something went wrong";
-}
 
 /**
  * My Place → Your room (`/landing/place/room`, #25): each room's scan and
@@ -68,8 +65,8 @@ export function RoomPage({ roomId }: { roomId?: string }) {
           </div>
           {adding && <NewRoomCard onDone={() => setAdding(false)} />}
           {room && (
-            <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-              <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+              <div className="flex min-w-0 flex-col gap-4">
                 <RoomScan room={room} />
                 <RoomDetails key={room._id} room={room} />
                 <Card className="overflow-hidden">
@@ -88,7 +85,7 @@ export function RoomPage({ roomId }: { roomId?: string }) {
                   </Link>
                 </Card>
               </div>
-              <div className="flex flex-col gap-4">
+              <div className="flex min-w-0 flex-col gap-4">
                 <VibeCard key={room._id} room={room} />
                 {room.vibe && <VibeMatches roomId={room._id} />}
               </div>
@@ -248,7 +245,7 @@ function RoomDetails({ room }: { room: Room }) {
           <KindSelect value={kind} onChange={setKind} />
         </div>
       </div>
-      <fieldset className="mt-3">
+      <fieldset className="mt-3 min-w-0">
         <legend className="mb-1 font-semibold text-[13px] text-secondary">
           Floor size in feet (optional, {SIZE_FT.min}–{SIZE_FT.max} each side)
         </legend>
@@ -273,7 +270,7 @@ function RoomDetails({ room }: { room: Room }) {
           <span className="text-[15px] text-secondary">ft</span>
         </div>
       </fieldset>
-      <div className="mt-4 flex items-center justify-between gap-2">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
         <Button
           variant="ghost"
           icon={<Trash2 size={16} />}

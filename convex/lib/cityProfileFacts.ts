@@ -232,13 +232,22 @@ export function isCalendarDate(s: string): boolean {
   return d <= new Date(Date.UTC(y, mo, 0)).getUTCDate();
 }
 
+/** How far back a move-in can be: people who already moved enter when they did. */
+export const MOVE_IN_PAST_MONTHS = 12;
+
+/** The earliest move-in month the brief takes on `today`: "2025-11" on "2026-11-12". */
+export function earliestMoveInMonth(today: string): string {
+  const [y, m] = [Number(today.slice(0, 4)), Number(today.slice(5, 7))];
+  return new Date(Date.UTC(y, m - 1 - MOVE_IN_PAST_MONTHS, 1)).toISOString().slice(0, 7);
+}
+
 /**
- * Why a move-in can't be proposed or saved, or null when it's fine. The one
- * policy for extraction, Muse's checks, the brief form and `saveBrief`:
+ * Why a move-in can't be saved, or null when it's fine. The policy for the
+ * brief form and `saveBrief`:
  * - the month and date must be real ("2027-02-31" isn't), and the date inside the month;
- * - a new move-in can't be in the past: not before this month, and a date not before today;
- * - one the person already saved (`saved`) stays valid after it passes, so they can
- *   still edit the rest of their brief once they've moved.
+ * - it can be in the past, for people who already moved, back to `MOVE_IN_PAST_MONTHS` ago;
+ * - one the person already saved (`saved`) stays valid however old it gets, so they
+ *   can still edit the rest of their brief.
  */
 export function moveInProblem(
   value: FactValue<"moveIn">,
@@ -246,12 +255,24 @@ export function moveInProblem(
   saved?: FactValue<"moveIn"> | null,
 ): string | null {
   if (!isMonth(value.month)) return "Pick a move-in month";
-  if (
-    value.date !== undefined &&
-    (!isCalendarDate(value.date) || !value.date.startsWith(value.month))
-  )
-    return "Your move-in date isn't a real date in that month";
+  if (value.date !== undefined && !isCalendarDate(value.date)) return "Pick a real move-in date";
+  if (value.date !== undefined && !value.date.startsWith(value.month))
+    return "Your move-in date isn't in your move-in month";
   if (saved && valueKey(saved) === valueKey(value)) return null;
+  if (value.month < earliestMoveInMonth(today))
+    return "Your move-in is more than a year ago: pick when you moved, within the last year";
+  return null;
+}
+
+/**
+ * `moveInProblem` for a move-in read from what someone wrote ("moving in
+ * March"): text about moving is about a move to come, so a past month or date
+ * is a misreading, not a move they already made. Extraction and Muse's checks
+ * use this one.
+ */
+export function upcomingMoveInProblem(value: FactValue<"moveIn">, today: string): string | null {
+  const problem = moveInProblem(value, today);
+  if (problem) return problem;
   if (value.month < today.slice(0, 7)) return "Your move-in month is in the past";
   if (value.date !== undefined && value.date < today) return "Your move-in date is in the past";
   return null;

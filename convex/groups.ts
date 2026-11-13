@@ -2,14 +2,16 @@ import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { recordSignal, undoSignal } from "./lib/activity";
+import { isBlockedEitherWay } from "./lib/blocks";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { activityLabel, externalPostsPerDay } from "./lib/groupActivity";
 import {
   admitToHouse,
-  assertCanSeeGroupAsHouse,
   canSeeGroupAsHouse,
   declineHouseInvite,
+  houseOfGroup,
   inviteThroughHouse,
+  standingInvite,
 } from "./lib/houseAccess";
 import { checkPoint, neighborhoodIdAt } from "./lib/neighborhoods";
 import { notify } from "./lib/notify";
@@ -120,6 +122,47 @@ async function pendingInvites(ctx: QueryCtx, viewerId: Id<"users">, groupId?: Id
     .order("desc")
     .take(300);
   return rows.filter((n) => n.kind === "group_invite" && (!groupId || n.groupId === groupId));
+}
+
+/**
+ * The viewer's invites to this group that still stand: whoever sent one is
+ * still a member and neither has blocked the other (newest first).
+ */
+export async function standingInvites(ctx: QueryCtx, viewerId: Id<"users">, groupId: Id<"groups">) {
+  const out: Doc<"notifications">[] = [];
+  for (const n of await pendingInvites(ctx, viewerId, groupId)) {
+    const from = n.actorId;
+    if (!from || !(await membership(ctx, groupId, from))) continue;
+    if (await isBlockedEitherWay(ctx, viewerId, from)) continue;
+    out.push(n);
+  }
+  return out;
+}
+
+/**
+ * Who can see a group: a House Group (#38) follows the house's rules; a hidden
+ * group shows only to its members and people a member invited. With
+ * `membersOnly`, invitees don't count either.
+ */
+async function canSeeGroup(
+  ctx: QueryCtx,
+  g: Doc<"groups">,
+  viewerId: Id<"users">,
+  membersOnly = false,
+) {
+  if (await houseOfGroup(ctx, g._id)) return canSeeGroupAsHouse(ctx, g._id, viewerId, membersOnly);
+  if (g.visible || (await membership(ctx, g._id, viewerId))) return true;
+  return !membersOnly && (await standingInvites(ctx, viewerId, g._id)).length > 0;
+}
+
+/**
+ * Who can join: anyone can join a public group; a private one (hidden or not)
+ * needs an invite that still stands. A House Group (#38) needs a house invite.
+ */
+async function canJoin(ctx: QueryCtx, g: Doc<"groups">, viewerId: Id<"users">) {
+  const house = await houseOfGroup(ctx, g._id);
+  if (house) return (await standingInvite(ctx, house, viewerId)) !== null;
+  return g.privacy === "public" || (await standingInvites(ctx, viewerId, g._id)).length > 0;
 }
 
 /** Friend status for member rows' "Add friend" buttons. */
@@ -305,14 +348,15 @@ export const get = viewerQuery({
     const g = await resolveGroup(ctx, idOrSlug);
     if (!g) return null;
     const viewerId = ctx.viewer._id;
-    // A House Group (#38) shows only to the people who live there and those invited.
-    if (!(await canSeeGroupAsHouse(ctx, g._id, viewerId))) return null;
-    const [members, friendList, stats, creator, invites] = await Promise.all([
+    // Hidden groups (House Groups, #38, among them) show only to members and invitees.
+    if (!(await canSeeGroup(ctx, g, viewerId))) return null;
+    const [members, friendList, stats, creator, invites, joinable] = await Promise.all([
       groupMembers(ctx, g._id),
       friendIds(ctx, viewerId),
       postStats(ctx, g),
       ctx.db.get(g.createdBy),
-      pendingInvites(ctx, viewerId, g._id),
+      standingInvites(ctx, viewerId, g._id),
+      canJoin(ctx, g, viewerId),
     ]);
     const friends = new Set(friendList);
     const me = members.find((m) => m.userId === viewerId) ?? null;
@@ -354,6 +398,8 @@ export const get = viewerQuery({
       creator: creator ? userSummary(creator) : null,
       viewerRole: (me?.role ?? null) as Role | null,
       canSeePosts,
+      /** Whether "Join group" works for the viewer: public, or invited to a private group. */
+      canJoin: me === null && joinable,
       memberPreview: preview.flatMap((m) => summaries.get(m.userId) ?? []),
       friendCount: friendMembers.length,
       friendNames: friendMembers
@@ -443,8 +489,8 @@ export const members = viewerQuery({
   handler: async (ctx, { groupId, q }) => {
     const g = await requireGroup(ctx, groupId);
     const viewerId = ctx.viewer._id;
-    // Who lives in a House Group (#38) is for its members and invitees.
-    await assertCanSeeGroupAsHouse(ctx, groupId, viewerId);
+    // Who's in a hidden group (a House Group, #38, too) is for its members and invitees.
+    if (!(await canSeeGroup(ctx, g, viewerId))) throw new ConvexError("Group not found");
     const rows = await groupMembers(ctx, groupId);
     const isMember = rows.some((m) => m.userId === viewerId);
     const friends = new Set(await friendIds(ctx, viewerId));
@@ -537,10 +583,9 @@ export const members = viewerQuery({
 export const events = viewerQuery({
   args: { groupId: v.id("groups") },
   handler: async (ctx, { groupId }) => {
-    await requireGroup(ctx, groupId);
+    const g = await requireGroup(ctx, groupId);
     // A House Group's (#38) Events are for the people who live there.
-    if (!(await canSeeGroupAsHouse(ctx, groupId, ctx.viewer._id, true)))
-      return { upcoming: [], past: [] };
+    if (!(await canSeeGroup(ctx, g, ctx.viewer._id, true))) return { upcoming: [], past: [] };
     const rows = await ctx.db
       .query("events")
       .withIndex("by_group", (q) => q.eq("groupId", groupId))
@@ -554,7 +599,8 @@ export const events = viewerQuery({
           .withIndex("by_event", (q) => q.eq("eventId", e._id))
           .collect();
         const mine = responses.find((r) => r.userId === ctx.viewer._id);
-        if (!eventVisible(e, a, mine !== undefined)) return null;
+        // Blocking hides the other person's Events.
+        if (a.blocked.has(e.hostId) || !eventVisible(e, a, mine !== undefined)) return null;
         return {
           _id: e._id,
           title: e.title,
@@ -585,8 +631,9 @@ export const events = viewerQuery({
 export const inviteCandidates = viewerQuery({
   args: { groupId: v.id("groups") },
   handler: async (ctx, { groupId }) => {
-    // Who's in or invited to a House Group (#38) is for the people who live there.
-    if (!(await canSeeGroupAsHouse(ctx, groupId, ctx.viewer._id, true))) return [];
+    // Who's in or invited to a hidden group (a House Group, #38, too) is for its members.
+    const g = await ctx.db.get(groupId);
+    if (!g || !(await canSeeGroup(ctx, g, ctx.viewer._id, true))) return [];
     const ids = await friendIds(ctx, ctx.viewer._id);
     const summaries = await getSummaries(ctx, ids);
     const rows = await Promise.all(
@@ -606,13 +653,9 @@ export const inviteCandidates = viewerQuery({
   },
 });
 
+/** An invite that still stands; a stale one (its sender left) doesn't stop a new invite. */
 async function alreadyInvited(ctx: QueryCtx, groupId: Id<"groups">, userId: Id<"users">) {
-  const rows = await ctx.db
-    .query("notifications")
-    .withIndex("by_user", (q) => q.eq("userId", userId))
-    .order("desc")
-    .take(200);
-  return rows.some((n) => n.kind === "group_invite" && n.groupId === groupId);
+  return (await standingInvites(ctx, userId, groupId)).length > 0;
 }
 
 /**
@@ -682,8 +725,11 @@ export const join = viewerMutation({
     const g = await requireGroup(ctx, groupId);
     const viewerId = ctx.viewer._id;
     if (await membership(ctx, groupId, viewerId)) return;
-    // A House Group (#38) is invite-only; this uses the invite up.
-    await admitToHouse(ctx, groupId, viewerId);
+    // A House Group (#38) is invite-only; this uses the invite up. Other
+    // private groups (hidden or not) admit people a member invited.
+    if (await houseOfGroup(ctx, groupId)) await admitToHouse(ctx, groupId, viewerId);
+    else if (!(await canJoin(ctx, g, viewerId)))
+      throw new ConvexError("This group is private. Ask a member to invite you.");
     const now = Date.now();
     await ctx.db.insert("groupMembers", {
       groupId,

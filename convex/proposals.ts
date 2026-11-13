@@ -390,8 +390,8 @@ export const seedDemo = internalMutation({
       if (l.category === "propertyrentals") continue;
       const amount = Math.round((l.price * 0.8) / 5) * 5;
       const seller = await ctx.db.get(l.sellerId);
-      await safe(() =>
-        proposeImpl(ctx, {
+      await safe(async () => {
+        const proposalId = await proposeImpl(ctx, {
           ownerId: maya._id,
           payload: {
             kind: "offer",
@@ -404,8 +404,27 @@ export const seedDemo = internalMutation({
           citations: cite([{ kind: "listing", listingId: l._id }]),
           origin: { agent: "spark", task: "spark.negotiate", via: "model" },
           ttlMs: 5 * HOUR,
-        }),
-      );
+        });
+        // The offer is the draft of Maya's negotiation on this chat (#36), so
+        // "Negotiate with Muse" edits it instead of drafting a competing offer.
+        const now = Date.now();
+        await ctx.db.insert("negotiations", {
+          buyerId: maya._id,
+          listingId: l._id,
+          conversationId: c._id,
+          maxPrice: l.price,
+          targetPrice: amount,
+          limitsSetAt: now,
+          status: "active",
+          pendingProposalId: proposalId,
+          lastMove: "offer",
+          lastOffer: amount,
+          // The seller's messages so far are answered by this draft.
+          handledThrough: now,
+          createdAt: now,
+          updatedAt: now,
+        });
+      });
       break;
     }
 

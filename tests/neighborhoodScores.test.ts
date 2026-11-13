@@ -618,3 +618,52 @@ describe("recompute and get", () => {
     expect(r.interestFit.state).toBe("no_profile");
   });
 });
+
+describe("interest fit cites what it counts", () => {
+  const w = (ids: InterestId[]) => new Map(ids.map((id) => [id, 1]));
+  test("nothing matched: no score (null), never 0.0 with nothing to cite", () => {
+    expect(interestFit(w(["surfing"]), [{ interests: ["climbing"], source: post("a") }])).toBe(
+      null,
+    );
+  });
+  test("a long interest list doesn't drag every neighborhood down", () => {
+    // Six interests, two fully met: 2 of the 3 a 10 needs, not 2 of 6.
+    const fit = interestFit(w(["climbing", "coffee", "surfing", "hiking", "yoga", "books"]), [
+      { interests: ["climbing"], source: post("a") },
+      { interests: ["climbing"], source: post("b") },
+      { interests: ["coffee"], source: post("c") },
+      { interests: ["coffee"], source: post("d") },
+    ]);
+    expect(fit?.score).toBe(6.7);
+  });
+
+  const fitFor = async (interest: InterestId) => {
+    const { tables } = world();
+    tables.cityProfiles = [];
+    tables.cityProfileFacts = [
+      {
+        _id: `cityProfileFacts:${interest}`,
+        userId: "users:v",
+        key: "interest",
+        value: { id: interest },
+        source: "stated",
+        evidence: { kind: "brief", summary: "You said so in your brief" },
+        confidence: 1,
+        updatedAt: NOW - DAY,
+      },
+    ];
+    const r = (await run(scores.get, fakeCtx(tables), {
+      viewerId: "users:v",
+      neighborhoodId: "neighborhoods:mission",
+    })) as { interestFit: { state: string; score?: number; sources?: unknown[] } };
+    return r.interestFit;
+  };
+  test("get: no score when nothing here matches the viewer's interests", async () => {
+    expect(await fitFor("surfing")).toEqual({ state: "no_match", missing: ["Surfing"] });
+  });
+  test("get: a score always comes with its sources", async () => {
+    const fit = await fitFor("climbing");
+    expect(fit.state).toBe("ok");
+    expect(fit.sources?.length).toBeGreaterThan(0);
+  });
+});

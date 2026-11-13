@@ -1,13 +1,16 @@
 import { Link } from "@tanstack/react-router";
-import { ImagePlus, Store, Trash2, X } from "lucide-react";
+import { Store, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { useM, useQ } from "@/app/viewer";
+import { useToast } from "@/features/marketplace/toast";
 import { uploadFile } from "@/features/posts/util";
 import { toListing } from "@/landing/links";
 import { price } from "@/lib/format";
-import { Button, Card, IconButton, Skeleton, Spinner } from "@/ui/primitives";
+import { Modal } from "@/ui/overlays";
+import { Button, Card, IconButton, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { AddPhotoTile } from "./AddPhotoTile";
 import { PlaceInRoom } from "./PlaceInRoom";
 
 const field =
@@ -23,6 +26,50 @@ export const today = () => {
 export const dayStart = (date: string) => new Date(`${date}T00:00:00`).getTime();
 const day = (ts: number) =>
   new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+/** What someone paid: "$50", or "$49.99" and "$12.50" with cents. */
+export const paidPrice = (n: number) =>
+  Number.isInteger(n)
+    ? price(n)
+    : `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+const errorText = (e: unknown, fallback: string) => {
+  const data = (e as { data?: unknown }).data;
+  return typeof data === "string" ? data : fallback;
+};
+
+/** Uploads photos to an item that has none yet, so it can be listed at move-out (#43). */
+export function AddItemPhoto({ itemId, title }: { itemId: Id<"ownedItems">; title: string }) {
+  const getUploadUrl = useM(api.posts.generateUploadUrl);
+  const addPhotos = useM(api.inventory.addPhotos);
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
+  const add = async (files: File[]) => {
+    setBusy(true);
+    try {
+      const photos: { storageId: Id<"_storage"> }[] = [];
+      for (const file of files.slice(0, 10))
+        photos.push({
+          storageId: (await uploadFile(await getUploadUrl({}), file)) as Id<"_storage">,
+        });
+      await addPhotos({ itemId, photos });
+    } catch (e) {
+      toast.show(errorText(e, "A photo didn't upload. Try again."));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <>
+      <AddPhotoTile
+        label={`Add a photo of ${title}`}
+        busy={busy}
+        onFiles={add}
+        className="h-12 w-12"
+      />
+      {toast.node}
+    </>
+  );
+}
 
 /** "Your stuff": everything the viewer owns, tracked for resale at move-out (#27). */
 export function OwnedItems() {
@@ -40,7 +87,14 @@ export function OwnedItems() {
         (it.source.kind === "marketplace" && u.listingIds.includes(it.source.listingId)),
     )?.unitId ?? null;
   const remove = useM(api.inventory.remove);
+  const toast = useToast();
   const [adding, setAdding] = useState(false);
+  /** A listed item waiting for "Remove" to be confirmed: its listing comes down too. */
+  const [removing, setRemoving] = useState<{ _id: Id<"ownedItems">; title: string } | null>(null);
+  const doRemove = (itemId: Id<"ownedItems">) =>
+    remove({ itemId })
+      .then(() => setRemoving(null))
+      .catch((e: unknown) => toast.show(errorText(e, "Couldn't remove it. Try again.")));
 
   return (
     <Card className="mb-4 overflow-hidden">
@@ -80,7 +134,7 @@ export function OwnedItems() {
                   className="h-14 w-14 shrink-0 rounded-lg object-cover"
                 />
               ) : (
-                <div className="h-14 w-14 shrink-0 rounded-lg bg-btn" />
+                <AddItemPhoto itemId={it._id} title={it.title} />
               )}
               <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
                 <div className="min-w-0 flex-1">
@@ -88,7 +142,7 @@ export function OwnedItems() {
                     {it.title}
                   </div>
                   <div className="flex flex-wrap items-center gap-x-1 text-[13px] text-secondary leading-[18px]">
-                    <span>{it.price === 0 ? "Free" : price(it.price)}</span>
+                    <span>{it.price === 0 ? "Free" : paidPrice(it.price)}</span>
                     <span aria-hidden>·</span>
                     <span>{day(it.acquiredAt)}</span>
                     <span aria-hidden>·</span>
@@ -118,7 +172,11 @@ export function OwnedItems() {
                 label={`Remove ${it.title}`}
                 size={32}
                 variant="ghost"
-                onClick={() => remove({ itemId: it._id })}
+                onClick={() =>
+                  it.saleListingId && it.saleStatus !== "sold"
+                    ? setRemoving(it)
+                    : void doRemove(it._id)
+                }
               >
                 <Trash2 size={16} />
               </IconButton>
@@ -126,6 +184,27 @@ export function OwnedItems() {
           ))}
         </ul>
       )}
+      <Modal
+        open={removing !== null}
+        onOpenChange={(o) => !o && setRemoving(null)}
+        title="Remove this item?"
+        width={440}
+      >
+        <div className="px-4 pb-4">
+          <p className="text-[15px] text-primary">
+            {removing?.title} is listed on Marketplace. Removing it also deletes the listing.
+          </p>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setRemoving(null)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={() => removing && void doRemove(removing._id)}>
+              Remove
+            </Button>
+          </div>
+        </div>
+      </Modal>
+      {toast.node}
     </Card>
   );
 }
@@ -141,8 +220,7 @@ function AddItemForm({ onDone }: { onDone: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const addPhotos = async (files: FileList | null) => {
-    if (!files?.length) return;
+  const addPhotos = async (files: File[]) => {
     setUploading(true);
     try {
       const added: { storageId: Id<"_storage">; preview: string }[] = [];
@@ -194,6 +272,8 @@ function AddItemForm({ onDone }: { onDone: () => void }) {
           <input
             type="number"
             min={0}
+            step={0.01}
+            inputMode="decimal"
             className={field}
             value={paid}
             onChange={(e) => setPaid(e.target.value)}
@@ -227,16 +307,12 @@ function AddItemForm({ onDone }: { onDone: () => void }) {
             </span>
           ))}
           {photos.length < 10 && (
-            <label className="flex h-14 w-14 cursor-pointer items-center justify-center rounded-md border border-divider border-dashed text-secondary hover:bg-hover">
-              {uploading ? <Spinner size={18} /> : <ImagePlus size={20} />}
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={(e) => addPhotos(e.target.files)}
-              />
-            </label>
+            <AddPhotoTile
+              label="Add photos"
+              busy={uploading}
+              onFiles={addPhotos}
+              className="h-14 w-14"
+            />
           )}
         </div>
       </div>

@@ -134,8 +134,9 @@ export function WeekendRouteCard({
   data: WeekendRouteData | undefined;
   className?: string;
 }) {
-  const route = data?.route;
-  const stops = route?.stops ?? [];
+  const stops = data?.route?.stops ?? [];
+  // A route with no stops (too few places, or every stop over or hidden) is no route.
+  const route = stops.length > 0 ? data?.route : null;
   return (
     <Card className={cn("overflow-hidden", className)}>
       <header className="flex items-start justify-between gap-3 px-4 pt-4 pb-3">
@@ -160,7 +161,7 @@ export function WeekendRouteCard({
 
       {data === undefined ? (
         <Loading />
-      ) : !route || stops.length === 0 ? (
+      ) : !route ? (
         <Empty data={data} />
       ) : (
         <>
@@ -240,6 +241,21 @@ const eventTime = new Intl.DateTimeFormat("en-US", {
   hour: "numeric",
   minute: "2-digit",
 });
+
+const weekday = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/Los_Angeles",
+  weekday: "long",
+});
+
+/**
+ * The day a route's Events fall on ("Saturday", or "Sunday" once Saturday is
+ * over), for titles like "Your Saturday". Null when it has no Event stops: then
+ * it's any day of the weekend.
+ */
+export function routeDay(stops: readonly Pick<WeekendStopView, "startAt">[]): string | null {
+  const at = stops.find((s) => s.startAt !== undefined)?.startAt;
+  return at === undefined ? null : weekday.format(at);
+}
 
 function timeLabel(s: WeekendStopView) {
   return s.startAt !== undefined ? eventTime.format(s.startAt) : TIME_LABEL[s.timeOfDay];

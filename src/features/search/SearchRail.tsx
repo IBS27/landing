@@ -372,7 +372,7 @@ export function SearchRail({ tab, params }: { tab: SearchTab; params: SearchPara
   return (
     <aside
       aria-label="Result filters"
-      className="sticky top-14 h-[calc(100vh-56px)] w-[360px] shrink-0 overflow-y-auto bg-card shadow-[1px_0_2px_var(--shadow-1)]"
+      className="shrink-0 bg-card shadow-[0_1px_2px_var(--shadow-1)] md:sticky md:top-14 md:h-[calc(100vh-56px)] md:w-[360px] md:overflow-y-auto md:shadow-[1px_0_2px_var(--shadow-1)]"
     >
       <h1 className="px-4 pt-[14px] font-bold text-[24px] text-primary leading-7">
         Search results

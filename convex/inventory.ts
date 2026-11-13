@@ -1,9 +1,10 @@
 import { ConvexError, v } from "convex/values";
-import type { Id } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { ITEM_CATEGORIES } from "./lib/listings";
 import { neighborhoodIdAt } from "./lib/neighborhoods";
 import { photoInput, placeFor, resolvePhotos, validate } from "./listings";
+import { retire as retireSaleDraft } from "./moveOutSales";
 import { listingCategory } from "./validators";
 
 /**
@@ -22,9 +23,11 @@ export const mine = viewerQuery({
       .order("desc")
       .collect();
     // A sale listing that was deleted no longer counts as listed.
-    const live = new Set<string>();
-    for (const r of rows)
-      if (r.saleListingId && (await ctx.db.get(r.saleListingId))) live.add(r.saleListingId);
+    const live = new Map<string, Doc<"listings">["status"]>();
+    for (const r of rows) {
+      const l = r.saleListingId ? await ctx.db.get(r.saleListingId) : null;
+      if (l) live.set(l._id, l.status);
+    }
     return rows.map((r) => ({
       _id: r._id,
       title: r.title,
@@ -33,6 +36,7 @@ export const mine = viewerQuery({
       photos: r.photos,
       source: r.source,
       saleListingId: r.saleListingId && live.has(r.saleListingId) ? r.saleListingId : null,
+      saleStatus: (r.saleListingId && live.get(r.saleListingId)) || null,
       saleMinPrice: r.saleMinPrice ?? null,
       saleMuse: r.saleMuse ?? null,
     }));
@@ -51,7 +55,8 @@ export const add = viewerMutation({
     const title = a.title.trim();
     if (!title) throw new ConvexError("Name the item");
     if (title.length > 100) throw new ConvexError("Names can be up to 100 characters");
-    if (!Number.isFinite(a.price) || a.price < 0) throw new ConvexError("Enter a valid price");
+    if (!Number.isFinite(a.price) || a.price < 0 || a.price > 1_000_000)
+      throw new ConvexError("Enter a valid price");
     if (!Number.isFinite(a.acquiredAt) || a.acquiredAt > Date.now())
       throw new ConvexError("Enter the date you got it");
     const photos = await resolvePhotos(ctx, a.photos);
@@ -60,7 +65,8 @@ export const add = viewerMutation({
     return ctx.db.insert("ownedItems", {
       userId: ctx.viewer._id,
       title,
-      price: Math.round(a.price),
+      // To the cent: $49.99 stays $49.99.
+      price: Math.round(a.price * 100) / 100,
       acquiredAt: a.acquiredAt,
       photos,
       source: { kind: "manual" },
@@ -69,11 +75,53 @@ export const add = viewerMutation({
   },
 });
 
+/** Adds photos to an item, so one added without a photo can still be listed (#43). */
+export const addPhotos = viewerMutation({
+  args: { itemId: v.id("ownedItems"), photos: v.array(photoInput) },
+  handler: async (ctx, { itemId, photos }) => {
+    const item = await ctx.db.get(itemId);
+    if (!item || item.userId !== ctx.viewer._id) throw new ConvexError("Item not found");
+    const added = await resolvePhotos(ctx, photos);
+    if (added.length === 0) throw new ConvexError("Add a photo");
+    const all = [...new Set([...item.photos, ...added])];
+    if (all.length > 10) throw new ConvexError("You can add up to 10 photos");
+    await ctx.db.patch(item._id, { photos: all });
+  },
+});
+
+/**
+ * Removes an item. A Marketplace listing still up for it comes down too, with
+ * Muse's waiting replies to its buyers; a sold one stays as the record of the sale.
+ */
 export const remove = viewerMutation({
   args: { itemId: v.id("ownedItems") },
   handler: async (ctx, { itemId }) => {
     const item = await ctx.db.get(itemId);
     if (!item || item.userId !== ctx.viewer._id) throw new ConvexError("Item not found");
+    const listing = item.saleListingId ? await ctx.db.get(item.saleListingId) : null;
+    if (listing && listing.sellerId === item.userId && listing.status !== "sold") {
+      const listingId = listing._id;
+      const chats = await ctx.db
+        .query("conversations")
+        .withIndex("by_listing", (q) => q.eq("listingId", listingId))
+        .collect();
+      for (const c of chats) {
+        const row = await ctx.db
+          .query("saleChats")
+          .withIndex("by_conversation", (q) => q.eq("conversationId", c._id))
+          .unique();
+        if (!row) continue;
+        await retireSaleDraft(ctx, row);
+        await ctx.db.delete(row._id);
+      }
+      // As `listings.remove`: saves of a deleted listing go with it.
+      const saves = await ctx.db
+        .query("saved")
+        .withIndex("by_ref", (q) => q.eq("kind", "listing").eq("refId", listingId))
+        .collect();
+      for (const s of saves) await ctx.db.delete(s._id);
+      await ctx.db.delete(listingId);
+    }
     await ctx.db.delete(itemId);
   },
 });

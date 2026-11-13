@@ -3,9 +3,12 @@
  * ranking: each rental gets a 0–1 score for budget, transit, interests, target
  * neighborhood and move-in date, each with a plain-language reason, combined
  * with visible weights. Must-haves (`RentalFilters`) filter; they aren't scored.
+ * Trust signals (#11) and the viewer's own report take points off and lead
+ * the reasons with a warning (`trustPart`).
  *
  * No AI and no device location: distances come from the listing's stated
- * point and #15's cited station facts. No protected traits are read.
+ * point and #15's cited station and transit service facts. No protected
+ * traits are read.
  */
 
 import type { TransitSystem } from "../validators";
@@ -45,6 +48,22 @@ export type FitListing = {
   neighborhoodId?: string | null;
   /** `rental.availableFrom` (ms); null or absent means available now. */
   availableFrom?: number | null;
+  /** Muni bus lines stopping in its neighborhood, from that neighborhood's transit service fact. */
+  buses?: FitBuses | null;
+  /** What the viewer should know before trusting it; absent when nothing stood out. */
+  trust?: FitTrust | null;
+};
+
+/** Muni bus lines in a neighborhood ("14", "22", "49") and the fact they come from. */
+export type FitBuses = { factKey: string; lines: readonly string[] };
+
+/**
+ * Trust signals on a listing (#11) for this viewer: whether they reported it,
+ * and each "things to check" signal with the source keys behind it.
+ */
+export type FitTrust = {
+  reported: boolean;
+  signals: readonly { text: string; sources: readonly string[] }[];
 };
 
 /** Hard requirements the person picks. A listing that misses one is left out, not ranked lower. */
@@ -70,7 +89,8 @@ export function meetsFilters(
 export type ReasonKind = "budget" | "transit" | "interests" | "neighborhood" | "moveIn";
 
 export type Reason = {
-  kind: ReasonKind;
+  /** A part of the fit, or "trust": what to check before trusting the listing. */
+  kind: ReasonKind | "trust";
   /** "$1,650, inside your budget" */
   text: string;
   tone: "good" | "bad";
@@ -78,11 +98,16 @@ export type Reason = {
   sources: string[];
 };
 
+/** A reason from one part of the fit. */
+export type FitReason = Reason & { kind: ReasonKind };
+
 export type Fit = {
   id: string;
   score: number;
   parts: Record<ReasonKind, number>;
-  /** Strongest first: the two or three reasons that most explain the rank. */
+  /** Taken off the fit for trust signals (`trustPart`); 0 when nothing stood out. */
+  penalty: number;
+  /** The trust warning first, if any, then the reasons that most explain the rank; three at most. */
   reasons: Reason[];
 };
 
@@ -115,16 +140,27 @@ const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 const listingKey = (id: string) => `listing:${id}`;
 
 /**
- * 1 inside the budget (cheaper isn't rewarded more), falling to 0 at 15% over
- * the max. The reason cites the listing, where the price comes from.
+ * 1 inside the budget (cheaper isn't rewarded more, including below the
+ * minimum), falling to 0 at 15% over the max. The reason cites the listing,
+ * where the price comes from.
  */
 export function budgetPart(
   listing: Pick<FitListing, "id" | "price">,
   budget: FitProfile["budget"],
-): [number, Reason | null] {
+): [number, FitReason | null] {
   if (!budget) return [0, null];
   const { price } = listing;
   const sources = [listingKey(listing.id)];
+  if (budget.min !== undefined && price < budget.min)
+    return [
+      1,
+      {
+        kind: "budget",
+        text: `${usd(price)}, under your ${usd(budget.min)} minimum`,
+        tone: "good",
+        sources,
+      },
+    ];
   if (price <= budget.max)
     return [
       1,
@@ -173,16 +209,59 @@ const SYSTEM_LABEL: Record<TransitSystem, string> = {
   caltrain: "Caltrain",
 };
 
-/** "BART, Muni Metro or Caltrain" */
-const orList = (xs: string[]) =>
-  xs.length > 1 ? `${xs.slice(0, -1).join(", ")} or ${xs[xs.length - 1]}` : xs[0];
+/** "BART, Muni Metro or Caltrain", "14, 22 and 49" */
+const joinList = (xs: string[], last: "or" | "and") =>
+  xs.length > 1 ? `${xs.slice(0, -1).join(", ")} ${last} ${xs[xs.length - 1]}` : xs[0];
+const orList = (xs: string[]) => joinList(xs, "or");
 
-/** 1 within a 5 minute walk of a stop the person uses, 0 at 25 minutes or more. */
+/** Bus lines named in a reason before the rest are counted. */
+const BUS_LINES_NAMED = 3;
+/** A Muni bus line here counts this much, up to BUS_SCORE_MAX: buses don't beat a short walk to rail. */
+const BUS_LINE_SCORE = 0.25;
+const BUS_SCORE_MAX = 0.75;
+
+/**
+ * Muni buses in the listing's neighborhood, for someone who rides Muni. The
+ * transit service fact lists lines with a stop there, not the stops, so it
+ * scores by how many lines, capped under a short walk to a station.
+ */
+function busPart(listing: FitListing, modes: FitProfile["modes"]): [number, FitReason | null] {
+  const buses = listing.buses;
+  if ((modes && !modes.includes("muni")) || !buses || buses.lines.length === 0) return [0, null];
+  const lines = [...buses.lines].sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
+  const named = lines.slice(0, BUS_LINES_NAMED);
+  const more = lines.length - named.length;
+  const text =
+    more > 0
+      ? `Muni ${named.join(", ")} and ${more} more bus ${more === 1 ? "line" : "lines"} stop in the neighborhood`
+      : `Muni ${joinList(named, "and")} ${lines.length === 1 ? "bus stops" : "buses stop"} in the neighborhood`;
+  return [
+    Math.min(BUS_SCORE_MAX, lines.length * BUS_LINE_SCORE),
+    { kind: "transit", text, tone: "good", sources: [buses.factKey] },
+  ];
+}
+
+/**
+ * 1 within a 5 minute walk of a station the person uses, 0 at 25 minutes or
+ * more. Muni buses in the neighborhood count too (`busPart`); the better of
+ * the two gives the score and the reason.
+ */
 export function transitPart(
   listing: FitListing,
   stops: readonly FitStop[],
   modes: FitProfile["modes"],
-): [number, Reason | null] {
+): [number, FitReason | null] {
+  const rail = railPart(listing, stops, modes);
+  const bus = busPart(listing, modes);
+  return bus[1] && (!rail[1] || bus[0] > rail[0]) ? bus : rail;
+}
+
+/** The walk to the nearest BART, Muni Metro or Caltrain stop the person uses. */
+function railPart(
+  listing: FitListing,
+  stops: readonly FitStop[],
+  modes: FitProfile["modes"],
+): [number, FitReason | null] {
   const usable = usableSystems(modes);
   if (listing.lat === null || listing.lng === null || usable.size === 0) return [0, null];
   const here = { lat: listing.lat, lng: listing.lng };
@@ -223,7 +302,7 @@ export function transitPart(
 export function interestsPart(
   places: readonly FitPlace[],
   profile: FitProfile,
-): [number, Reason | null] {
+): [number, FitReason | null] {
   if (profile.interests.size === 0) return [0, null];
   let total = 0;
   const matched: string[] = [];
@@ -259,7 +338,7 @@ export function interestsPart(
 export function neighborhoodPart(
   listing: FitListing,
   profile: FitProfile,
-): [number, Reason | null] {
+): [number, FitReason | null] {
   const label = listing.neighborhoodId
     ? profile.neighborhoods.get(listing.neighborhoodId)
     : undefined;
@@ -276,11 +355,28 @@ export function neighborhoodPart(
 }
 
 const DAY = 24 * 60 * 60 * 1000;
+/** Landing's rentals are in San Francisco: their days are San Francisco days, for every viewer. */
+const SF_TIME_ZONE = "America/Los_Angeles";
 const SHORT_DATE = new Intl.DateTimeFormat("en-US", {
   month: "short",
   day: "numeric",
-  timeZone: "UTC",
+  timeZone: SF_TIME_ZONE,
 });
+const SF_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: SF_TIME_ZONE });
+
+/** The San Francisco day `ms` falls on, as that date's UTC midnight (how move-in days are kept). */
+export const sfDay = (ms: number) => Date.parse(`${SF_DAY.format(ms)}T00:00:00Z`);
+
+/**
+ * "Available Dec 6", or "Available now" once that day has come. A rental's
+ * `availableFrom` is an instant on its San Francisco day (noon when the lister
+ * picked a date), so it's read as that day everywhere it's shown.
+ */
+export function availableLabel(availableFrom: number | null | undefined, now = Date.now()) {
+  return availableFrom && sfDay(availableFrom) > sfDay(now)
+    ? `Available ${SHORT_DATE.format(availableFrom)}`
+    : "Available now";
+}
 
 /**
  * 1 when the rental is free within two weeks of the move-in day, falling to 0
@@ -291,17 +387,16 @@ export function moveInPart(
   listing: FitListing,
   moveIn: number | null,
   now: number,
-): [number, Reason | null] {
+): [number, FitReason | null] {
   if (moveIn === null) return [0, null];
-  const target = Math.max(moveIn, now);
-  const from = Math.max(listing.availableFrom ?? now, now);
+  // Whole San Francisco days on both sides, so the count matches the dates shown.
+  const today = sfDay(now);
+  const target = Math.max(moveIn, today);
+  const from = Math.max(sfDay(listing.availableFrom ?? now), today);
   const days = Math.round((from - target) / DAY);
   const off = Math.abs(days);
   const score = Math.min(1, Math.max(0, (60 - off) / 46));
-  const when =
-    listing.availableFrom && listing.availableFrom > now
-      ? `Available ${SHORT_DATE.format(from)}`
-      : "Available now";
+  const when = availableLabel(listing.availableFrom, now);
   const weeks = Math.round(off / 7);
   const text =
     off <= 14
@@ -313,8 +408,45 @@ export function moveInPart(
   ];
 }
 
+/** What viewing a listing they reported costs: below every listing they didn't report. */
+export const REPORTED_PENALTY = 1;
+/** What each "things to check" signal costs, up to SIGNALS_PENALTY_MAX. */
+export const SIGNAL_PENALTY = 0.2;
+const SIGNALS_PENALTY_MAX = 0.6;
+/** Sources cited under a trust warning, the listing itself included. */
+const TRUST_SOURCES_MAX = 6;
+
 /**
- * Ranks rentals for a profile, best first. Ties go to the cheaper listing.
+ * How much trust signals take off a listing's rank, with a warning that leads
+ * its reasons: "You reported this listing", else the first signal and how many
+ * more there are. It cites the signals' evidence and the listing itself, which
+ * shows who listed it and links to its things to check.
+ */
+export function trustPart(listing: Pick<FitListing, "id" | "trust">): [number, Reason | null] {
+  const t = listing.trust;
+  if (!t || (!t.reported && t.signals.length === 0)) return [0, null];
+  const penalty =
+    (t.reported ? REPORTED_PENALTY : 0) +
+    Math.min(SIGNALS_PENALTY_MAX, SIGNAL_PENALTY * t.signals.length);
+  const [first, ...rest] = t.signals;
+  const text = t.reported
+    ? "You reported this listing"
+    : `${first.text}${rest.length ? `, and ${rest.length} more to check` : ""}`;
+  const self = listingKey(listing.id);
+  const evidence = [...new Set(t.signals.flatMap((x) => x.sources))].filter((k) => k !== self);
+  return [
+    penalty,
+    {
+      kind: "trust",
+      text,
+      tone: "bad",
+      sources: [...evidence.slice(0, TRUST_SOURCES_MAX - 1), self],
+    },
+  ];
+}
+
+/**
+ * Ranks rentals for a profile, best first, after trust penalties. Ties go to the cheaper listing.
  * `context` gives every stop, each listing's neighborhood places, and the time.
  */
 export function rankRentals(
@@ -334,16 +466,17 @@ export function rankRentals(
     const [n, nr] = neighborhoodPart(l, profile);
     const [m, mr] = moveInPart(l, profile.moveIn, context.now);
     const parts = { budget: b, transit: t, interests: i, neighborhood: n, moveIn: m };
+    const [penalty, warning] = trustPart(l);
     const score =
-      w.budget * b + w.transit * t + w.interests * i + w.neighborhood * n + w.moveIn * m;
-    // Reasons in order of how much they moved the score, up or down; three at most.
-    const impact = (r: Reason) =>
+      w.budget * b + w.transit * t + w.interests * i + w.neighborhood * n + w.moveIn * m - penalty;
+    // Reasons in order of how much they moved the score, up or down, after any warning.
+    const impact = (r: FitReason) =>
       w[r.kind] * (r.tone === "good" ? parts[r.kind] : 1 - parts[r.kind]);
-    const reasons = [br, tr, ir, nr, mr]
-      .filter((r): r is Reason => r !== null && w[r.kind] > 0)
-      .sort((x, y) => impact(y) - impact(x))
-      .slice(0, 3);
-    return { id: l.id, score, parts, reasons };
+    const fitReasons = [br, tr, ir, nr, mr]
+      .filter((r): r is FitReason => r !== null && w[r.kind] > 0)
+      .sort((x, y) => impact(y) - impact(x));
+    const reasons: Reason[] = warning ? [warning, ...fitReasons] : fitReasons;
+    return { id: l.id, score, parts, penalty, reasons: reasons.slice(0, 3) };
   });
   const price = new Map(listings.map((l) => [l.id, l.price]));
   return fits.sort((a, b) => b.score - a.score || (price.get(a.id) ?? 0) - (price.get(b.id) ?? 0));

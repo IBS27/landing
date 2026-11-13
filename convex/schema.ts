@@ -363,6 +363,8 @@ export default defineSchema({
     ),
     badges: v.array(badge),
     groupIds: v.optional(v.array(v.id("groups"))),
+    /** "Hide from friends": the seller's friends don't see it while browsing Marketplace. */
+    hideFromFriends: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
     viewCount: v.number(),
@@ -1042,7 +1044,7 @@ export default defineSchema({
   ownedItems: defineTable({
     userId: v.id("users"),
     title: v.string(),
-    /** What the user paid, whole dollars; 0 = free. */
+    /** What the user paid, in dollars to the cent; 0 = free. */
     price: v.number(),
     /** When they got it. */
     acquiredAt: v.number(),

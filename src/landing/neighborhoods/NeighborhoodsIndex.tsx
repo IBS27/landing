@@ -8,6 +8,7 @@ import { useMediaQuery } from "@/landing/map/useEnv";
 import { plural } from "@/lib/format";
 import { Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
+import { searchNeighborhoods } from "../../../convex/lib/neighborhoodNames";
 import type { DirectoryEntry } from "../../../convex/lib/neighborhoodPage";
 import { NeighborhoodCrumbs } from "./NeighborhoodPage";
 
@@ -37,9 +38,9 @@ export function NeighborhoodsIndexView({ data }: { data: Directory | undefined }
     [data, navigate],
   );
   const all = data?.neighborhoods ?? [];
-  const needle = q.trim().toLowerCase();
-  const match = (n: DirectoryEntry) =>
-    !needle || n.label.toLowerCase().includes(needle) || n.name.toLowerCase().includes(needle);
+  // Any name people use finds it: "the Richmond", "Dogpatch", "Cole Valley", "NoPa".
+  const found = useMemo(() => searchNeighborhoods(q), [q]);
+  const match = (n: DirectoryEntry) => !found || found.has(n.slug);
   const yours = all.filter((n) => n.yours && match(n));
   // "Try the neighborhood" starts from the viewer's first two, when they have them.
   const mine = all.filter((n) => n.yours);

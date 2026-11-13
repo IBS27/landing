@@ -31,6 +31,8 @@ export type SubletInput = {
 export type SubletMove = { move: Move; amount: number; text: string; rationale: string };
 
 const round5 = (n: number) => Math.round(n / 5) * 5;
+/** "$1,400", as people write rents. */
+const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 
 /** Rents in chat text, "$1,450" or "1450", as whole numbers: "1200 sqft" is not $120. */
 const RENT =
@@ -104,7 +106,7 @@ export function subletLadder(input: SubletInput): SubletMove {
     return {
       move: "message",
       amount: 0,
-      text: `Hi! Yes, it's still available${dates}. Rent is $${last}/month${l.furnished ? ", furnished" : ""}. Want to set up a time to see it?`,
+      text: `Hi! Yes, it's still available${dates}. Rent is ${usd(last)}/month${l.furnished ? ", furnished" : ""}. Want to set up a time to see it?`,
       rationale:
         "Answers with the listing's dates and rent and offers a tour, with no address until you agree to a viewing.",
     };
@@ -114,22 +116,22 @@ export function subletLadder(input: SubletInput): SubletMove {
     return {
       move: "accept",
       amount,
-      text: `$${amount}/month works for me. Want to see the place first? I can do a tour this week.`,
-      rationale: `The renter offered $${theirs}, which is at or above your lowest rent of $${minRent}.`,
+      text: `${usd(amount)}/month works for me. Want to see the place first? I can do a tour this week.`,
+      rationale: `The renter offered ${usd(theirs)}, which is at or above your lowest rent of ${usd(minRent)}.`,
     };
   }
   if (last <= minRent)
     return {
       move: "walk_away",
       amount: 0,
-      text: `Thanks for the offer! $${minRent}/month is the lowest I can do, so no worries if that doesn't work for you.`,
-      rationale: `The renter's $${theirs} is under your lowest rent, and you're already at $${minRent}.`,
+      text: `Thanks for the offer! ${usd(minRent)}/month is the lowest I can do, so no worries if that doesn't work for you.`,
+      rationale: `The renter's ${usd(theirs)} is under your lowest rent, and you're already at ${usd(minRent)}.`,
     };
   const counter = Math.max(minRent, Math.min(last - 5, round5((last + theirs) / 2)));
   return {
     move: "offer",
     amount: counter,
-    text: `That's a bit low for me, but I could do $${counter}/month. Would that work?`,
-    rationale: `Meeting the renter's $${theirs} partway, staying at or above your lowest rent of $${minRent}.`,
+    text: `That's a bit low for me, but I could do ${usd(counter)}/month. Would that work?`,
+    rationale: `Meeting the renter's ${usd(theirs)} partway, staying at or above your lowest rent of ${usd(minRent)}.`,
   };
 }

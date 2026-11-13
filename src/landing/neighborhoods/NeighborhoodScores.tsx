@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useQ } from "@/app/viewer";
+import { outdatedSchedule } from "@/lib/citations";
 import { cn, shortAge } from "@/lib/format";
 import { SourcesChip } from "@/ui/Citations";
 import { Card, Skeleton } from "@/ui/primitives";
@@ -106,6 +107,9 @@ export function ScoreTiles({ data, className }: { data: ScoresData; className?: 
           detail={fitDetail(fit.matched, fit.missing)}
           sources={fit.sources}
         />
+      ) : fit.state === "no_match" ? (
+        // Nothing to cite, so no score: say what we looked for.
+        <Tile {...TILE.fit} personal detail={fitDetail([], fit.missing)} />
       ) : (
         <Tile
           {...TILE.fit}
@@ -144,6 +148,7 @@ function Tile({
 }) {
   const [first, ...rest] = sources ?? [];
   const sub = [label, personal && "Just for you"].filter(Boolean).join(" · ");
+  const outdated = outdatedSchedule(sources ?? []);
   return (
     <section aria-label={title} className="flex min-w-0 flex-col rounded-lg bg-comment p-3">
       <div className="flex items-center gap-3">
@@ -169,6 +174,7 @@ function Tile({
         )}
       </div>
       <p className="mt-2 flex-1 text-[13px] text-secondary leading-[18px]">{detail}</p>
+      {outdated && <p className="mt-1 text-[12px] text-secondary leading-4">{outdated}</p>}
       {first && (
         <div className="mt-2">
           <SourcesChip sources={[first, ...rest]} />
@@ -185,13 +191,19 @@ export function fitLabel(score: number) {
       ? "A good fit"
       : score >= 4
         ? "Some fit"
-        : "Not much for you";
+        : // A score always has something here that matches (with nothing, there's no score).
+          "A little for you";
 }
 
 export function fitDetail(matched: string[], missing: string[]) {
   const list = (xs: string[]) =>
     xs.length <= 2 ? xs.join(" and ") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`;
-  if (matched.length === 0) return `Nothing here yet for ${list(missing.slice(0, 3))}.`;
+  if (matched.length === 0) {
+    const more = missing.length - 3;
+    return more > 0
+      ? `Nothing here yet for ${missing.slice(0, 3).join(", ")} or ${more} more of your interests.`
+      : `Nothing here yet for ${list(missing)}.`;
+  }
   const have = `${list(matched.slice(0, 4))} ${matched.length === 1 ? "has" : "have"} Groups, Events or places here.`;
   return missing.length ? `${have} Not yet: ${list(missing.slice(0, 3))}.` : have;
 }
@@ -313,6 +325,7 @@ function NightRow({
   children: ReactNode;
 }) {
   const [first, ...rest] = sources;
+  const outdated = outdatedSchedule(sources);
   return (
     <div>
       <h3 className="flex items-center gap-2 font-semibold text-[15px] text-primary leading-5">
@@ -322,6 +335,9 @@ function NightRow({
       <div className="mt-1 space-y-0.5 pl-[26px] text-[15px] text-primary leading-5">
         {children}
       </div>
+      {outdated && (
+        <p className="mt-1 pl-[26px] text-[12px] text-secondary leading-4">{outdated}</p>
+      )}
       {first && (
         <div className="mt-2 pl-[26px]">
           <SourcesChip sources={[first, ...rest]} />

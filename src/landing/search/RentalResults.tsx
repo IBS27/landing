@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
-import { BadgeCheck, ChevronDown, CircleAlert, CircleCheck } from "lucide-react";
+import { BadgeCheck, ChevronDown, CircleAlert, CircleCheck, ShieldAlert } from "lucide-react";
 import type { ReactNode } from "react";
 import { toNeighborhood, toRentalCheck } from "@/landing/links";
 import { cn, price } from "@/lib/format";
@@ -21,7 +21,8 @@ const SOURCE_LINK =
 /**
  * Rentals ranked by fit with the viewer's City Profile (#10): budget, transit,
  * interests, target neighborhood and move-in date. Must-haves filter the list.
- * Each result shows the reasons behind its rank, with sources.
+ * Each result shows the reasons behind its rank, with sources, led by a
+ * warning when it has things to check (#11) or the viewer reported it.
  */
 export function RentalResults({
   data,
@@ -38,8 +39,11 @@ export function RentalResults({
       <div className="px-4 pt-4 pb-2">
         <h2 className="font-bold text-[17px] text-primary leading-5">Rentals for you</h2>
         <p className="mt-0.5 text-[13px] text-secondary leading-[18px]">
-          Ranked by your budget, transit, interests, neighborhoods and move-in date from your City
-          Profile.
+          {data === undefined
+            ? "Rentals that meet your must-haves."
+            : data.needsBrief
+              ? "Newest first. Listings with things to check are moved down."
+              : "Ranked by your budget, transit, interests, neighborhoods and move-in date from your City Profile."}
         </p>
       </div>
       <fieldset className="flex flex-wrap gap-2 px-4 pb-3">
@@ -153,7 +157,14 @@ export function RentalResults({
                     <ul className="mt-1.5 flex flex-col gap-1">
                       {r.reasons.map((x) => (
                         <li key={x.kind} className="flex items-start gap-1.5">
-                          {x.tone === "good" ? (
+                          {x.kind === "trust" ? (
+                            <ShieldAlert
+                              size={14}
+                              strokeWidth={2.25}
+                              aria-hidden
+                              className="mt-0.5 shrink-0 text-[#B07A00] dark:text-[#F7B928]"
+                            />
+                          ) : x.tone === "good" ? (
                             <CircleCheck
                               size={14}
                               strokeWidth={2.25}

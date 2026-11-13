@@ -141,13 +141,31 @@ export type Reason = {
   interest: InterestId;
   /** "Climbing". */
   label: string;
-  /** "from your brief", "you RSVP'd to 2 board games Events". */
+  /** "from your brief", "from Events you've RSVP'd to". */
   because: string;
   /** Other shared interests, strongest first. */
   also: string[];
 };
 
-/** Where an interest fact came from, as the end of "Climbing · …". */
+/**
+ * How activity taught an interest, by the strongest kind of signal (an
+ * activity summary lists them strongest first: "RSVP'd to …", "joined …",
+ * "interested in …", "saved …", "liked …").
+ */
+const ACTIVITY_BECAUSE: readonly (readonly [RegExp, string])[] = [
+  [/^rsvp'd\b/i, "from Events you've RSVP'd to"],
+  [/^joined\b/i, "from Groups you've joined"],
+  [/^interested in\b/i, "from Events you're interested in"],
+  [/^saved\b/i, "from things you've saved"],
+  [/^liked\b/i, "from posts you've liked"],
+];
+
+/**
+ * Where an interest fact came from, as the end of "Climbing · …". It explains
+ * the interest, not one card: an activity fact's summary names other Events
+ * and Groups ("RSVP'd to Bouldering Night"), which would read as the reason
+ * for an unrelated card, so only the kind of activity is said.
+ */
 export function becauseOf(f: Fact<"interest">): string {
   switch (f.evidence.kind) {
     case "brief":
@@ -162,10 +180,7 @@ export function becauseOf(f: Fact<"interest">): string {
       return "you told Muse";
     case "activity": {
       const s = f.evidence.summary.trim();
-      if (!s || /^from your/i.test(s)) return "from your activity";
-      // "Joined …" → "you joined …", but "RSVP'd …" keeps its capitals.
-      const lower = /^[A-Z][a-z]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s;
-      return `you ${lower}`;
+      return ACTIVITY_BECAUSE.find(([re]) => re.test(s))?.[1] ?? "from your activity";
     }
   }
 }

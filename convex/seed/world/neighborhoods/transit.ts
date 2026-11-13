@@ -12,161 +12,143 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
     title: "Embarcadero | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "298 Market Street, San Francisco, CA 94111",
-    fetchedAt: 1794531142626,
+    fetchedAt: 1794559930361,
   },
-  'https://www.bart.gov/dev/schedules/google_transit.zip#"EMBR","901169","Embarcadero","","37.792762","-122.397037","EMBR","https://www.bart.gov/stations/embr","1","",""':
-    {
-      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
-      publisher: "BART",
-      snippet:
-        '"EMBR","901169","Embarcadero","","37.792762","-122.397037","EMBR","https://www.bart.gov/stations/embr","1","",""',
-      fetchedAt: 1794531142131,
-    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · Embarcadero station": {
+    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+    title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+    publisher: "BART",
+    snippet: "BART · Embarcadero station",
+    fetchedAt: 1794559929941,
+  },
   "https://www.bart.gov/stations/mont": {
     url: "https://www.bart.gov/stations/mont",
     title: "Montgomery St. | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "598 Market Street, San Francisco, CA 94104",
-    fetchedAt: 1794531142914,
+    fetchedAt: 1794559930859,
   },
-  'https://www.bart.gov/dev/schedules/google_transit.zip#"MONT","901209","Montgomery Street","","37.789173","-122.401587","MONT","https://www.bart.gov/stations/mont","1","",""':
-    {
-      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
-      publisher: "BART",
-      snippet:
-        '"MONT","901209","Montgomery Street","","37.789173","-122.401587","MONT","https://www.bart.gov/stations/mont","1","",""',
-      fetchedAt: 1794531142131,
-    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · Montgomery Street station": {
+    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+    title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+    publisher: "BART",
+    snippet: "BART · Montgomery Street station",
+    fetchedAt: 1794559929941,
+  },
   "https://www.bart.gov/stations/powl": {
     url: "https://www.bart.gov/stations/powl",
     title: "Powell St. | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "899 Market Street, San Francisco, CA 94102",
-    fetchedAt: 1794531143017,
+    fetchedAt: 1794559930980,
   },
-  'https://www.bart.gov/dev/schedules/google_transit.zip#"POWL","901309","Powell Street","","37.784606","-122.407331","POWL","https://www.bart.gov/stations/powl","1","",""':
-    {
-      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
-      publisher: "BART",
-      snippet:
-        '"POWL","901309","Powell Street","","37.784606","-122.407331","POWL","https://www.bart.gov/stations/powl","1","",""',
-      fetchedAt: 1794531142131,
-    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · Powell Street station": {
+    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+    title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+    publisher: "BART",
+    snippet: "BART · Powell Street station",
+    fetchedAt: 1794559929941,
+  },
   "https://www.bart.gov/stations/civc": {
     url: "https://www.bart.gov/stations/civc",
     title: "Civic Center/UN Plaza | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "1150 Market Street, San Francisco, CA 94102",
-    fetchedAt: 1794531143122,
+    fetchedAt: 1794559931089,
   },
-  'https://www.bart.gov/dev/schedules/google_transit.zip#"CIVC","901409","Civic Center / UN Plaza","","37.779408","-122.413826","CIVC","https://www.bart.gov/stations/civc","1","",""':
-    {
-      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
-      publisher: "BART",
-      snippet:
-        '"CIVC","901409","Civic Center / UN Plaza","","37.779408","-122.413826","CIVC","https://www.bart.gov/stations/civc","1","",""',
-      fetchedAt: 1794531142131,
-    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · Civic Center / UN Plaza station": {
+    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+    title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+    publisher: "BART",
+    snippet: "BART · Civic Center / UN Plaza station",
+    fetchedAt: 1794559929941,
+  },
   "https://www.bart.gov/stations/16th": {
     url: "https://www.bart.gov/stations/16th",
     title: "16th St./Mission | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "2000 Mission Street, San Francisco, CA 94110",
-    fetchedAt: 1794531143221,
+    fetchedAt: 1794559931194,
   },
-  'https://www.bart.gov/dev/schedules/google_transit.zip#"16TH","901509","16th Street / Mission","","37.765173","-122.419704","16TH","https://www.bart.gov/stations/16th","1","",""':
-    {
-      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
-      publisher: "BART",
-      snippet:
-        '"16TH","901509","16th Street / Mission","","37.765173","-122.419704","16TH","https://www.bart.gov/stations/16th","1","",""',
-      fetchedAt: 1794531142131,
-    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · 16th Street / Mission station": {
+    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+    title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+    publisher: "BART",
+    snippet: "BART · 16th Street / Mission station",
+    fetchedAt: 1794559929941,
+  },
   "https://www.bart.gov/stations/24th": {
     url: "https://www.bart.gov/stations/24th",
     title: "24th St./Mission | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "2800 Mission Street, San Francisco, CA 94110",
-    fetchedAt: 1794531143322,
+    fetchedAt: 1794559931310,
   },
-  'https://www.bart.gov/dev/schedules/google_transit.zip#"24TH","901609","24th Street / Mission","","37.752419","-122.418468","24TH","https://www.bart.gov/stations/24th","1","",""':
-    {
-      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
-      publisher: "BART",
-      snippet:
-        '"24TH","901609","24th Street / Mission","","37.752419","-122.418468","24TH","https://www.bart.gov/stations/24th","1","",""',
-      fetchedAt: 1794531142131,
-    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · 24th Street / Mission station": {
+    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+    title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+    publisher: "BART",
+    snippet: "BART · 24th Street / Mission station",
+    fetchedAt: 1794559929941,
+  },
   "https://www.bart.gov/stations/glen": {
     url: "https://www.bart.gov/stations/glen",
     title: "Glen Park | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "2901 Diamond Street, San Francisco, CA 94131",
-    fetchedAt: 1794531143441,
+    fetchedAt: 1794559931420,
   },
-  'https://www.bart.gov/dev/schedules/google_transit.zip#"GLEN","901709","Glen Park","","37.733235","-122.433515","GLEN","https://www.bart.gov/stations/glen","1","",""':
-    {
-      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
-      publisher: "BART",
-      snippet:
-        '"GLEN","901709","Glen Park","","37.733235","-122.433515","GLEN","https://www.bart.gov/stations/glen","1","",""',
-      fetchedAt: 1794531142131,
-    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · Glen Park station": {
+    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+    title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+    publisher: "BART",
+    snippet: "BART · Glen Park station",
+    fetchedAt: 1794559929941,
+  },
   "https://www.bart.gov/stations/balb": {
     url: "https://www.bart.gov/stations/balb",
     title: "Balboa Park | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "401 Geneva Avenue, San Francisco, CA 94112",
-    fetchedAt: 1794531143546,
+    fetchedAt: 1794559931526,
   },
-  'https://www.bart.gov/dev/schedules/google_transit.zip#"BALB","901809","Balboa Park","","37.721747","-122.447457","BALB","https://www.bart.gov/stations/balb","1","",""':
-    {
-      url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
-      publisher: "BART",
-      snippet:
-        '"BALB","901809","Balboa Park","","37.721747","-122.447457","BALB","https://www.bart.gov/stations/balb","1","",""',
-      fetchedAt: 1794531142131,
-    },
+  "https://www.bart.gov/dev/schedules/google_transit.zip#BART · Balboa Park station": {
+    url: "https://www.bart.gov/dev/schedules/google_transit.zip",
+    title: "BART schedule, Aug 10, 2026 – Jan 10, 2027",
+    publisher: "BART",
+    snippet: "BART · Balboa Park station",
+    fetchedAt: 1794559929941,
+  },
   "https://www.sfmta.com/routes/j-church": {
     url: "https://www.sfmta.com/routes/j-church",
     title: "J Church",
     publisher: "SFMTA",
     snippet:
       "Inbound to Embarcadero Station From San Jose & Geneva, north on San Jose, left on 30th St, right on Church, right onto Muni separated trackway from 22nd to…",
-    fetchedAt: 1794531144973,
+    fetchedAt: 1794559932809,
   },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#J,SFMTA,J,CHURCH,http://www.sfmta.com/J,5am-12 midnight daily,0,A96614 ,FFFFFF,":
-    {
-      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
-      publisher: "SFMTA",
-      snippet: "J,SFMTA,J,CHURCH,http://www.sfmta.com/J,5am-12 midnight daily,0,A96614 ,FFFFFF,",
-      fetchedAt: 1794531143656,
-    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni J Church · Muni Metro line": {
+    url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+    title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+    publisher: "SFMTA",
+    snippet: "Muni J Church · Muni Metro line",
+    fetchedAt: 1794559931635,
+  },
   "https://www.sfmta.com/routes/k-ingleside": {
     url: "https://www.sfmta.com/routes/k-ingleside",
     title: "K Ingleside",
     publisher: "SFMTA",
     snippet:
       "Northbound to Downtown From San Jose Avenue & Geneva, north on San Jose Avenue, left on Ocean, right on Junipero Serra, continue to West Portal Ave to West…",
-    fetchedAt: 1794531147282,
+    fetchedAt: 1794559933210,
   },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#K,SFMTA,K,INGLESIDE,http://www.sfmta.com/K,Weekdays 6am-12 midnight; weekends 8am-12 midnight,0,437C93 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni K Ingleside · Muni Metro line":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "K,SFMTA,K,INGLESIDE,http://www.sfmta.com/K,Weekdays 6am-12 midnight; weekends 8am-12 midnight,0,437C93 ,FFFFFF,",
-      fetchedAt: 1794531143656,
+      snippet: "Muni K Ingleside · Muni Metro line",
+      fetchedAt: 1794559931635,
     },
   "https://www.sfmta.com/routes/l-taraval": {
     url: "https://www.sfmta.com/routes/l-taraval",
@@ -174,33 +156,30 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
     publisher: "SFMTA",
     snippet:
       "This route serves Ocean Beach along 46th Ave. Inbound Wawona and 46th Avenue (San Francisco Zoo) via Wawona. 46th Avenue, Taraval, 15th Avenue, Ulloa to West…",
-    fetchedAt: 1794531147634,
+    fetchedAt: 1794559933527,
   },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#L,SFMTA,L,TARAVAL,http://www.sfmta.com/L,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,942D83 ,FFFFFF,":
-    {
-      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
-      publisher: "SFMTA",
-      snippet:
-        "L,SFMTA,L,TARAVAL,http://www.sfmta.com/L,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,942D83 ,FFFFFF,",
-      fetchedAt: 1794531143656,
-    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni L Taraval · Muni Metro line": {
+    url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+    title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+    publisher: "SFMTA",
+    snippet: "Muni L Taraval · Muni Metro line",
+    fetchedAt: 1794559931635,
+  },
   "https://www.sfmta.com/routes/m-ocean-view": {
     url: "https://www.sfmta.com/routes/m-ocean-view",
     title: "M Ocean View",
     publisher: "SFMTA",
     snippet:
       "Inbound San Jose Avenue and Geneva (Balboa Park Muni Metro/BART) via San Jose Avenue, Broad, Orizaba, Randolph, 19th Avenue (San Francisco State University),…",
-    fetchedAt: 1794531149980,
+    fetchedAt: 1794559933882,
   },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#M,SFMTA,M,OCEAN VIEW,http://www.sfmta.com/M,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,008547 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni M Ocean View · Muni Metro line":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "M,SFMTA,M,OCEAN VIEW,http://www.sfmta.com/M,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,008547 ,FFFFFF,",
-      fetchedAt: 1794531143656,
+      snippet: "Muni M Ocean View · Muni Metro line",
+      fetchedAt: 1794559931635,
     },
   "https://www.sfmta.com/routes/n-judah": {
     url: "https://www.sfmta.com/routes/n-judah",
@@ -208,172 +187,155 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
     publisher: "SFMTA",
     snippet:
       "This route serves Ocean Beach at La Playa St. Inbound Judah and La Playa via Judah, 9th Avenue, Irving, Arguello (UCSF), Carl, Sunset tunnel, Duboce, Market…",
-    fetchedAt: 1794531152745,
+    fetchedAt: 1794559934224,
   },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#N,SFMTA,N,JUDAH,http://www.sfmta.com/N,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,005B95 ,FFFFFF,":
-    {
-      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
-      publisher: "SFMTA",
-      snippet:
-        "N,SFMTA,N,JUDAH,http://www.sfmta.com/N,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,005B95 ,FFFFFF,",
-      fetchedAt: 1794531143656,
-    },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni N Judah · Muni Metro line": {
+    url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+    title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+    publisher: "SFMTA",
+    snippet: "Muni N Judah · Muni Metro line",
+    fetchedAt: 1794559931635,
+  },
   "https://www.sfmta.com/routes/t-third-street": {
     url: "https://www.sfmta.com/routes/t-third-street",
     title: "T Third Street",
     publisher: "SFMTA",
     snippet:
       "Southbound to Sunnydale From Chinatown Station, exit Central Subway, continue on 4th St, left on Channel, right on 3rd St to Bayshore Blvd to the terminal at…",
-    fetchedAt: 1794531154944,
+    fetchedAt: 1794559934546,
   },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#T,SFMTA,T,THIRD,http://www.sfmta.com/T,Weekends 8 am-11:30 pm,0,BF2B45 ,FFFFFF,":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni T Third · Muni Metro line": {
+    url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
+    title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
+    publisher: "SFMTA",
+    snippet: "Muni T Third · Muni Metro line",
+    fetchedAt: 1794559931635,
+  },
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Castro Station · K, L, M lines":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet: "T,SFMTA,T,THIRD,http://www.sfmta.com/T,Weekends 8 am-11:30 pm,0,BF2B45 ,FFFFFF,",
-      fetchedAt: 1794531143656,
+      snippet: "Muni Metro · Castro Station · K, L, M lines",
+      fetchedAt: 1794559931635,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5728,15728,Metro Castro Station/Downtown,37.76262,-122.435231,0, ,https://www.sfmta.com/15728":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Chinatown–Rose Pak Station · T lines":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "5728,15728,Metro Castro Station/Downtown,37.76262,-122.435231,0, ,https://www.sfmta.com/15728",
-      fetchedAt: 1794531143656,
+      snippet: "Muni Metro · Chinatown–Rose Pak Station · T lines",
+      fetchedAt: 1794559931635,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7876,17876,Chinatown - Rose Pak Station,37.794807,-122.408078,0, ,https://www.sfmta.com/17876":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Church Station · K, L, M lines":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "7876,17876,Chinatown - Rose Pak Station,37.794807,-122.408078,0, ,https://www.sfmta.com/17876",
-      fetchedAt: 1794531143656,
+      snippet: "Muni Metro · Church Station · K, L, M lines",
+      fetchedAt: 1794559931635,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5726,15726,Metro Church Station/Downtown,37.767194,-122.429168,0, ,https://www.sfmta.com/15726":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Civic Center Station · J, K, L, M, N lines":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "5726,15726,Metro Church Station/Downtown,37.767194,-122.429168,0, ,https://www.sfmta.com/15726",
-      fetchedAt: 1794531143656,
+      snippet: "Muni Metro · Civic Center Station · J, K, L, M, N lines",
+      fetchedAt: 1794559931635,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5727,15727,Metro Civic Center Station/Downtn,37.779712,-122.413347,0, ,https://www.sfmta.com/15727":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Embarcadero Station · J, K, L, M, N lines":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "5727,15727,Metro Civic Center Station/Downtn,37.779712,-122.413347,0, ,https://www.sfmta.com/15727",
-      fetchedAt: 1794531143656,
+      snippet: "Muni Metro · Embarcadero Station · J, K, L, M, N lines",
+      fetchedAt: 1794559931635,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#6992,16992,Metro Embarcadero Station,37.793134,-122.396431,0, ,https://www.sfmta.com/16992":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Forest Hill Station · K, L, M lines":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "6992,16992,Metro Embarcadero Station,37.793134,-122.396431,0, ,https://www.sfmta.com/16992",
-      fetchedAt: 1794531143656,
+      snippet: "Muni Metro · Forest Hill Station · K, L, M lines",
+      fetchedAt: 1794559931635,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5730,15730,Metro Forest Hill Station/Downtown,37.748351,-122.458623,0, ,https://www.sfmta.com/15730":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Montgomery Station · J, K, L, M, N lines":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "5730,15730,Metro Forest Hill Station/Downtown,37.748351,-122.458623,0, ,https://www.sfmta.com/15730",
-      fetchedAt: 1794531143656,
+      snippet: "Muni Metro · Montgomery Station · J, K, L, M, N lines",
+      fetchedAt: 1794559931635,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5731,15731,Metro Montgomery Station/Downtown,37.789219,-122.401351,0, ,https://www.sfmta.com/15731":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Powell Station · J, K, L, M, N lines":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "5731,15731,Metro Montgomery Station/Downtown,37.789219,-122.401351,0, ,https://www.sfmta.com/15731",
-      fetchedAt: 1794531143656,
+      snippet: "Muni Metro · Powell Station · J, K, L, M, N lines",
+      fetchedAt: 1794559931635,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5417,15417,Metro Powell Station/Downtown,37.784653,-122.407086,0, ,https://www.sfmta.com/15417":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Union Square/Market Street Station · T lines":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "5417,15417,Metro Powell Station/Downtown,37.784653,-122.407086,0, ,https://www.sfmta.com/15417",
-      fetchedAt: 1794531143656,
+      snippet: "Muni Metro · Union Square/Market Street Station · T lines",
+      fetchedAt: 1794559931635,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7874,17874,Union Square/Market St Station Southbound,37.787133,-122.406523,0, ,https://www.sfmta.com/17874":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Van Ness Station · J, K, L, M, N lines":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "7874,17874,Union Square/Market St Station Southbound,37.787133,-122.406523,0, ,https://www.sfmta.com/17874",
-      fetchedAt: 1794531143656,
+      snippet: "Muni Metro · Van Ness Station · J, K, L, M, N lines",
+      fetchedAt: 1794559931635,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5419,15419,Metro Van Ness Station,37.775127,-122.419252,0, ,https://www.sfmta.com/15419":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · West Portal Station · K, L, M lines":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "5419,15419,Metro Van Ness Station,37.775127,-122.419252,0, ,https://www.sfmta.com/15419",
-      fetchedAt: 1794531143656,
+      snippet: "Muni Metro · West Portal Station · K, L, M lines",
+      fetchedAt: 1794559931635,
     },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#6739,16739,West Portal Station,37.741391,-122.46553,0, ,https://www.sfmta.com/16739":
+  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Yerba Buena/Moscone Station · T lines":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
+      title: "SFMTA Muni schedule, Jul 23 – Aug 28, 2026",
       publisher: "SFMTA",
-      snippet:
-        "6739,16739,West Portal Station,37.741391,-122.46553,0, ,https://www.sfmta.com/16739",
-      fetchedAt: 1794531143656,
-    },
-  "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7873,17873,Yerba Buena/Moscone Station Southbound,37.78238,-122.40173,0, ,https://www.sfmta.com/17873":
-    {
-      url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
-      publisher: "SFMTA",
-      snippet:
-        "7873,17873,Yerba Buena/Moscone Station Southbound,37.78238,-122.40173,0, ,https://www.sfmta.com/17873",
-      fetchedAt: 1794531143656,
+      snippet: "Muni Metro · Yerba Buena/Moscone Station · T lines",
+      fetchedAt: 1794559931635,
     },
   "https://www.caltrain.com/station/22ndstreet": {
     url: "https://www.caltrain.com/station/22ndstreet",
     title: "22nd Street | Caltrain",
     publisher: "Caltrain",
     snippet: "1149 22nd St., San Francisco 94107",
-    fetchedAt: 1794531157814,
+    fetchedAt: 1794559935426,
   },
-  "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#22nd_street,22nd_street,,22nd Street Station,,37.756972,-122.392492,,,1,,America/Los_Angeles,,,0,twenty second street":
+  "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#Caltrain · 22nd Street station":
     {
       url: "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip",
-      title: "Caltrain GTFS schedule feed (stops.txt), schedule through 2027-01-31",
+      title: "Caltrain schedule, Jan 31, 2026 – Jan 31, 2027",
       publisher: "Caltrain",
-      snippet:
-        "22nd_street,22nd_street,,22nd Street Station,,37.756972,-122.392492,,,1,,America/Los_Angeles,,,0,twenty second street",
-      fetchedAt: 1794531157206,
+      snippet: "Caltrain · 22nd Street station",
+      fetchedAt: 1794559934858,
     },
   "https://www.caltrain.com/station/sanfrancisco": {
     url: "https://www.caltrain.com/station/sanfrancisco",
     title: "San Francisco | Caltrain",
     publisher: "Caltrain",
     snippet: "700 4th St., San Francisco 94107",
-    fetchedAt: 1794531158433,
+    fetchedAt: 1794559935932,
   },
-  "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#san_francisco,san_francisco,,San Francisco Caltrain Station,,37.776404,-122.394911,,,1,,America/Los_Angeles,,,0,san francisco":
+  "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#Caltrain · San Francisco station":
     {
       url: "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip",
-      title: "Caltrain GTFS schedule feed (stops.txt), schedule through 2027-01-31",
+      title: "Caltrain schedule, Jan 31, 2026 – Jan 31, 2027",
       publisher: "Caltrain",
-      snippet:
-        "san_francisco,san_francisco,,San Francisco Caltrain Station,,37.776404,-122.394911,,,1,,America/Los_Angeles,,,0,san francisco",
-      fetchedAt: 1794531157206,
+      snippet: "Caltrain · San Francisco station",
+      fetchedAt: 1794559934858,
     },
 };
 
@@ -389,7 +351,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
     },
     sources: [
       "https://www.bart.gov/stations/embr",
-      'https://www.bart.gov/dev/schedules/google_transit.zip#"EMBR","901169","Embarcadero","","37.792762","-122.397037","EMBR","https://www.bart.gov/stations/embr","1","",""',
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · Embarcadero station",
     ],
   },
   {
@@ -403,7 +365,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
     },
     sources: [
       "https://www.bart.gov/stations/mont",
-      'https://www.bart.gov/dev/schedules/google_transit.zip#"MONT","901209","Montgomery Street","","37.789173","-122.401587","MONT","https://www.bart.gov/stations/mont","1","",""',
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · Montgomery Street station",
     ],
   },
   {
@@ -417,7 +379,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
     },
     sources: [
       "https://www.bart.gov/stations/powl",
-      'https://www.bart.gov/dev/schedules/google_transit.zip#"POWL","901309","Powell Street","","37.784606","-122.407331","POWL","https://www.bart.gov/stations/powl","1","",""',
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · Powell Street station",
     ],
   },
   {
@@ -431,7 +393,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
     },
     sources: [
       "https://www.bart.gov/stations/civc",
-      'https://www.bart.gov/dev/schedules/google_transit.zip#"CIVC","901409","Civic Center / UN Plaza","","37.779408","-122.413826","CIVC","https://www.bart.gov/stations/civc","1","",""',
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · Civic Center / UN Plaza station",
     ],
   },
   {
@@ -445,7 +407,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
     },
     sources: [
       "https://www.bart.gov/stations/16th",
-      'https://www.bart.gov/dev/schedules/google_transit.zip#"16TH","901509","16th Street / Mission","","37.765173","-122.419704","16TH","https://www.bart.gov/stations/16th","1","",""',
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · 16th Street / Mission station",
     ],
   },
   {
@@ -459,7 +421,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
     },
     sources: [
       "https://www.bart.gov/stations/24th",
-      'https://www.bart.gov/dev/schedules/google_transit.zip#"24TH","901609","24th Street / Mission","","37.752419","-122.418468","24TH","https://www.bart.gov/stations/24th","1","",""',
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · 24th Street / Mission station",
     ],
   },
   {
@@ -473,7 +435,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
     },
     sources: [
       "https://www.bart.gov/stations/glen",
-      'https://www.bart.gov/dev/schedules/google_transit.zip#"GLEN","901709","Glen Park","","37.733235","-122.433515","GLEN","https://www.bart.gov/stations/glen","1","",""',
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · Glen Park station",
     ],
   },
   {
@@ -487,7 +449,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
     },
     sources: [
       "https://www.bart.gov/stations/balb",
-      'https://www.bart.gov/dev/schedules/google_transit.zip#"BALB","901809","Balboa Park","","37.721747","-122.447457","BALB","https://www.bart.gov/stations/balb","1","",""',
+      "https://www.bart.gov/dev/schedules/google_transit.zip#BART · Balboa Park station",
     ],
   },
   {
@@ -500,7 +462,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
       lng: -122.43526,
     },
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5728,15728,Metro Castro Station/Downtown,37.76262,-122.435231,0, ,https://www.sfmta.com/15728",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Castro Station · K, L, M lines",
       "https://www.sfmta.com/routes/k-ingleside",
       "https://www.sfmta.com/routes/l-taraval",
     ],
@@ -515,7 +477,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
       lng: -122.408078,
     },
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7876,17876,Chinatown - Rose Pak Station,37.794807,-122.408078,0, ,https://www.sfmta.com/17876",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Chinatown–Rose Pak Station · T lines",
       "https://www.sfmta.com/routes/t-third-street",
     ],
   },
@@ -529,7 +491,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
       lng: -122.429245,
     },
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5726,15726,Metro Church Station/Downtown,37.767194,-122.429168,0, ,https://www.sfmta.com/15726",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Church Station · K, L, M lines",
       "https://www.sfmta.com/routes/k-ingleside",
       "https://www.sfmta.com/routes/l-taraval",
     ],
@@ -544,7 +506,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
       lng: -122.413785,
     },
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5727,15727,Metro Civic Center Station/Downtn,37.779712,-122.413347,0, ,https://www.sfmta.com/15727",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Civic Center Station · J, K, L, M, N lines",
       "https://www.sfmta.com/routes/j-church",
       "https://www.sfmta.com/routes/k-ingleside",
     ],
@@ -559,7 +521,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
       lng: -122.396791,
     },
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#6992,16992,Metro Embarcadero Station,37.793134,-122.396431,0, ,https://www.sfmta.com/16992",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Embarcadero Station · J, K, L, M, N lines",
       "https://www.sfmta.com/routes/j-church",
       "https://www.sfmta.com/routes/k-ingleside",
     ],
@@ -574,7 +536,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
       lng: -122.458908,
     },
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5730,15730,Metro Forest Hill Station/Downtown,37.748351,-122.458623,0, ,https://www.sfmta.com/15730",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Forest Hill Station · K, L, M lines",
       "https://www.sfmta.com/routes/k-ingleside",
       "https://www.sfmta.com/routes/l-taraval",
     ],
@@ -589,7 +551,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
       lng: -122.401739,
     },
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5731,15731,Metro Montgomery Station/Downtown,37.789219,-122.401351,0, ,https://www.sfmta.com/15731",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Montgomery Station · J, K, L, M, N lines",
       "https://www.sfmta.com/routes/j-church",
       "https://www.sfmta.com/routes/k-ingleside",
     ],
@@ -604,7 +566,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
       lng: -122.407454,
     },
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5417,15417,Metro Powell Station/Downtown,37.784653,-122.407086,0, ,https://www.sfmta.com/15417",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Powell Station · J, K, L, M, N lines",
       "https://www.sfmta.com/routes/j-church",
       "https://www.sfmta.com/routes/k-ingleside",
     ],
@@ -619,7 +581,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
       lng: -122.4065,
     },
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7874,17874,Union Square/Market St Station Southbound,37.787133,-122.406523,0, ,https://www.sfmta.com/17874",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Union Square/Market Street Station · T lines",
       "https://www.sfmta.com/routes/t-third-street",
     ],
   },
@@ -633,7 +595,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
       lng: -122.419296,
     },
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5419,15419,Metro Van Ness Station,37.775127,-122.419252,0, ,https://www.sfmta.com/15419",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Van Ness Station · J, K, L, M, N lines",
       "https://www.sfmta.com/routes/j-church",
       "https://www.sfmta.com/routes/k-ingleside",
     ],
@@ -648,7 +610,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
       lng: -122.465373,
     },
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#6739,16739,West Portal Station,37.741391,-122.46553,0, ,https://www.sfmta.com/16739",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · West Portal Station · K, L, M lines",
       "https://www.sfmta.com/routes/k-ingleside",
       "https://www.sfmta.com/routes/l-taraval",
     ],
@@ -663,7 +625,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
       lng: -122.40164,
     },
     sources: [
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7873,17873,Yerba Buena/Moscone Station Southbound,37.78238,-122.40173,0, ,https://www.sfmta.com/17873",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni Metro · Yerba Buena/Moscone Station · T lines",
       "https://www.sfmta.com/routes/t-third-street",
     ],
   },
@@ -678,7 +640,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
     },
     sources: [
       "https://www.caltrain.com/station/22ndstreet",
-      "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#22nd_street,22nd_street,,22nd Street Station,,37.756972,-122.392492,,,1,,America/Los_Angeles,,,0,twenty second street",
+      "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#Caltrain · 22nd Street station",
     ],
   },
   {
@@ -692,7 +654,7 @@ export const TRANSIT_STATIONS: readonly TransitStationSeed[] = [
     },
     sources: [
       "https://www.caltrain.com/station/sanfrancisco",
-      "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#san_francisco,san_francisco,,San Francisco Caltrain Station,,37.776404,-122.394911,,,1,,America/Los_Angeles,,,0,san francisco",
+      "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#Caltrain · San Francisco station",
     ],
   },
 ];
@@ -896,7 +858,7 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
     ],
     sources: [
       "https://www.sfmta.com/routes/j-church",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#J,SFMTA,J,CHURCH,http://www.sfmta.com/J,5am-12 midnight daily,0,A96614 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni J Church · Muni Metro line",
     ],
   },
   {
@@ -1062,7 +1024,7 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
     ],
     sources: [
       "https://www.sfmta.com/routes/k-ingleside",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#K,SFMTA,K,INGLESIDE,http://www.sfmta.com/K,Weekdays 6am-12 midnight; weekends 8am-12 midnight,0,437C93 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni K Ingleside · Muni Metro line",
     ],
   },
   {
@@ -1270,7 +1232,7 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
     ],
     sources: [
       "https://www.sfmta.com/routes/l-taraval",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#L,SFMTA,L,TARAVAL,http://www.sfmta.com/L,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,942D83 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni L Taraval · Muni Metro line",
     ],
   },
   {
@@ -1471,7 +1433,7 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
     ],
     sources: [
       "https://www.sfmta.com/routes/m-ocean-view",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#M,SFMTA,M,OCEAN VIEW,http://www.sfmta.com/M,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,008547 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni M Ocean View · Muni Metro line",
     ],
   },
   {
@@ -1735,7 +1697,7 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
     ],
     sources: [
       "https://www.sfmta.com/routes/n-judah",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#N,SFMTA,N,JUDAH,http://www.sfmta.com/N,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,005B95 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni N Judah · Muni Metro line",
     ],
   },
   {
@@ -1901,7 +1863,7 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
     ],
     sources: [
       "https://www.sfmta.com/routes/t-third-street",
-      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#T,SFMTA,T,THIRD,http://www.sfmta.com/T,Weekends 8 am-11:30 pm,0,BF2B45 ,FFFFFF,",
+      "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#Muni T Third · Muni Metro line",
     ],
   },
 ];

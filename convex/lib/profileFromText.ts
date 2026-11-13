@@ -5,10 +5,10 @@ import {
   type FactEntry,
   factSlot,
   GOALS,
-  moveInProblem,
   SF_NEIGHBORHOODS,
   TRANSPORT_MODES,
   todayInSF,
+  upcomingMoveInProblem,
   WORK_HOURS,
   WORKPLACES,
 } from "./cityProfileFacts";
@@ -159,7 +159,7 @@ export const profileFromText = defineTask({
             problems.push(`${at}: budget min should be between 0 and max`);
           break;
         case "moveIn": {
-          const problem = moveInProblem(e.value, input.today);
+          const problem = upcomingMoveInProblem(e.value, input.today);
           if (problem)
             problems.push(
               `${at}: ${problem} (month "YYYY-MM", date a real "YYYY-MM-DD" in it, not before ${input.today})`,

@@ -248,6 +248,16 @@ export const update = viewerMutation({
     const post = await ctx.db.get(postId);
     if (!post) throw new ConvexError("Post not found");
     if (post.authorId !== ctx.viewer._id) throw new ConvexError("Only the author can edit");
+    // Clearing the text is fine only while the post still shows something else.
+    if (
+      text !== undefined &&
+      !text.trim() &&
+      post.media.length === 0 &&
+      post.attachments.length === 0 &&
+      !post.sharedPostId &&
+      !post.live
+    )
+      throw new ConvexError("A post needs some content");
     await ctx.db.patch(postId, {
       ...(text !== undefined && { text: text.trim() || undefined }),
       ...(background !== undefined && { background: background ?? undefined }),

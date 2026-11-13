@@ -7,7 +7,8 @@ import {
   saleLadder,
   saleMoveProblems,
 } from "../convex/lib/moveOutSales";
-import { saveReply, setTerms } from "../convex/moveOutSales";
+import { executeProposal } from "../convex/lib/proposals";
+import { afterSaleAgreed, saveReply, setTerms } from "../convex/moveOutSales";
 import { fakeCtx, type Row } from "./fakeDb";
 
 const base = (chat: SaleInput["chat"], yourLastPrice: number | null = null): SaleInput => ({
@@ -286,5 +287,167 @@ describe("setTerms", () => {
     await expect(
       call(setTerms, ctx, terms({ viewerId: "users:jordan", minPrice: 20 })),
     ).rejects.toThrow("Item not found");
+  });
+});
+
+/* Once a sale is agreed, Muse stops selling the item to anyone else. */
+
+describe("a sale agreed in one chat", () => {
+  test("the fallback tells other buyers it's spoken for, and the checks hold it there", () => {
+    const input = { ...base([{ from: "buyer", text: "I can do 35" }]), spokenFor: true };
+    const m = saleLadder(input);
+    expect(m.move).toBe("message");
+    expect(m.text).not.toMatch(/still available/i);
+    expect(saleMoveProblems(m, input)).toEqual([]);
+    expect(
+      saleMoveProblems({ move: "accept", amount: 35, text: "$35 works!", rationale: "r" }, input),
+    ).toContain("it's spoken for: don't offer or accept a price");
+    expect(
+      saleMoveProblems(
+        { move: "message", amount: 0, text: "Yes, it's still available!", rationale: "r" },
+        input,
+      ),
+    ).toContain("it's spoken for: don't say it's still available");
+  });
+
+  const twoBuyers = () =>
+    world({
+      users: [{ _id: "users:maya" }, { _id: "users:jordan" }, { _id: "users:sam" }],
+      conversations: [
+        {
+          _id: "conversations:c1",
+          kind: "marketplace",
+          listingId: "listings:lamp",
+          memberIds: ["users:maya", "users:jordan"],
+        },
+        {
+          _id: "conversations:c2",
+          kind: "marketplace",
+          listingId: "listings:lamp",
+          memberIds: ["users:maya", "users:sam"],
+        },
+      ],
+      conversationMembers: [
+        { _id: "cm1", conversationId: "conversations:c1", userId: "users:maya" },
+        { _id: "cm2", conversationId: "conversations:c1", userId: "users:jordan" },
+        { _id: "cm3", conversationId: "conversations:c2", userId: "users:maya" },
+        { _id: "cm4", conversationId: "conversations:c2", userId: "users:sam" },
+      ],
+    });
+  const inChat = (p: Row, id: string) =>
+    (p.payload as { conversationId: string }).conversationId === id;
+  /** The seller approves Jordan's waiting draft. */
+  const agree = (tables: Record<string, Row[]>) => {
+    const p = tables.proposals.find((x) => x.status === "pending" && inChat(x, "conversations:c1"));
+    if (!p) throw new Error("no draft for Jordan");
+    Object.assign(p, { status: "approved", decidedAt: 100 });
+    return p;
+  };
+
+  test("approving the acceptance withdraws the other buyer's waiting draft and drafts again", async () => {
+    const { ctx, tables, scheduled } = twoBuyers();
+    await call(saveReply, ctx, reply({ move: "accept", amount: 35, text: "$35 works for me." }));
+    await call(
+      saveReply,
+      ctx,
+      reply({ conversationId: "conversations:c2", move: "accept", amount: 32, text: "$32 works." }),
+    );
+    const p = agree(tables);
+    scheduled.length = 0;
+    await afterSaleAgreed(ctx, p as never);
+    const sams = tables.proposals.filter((x) => inChat(x, "conversations:c2"));
+    expect(sams.map((x) => x.status)).toEqual(["expired"]);
+    expect(scheduled.map((s) => s.args)).toEqual([{ conversationId: "conversations:c2" }]);
+  });
+
+  test("a draft made as if it were still for sale is drafted again; the agreed chat gets none", async () => {
+    const { ctx, tables, scheduled } = twoBuyers();
+    await call(saveReply, ctx, reply({ move: "accept", amount: 35, text: "$35 works for me." }));
+    agree(tables);
+    scheduled.length = 0;
+    await call(
+      saveReply,
+      ctx,
+      reply({ conversationId: "conversations:c2", move: "accept", amount: 32, text: "$32 works." }),
+    );
+    expect(pending(tables)).toHaveLength(0);
+    expect(scheduled).toHaveLength(1);
+    await call(
+      saveReply,
+      ctx,
+      reply({
+        conversationId: "conversations:c2",
+        spokenFor: true,
+        text: "Someone else is picking it up, sorry!",
+      }),
+    );
+    expect(pending(tables)).toHaveLength(1);
+    // Jordan's chat, where the sale was agreed: pickup talk is the seller's own.
+    await call(saveReply, ctx, reply({ handledThrough: 30, text: "Still available!" }));
+    expect(pending(tables)).toHaveLength(1);
+  });
+
+  test("pausing and resuming Muse keeps the sale agreed", async () => {
+    const { ctx, tables } = twoBuyers();
+    await call(saveReply, ctx, reply({ move: "accept", amount: 35, text: "$35 works for me." }));
+    agree(tables);
+    const termsAt = tables.ownedItems[0].saleTermsAt;
+    await call(setTerms, ctx, {
+      viewerId: "users:maya",
+      itemId: "ownedItems:lamp",
+      muse: "paused",
+    });
+    await call(setTerms, ctx, {
+      viewerId: "users:maya",
+      itemId: "ownedItems:lamp",
+      muse: "active",
+    });
+    expect(tables.ownedItems[0].saleTermsAt).toBe(termsAt);
+    await call(
+      saveReply,
+      ctx,
+      reply({ conversationId: "conversations:c2", move: "accept", amount: 32, text: "$32 works." }),
+    );
+    expect(pending(tables)).toHaveLength(0);
+  });
+
+  test("new terms reopen the sale", async () => {
+    const { ctx, tables } = twoBuyers();
+    await call(saveReply, ctx, reply({ move: "accept", amount: 35, text: "$35 works for me." }));
+    agree(tables);
+    tables.ownedItems[0].saleTermsAt = 200;
+    await call(
+      saveReply,
+      ctx,
+      reply({
+        conversationId: "conversations:c2",
+        termsAt: 200,
+        move: "accept",
+        amount: 32,
+        text: "$32 works.",
+      }),
+    );
+    expect(pending(tables)).toHaveLength(1);
+  });
+});
+
+describe("approving a Muse draft wakes the other side's Muse", () => {
+  test("the seller's sent reply prompts the buyer's negotiation", async () => {
+    const { ctx, tables, scheduled } = world({
+      negotiations: [
+        {
+          _id: "negotiations:n",
+          buyerId: "users:jordan",
+          listingId: "listings:lamp",
+          conversationId: "conversations:c1",
+          status: "active",
+        },
+      ],
+    });
+    await call(saveReply, ctx, reply());
+    scheduled.length = 0;
+    await executeProposal(ctx, tables.proposals[0] as never);
+    expect(tables.messages[0].status).toBe("sent");
+    expect(scheduled.map((s) => s.args)).toEqual([{ negotiationId: "negotiations:n" }]);
   });
 });

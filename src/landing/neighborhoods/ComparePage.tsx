@@ -42,7 +42,7 @@ import {
   TILE,
 } from "./NeighborhoodScores";
 import { ForYouSection, SkipsProvider } from "./sections";
-import { useWeekendRoute, WeekendRouteCard } from "./WeekendRoute";
+import { routeDay, useWeekendRoute, WeekendRouteCard } from "./WeekendRoute";
 
 /**
  * `/landing/find/neighborhoods/compare?a=&b=`: "Try the neighborhood" (#19).
@@ -300,6 +300,21 @@ function stopsOf(route: Loaded["route"]): CompareSide["stops"] {
   return route.building ? undefined : null;
 }
 
+/**
+ * "Your Saturday", or the day the routes' Events are on once Saturday is over
+ * ("Your Sunday"); "Your weekend" when the two routes' Events fall on different days.
+ */
+function dayTitle(sides: readonly Loaded[]): string {
+  const days = new Set(
+    sides.flatMap((s) => {
+      const day = s.route?.route ? routeDay(s.route.route.stops) : null;
+      return day ? [day] : [];
+    }),
+  );
+  const [only] = days;
+  return days.size > 1 ? "Your weekend" : `Your ${only ?? "Saturday"}`;
+}
+
 function Comparison({ a, b }: { a: Hood; b: Hood }) {
   const list = useQ(api.neighborhoods.list, {});
   const ids = useMemo(
@@ -319,7 +334,7 @@ function Comparison({ a, b }: { a: Hood; b: Hood }) {
       <Answer a={A} b={B} profile={profile} />
       <ScoreTable a={A} b={B} yours={yours} />
       <Row
-        title="Your Saturday"
+        title={dayTitle(sides)}
         sub="Each neighborhood's Weekend Route: what locals agree on, morning to night."
       >
         {sides.map((s) => (
@@ -457,7 +472,7 @@ function Answer({ a, b, profile }: { a: Loaded; b: Loaded; profile: CityProfile 
   return (
     <Card className="p-4">
       <h2 className="font-bold text-[20px] text-primary leading-6">
-        Your Saturday: {a.hood.label} vs {b.hood.label}
+        {dayTitle([a, b])}: {a.hood.label} vs {b.hood.label}
       </h2>
       {answer.lead ? (
         <>
@@ -524,6 +539,7 @@ function cellFor(s: Loaded, kind: (typeof KINDS)[number] | "fit"): CellScore {
   if (s.scores === null) return { state: "none", detail: "Not available." };
   if (kind === "fit") {
     const f = s.scores.interestFit;
+    if (f.state === "no_match") return { state: "none", detail: fitDetail([], f.missing) };
     if (f.state !== "ok")
       return {
         state: "none",
@@ -542,7 +558,7 @@ function cellFor(s: Loaded, kind: (typeof KINDS)[number] | "fit"): CellScore {
       score: f.score,
       label: fitLabel(f.score),
       detail: fitDetail(f.matched, f.missing),
-      sources: f.sources,
+      sources: [...f.sources],
     };
   }
   const x = s.scores.scores.find((r) => r.kind === kind);

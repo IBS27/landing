@@ -4,9 +4,12 @@ import type { ActionCtx } from "../convex/_generated/server";
 import { review, runAgent } from "../convex/ai/agent";
 import { MODEL } from "../convex/ai/model";
 import { agentSources } from "../convex/ai/sources";
+import { crewGroup } from "../convex/crews";
+import { DEFAULT_MATCH_BY } from "../convex/lib/crews";
 import {
   type CrewGroupInput,
   type CrewMeetupInput,
+  crewContext,
   crewGroupName,
   crewGroupTask,
   crewIntro,
@@ -14,6 +17,7 @@ import {
   crewRationale,
   type MeetupOption,
   meetupIdea,
+  meetupRationale,
   pickMeetup,
 } from "../convex/lib/crewTasks";
 import type { Source } from "../convex/validators";
@@ -42,6 +46,7 @@ const coffee: MeetupOption = {
 
 const input: CrewGroupInput = {
   owner: { firstName: "Maya", moving: "February 2027", moved: false },
+  commonMonth: "February 2027",
   commonPlace: "Mission",
   members: [
     {
@@ -94,6 +99,17 @@ describe("crew templates", () => {
     expect(crewGroupName("February 2027", "Mission")).toBe("February Move-in Crew · Mission");
     expect(crewGroupName(null, null)).toBe("SF Move-in Crew");
     expect(crewGroupName("February 2027", "x".repeat(100)).length).toBeLessThanOrEqual(75);
+  });
+
+  test("a crew arriving in different months gets no month in its name", () => {
+    const mixed = { ...input, commonMonth: null };
+    expect(crewGroupTask.fallback(mixed, []).name).toBe("SF Move-in Crew · Mission");
+  });
+
+  test("the meetup rationale says which shared interests the Event fits", () => {
+    expect(meetupRationale("February Move-in Crew · Mission", climbing)).toBe(
+      "The first meetup for February Move-in Crew · Mission: Bay Area Climbers Meetup Night @ Sutro Boulders fits climbing, which 3 people in your crew share with you.",
+    );
   });
 
   test("the rationale names a shared move-in month only for people who matched on it", () => {
@@ -154,6 +170,14 @@ describe("muse.crewGroup review", () => {
       "stop",
     );
     expect(r2.ok ? "" : r2.problems.join()).toContain("name at least one member");
+    const r4 = await review(
+      crewGroupTask,
+      [groupAnswer()],
+      { ...input, commonMonth: null },
+      g,
+      "stop",
+    );
+    expect(r4.ok ? "" : r4.problems.join()).toContain("don't name a month");
     const r3 = await review(
       crewGroupTask,
       [groupAnswer({ name: "x".repeat(80) })],
@@ -329,5 +353,199 @@ describe("muse.crewGroup on runAgent", () => {
     expect(r.output.intro).toBe(crewIntro(input));
     expect(r.output.name).toBe("February Move-in Crew · Mission");
     expect(r.cited?.first).toEqual(sources[0]);
+  });
+});
+
+/* ---------- The crew's context and Groups, against a fake db ---------- */
+
+describe("crewContext and crew Groups", () => {
+  const DAY = 86_400_000;
+  const NOV_12 = Date.UTC(2026, 10, 12, 20);
+  const FEB_10 = Date.UTC(2027, 1, 10, 3);
+  let n = 0;
+  const fact = (userId: string, key: string, value: unknown): Row => ({
+    _id: `cityProfileFacts:${++n}`,
+    userId,
+    key,
+    value,
+    source: "stated",
+    evidence: { kind: "brief", summary: "You said so in your brief" },
+    confidence: 1,
+    updatedAt: 1,
+  });
+  /** Everyone looks in the Mission and climbs; `months` says when each arrives. */
+  function db(months: Record<string, string>, extra: Record<string, Row[]> = {}) {
+    const people = Object.keys(months);
+    const ev = (_id: string, title: string, category: string, startAt: number): Row => ({
+      _id,
+      hostId: "users:host",
+      title,
+      cover: "",
+      description: title,
+      category,
+      startAt,
+      online: false,
+      venue: "Mission Cliffs",
+      city: "San Francisco, CA",
+      privacy: "public",
+      externalGoingCount: 0,
+      externalInterestedCount: 0,
+      createdAt: 1,
+    });
+    return fakeCtx({
+      users: [...people, "host"].map((p) => ({
+        _id: `users:${p}`,
+        name: p,
+        firstName: p,
+        username: p,
+        avatar: "",
+      })),
+      cityProfiles: people.map((p) => ({
+        _id: `cityProfiles:${p}`,
+        userId: `users:${p}`,
+        briefCompletedAt: 1,
+      })),
+      cityProfileFacts: people.flatMap((p) => [
+        fact(`users:${p}`, "moveIn", { month: months[p] }),
+        fact(`users:${p}`, "neighborhood", { slug: "mission" }),
+        fact(`users:${p}`, "interest", { id: "climbing" }),
+      ]),
+      crewOptIns: people.map((p) => ({
+        _id: `crewOptIns:${p}`,
+        userId: `users:${p}`,
+        matchBy: DEFAULT_MATCH_BY,
+        createdAt: 1,
+        updatedAt: 1,
+      })),
+      events: [
+        // Next week: before the owner has moved.
+        ev("events:soon", "Climbing night", "Fitness", NOV_12 + 6 * DAY),
+        // After move-in, but nothing the crew shares.
+        ev("events:wine", "Wine tasting", "Food & Drink", FEB_10),
+        ev("events:climb", "Bouldering at Mission Cliffs", "Fitness", FEB_10 + DAY),
+      ],
+      groups: [],
+      ...extra,
+    });
+  }
+
+  test("a first meetup is after the owner arrives and fits what the crew shares", async () => {
+    const ctx = db({ v: "2027-02", a: "2027-02" });
+    const c = await crewContext(ctx, "users:v" as never, { eventsOnly: true, now: NOV_12 });
+    expect(c?.input.meetupOptions.map((o) => o.source)).toEqual(["event:events:climb"]);
+    expect(c?.input.meetupOptions[0]?.fits).toEqual(["Climbing"]);
+    expect(c?.arrivesAt).toBe(Date.UTC(2027, 1, 1, 8));
+  });
+
+  test("no Event fits: no stand-in Event, and no meetup option at all without a fitting Group", async () => {
+    const ctx = db({ v: "2027-02", a: "2027-02" });
+    const c = await crewContext(ctx, "users:v" as never, {
+      eventsOnly: false,
+      now: FEB_10 + 2 * DAY,
+    });
+    expect(c?.input.meetupOptions).toEqual([]);
+    expect(c?.sources).toEqual([]);
+  });
+
+  test("the Group is named for a month only when most of the crew arrives then", async () => {
+    const same = await crewContext(
+      db({ v: "2027-02", a: "2027-02", b: "2027-02" }),
+      "users:v" as never,
+      {
+        eventsOnly: false,
+        now: NOV_12,
+      },
+    );
+    expect(same?.input.commonMonth).toBe("February 2027");
+    const mixed = await crewContext(
+      db({ v: "2027-02", a: "2027-03", b: "2027-04", c: "2027-02" }),
+      "users:v" as never,
+      { eventsOnly: false, now: NOV_12 },
+    );
+    expect(mixed?.input.commonMonth).toBeNull();
+    expect(crewGroupName(mixed?.input.commonMonth ?? null, mixed?.input.commonPlace ?? null)).toBe(
+      "SF Move-in Crew · Mission",
+    );
+  });
+
+  test("a crew Group someone else started shows for the people it invited or who joined", async () => {
+    type Handler = (ctx: unknown, args: Record<string, unknown>) => Promise<unknown>;
+    const query = (viewer: string, ctx: unknown) =>
+      (crewGroup as unknown as { _handler: Handler })._handler(ctx, {
+        viewerId: `users:${viewer}`,
+      }) as Promise<{
+        group: unknown;
+        fromCrew: { name: string; owner: { username: string }; joined: boolean }[];
+      }>;
+    const ctx = db(
+      { v: "2027-02", a: "2027-02", b: "2027-02" },
+      {
+        groups: [
+          {
+            _id: "groups:crew",
+            slug: "feb-crew",
+            name: "February Move-in Crew · Mission",
+            memberCount: 2,
+          },
+        ],
+        groupMembers: [
+          {
+            _id: "groupMembers:1",
+            groupId: "groups:crew",
+            userId: "users:a",
+            role: "admin",
+            joinedAt: 1,
+          },
+          {
+            _id: "groupMembers:2",
+            groupId: "groups:crew",
+            userId: "users:b",
+            role: "member",
+            joinedAt: 2,
+          },
+        ],
+        proposals: [
+          {
+            _id: "proposals:1",
+            ownerId: "users:a",
+            kind: "group",
+            status: "approved",
+            payload: {
+              kind: "group",
+              name: "February Move-in Crew · Mission",
+              description: "Hi!",
+              privacy: "private",
+              inviteIds: ["users:v"],
+            },
+            result: { kind: "group", groupId: "groups:crew" },
+            origin: { agent: "muse", task: "muse.crewGroup", via: "fallback" },
+            createdAt: 1,
+          },
+        ],
+        notifications: [
+          {
+            _id: "notifications:invite",
+            userId: "users:v",
+            actorId: "users:a",
+            kind: "group_invite",
+            groupId: "groups:crew",
+            text: "invited you to join February Move-in Crew · Mission.",
+            read: false,
+            createdAt: 1,
+          },
+        ],
+      },
+    );
+    const v = await query("v", ctx);
+    expect(v.group).toBeNull();
+    expect(v.fromCrew).toMatchObject([{ owner: { username: "a" }, joined: false }]);
+    // b wasn't invited but joined; the owner's own Group isn't "from the crew".
+    expect((await query("b", ctx)).fromCrew).toMatchObject([{ joined: true }]);
+    expect((await query("a", ctx)).fromCrew).toEqual([]);
+    // Once v declines (the invite is gone), the crew page stops saying they're invited.
+    await (ctx as { db: { delete: (id: string) => Promise<void> } }).db.delete(
+      "notifications:invite",
+    );
+    expect((await query("v", ctx)).fromCrew).toEqual([]);
   });
 });
