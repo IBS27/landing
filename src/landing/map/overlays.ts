@@ -28,7 +28,7 @@ export type OverlayData = {
   pins: Pin[];
   hoods: readonly NeighborhoodShape[];
   /** Slug of the highlighted neighborhood. */
-  selectedHood: string | null;
+  selectedHood: string | readonly string[] | null;
   stops: readonly RouteStop[];
 };
 
@@ -62,14 +62,25 @@ function pinsGeo(pins: Pin[]): FeatureCollection {
   };
 }
 
-function hoodsGeo(hoods: readonly NeighborhoodShape[], selected: string | null): FeatureCollection {
+function hoodsGeo(
+  hoods: readonly NeighborhoodShape[],
+  selected: string | readonly string[] | null,
+): FeatureCollection {
   return {
     type: "FeatureCollection",
     features: hoods.map((n, i) => ({
       type: "Feature",
       id: i,
       geometry: { type: "MultiPolygon", coordinates: n.polygon },
-      properties: { slug: n.slug, label: n.label, park: n.park, selected: n.slug === selected },
+      properties: {
+        slug: n.slug,
+        label: n.label,
+        park: n.park,
+        selected:
+          typeof selected === "string"
+            ? n.slug === selected
+            : (selected?.includes(n.slug) ?? false),
+      },
     })),
   };
 }

@@ -47,7 +47,7 @@ export function HiddenCards() {
           </p>
         )}
         <div className="mt-3 flex flex-wrap items-center gap-3 border-divider-soft border-t pt-3">
-          <p className="min-w-0 flex-1 text-[13px] text-secondary leading-4" aria-live="polite">
+          <div className="min-w-0 flex-1 text-[13px] text-secondary leading-4" aria-live="polite">
             {hidden === undefined ? (
               <Skeleton className="h-3 w-40" />
             ) : hidden.total === 0 ? (
@@ -58,7 +58,7 @@ export function HiddenCards() {
                 {one ? "card" : "cards"}
               </>
             )}
-          </p>
+          </div>
           <ConfirmAction
             label="Show all again"
             icon={<Eye size={16} aria-hidden />}

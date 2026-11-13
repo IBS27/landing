@@ -43,8 +43,11 @@ export function ChatDock() {
   // The Messenger page replaces the dock.
   if (path.startsWith("/messages")) return null;
   // Facebook drops the floating "New message" button on Reels, listing pages and the listing
-  // forms (it stays on the /marketplace/create type picker), and in Live Producer.
+  // forms (it stays on the /marketplace/create type picker), and in Live Producer. Landing
+  // Home is a full-screen map with its own chat bar, so it goes there too.
   const showCompose =
+    path !== "/landing" &&
+    path !== "/landing/" &&
     !path.startsWith("/reel") &&
     !path.startsWith("/live/") &&
     !path.startsWith("/marketplace/item/") &&
