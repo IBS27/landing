@@ -2,7 +2,7 @@ import { daysAgo, hoursAgo, minutesAgo } from "../lib/time";
 import type { ConversationSeed } from "../types";
 
 /**
- * Messenger. Maya's inbox (15 DMs, 3 group chats, 8 Marketplace threads) first,
+ * Messenger. Maya's inbox (15 DMs, 4 group chats, 8 Marketplace threads) first,
  * then conversations between other personas so every persona has an inbox.
  * Messages are laid out backwards from `last` using each message's `gap`.
  */
@@ -1172,6 +1172,14 @@ export const conversations: readonly ConversationSeed[] = [
       },
       { by: "maya.chen", text: "...me. sorry. tonight i promise", gap: 15 },
       { by: "hannah.lee", sticker: "👀", gap: 3 },
+      // Plan talk Muse turns into a poll (#34).
+      {
+        by: "ana.torres",
+        text: "unrelated but we should hit a farmers market one of these saturdays. i need real vegetables",
+        gap: 240,
+      },
+      { by: "hannah.lee", text: "yes!! i'm in", gap: 5 },
+      { by: "maya.chen", text: "same, i'll bring the tote bags", gap: 3 },
     ],
   },
   {
@@ -1262,6 +1270,55 @@ export const conversations: readonly ConversationSeed[] = [
       },
       { by: "zoe.nguyen", text: "also it's ethan's bday in 20 min 👀", gap: 30 },
       { by: "noah.williams", sticker: "🎂", gap: 1, reactions: [["ethan.park", "love"]] },
+      // Plan talk left for a live "Plan it" (#34).
+      {
+        by: "ethan.park",
+        text: "ok we should do karaoke sometime for real, before everyone scatters for break",
+        gap: 25,
+      },
+      { by: "zoe.nguyen", text: "i'm in. ethan picks the first song", gap: 2 },
+      { by: "noah.williams", text: "only if there's a duet", gap: 4 },
+    ],
+  },
+  {
+    // Maya's Move-in Crew (#30) chatting before the move; Muse turns the hike talk into a poll (#34).
+    key: "move-in-crew",
+    kind: "group",
+    title: "SF move-in crew 🌉",
+    members: [
+      "maya.chen",
+      "zoe.nguyen",
+      "daniel.reyes",
+      "ethan.park",
+      "sofia.alvarez",
+      "marcus.bell",
+    ],
+    last: hoursAgo(6),
+    messages: [
+      { by: "zoe.nguyen", text: "hi crew 👋 who's landing when? i'm feb 1" },
+      { by: "daniel.reyes", text: "feb 6, mission", gap: 4 },
+      { by: "ethan.park", text: "feb 1 too. already packing lol", gap: 7 },
+      { by: "sofia.alvarez", text: "end of jan technically but i'm counting it", gap: 12 },
+      {
+        by: "marcus.bell",
+        text: "feb 14. very romantic of me",
+        gap: 30,
+        reactions: [
+          ["zoe.nguyen", "haha"],
+          ["sofia.alvarez", "haha"],
+        ],
+      },
+      { by: "maya.chen", text: "feb 1! bernal or mission, still deciding", gap: 9 },
+      { by: "zoe.nguyen", text: "we should hike sometime before the move gets crazy", gap: 180 },
+      {
+        by: "daniel.reyes",
+        text: "yes!! the bernal hill stairs, i keep hearing about them",
+        gap: 6,
+      },
+      { by: "sofia.alvarez", text: "i'm in. weekends only for me, i work nights", gap: 11 },
+      { by: "ethan.park", text: "down. not before 9 please", gap: 4 },
+      { by: "maya.chen", text: "same, mornings are perfect", gap: 2 },
+      { by: "marcus.bell", text: "i'll bring snacks", gap: 25 },
     ],
   },
 

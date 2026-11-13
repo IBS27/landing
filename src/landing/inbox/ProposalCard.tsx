@@ -16,6 +16,7 @@ import {
 import { type ReactNode, useEffect, useState } from "react";
 import { useM } from "@/app/viewer";
 import { toConversation, toEvent, toGroup, toListing } from "@/landing/links";
+import { PollPreview } from "@/landing/plans/ChatPoll";
 import { cn, price, shortAge } from "@/lib/format";
 import { SourcesChip } from "@/ui/Citations";
 import { Avatar, Button, Card } from "@/ui/primitives";
@@ -130,7 +131,7 @@ function EventAudience({
 function approveLabel(p: ProposalView, payload: ProposalPayload) {
   switch (payload.kind) {
     case "message":
-      return "Approve & send";
+      return payload.poll ? "Send poll" : "Approve & send";
     case "offer":
       return `Send ${price(payload.amount)} offer`;
     case "event":
@@ -144,7 +145,7 @@ function approveLabel(p: ProposalView, payload: ProposalPayload) {
 function title(p: ProposalView) {
   switch (p.kind) {
     case "message":
-      return `Message to ${p.conversation?.title ?? "a chat"}`;
+      return `${p.payload.kind === "message" && p.payload.poll ? "Poll" : "Message"} to ${p.conversation?.title ?? "a chat"}`;
     case "offer":
       return `Offer to ${p.listing?.sellerName ?? p.conversation?.title ?? "the seller"}`;
     case "event":
@@ -266,6 +267,7 @@ function Preview({ p }: { p: ProposalView }) {
             </Link>
           )}
           <OutgoingBubble text={p.payload.kind === "message" ? p.payload.text : ""} />
+          {p.payload.kind === "message" && p.payload.poll && <PollPreview poll={p.payload.poll} />}
         </div>
       );
     case "offer": {
@@ -708,6 +710,7 @@ export function ChatDraft({ p, compact }: { p: ProposalView; compact?: boolean }
                 {text}
               </div>
             </div>
+            {pay.kind === "message" && pay.poll && <PollPreview poll={pay.poll} />}
           </>
         )}
         {!compact && <WhyBox p={p} compact />}

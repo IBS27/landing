@@ -2,7 +2,7 @@ import { ConvexError } from "convex/values";
 import { internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
-import type { Citations, ProposalPayload } from "../validators";
+import type { Citations, Poll, ProposalPayload } from "../validators";
 import { dmBlockNotice } from "./blocks";
 import { assertCitable, resolveCitations } from "./citations";
 import { CREW_TASKS, crewMateIds } from "./crewMembers";
@@ -23,6 +23,7 @@ import { friendIds } from "./users";
  */
 
 export const OFFER_TTL_MS = 24 * 60 * 60 * 1000;
+export const POLL_MAX_OPTIONS = 6;
 export const DEFAULT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export type ProposeArgs = {
@@ -83,6 +84,7 @@ export async function assertPayload(
       // Same rule as `messenger.send`: nothing goes across a block.
       const blocked = await dmBlockNotice(ctx, conv, ownerId);
       if (blocked) throw new ConvexError(blocked);
+      if (p.kind === "message" && p.poll) assertPoll(p.poll);
       if (p.kind === "offer") {
         if (!Number.isInteger(p.amount) || p.amount < 0)
           throw new ConvexError("Offers are whole dollars");
@@ -101,7 +103,9 @@ export async function assertPayload(
       if (p.startAt < Date.now()) throw new ConvexError("The event is in the past");
       if (p.groupId && !(await inGroup(ctx, p.groupId, ownerId)))
         throw new ConvexError("You're not in this group");
-      return assertInvitable(ctx, ownerId, p.inviteIds, crewOnly);
+      if (p.conversationId && !(await inConversation(ctx, p.conversationId, ownerId)))
+        throw new ConvexError("Not in this conversation");
+      return assertInvitable(ctx, ownerId, p.inviteIds, crewOnly, p.conversationId);
     }
     case "group": {
       const name = p.name.trim();
@@ -163,27 +167,50 @@ export function statesAmount(text: string, amount: number): boolean {
   );
 }
 
+/** A poll has a question and 2–6 distinct, short options. */
+function assertPoll(poll: Poll) {
+  const q = poll.question.trim();
+  if (!q || q.length > 140) throw new ConvexError("A poll needs a question (up to 140 characters)");
+  if (poll.options.length < 2 || poll.options.length > POLL_MAX_OPTIONS)
+    throw new ConvexError(`A poll has 2 to ${POLL_MAX_OPTIONS} options`);
+  const ids = new Set(poll.options.map((o) => o.id));
+  if (ids.size !== poll.options.length || ids.has(""))
+    throw new ConvexError("Poll options need distinct ids");
+  if (poll.options.some((o) => !o.label.trim() || o.label.length > 60))
+    throw new ConvexError("Poll options are 1 to 60 characters");
+}
+
 /**
  * Muse invites only the owner's friends, or people in their Move-in Crew (#30,
  * #31): crew members opted in to being matched, but aren't friends yet. A crew
  * Group or meetup (`crewOnly`) invites only the current crew, friends or not.
- * Checked again on approval, so someone who left the crew can't be invited.
+ * An Event planned in a group chat (#34) may also invite that chat's members.
+ * Checked again on approval, so someone who left the crew or chat can't be invited.
  */
 async function assertInvitable(
   ctx: MutationCtx,
   ownerId: Id<"users">,
   ids: Id<"users">[],
   crewOnly: boolean,
+  conversationId?: Id<"conversations">,
 ) {
-  const friends = crewOnly ? new Set<Id<"users">>() : new Set(await friendIds(ctx, ownerId));
-  const others = ids.filter((id) => !friends.has(id));
+  const allowed = crewOnly ? new Set<Id<"users">>() : new Set(await friendIds(ctx, ownerId));
+  if (conversationId && !crewOnly)
+    for (const r of await ctx.db
+      .query("conversationMembers")
+      .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
+      .collect())
+      allowed.add(r.userId);
+  const others = ids.filter((id) => !allowed.has(id));
   if (others.length === 0) return;
   const crew = await crewMateIds(ctx, ownerId);
   if (others.some((id) => !crew.has(id)))
     throw new ConvexError(
       crewOnly
         ? "Someone here isn't in your Move-in Crew anymore"
-        : "Muse can only invite your friends or your Move-in Crew",
+        : conversationId
+          ? "Muse can only invite your friends, your Move-in Crew or people in this chat"
+          : "Muse can only invite your friends or your Move-in Crew",
     );
 }
 
@@ -204,11 +231,30 @@ export function assertSameTarget(before: ProposalPayload, after: ProposalPayload
     throw new ConvexError("Can't move an offer to another listing");
   if (before.kind === "event" && after.kind === "event" && before.groupId !== after.groupId)
     throw new ConvexError("Can't move an event to another group");
+  if (
+    before.kind === "event" &&
+    after.kind === "event" &&
+    before.conversationId !== after.conversationId
+  )
+    throw new ConvexError("Can't move an event to another chat");
+  if (
+    before.kind === "message" &&
+    after.kind === "message" &&
+    JSON.stringify(before.poll ?? null) !== JSON.stringify(after.poll ?? null)
+  )
+    throw new ConvexError("Can't change a poll's options");
 }
 
-/** Offer drafts carry the listing as an attachment so the chat shows what it's for. */
+/**
+ * Offer drafts carry the listing as an attachment so the chat shows what it's
+ * for, and a message with a poll carries the poll (#34).
+ */
 function draftFields(p: ProposalPayload) {
-  if (p.kind === "message") return { text: p.text.trim(), attachments: [] };
+  if (p.kind === "message")
+    return {
+      text: p.text.trim(),
+      attachments: p.poll ? [{ kind: "poll" as const, ...p.poll }] : [],
+    };
   if (p.kind === "offer")
     return {
       text: p.text.trim(),

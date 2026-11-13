@@ -39,4 +39,11 @@ crons.daily("rebuild journeys", { hourUTC: 14, minuteUTC: 0 }, internal.journeys
   force: true,
 });
 
+/**
+ * Chat plans (#34): every hour, draft the Event for chat polls that closed and
+ * the day-of reminder for today's Events. Both wait in Landing Inbox for the
+ * owner's OK. Plain code, no model calls.
+ */
+crons.hourly("chat plans", { minuteUTC: 5 }, internal.chatPlans.tick, {});
+
 export default crons;
