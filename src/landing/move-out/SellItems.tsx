@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Store } from "lucide-react";
+import { Sparkles, Store } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { toListing } from "@/landing/links";
@@ -110,6 +110,7 @@ export function SellItems() {
                     </Link>
                   )}
                 </label>
+                {listed && <MuseTerms item={it} />}
               </li>
             );
           })}
@@ -119,7 +120,86 @@ export function SellItems() {
   );
 }
 
-type Draft = { itemId: Id<"ownedItems">; title: string; price: string; category: ListingCategory };
+type Item = NonNullable<ReturnType<typeof useQ<typeof api.inventory.mine>>>[number];
+
+/** For a listed item: whether Muse replies to buyers, and its lowest price (#44). */
+function MuseTerms({ item }: { item: Item }) {
+  const setTerms = useM(api.moveOutSales.setTerms);
+  const [editing, setEditing] = useState(false);
+  const [min, setMin] = useState(item.saleMinPrice ? String(item.saleMinPrice) : "");
+  const [error, setError] = useState<string | null>(null);
+  const on = item.saleMuse === "active";
+
+  const save = async () => {
+    setError(null);
+    try {
+      await setTerms({ itemId: item._id, minPrice: Number(min) });
+      setEditing(false);
+    } catch (e) {
+      const data = (e as { data?: unknown }).data;
+      setError(typeof data === "string" ? data : "Couldn't save. Try again.");
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 px-4 pb-2.5 pl-[76px] text-[13px]">
+      <Sparkles size={12} className="text-[#8A3FFC]" aria-hidden />
+      {item.saleMinPrice !== null ? (
+        <span className="text-secondary">
+          {on ? "Muse replies to buyers" : "Muse paused"} · lowest{" "}
+          <b className="text-primary">{price(item.saleMinPrice)}</b>
+        </span>
+      ) : (
+        <span className="text-secondary">
+          Set a lowest price and Muse drafts your replies to buyers
+        </span>
+      )}
+      {editing ? (
+        <>
+          <input
+            aria-label="Lowest price"
+            type="number"
+            min={1}
+            className="h-8 w-24 rounded-lg border border-divider bg-input px-2 text-[13px] text-primary outline-none focus:border-fb"
+            value={min}
+            onChange={(e) => setMin(e.target.value)}
+          />
+          <Button variant="primary" size="sm" onClick={save} disabled={!min.trim()}>
+            Save
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
+            Cancel
+          </Button>
+        </>
+      ) : (
+        <>
+          <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
+            {item.saleMinPrice !== null ? "Edit lowest" : "Set lowest price"}
+          </Button>
+          {item.saleMinPrice !== null && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setTerms({ itemId: item._id, muse: on ? "paused" : "active" })}
+            >
+              {on ? "Pause" : "Resume"}
+            </Button>
+          )}
+        </>
+      )}
+      {error && <span className="text-[#E41E3F]">{error}</span>}
+    </div>
+  );
+}
+
+type Draft = {
+  itemId: Id<"ownedItems">;
+  title: string;
+  price: string;
+  category: ListingCategory;
+  /** Lowest price Muse may accept (#44); blank = Muse doesn't reply to buyers. */
+  minPrice: string;
+};
 
 function ReviewListings({
   itemIds,
@@ -144,6 +224,7 @@ function ReviewListings({
         title: d.title,
         price: String(d.price),
         category: d.category,
+        minPrice: "",
       })),
     );
     const from = drafts.find((d) => d.neighborhood)?.neighborhood;
@@ -171,6 +252,7 @@ function ReviewListings({
           title: r.title,
           price: Number(r.price),
           category: r.category,
+          minPrice: r.minPrice.trim() ? Number(r.minPrice) : undefined,
         })),
         neighborhood: hood,
       });
@@ -199,7 +281,7 @@ function ReviewListings({
                       <img key={p} src={p} alt="" className="h-14 w-14 rounded-md object-cover" />
                     ))}
                 </div>
-                <div className="grid min-w-0 flex-1 grid-cols-1 gap-2 sm:grid-cols-[1fr_110px_170px]">
+                <div className="grid min-w-0 flex-1 grid-cols-1 gap-2 sm:grid-cols-[1fr_100px_100px_160px]">
                   <input
                     aria-label="Title"
                     className={field}
@@ -217,6 +299,21 @@ function ReviewListings({
                       className={`${field} pl-6`}
                       value={r.price}
                       onChange={(e) => set(i, { price: e.target.value })}
+                    />
+                  </span>
+                  <span className="relative">
+                    <span className="-translate-y-1/2 absolute top-1/2 left-3 text-secondary">
+                      $
+                    </span>
+                    <input
+                      aria-label="Lowest price for Muse"
+                      title="Lowest price Muse may accept from buyers. Leave blank to reply yourself."
+                      placeholder="Lowest"
+                      type="number"
+                      min={1}
+                      className={`${field} pl-6`}
+                      value={r.minPrice}
+                      onChange={(e) => set(i, { minPrice: e.target.value })}
                     />
                   </span>
                   <select

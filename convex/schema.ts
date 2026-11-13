@@ -977,10 +977,28 @@ export default defineSchema({
     ),
     /** The Marketplace listing created to sell it at move-out (#43). */
     saleListingId: v.optional(v.id("listings")),
+    /** Lowest price Muse may accept when negotiating the sale (#44); unset = Muse doesn't reply. */
+    saleMinPrice: v.optional(v.number()),
+    /** Whether Muse drafts replies to buyers (#44). */
+    saleMuse: v.optional(v.union(v.literal("active"), v.literal("paused"))),
+    /** Changes whenever the sale terms change, so drafts made under old terms are redone. */
+    saleTermsAt: v.optional(v.number()),
     createdAt: v.number(),
   })
     .index("by_user", ["userId", "acquiredAt"])
-    .index("by_user_listing", ["userId", "source.listingId"]),
+    .index("by_user_listing", ["userId", "source.listingId"])
+    .index("by_sale_listing", ["saleListingId"]),
+
+  /** One buyer's chat about a move-out listing (#44): Muse's waiting draft and last move. */
+  saleChats: defineTable({
+    itemId: v.id("ownedItems"),
+    conversationId: v.id("conversations"),
+    pendingProposalId: v.optional(v.id("proposals")),
+    lastMove: v.optional(negotiationMove),
+    /** Time of the last buyer message Muse has answered. */
+    handledThrough: v.number(),
+    updatedAt: v.number(),
+  }).index("by_conversation", ["conversationId"]),
 
   /**
    * Landing rooms (#25): a person's room scan (photos and optional floor size)
