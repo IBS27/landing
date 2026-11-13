@@ -61,20 +61,29 @@ export const status = viewerQuery({
   },
 });
 
-async function checkMatchBy(ctx: QueryCtx, userId: Id<"users">, m: MatchBy) {
+/**
+ * The anchors to store: only those turned on that the profile has, so one the
+ * person couldn't see checked never starts matching when they add it later.
+ */
+async function checkMatchBy(ctx: QueryCtx, userId: Id<"users">, m: MatchBy): Promise<MatchBy> {
   const profile = await getProfile(ctx, userId);
   if (profile.briefCompletedAt === null) throw new ConvexError("Set up your City Profile first");
   const usable = usableAnchors(crewProfile(profile, m));
-  const on = (["month", "neighborhood", "employer"] as const).filter((k) => m[k] && usable[k]);
-  if (on.length === 0)
+  const on: MatchBy = {
+    month: m.month && usable.month,
+    neighborhood: m.neighborhood && usable.neighborhood,
+    employer: m.employer && usable.employer,
+  };
+  if (!on.month && !on.neighborhood && !on.employer)
     throw new ConvexError("Turn on at least one thing to match on that's in your City Profile");
+  return on;
 }
 
 /** Join the Move-in Crew, matched on the anchors in `matchBy`. */
 export const optIn = viewerMutation({
   args: { matchBy },
-  handler: async (ctx, { matchBy: m }) => {
-    await checkMatchBy(ctx, ctx.viewer._id, m);
+  handler: async (ctx, args) => {
+    const m = await checkMatchBy(ctx, ctx.viewer._id, args.matchBy);
     const now = Date.now();
     const row = await optInRow(ctx, ctx.viewer._id);
     if (row) await ctx.db.patch(row._id, { matchBy: m, updatedAt: now });
@@ -90,10 +99,10 @@ export const optIn = viewerMutation({
 
 export const setMatchBy = viewerMutation({
   args: { matchBy },
-  handler: async (ctx, { matchBy: m }) => {
+  handler: async (ctx, args) => {
     const row = await optInRow(ctx, ctx.viewer._id);
     if (!row) throw new ConvexError("You're not in a Move-in Crew");
-    await checkMatchBy(ctx, ctx.viewer._id, m);
+    const m = await checkMatchBy(ctx, ctx.viewer._id, args.matchBy);
     await ctx.db.patch(row._id, { matchBy: m, updatedAt: Date.now() });
   },
 });

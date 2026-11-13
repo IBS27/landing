@@ -256,6 +256,13 @@ describe("myCrew privacy", () => {
     expect(r?.members.map((m) => m.shared)).toEqual([["climbing"]]);
   });
 
+  test("an anchor your profile lacks is stored off, so adding it later doesn't match you", async () => {
+    const ctx = world(["v"], []);
+    await call(optIn, ctx, "v", { matchBy: { month: true, neighborhood: true, employer: true } });
+    const row = (await ctx.db.query("crewOptIns").first()) as unknown as Row;
+    expect(row.matchBy).toEqual({ month: true, neighborhood: true, employer: false });
+  });
+
   test("joining needs a finished City Profile", async () => {
     const ctx = fakeCtx({ users: [{ _id: "users:w", name: "w", username: "w" }] });
     await expect(call(optIn, ctx, "w", { matchBy: DEFAULT_MATCH_BY })).rejects.toThrow(
