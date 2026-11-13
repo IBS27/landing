@@ -63,6 +63,10 @@ function HouseView({ data }: { data: MemberData }) {
         </>
       }
     >
+      {/* Invites to other houses, e.g. when moving: My Place shows this house instead. */}
+      {mine?.invites.map((i) => (
+        <InviteRow key={i._id} invite={{ house: i, invitedBy: i.invitedBy }} />
+      ))}
       <Card className="mb-4 p-4">
         <h2 className="font-semibold text-[15px] text-primary">Who lives here</h2>
         <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-2">

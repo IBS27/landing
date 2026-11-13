@@ -5,7 +5,10 @@ import { plural } from "@/lib/format";
 import { Card } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 
-/** My Place's way into the House Group (#38): the viewer's house, an invite, or a start. */
+/**
+ * My Place's way into the House Group (#38): an invite (the house page shows it,
+ * with Join and Decline), the viewer's house, or a start.
+ */
 export function HouseCard() {
   const mine = useQ(api.house.mine, {});
   const house = mine?.houses[0];
@@ -13,10 +16,10 @@ export function HouseCard() {
   const status =
     mine === undefined
       ? ""
-      : house
-        ? `${house.name} · ${plural(house.memberCount, "person", "people")}. Chores, bills and groceries.`
-        : invite
-          ? `${invite.invitedBy.name} invited you to ${invite.name}.`
+      : invite
+        ? `${invite.invitedBy.name} invited you to ${invite.name}.`
+        : house
+          ? `${house.name} · ${plural(house.memberCount, "person", "people")}. Chores, bills and groceries.`
           : "Share chores, bills and a grocery list with the people you live with.";
   return (
     <Card className="mb-3 overflow-hidden">
@@ -26,7 +29,7 @@ export function HouseCard() {
         className="flex items-center gap-3 p-4 hover:bg-hover"
       >
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-highlight text-accent">
-          {!house && invite ? <MailOpen size={20} /> : <Home size={20} />}
+          {invite ? <MailOpen size={20} /> : <Home size={20} />}
         </span>
         <span className="min-w-0 flex-1">
           <span className="block font-semibold text-[17px] text-primary leading-[22px]">House</span>
