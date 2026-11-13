@@ -1,9 +1,11 @@
 import { ConvexError, v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
+import { recordSignal, undoSignal } from "./lib/activity";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { notify } from "./lib/notify";
 import { canView, loadAudience } from "./lib/posts";
+import { isPositiveReaction } from "./lib/profileSignals";
 import { getSummaries } from "./lib/users";
 import { type ReactionType, reactionTarget, reactionType } from "./validators";
 
@@ -89,9 +91,16 @@ export const react = viewerMutation({
     if (existing && (type === null || existing.type === type)) {
       await ctx.db.delete(existing._id);
       await adjustCount(ctx, targetType, targetId, -1);
+      if (targetType === "post") await undoSignal(ctx, ctx.viewer._id, ["like"], targetId);
       return null;
     }
     if (type === null) return null;
+    // Post likes are City Profile signals (#4); Sad and Angry don't count as one.
+    if (targetType === "post") {
+      if (isPositiveReaction(type))
+        await recordSignal(ctx, ctx.viewer._id, "like", "post", targetId);
+      else await undoSignal(ctx, ctx.viewer._id, ["like"], targetId);
+    }
     if (existing) {
       await ctx.db.patch(existing._id, { type });
       return type;

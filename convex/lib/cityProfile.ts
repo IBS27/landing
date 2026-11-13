@@ -305,3 +305,36 @@ export async function removeFact(
   }
   return true;
 }
+
+/**
+ * Drops an inferred fact that activity no longer supports (#4). Stated facts and
+ * removals stay: a removal is the person's choice, and it keeps the fact from
+ * being inferred again.
+ */
+export async function dropInferredFact(ctx: MutationCtx, userId: Id<"users">, entry: FactEntry) {
+  const slot = factSlot(entry);
+  for (const row of await rowsFor(ctx, userId, entry.key))
+    if (factSlot(row) === slot && row.source === "inferred" && row.removedAt === undefined)
+      await ctx.db.delete(row._id);
+}
+
+/** Whether Landing learns from this person's activity (#4). On unless they turned it off. */
+export async function learnsFromActivity(ctx: QueryCtx, userId: Id<"users">): Promise<boolean> {
+  const row = await ctx.db
+    .query("cityProfiles")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .unique();
+  return row?.learnFromActivity !== false;
+}
+
+/** Turns learning from activity on or off (#4). */
+export async function setLearnFromActivity(ctx: MutationCtx, userId: Id<"users">, on: boolean) {
+  const row = await ctx.db
+    .query("cityProfiles")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .unique();
+  const learnFromActivity = on ? undefined : false;
+  if (row) await ctx.db.patch(row._id, { learnFromActivity, updatedAt: Date.now() });
+  else if (!on)
+    await ctx.db.insert("cityProfiles", { userId, learnFromActivity, updatedAt: Date.now() });
+}

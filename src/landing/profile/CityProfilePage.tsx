@@ -5,6 +5,7 @@ import { LandingPage } from "@/landing/shell/LandingPage";
 import { Card, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import { PrivacyNote } from "./CityBrief";
+import { LearnFromActivity } from "./LearnFromActivity";
 import { ProfileSummary } from "./ProfileSummary";
 
 /** Landing → City Profile (`/landing/profile`): the viewer's profile, or a prompt to set it up. */
@@ -56,6 +57,7 @@ export function CityProfilePage() {
             {(onboarded || profile.facts.length > 0) && (
               <ProfileSummary profile={profile} showHeader={false} />
             )}
+            <LearnFromActivity />
             <PrivacyNote />
           </div>
         )}
