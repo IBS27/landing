@@ -1,4 +1,4 @@
-import type { Doc } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { isBlockedEitherWay } from "./blocks";
 import { notificationCategoryOf, settingsRow } from "./settings";
@@ -11,11 +11,16 @@ type NotificationInput = Omit<
 /**
  * Insert a notification unless the actor is notifying themselves, either has
  * blocked the other, or the recipient turned that category off in Settings.
+ * Returns the new notification, or null when none was sent.
  */
-export async function notify(ctx: MutationCtx, n: NotificationInput) {
-  if (n.actorId && n.actorId === n.userId) return;
-  if (n.actorId && (await isBlockedEitherWay(ctx, n.userId, n.actorId))) return;
+export async function notify(
+  ctx: MutationCtx,
+  n: NotificationInput,
+): Promise<Id<"notifications"> | null> {
+  if (n.actorId && n.actorId === n.userId) return null;
+  if (n.actorId && (await isBlockedEitherWay(ctx, n.userId, n.actorId))) return null;
   const category = notificationCategoryOf(n.kind);
-  if (category && (await settingsRow(ctx, n.userId))?.notificationsOff?.includes(category)) return;
-  await ctx.db.insert("notifications", { ...n, read: false, seen: false, createdAt: Date.now() });
+  if (category && (await settingsRow(ctx, n.userId))?.notificationsOff?.includes(category))
+    return null;
+  return ctx.db.insert("notifications", { ...n, read: false, seen: false, createdAt: Date.now() });
 }

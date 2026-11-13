@@ -90,6 +90,12 @@ export const NOTIFICATION_CATEGORIES: {
     label: "Fundraisers and crises",
     description: "These are notifications about fundraisers and crisis response.",
   },
+  {
+    id: "landing",
+    label: "Landing",
+    description:
+      "These are notifications about drafts Muse has waiting for your OK and your weekly check-ins.",
+  },
 ];
 
 /** Which Settings category silences each notification kind. Unlisted kinds always notify. */
@@ -104,11 +110,14 @@ const CATEGORY_OF: Partial<Record<Doc<"notifications">["kind"], NotificationCate
   group_invite: "groups",
   event_invite: "events",
   event_reminder: "events",
+  event_activity: "events",
   listing_message: "marketplace",
   listing_saved: "marketplace",
   vouch: "marketplace",
   birthday: "birthdays",
   memory: "reminders",
+  landing_check_in: "landing",
+  landing_drafts: "landing",
 };
 
 export function notificationCategoryOf(kind: Doc<"notifications">["kind"]) {

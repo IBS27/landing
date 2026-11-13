@@ -16,6 +16,7 @@ import {
   type SuggestInput,
 } from "../convex/lib/checkIns";
 import { journeyWeek } from "../convex/lib/journeys";
+import * as notifications from "../convex/notifications";
 import type { JourneyCheckIn, WeekendStop } from "../convex/validators";
 import { fakeCtx, type Row } from "./fakeDb";
 
@@ -584,6 +585,59 @@ describe("writeCheckIns", () => {
     expect(row(3).checkIn).toBeUndefined();
     expect(await current(db)).toBeNull();
     expect(tables.journeys?.length).toBe(3);
+  });
+});
+
+describe("check-in ready notification (#134)", () => {
+  const notes = (tables: Record<string, Row[]>) =>
+    (tables.notifications ?? []).filter((n) => n.userId === "users:v");
+
+  test("once per week, counting only what she did, linking to Journeys", async () => {
+    const { db, tables } = world();
+    await checkIns.writeCheckIns(db, "users:v" as never, NOW);
+    expect(notes(tables)).toMatchObject([
+      {
+        kind: "landing_check_in",
+        text: "2 weeks in: 3 events, 1 Group and 2 new friends. Your check-in is ready.",
+        read: false,
+      },
+    ]);
+    // The daily build runs again (and again): still one this week.
+    await checkIns.writeCheckIns(db, "users:v" as never, NOW + HOUR);
+    await checkIns.writeCheckIns(db, "users:v" as never, NOW + 20 * HOUR);
+    expect(notes(tables)).toHaveLength(1);
+    const v = tables.users?.find((u) => u._id === "users:v");
+    if (v) v.notificationsSeenAt = 0; // the fake db can't run the seed fallback's filter
+    const out = (await handler(notifications.list)(db, { viewerId: "users:v" })) as {
+      items: { target: unknown }[];
+    };
+    expect(out.items[0]?.target).toEqual({ kind: "landing", to: "/landing/crew/journeys" });
+  });
+
+  test("a quiet stretch reads as ready, never as a shortfall", async () => {
+    const { db, tables } = world((t) => {
+      t.eventResponses = [];
+      t.groupMembers = [];
+      t.friendships = [];
+    });
+    await checkIns.writeCheckIns(db, "users:v" as never, NOW);
+    expect(notes(tables).map((n) => n.text)).toEqual(["2 weeks in: your check-in is ready."]);
+  });
+
+  test("off when Landing notifications are off", async () => {
+    const { db, tables } = world((t) => {
+      t.userSettings = [
+        { _id: "userSettings:v", userId: "users:v", notificationsOff: ["landing"], updatedAt: 0 },
+      ];
+    });
+    await checkIns.writeCheckIns(db, "users:v" as never, NOW);
+    expect(notes(tables)).toEqual([]);
+  });
+
+  test("not before move-in", async () => {
+    const { db, tables } = world();
+    await checkIns.writeCheckIns(db, "users:v" as never, Date.UTC(2026, 9, 26, 20));
+    expect(notes(tables)).toEqual([]);
   });
 });
 

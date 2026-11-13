@@ -306,6 +306,7 @@ export const proposeGroup = action({
       rationale: o.rationale.trim(),
       citations: r.cited,
       origin: { agent: "muse", task: GROUP_TASK, runId: r.runId, via: r.via },
+      byOwner: true,
     });
   },
 });
@@ -355,6 +356,7 @@ export const proposeMeetup = action({
       rationale: `The first meetup for ${state.group.name}, at an upcoming event that fits what your crew shares.`,
       citations: r.cited,
       origin: { agent: "muse", task: MEETUP_TASK, runId: r.runId, via: r.via },
+      byOwner: true,
     });
   },
 });

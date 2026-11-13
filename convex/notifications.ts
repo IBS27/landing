@@ -16,6 +16,8 @@ export type NotificationTarget =
   | { kind: "event"; eventId: Id<"events"> }
   | { kind: "listing"; listingId: Id<"listings"> }
   | { kind: "conversation"; conversationId: Id<"conversations"> }
+  /** A Landing page: Landing Inbox, or Crew & Journeys for the check-in. */
+  | { kind: "landing"; to: "/landing/inbox" | "/landing/crew/journeys" }
   | { kind: "none" };
 
 export type NotificationView = {
@@ -37,6 +39,13 @@ export type NotificationView = {
 };
 
 const DEFAULT_LIMIT = 30;
+
+/** Notifications about the viewer themselves, shown with their own photo. */
+const LANDING_OR_MEMORY = new Set<Doc<"notifications">["kind"]>([
+  "memory",
+  "landing_check_in",
+  "landing_drafts",
+]);
 
 async function enrich(
   ctx: QueryCtx,
@@ -88,7 +97,10 @@ async function enrich(
       }
 
       let target: NotificationTarget = { kind: "none" };
-      if (n.kind === "listing_message" && n.conversationId)
+      if (n.kind === "landing_drafts") target = { kind: "landing", to: "/landing/inbox" };
+      else if (n.kind === "landing_check_in")
+        target = { kind: "landing", to: "/landing/crew/journeys" };
+      else if (n.kind === "listing_message" && n.conversationId)
         target = { kind: "conversation", conversationId: n.conversationId };
       else if (post && postAuthor)
         target = {
@@ -112,7 +124,9 @@ async function enrich(
         createdAt: n.createdAt,
         read: n.read,
         actor,
-        image: actor ? null : (event?.cover ?? (n.kind === "memory" ? viewer.avatar : null)),
+        image: actor
+          ? null
+          : (event?.cover ?? (LANDING_OR_MEMORY.has(n.kind) ? viewer.avatar : null)),
         emphasis,
         reaction,
         request,

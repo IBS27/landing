@@ -6,7 +6,7 @@ import { useM, useQ } from "@/app/viewer";
 import { useToast } from "@/features/marketplace/toast";
 import { toProfile } from "@/landing/links";
 import { ChatPlansCard } from "@/landing/plans/ChatPlansCard";
-import { ComingSoon, LandingPage } from "@/landing/shell/LandingPage";
+import { LandingPage } from "@/landing/shell/LandingPage";
 import { cn } from "@/lib/format";
 import { Modal } from "@/ui/overlays";
 import { Avatar, Button, Card, Spinner } from "@/ui/primitives";
@@ -73,7 +73,6 @@ export function CrewPage() {
           </>
         )}
         {status !== undefined && <ChatPlansCard />}
-        <ComingSoon items={["Weekly check-ins and levels: Explore, Regular, Local"]} />
       </div>
     </LandingPage>
   );

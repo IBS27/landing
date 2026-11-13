@@ -8,7 +8,6 @@ import { type Audience, loadAudience } from "./lib/posts";
 import {
   assertPayload,
   assertSameTarget,
-  citationsVisible,
   dropDraft,
   executeProposal,
   inConversation,
@@ -17,7 +16,7 @@ import {
   logEvent,
   propose as proposeImpl,
   syncDraft,
-  targetReachable,
+  waitingProposals,
 } from "./lib/proposals";
 import { getSummaries, type UserSummary } from "./lib/users";
 import { citations, proposalOrigin, proposalPayload, type Source } from "./validators";
@@ -37,6 +36,7 @@ export const propose = internalMutation({
     citations: v.optional(citations),
     origin: proposalOrigin,
     ttlMs: v.optional(v.number()),
+    byOwner: v.optional(v.boolean()),
   },
   handler: (ctx, args) => proposeImpl(ctx, args),
 });
@@ -231,28 +231,6 @@ export type ProposalView = NonNullable<Awaited<ReturnType<typeof proposalView>>>
 const present = <T>(x: T | null): x is T => x !== null;
 
 /**
- * The owner's pending proposals that are still live and actionable: not
- * expired, every cited source still visible to them, and its chat or Group
- * still theirs. The inbox, its badge and the chat drafts all show this set.
- */
-async function waiting(ctx: QueryCtx, ownerId: Id<"users">, now: number) {
-  const rows = await ctx.db
-    .query("proposals")
-    .withIndex("by_owner_status", (q) => q.eq("ownerId", ownerId).eq("status", "pending"))
-    .collect();
-  const a = await loadAudience(ctx, ownerId);
-  const ok = await Promise.all(
-    rows.map(
-      async (p) =>
-        !isExpired(p, now) &&
-        (await citationsVisible(ctx, p, a)) &&
-        (await targetReachable(ctx, p)),
-    ),
-  );
-  return { rows: rows.filter((_, i) => ok[i]), audience: a };
-}
-
-/**
  * Everything waiting on the viewer: what expires soonest first, then newest.
  * Expired ones move to history.
  */
@@ -260,7 +238,7 @@ export const pending = viewerQuery({
   args: {},
   handler: async (ctx) => {
     const now = Date.now();
-    const { rows, audience: a } = await waiting(ctx, ctx.viewer._id, now);
+    const { rows, audience: a } = await waitingProposals(ctx, ctx.viewer._id, now);
     const live = rows.sort(
       (x, y) =>
         (x.expiresAt ?? Number.POSITIVE_INFINITY) - (y.expiresAt ?? Number.POSITIVE_INFINITY) ||
@@ -274,7 +252,7 @@ export const pending = viewerQuery({
 export const pendingCount = viewerQuery({
   args: {},
   handler: async (ctx) => {
-    return (await waiting(ctx, ctx.viewer._id, Date.now())).rows.length;
+    return (await waitingProposals(ctx, ctx.viewer._id, Date.now())).rows.length;
   },
 });
 
@@ -313,7 +291,7 @@ export const forConversation = viewerQuery({
   args: { conversationId: v.id("conversations") },
   handler: async (ctx, { conversationId }) => {
     const now = Date.now();
-    const { rows, audience: a } = await waiting(ctx, ctx.viewer._id, now);
+    const { rows, audience: a } = await waitingProposals(ctx, ctx.viewer._id, now);
     const mine = rows.filter(
       (p) =>
         (p.payload.kind === "message" || p.payload.kind === "offer") &&

@@ -561,7 +561,7 @@ export const respond = viewerMutation({
     await notify(ctx, {
       userId: e.hostId,
       actorId: viewerId,
-      kind: "event_reminder",
+      kind: "event_activity",
       text:
         status === "going"
           ? `is going to your event ${e.title}.`
@@ -731,7 +731,7 @@ export const post = viewerMutation({
     await notify(ctx, {
       userId: e.hostId,
       actorId: ctx.viewer._id,
-      kind: "event_reminder",
+      kind: "event_activity",
       text: `posted in ${e.title}.`,
       eventId,
       postId,

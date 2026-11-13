@@ -38,8 +38,10 @@ import { getProfile } from "./lib/cityProfile";
 import { viewerQuery } from "./lib/functions";
 import { interestsForEvent } from "./lib/interests";
 import { isOver, JOURNEY_WEEKS, moveInStart, planWhen } from "./lib/journeys";
+import { notify } from "./lib/notify";
 import { type Audience, canSeeEvent, loadAudience } from "./lib/posts";
 import { hasProtected } from "./lib/protectedText";
+import { checkInReminderKey, checkInText, recordReminder, sentReminder } from "./lib/reminders";
 import { getSummaries, type UserSummary } from "./lib/users";
 import {
   type CheckInActivity,
@@ -273,7 +275,36 @@ export async function writeCheckIns(ctx: MutationCtx, userId: Id<"users">, now: 
       computedAt: now,
     };
     await ctx.db.patch(row._id, { checkIn });
+    if (i === 0 && row.endsAt > now && now >= moveInAt)
+      await announceCheckIn(ctx, userId, row.weekOf, daysSince(moveInAt, now), total, now);
   }
+}
+
+/**
+ * "3 weeks in: 2 events and 1 new friend. Your check-in is ready.", once per
+ * week (the `reminders` ledger), linking to Journeys. Off when the person
+ * turned Landing notifications off; then it's tried again on the next build.
+ */
+async function announceCheckIn(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  weekOf: string,
+  days: number,
+  total: CheckInActivity,
+  now: number,
+) {
+  const key = checkInReminderKey(weekOf);
+  if (await sentReminder(ctx, userId, key)) return;
+  const id = await notify(ctx, {
+    userId,
+    kind: "landing_check_in",
+    text: checkInText(days, {
+      events: total.events.length,
+      groups: total.groups.length,
+      friends: total.friends.length,
+    }),
+  });
+  if (id) await recordReminder(ctx, userId, key, now);
 }
 
 /** Finishes a check-in when there's no Journey to build (the week after the first 90 days). */

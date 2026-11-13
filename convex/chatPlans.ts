@@ -259,6 +259,8 @@ type StartArgs = {
   citations?: Citations;
   origin: Infer<typeof proposalOrigin>;
   now: number;
+  /** The owner pressed "Plan it" (not the seed). */
+  byOwner?: boolean;
 };
 
 /** Stores the plan and proposes its poll message. Nothing is sent until the owner approves. */
@@ -285,6 +287,7 @@ async function startPlan(ctx: MutationCtx, a: StartArgs): Promise<Id<"proposals"
     origin: a.origin,
     // A poll can't go out once it would already be closed.
     ttlMs: closesAt - a.now,
+    byOwner: a.byOwner,
   });
   await ctx.db.insert("chatPlans", {
     ownerId: a.ownerId,
@@ -314,7 +317,8 @@ export const start = internalMutation({
     citations: v.optional(citations),
     origin: proposalOrigin,
   },
-  handler: (ctx, a): Promise<Id<"proposals">> => startPlan(ctx, { ...a, now: Date.now() }),
+  handler: (ctx, a): Promise<Id<"proposals">> =>
+    startPlan(ctx, { ...a, now: Date.now(), byOwner: true }),
 });
 
 /** The picked times as poll options, earliest first. */
@@ -377,6 +381,7 @@ async function proposeEventFor(
   ctx: MutationCtx,
   plan: Doc<"chatPlans">,
   now: number,
+  byOwner = false,
 ): Promise<Id<"proposals"> | null> {
   const s = await planState(ctx, plan, now);
   if (s.stage !== "polling") throw new ConvexError("This plan isn't at the poll anymore");
@@ -405,6 +410,7 @@ async function proposeEventFor(
     citations: plan.citations,
     origin: { agent: "muse", task: CHAT_PLAN_EVENT_TASK, via: "fallback" },
     ttlMs: Math.max(HOUR, winner.startAt - now - HOUR),
+    byOwner,
   });
   await ctx.db.patch(plan._id, { eventProposalId: id, updatedAt: now });
   return id;
@@ -417,7 +423,7 @@ export const proposeEvent = viewerMutation({
     const plan = await ctx.db.get(planId);
     if (!plan || plan.ownerId !== ctx.viewer._id || plan.dismissed)
       throw new ConvexError("Plan not found");
-    const id = await proposeEventFor(ctx, plan, Date.now());
+    const id = await proposeEventFor(ctx, plan, Date.now(), true);
     if (!id) throw new ConvexError("Nobody has picked a time that's still ahead yet");
     return id;
   },

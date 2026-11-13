@@ -55,6 +55,9 @@ const BADGE: Record<Kind, { bg: string; icon: keyof typeof glyph }> = {
   memory: { bg: "#0866FF", icon: "clock" },
   live: { bg: "#F3425F", icon: "video" },
   vouch: { bg: "#0866FF", icon: "person" },
+  event_activity: { bg: "#F3425F", icon: "calendar" },
+  landing_check_in: { bg: "#0866FF", icon: "clock" },
+  landing_drafts: { bg: "#0866FF", icon: "comment" },
 };
 
 /** The 28px badge overlapping a notification avatar's bottom-right corner. */

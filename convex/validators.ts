@@ -213,6 +213,12 @@ export const notificationKind = v.union(
   v.literal("live"),
   /** Landing: someone vouched for you (convex/vouches.ts). */
   v.literal("vouch"),
+  /** A host hears who's going to or posted in their Event (`event_reminder` is a real reminder). */
+  v.literal("event_activity"),
+  /** Landing: this week's check-in is ready (convex/checkIns.ts). */
+  v.literal("landing_check_in"),
+  /** Landing: Muse has drafts waiting in Landing Inbox (convex/reminders.ts). */
+  v.literal("landing_drafts"),
 );
 
 /** Settings → Notifications categories (each maps to one or more notification kinds). */
@@ -231,6 +237,8 @@ export const notificationCategory = v.union(
   v.literal("pages"),
   v.literal("marketplace"),
   v.literal("fundraisers"),
+  /** Landing: Muse drafts waiting for you and weekly check-ins. */
+  v.literal("landing"),
 );
 export type NotificationCategory = Infer<typeof notificationCategory>;
 
