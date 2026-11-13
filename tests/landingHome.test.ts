@@ -6,6 +6,7 @@ import {
   type ChatMessage,
   readSessions,
   storedMessage,
+  viaLabel,
 } from "../src/landing/home/useChatLog";
 import { defaultMoveIn } from "../src/landing/place/placeParts";
 
@@ -109,6 +110,52 @@ describe("the stored chat log", () => {
     expect(readSessions(JSON.stringify(old))).toEqual(old as never);
   });
 
+  test("a reply keeps why the rules answered and the things it added; older chats have neither (#153)", () => {
+    const m: ChatMessage = {
+      id: "m1",
+      who: "muse",
+      text: "Looking on Marketplace for a lamp.",
+      via: "rules",
+      why: "busy",
+      command: { kind: "add_items", items: ["lamp"], want: "reading", budget: 120 },
+    };
+    expect(storedMessage(m)).toEqual(m);
+    const raw = JSON.stringify([
+      {
+        id: "s1",
+        title: "Lamp",
+        updatedAt: 5,
+        messages: [
+          m,
+          { id: "m2", who: "muse", text: "Offline.", via: "rules", why: "offline" },
+          // From before #153: no reason, and a reason this build doesn't know is dropped.
+          { id: "m3", who: "muse", text: "Old.", via: "rules" },
+          { id: "m4", who: "muse", text: "Odd.", via: "rules", why: "asleep" },
+        ],
+      },
+    ]);
+    const [session] = readSessions(raw);
+    expect(session.messages.map((x) => x.why)).toEqual(["busy", "offline", undefined, undefined]);
+    expect(session.messages[0].command).toEqual(m.command);
+  });
+
+  test("the label under a reply says why the rules answered only when it knows (#153)", () => {
+    expect(viaLabel({ via: "muse" })).toBe("Answered by Muse");
+    expect(viaLabel({ via: "landing" })).toBe("From Landing");
+    expect(viaLabel({ via: "rules", why: "off" })).toBe("Answered by Landing's rules (AI off)");
+    expect(viaLabel({ via: "rules", why: "busy" })).toBe(
+      "Answered by Landing's rules (Muse is busy)",
+    );
+    expect(viaLabel({ via: "rules", why: "offline" })).toBe(
+      "Answered by Landing's rules (offline)",
+    );
+    // Muse's answer was set aside, or a chat stored before the reason was: no parenthesis.
+    expect(viaLabel({ via: "rules", why: "unsure" })).toBe("Answered by Landing's rules");
+    expect(viaLabel({ via: "rules" })).toBe("Answered by Landing's rules");
+    // A reason never changes Muse's own label.
+    expect(viaLabel({ via: "muse", why: "off" })).toBe("Answered by Muse");
+  });
+
   test("what isn't a chat, a message or a card is dropped, never thrown on", () => {
     expect(readSessions(null)).toEqual([]);
     expect(readSessions("{not json")).toEqual([]);
@@ -182,7 +229,7 @@ describe("suggestions", () => {
     ]);
   });
 
-  test("with AI off, Landing's rules furnish from every furnishing chip", () => {
+  test("with AI off, Landing's rules furnish or add from every furnishing chip (#153)", () => {
     const chips = [
       ...suggestions({
         ...base,
@@ -196,14 +243,28 @@ describe("suggestions", () => {
       }).filter((c) => !c.run),
     ];
     expect(chips.length).toBe(5);
-    for (const c of chips) {
-      const reply = ruleReply(
+    const commands = chips.map((c) => [
+      c.label,
+      ruleReply(
         c.label,
         { stage: "city", view: "apartment" },
         { neighborhoods: [], apartment: { hasModel: true }, today: "2026-11-13" },
-      );
-      expect([c.label, reply.command.kind]).toEqual([c.label, "furnish"]);
-    }
+      ).command,
+    ]);
+    // A look furnishes the whole apartment; a chip that names things adds only those.
+    expect(commands).toEqual([
+      [
+        "Make it cozy and warm under $1,500",
+        { kind: "furnish", vibe: "cozy and warm", budget: 1500 },
+      ],
+      [
+        "A minimal, bright style under $1,000",
+        { kind: "furnish", vibe: "A minimal, bright style", budget: 1000 },
+      ],
+      ["Add a desk and a lamp", { kind: "add_items", items: ["desk", "lamp"] }],
+      ["Add a reading lamp", { kind: "add_items", items: ["lamp"], want: "reading" }],
+      ["Add a rug under $200", { kind: "add_items", items: ["rug"], budget: 200 }],
+    ]);
   });
 
   test("the map offers the apartment once there is a place", () => {

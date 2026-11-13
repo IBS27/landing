@@ -24,14 +24,30 @@ export const unitSceneFields = {
       status: generationStatus,
       revision: v.number(),
       autoApply: v.boolean(),
+      /** One short sentence, written by Landing, on what a partial or failed build is missing (#153). */
+      note: v.optional(v.string()),
     }),
   ),
   jobId: v.optional(v.id("aiJobs")),
   candidate: v.optional(unitScene),
   explanation: v.optional(v.string()),
   runId: v.optional(v.id("aiRuns")),
-  /** The last vibe and total furniture budget (whole dollars) given in Landing Home's chat (#150). */
-  furnishing: v.optional(v.object({ vibe: v.string(), budget: v.optional(v.number()) })),
+  /**
+   * Furnishing from Landing Home's chat (#150, #153). `vibe`: the look last
+   * given for the whole apartment. `budget`: the apartment's one furniture
+   * budget, whole dollars: what the Apartment tab's chip and every reply
+   * show. Only a request to furnish the room sets it, and never below what is
+   * already placed; "add a rug under $200" caps that request and leaves it
+   * alone. `removed`: Marketplace listings the person took out, newest last,
+   * which furnishing the room again leaves out.
+   */
+  furnishing: v.optional(
+    v.object({
+      vibe: v.optional(v.string()),
+      budget: v.optional(v.number()),
+      removed: v.optional(v.array(v.id("listings"))),
+    }),
+  ),
   createdAt: v.number(),
   updatedAt: v.number(),
 };

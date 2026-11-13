@@ -8,10 +8,23 @@ import type { ApartmentView, FurnishReply } from "../convex/apartment";
 import * as apartment from "../convex/apartment";
 import type { FurnishInput } from "../convex/lib/furnishTask";
 import { type ItemModel, itemModelProblems, proxyModel } from "../convex/lib/itemModel";
-import { itemSize, manualScene, type Placement, placementProblems } from "../convex/lib/unitScene";
+import { NO_DETAILS_NOTE, NO_LAYOUT_NOTE } from "../convex/lib/unitGeneration";
+import {
+  itemSize,
+  manualScene,
+  type Placement,
+  type PlacementKind,
+  placementProblems,
+} from "../convex/lib/unitScene";
+import { unitSceneRecord } from "../convex/lib/unitSceneRecord";
 import { save } from "../convex/unitScenes";
 import { fakeCtx, type Row } from "./fakeDb";
-import { invoke, modelCompletion } from "./unitGenerationHarness";
+import {
+  generationAppearance,
+  generationLayout,
+  invoke,
+  modelCompletion,
+} from "./unitGenerationHarness";
 
 // Landing Home's Apartment tab (#150): the unit, its items, furnishing and item models.
 type Args = Record<string, unknown>;
@@ -217,20 +230,23 @@ function world(
       invoke<number>(apartment.removeItem, ctx, { viewerId, unitId, itemId }),
     add: (listingId: string, unitId = "unit") =>
       invoke<string>(apartment.addItem, ctx, { viewerId, unitId, listingId }),
-    furnish: async (vibe: string, budget?: number) => {
+    /** `only`: the kinds an "add a lamp" request names (#153). */
+    furnish: async (vibe: string, budget?: number, only?: PlacementKind[]) => {
       const r = await invoke<FurnishReply>(apartment.furnish, action, {
         viewerId,
         vibe,
         ...(budget === undefined ? {} : { budget }),
+        ...(only ? { only } : {}),
       });
       validate(apartment.furnishReply, r, { throw: true });
       return r;
     },
-    context: (vibe: string, budget?: number) =>
+    context: (vibe: string, budget?: number, only?: PlacementKind[]) =>
       apartment.furnishContext(ctx, {
         viewerId: viewerId as Id<"users">,
         vibe,
         ...(budget === undefined ? {} : { budget }),
+        ...(only ? { only } : {}),
       }),
   });
   /** Runs the scheduled item-model job, as the scheduler would. */
@@ -349,6 +365,84 @@ describe("apartment.get", () => {
     // A hand-made scene with no build is simply ready.
     await w.ctx.db.patch("unit" as never, { scene: READY, generation: undefined });
     expect((await w.me.get()).unit).toMatchObject({ state: "ready" });
+  });
+  test("a build stored as partial before #153 reads as ready when its finishes landed", async () => {
+    const w = world({ photos: [HTTPS] });
+    ai(true);
+    const built = { ...generationLayout, appearance: generationAppearance };
+    const stored = async (scene: unknown, note?: string) => {
+      await w.ctx.db.patch("unit" as never, {
+        scene,
+        generation: { status: "partial", revision: 4, autoApply: true, ...(note ? { note } : {}) },
+        explanation: "Reconstructed from the floor plan. Some details were omitted.",
+      });
+      return (await w.me.get()).unit;
+    };
+    // The old rule: partial whenever one detail was dropped, and no note.
+    expect(await stored(built)).toMatchObject({
+      state: "ready",
+      note: null,
+      canRetry: false,
+      buildRevision: 4,
+      explanation: "Reconstructed from the floor plan. Some details were omitted.",
+    });
+    // An old build that really has no finishes stays partial, with the tab's own wording.
+    expect(await stored(generationLayout)).toMatchObject({
+      state: "partial",
+      note: null,
+      canRetry: true,
+    });
+    expect(
+      await stored({ ...built, appearance: { ...generationAppearance, objects: [] } }),
+    ).toMatchObject({ state: "ready" });
+    // A build judged by the new rule keeps its verdict, whatever the scene holds.
+    const note = "Most fixtures couldn't be placed.";
+    expect(await stored(built, note)).toMatchObject({ state: "partial", note, canRetry: true });
+  });
+  test("a retry is offered only for a partial or failed build Muse could try again (#153)", async () => {
+    const starter = manualScene(4, 5, "Sunny one-bedroom");
+    for (const readable of [true, false])
+      for (const on of [true, false]) {
+        const w = world({ photos: readable ? [HTTPS] : ["/seed/home-1.jpg"] });
+        ai(on);
+        const at = async (status: string, scene = READY, note?: string) => {
+          await w.ctx.db.patch("unit" as never, {
+            scene,
+            generation: { status, revision: 2, autoApply: true, ...(note ? { note } : {}) },
+          });
+          return (await w.me.get()).unit;
+        };
+        const can = readable && on;
+        expect(await at("partial", READY, NO_DETAILS_NOTE)).toMatchObject({
+          state: "partial",
+          note: NO_DETAILS_NOTE,
+          canBuild: can,
+          canRetry: can,
+        });
+        expect(await at("failed", starter, NO_LAYOUT_NOTE)).toMatchObject({
+          state: "failed",
+          note: NO_LAYOUT_NOTE,
+          canRetry: can,
+        });
+        // Nothing to retry: a finished build, and a failed one over a hand-made layout.
+        expect(await at("ready")).toMatchObject({ state: "ready", note: null, canRetry: false });
+        expect(await at("failed", READY, NO_LAYOUT_NOTE)).toMatchObject({
+          state: "ready",
+          note: null,
+          canRetry: false,
+        });
+        await w.ctx.db.patch("unit" as never, { scene: starter, generation: undefined });
+        expect((await w.me.get()).unit).toMatchObject({
+          state: "starter",
+          canRetry: false,
+          buildRevision: null,
+        });
+      }
+    // Nor while a build is running.
+    const w = world({ scene: "starter", photos: [HTTPS] });
+    ai(true);
+    await w.me.build();
+    expect((await w.me.get()).unit).toMatchObject({ state: "building", canRetry: false });
   });
   test("items: listings, owned things, plain shapes, and what they cost", async () => {
     const w = world({
@@ -689,8 +783,13 @@ describe("furnish: what Muse reads", () => {
     expect(ids(c.input)).toEqual(["table", "rug", "lamp", "plant"]);
     expect(c.input.placed).toEqual([{ kind: "sofa", label: "Teak sofa", price: 400 }]);
     expect(c).toMatchObject({ budget: 600, spent: 400 });
-    // Over budget already: nothing is affordable.
-    expect(ids(ready(await w.me.context("mid-century", 300)).input)).toEqual([]);
+    // A total below what is already placed is refused, not stored (#153).
+    expect(await w.me.context("mid-century", 300)).toEqual({
+      ready: false,
+      text: "You've already placed $400, more than $300. Remove something or raise the budget.",
+      spent: 400,
+      budget: null,
+    });
   });
   test("caps the candidates and their text, and keeps protected traits out", async () => {
     const w = world();
@@ -759,8 +858,9 @@ describe("furnish: what Muse reads", () => {
     expect((await starter.me.context("cozy")).ready).toBe(true);
     // AI on and buildable: build first.
     ai(true);
+    // Nothing is furnished, so the amount typed isn't the apartment's budget yet (#153).
     const unbuilt = await starter.me.context("cozy", 700);
-    expect(unbuilt).toMatchObject({ ready: false, budget: 700, spent: 0 });
+    expect(unbuilt).toMatchObject({ ready: false, budget: null, spent: 0 });
     expect(!unbuilt.ready && unbuilt.text).toContain("isn't ready yet");
     await starter.me.build();
     const building = await starter.me.context("cozy");
@@ -815,25 +915,29 @@ describe("apartment.furnish", () => {
     expect(again).toMatchObject({ items: [], total: 0, spent: 675, budget: 700, sources: [] });
     expect(again.text).toContain("Nothing on Marketplace fits");
     expect(w.unit().revision).toBe(1);
-    // Raising the budget adds the next basics, and "add a lamp" only a lamp.
+    // Raising the budget adds the next basics.
     const more = await w.me.furnish("", 900);
     expect(more.items.map((i) => i.listingId as string)).toEqual(["table", "rug"]);
     expect(more).toMatchObject({ total: 200, spent: 875, budget: 900 });
     expect(more.text).toContain("$200 more, $875 of your $900");
+    // "Add a lamp" with an amount caps that request; the apartment's $900 still holds (#153).
     const lamp = await w.me.furnish("add a lamp", 1000);
-    expect(lamp.items.map((i) => i.listingId as string)).toEqual(["lamp"]);
-    expect(w.unit().furnishing).toEqual({ vibe: "mid-century", budget: 1000 });
-    expect(w.unit().placements.length).toBe(6);
+    expect(lamp).toMatchObject({ items: [], asked: ["lamp"], spent: 875, budget: 900 });
+    expect(lamp.text).toBe("No lamp on Marketplace fits within $25 right now.");
+    expect(w.unit().furnishing).toEqual({ vibe: "mid-century", budget: 900 });
+    expect(w.unit().placements.length).toBe(5);
   });
   test("places nothing before there is a unit, and for anyone but the owner", async () => {
     const w = world({ scene: "none" });
     expect(await w.me.furnish("cozy", 500)).toEqual({
       text: "Your apartment model isn't ready yet. Open the Apartment tab to build it, then ask again.",
       via: "rules",
+      why: "off",
       items: [],
       total: 0,
       spent: 0,
       budget: null,
+      asked: [],
       sources: [],
     });
     const other = world();
@@ -934,6 +1038,41 @@ describe("apartment.furnish", () => {
     expect(r.via).toBe("rules");
     expect(r.items.length).toBe(3);
     expect(requests).toEqual([]);
+  });
+  test("says why the rules answered (#153)", async () => {
+    // AI off.
+    expect(await world().me.furnish("mid-century", 700)).toMatchObject({
+      via: "rules",
+      why: "off",
+    });
+    expect(await world({ scene: "none" }).me.furnish("cozy")).toMatchObject({ why: "off" });
+    ai(true);
+    // Over the rate limit, and a model that fails: Muse is busy.
+    const limited = world();
+    limited.tables.aiRuns = Array.from({ length: 4 }, (_, i) => ({
+      _id: `r${i}`,
+      userId: "u1",
+      task: "muse.furnish",
+      createdAt: Date.now() - 1000,
+    }));
+    expect(await limited.me.furnish("mid-century")).toMatchObject({ via: "rules", why: "busy" });
+    reply = () => {
+      throw new Error("Model down");
+    };
+    expect(await world().me.furnish("mid-century")).toMatchObject({ via: "rules", why: "busy" });
+    // A rejected answer, nothing to pick from, and a unit that isn't there: no blame on AI.
+    reply = () => ({
+      text: "Here.",
+      picks: [{ listingId: "mine", kind: "sofa", ...itemSize("sofa"), reason: "x" }],
+    });
+    expect(await world().me.furnish("mid-century")).toMatchObject({ via: "rules", why: "unsure" });
+    expect(await world().me.furnish("", 5)).toMatchObject({ via: "rules", why: "unsure" });
+    expect(await world({ scene: "none" }).me.furnish("cozy")).toMatchObject({ why: "unsure" });
+    // Muse's own answer carries none.
+    reply = () => ({ text: "Nothing fits yet.", picks: [] });
+    const muse = await world().me.furnish("mid-century");
+    expect(muse.via).toBe("muse");
+    expect(muse.why).toBeUndefined();
   });
   test("placing checks every pick again", async () => {
     const w = world();
@@ -1124,5 +1263,353 @@ describe("item models", () => {
     expect(w.tables.itemModels[0].error).toBeUndefined();
     // Another owner's row for the same listing is untouched.
     expect(w.tables.itemModels[1]).toMatchObject({ status: "building" });
+  });
+});
+
+/* ---------- Named things, removed items and the one furniture budget (#153) ---------- */
+
+describe("apartment.furnish: add what was asked for (#153)", () => {
+  /**
+   * QA's apartment: furnished for "cozy and warm" within $1,500 (eight items,
+   * one of them the only lamp on Marketplace), then the dresser is removed.
+   */
+  async function qa() {
+    const w = world({
+      more: {
+        listings: [
+          listing("dresser", "Antique dresser, 4 drawers", 190, { createdAt: 83 }),
+          listing("chair", "Cane armchair", 90, { createdAt: 82 }),
+        ],
+      },
+    });
+    const first = await w.me.furnish("cozy and warm", 1500);
+    expect(first.items.map((i) => i.listingId as string)).toEqual([
+      "bed",
+      "sofa",
+      "table",
+      "rug",
+      "lamp",
+      "plant",
+      "dresser",
+      "chair",
+    ]);
+    expect(first).toMatchObject({ total: 1215, spent: 1215, budget: 1500, asked: [] });
+    const dresser = w.unit().placements.find((p) => p.listingId === ("dresser" as never));
+    await w.me.remove(dresser?.id ?? "");
+    const placed = () => w.unit().placements.map((p) => p.listingId as string);
+    return { w, placed, before: placed() };
+  }
+  const REMEMBERED = { vibe: "cozy and warm", budget: 1500, removed: ["dresser"] };
+
+  test('B1: "add a reading lamp" with no other lamp adds nothing, and says so', async () => {
+    const { w, placed, before } = await qa();
+    expect(before).not.toContain("dresser");
+    const r = await w.me.furnish("reading", undefined, ["lamp"]);
+    expect(r).toMatchObject({
+      via: "rules",
+      items: [],
+      total: 0,
+      spent: 1025,
+      budget: 1500,
+      asked: ["lamp"],
+      sources: [],
+    });
+    expect(r.text).toBe("No other lamp on Marketplace fits within $475 right now.");
+    // Nothing came back, the dresser included, and the look and budget are as they were.
+    expect(placed()).toEqual(before);
+    expect(w.unit().furnishing).toEqual(REMEMBERED as never);
+    expect(w.unit().revision).toBe(2);
+    // Muse is given only lamps to choose from; with none it isn't called.
+    ai(true);
+    const c = ready(await w.me.context("reading", undefined, ["lamp"]));
+    expect(c.input).toMatchObject({ vibe: "cozy and warm", want: "reading", asked: ["lamp"] });
+    expect(ids(c.input)).toEqual([]);
+    const again = await w.me.furnish("reading", undefined, ["lamp"]);
+    expect(again).toMatchObject({ via: "rules", why: "unsure", items: [] });
+    expect(again.text).toContain("lamp");
+    expect(requests).toEqual([]);
+    expect(placed()).toEqual(before);
+  });
+  test("B1: a shopping list sent as a vibe is still only a shopping list", async () => {
+    const { w, placed, before } = await qa();
+    // Muse, or an older client, sends the whole message as the vibe.
+    const r = await w.me.furnish("add a reading lamp");
+    expect(r).toMatchObject({ items: [], asked: ["lamp"], budget: 1500, spent: 1025 });
+    expect(r.text).toBe("No other lamp on Marketplace fits within $475 right now.");
+    expect(placed()).toEqual(before);
+    expect(w.unit().furnishing).toEqual(REMEMBERED as never);
+  });
+  test("B1: with another lamp on Marketplace, exactly that lamp is added", async () => {
+    const { w, placed, before } = await qa();
+    const { _id, ...lamp2 } = listing("", "Brass reading lamp", 45, { createdAt: 81 });
+    const id = (await w.ctx.db.insert("listings", lamp2 as never)) as string;
+    const r = await w.me.furnish("reading", undefined, ["lamp"]);
+    expect(r.items.map((i) => [i.listingId as string, i.kind, i.price])).toEqual([
+      [id, "lamp", 45],
+    ]);
+    expect(r).toMatchObject({ total: 45, spent: 1070, budget: 1500, asked: ["lamp"] });
+    expect(r.text).toBe("Added a lamp: Brass reading lamp, $45. $1,070 of your $1,500.");
+    expect(r.items[0].reason).toBe('Your keyword: "reading"');
+    expect(placed()).toEqual([...before, id]);
+    expect(w.unit().furnishing).toEqual(REMEMBERED as never);
+  });
+  test("B1: Muse picks from the asked kind only, one of each", async () => {
+    const { w, placed, before } = await qa();
+    const add = async (title: string, price: number) => {
+      const { _id, ...row } = listing("", title, price, { createdAt: 81 });
+      return (await w.ctx.db.insert("listings", row as never)) as string;
+    };
+    const lampA = await add("Brass reading lamp", 45);
+    const lampB = await add("Paper lantern", 20);
+    ai(true);
+    const lampPick = (listingId: string) => ({
+      listingId,
+      kind: "lamp",
+      ...itemSize("lamp"),
+      reason: "Good to read by",
+    });
+    // The dresser isn't a candidate, and two lamps are one too many: both answers are rejected.
+    const answers: unknown[] = [
+      {
+        text: "A lamp and your dresser back.",
+        picks: [
+          lampPick(lampA),
+          { ...lampPick("dresser"), kind: "storage", ...itemSize("storage") },
+        ],
+      },
+      { text: "Two lamps.", picks: [lampPick(lampA), lampPick(lampB)] },
+    ];
+    reply = (body) => {
+      const prompt = JSON.stringify(body.messages);
+      expect(prompt).toContain("Brass reading lamp");
+      expect(prompt).not.toContain("Antique dresser");
+      return answers.shift();
+    };
+    const rejected = await w.me.furnish("reading", undefined, ["lamp"]);
+    expect(requests.length).toBe(2);
+    expect(rejected).toMatchObject({ via: "rules", why: "unsure", total: 45, asked: ["lamp"] });
+    expect(rejected.items.map((i) => i.listingId as string)).toEqual([lampA]);
+    expect(placed()).toEqual([...before, lampA]);
+    // A sound answer is Muse's: the other lamp, in its words.
+    answers.push({
+      text: "A paper lantern for a soft reading light, $20.",
+      picks: [lampPick(lampB)],
+    });
+    const r = await w.me.furnish("soft light", undefined, ["lamp"]);
+    expect(r).toMatchObject({ via: "muse", total: 20, spent: 1090, budget: 1500 });
+    expect(r.text).toBe("A paper lantern for a soft reading light, $20.");
+    expect(placed()).toEqual([...before, lampA, lampB]);
+    expect(w.unit().furnishing).toEqual(REMEMBERED as never);
+  });
+  test("removed items stay out of a room request; asking for one by name brings it back", async () => {
+    const { w, placed, before } = await qa();
+    expect(w.unit().furnishing?.removed).toEqual(["dresser"] as never);
+    // Furnishing the room again leaves the dresser out, of the candidates and of the room.
+    expect(ids(ready(await w.me.context("")).input)).not.toContain("dresser");
+    const room = await w.me.furnish("");
+    expect(room).toMatchObject({ items: [], asked: [], budget: 1500 });
+    expect(placed()).toEqual(before);
+    // Asking for storage is asking: the dresser may come back, and is then off the list.
+    const r = await w.me.furnish("", undefined, ["storage"]);
+    expect(r.items.map((i) => i.listingId as string)).toEqual(["dresser"]);
+    expect(r.text).toBe("Added storage: Antique dresser, 4 drawers, $190. $1,215 of your $1,500.");
+    expect(w.unit().furnishing).toEqual({ vibe: "cozy and warm", budget: 1500 });
+  });
+  test("removing remembers the listing once, newest last, at most 60; adding forgets it", async () => {
+    const w = world();
+    const rug = await w.me.add("rug");
+    const sofa = await w.me.add("sofa");
+    w.placeRow({ id: "shape" });
+    await w.me.remove(rug);
+    await w.me.remove("shape");
+    // A unit that was never furnished holds only the list, and still reads as unfurnished.
+    expect(w.unit().furnishing).toEqual({ removed: ["rug"] } as never);
+    validate(unitSceneRecord, w.unit(), { throw: true });
+    expect((await w.me.get()).unit?.furnishing).toBeNull();
+    await w.me.remove(sofa);
+    await w.me.remove(await w.me.add("rug"));
+    expect(w.unit().furnishing?.removed).toEqual(["sofa", "rug"] as never);
+    await w.me.add("sofa");
+    expect(w.unit().furnishing?.removed).toEqual(["rug"] as never);
+    await w.me.add("rug");
+    expect(w.unit().furnishing).toBeUndefined();
+    // The newest 60.
+    await w.ctx.db.patch(
+      "unit" as never,
+      {
+        furnishing: { vibe: "boho", removed: Array.from({ length: 60 }, (_, i) => `old${i}`) },
+      } as never,
+    );
+    await w.me.remove(w.unit().placements.find((p) => p.listingId === ("rug" as never))?.id ?? "");
+    const kept = w.unit().furnishing?.removed as unknown as string[];
+    expect(kept.length).toBe(60);
+    expect(kept.slice(0, 1).concat(kept.slice(-1))).toEqual(["old1", "rug"]);
+    expect(w.unit().furnishing?.vibe).toBe("boho");
+    // Documents from before the list existed still validate.
+    await w.ctx.db.patch("unit" as never, { furnishing: { vibe: "boho", budget: 900 } });
+    validate(unitSceneRecord, w.unit(), { throw: true });
+  });
+  test("rejects an `only` that isn't one to four different kinds", async () => {
+    const w = world();
+    await expect(w.me.furnish("", undefined, [])).rejects.toThrow("one to four");
+    await expect(w.me.furnish("", undefined, ["lamp", "lamp"])).rejects.toThrow("one to four");
+    await expect(
+      w.me.furnish("", undefined, ["lamp", "rug", "sofa", "bed", "desk"]),
+    ).rejects.toThrow("one to four");
+    expect(w.unit().placements).toEqual([]);
+  });
+  test("an asked kind is never crowded out of the candidates", async () => {
+    const w = world();
+    for (let i = 0; i < 60; i++) {
+      const { _id, ...row } = listing("", `Walnut side table ${i}`, 20, { createdAt: 200 + i });
+      await w.ctx.db.insert("listings", row as never);
+    }
+    const c = ready(await w.me.context("walnut", undefined, ["table", "lamp"]));
+    expect(c.input.candidates.length).toBe(40);
+    expect(ids(c.input)).toContain("lamp");
+    expect(c.input.candidates.every((x) => /table|lamp/i.test(x.title))).toBe(true);
+    const r = await w.me.furnish("walnut", undefined, ["table", "lamp"]);
+    expect(r.items.map((i) => i.kind)).toEqual(["table", "lamp"]);
+  });
+});
+
+describe("apartment.furnish: one furniture budget (#153)", () => {
+  /** Furnished for "mid-century" within $1,500: a bed, sofa, table, rug, plant and lamp, $935. */
+  async function furnished() {
+    const w = world();
+    await w.me.furnish("mid-century", 900);
+    await w.me.furnish("", 1500);
+    expect((await w.me.get()).spent).toBe(935);
+    return { w, placed: () => w.unit().placements.map((p) => p.listingId as string) };
+  }
+
+  test("B2: an amount on an items request caps that request and leaves the total alone", async () => {
+    const { w, placed } = await furnished();
+    const before = placed();
+    const { spent } = await w.me.get();
+    expect(w.unit().furnishing).toEqual({ vibe: "mid-century", budget: 1500 });
+    // QA's "add a sofa and a bed, $100": nothing that cheap, so nothing is added.
+    const none = await w.me.furnish("", 100, ["sofa", "bed"]);
+    expect(none).toMatchObject({
+      items: [],
+      total: 0,
+      spent,
+      budget: 1500,
+      asked: ["sofa", "bed"],
+    });
+    expect(none.text).toBe("No other sofa or bed on Marketplace fits within $100 right now.");
+    expect(placed()).toEqual(before);
+    expect(w.unit().furnishing).toEqual({ vibe: "mid-century", budget: 1500 });
+    expect((await w.me.get()).unit?.furnishing).toEqual({ vibe: "mid-century", budget: 1500 });
+    // With a futon at $80 and a bed at $70, only one fits inside $100.
+    const add = async (title: string, price: number) => {
+      const { _id, ...row } = listing("", title, price, { createdAt: 81 });
+      return (await w.ctx.db.insert("listings", row as never)) as string;
+    };
+    const futon = await add("Futon sofa", 80);
+    await add("Twin bed frame", 70);
+    const one = await w.me.furnish("", 100, ["sofa", "bed"]);
+    expect(one.items.map((i) => i.listingId as string)).toEqual([futon]);
+    expect(one).toMatchObject({ total: 80, spent: spent + 80, budget: 1500 });
+    expect(one.total).toBeLessThanOrEqual(100);
+    expect(one.text).toBe(
+      `Added a sofa: Futon sofa, $80. No other bed on Marketplace fits within $20 right now. $${(spent + 80).toLocaleString("en-US")} of your $1,500.`,
+    );
+    expect(w.unit().furnishing).toEqual({ vibe: "mid-century", budget: 1500 });
+  });
+  test("B2: an items request spends at most what is left of the total", async () => {
+    const w = world();
+    await w.me.furnish("mid-century", 700);
+    // $675 of $700 placed: a $100 cap still leaves only $25 to spend.
+    const c = ready(await w.me.context("", 100, ["lamp", "plant", "rug"]));
+    expect(c).toMatchObject({ budget: 700, cap: 100, spent: 675 });
+    expect(c.input).toMatchObject({ budget: { total: 700, spent: 675, remaining: 25 }, cap: 100 });
+    expect(ids(c.input)).toEqual([]);
+    const r = await w.me.furnish("", 100, ["lamp", "rug"]);
+    expect(r).toMatchObject({ items: [], spent: 675, budget: 700 });
+    expect(r.text).toBe("No lamp or rug on Marketplace fits within $25 right now.");
+    // No total at all: the cap alone.
+    const free = world();
+    const capped = await free.me.furnish("", 100, ["sofa", "rug", "lamp"]);
+    expect(capped.items.map((i) => i.listingId as string)).toEqual(["rug"]);
+    expect(capped).toMatchObject({ total: 80, spent: 80, budget: null });
+    expect(free.unit().furnishing).toBeUndefined();
+    expect(capped.text).toBe(
+      "Added a rug: Wool rug, cozy, $80. No sofa or lamp on Marketplace fits within $20 right now.",
+    );
+  });
+  test("B2: a room budget below what is placed adds nothing and changes nothing", async () => {
+    const { w, placed } = await furnished();
+    const before = placed();
+    const { spent } = await w.me.get();
+    const r = await w.me.furnish("boho", 500);
+    expect(r).toEqual({
+      text: `You've already placed $${spent.toLocaleString("en-US")}, more than $500. Remove something or raise the budget.`,
+      via: "rules",
+      why: "off",
+      items: [],
+      total: 0,
+      spent,
+      budget: 1500,
+      asked: [],
+      sources: [],
+    });
+    expect(placed()).toEqual(before);
+    expect(w.unit().furnishing).toEqual({ vibe: "mid-century", budget: 1500 });
+    // The same amount as what is placed is a budget that is used up, and is stored.
+    const exact = await w.me.furnish("", spent);
+    expect(exact).toMatchObject({ items: [], spent, budget: spent });
+    expect(exact.text).toContain("used up");
+    expect(w.unit().furnishing?.budget).toBe(spent);
+    // Raising it stores the new total and adds what now fits.
+    const more = await w.me.furnish("", 2000);
+    expect(more.budget).toBe(2000);
+    expect(more.spent).toBeLessThanOrEqual(2000);
+    expect(w.unit().furnishing?.budget).toBe(2000);
+    // Never a total below what is placed, even when `place` is called late or directly.
+    await invoke(apartment.place, w.ctx, {
+      viewerId: "u1",
+      unitId: "unit",
+      vibe: "japandi",
+      budget: 10,
+      picks: [],
+    });
+    // A refused request stores nothing: neither its budget nor its vibe.
+    expect(w.unit().furnishing?.budget).toBe(2000);
+    expect(w.unit().furnishing?.vibe).not.toBe("japandi");
+    const view = await w.me.get();
+    expect(view.spent).toBeLessThanOrEqual(view.unit?.furnishing?.budget ?? 0);
+  });
+  test("B2: placing holds an items request to its kinds, one each, its cap and what is left", async () => {
+    const w = world();
+    await w.ctx.db.patch("unit" as never, { furnishing: { vibe: "boho", budget: 500 } });
+    const pick = (listingId: string, kind: PlacementKind) => ({
+      listingId,
+      kind,
+      ...itemSize(kind),
+      reason: "Because",
+    });
+    const out = await invoke<{ items: FurnishReply["items"]; spent: number }>(
+      apartment.place,
+      w.ctx,
+      {
+        viewerId: "u1",
+        unitId: "unit",
+        vibe: "ignored",
+        budget: 300,
+        only: ["rug", "lamp", "bed"],
+        picks: [
+          pick("sofa", "sofa"),
+          pick("rug", "rug"),
+          pick("poster", "rug"),
+          pick("bed", "bed"),
+          pick("lamp", "lamp"),
+        ],
+      },
+    );
+    // No sofa (not asked), one rug, and the $250 bed is over what the $300 cap has left.
+    expect(out.items.map((i) => i.listingId as string)).toEqual(["rug", "lamp"]);
+    expect(out.spent).toBe(140);
+    expect(w.unit().furnishing).toEqual({ vibe: "boho", budget: 500 });
   });
 });

@@ -14,6 +14,8 @@ export const FURNISH_LIMITS = {
   vibeMax: 200,
   budgetMax: 1_000_000,
   picksMax: 8,
+  /** Kinds one "add a lamp and a rug" request may name (#153). */
+  onlyMax: 4,
   textMax: 400,
   reasonMax: 160,
   candidatesMax: 40,
@@ -43,7 +45,9 @@ const STOP = new Set(
   furnish furnished furniture budget under over about around up max please some very really kind
   sort bit more less lots lot make give get add put pick find show something things stuff that this
   but not too so just can you could would should have has total spend dollars bucks usd
-  another one two new also here there`.split(/\s+/),
+  another one two new also here there buy use missing living bedroom kitchen bathroom hallway`.split(
+    /\s+/,
+  ),
 );
 
 const flat = (s: string) =>
@@ -107,7 +111,11 @@ const size = (width: number, depth: number, height: number): Size => ({ width, d
  */
 const KIND_RULES: readonly { words: string[]; kind: PlacementKind; size?: Size }[] = [
   { words: ["floor lamp"], kind: "lamp", size: size(0.4, 0.4, 1.6) },
-  { words: ["lamp", "lantern"], kind: "lamp", size: size(0.3, 0.3, 0.5) },
+  {
+    words: ["desk lamp", "table lamp", "bedside lamp", "lamp", "lantern"],
+    kind: "lamp",
+    size: size(0.3, 0.3, 0.5),
+  },
   { words: ["plant stand"], kind: "table", size: size(0.35, 0.35, 0.6) },
   { words: ["coffee table", "cocktail table"], kind: "table", size: size(1.1, 0.6, 0.45) },
   {
@@ -122,7 +130,7 @@ const KIND_RULES: readonly { words: string[]; kind: PlacementKind; size?: Size }
     size: size(0.85, 0.85, 0.9),
   },
   { words: ["bar stool", "stool"], kind: "chair", size: size(0.42, 0.42, 0.75) },
-  { words: ["chair"], kind: "chair" },
+  { words: ["desk chair", "office chair", "chair"], kind: "chair" },
   {
     words: ["tv stand", "media console", "console", "credenza", "sideboard", "buffet"],
     kind: "storage",
@@ -153,6 +161,11 @@ const KIND_RULES: readonly { words: string[]; kind: PlacementKind; size?: Size }
   { words: ["table"], kind: "table" },
   { words: ["vase", "clock", "candle", "sculpture", "basket", "planter"], kind: "decor" },
 ];
+
+/** Every word that names a kind of thing, longest first, for matching a thing's own phrase. */
+export const ITEM_WORDS: readonly string[] = KIND_RULES.flatMap((r) => r.words).sort(
+  (a, b) => b.length - a.length,
+);
 
 /** Categories whose listings are never home furnishings, whatever the title says. */
 const NOT_HOME = new Set([
@@ -196,21 +209,26 @@ export function sizeOf(kind: PlacementKind, l: { title: string; category: string
 }
 
 /**
- * The kinds of thing a message asks for by name and nothing else ("add a floor
- * lamp and a rug"). Empty when it also describes a look ("cozy, lots of
- * plants"): that is a vibe for the whole apartment, not a shopping list.
+ * The kinds of thing a message names ("a floor lamp and a rug"), in the order
+ * it names them, and `want`: the words left that describe them ("reading",
+ * "mid century walnut"), without filler, prices and room names. Whether the
+ * message asks for those things or for a whole look is `furnishRequest`'s call
+ * (./chatText.ts, #153).
  */
-export function kindsAsked(text: string): PlacementKind[] {
+export function kindsNamed(text: string): { kinds: PlacementKind[]; want: string } {
   let rest = flat(text.replace(/\[removed\]/g, " "));
-  const kinds: PlacementKind[] = [];
+  const found: { kind: PlacementKind; at: number }[] = [];
   for (const rule of KIND_RULES)
     for (const word of rule.words)
-      for (const p of [flat(word), flat(`${word}s`)])
-        if (rest.includes(p)) {
-          rest = rest.split(p).join(" ");
-          if (!kinds.includes(rule.kind)) kinds.push(rule.kind);
+      for (const p of [flat(word), flat(`${word}s`), flat(`${word}es`)])
+        for (let at = rest.indexOf(p); at >= 0; at = rest.indexOf(p)) {
+          found.push({ kind: rule.kind, at });
+          // Blank the match in place, so "desk lamp" isn't also a desk and positions hold.
+          rest = `${rest.slice(0, at)}${" ".repeat(p.length)}${rest.slice(at + p.length)}`;
         }
-  return saysLook(rest) ? [] : kinds;
+  const kinds = [...new Set(found.sort((a, b) => a.at - b.at).map((f) => f.kind))];
+  const want = rest.split(" ").filter((w) => w && !/^\d+k?$/.test(w) && !STOP.has(w));
+  return { kinds, want: want.join(" ") };
 }
 
 /** Whether text describes a look at all: a style, a colour or a word worth matching. */
@@ -332,4 +350,62 @@ export function furnishText(a: {
       ? `${dollars(a.total)} more, ${dollars(a.total + a.budget.spent)} of your ${dollars(a.budget.total)}`
       : `${dollars(a.total)} of your ${dollars(a.budget.total)}`;
   return `${what}${feel}: ${cost}. They're in your apartment to review; nothing is bought yet.`;
+}
+
+const KIND_NOUN: Record<PlacementKind, string> = {
+  sofa: "a sofa",
+  bed: "a bed",
+  table: "a table",
+  storage: "storage",
+  chair: "a chair",
+  desk: "a desk",
+  lamp: "a lamp",
+  rug: "a rug",
+  art: "art",
+  plant: "a plant",
+  decor: "decor",
+};
+
+/** "a desk, a chair and a lamp" (or "desk, chair or lamp" with `or`). */
+export function kindList(kinds: readonly PlacementKind[], or = false): string {
+  const names = kinds.map((k) => (or ? KIND_NOUN[k].replace(/^a /, "") : KIND_NOUN[k]));
+  const last = names.pop() ?? "";
+  return names.length ? `${names.join(", ")} ${or ? "or" : "and"} ${last}` : last;
+}
+
+/**
+ * The reply to "add a lamp" (#153) when Landing's rules pick, or when Muse's
+ * words can't be used: what was added, by name and price, and for each thing
+ * asked for and not found, that none fits and within what. `limit` is the most
+ * the request could spend, `budget` the apartment's furniture budget and what
+ * was placed before. Like `furnishText`, never that anything was bought.
+ */
+export function itemsText(a: {
+  asked: readonly PlacementKind[];
+  added: readonly { kind: PlacementKind; title: string; price: number }[];
+  /** Kinds already in the apartment. */
+  have: readonly PlacementKind[];
+  budget: { total: number; spent: number } | null;
+  limit: number | null;
+}): string {
+  const total = a.added.reduce((sum, i) => sum + i.price, 0);
+  if (!a.added.length && a.budget && a.budget.total - a.budget.spent <= 0)
+    return furnishText({ count: 0, vibe: "", total: 0, budget: a.budget });
+  const out: string[] = [];
+  if (a.added.length)
+    out.push(
+      `Added ${kindList([...new Set(a.added.map((i) => i.kind))])}: ${a.added
+        .map((i) => `${i.title.trim().slice(0, 60)}, ${dollars(i.price)}`)
+        .join("; ")}.`,
+    );
+  const missing = a.asked.filter((k) => !a.added.some((i) => i.kind === k));
+  if (missing.length) {
+    // "No other lamp" when the apartment already has one.
+    const other = a.have.includes(missing[0]) ? "other " : "";
+    const within = a.limit === null ? "" : ` within ${dollars(Math.max(0, a.limit - total))}`;
+    out.push(`No ${other}${kindList(missing, true)} on Marketplace fits${within} right now.`);
+  }
+  if (a.added.length && a.budget)
+    out.push(`${dollars(a.budget.spent + total)} of your ${dollars(a.budget.total)}.`);
+  return out.join(" ");
 }

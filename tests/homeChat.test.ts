@@ -198,15 +198,35 @@ function actionCtx(tables: Record<string, Row[]>) {
 const ask = (
   message: string,
   tables = world(),
-  extra: { neighborhood?: string; view?: "map" | "apartment" } = {},
+  {
+    recent,
+    ...extra
+  }: {
+    neighborhood?: string;
+    view?: "map" | "apartment";
+    recent?: { who: "me" | "muse"; text: string }[];
+  } = {},
 ) => {
   const { ctx, runs } = actionCtx(tables);
   return answer(ctx, {
     viewerId: "V" as never,
     message,
     context: { stage: "city", ...extra },
+    ...(recent ? { recent } : {}),
   }).then((reply) => ({ reply, runs }));
 };
+
+/** A draft of Muse's waiting in V's Inbox. */
+const draft = (_id: string, extra: Row = {}) => ({
+  _id,
+  ownerId: "V",
+  status: "pending",
+  payload: { kind: "group", name: "Mission climbers" },
+  rationale: "You asked for one.",
+  origin: { kind: "agent", agent: "muse" },
+  createdAt: NOW,
+  ...extra,
+});
 
 const muse = (out: Partial<HomeChatOutput> & Pick<HomeChatOutput, "command">) =>
   JSON.stringify({ text: "Here you go.", sourceIds: [], plan: NO_PLAN, ...out });
@@ -378,6 +398,29 @@ describe("homeChatContext", () => {
     expect(JSON.stringify(c.cards)).not.toMatch(/muslim|women|Ignore your rules/i);
   });
 
+  test("the Inbox: how many drafts are waiting for the viewer's OK (#153)", async () => {
+    const tables = world();
+    const read = async () =>
+      (
+        await homeChatContext(fakeCtx(tables), {
+          viewerId: "V" as never,
+          message: "hi",
+          context: { stage: "city" },
+          recent: [],
+        })
+      ).input.you.inbox;
+    expect(await read()).toEqual({ waiting: 0 });
+    tables.proposals = [
+      draft("pr1"),
+      draft("pr2"),
+      // Not waiting: decided, expired, or someone else's.
+      draft("pr3", { status: "approved" }),
+      draft("pr4", { expiresAt: NOW - DAY }),
+      draft("pr5", { ownerId: "S" }),
+    ];
+    expect(await read()).toEqual({ waiting: 2 });
+  });
+
   test("rate limit: over 8 chat runs in a minute, the rules answer", async () => {
     const tables = world();
     tables.aiRuns = Array.from({ length: 8 }, (_, i) => ({
@@ -514,6 +557,79 @@ describe("homeChat.reply", () => {
       command: { kind: "weekend_route", slug: "noe-valley" },
     });
     expect(runs.map((r) => r.fallbackReason)).toEqual(["model_error"]);
+  });
+
+  test("says why the rules answered, and nothing for Muse's own answers (#153)", async () => {
+    // Muse answered.
+    replies.push(muse({ command: { kind: "show_move" } }));
+    const own = await ask("show me the move");
+    expect(own.reply.via).toBe("muse");
+    expect(own.reply.why).toBeUndefined();
+    // Rejected twice: Muse wasn't sure.
+    replies.push(
+      muse({ command: { kind: "fly_neighborhood", slug: "atlantis" } }),
+      muse({ command: { kind: "fly_neighborhood", slug: "atlantis" } }),
+    );
+    expect((await ask("take me to the Mission")).reply).toMatchObject({
+      via: "rules",
+      why: "unsure",
+    });
+    // The model failed, or the viewer is over the rate limit: Muse is busy.
+    replies.push(new Response("bad request", { status: 400 }));
+    expect((await ask("weekend in Noe Valley")).reply).toMatchObject({ via: "rules", why: "busy" });
+    const limited = world();
+    limited.aiRuns = Array.from({ length: 8 }, (_, i) => ({
+      _id: `r${i}`,
+      userId: "V",
+      task: HOME_CHAT_TASK,
+      createdAt: NOW - 1000 * i,
+    }));
+    expect((await ask("my crew", limited)).reply).toMatchObject({ via: "rules", why: "busy" });
+    // AI off, by the kill switch or with no key, rate limit or not.
+    process.env.AI_ENABLED = "false";
+    expect((await ask("my crew")).reply).toMatchObject({ via: "rules", why: "off" });
+    expect((await ask("my crew", limited)).reply).toMatchObject({ via: "rules", why: "off" });
+    delete process.env.AI_ENABLED;
+    delete process.env.MODEL_API_KEY;
+    expect((await ask("my crew")).reply).toMatchObject({ via: "rules", why: "off" });
+  });
+
+  test("the Inbox line says nothing is waiting when nothing is (#153)", async () => {
+    const waiting = muse({
+      text: "I can't message them from here, but your drafts are waiting in the Inbox.",
+      command: { kind: "open_page", page: "inbox" },
+    });
+    // Empty Inbox: Muse's claim is rejected, and the rules say what is true.
+    replies.push(waiting, waiting);
+    const empty = await ask("message the lister, it's in my drafts");
+    expect(requests[0].messages.map((m) => m.content).join("\n")).toContain('"waiting": 0');
+    expect(requests[0].messages.map((m) => m.content).join("\n")).toContain(
+      "you.inbox.waiting is how many drafts are waiting",
+    );
+    expect(requests[1].messages.at(-1)?.content).toContain("you.inbox.waiting is 0");
+    expect(empty.reply).toMatchObject({
+      via: "rules",
+      why: "unsure",
+      command: { kind: "open_page", page: "inbox" },
+    });
+    expect(empty.reply.text).toContain("Nothing is waiting for your OK right now");
+    // A sound answer for an empty Inbox passes.
+    replies.push(
+      muse({
+        text: "I can't message them from here. Nothing is waiting in your Inbox right now.",
+        command: { kind: "open_page", page: "inbox" },
+      }),
+    );
+    expect((await ask("message the lister for me")).reply.via).toBe("muse");
+    // With a draft there, saying so is true.
+    const tables = world();
+    tables.proposals = [draft("pr1")];
+    replies.push(waiting);
+    expect((await ask("message the lister for me", tables)).reply.via).toBe("muse");
+    process.env.AI_ENABLED = "false";
+    expect((await ask("anything to approve?", tables)).reply.text).toBe(
+      "Opening Inbox: 1 draft is waiting for your OK. Nothing is sent until you approve it.",
+    );
   });
 
   test("a message that names protected traits gets the rules' explanation with AI off", async () => {
@@ -678,6 +794,81 @@ describe("homeChat.reply: the apartment", () => {
     expect(reply.saved).toEqual([]);
     expect(reply.rentals).toEqual([]);
     expect(facts(tables, "budget")[0].value).toEqual({ max: 2000 });
+  });
+
+  test("naming things to add is add_items, with what the person said about them (#153)", async () => {
+    const tables = withPlace(world(), "built");
+    replies.push(
+      muse({
+        text: "Looking for a reading lamp to place in your 3D model; nothing is bought.",
+        command: { kind: "add_items", items: ["lamp"], want: "  reading ", budget: 120 },
+      }),
+    );
+    const { reply } = await ask("add a reading lamp under $120", tables, apartment);
+    expect(reply.via).toBe("muse");
+    expect(reply.command).toEqual({
+      kind: "add_items",
+      items: ["lamp"],
+      want: "reading",
+      budget: 120,
+    });
+    expect(reply.sources).toEqual([]);
+    expect(reply.saved).toEqual([]);
+    expect(facts(tables, "budget")[0].value).toEqual({ max: 2000 });
+    // The instructions keep the two requests apart.
+    const prompt = requests[0].messages.map((m) => m.content).join("\n");
+    expect(prompt).toContain("add_items {items, want?, budget?}");
+    expect(prompt).toContain("never a request to repeat");
+    // With AI off the rules read the same message the same way.
+    process.env.AI_ENABLED = "false";
+    const rules = await ask("add a reading lamp under $120", tables, apartment);
+    expect(rules.reply).toMatchObject({
+      via: "rules",
+      why: "off",
+      command: { kind: "add_items", items: ["lamp"], want: "reading", budget: 120 },
+    });
+  });
+
+  test("B2: navigation never furnishes, whatever the earlier turns said (#153)", async () => {
+    const tables = withPlace(world(), "built");
+    const recent = [
+      { who: "me" as const, text: "add a reading lamp" },
+      { who: "muse" as const, text: "I'm picking a reading lamp for you to review." },
+      { who: "me" as const, text: "make it cozy and warm, $1,500" },
+    ];
+    // Muse repeats the earlier requests instead of answering this message, twice.
+    replies.push(
+      muse({
+        text: "I'm picking a reading lamp for you to review.",
+        command: { kind: "add_items", items: ["lamp"], want: "reading" },
+      }),
+      muse({ command: { kind: "furnish", vibe: "cozy and warm", budget: 1500 } }),
+    );
+    const { reply, runs } = await ask("show my apartment", tables, { ...apartment, recent });
+    expect(requests).toHaveLength(2);
+    expect(requests[1].messages.at(-1)?.content).toContain(
+      "this message asks for show_apartment, not for furnishing",
+    );
+    expect(runs.map((r) => r.fallbackReason)).toEqual(["invalid_output"]);
+    expect(reply).toEqual({
+      text: "Here's your apartment in 3D.",
+      command: { kind: "show_apartment" },
+      sources: [{ label: "Your place", href: "/landing/place" }],
+      via: "rules",
+      why: "unsure",
+      rentals: [],
+      saved: [],
+    });
+    // Opening a page is navigation too.
+    replies.push(
+      muse({ command: { kind: "furnish", vibe: "cozy and warm" } }),
+      muse({ command: { kind: "open_page", page: "roommates" } }),
+    );
+    const page = await ask("open my roommates page", tables, { ...apartment, recent });
+    expect(page.reply).toMatchObject({
+      via: "muse",
+      command: { kind: "open_page", page: "roommates" },
+    });
   });
 
   test("a furniture budget passed off as rent is rejected", async () => {
@@ -897,6 +1088,7 @@ const input = (over: Partial<HomeChatInput> = {}): HomeChatInput => ({
     place: null,
     apartment: null,
     crew: { joined: false, members: 0, neighborhoods: [] },
+    inbox: { waiting: 0 },
   },
   neighborhoods: [{ slug: "mission", name: "Mission", shortName: null }],
   rentals: [
@@ -986,17 +1178,20 @@ describe("homeChatProblems", () => {
     expect(furnish({ vibe: "like www.example.com" })[0]).toContain("command.vibe");
     expect(furnish({ vibe: "for a Christian couple" })[0]).toContain("protected traits");
     expect(furnish({ budget: 900 })).toEqual([
-      "command.budget: only an amount the person wrote, or leave it out",
+      "command.budget: only an amount the person wrote in this message, or leave it out",
     ]);
     expect(furnish({ budget: 0 })[0]).toContain("whole dollars");
     expect(furnish({ budget: 800.5 })[0]).toContain("whole dollars");
-    // A budget from an earlier turn counts for furniture.
+    // A budget from an earlier turn is not this message's (#153).
     expect(
       furnish(
         { budget: 1500 },
-        { message: "boho please", recent: [{ who: "you", text: "I have 1.5k for furniture" }] },
+        {
+          message: "make it boho please",
+          recent: [{ who: "you", text: "I have 1.5k for furniture" }],
+        },
       ),
-    ).toEqual([]);
+    ).toEqual(["command.budget: only an amount the person wrote in this message, or leave it out"]);
     expect(furnish({ budget: 800 }, {}, { ...NO_PLAN, budgetMax: 800 })).toEqual([
       "plan.budgetMax: a furniture budget is not the rent budget; use null",
     ]);
@@ -1004,6 +1199,114 @@ describe("homeChatProblems", () => {
     expect(
       furnish({ budget: 800 }, { message: "$800 for the lot" }, { ...NO_PLAN, budgetMax: 800 }),
     ).toEqual(["plan.budgetMax: a furniture budget is not the rent budget; use null"]);
+  });
+  test("add_items needs a model, real kinds, a clean want and an amount from this message (#153)", () => {
+    const model = { hasModel: true, ready: true, items: 3 };
+    const you = (apartment: HomeChatInput["you"]["apartment"]) => ({ ...input().you, apartment });
+    const add = (
+      command: Partial<Extract<HomeChatOutput["command"], { kind: "add_items" }>>,
+      over: Partial<HomeChatInput> = {},
+      more: Partial<HomeChatOutput> = {},
+    ) =>
+      homeChatProblems(
+        {
+          ...ok,
+          text: "Looking for a lamp to place in your 3D model.",
+          command: { kind: "add_items", items: ["lamp"], ...command },
+          ...more,
+        },
+        input({
+          message: "add a reading lamp under $120",
+          map: { stage: "city", neighborhood: null, view: "apartment" },
+          you: you(model),
+          ...over,
+        }),
+      );
+    expect(add({})).toEqual([]);
+    expect(add({ want: "reading", budget: 120 })).toEqual([]);
+    expect(add({ want: "" })).toEqual([]);
+    expect(add({}, { you: you(null) })[0]).toContain("no place to furnish");
+    expect(add({}, { you: you({ ...model, hasModel: false }) })[0]).toContain(
+      "3D model isn't built yet",
+    );
+    expect(add({ items: [] })[0]).toContain("command.items");
+    expect(add({ items: ["lamp", "lamp"] })[0]).toContain("command.items");
+    expect(add({ items: ["lamp", "rug", "desk", "chair", "bed"] })[0]).toContain("command.items");
+    expect(add({ want: "for a Christian couple" })[0]).toContain("command.want");
+    expect(add({ want: "like www.example.com" })[0]).toContain("command.want");
+    expect(add({ budget: 200 })).toEqual([
+      "command.budget: only an amount the person wrote in this message, or leave it out",
+    ]);
+    expect(add({ budget: 120.5 })[0]).toContain("whole dollars");
+    expect(
+      add(
+        { budget: 800 },
+        { message: "add a reading lamp under $800" },
+        { plan: { ...NO_PLAN, budgetMax: 800 } },
+      ),
+    ).toEqual(["plan.budgetMax: a furniture budget is not the rent budget; use null"]);
+    // Saying nothing is placed is false: the picks go into the 3D model.
+    expect(add({}, {}, { text: "Picking a lamp. Nothing is bought or placed." })[0]).toContain(
+      "never that nothing is placed",
+    );
+  });
+  test("B2: furnishing is rejected when the rules read the message as something else (#153)", () => {
+    const you = { ...input().you, apartment: { hasModel: true, ready: true, items: 8 } };
+    const problems = (message: string, command: HomeChatOutput["command"], view = "apartment") =>
+      homeChatProblems(
+        { ...ok, command },
+        input({
+          message,
+          you,
+          map: { stage: "city", neighborhood: null, view: view as "map" | "apartment" },
+          // What came before never makes this message a furnishing request.
+          recent: [
+            { who: "you", text: "add a reading lamp" },
+            { who: "muse", text: "I'm picking a reading lamp." },
+          ],
+        }),
+      );
+    const lamp = { kind: "add_items", items: ["lamp"], want: "reading" } as const;
+    const cozy = { kind: "furnish", vibe: "cozy and warm" } as const;
+    for (const message of ["show my apartment", "Show me my place", "my place in 3D"])
+      for (const command of [lamp, cozy])
+        expect([message, problems(message, command)]).toEqual([
+          message,
+          [
+            "command: this message asks for show_apartment, not for furnishing. Earlier turns are context, never a request to repeat: answer this message, with show_apartment",
+          ],
+        ]);
+    expect(problems("open my roommates page", lamp)[0]).toContain("asks for open_page");
+    expect(problems("events near my place", cozy, "map")[0]).toContain("asks for show_pins");
+    // Phrasings the rules don't understand, or read as furnishing, stay Muse's call.
+    expect(problems("could use something to read by", lamp)).toEqual([]);
+    expect(problems("add a reading lamp", lamp)).toEqual([]);
+    expect(problems("make it cozy and warm", cozy)).toEqual([]);
+    // And navigation itself is always fine.
+    expect(problems("show my apartment", { kind: "show_apartment" })).toEqual([]);
+    // A message that names things is never answered by furnishing the room, or with other things.
+    expect(problems("add a reading lamp", cozy)[0]).toContain("use add_items");
+    expect(problems("a cozy armchair", cozy)[0]).toContain("use add_items");
+    expect(
+      problems("add a reading lamp", { kind: "add_items", items: ["lamp", "rug"] })[0],
+    ).toContain("asks only for lamp");
+    // An explicit ask for a named thing is one on the Map tab too, whatever the rules' keywords open.
+    expect(problems("find me a reading lamp", lamp, "map")).toEqual([]);
+    expect(problems("add a lamp from Marketplace", lamp, "map")).toEqual([]);
+    // Selling a couch or opening the Inbox is not shopping for one.
+    expect(
+      problems("I need to sell my couch", { kind: "add_items", items: ["sofa"] })[0],
+    ).toContain("asks for open_page");
+    expect(problems("open my inbox to approve adding a lamp", lamp)[0]).toContain(
+      "asks for open_page",
+    );
+    // With things in the apartment, no reply may say nothing is placed.
+    expect(
+      homeChatProblems(
+        { ...ok, text: "Nothing has been placed yet.", command: { kind: "show_apartment" } },
+        input({ message: "show my apartment", you }),
+      )[0],
+    ).toContain("never that nothing is placed");
   });
   test("show_apartment needs a place", () => {
     const show = { ...ok, command: { kind: "show_apartment" } } as HomeChatOutput;
@@ -1105,6 +1408,32 @@ describe("toReply", () => {
       vibe: expect.not.stringMatching(/muslim|women/i),
     });
     expect(furnish("see www.example.com")).toEqual({ kind: "none" });
+  });
+
+  test("what the person wants from add_items is cleaned again, or dropped (#153)", () => {
+    const add = (want?: string) =>
+      toReply(
+        {
+          text: "Looking for a lamp.",
+          command: { kind: "add_items", items: ["lamp"], ...(want === undefined ? {} : { want }) },
+          sourceIds: [],
+          plan: NO_PLAN,
+        },
+        "rules",
+        input(),
+        {},
+        { why: "busy" },
+      );
+    expect(add("  reading   nook ").command).toEqual({
+      kind: "add_items",
+      items: ["lamp"],
+      want: "reading nook",
+    });
+    expect(add().command).toEqual({ kind: "add_items", items: ["lamp"] });
+    expect(add(" ").command).toEqual({ kind: "add_items", items: ["lamp"] });
+    expect(add("see www.example.com").command).toEqual({ kind: "add_items", items: ["lamp"] });
+    expect(add().why).toBe("busy");
+    expect(add().sources).toEqual([]);
   });
 
   test("the rules read the plan with the rest of the answer", () => {

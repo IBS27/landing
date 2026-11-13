@@ -3,7 +3,7 @@ import { type FormEvent, useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/lib/format";
 import { CHAT_MESSAGE_MAX, pageHref } from "../../../convex/lib/homeChatRules";
 import { ItemCards, type RentalActions, RentalCards, SavedLine, Sources, Tally } from "./ChatCards";
-import type { ChatMessage } from "./useChatLog";
+import { type ChatMessage, viaLabel } from "./useChatLog";
 
 /** Where the City Profile source goes, which a reply carries when it saved something. */
 const PROFILE_HREF = pageHref("profile");
@@ -192,22 +192,19 @@ function Message({
   const linked = new Set(m.items?.map((i) => `/marketplace/item/${i.listingId}`));
   if (m.saved?.length) linked.add(PROFILE_HREF);
   const sources = m.sources?.filter((s) => !s.href || !linked.has(s.href)) ?? [];
+  const via = viaLabel(m);
   return (
     <div className="lh-turn">
       <div className="lh-msg lh-muse lh-glass text-primary">
         {m.text}
         {m.tally && <Tally tally={m.tally} />}
-        {sources.length || m.via ? (
+        {sources.length || via ? (
           <div className="mt-1.5 flex flex-wrap gap-x-1.5 text-[11px] text-secondary">
             <Sources sources={sources} onSource={onSource} className="max-w-full truncate" dots />
-            {m.via && (
+            {via && (
               <span>
                 {sources.length > 0 && "· "}
-                {m.via === "muse"
-                  ? "Answered by Muse"
-                  : m.via === "rules"
-                    ? "Answered by Landing's rules (AI off)"
-                    : "From Landing"}
+                {via}
               </span>
             )}
           </div>

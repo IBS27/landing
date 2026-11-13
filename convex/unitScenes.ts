@@ -18,8 +18,11 @@ import { placeListingId } from "./lib/myPlace";
 import { loadAudience } from "./lib/posts";
 import { unitAppearanceTask } from "./lib/unitAppearanceTask";
 import {
+  buildOutcome,
   isStarterScene,
   listingSources,
+  NO_DETAILS_NOTE,
+  NO_LAYOUT_NOTE,
   refreshedRoomSources,
   refreshedSources,
   roomSources,
@@ -387,6 +390,8 @@ export async function startGeneration(
     explanation: undefined,
     generation: {
       status: retryDetails ? "details" : "layout",
+      // A details retry that adds nothing leaves the build as it was, with its note (#153).
+      ...(retryDetails && doc.generation?.note ? { note: doc.generation.note } : {}),
       revision: nextRevision,
       autoApply:
         doc.manuallyEdited === false ||
@@ -426,11 +431,13 @@ export const saveCandidate = internalMutation({
     explanation: v.string(),
     runId: v.optional(v.id("aiRuns")),
     status: v.optional(generationStatus),
+    /** What a partial or failed build is missing, in one short sentence (#153). */
+    note: v.optional(v.string()),
   },
   returns: v.union(v.number(), v.null()),
   handler: async (
     ctx,
-    { id, ownerId, revision, jobId, candidate, explanation, runId, status = "ready" },
+    { id, ownerId, revision, jobId, candidate, explanation, runId, status = "ready", note },
   ) => {
     const doc = await ownScene(ctx, id, ownerId);
     if (doc.jobId !== jobId) return null;
@@ -465,7 +472,7 @@ export const saveCandidate = internalMutation({
       ...(runId ? { runId } : {}),
       revision: nextRevision,
       updatedAt: Date.now(),
-      generation: { status, revision: nextRevision, autoApply },
+      generation: { status, revision: nextRevision, autoApply, ...(note ? { note } : {}) },
     });
     return nextRevision;
   },
@@ -517,6 +524,7 @@ export const generate = internalAction({
           explanation: string,
           status: "details" | "ready" | "partial",
           runId?: Id<"aiRuns">,
+          note?: string | null,
         ) => {
           const next: number | null = await ctx.runMutation(internal.unitScenes.saveCandidate, {
             id: args.id,
@@ -527,6 +535,7 @@ export const generate = internalAction({
             explanation,
             status,
             runId,
+            ...(note ? { note } : {}),
           });
           if (next === null) return false;
           revision = next;
@@ -599,18 +608,27 @@ export const generate = internalAction({
           },
         );
         if (details.output.appearance) candidate.appearance = details.output.appearance;
-        const partial = !details.output.appearance || !!details.output.omitted?.length;
+        // A few details dropped in validation is a finished build (#153). The full text stays
+        // in `explanation` for the editor; the Apartment tab shows only the short note.
+        // A details retry that adds nothing leaves the build partial, as it was.
+        const outcome =
+          args.detailsOnly && !details.output.appearance
+            ? { status: "partial" as const, note: doc.generation?.note ?? NO_DETAILS_NOTE }
+            : buildOutcome(candidate.appearance, details.output.omitted);
         if (
           !(await publish(
             candidate,
             `${explanation} ${details.output.explanation}`,
-            partial ? "partial" : "ready",
+            outcome.status,
             details.runId,
+            outcome.note,
           ))
         )
           return;
         await progress(
-          partial ? "Layout ready; some details unavailable" : "Apartment ready",
+          outcome.status === "partial"
+            ? "Layout ready; some details unavailable"
+            : "Apartment ready",
           3,
           3,
         );
@@ -624,6 +642,7 @@ export const generate = internalAction({
         candidate: null,
         explanation: error instanceof Error ? error.message : "Generation failed. Please retry.",
         status: hasLayout ? "partial" : "failed",
+        note: hasLayout ? NO_DETAILS_NOTE : NO_LAYOUT_NOTE,
       });
     }
     return null;

@@ -1,7 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode, useState } from "react";
 import { Button, Card, Spinner } from "@/ui/primitives";
 import type { Doc } from "../../../../convex/_generated/dataModel";
-import { isStarterScene } from "../../../../convex/lib/unitGeneration";
+import { buildIsPartial, isStarterScene } from "../../../../convex/lib/unitGeneration";
 import type { PickerItem } from "./ItemPicker";
 import { type UnitDraft, UnitEditor } from "./UnitEditor";
 
@@ -51,7 +51,8 @@ export function UnitWorkspace({
     (job === undefined &&
       (doc.generation?.status === "layout" || doc.generation?.status === "details"));
   const failed = job?.status === "failed" || doc.generation?.status === "failed";
-  const partial = doc.generation?.status === "partial";
+  // The same rule as the Apartment tab (#153): a build that dropped a few details is finished.
+  const partial = buildIsPartial(doc);
   const preview = !!doc.candidate && !showSaved && !dirty;
   const scene = preview ? doc.candidate! : doc.scene;
   const starter =

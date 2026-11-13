@@ -55,13 +55,14 @@ export type { HomeView };
  *   Weekend Routes (#18), comparisons (#19), the Move-in Crew at neighborhood
  *   level (#30).
  * - **Apartment** (#150): the place they chose from a rental card, as a 3D
- *   model Muse furnishes from Marketplace for a vibe and a budget.
+ *   model Muse furnishes from Marketplace for a vibe and a budget, or adds
+ *   the things they name to (#153).
  *
  * Questions about other parts of Landing open their pages; "Explore" lists
  * them all. Muse answers on the server (`api.homeChat.reply`); it only routes
  * and explains. The person chooses a place and reviews what's placed; nothing
- * is sent or bought. With AI off, Landing's rules answer instead, here in the
- * browser if the server can't.
+ * is sent or bought. When Muse can't answer, Landing's rules do, and say why;
+ * here in the browser if the server can't be reached.
  */
 export function LandingHome({ view = "map" }: { view?: HomeView }) {
   const viewer = useViewer();
@@ -101,12 +102,15 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
 
   /* ── Furnishing: Muse picks, the apartment gets the pieces, the chat shows them ── */
   const furnishNow = useCallback(
-    async (cmd: Extract<ChatCommand, { kind: "furnish" }>, sessionId: string) => {
+    async (cmd: Extract<ChatCommand, { kind: "furnish" | "add_items" }>, sessionId: string) => {
       setPending("furnish");
       try {
         const r = await furnish({
           viewerId: viewer._id,
-          vibe: cmd.vibe,
+          // Named things (#153): only those kinds, and what the person said about them.
+          ...(cmd.kind === "add_items"
+            ? { vibe: cmd.want ?? "", only: cmd.items }
+            : { vibe: cmd.vibe }),
           ...(cmd.budget === undefined ? {} : { budget: cmd.budget }),
         });
         chat.add(
@@ -115,6 +119,7 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
             text: r.text,
             sources: r.sources,
             via: r.via,
+            ...(r.why && { why: r.why }),
             ...(r.items.length
               ? { items: r.items, tally: { total: r.total, spent: r.spent, budget: r.budget } }
               : {}),
@@ -150,6 +155,7 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
         case "show_apartment":
           return setView("apartment");
         case "furnish":
+        case "add_items":
           setView("apartment");
           if (!o.replay) void furnishNow(cmd, o.sessionId);
           return;
@@ -221,11 +227,13 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
       };
       setPending("answer");
       let reply: ChatReply;
+      let offline = false;
       try {
         reply = await ask({ viewerId: viewer._id, message, context, recent });
       } catch {
         // The chat never dead-ends: answer with the rules here.
         reply = await localReply(message, context);
+        offline = true;
       } finally {
         setPending(null);
       }
@@ -244,6 +252,7 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
           text: reply.text,
           sources: reply.sources,
           via: reply.via,
+          ...(offline ? { why: "offline" as const } : reply.why && { why: reply.why }),
           command,
           saved: reply.saved,
           rentals: reply.rentals,
@@ -263,7 +272,8 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
         x.command &&
         (isMapCommand(x.command) ||
           x.command.kind === "show_apartment" ||
-          x.command.kind === "furnish"),
+          x.command.kind === "furnish" ||
+          x.command.kind === "add_items"),
     )?.command;
 
   const openSession = (s: ChatSession) => {

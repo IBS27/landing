@@ -381,14 +381,18 @@ function ChooseForm({
 
 /* ───────────── Furnishing picks ───────────── */
 
-/** "$1,240 of $1,500": what is placed in the apartment against the furniture budget. */
+/**
+ * "$1,240 of $1,500 placed": what is placed in the apartment against its one
+ * furniture budget (#153), the same two numbers as the Apartment tab's chip;
+ * "$1,240 placed" with no budget. The server never places past the budget, so
+ * "over" shows only if a placed listing's price rose before this reply.
+ */
 export function Tally({ tally }: { tally: ChatTally }) {
-  const { spent, budget, total } = tally;
+  const { spent, budget } = tally;
   if (budget === null)
     return (
       <p className="mt-1.5 text-[12px] text-secondary">
-        <b className="text-primary tabular-nums">{price(total)}</b> for these pieces
-        {spent > total && <>, {price(spent)} placed in all</>}
+        <b className="text-primary tabular-nums">{price(spent)}</b> placed
       </p>
     );
   const over = spent > budget;
