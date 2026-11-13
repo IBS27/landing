@@ -10,6 +10,7 @@ import {
   type HomeChatOutput,
   homeChatContext,
   homeChatProblems,
+  homeChatTask,
   rulesOutput,
   toReply,
 } from "../convex/homeChat";
@@ -19,7 +20,7 @@ import { fakeCtx, type Row } from "./fakeDb";
 /* ---------- A stubbed Meta Model API: replies are queued, requests recorded ---------- */
 
 const replies: (string | Response)[] = [];
-const requests: { messages: { role: string; content: string }[] }[] = [];
+const requests: { model?: string; messages: { role: string; content: string }[] }[] = [];
 
 function completion(text: string) {
   const sse = [
@@ -267,6 +268,13 @@ describe("homeChatContext", () => {
 /* ---------- The action ---------- */
 
 describe("homeChat.reply", () => {
+  test("runs on Muse Wonder", async () => {
+    expect(homeChatTask.model).toBe("muse-wonder-1.0");
+    replies.push(muse({ command: { kind: "show_move" } }));
+    await ask("show me the move");
+    expect(requests.map((r) => r.model)).toEqual(["muse-wonder-1.0"]);
+  });
+
   test("a valid answer is Muse's, with code-built links for what it cites", async () => {
     replies.push(
       muse({

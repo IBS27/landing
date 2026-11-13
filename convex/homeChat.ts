@@ -225,6 +225,9 @@ export function rulesOutput(input: HomeChatInput): HomeChatOutput {
 export const homeChatTask = defineTask<HomeChatInput, typeof homeChatOutput>({
   agent: "muse",
   name: HOME_CHAT_TASK,
+  // Muse Wonder ($4 / $20 per million input / output tokens, vs Spark's $1.25 / $4.25);
+  // the per-viewer rate limit, two attempts and low effort bound the cost.
+  model: "muse-wonder-1.0",
   instructions: `You answer the person in Landing Home's chat. The page is a map of San Francisco, and your answer moves it: pick one command for the client to run and write a short reply (one to three sentences, under ${REPLY_MAX} characters) that explains what the map now shows and why, from <input> only.
 
 Commands:
