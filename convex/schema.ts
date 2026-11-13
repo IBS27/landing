@@ -797,6 +797,36 @@ export default defineSchema({
     .index("by_owner", ["ownerId", "at"]),
 
   /**
+   * Subleases (#45): the lister's terms for a sublet listing. Muse replies to
+   * renters in each chat as proposals (#6), never under `minRent`.
+   */
+  sublets: defineTable({
+    listingId: v.id("listings"),
+    ownerId: v.id("users"),
+    /** Lowest monthly rent the lister would accept, whole dollars. */
+    minRent: v.number(),
+    /** Anything Muse should know ("flexible on move-in date"). */
+    notes: v.optional(v.string()),
+    /** Whether Muse drafts replies to renters. */
+    museReplies: v.union(v.literal("active"), v.literal("paused")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_listing", ["listingId"])
+    .index("by_owner", ["ownerId", "createdAt"]),
+
+  /** One renter's chat about a sublet: Muse's waiting draft and last move there. */
+  subletChats: defineTable({
+    subletId: v.id("sublets"),
+    conversationId: v.id("conversations"),
+    pendingProposalId: v.optional(v.id("proposals")),
+    lastMove: v.optional(negotiationMove),
+    /** Time of the last renter message Muse has answered. */
+    handledThrough: v.number(),
+    updatedAt: v.number(),
+  }).index("by_conversation", ["conversationId"]),
+
+  /**
    * One row per model call made through `runAgent` (convex/ai/agent.ts), including
    * calls that ended in the task's non-AI fallback. Model results are reused by
    * `inputHash` while fresh, so shared outputs are generated once.

@@ -193,7 +193,8 @@ async function proposalView(ctx: QueryCtx, p: Doc<"proposals">, a: Audience, now
               price: l.price,
               photo: l.photos[0] ?? null,
               status: l.status,
-              sellerName: seller?.name ?? null,
+              // A lister's own reply (#45) is titled by the renter's chat instead.
+              sellerName: l.sellerId === p.ownerId ? null : (seller?.name ?? null),
             }
           : null,
       };
