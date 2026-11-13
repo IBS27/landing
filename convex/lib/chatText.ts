@@ -1,4 +1,7 @@
+import type { AiFallbackReason } from "../validators";
+import { FURNISH_LIMITS, kindsNamed } from "./furnish";
 import { hasProtected, REDACTED, redactProtected } from "./protectedText";
+import type { PlacementKind } from "./unitScene";
 
 /**
  * What a Landing Home chat message says: the neighborhoods it names, the
@@ -233,12 +236,16 @@ const FURNISH_ITEMS =
   / (furniture|couch|sofa|bed|bed frame|mattress|lamps?|rugs?|posters?|desk|chairs?|table|bookshelf|shelves|dresser|nightstand|curtains|mirror|plants?) /;
 const MY_PLACE =
   / (my|our|the) (place|apartment|apt|room|bedroom|living room|studio|unit|home|flat) /;
+/** Words that ask for a thing: "add a lamp", "I need a desk", "could use a rug". */
+const ADD_CUES =
+  / (add|adding|another|get me|i need|need (a|an|some)|want (a|an|some)|find me|buy|put (a|an|in|some)|place (a|an|some)|looking for|could use|missing) /;
 
 /**
  * Whether a message asks to furnish or style the person's apartment. "Furnish"
  * and "decorate" always do. A mood ("cozy", "vibe", "style") does unless the
- * message is a rental search or about a neighborhood. A piece of furniture
- * does only for their own place, or on the Apartment tab.
+ * message is a rental search or about a neighborhood. A piece of furniture,
+ * or asking for any kind of thing by name, does only for their own place, or
+ * on the Apartment tab.
  */
 export function furnishAsk(
   message: string,
@@ -253,5 +260,76 @@ export function furnishAsk(
       (!RENTAL_WORDS.test(t) && findNeighborhoods(message, about.neighborhoods ?? []).length === 0)
     );
   // "Will my furniture fit" is a question for My Place, not a request for new pieces.
-  return mine && FURNISH_ITEMS.test(t) && !/ (fit|fits) /.test(t);
+  if (!mine || / (fit|fits) /.test(t)) return false;
+  // Any kind of thing asked for by name counts (#153): "find me an armchair".
+  return FURNISH_ITEMS.test(t) || (ADD_CUES.test(t) && kindsNamed(message).kinds.length > 0);
+}
+
+/* ── A look for the whole place, or named things to add (#153) ── */
+
+/** Words about the whole place, beyond `FURNISH_VERBS` and `FURNISH_MOODS`. */
+const ROOM_CUES = / (make it|make (my|our|the|this) \w+|feel|feels|look) /;
+
+export type FurnishRequest =
+  /** Style or furnish the whole apartment: `vibe` is the look, without the ask and the price. */
+  | { type: "room"; vibe: string }
+  /** Add these things and nothing else: `want` is how the person described them, maybe "". */
+  | { type: "items"; kinds: PlacementKind[]; want: string };
+
+/**
+ * What a furnishing message asks for. Naming things ("add a reading lamp", "a
+ * rug under $200") asks for those things, at most `FURNISH_LIMITS.onlyMax`
+ * kinds, unless the message is plainly about the whole place and has no add
+ * cue ("cozy, lots of plants", "make it cozy with a big rug"). An adjective
+ * never turns a list of things into a look: "add a cozy armchair" is a chair.
+ */
+export function furnishRequest(text: string): FurnishRequest {
+  const { kinds, want } = kindsNamed(text);
+  const t = words(text);
+  const room =
+    !kinds.length ||
+    (!ADD_CUES.test(t) && (FURNISH_VERBS.test(t) || FURNISH_MOODS.test(t) || ROOM_CUES.test(t)));
+  return room
+    ? { type: "room", vibe: vibeWords(text) }
+    : { type: "items", kinds: kinds.slice(0, FURNISH_LIMITS.onlyMax), want };
+}
+
+/**
+ * Whether a reply says nothing was placed ("nothing is bought or placed").
+ * Furnishing does place its picks in the private 3D model, so that is false:
+ * the true line is that nothing is bought or sent.
+ */
+export function deniesPlacing(text: string): boolean {
+  return /\b(?:bought|ordered|purchased|sent|reserved)\s+(?:or|nor)\s+placed\b|\bnothing\s+(?:is|was|has been|gets|will be)\s+placed\b|(?:\bnot|\bnever|n['’]t)\s+(?:been\s+|yet\s+)?placed\b/i.test(
+    text,
+  );
+}
+
+/**
+ * Whether a reply says drafts are waiting in the Inbox ("your drafts are
+ * waiting for approval"), as opposed to "nothing is waiting" or "no drafts are
+ * waiting". True only of an Inbox that holds some (#153).
+ */
+export function saysDraftsWait(text: string): boolean {
+  const m =
+    /\b(\w+\s+)?(?:drafts?|messages?)\s+(?:(?:is|are|re)\s+)?(?:still\s+)?(?:waiting|pending)\b/i.exec(
+      text.replace(/['’]/g, " "),
+    );
+  return !!m && !/^(?:no|any|zero)\s+$/i.test(m[1] ?? "");
+}
+
+/* ── Why Landing's rules answered (#153) ── */
+
+/**
+ * Why a reply came from Landing's rules and not Muse, for its label. `off`:
+ * AI is disabled. `busy`: the viewer is over the rate limit, or the model
+ * timed out or failed. `unsure`: Muse's answer was rejected, or the rules
+ * answered for another reason (nothing to ask Muse about).
+ */
+export type RulesWhy = "off" | "busy" | "unsure";
+
+/** `runAgent`'s reason for falling back, as the reason a reply shows. */
+export function rulesWhy(reason: AiFallbackReason | undefined): RulesWhy {
+  if (reason === "disabled") return "off";
+  return reason === "timeout" || reason === "model_error" ? "busy" : "unsure";
 }

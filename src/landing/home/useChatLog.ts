@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FurnishReply } from "../../../convex/apartment";
+import type { RulesWhy } from "../../../convex/lib/chatText";
 import {
   CHAT_CARDS_MAX,
   type ChatCommand,
@@ -9,8 +10,17 @@ import {
 
 /** A Marketplace item Muse placed in the apartment, as a card under the reply. */
 export type ChatItemCard = FurnishReply["items"][number];
-/** What a furnish reply's items cost, what is placed in all, and the furniture budget. */
+/**
+ * What a furnish reply's items cost, what is placed in all, and the
+ * apartment's furniture budget: always the overall one (#153), null with none.
+ */
 export type ChatTally = { total: number; spent: number; budget: number | null };
+/**
+ * Why Landing's rules answered (#153), as the server said, or `offline`: the
+ * browser's own rules answered because the server couldn't be reached.
+ */
+export type ChatWhy = RulesWhy | "offline";
+const WHYS: readonly string[] = ["off", "busy", "unsure", "offline"] satisfies ChatWhy[];
 
 export type ChatMessage = {
   id: string;
@@ -23,6 +33,8 @@ export type ChatMessage = {
    * something the person did (they chose a place).
    */
   via?: "muse" | "rules" | "landing";
+  /** Why the rules answered. Chats stored before #153 have none. */
+  why?: ChatWhy;
   command?: ChatCommand;
   /** What the message added to the City Profile. */
   saved?: string[];
@@ -48,6 +60,22 @@ const SAVED_MAX = 6;
 const SOURCES_MAX = 8;
 /** A chat this recent is still open after a reload; an older one waits under "Chats". */
 const RESUME_MS = 12 * 60 * 60 * 1000;
+
+/**
+ * The line under a reply saying who answered. The rules' reason shows only
+ * when it is one the person can act on or wait out: AI is off, Muse is busy,
+ * or the browser is offline. A rejected answer, and a chat stored before
+ * replies carried a reason, get no parenthesis.
+ */
+export function viaLabel(m: Pick<ChatMessage, "via" | "why">): string | null {
+  if (m.via === "muse") return "Answered by Muse";
+  if (m.via === "landing") return "From Landing";
+  if (m.via !== "rules") return null;
+  const why = { off: "AI off", busy: "Muse is busy", offline: "offline", unsure: null }[
+    m.why ?? "unsure"
+  ];
+  return `Answered by Landing's rules${why ? ` (${why})` : ""}`;
+}
 
 const newId = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
 const cut = (s: string, max: number) => (s.length > max ? s.slice(0, max) : s);
@@ -100,6 +128,7 @@ export function storedMessage(m: ChatMessage): ChatMessage {
       sources: m.sources.slice(0, SOURCES_MAX).map((s) => ({ ...s, label: cut(s.label, 200) })),
     }),
     ...(m.via && { via: m.via }),
+    ...(m.why && { why: m.why }),
     ...(m.command && { command: m.command }),
     ...(m.saved?.length && { saved: m.saved.slice(0, SAVED_MAX).map((s) => cut(s, 120)) }),
     ...(m.rentals?.length && {
@@ -139,6 +168,7 @@ function readMessage(v: unknown): ChatMessage | null {
     text: v.text,
     ...(sources && { sources }),
     ...((v.via === "muse" || v.via === "rules" || v.via === "landing") && { via: v.via }),
+    ...(typeof v.why === "string" && WHYS.includes(v.why) && { why: v.why as ChatWhy }),
     // The page ignores a command kind it doesn't know.
     ...(isObject(v.command) &&
       typeof v.command.kind === "string" && { command: v.command as ChatCommand }),

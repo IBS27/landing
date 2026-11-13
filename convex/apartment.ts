@@ -15,14 +15,15 @@ import { runJob, startJob } from "./ai/jobs";
 import type { MediaInput } from "./ai/model";
 import { aiEnabled } from "./ai/status";
 import { blockedSet } from "./lib/blocks";
+import { type FurnishRequest, furnishRequest, type RulesWhy, rulesWhy } from "./lib/chatText";
 import { resolveSources } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import {
   dollars,
   FURNISH_LIMITS,
   furnishText,
+  itemsText,
   kindOf,
-  kindsAsked,
   saysLook,
   sizeOf,
   vibeFromText,
@@ -35,6 +36,7 @@ import {
   furnishProblems,
   furnishTask,
   rulesFurnish,
+  spendLimit,
 } from "./lib/furnishTask";
 import { type LayoutItem, placeItems } from "./lib/itemLayout";
 import {
@@ -50,7 +52,7 @@ import { currentPlace } from "./lib/myPlace";
 import { placeStatus } from "./lib/placeRules";
 import { loadAudience } from "./lib/posts";
 import { redactProtected } from "./lib/protectedText";
-import { isStarterScene } from "./lib/unitGeneration";
+import { buildIsPartial, isStarterScene } from "./lib/unitGeneration";
 import {
   area,
   ITEM_LIMITS,
@@ -80,8 +82,10 @@ import { latLng } from "./validators";
  * chose, furnished from the same chat with Muse. The person chooses a rental
  * (`myPlace.takeListing`), `build` makes its unit and starts the existing 3D
  * generation (convex/unitScenes.ts), and `furnish` has Muse pick Marketplace
- * items for a vibe and a budget, places them, and starts a 3D model of each.
- * The person then moves, turns and removes items, and everything persists.
+ * items, places them, and starts a 3D model of each: for a vibe and a budget
+ * for the whole apartment, or only the things the person named ("add a
+ * reading lamp", #153). The person then moves, turns and removes items, and
+ * everything persists.
  *
  * Private: every function reads and writes only the viewer's own unit, items
  * and models. Nothing is bought, messaged or sent: items are placed in a
@@ -90,6 +94,8 @@ import { latLng } from "./validators";
  */
 
 const MAX_ITEMS = 80;
+/** Listings the person took out that a room request leaves out (#153): the newest this many. */
+const REMOVED_KEPT = 60;
 /** A `building` model row this old lost its job (jobs stop at 10 minutes). */
 const MODEL_STALE_MS = 15 * 60_000;
 /** Item models built by one job, how many at once, and the job's shared deadline. */
@@ -159,9 +165,16 @@ export const apartmentView = v.object({
       state: unitState,
       /** The live build job, for `api.ai.jobs.get`. */
       jobId: v.union(v.id("aiJobs"), v.null()),
+      /** What a `partial` or `failed` build is missing, in one short sentence (#153); null: nothing stored. */
+      note: v.union(v.string(), v.null()),
+      /** The build's full text, for the detailed editor. */
       explanation: v.union(v.string(), v.null()),
       /** AI is on and Muse can read at least one of the unit's photos, plans or videos. */
       canBuild: v.boolean(),
+      /** A `partial` or `failed` build that Muse could try again now (#153). */
+      canRetry: v.boolean(),
+      /** Changes with every build result and never when items move: what a dismissal is remembered by. */
+      buildRevision: v.union(v.number(), v.null()),
       furnishing: v.union(
         v.null(),
         v.object({ vibe: v.string(), budget: v.union(v.number(), v.null()) }),
@@ -286,20 +299,36 @@ async function placedItems(ctx: QueryCtx, ownerId: Id<"users">, placements: Plac
 /**
  * Where a unit's build stands. `starter`: the example room, nothing built.
  * `building`: a job is running (the scene may already hold the layout).
- * `failed`: a build ended without a layout. `partial`: a layout without all
- * its finishes. `ready`: everything else, a hand-edited scene included.
+ * `failed`: a build ended without a layout. `partial`: a layout missing its
+ * finishes and fixtures, or most of them (`buildOutcome`, `buildIsPartial`).
+ * `ready`: everything else, a hand-edited scene included.
  */
 function stateOf(doc: Doc<"unitScenes">, building: boolean): Infer<typeof unitState> {
   if (building) return "building";
   const status = doc.generation?.status;
   if (isStarterScene(doc.scene))
     return status === "failed" || status === "layout" ? "failed" : "starter";
-  return status === "partial" || status === "layout" || status === "details" ? "partial" : "ready";
+  return buildIsPartial(doc) || status === "layout" || status === "details" ? "partial" : "ready";
 }
 
 /** Whether Muse could build this unit now: AI is on and it can read some of the unit's media. */
 async function canBuild(ctx: QueryCtx, doc: Doc<"unitScenes">) {
   return aiEnabled() && (await generationInputs(ctx, doc)).sources.some(readableSource);
+}
+
+/** A unit's build as the tab shows it: where it stands, what is missing, whether a retry can help. */
+async function buildView(ctx: QueryCtx, doc: Doc<"unitScenes">, live: Doc<"aiJobs"> | null) {
+  const state = stateOf(doc, !!live);
+  const stopped = state === "partial" || state === "failed";
+  const can = await canBuild(ctx, doc);
+  return {
+    state,
+    jobId: live?._id ?? null,
+    note: stopped ? (doc.generation?.note ?? null) : null,
+    canBuild: can,
+    canRetry: stopped && can,
+    buildRevision: doc.generation?.revision ?? null,
+  };
 }
 
 /** The viewer's place, its 3D unit and what is placed in it. */
@@ -336,13 +365,13 @@ export const get = viewerQuery({
         revision: unit.revision,
         scene: unit.scene,
         placements: unit.placements,
-        state: stateOf(unit, !!live),
-        jobId: live?._id ?? null,
+        ...(await buildView(ctx, unit, live)),
         explanation: unit.explanation ?? null,
-        canBuild: await canBuild(ctx, unit),
-        furnishing: unit.furnishing
-          ? { vibe: unit.furnishing.vibe, budget: unit.furnishing.budget ?? null }
-          : null,
+        // Null until the apartment has a look or a budget: a list of removed items alone isn't one.
+        furnishing:
+          unit.furnishing?.vibe !== undefined || unit.furnishing?.budget !== undefined
+            ? { vibe: unit.furnishing.vibe ?? "", budget: unit.furnishing.budget ?? null }
+            : null,
       },
       items,
       spent,
@@ -402,16 +431,30 @@ type ListingPick = {
   height: number;
 };
 
+type Furnishing = NonNullable<Doc<"unitScenes">["furnishing"]>;
+
+/** `furnishing` as stored: only the fields that hold something, or undefined (unset) with none. */
+function furnishingOf(f: Furnishing): Furnishing | undefined {
+  const out: Furnishing = {
+    ...(f.vibe === undefined ? {} : { vibe: f.vibe }),
+    ...(f.budget === undefined ? {} : { budget: f.budget }),
+    ...(f.removed?.length ? { removed: f.removed } : {}),
+  };
+  return Object.keys(out).length ? out : undefined;
+}
+
 /**
  * Lays the picks out in the unit, saves them, and starts their 3D models.
  * Bumps `revision` (so an open editor's stale save is refused) and leaves the
- * scene and any build in flight untouched.
+ * scene and any build in flight untouched. `remember` is a room request's
+ * look and total budget. A listing that is placed comes off the removed list
+ * (#153), whoever placed it.
  */
 async function placeListings(
   ctx: MutationCtx,
   doc: Doc<"unitScenes">,
   picks: ListingPick[],
-  patch: { furnishing?: Doc<"unitScenes">["furnishing"] } = {},
+  remember?: { vibe: string; budget?: number },
 ): Promise<Placement[]> {
   const items: LayoutItem[] = picks.map((p) => ({
     id: itemId(),
@@ -425,10 +468,15 @@ async function placeListings(
     color: colorFromText(p.listing.title),
   }));
   const placed = placeItems(doc.scene, doc.placements, items);
-  if (!placed.length && !Object.keys(patch).length) return placed;
+  const back = new Set(placed.map((p) => p.listingId));
+  const removed = doc.furnishing?.removed?.filter((id) => !back.has(id));
+  const forgot = removed?.length !== doc.furnishing?.removed?.length;
+  if (!placed.length && !remember) return placed;
   const revision = doc.revision + (placed.length ? 1 : 0);
   await ctx.db.patch(doc._id, {
-    ...patch,
+    ...(remember || forgot
+      ? { furnishing: furnishingOf({ ...doc.furnishing, ...remember, removed }) }
+      : {}),
     ...(placed.length
       ? { placements: [...doc.placements, ...placed], revision, updatedAt: Date.now() }
       : {}),
@@ -513,7 +561,12 @@ export const moveItem = viewerMutation({
   },
 });
 
-/** Takes one item out of the unit. Returns the unit's revision. */
+/**
+ * Takes one item out of the unit. Returns the unit's revision. A Marketplace
+ * listing taken out is remembered (#153), so furnishing the room again doesn't
+ * bring it back; asking for it by name, or adding it, does. The tab calls this
+ * once its undo window has passed, so an undone removal never gets here.
+ */
 export const removeItem = viewerMutation({
   args: { unitId: v.id("unitScenes"), itemId: v.string() },
   returns: v.number(),
@@ -522,7 +575,18 @@ export const removeItem = viewerMutation({
     const placements = doc.placements.filter((p) => p.id !== id);
     if (placements.length === doc.placements.length) return doc.revision;
     const revision = doc.revision + 1;
-    await ctx.db.patch(unitId, { placements, revision, updatedAt: Date.now() });
+    const listingId = doc.placements.find((p) => p.id === id)?.listingId;
+    const gone = listingId && !placements.some((p) => p.listingId === listingId);
+    const removed = [...(doc.furnishing?.removed ?? []).filter((l) => l !== listingId)];
+    if (listingId && gone) removed.push(listingId);
+    await ctx.db.patch(unitId, {
+      placements,
+      revision,
+      updatedAt: Date.now(),
+      ...(gone
+        ? { furnishing: furnishingOf({ ...doc.furnishing, removed: removed.slice(-REMOVED_KEPT) }) }
+        : {}),
+    });
     return revision;
   },
 });
@@ -556,6 +620,8 @@ export const addItem = viewerMutation({
 export const furnishReply = v.object({
   text: v.string(),
   via: v.union(v.literal("muse"), v.literal("rules")),
+  /** Why the rules answered (#153): AI is off, Muse is busy (rate limit, timeout, error), or another reason. */
+  why: v.optional(v.union(v.literal("off"), v.literal("busy"), v.literal("unsure"))),
   items: v.array(
     v.object({
       /** The new placement's id. */
@@ -568,10 +634,16 @@ export const furnishReply = v.object({
       reason: v.string(),
     }),
   ),
-  /** What this call's items cost, what is placed in all, and the total budget. */
+  /**
+   * What this call's items cost, what is placed in all after it, and the
+   * apartment's furniture budget (null with none): always the overall one,
+   * never an amount that capped this request (#153).
+   */
   total: v.number(),
   spent: v.number(),
   budget: v.union(v.number(), v.null()),
+  /** The kinds this request asked for by name; empty when it furnished the apartment. */
+  asked: v.array(placementKind),
   /** Each picked listing, "Title · $X", linking to its Marketplace page. */
   sources: v.array(v.object({ label: v.string(), href: v.optional(v.string()) })),
 });
@@ -583,12 +655,14 @@ const contextArgs = {
   viewerId: v.id("users"),
   vibe: v.string(),
   budget: v.optional(v.number()),
+  only: v.optional(v.array(placementKind)),
 };
 
 /**
  * Everything one furnishing reads, for the viewer only and with bounded
- * reads: their unit and what is in it, the vibe and budget (typed now, else
- * remembered), the rate limit, and the Marketplace candidates.
+ * reads: their unit and what is in it, which of the two requests this is
+ * (#153), the vibe and budget (typed now, else remembered), the rate limit,
+ * and the Marketplace candidates.
  */
 export const context = internalQuery({
   args: contextArgs,
@@ -602,9 +676,11 @@ type FurnishContext =
       unitId: Id<"unitScenes">;
       input: FurnishInput;
       limited: boolean;
-      /** The vibe and total budget to remember. */
+      /** The apartment's look and total budget: a room request's to remember, else as remembered. */
       vibe: string;
       budget: number | null;
+      /** The most an items request may spend by its own amount; null for a room request or none given. */
+      cap: number | null;
       spent: number;
     };
 
@@ -627,7 +703,8 @@ export async function furnishContext(
       "Your apartment model isn't ready yet. Open the Apartment tab to build it, then ask again.",
     );
   const { items, spent } = await placedItems(ctx, viewerId, unit.placements);
-  const budget = a.budget ?? unit.furnishing?.budget ?? null;
+  /** The apartment's furniture budget as it stands: what every reply reports until one changes it. */
+  const stored = unit.furnishing?.budget ?? null;
   // The starter room is furnished only when no build is running or still to come
   // (AI off, no media Muse can read, or a build that failed): the flow works without AI.
   if (isStarterScene(unit.scene)) {
@@ -635,21 +712,43 @@ export async function furnishContext(
       return wait(
         "Your apartment model is still being built. Ask again once it's ready.",
         spent,
-        budget,
+        stored,
       );
     if (!unit.generation && unit.manuallyEdited !== true && (await canBuild(ctx, unit)))
       return wait(
         "Your apartment model isn't ready yet. Open the Apartment tab to build it, then ask again.",
         spent,
-        budget,
+        stored,
       );
   }
 
-  // "Add a lamp" names things and "furnish it" says nothing: both keep the remembered look.
+  // Two requests (#153): the things the person named ("add a reading lamp"), or a look for
+  // the whole apartment. A list of things sent as a vibe (by Muse, or an older client) is
+  // still a list of things. Naming things and "furnish it" both keep the remembered look.
   const typed = cap(a.vibe, FURNISH_LIMITS.vibeMax);
-  const asked = kindsAsked(typed);
+  const request: FurnishRequest = a.only?.length
+    ? { type: "items", kinds: a.only, want: typed }
+    : furnishRequest(typed);
+  const asked = request.type === "items" ? request.kinds : [];
+  const want = request.type === "items" ? request.want : "";
   const vibe = !asked.length && saysLook(typed) ? typed : (unit.furnishing?.vibe ?? "");
+
+  // One furniture budget, for the whole apartment. A room request's amount replaces it,
+  // unless it is below what is already placed. An items request's amount caps that request
+  // only: it spends at most that, and at most what is left of the total.
+  if (!asked.length && a.budget !== undefined && a.budget < spent)
+    return wait(
+      `You've already placed ${dollars(spent)}, more than ${dollars(a.budget)}. Remove something or raise the budget.`,
+      spent,
+      stored,
+    );
+  const budget = asked.length ? stored : (a.budget ?? stored);
+  const ownCap = asked.length ? (a.budget ?? null) : null;
   const remaining = budget === null ? null : Math.max(0, budget - spent);
+  const limit = spendLimit({
+    budget: budget === null ? null : { total: budget, spent, remaining: remaining ?? 0 },
+    cap: ownCap,
+  });
 
   const now = Date.now();
   const runs = await ctx.db
@@ -666,29 +765,48 @@ export async function furnishContext(
     ctx.db.query("listings").withIndex("by_created").order("desc").take(CANDIDATE_SCAN),
   ]);
   const here = new Set(unit.placements.map((p) => p.listingId));
+  const removed = new Set(unit.furnishing?.removed ?? []);
+  const kinds = new Set<PlacementKind | null>(asked);
   const pool = recent.filter(
     (l) =>
       placeable(l) &&
       l.sellerId !== viewerId &&
       !blocked.has(l.sellerId) &&
       !here.has(l._id) &&
-      (remaining === null || l.price <= remaining),
+      l.price <= limit &&
+      // Named things: only listings of those kinds, so nothing else can be picked or crowd
+      // them out, what the person took out included (asking by name is asking). A room
+      // request leaves out what they took out.
+      (asked.length ? kinds.has(kindOf(l)) : !removed.has(l._id)),
   );
-  // Best vibe matches first, then furniture and household basics, newest first.
-  const ranked = rankVibeMatches(
-    vibeFromText(vibe),
-    pool.map((l) => ({
-      id: l._id,
-      title: l.title,
-      description: l.description,
-      createdAt: l.createdAt,
-    })),
-  ).map((m) => m.id);
-  const order = [
-    ...ranked.slice(0, MATCHES_KEPT),
-    ...pool.filter((l) => BASICS.has(l.category)).map((l) => l._id as string),
-    ...ranked.slice(MATCHES_KEPT),
-  ];
+  const matches = (look: string) =>
+    rankVibeMatches(
+      vibeFromText(look),
+      pool.map((l) => ({
+        id: l._id,
+        title: l.title,
+        description: l.description,
+        createdAt: l.createdAt,
+      })),
+    ).map((m) => m.id);
+  let order: string[];
+  if (asked.length) {
+    // Best match for what they said about the things, then for the apartment's look, then
+    // the newest; one kind at a time, so each kind asked for has candidates.
+    const ranked = [...new Set([...matches(want), ...matches(vibe), ...pool.map((l) => l._id)])];
+    const kindOfId = new Map(pool.map((l) => [l._id as string, kindOf(l)]));
+    const byKind = asked.map((k) => ranked.filter((id) => kindOfId.get(id) === k));
+    const turns = Math.max(0, ...byKind.map((ids) => ids.length));
+    order = Array.from({ length: turns }, (_, i) => byKind.flatMap((ids) => ids[i] ?? [])).flat();
+  } else {
+    // Best vibe matches first, then furniture and household basics, newest first.
+    const ranked = matches(vibe);
+    order = [
+      ...ranked.slice(0, MATCHES_KEPT),
+      ...pool.filter((l) => BASICS.has(l.category)).map((l) => l._id as string),
+      ...ranked.slice(MATCHES_KEPT),
+    ];
+  }
   const byId = new Map(pool.map((l) => [l._id as string, l]));
   // What the viewer can't see (a deleted seller) never reaches Muse: check twice the cap, keep the cap.
   const shortlist = [...new Set(order)]
@@ -704,7 +822,9 @@ export async function furnishContext(
   const input: FurnishInput = {
     vibe,
     asked,
+    want,
     budget: budget === null ? null : { total: budget, spent, remaining: remaining ?? 0 },
+    cap: ownCap,
     rooms: unit.scene.rooms.map((r) => ({
       id: r.id,
       name: cap(r.name, 80),
@@ -725,7 +845,7 @@ export async function furnishContext(
       description: cap(l.description, 200),
     })),
   };
-  return { ready: true, unitId: unit._id, input, limited, vibe, budget, spent };
+  return { ready: true, unitId: unit._id, input, limited, vibe, budget, cap: ownCap, spent };
 }
 
 const pick = furnishOutput.fields.picks.element;
@@ -733,8 +853,14 @@ const pick = furnishOutput.fields.picks.element;
 /**
  * Places Muse's (or the rules') picks, after checking each again: still a
  * visible, active listing that isn't the viewer's own or already placed, a
- * valid size, and inside the budget that is left. Remembers the vibe and
- * budget on the unit. The only write `furnish` makes.
+ * valid size, and inside what may be spent. The only write `furnish` makes.
+ *
+ * A room request (no `only`) remembers `vibe` and `budget`, the total for the
+ * whole apartment, on the unit; a total below what is placed at this moment
+ * is never stored, and then nothing is placed either. It skips listings the
+ * person took out. An items request (`only`, #153) places at most one listing
+ * of each of those kinds, spends at most `budget` (its own cap) and at most
+ * what is left of the stored total, and remembers nothing.
  */
 export const place = internalMutation({
   args: {
@@ -742,9 +868,10 @@ export const place = internalMutation({
     unitId: v.id("unitScenes"),
     vibe: v.string(),
     budget: v.optional(v.number()),
+    only: v.optional(v.array(placementKind)),
     picks: v.array(pick),
   },
-  handler: async (ctx, { viewerId, unitId, vibe, budget, picks }) => {
+  handler: async (ctx, { viewerId, unitId, vibe, budget, only, picks }) => {
     const doc = await ownScene(ctx, unitId, viewerId);
     const before = await placedItems(ctx, viewerId, doc.placements);
     const visible = await visibleListings(
@@ -754,7 +881,14 @@ export const place = internalMutation({
     );
     const here = new Set(doc.placements.map((p) => p.listingId));
     const rooms = new Set(doc.scene.rooms.map((r) => r.id));
-    let left = budget === undefined ? Number.POSITIVE_INFINITY : budget - before.spent;
+    const removed = new Set(doc.furnishing?.removed ?? []);
+    const stored = doc.furnishing?.budget;
+    const total = only || (budget !== undefined && budget < before.spent) ? stored : budget;
+    const none = Number.POSITIVE_INFINITY;
+    let left = only
+      ? Math.min(budget ?? none, stored === undefined ? none : stored - before.spent)
+      : (budget ?? none) - before.spent;
+    const kinds = new Set<PlacementKind>();
     const ok = (n: number) => Number.isFinite(n) && n >= ITEM_LIMITS.min && n <= ITEM_LIMITS.max;
     const accepted: (ListingPick & { reason: string })[] = [];
     for (const p of picks.slice(0, FURNISH_LIMITS.picksMax)) {
@@ -765,10 +899,14 @@ export const place = internalMutation({
         listing.sellerId === viewerId ||
         here.has(listing._id) ||
         listing.price > left ||
-        doc.placements.length + accepted.length >= MAX_ITEMS
+        doc.placements.length + accepted.length >= MAX_ITEMS ||
+        (only
+          ? !only.includes(p.kind) || kinds.has(p.kind) || kindOf(listing) !== p.kind
+          : removed.has(listing._id))
       )
         continue;
       here.add(listing._id);
+      kinds.add(p.kind);
       left -= listing.price;
       const size = [p.width, p.depth, p.height].every(ok) ? p : sizeOf(p.kind, listing);
       accepted.push({
@@ -781,9 +919,12 @@ export const place = internalMutation({
         reason: p.reason.trim().slice(0, FURNISH_LIMITS.reasonMax),
       });
     }
-    const placed = await placeListings(ctx, doc, accepted, {
-      furnishing: { vibe, ...(budget === undefined ? {} : { budget }) },
-    });
+    const placed = await placeListings(
+      ctx,
+      doc,
+      accepted,
+      only ? undefined : { vibe, budget: total },
+    );
     // Only what found a spot: a pick that fits nowhere isn't placed or counted.
     const idOf = new Map(placed.map((p) => [p.listingId, p.id]));
     const items = accepted.flatMap((a) => {
@@ -808,17 +949,29 @@ export const place = internalMutation({
 
 const furnishArgs = {
   viewerId: v.id("users"),
-  /** The look the person described, or the things they asked for. Empty reuses the remembered vibe. */
+  /**
+   * The look the person described for the apartment; empty reuses the
+   * remembered one. With `only`: how they described those things ("reading"),
+   * maybe empty, which never changes the remembered look.
+   */
   vibe: v.string(),
-  /** The furniture budget for the whole apartment, in dollars. Left out, the remembered one applies. */
+  /**
+   * Whole dollars. The furniture budget for the whole apartment: left out, the
+   * remembered one applies, and one below what is already placed is refused.
+   * With `only`: the most this request may spend, inside what is left of the
+   * apartment's budget, which it never changes.
+   */
   budget: v.optional(v.number()),
+  /** Add only these kinds of thing, at most one of each (#153): one to four different kinds. */
+  only: v.optional(v.array(placementKind)),
 };
 
 /**
- * Furnishes the viewer's apartment from Marketplace for a vibe and a total
- * budget: Muse picks, or Landing's rules when AI is off, the answer is
- * rejected or the viewer is over the rate limit. The picks are placed in the
- * private 3D model for the person to review; nothing is bought or sent.
+ * Furnishes the viewer's apartment from Marketplace: for a vibe and a total
+ * budget, or (`only`, #153) just the things the person named. Muse picks, or
+ * Landing's rules when AI is off, the answer is rejected or the viewer is
+ * over the rate limit. The picks are placed in the private 3D model for the
+ * person to review; nothing is bought or sent.
  */
 export const furnish = action({
   args: furnishArgs,
@@ -837,24 +990,36 @@ export async function furnishApartment(
     !(Number.isFinite(a.budget) && a.budget >= 0 && a.budget <= FURNISH_LIMITS.budgetMax)
   )
     throw new ConvexError("A furniture budget is a dollar amount");
+  if (
+    a.only &&
+    (a.only.length < 1 ||
+      a.only.length > FURNISH_LIMITS.onlyMax ||
+      new Set(a.only).size !== a.only.length)
+  )
+    throw new ConvexError("Name one to four different kinds of thing to add");
   const c: FurnishContext = await ctx.runQuery(internal.apartment.context, {
     viewerId: a.viewerId,
     vibe: a.vibe,
     ...(a.budget === undefined ? {} : { budget: Math.round(a.budget) }),
+    ...(a.only ? { only: a.only } : {}),
   });
   if (!c.ready)
     return {
       text: c.text,
       via: "rules",
+      why: aiEnabled() ? "unsure" : "off",
       items: [],
       total: 0,
       spent: c.spent,
       budget: c.budget,
+      asked: [],
       sources: [],
     };
 
+  const { asked } = c.input;
   let out: FurnishOutput = rulesFurnish(c.input);
   let via: FurnishReply["via"] = "rules";
+  let why: RulesWhy = !aiEnabled() ? "off" : c.limited ? "busy" : "unsure";
   if (!c.limited && c.input.candidates.length) {
     const r = await runAgent(ctx, furnishTask, {
       input: c.input,
@@ -867,7 +1032,7 @@ export async function furnishApartment(
     if (r.via !== "fallback" && furnishProblems(r.output, c.input).length === 0) {
       out = r.output;
       via = "muse";
-    }
+    } else why = rulesWhy(r.fallbackReason);
   }
 
   const placed: { items: FurnishReply["items"]; spent: number } = await ctx.runMutation(
@@ -876,27 +1041,42 @@ export async function furnishApartment(
       viewerId: a.viewerId,
       unitId: c.unitId,
       vibe: c.vibe,
-      ...(c.budget === null ? {} : { budget: c.budget }),
+      ...(asked.length
+        ? { only: asked, ...(c.cap === null ? {} : { budget: c.cap }) }
+        : c.budget === null
+          ? {}
+          : { budget: c.budget }),
       picks: out.picks,
     },
   );
   const total = placed.items.reduce((sum, i) => sum + i.price, 0);
+  const budget = c.budget === null ? null : { total: c.budget, spent: c.spent };
+  const limit = spendLimit(c.input);
+  // Muse's words only when everything it picked was placed, and for named things only when
+  // something was: otherwise say what was placed, or what couldn't be found and within what.
+  const museText =
+    via === "muse" &&
+    placed.items.length === out.picks.length &&
+    (!asked.length || placed.items.length > 0);
   return {
-    // Muse's words only when everything it picked was placed; otherwise say what was.
-    text:
-      via === "muse" && placed.items.length === out.picks.length
-        ? redactProtected(out.text.trim())
-        : furnishText({
-            count: placed.items.length,
-            vibe: c.vibe,
-            total,
-            budget: c.budget === null ? null : { total: c.budget, spent: c.spent },
-          }),
+    text: museText
+      ? redactProtected(out.text.trim())
+      : asked.length
+        ? itemsText({
+            asked,
+            added: placed.items,
+            have: c.input.placed.map((p) => p.kind),
+            budget,
+            limit: Number.isFinite(limit) ? limit : null,
+          })
+        : furnishText({ count: placed.items.length, vibe: c.vibe, total, budget }),
     via,
+    ...(via === "rules" ? { why } : {}),
     items: placed.items,
     total,
     spent: placed.spent,
     budget: c.budget,
+    asked,
     sources: placed.items.map((i) => ({
       label: `${i.title.slice(0, 120)} · ${dollars(i.price)}`,
       href: `/marketplace/item/${i.listingId}`,

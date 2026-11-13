@@ -3,8 +3,9 @@ import { checkValue } from "../convex/ai/outputSchema";
 import {
   FURNISH_LIMITS,
   furnishText,
+  itemsText,
   kindOf,
-  kindsAsked,
+  kindsNamed,
   saysLook,
   sizeOf,
   sizeProblem,
@@ -134,14 +135,27 @@ describe("what a listing is", () => {
     expect(sizeProblem("art", { width: 0.6, depth: 0.5, height: 0.8 })).toContain("art");
     expect(sizeProblem("lamp", { width: 0.4, depth: 0.4, height: Number.NaN })).toContain("lamp");
   });
-  test("tells a shopping list from a look", () => {
-    expect(kindsAsked("add a lamp")).toEqual(["lamp"]);
-    expect(kindsAsked("a rug and a coffee table please")).toEqual(["table", "rug"]);
-    expect(kindsAsked("another two plants")).toEqual(["plant"]);
-    expect(kindsAsked("cozy with lots of plants")).toEqual([]);
-    expect(kindsAsked("a boho rug")).toEqual([]);
-    expect(kindsAsked("mid-century, under $800")).toEqual([]);
-    expect(kindsAsked("")).toEqual([]);
+  test("finds the kinds a message names, in the order it names them (#153)", () => {
+    const named = (text: string) => kindsNamed(text);
+    expect(named("add a lamp")).toEqual({ kinds: ["lamp"], want: "" });
+    expect(named("add a reading lamp")).toEqual({ kinds: ["lamp"], want: "reading" });
+    expect(named("a rug and a coffee table please")).toEqual({ kinds: ["rug", "table"], want: "" });
+    expect(named("I need a desk and a chair")).toEqual({ kinds: ["desk", "chair"], want: "" });
+    expect(named("another two plants")).toEqual({ kinds: ["plant"], want: "" });
+    expect(named("a rug under $200")).toEqual({ kinds: ["rug"], want: "" });
+    expect(named("a mid-century walnut desk for $1.5k")).toEqual({
+      kinds: ["desk"],
+      want: "mid century walnut",
+    });
+    // A desk lamp is a lamp and an office chair a chair, not a desk and an office.
+    expect(named("a brass desk lamp").kinds).toEqual(["lamp"]);
+    expect(named("a desk chair").kinds).toEqual(["chair"]);
+    expect(named("two couches for the living room")).toEqual({ kinds: ["sofa"], want: "" });
+    expect(named("a cozy [removed] armchair")).toEqual({ kinds: ["chair"], want: "cozy" });
+    // Words that name nothing: a look, a room, nothing at all.
+    expect(named("cozy mid-century, under $800").kinds).toEqual([]);
+    expect(named("something for the bedroom").kinds).toEqual([]);
+    expect(named("").kinds).toEqual([]);
     expect(saysLook("furnish my apartment please")).toBe(false);
     expect(saysLook("something cozy")).toBe(true);
   });
@@ -190,6 +204,52 @@ describe("words", () => {
     });
     expect(longest.length).toBeLessThanOrEqual(FURNISH_LIMITS.textMax);
   });
+  test("an items request's reply names what was asked for and the limit (#153)", () => {
+    const lamp = { kind: "lamp" as const, title: "IKEA Hektar floor lamp", price: 15 };
+    const budget = { total: 1500, spent: 875 };
+    expect(itemsText({ asked: ["lamp"], added: [lamp], have: [], budget, limit: 625 })).toBe(
+      "Added a lamp: IKEA Hektar floor lamp, $15. $890 of your $1,500.",
+    );
+    expect(
+      itemsText({
+        asked: ["desk", "chair", "art"],
+        added: [
+          { kind: "desk", title: "Micke desk", price: 70 },
+          { kind: "chair", title: "Cane armchair", price: 90 },
+        ],
+        have: [],
+        budget: null,
+        limit: 200,
+      }),
+    ).toBe(
+      "Added a desk and a chair: Micke desk, $70; Cane armchair, $90. No art on Marketplace fits within $40 right now.",
+    );
+    // Nothing found: the thing and the limit, and "other" when the apartment has one already.
+    const none = (a: Partial<Parameters<typeof itemsText>[0]>) =>
+      itemsText({ asked: ["lamp"], added: [], have: [], budget: null, limit: null, ...a });
+    expect(none({})).toBe("No lamp on Marketplace fits right now.");
+    expect(none({ limit: 120 })).toBe("No lamp on Marketplace fits within $120 right now.");
+    expect(none({ have: ["lamp"], asked: ["lamp", "rug"] })).toBe(
+      "No other lamp or rug on Marketplace fits right now.",
+    );
+    expect(none({ budget: { total: 1500, spent: 1500 }, limit: 0 })).toBe(
+      "Your $1,500 furniture budget is used up. Remove something or raise it to add more.",
+    );
+    // Never that anything was bought, and never too long.
+    const most = itemsText({
+      asked: ["sofa", "bed", "table", "storage"],
+      added: (["sofa", "bed", "table"] as const).map((kind) => ({
+        kind,
+        title: "t".repeat(120),
+        price: 99_999,
+      })),
+      have: ["storage"],
+      budget: { total: 1_000_000, spent: 1 },
+      limit: 99_999,
+    });
+    expect(most.length).toBeLessThanOrEqual(FURNISH_LIMITS.textMax);
+    expect(most).not.toMatch(/bought|ordered/i);
+  });
 });
 
 const candidate = (id: string, title: string, price: number, description = "") => ({
@@ -204,7 +264,9 @@ const candidate = (id: string, title: string, price: number, description = "") =
 const input = (extra: Partial<FurnishInput> = {}): FurnishInput => ({
   vibe: "cozy mid-century",
   asked: [],
+  want: "",
   budget: { total: 1000, spent: 0, remaining: 1000 },
+  cap: null,
   rooms: [
     { id: "living", name: "Living room", area: 20 },
     { id: "bed", name: "Bedroom", area: 12 },
@@ -286,6 +348,34 @@ describe("muse.furnish checks", () => {
     expect(problems([pick("sofa2", "sofa")], "ok", asked)).toBe("");
     expect(problems([pick("rug", "rug")], "ok", asked)).toContain("asked only for sofa");
   });
+  test("an items request takes at most one of each kind asked for, each the kind it is (#153)", () => {
+    const asked = input({ asked: ["sofa", "lamp"] });
+    expect(problems([pick("sofa", "sofa"), pick("lamp", "lamp")], "ok", asked)).toBe("");
+    expect(problems([pick("sofa", "sofa"), pick("sofa2", "sofa")], "ok", asked)).toContain(
+      "at most one sofa",
+    );
+    // A bookcase called a lamp is still a bookcase.
+    expect(problems([pick("shelf", "lamp")], "ok", asked)).toContain("picks[0].kind");
+    expect(problems([], "ok", asked)).toBe("");
+  });
+  test("a request's own amount caps its picks, inside what is left of the budget (#153)", () => {
+    const capped = input({ asked: ["sofa", "lamp"], cap: 200 });
+    expect(problems([pick("sofa", "sofa")], "ok", capped)).toContain(
+      "more than the $200 this request may spend",
+    );
+    expect(problems([pick("sofa2", "sofa")], "ok", capped)).toBe("");
+    // What is left of the overall budget still binds when it is less.
+    const tight = input({
+      asked: ["sofa"],
+      cap: 200,
+      budget: { total: 1000, spent: 900, remaining: 100 },
+    });
+    expect(problems([pick("sofa2", "sofa")], "ok", tight)).toContain("more than the $100 left");
+    // A cap with no overall budget.
+    const only = input({ asked: ["sofa"], cap: 200, budget: null });
+    expect(problems([pick("sofa", "sofa")], "ok", only)).toContain("$200 this request may spend");
+    expect(problems([pick("sofa2", "sofa")], "ok", only)).toBe("");
+  });
   test("rejects links, contact details and protected traits in text and reasons", () => {
     expect(problems([], "Order at www.shop.com")).toContain("no links");
     expect(problems([pick("rug", "rug", { reason: "text me 415-555-0199" })])).toContain(
@@ -363,6 +453,31 @@ describe("Landing's rules furnish", () => {
     const out = rulesFurnish(i);
     expect(out.picks.map((p) => p.listingId as string)).toEqual(["lamp", "sofa"]);
     expect(furnishProblems(out, i)).toEqual([]);
+    expect(out.text).toBe(
+      "Added a lamp and a sofa: Floor lamp, $60; Teak frame sofa, $400. $460 of your $1,000.",
+    );
+  });
+  test("an items request stays inside its own amount and says what it couldn't find (#153)", () => {
+    const i = input({ asked: ["sofa", "lamp", "decor"], want: "gray", cap: 220 });
+    const out = rulesFurnish(i);
+    // The $400 sofa is over the $220 this request may spend: the $150 one, then the $60 lamp.
+    expect(out.picks.map((p) => p.listingId as string)).toEqual(["sofa2", "lamp"]);
+    expect(furnishProblems(out, i)).toEqual([]);
+    expect(out.text).toBe(
+      "Added a sofa and a lamp: Gray sofa, $150; Floor lamp, $60. No decor on Marketplace fits within $10 right now. $210 of your $1,000.",
+    );
+    const none = rulesFurnish(input({ asked: ["lamp"], cap: 20, budget: null }));
+    expect(none.picks).toEqual([]);
+    expect(none.text).toBe("No lamp on Marketplace fits within $20 right now.");
+    const have = rulesFurnish(
+      input({
+        asked: ["lamp"],
+        candidates: [candidate("sofa", "Teak frame sofa", 400)],
+        placed: [{ kind: "lamp", label: "Floor lamp", price: 60 }],
+      }),
+    );
+    expect(have.picks).toEqual([]);
+    expect(have.text).toBe("No other lamp on Marketplace fits within $1,000 right now.");
   });
   test("without candidates it says so", () => {
     const out = rulesFurnish(input({ candidates: [] }));

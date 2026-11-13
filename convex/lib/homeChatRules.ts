@@ -5,22 +5,26 @@ import {
   cleanVibe,
   findNeighborhoods,
   furnishAsk,
+  furnishRequest,
   priceIn,
   RENTAL_WORDS,
+  type RulesWhy,
   spendIn,
   validFurnishBudget,
   vibeProblem,
-  vibeWords,
   words,
 } from "./chatText";
 import { todayInSF } from "./cityProfileFacts";
+import { FURNISH_LIMITS, kindList } from "./furnish";
 import { planIn, statesPlan } from "./movePlan";
 import { hasProtected, redactProtected } from "./protectedText";
+import { ALL_ITEM_KINDS, type PlacementKind } from "./unitScene";
 
 /**
  * Landing Home's chat dock: the person types, and the reply carries one
  * command the client runs (fly to a neighborhood, show rentals, open a page,
- * show or furnish their 3D apartment, #150). Muse answers on the server
+ * show or furnish their 3D apartment, #150, or add named things to it, #153).
+ * Muse answers on the server
  * (`api.homeChat.reply`, convex/homeChat.ts); these keyword rules are its
  * fallback there (AI off, a rejected answer, a model error) and in the browser
  * when the action can't be reached. Pure, so the client and the server share it.
@@ -70,6 +74,12 @@ export type ChatCommand =
   | { kind: "show_apartment" } // the Apartment tab: the 3D model of their place
   /** Furnish the apartment: `vibe` in the person's words, `budget` for all the furniture, whole dollars. */
   | { kind: "furnish"; vibe: string; budget?: number }
+  /**
+   * Add the things the person named and nothing else (#153): `items` is one to
+   * four different kinds, `want` how they described them ("reading"), `budget`
+   * the most this request may spend, whole dollars. Never the whole apartment.
+   */
+  | { kind: "add_items"; items: PlacementKind[]; want?: string; budget?: number }
   | { kind: "none" };
 export type ChatSource = { label: string; href?: string };
 /** A ranked rental as a card in the reply. Code builds every field; Muse writes none of it. */
@@ -91,6 +101,8 @@ export type ChatReply = {
   command: ChatCommand;
   sources: ChatSource[];
   via: "muse" | "rules";
+  /** Why the rules answered (#153), when the server said; absent for Muse's answers and the browser's. */
+  why?: RulesWhy;
   /** Rentals the reply names or shows, as cards the person can choose from. */
   rentals: ChatRentalCard[];
   /** What this message added to the City Profile ("Budget up to $2,400/mo"). */
@@ -165,9 +177,10 @@ function money(n: number): string {
 }
 
 /**
- * Whether a command only names neighborhoods and listings that exist, and a
- * furnish request carries a clean vibe and a sane budget. Whether there is an
- * apartment to show or furnish is the server's check (convex/homeChat.ts).
+ * Whether a command only names neighborhoods and listings that exist, a
+ * furnish request carries a clean vibe and a sane budget, and a request to add
+ * things names one to four different kinds. Whether there is an apartment to
+ * show or furnish is the server's check (convex/homeChat.ts).
  */
 export function validCommand(
   cmd: ChatCommand,
@@ -206,9 +219,36 @@ export function validCommand(
         vibeProblem(cmd.vibe) === null &&
         (cmd.budget === undefined || validFurnishBudget(cmd.budget))
       );
+    case "add_items":
+      return (
+        addItemsProblems(cmd).length === 0 &&
+        (cmd.budget === undefined || validFurnishBudget(cmd.budget))
+      );
     default:
       return false;
   }
+}
+
+/**
+ * What's wrong with the things an `add_items` command names and how it
+ * describes them (#153): one to four different kinds of thing, and a `want`
+ * that is empty or passes the same checks as a vibe. Empty when fine.
+ */
+export function addItemsProblems(cmd: { items: readonly string[]; want?: string }): string[] {
+  const problems: string[] = [];
+  const kinds: readonly string[] = ALL_ITEM_KINDS;
+  if (
+    cmd.items.length < 1 ||
+    cmd.items.length > FURNISH_LIMITS.onlyMax ||
+    new Set(cmd.items).size !== cmd.items.length ||
+    !cmd.items.every((k) => kinds.includes(k))
+  )
+    problems.push(
+      `command.items: one to ${FURNISH_LIMITS.onlyMax} different kinds, each one of ${kinds.join(", ")}`,
+    );
+  const want = cmd.want?.trim() ? vibeProblem(cmd.want) : null;
+  if (want) problems.push(`command.want: ${want}`);
+  return problems;
 }
 
 /**
@@ -282,6 +322,17 @@ const PROTECTED_LINE =
 
 const VIBE_HELP = 'Describe the vibe in a few words, like "cozy and warm, under $800".';
 
+/** What furnishing does and doesn't do, said the same way by every rules reply (#153). */
+const REVIEW_LINE = "your private 3D model for you to review; nothing is bought or sent.";
+
+/** The Inbox line (#153): how many drafts are waiting, when known. */
+function inboxLine(waiting: number | undefined): string {
+  if (waiting === undefined) return PAGE_LINES.inbox;
+  if (waiting <= 0)
+    return "Opening Inbox. Nothing is waiting for your OK right now; Muse's drafts show up there, and nothing is sent until you approve it.";
+  return `Opening Inbox: ${waiting} ${waiting === 1 ? "draft is" : "drafts are"} waiting for your OK. Nothing is sent until you approve it.`;
+}
+
 const PAGE_LINES: Record<ChatPage, string> = {
   find: "Opening Find, with rentals ranked for your City Profile.",
   place: "Opening your place: roommates, the house and what fits.",
@@ -331,6 +382,8 @@ export function ruleRoute(
     apartment?: { hasModel: boolean } | null;
     /** Today in San Francisco ("YYYY-MM-DD"), for move-in dates. Now, when absent. */
     today?: string;
+    /** Drafts waiting in the Inbox (#153); absent when not known (the browser). */
+    inboxWaiting?: number;
   },
 ): Routed {
   const fallbackLine = hasProtected(message) || data.hadProtected ? PROTECTED_LINE : CHAT_HELP;
@@ -349,7 +402,7 @@ export function ruleRoute(
   const home = data.homeSlugs?.find((s) => valid.has(s));
   const name = (slug: string) => nameOf(slug, data.neighborhoods);
   const page = (p: ChatPage): Routed => ({
-    text: PAGE_LINES[p],
+    text: p === "inbox" ? inboxLine(data.inboxWaiting) : PAGE_LINES[p],
     command: { kind: "open_page", page: p },
     listingIds: [],
   });
@@ -438,11 +491,28 @@ export function ruleRoute(
         command: { kind: "show_apartment" },
         listingIds: [],
       };
-    const vibe = cleanVibe(vibeWords(clean)) ?? cleanVibe(clean);
-    if (!vibe) return none(VIBE_HELP);
     const budget = spendIn(clean);
+    const within = budget === undefined ? "" : `, within ${money(budget)}`;
+    // Things named ("add a reading lamp") are added and nothing else (#153); anything
+    // else is a look for the whole apartment.
+    const request = furnishRequest(clean);
+    if (request.type === "items") {
+      const want = cleanVibe(request.want);
+      return {
+        text: `Looking on Marketplace for ${kindList(request.kinds)}${within}. What fits goes into ${REVIEW_LINE}`,
+        command: {
+          kind: "add_items",
+          items: request.kinds,
+          ...(want ? { want } : {}),
+          ...(budget === undefined ? {} : { budget }),
+        },
+        listingIds: [],
+      };
+    }
+    const vibe = cleanVibe(request.vibe) ?? cleanVibe(clean);
+    if (!vibe) return none(VIBE_HELP);
     return {
-      text: `Picking Marketplace items for that vibe${budget === undefined ? "" : `, within ${money(budget)}`}, for you to review.`,
+      text: `Picking Marketplace items for that vibe${within}. They go into ${REVIEW_LINE}`,
       command: { kind: "furnish", vibe, ...(budget === undefined ? {} : { budget }) },
       listingIds: [],
     };

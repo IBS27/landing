@@ -1,5 +1,13 @@
 import { describe, expect, test } from "bun:test";
-import { furnishAsk, numbersIn, spendIn, vibeProblem, vibeWords } from "../convex/lib/chatText";
+import {
+  deniesPlacing,
+  furnishAsk,
+  furnishRequest,
+  numbersIn,
+  spendIn,
+  vibeProblem,
+  vibeWords,
+} from "../convex/lib/chatText";
 import { SF_NEIGHBORHOODS } from "../convex/lib/cityProfileFacts";
 import {
   CHAT_HELP,
@@ -227,9 +235,10 @@ describe("ruleReply", () => {
       kind: "furnish",
       vibe: "mid-century with plants",
     });
-    expect(cmd("a couch and a rug for my living room", city, built).kind).toBe("furnish");
+    // Things named are added, not a look for the whole place (#153).
+    expect(cmd("a couch and a rug for my living room", city, built).kind).toBe("add_items");
     // On the Apartment tab a piece of furniture is enough; on the map it isn't.
-    expect(cmd("a lamp and a rug", apartmentTab, built).kind).toBe("furnish");
+    expect(cmd("a lamp and a rug", apartmentTab, built).kind).toBe("add_items");
     expect(cmd("a lamp and a rug", city, built).kind).toBe("none");
     // No place yet: rentals to choose from. A place without a model: wait for it.
     const none = ruleReply("decorate it boho", city, { ...data, apartment: null });
@@ -243,11 +252,78 @@ describe("ruleReply", () => {
     expect(building.text).toContain("still being built");
     // Not known (the browser, offline): never furnish blind.
     expect(cmd("decorate it boho").kind).toBe("show_rentals");
-    // The reply says the picks are for review, never that anything was bought or placed.
+    // The reply says what is true (#153): the picks go into the private 3D model to review,
+    // and nothing is bought or sent.
     const r = ruleReply("make it cozy for $800", apartmentTab, built);
-    expect(r.text).toContain("for you to review");
-    expect(r.text).not.toMatch(/bought|ordered|placed/i);
+    expect(r.text).toBe(
+      "Picking Marketplace items for that vibe, within $800. They go into your private 3D model for you to review; nothing is bought or sent.",
+    );
+    expect(deniesPlacing(r.text)).toBe(false);
     expect(r.sources).toEqual([]);
+  });
+  test("naming things to add is its own command, never a look for the whole place (#153)", () => {
+    const lamp = ruleReply("add a reading lamp", apartmentTab, built);
+    expect(lamp.command).toEqual({ kind: "add_items", items: ["lamp"], want: "reading" });
+    expect(lamp.text).toBe(
+      "Looking on Marketplace for a lamp. What fits goes into your private 3D model for you to review; nothing is bought or sent.",
+    );
+    expect(lamp.sources).toEqual([]);
+    expect(cmd("Add a rug under $200", apartmentTab, built)).toEqual({
+      kind: "add_items",
+      items: ["rug"],
+      budget: 200,
+    });
+    expect(cmd("add a sofa and a bed, $100", apartmentTab, built)).toEqual({
+      kind: "add_items",
+      items: ["sofa", "bed"],
+      budget: 100,
+    });
+    expect(ruleReply("I need a desk and a chair for my room", city, built)).toMatchObject({
+      command: { kind: "add_items", items: ["desk", "chair"] },
+      text: expect.stringContaining("for a desk and a chair."),
+    });
+    expect(cmd("add a cozy armchair", apartmentTab, built)).toEqual({
+      kind: "add_items",
+      items: ["chair"],
+      want: "cozy",
+    });
+    expect(cmd("find me a used bookcase", apartmentTab, built)).toEqual({
+      kind: "add_items",
+      items: ["storage"],
+      want: "used",
+    });
+    // A look for the whole place stays a furnish request, whatever it mentions.
+    expect(cmd("cozy, lots of plants", apartmentTab, built)).toEqual({
+      kind: "furnish",
+      vibe: "cozy, lots of plants",
+    });
+    expect(cmd("make it cozy with a big rug", apartmentTab, built).kind).toBe("furnish");
+    // The same gates as furnishing: a place, then its model.
+    expect(cmd("add a reading lamp", apartmentTab, { ...data, apartment: null }).kind).toBe(
+      "show_rentals",
+    );
+    expect(
+      cmd("add a reading lamp", apartmentTab, { ...data, apartment: { hasModel: false } }).kind,
+    ).toBe("show_apartment");
+    // What the person wants never carries protected traits.
+    const c = cmd("add a lamp for a Muslim woman", apartmentTab, built);
+    expect(c.kind).toBe("add_items");
+    expect(JSON.stringify(c)).not.toMatch(/muslim|woman|removed/i);
+  });
+  test("the Inbox line says whether anything is waiting (#153)", () => {
+    const inbox = (inboxWaiting?: number) =>
+      ruleReply("open my drafts", city, { ...data, inboxWaiting }).text;
+    expect(inbox(0)).toBe(
+      "Opening Inbox. Nothing is waiting for your OK right now; Muse's drafts show up there, and nothing is sent until you approve it.",
+    );
+    expect(inbox(1)).toBe(
+      "Opening Inbox: 1 draft is waiting for your OK. Nothing is sent until you approve it.",
+    );
+    expect(inbox(3)).toContain("3 drafts are waiting for your OK");
+    // Not known (the browser, offline): it doesn't say either way.
+    expect(inbox()).toBe(
+      "Opening Inbox, where Muse's drafts wait for your OK. Nothing is sent until you approve it.",
+    );
   });
   test("a furnish vibe never carries protected traits or links (#150)", () => {
     const c = cmd("cozy decor for a Muslim woman, under $500", apartmentTab, built);
@@ -328,6 +404,11 @@ describe("ruleReply", () => {
     ])
       expect(validCommand(cmd(m), { neighborhoods })).toBe(true);
     expect(validCommand(cmd("make it cozy for $800", apartmentTab, built), data)).toBe(true);
+    for (const m of ["add a reading lamp", "Add a rug under $200", "Add a desk and a lamp"]) {
+      const c = cmd(m, apartmentTab, built);
+      expect([m, c.kind, validCommand(c, data)]).toEqual([m, "add_items", true]);
+      expect(commandSources(c, data)).toEqual([]);
+    }
   });
   test("the browser's reply carries no saved facts, and cards only when given the ranked ones", () => {
     const r = ruleReply("rooms under $2,000", city, { neighborhoods, rentals });
@@ -406,6 +487,62 @@ describe("furnish text helpers", () => {
     expect(furnishAsk("a desk", { view: "apartment" })).toBe(true);
     expect(furnishAsk("a desk")).toBe(false);
     expect(furnishAsk("furnished rooms")).toBe(false);
+    // For their own place, asking for any kind of thing by name counts (#153), so "find me
+    // an armchair" on the Apartment tab is never read as a search for a rental.
+    expect(furnishAsk("find me an armchair", { view: "apartment" })).toBe(true);
+    expect(furnishAsk("add a used bookcase to my room")).toBe(true);
+    expect(furnishAsk("find me an armchair")).toBe(false);
+    expect(furnishAsk("will a bookcase fit", { view: "apartment" })).toBe(false);
+  });
+  test("furnishRequest tells named things to add from a look for the whole place (#153)", () => {
+    const items = (kinds: string[], want = "") => ({ type: "items", kinds, want });
+    const table: [string, ReturnType<typeof furnishRequest>][] = [
+      // Names things, with an add cue.
+      ["add a reading lamp", items(["lamp"], "reading")],
+      ["Add a cozy armchair", items(["chair"], "cozy")],
+      ["I need a desk and a chair", items(["desk", "chair"])],
+      ["could use another plant", items(["plant"])],
+      ["find me a mid-century walnut desk", items(["desk"], "mid century walnut")],
+      ["add a sofa and a bed, $100", items(["sofa", "bed"])],
+      ["put in a rug to make it feel cozy", items(["rug"], "cozy")],
+      // Names things, no cue either way.
+      ["a rug under $200", items(["rug"])],
+      ["desk and a lamp", items(["desk", "lamp"])],
+      ["a boho rug", items(["rug"], "boho")],
+      // Names things, but plainly about the whole place.
+      ["cozy, lots of plants", { type: "room", vibe: "cozy, lots of plants" }],
+      ["make it cozy with a big rug", { type: "room", vibe: "cozy with a big rug" }],
+      [
+        "furnish my place, mid-century with plants",
+        { type: "room", vibe: "mid-century with plants" },
+      ],
+      ["a calm look with posters", { type: "room", vibe: "a calm look with posters" }],
+      // Names nothing.
+      ["make it cozy and warm", { type: "room", vibe: "cozy and warm" }],
+      ["make it cozy and warm, $1,500", { type: "room", vibe: "cozy and warm" }],
+      ["mid-century, under $800", { type: "room", vibe: "mid-century" }],
+      ["something to read by", { type: "room", vibe: "to read by" }],
+      ["", { type: "room", vibe: "" }],
+    ];
+    for (const [text, want] of table) expect([text, furnishRequest(text)]).toEqual([text, want]);
+    // At most four kinds, the first four named.
+    const many = furnishRequest("add a sofa, a bed, a rug, a lamp, a desk and a plant");
+    expect(many).toEqual(items(["sofa", "bed", "rug", "lamp"]));
+  });
+  test("deniesPlacing spots a reply that says nothing was placed (#153)", () => {
+    for (const text of [
+      "Nothing is bought or placed.",
+      "I'm picking items; nothing is placed yet.",
+      "Nothing has been ordered or placed.",
+      "These aren't placed until you approve.",
+    ])
+      expect([text, deniesPlacing(text)]).toEqual([text, true]);
+    for (const text of [
+      "They're placed in your private 3D model to review; nothing is bought or sent.",
+      "Nothing is bought. The pieces are placed in your model.",
+      "Picking a lamp for you to review.",
+    ])
+      expect([text, deniesPlacing(text)]).toEqual([text, false]);
   });
 });
 
@@ -441,6 +578,25 @@ describe("validCommand", () => {
     expect(furnish("warm", 100_001)).toBe(false);
     expect(furnish("warm", 99.5)).toBe(false);
     expect(validCommand({ kind: "show_apartment" }, d)).toBe(true);
+  });
+  test("add_items needs one to four different kinds, a clean want and a whole-dollar budget (#153)", () => {
+    const add = (items: string[], more: { want?: string; budget?: number } = {}) =>
+      validCommand({ kind: "add_items", items: items as never, ...more }, d);
+    expect(add(["lamp"])).toBe(true);
+    expect(add(["lamp", "rug", "desk", "chair"], { want: "mid-century walnut", budget: 200 })).toBe(
+      true,
+    );
+    // Nothing said about them is fine.
+    expect(add(["lamp"], { want: " " })).toBe(true);
+    expect(add([])).toBe(false);
+    expect(add(["lamp", "lamp"])).toBe(false);
+    expect(add(["lamp", "rug", "desk", "chair", "bed"])).toBe(false);
+    expect(add(["hot tub"])).toBe(false);
+    expect(add(["lamp"], { want: "x".repeat(201) })).toBe(false);
+    expect(add(["lamp"], { want: "for Muslim women" })).toBe(false);
+    expect(add(["lamp"], { want: "see scam.example.com" })).toBe(false);
+    expect(add(["lamp"], { budget: 0 })).toBe(false);
+    expect(add(["lamp"], { budget: 99.5 })).toBe(false);
   });
 });
 

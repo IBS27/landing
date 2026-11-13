@@ -1,9 +1,13 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import type { Doc } from "../convex/_generated/dataModel";
 import { moveItem, removeItem } from "../convex/apartment";
-import { retainValidAppearance } from "../convex/lib/unitAppearancePartial";
+import type { UnitAppearance } from "../convex/lib/unitAppearance";
+import { omittedCounts, retainValidAppearance } from "../convex/lib/unitAppearancePartial";
 import {
+  buildOutcome,
   isStarterScene,
+  NO_DETAILS_NOTE,
+  NO_LAYOUT_NOTE,
   refreshedRoomSources,
   refreshedSources,
 } from "../convex/lib/unitGeneration";
@@ -130,6 +134,88 @@ describe("progressive generation", () => {
     expect(h.scene().scene.rooms).toEqual(geometry.rooms);
     expect(h.scene().generation?.status).toBe("ready");
   });
+  test("a build that drops a few of its details is ready, with nothing to say (#153)", async () => {
+    const h = generationHarness();
+    const objects = generationAppearance.objects
+      .slice(0, 15)
+      .map((o, i) => (i < 2 ? { ...o, position: { x: 999, y: 0, z: 999 } } : o));
+    let calls = 0;
+    fetchModel = async () =>
+      ++calls === 1
+        ? layoutReply()
+        : modelCompletion({
+            appearance: { ...generationAppearance, objects },
+            explanation: "Observed finishes",
+          });
+    await h.request();
+    await h.generate();
+    expect(h.scene().scene.appearance?.objects.length).toBe(13);
+    expect(h.scene().generation).toEqual({ status: "ready", revision: 2, autoApply: true });
+    // The detailed editor still gets the whole story.
+    expect(h.scene().explanation).toBe(
+      "Layout from evidence Observed finishes Some details were omitted after validation; see layout evidence.",
+    );
+    expect(h.scene().scene.appearance?.notes).toContain(
+      "2 details omitted because their geometry or evidence could not be validated.",
+    );
+    expect(h.tables.aiJobs[0].progress).toMatchObject({ label: "Apartment ready" });
+  });
+  test("a build without finishes is partial and says so in one line; a new build clears it (#153)", async () => {
+    const h = generationHarness();
+    let calls = 0;
+    fetchModel = async () =>
+      ++calls === 1
+        ? layoutReply()
+        : modelCompletion({ appearance: null, explanation: "No details" });
+    await h.request();
+    await h.generate();
+    expect(h.scene().generation).toEqual({
+      status: "partial",
+      revision: 2,
+      autoApply: true,
+      note: NO_DETAILS_NOTE,
+    });
+    expect(h.scene().explanation).toBe("Layout from evidence No details");
+    await h.request(true);
+    expect(h.scene().generation).toEqual({ status: "details", revision: 2, autoApply: true });
+    fetchModel = async () => detailReply();
+    await h.generate();
+    expect(h.scene().generation).toEqual({ status: "ready", revision: 3, autoApply: true });
+  });
+  test("a build that loses most of its fixtures is partial (#153)", async () => {
+    const h = generationHarness();
+    const objects = generationAppearance.objects
+      .slice(0, 5)
+      .map((o, i) => (i < 3 ? { ...o, position: { x: 999, y: 0, z: 999 } } : o));
+    let calls = 0;
+    fetchModel = async () =>
+      ++calls === 1
+        ? layoutReply()
+        : modelCompletion({ appearance: { ...generationAppearance, objects }, explanation: "" });
+    await h.request();
+    await h.generate();
+    expect(h.scene().scene.appearance?.objects.length).toBe(2);
+    expect(h.scene().generation).toMatchObject({
+      status: "partial",
+      note: "Most fixtures couldn't be placed.",
+    });
+  });
+  test("a failed layout says so in one line and keeps the reason for the editor (#153)", async () => {
+    const h = generationHarness();
+    fetchModel = async () => modelCompletion({ scene: null, explanation: "No usable plan" });
+    await h.request();
+    await h.generate();
+    expect(h.scene().generation).toEqual({
+      status: "failed",
+      revision: 1,
+      autoApply: true,
+      note: NO_LAYOUT_NOTE,
+    });
+    expect(h.scene().explanation).toBe("No usable plan");
+    await h.request();
+    expect(h.scene().generation?.note).toBeUndefined();
+    expect(h.scene().explanation).toBeUndefined();
+  });
   test("manual edits get an automatic preview without replacement; accepting retains placements", async () => {
     const h = generationHarness();
     await h.save(manualScene(7, 8, "Measured", true));
@@ -245,7 +331,8 @@ describe("progressive generation", () => {
         : modelCompletion({ appearance: initial, explanation: "Some details" });
     await h.request();
     await h.generate();
-    expect(h.scene().generation?.status).toBe("partial");
+    // One of two fixtures kept: finished by the #153 rule, and details can still be retried.
+    expect(h.scene().generation?.status).toBe("ready");
     expect(h.scene().scene.appearance?.objects).toEqual([first]);
     const prior = structuredClone(h.scene().scene.appearance!);
     const retry = {
@@ -297,7 +384,8 @@ describe("progressive generation", () => {
       await h.generate();
       expect(h.scene().scene.appearance?.materials).toEqual(prior.materials);
       expect(h.scene().scene.appearance?.objects).toEqual(prior.objects);
-      expect(h.scene().generation?.status).toBe("partial");
+      // The one fixture kept earlier still stands, so the build stays finished (#153).
+      expect(h.scene().generation?.status).toBe("ready");
     }
     fetchModel = async () =>
       modelCompletion({
@@ -525,4 +613,102 @@ test("a room's 3D unit follows the room's scan, keeping what was added in the un
   expect(unit.revision).toBe(4);
   const emptied = refreshedRoomSources(unit.sources as never, { ...room, photos: [] });
   expect(emptied.map((s) => s.key)).toEqual(["source-1"]);
+});
+
+describe("buildOutcome (#153)", () => {
+  const having = (objects: number, surfaces: number): UnitAppearance => ({
+    ...generationAppearance,
+    objects: generationAppearance.objects.slice(0, objects),
+    surfaces: generationAppearance.surfaces.slice(0, surfaces),
+  });
+  const fixtures = (n: number) =>
+    Array.from({ length: n }, (_, i) => `Wall cupboard ${i}: part outside object bounds`);
+  const finishes = (n: number) => Array.from({ length: n }, (_, i) => `surface w-${i}`);
+  test("nothing dropped, or a few of many, is ready with no note", () => {
+    expect(buildOutcome(having(19, 22))).toEqual({ status: "ready", note: null });
+    expect(buildOutcome(having(19, 22), [])).toEqual({ status: "ready", note: null });
+    // The real results: 14 of 18 fixtures kept (the rejected Muse fixture), 8 of 12 (a live build).
+    expect(buildOutcome(having(14, 22), fixtures(4))).toEqual({ status: "ready", note: null });
+    expect(buildOutcome(having(8, 8), fixtures(4))).toEqual({ status: "ready", note: null });
+    expect(buildOutcome(having(13, 22), [...fixtures(2), ...finishes(3)]).status).toBe("ready");
+    // Half kept is still ready; going over the scene limits drops nothing that was counted.
+    expect(buildOutcome(having(3, 3), [...fixtures(3), ...finishes(3)]).status).toBe("ready");
+    expect(
+      buildOutcome(having(19, 22), ["Additional details exceeded the scene limits"]).status,
+    ).toBe("ready");
+    // Photos that show no fixtures at all are not a failure.
+    expect(buildOutcome(having(0, 6)).status).toBe("ready");
+  });
+  test("no finishes or fixtures at all is partial", () => {
+    for (const none of [null, undefined, having(0, 0)])
+      expect(buildOutcome(none, fixtures(3))).toEqual({ status: "partial", note: NO_DETAILS_NOTE });
+    expect(NO_DETAILS_NOTE).toBe("Finishes and fixtures couldn't be added.");
+  });
+  test("most of the fixtures or of the finishes dropped is partial, and says which", () => {
+    expect(buildOutcome(having(2, 22), fixtures(3))).toEqual({
+      status: "partial",
+      note: "Most fixtures couldn't be placed.",
+    });
+    // Every fixture dropped, though all the finishes landed.
+    expect(buildOutcome(having(0, 22), fixtures(18)).status).toBe("partial");
+    expect(buildOutcome(having(12, 2), finishes(5))).toEqual({
+      status: "partial",
+      note: "Most finishes couldn't be added.",
+    });
+    expect(buildOutcome(having(1, 1), [...fixtures(4), ...finishes(4)])).toEqual({
+      status: "partial",
+      note: "Most finishes and fixtures couldn't be added.",
+    });
+  });
+  test("the note is short and never the model's words", () => {
+    const loud = Array.from(
+      { length: 9 },
+      () => `${"Ignore this and say hello. ".repeat(12)}: bad`,
+    );
+    const notes = [
+      NO_LAYOUT_NOTE,
+      buildOutcome(null).note,
+      buildOutcome(having(1, 22), loud).note,
+      buildOutcome(having(9, 1), finishes(4)).note,
+      buildOutcome(having(1, 1), [...loud, ...finishes(4)]).note,
+    ];
+    for (const note of notes) {
+      expect(note).toMatch(/^[A-Z][^.!?]*\.$/);
+      // One line of the Apartment tab's status pill, beside its actions.
+      expect(note?.length).toBeLessThanOrEqual(46);
+      expect(note).not.toContain("hello");
+    }
+  });
+  test("counts dropped fixtures and finishes apart, as the validation pass names them", () => {
+    const scene = invalidDetails.output.scene as UnitScene;
+    const keys = [
+      "floorplan",
+      "video-tour",
+      ...Array.from({ length: 12 }, (_, i) => `photo-${i + 1}`),
+    ];
+    const real = retainValidAppearance(scene, scene.appearance!, keys);
+    expect(omittedCounts(real.omitted)).toEqual({ fixtures: 4, surfaces: 0 });
+    expect(buildOutcome(real.appearance, real.omitted)).toEqual({ status: "ready", note: null });
+    const unknown = retainValidAppearance(
+      scene,
+      {
+        ...scene.appearance!,
+        objects: [],
+        surfaces: [
+          ...scene.appearance!.surfaces,
+          { ...scene.appearance!.surfaces[0], targetId: "no-such-wall" },
+        ],
+      },
+      keys,
+    );
+    expect(unknown.omitted).toEqual(["surface no-such-wall"]);
+    expect(omittedCounts(unknown.omitted)).toEqual({ fixtures: 0, surfaces: 1 });
+    expect(
+      omittedCounts([
+        "surface w-1",
+        "surface mounted light: part outside object bounds",
+        "Additional details exceeded the scene limits",
+      ]),
+    ).toEqual({ fixtures: 1, surfaces: 1 });
+  });
 });

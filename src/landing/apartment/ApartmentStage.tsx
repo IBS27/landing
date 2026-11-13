@@ -31,9 +31,11 @@ import { toListing, toUnit } from "@/landing/links";
 import { cn, plural, price } from "@/lib/format";
 import { api } from "../../../convex/_generated/api";
 import type { ApartmentItem, ApartmentView } from "../../../convex/apartment";
+import { NO_DETAILS_NOTE, NO_LAYOUT_NOTE } from "../../../convex/lib/unitGeneration";
 import { type Placement, placementProblems, type UnitScene } from "../../../convex/lib/unitScene";
 import type { ItemAssets, WalkInput } from "../move-in/unit/UnitCanvas";
 import type { CanvasHandle, StageView } from "./ApartmentCanvas";
+import { dismissalToken, dismissBuild, dismissedBuild } from "./dismissal";
 import {
   arrowStep,
   overOpening,
@@ -148,7 +150,6 @@ function Stage({ active, focusItemId, focusRequest, onAsk }: Required<ApartmentS
           unit={unit}
           items={data.items}
           spent={data.spent}
-          aiOn={data.aiOn}
           buildFailed={buildFailed}
           onBuild={startBuild}
           dock={dock}
@@ -197,7 +198,6 @@ function Apartment({
   unit,
   items,
   spent,
-  aiOn,
   buildFailed,
   onBuild,
   dock,
@@ -210,7 +210,6 @@ function Apartment({
   unit: Unit;
   items: ApartmentItem[];
   spent: number;
-  aiOn: boolean;
   buildFailed: boolean;
   onBuild: () => void;
   dock: Dock;
@@ -231,7 +230,8 @@ function Apartment({
   const [selected, setSelected] = useState<string | null>(null);
   const [listOpen, setListOpen] = useState(false);
   const [note, setNote] = useState<string | null>(null);
-  const [dismissed, setDismissed] = useState(false);
+  // The build whose status line the person closed (#153); a new build's result shows again.
+  const [closed, setClosed] = useState(() => dismissedBuild(unitId));
   const walk = useRef<WalkInput>({ forward: 0, turn: 0 });
   const handle = useRef<CanvasHandle | null>(null);
 
@@ -563,7 +563,7 @@ function Apartment({
       detailsOnly: unit.state === "partial",
     }).catch(() => flash("The build couldn't start. Try again in a moment."));
   const editor = toUnit({ unit: unitId });
-  const why = unit.explanation ? clip(unit.explanation, 140) : null;
+  const buildToken = dismissalToken(unit);
   const status: ReactNode = note ? (
     <span>{note}</span>
   ) : buildFailed ? (
@@ -580,28 +580,25 @@ function Apartment({
           : "Building your apartment"}
       </span>
     </>
-  ) : unit.state === "failed" || (unit.state === "partial" && !dismissed) ? (
+  ) : (unit.state === "failed" || unit.state === "partial") && closed !== buildToken ? (
     <>
-      <span>
-        {why ??
-          (unit.state === "failed"
-            ? "Your apartment couldn't be built from its photos."
-            : "Some finishes and fixtures couldn't be added.")}
-      </span>
-      {aiOn && unit.canBuild && <StatusAction onClick={retry}>Try again</StatusAction>}
+      {/* One short sentence written by Landing (#153); the full text is in the editor. */}
+      <span>{unit.note ?? (unit.state === "failed" ? NO_LAYOUT_NOTE : NO_DETAILS_NOTE)}</span>
+      {unit.canRetry && <StatusAction onClick={retry}>Try again</StatusAction>}
       <Link {...editor} className="shrink-0 font-semibold text-link hover:underline">
         Edit layout
       </Link>
-      {unit.state === "partial" && (
-        <button
-          type="button"
-          aria-label="Dismiss"
-          onClick={() => setDismissed(true)}
-          className="-mr-1.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-secondary hover:bg-hover"
-        >
-          <X size={14} />
-        </button>
-      )}
+      <button
+        type="button"
+        aria-label="Dismiss"
+        onClick={() => {
+          setClosed(buildToken);
+          dismissBuild(unitId, buildToken);
+        }}
+        className="-mr-1.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-secondary hover:bg-hover"
+      >
+        <X size={14} />
+      </button>
     </>
   ) : unit.state === "starter" && !unit.canBuild ? (
     <>
@@ -721,9 +718,17 @@ function Apartment({
             <>
               {plural(placements.length, "item")}
               {total > 0 && ` · ${price(total)}`}
-              {budget !== null && total > 0 && (
-                <span className="font-normal text-secondary"> of {price(budget)}</span>
-              )}
+              {budget !== null &&
+                total > 0 &&
+                // Over only when a listing's price rose after it was placed (#153).
+                (total > budget ? (
+                  <span className="font-normal text-[#b96a00] dark:text-[#f0a63c]">
+                    {" "}
+                    · over {price(budget)}
+                  </span>
+                ) : (
+                  <span className="font-normal text-secondary"> of {price(budget)}</span>
+                ))}
             </>
           }
           onPick={(id) => {
@@ -844,11 +849,6 @@ function Apartment({
     </>
   );
 }
-
-const clip = (text: string, max: number) => {
-  const t = text.trim().replace(/\s+/g, " ");
-  return t.length > max ? `${t.slice(0, max - 1).trimEnd()}…` : t;
-};
 
 const itemLine = (item?: ApartmentItem) =>
   !item

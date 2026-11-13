@@ -10,6 +10,16 @@ function usedMaterials(appearance: UnitAppearance) {
   return appearance.materials.filter((m) => ids.has(m.id));
 }
 
+/** How `omitted` names a dropped finish; a dropped fixture is `<label>: <problem>`. */
+const SURFACE = "surface ";
+const OVER_LIMITS = "Additional details exceeded the scene limits";
+/** The fixtures and finishes in an `omitted` list, counted apart (#153). */
+export function omittedCounts(omitted: string[]) {
+  const surfaces = omitted.filter((o) => o.startsWith(SURFACE) && !o.includes(": ")).length;
+  const fixtures = omitted.filter((o) => o !== OVER_LIMITS).length - surfaces;
+  return { fixtures, surfaces };
+}
+
 /** Keep only independently valid evidence; never resize or move a fixture to hide an error. */
 export function retainValidAppearance(
   scene: UnitScene,
@@ -71,7 +81,7 @@ export function retainValidAppearance(
     if (!valid(next).length) {
       kept.surfaces.push(incoming);
       kept.materials = next.materials;
-    } else omitted.push(`surface ${surface.targetId}`);
+    } else omitted.push(`${SURFACE}${surface.targetId}`);
   }
   for (const object of appearance.objects.slice(0, 64)) {
     if (kept.objects.some((o) => o.id === object.id)) continue;
@@ -94,7 +104,7 @@ export function retainValidAppearance(
     appearance.surfaces.length > 184 ||
     appearance.objects.length > 64
   )
-    omitted.push("Additional details exceeded the scene limits");
+    omitted.push(OVER_LIMITS);
   kept.notes = appearance.notes.filter((n) => n.length <= 500).slice(0, 6);
   if (omitted.length) {
     kept.notes.push(
