@@ -11,6 +11,7 @@ import {
   citations,
   friendRequestAudience,
   friendsListAudience,
+  latLng,
   listingCategory,
   listingCondition,
   location,
@@ -18,6 +19,8 @@ import {
   messageAttachment,
   messageAuthor,
   messageStatus,
+  multiPolygon,
+  neighborhoodFact,
   notificationCategory,
   notificationKind,
   postAttachment,
@@ -148,9 +151,14 @@ export default defineSchema({
     externalMemberCount: v.number(),
     memberCount: v.number(),
     lastActivityAt: v.number(),
+    /** Where the Group is based (a neighborhood Group's center), if it has a home. */
+    point: v.optional(latLng),
+    /** DataSF neighborhood containing `point`, set by `neighborhoodIdAt`. */
+    neighborhoodId: v.optional(v.id("neighborhoods")),
   })
     .index("by_slug", ["slug"])
     .index("by_activity", ["lastActivityAt"])
+    .index("by_neighborhood", ["neighborhoodId", "lastActivityAt"])
     .searchIndex("search_name", { searchField: "name" }),
 
   groupMembers: defineTable({
@@ -334,10 +342,16 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
     viewCount: v.number(),
+    /**
+     * DataSF neighborhood containing `location`'s point (unset outside San Francisco). Set from
+     * coordinates by `neighborhoodIdAt`; `location.neighborhood` is only a display string.
+     */
+    neighborhoodId: v.optional(v.id("neighborhoods")),
   })
     .index("by_created", ["createdAt"])
     .index("by_category", ["category", "createdAt"])
     .index("by_seller", ["sellerId", "createdAt"])
+    .index("by_neighborhood", ["neighborhoodId", "createdAt"])
     .searchIndex("search_title", { searchField: "title", filterFields: ["category", "status"] }),
 
   conversations: defineTable({
@@ -502,10 +516,15 @@ export default defineSchema({
     ticketProvider: v.optional(v.string()),
     ticketPrice: v.optional(v.string()),
     createdAt: v.number(),
+    /** The venue's coordinates (in-person events). */
+    point: v.optional(latLng),
+    /** DataSF neighborhood containing `point`, set by `neighborhoodIdAt`. */
+    neighborhoodId: v.optional(v.id("neighborhoods")),
   })
     .index("by_start", ["startAt"])
     .index("by_host", ["hostId", "startAt"])
     .index("by_group", ["groupId", "startAt"])
+    .index("by_neighborhood", ["neighborhoodId", "startAt"])
     .searchIndex("search_title", { searchField: "title" }),
 
   eventResponses: defineTable({
@@ -549,6 +568,34 @@ export default defineSchema({
     snippet: v.string(),
     fetchedAt: v.number(),
   }).index("by_url", ["url", "fetchedAt"]),
+
+  /**
+   * San Francisco's 41 DataSF Analysis Neighborhoods (#15). Built by
+   * `scripts/neighborhoods/build.ts` and the seed; read through
+   * `convex/lib/neighborhoods.ts` and `api.neighborhoods.*`.
+   */
+  neighborhoods: defineTable({
+    /** DataSF name slugified ("south-of-market"); the same slugs as City Profile facts (#3). */
+    slug: v.string(),
+    /** DataSF's name ("South of Market"). */
+    name: v.string(),
+    /** What people call it ("SoMa"), when that differs. */
+    shortName: v.optional(v.string()),
+    /** Parks with no residents (Golden Gate Park, Lincoln Park, McLaren Park). */
+    park: v.optional(v.boolean()),
+    /** Label point, always inside the polygon. */
+    center: latLng,
+    bbox: v.object({ west: v.number(), south: v.number(), east: v.number(), north: v.number() }),
+    /** Simplified to ~5 m. */
+    polygon: multiPolygon,
+    /** The DataSF boundary snapshot. */
+    citations,
+  }).index("by_slug", ["slug"]),
+
+  /** Cited transit, nightlife and campus facts per neighborhood (#15). */
+  neighborhoodFacts: defineTable(neighborhoodFact)
+    .index("by_neighborhood", ["neighborhoodId", "kind"])
+    .index("by_key", ["key"]),
 
   /** Settings & privacy choices, one row per user. Missing fields mean Facebook's defaults. */
   userSettings: defineTable({

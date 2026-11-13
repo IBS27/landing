@@ -12,6 +12,7 @@ import { defineTask, runAgent } from "./ai/agent";
 import { runJob, startJob } from "./ai/jobs";
 import { type CitedSource, type NonEmpty, resolveSources } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
+import { neighborhoodIdAt } from "./lib/neighborhoods";
 import type { Audience } from "./lib/posts";
 import {
   BADGE,
@@ -694,6 +695,7 @@ export async function seedTrustDemo(ctx: MutationCtx, now = Date.now()) {
       description: r.description,
       photos: r.photos,
       location: { city: "San Francisco, CA", neighborhood: r.hood, lat: r.lat, lng: r.lng },
+      neighborhoodId: await neighborhoodIdAt(ctx, r),
       status: "active",
       rental: {
         propertyType: r.propertyType,
