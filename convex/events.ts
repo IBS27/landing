@@ -1,6 +1,7 @@
 import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
+import { recordSignal, undoSignal } from "./lib/activity";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { checkPoint, neighborhoodIdAt } from "./lib/neighborhoods";
 import { notify } from "./lib/notify";
@@ -543,6 +544,7 @@ export const respond = viewerMutation({
       .unique();
     if (status === "none") {
       if (row) await ctx.db.delete(row._id);
+      await undoSignal(ctx, viewerId, ["going", "interested"], eventId);
       return;
     }
     if (row?.status === status) return;
@@ -554,6 +556,8 @@ export const respond = viewerMutation({
         status,
         createdAt: Date.now(),
       });
+    await undoSignal(ctx, viewerId, [status === "going" ? "interested" : "going"], eventId);
+    await recordSignal(ctx, viewerId, status, "event", eventId);
     await notify(ctx, {
       userId: e.hostId,
       actorId: viewerId,

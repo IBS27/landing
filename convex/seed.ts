@@ -668,6 +668,10 @@ export const reset = internalAction({
     const cityProfileFacts: number = await ctx.runMutation(internal.seed.insertCityProfiles, {
       now: Date.now(),
     });
+    // Learn from the seeded activity (#4), so personas start with inferred interests.
+    const learners: Id<"users">[] = await ctx.runMutation(internal.profileSignals.backfill, {});
+    for (const userId of learners)
+      await ctx.runMutation(internal.profileSignals.recompute, { userId });
 
     // Demo rentals for "Things to check" (#11).
     await ctx.runMutation(internal.trust.seedDemo, {});

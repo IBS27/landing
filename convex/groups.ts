@@ -1,6 +1,7 @@
 import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
+import { recordSignal, undoSignal } from "./lib/activity";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { activityLabel, externalPostsPerDay } from "./lib/groupActivity";
 import { checkPoint, neighborhoodIdAt } from "./lib/neighborhoods";
@@ -674,6 +675,7 @@ export const join = viewerMutation({
     });
     await ctx.db.patch(groupId, { memberCount: g.memberCount + 1 });
     await clearInvites(ctx, viewerId, groupId);
+    await recordSignal(ctx, viewerId, "join", "group", groupId);
   },
 });
 
@@ -685,6 +687,7 @@ export const leave = viewerMutation({
     if (!row) return;
     await ctx.db.delete(row._id);
     await ctx.db.patch(groupId, { memberCount: Math.max(0, g.memberCount - 1) });
+    await undoSignal(ctx, ctx.viewer._id, ["join"], groupId);
   },
 });
 

@@ -2,6 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { cityProfileFact } from "./lib/cityProfileFacts";
 import { lifestyleAnswers } from "./lib/lifestyle";
+import { profileSignal } from "./lib/profileSignals";
 import { roomKind, roomVibe } from "./lib/vibe";
 import {
   aiJobStatus,
@@ -827,6 +828,8 @@ export default defineSchema({
     /** When the onboarding brief was last submitted; unset = not onboarded yet. */
     briefCompletedAt: v.optional(v.number()),
     updatedAt: v.number(),
+    /** Learn from activity (#4). Unset means on; false stops recording signals and inferring. */
+    learnFromActivity: v.optional(v.boolean()),
   }).index("by_user", ["userId"]),
 
   /**
@@ -836,6 +839,17 @@ export default defineSchema({
   cityProfileFacts: defineTable(cityProfileFact)
     .index("by_user", ["userId", "updatedAt"])
     .index("by_user_key", ["userId", "key"]),
+
+  /**
+   * Learn from activity (#4): what someone RSVP'd to, joined, liked, saved or
+   * skipped, as the interests and neighborhood each maps to. Private to its
+   * owner. Undoing an action sets `undoneAt`; rows are never deleted. Written
+   * and read only through `convex/lib/activity.ts`.
+   */
+  profileSignals: defineTable(profileSignal)
+    .index("by_user", ["userId", "at"])
+    .index("by_user_target", ["userId", "targetId", "kind"])
+    .index("by_user_updated", ["userId", "updatedAt"]),
 
   /**
    * Landing network vouching: `voucherId` says they know `subjectId` (usually a
