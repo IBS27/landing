@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { Doc } from "../convex/_generated/dataModel";
+import { neighborhoodSlugAt, SF_NEIGHBORHOODS } from "../convex/lib/neighborhoods";
 import {
   BADGE,
   badgesAfterEdit,
@@ -410,5 +411,19 @@ describe("seedTrustDemo", () => {
     await seedTrustDemo(ctx, NOW);
     expect(counts()).toEqual(first);
     expect(first.conversations).toBe(1);
+  });
+  test("demo rentals get the neighborhood their coordinates fall in (#15)", async () => {
+    const w: Record<string, Row[]> = {
+      users: [user("maya.chen"), user("derek.holloway")].map((u) => ({ ...u, username: u._id })),
+      listings: [],
+      neighborhoods: SF_NEIGHBORHOODS.map((n) => ({ _id: `nb:${n.slug}`, slug: n.slug })),
+    };
+    await seedTrustDemo(fakeCtx(w), NOW);
+    const demo = w.listings.map((l) => {
+      const { lat, lng } = l.location as { lat: number; lng: number };
+      return [l.title, l.neighborhoodId, `nb:${neighborhoodSlugAt({ lat, lng })}`];
+    });
+    expect(demo.length).toBeGreaterThan(0);
+    for (const [title, got, want] of demo) expect([title, got]).toEqual([title, want]);
   });
 });

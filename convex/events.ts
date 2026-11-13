@@ -2,10 +2,12 @@ import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { viewerMutation, viewerQuery } from "./lib/functions";
+import { checkPoint, neighborhoodIdAt } from "./lib/neighborhoods";
 import { notify } from "./lib/notify";
 import { canSeeEvent, enrichPosts, eventVisible, isSaved, loadAudience } from "./lib/posts";
 import { detailAudiences } from "./lib/settings";
 import { friendIds, getSummaries, getSummary, type UserSummary, userSummary } from "./lib/users";
+import { latLng } from "./validators";
 
 /* ---------------- Categories ---------------- */
 
@@ -613,6 +615,12 @@ const eventFields = {
   city: v.optional(v.string()),
   privacy: v.union(v.literal("public"), v.literal("friends"), v.literal("private")),
   coverStorageId: v.optional(v.id("_storage")),
+  /**
+   * The venue's coordinates, when the caller knows them (Landing flows do; Facebook's composer
+   * has no map picker). Sets the event's neighborhood. On update, omit to keep the current point
+   * (it's cleared if the venue or address text changes), or pass null to clear it.
+   */
+  point: v.optional(v.union(latLng, v.null())),
 };
 
 export const DEFAULT_COVER = "/event-cover-default.svg";
@@ -625,10 +633,11 @@ function validate(a: { title: string; startAt: number; endAt?: number }) {
 
 export const create = viewerMutation({
   args: eventFields,
-  handler: async (ctx, { coverStorageId, ...a }) => {
+  handler: async (ctx, { coverStorageId, point: pointArg, ...a }) => {
     validate(a);
     const cover = coverStorageId ? await ctx.storage.getUrl(coverStorageId) : null;
     const now = Date.now();
+    const point = a.online || !pointArg ? undefined : checkPoint(pointArg);
     const eventId = await ctx.db.insert("events", {
       hostId: ctx.viewer._id,
       title: a.title.trim(),
@@ -645,6 +654,8 @@ export const create = viewerMutation({
       externalGoingCount: 0,
       externalInterestedCount: 0,
       createdAt: now,
+      point,
+      neighborhoodId: await neighborhoodIdAt(ctx, point),
     });
     await ctx.db.insert("eventResponses", {
       eventId,
@@ -658,11 +669,22 @@ export const create = viewerMutation({
 
 export const update = viewerMutation({
   args: { eventId: v.id("events"), ...eventFields },
-  handler: async (ctx, { eventId, coverStorageId, ...a }) => {
+  handler: async (ctx, { eventId, coverStorageId, point: pointArg, ...a }) => {
     const e = await ctx.db.get(eventId);
     if (!e || e.hostId !== ctx.viewer._id) throw new ConvexError("Only the host can edit");
     validate(a);
     const cover = coverStorageId ? await ctx.storage.getUrl(coverStorageId) : null;
+    const venue = a.online ? undefined : a.venue?.trim() || undefined;
+    const address = a.online ? undefined : a.address?.trim() || undefined;
+    // Keep the point unless the event went online, the venue moved, or the caller set a new one.
+    const moved = venue !== e.venue || address !== e.address;
+    const point = a.online
+      ? undefined
+      : pointArg === undefined
+        ? moved
+          ? undefined
+          : e.point
+        : pointArg && checkPoint(pointArg);
     await ctx.db.patch(eventId, {
       title: a.title.trim(),
       description: a.description.trim(),
@@ -670,10 +692,12 @@ export const update = viewerMutation({
       startAt: a.startAt,
       endAt: a.endAt,
       online: a.online,
-      venue: a.online ? undefined : a.venue?.trim() || undefined,
-      address: a.online ? undefined : a.address?.trim() || undefined,
+      venue,
+      address,
       city: a.city?.trim() || e.city,
       privacy: a.privacy,
+      point: point ?? undefined,
+      neighborhoodId: await neighborhoodIdAt(ctx, point),
       ...(cover ? { cover } : {}),
     });
   },

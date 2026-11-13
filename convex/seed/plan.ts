@@ -7,8 +7,17 @@
  * construction. Deterministic for a given `now`.
  */
 import type { Doc } from "../_generated/dataModel";
-import type { ReactionType } from "../validators";
+import type { LatLng } from "../lib/geo";
+import { BOUNDARY_SOURCE } from "../lib/neighborhoodBoundaries";
+import {
+  type NeighborhoodSlug,
+  neighborhoodShape,
+  neighborhoodSlugAt,
+  SF_NEIGHBORHOODS,
+} from "../lib/neighborhoods";
+import type { NeighborhoodFact, ReactionType } from "../validators";
 import { backgrounds } from "./lib/backgrounds";
+import { ADDRESS_POINTS } from "./lib/geocoded";
 import { ImagePicker, type Picked } from "./lib/images";
 import { neighborhoods } from "./lib/places";
 import { type Rng, rng } from "./lib/prng";
@@ -16,12 +25,14 @@ import { Clock, DAY, HOUR, MINUTE } from "./lib/time";
 import { isTallClip, videoMedia } from "./lib/videos";
 import type {
   CommentSeed,
+  GroupSeed,
   GroupSlug,
   Handle,
   ListingSeed,
   Mood,
   PostSeed,
   ReplySeed,
+  SourceSnapshot,
   TimeSpec,
   Username,
 } from "./types";
@@ -37,10 +48,14 @@ import {
 import { groups as groupSeeds } from "./world/groups";
 import { listings as goodsSeeds } from "./world/listings";
 import { conversations as conversationSeeds } from "./world/messages";
+import { CAMPUSES, CORRIDORS, LANDMARK_SOURCES } from "./world/neighborhoods/facts";
+import { neighborhoodGroups } from "./world/neighborhoods/groups";
+import { TRANSIT_LINES, TRANSIT_SOURCES, TRANSIT_STATIONS } from "./world/neighborhoods/transit";
 import { pages } from "./world/pages";
 import { MAIN, people } from "./world/people";
 import { friendPosts } from "./world/posts/friends";
 import { groupPosts } from "./world/posts/groups";
+import { neighborhoodPosts } from "./world/posts/neighborhoods";
 import { pagePosts } from "./world/posts/pages";
 import { threadsFor } from "./world/posts/threads";
 import { rentals as rentalSeeds } from "./world/rentals";
@@ -57,6 +72,13 @@ type TableRows = {
 };
 
 export type NotificationKind = Doc<"notifications">["kind"];
+
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+/** A fact row before ids exist: the seed adds `neighborhoodId` and `citations`. */
+export type PlannedFact = DistributiveOmit<NeighborhoodFact, "neighborhoodId" | "citations">;
+
+/** Key of the DataSF boundary snapshot every neighborhood cites. */
+const BOUNDARY_SOURCE_KEY = "datasf:analysis-neighborhoods";
 
 export type Plan = ReturnType<typeof buildPlan>;
 
@@ -261,8 +283,18 @@ export function buildPlan(now: number) {
   // ── Groups ─────────────────────────────────────────────────────────────
   const groupMembersOf = new Map<GroupSlug, Set<Username>>();
   const groupName = new Map<string, string>();
-  const groups: { slug: GroupSlug; createdBy: Username; row: Omit<Row<"groups">, "createdBy"> }[] =
-    [];
+  const groups: {
+    slug: GroupSlug;
+    createdBy: Username;
+    /** DataSF neighborhood containing `row.point`. */
+    neighborhood?: NeighborhoodSlug;
+    row: Omit<Row<"groups">, "createdBy" | "neighborhoodId">;
+  }[] = [];
+  /** Neighborhood Groups pick covers last, so they never take a photo an earlier row would get. */
+  const lateCovers = new Map<GroupSlug, string>();
+  const neighborhoodGroupSlugs = new Set<string>(
+    (neighborhoodGroups as readonly GroupSeed[]).map((n) => n.slug),
+  );
   const groupMembers: {
     slug: GroupSlug;
     user: Username;
@@ -270,8 +302,15 @@ export function buildPlan(now: number) {
     joinedAt: number;
     lastVisitedAt?: number;
   }[] = [];
-  for (const g of groupSeeds) {
+  for (const g of [...groupSeeds, ...neighborhoodGroups]) {
     const r = rng(`group:${g.slug}`);
+    const home = "neighborhood" in g ? g.neighborhood : undefined;
+    const point: LatLng | undefined =
+      "point" in g ? { ...g.point } : home ? neighborhoodShape(home).center : undefined;
+    const neighborhood = point ? (neighborhoodSlugAt(point) ?? undefined) : undefined;
+    if (home && neighborhood !== home) fail(`group ${g.slug}: center is not in ${home}`);
+    const lateCover = neighborhoodGroupSlugs.has(g.slug);
+    if (lateCover) lateCovers.set(g.slug, g.cover);
     const createdAt = now - g.createdYearsAgo * 365 * DAY - r.int(0, 200) * DAY;
     const roles = new Map<Username, "admin" | "moderator" | "member">();
     for (const u of g.admins) roles.set(u, "admin");
@@ -298,10 +337,11 @@ export function buildPlan(now: number) {
     groups.push({
       slug: g.slug,
       createdBy: g.admins[0],
+      neighborhood,
       row: {
         name: g.name,
         slug: g.slug,
-        cover: pics.pick(g.cover, "covers", `group:${g.slug}`).url,
+        cover: lateCover ? "" : pics.pick(g.cover, "covers", `group:${g.slug}`).url,
         privacy: g.privacy,
         visible: true,
         description: g.description,
@@ -313,6 +353,7 @@ export function buildPlan(now: number) {
         externalMemberCount: g.externalMembers,
         memberCount: g.externalMembers + roles.size,
         lastActivityAt: createdAt,
+        point,
       },
     });
   }
@@ -331,8 +372,36 @@ export function buildPlan(now: number) {
     key: string;
     seller: Username;
     groups: GroupSlug[];
-    row: Omit<Row<"listings">, "sellerId" | "groupIds">;
+    /** DataSF neighborhood containing the listing's point. */
+    neighborhood?: NeighborhoodSlug;
+    row: Omit<Row<"listings">, "sellerId" | "groupIds" | "neighborhoodId">;
   }[] = [];
+  /** A spot within ~650 m of a place's center, from two uniform draws. */
+  const spot = (center: LatLng, u: number, w: number): LatLng => ({
+    lat: Math.round((center.lat + (u - 0.5) * 0.012) * 1e5) / 1e5,
+    lng: Math.round((center.lng + (w - 0.5) * 0.016) * 1e5) / 1e5,
+  });
+  /**
+   * Where a listing is: a rental's cross streets (geocoded), otherwise a spot near its place's
+   * center that stays inside that place's DataSF neighborhood, so it never lands in the next
+   * neighborhood or the bay. `jitter` is the listing's first two draws, as before.
+   */
+  const listingPoint = (l: ListingSeed, jitter: { u: number; w: number }): LatLng => {
+    const place = neighborhoods[l.hood];
+    const address = l.rental?.address
+      ? ADDRESS_POINTS[`${l.rental.address}, ${place.city}`]
+      : undefined;
+    if (address) return { lat: address.lat, lng: address.lng };
+    const first = spot(place, jitter.u, jitter.w);
+    const target = neighborhoodSlugAt(place);
+    if (!target || neighborhoodSlugAt(first) === target) return first;
+    const rr = rng(`listing-spot:${l.key}`);
+    for (let i = 0; i < 200; i++) {
+      const p = spot(place, rr.next(), rr.next());
+      if (neighborhoodSlugAt(p) === target) return p;
+    }
+    return { lat: place.lat, lng: place.lng };
+  };
   const allListings: readonly ListingSeed[] = [...goodsSeeds, ...rentalSeeds];
   for (const l of allListings) {
     if (listingTitle.has(l.key)) fail(`duplicate listing key ${l.key}`);
@@ -340,6 +409,9 @@ export function buildPlan(now: number) {
     for (const g of l.groups ?? []) checkGroup(g, `listing ${l.key}`);
     const r = rng(`listing:${l.key}`);
     const hood = neighborhoods[l.hood];
+    // The first two draws are the location jitter, as before, so the rest of the stream is unchanged.
+    const jitter = { u: r.next(), w: r.next() };
+    const point = listingPoint(l, jitter);
     const createdAt = Math.min(clock.at(l.listed), latest);
     // A listing shows its own photos: the exact-topic files for a single topic (never padded with
     // other items), or one distinct photo per slot. No photo may appear on two listings.
@@ -374,6 +446,7 @@ export function buildPlan(now: number) {
       key: l.key,
       seller: l.seller,
       groups: [...(l.groups ?? [])],
+      neighborhood: neighborhoodSlugAt(point) ?? undefined,
       row: {
         title: l.title,
         price: l.price,
@@ -383,12 +456,7 @@ export function buildPlan(now: number) {
         meetup: l.meetup ? [...l.meetup] : undefined,
         description: l.description,
         photos: photos.map((p) => p.url),
-        location: {
-          city: hood.city,
-          neighborhood: l.hood,
-          lat: Math.round((hood.lat + (r.next() - 0.5) * 0.012) * 1e5) / 1e5,
-          lng: Math.round((hood.lng + (r.next() - 0.5) * 0.016) * 1e5) / 1e5,
-        },
+        location: { city: hood.city, neighborhood: l.hood, lat: point.lat, lng: point.lng },
         status,
         rental: l.rental
           ? {
@@ -430,7 +498,9 @@ export function buildPlan(now: number) {
     key: string;
     host: Handle;
     group?: GroupSlug;
-    row: Omit<Row<"events">, "hostId" | "groupId">;
+    /** DataSF neighborhood containing the venue. */
+    neighborhood?: NeighborhoodSlug;
+    row: Omit<Row<"events">, "hostId" | "groupId" | "neighborhoodId">;
   }[] = [];
   const eventResponses: {
     event: string;
@@ -456,6 +526,9 @@ export function buildPlan(now: number) {
       latest - r.int(1, 48) * HOUR,
       (firstEventRef.get(e.key) ?? now) - r.int(2, 30) * HOUR,
     );
+    // In-person events sit at their venue (the same points the venue maps are drawn from).
+    const venuePoint = e.online || !e.address ? undefined : ADDRESS_POINTS[e.address];
+    if (!e.online && !venuePoint) fail(`event ${e.key}: no point for address "${e.address}"`);
     eventTitle.set(e.key, e.title);
     eventHost.set(e.key, e.host);
     eventStart.set(e.key, startAt);
@@ -464,6 +537,7 @@ export function buildPlan(now: number) {
       key: e.key,
       host: e.host,
       group: e.in,
+      neighborhood: venuePoint ? (neighborhoodSlugAt(venuePoint) ?? undefined) : undefined,
       row: {
         title: e.title,
         cover: pics.pick(e.cover, "events", `event:${e.key}`, `${e.title} ${e.category}`).url,
@@ -482,6 +556,7 @@ export function buildPlan(now: number) {
         ticketProvider: e.tickets?.provider,
         ticketPrice: e.tickets?.price,
         createdAt,
+        point: venuePoint ? { lat: venuePoint.lat, lng: venuePoint.lng } : undefined,
       },
     });
     const seen = new Set<string>();
@@ -544,6 +619,8 @@ export function buildPlan(now: number) {
           ? ("page" as const)
           : ("friend" as const),
     })),
+    // Last, with explicit keys, so earlier posts keep their generated keys and random streams.
+    ...neighborhoodPosts.map((seed) => ({ seed, kind: "group" as const })),
   ];
   const persons = people.map((p) => p.username as Username);
   const posts: PlannedPost[] = [];
@@ -1214,11 +1291,16 @@ export function buildPlan(now: number) {
   }
 
   const notifications: (Note & { read: boolean; seen: boolean })[] = [];
+  // Activity in the neighborhood Groups (#15) is added on top of each persona's usual picks,
+  // already read, so those threads never push out (or change the badge for) anything else.
+  const fromNeighborhoodGroup = (n: Note) =>
+    n.group !== undefined && neighborhoodGroupSlugs.has(n.group);
   for (const persona of personas) {
     const isMain = persona === MAIN;
-    const mine = notes
+    const recent = notes
       .filter((n) => n.user === persona && n.createdAt <= latest && now - n.createdAt <= 14 * DAY)
       .sort((a, b) => b.createdAt - a.createdAt);
+    const mine = recent.filter((n) => !fromNeighborhoodGroup(n));
     const cap = isMain ? 45 : 10;
     const chosen = new Set<Note>();
     if (isMain) {
@@ -1234,6 +1316,9 @@ export function buildPlan(now: number) {
     ordered.forEach((n, i) => {
       notifications.push({ ...n, read: i >= unread, seen: i >= unread });
     });
+    for (const n of recent.filter(fromNeighborhoodGroup).slice(0, isMain ? 8 : 4)) {
+      notifications.push({ ...n, read: true, seen: true });
+    }
   }
   for (const n of notifications) {
     if (n.post) checkPost(n.post, "notification");
@@ -1241,8 +1326,139 @@ export function buildPlan(now: number) {
 
   if (lateRefs.length) fail(`references before their target exists:\n  ${lateRefs.join("\n  ")}`);
 
+  // ── Neighborhoods, their facts and sources (#15) ───────────────────────
+  // Picked last: see `lateCovers`.
+  for (const g of groups) {
+    const cover = lateCovers.get(g.slug);
+    if (cover !== undefined) g.row.cover = pics.pick(cover, "covers", `group:${g.slug}`).url;
+  }
+  const sourceRows = new Map<string, SourceSnapshot>([[BOUNDARY_SOURCE_KEY, BOUNDARY_SOURCE]]);
+  const takeSource = (key: string, from: Record<string, SourceSnapshot>, where: string) => {
+    const snap = from[key];
+    if (!snap) fail(`${where}: unknown source "${key}"`);
+    if (!/^https?:\/\//.test(snap.url)) fail(`${where}: source url must be http(s)`);
+    sourceRows.set(key, snap);
+    return key;
+  };
+  const neighborhoodRows = SF_NEIGHBORHOODS.map((def) => {
+    const shape = neighborhoodShape(def.slug);
+    return {
+      slug: def.slug as NeighborhoodSlug,
+      sources: [BOUNDARY_SOURCE_KEY],
+      row: {
+        slug: def.slug,
+        name: def.name,
+        shortName: "short" in def ? def.short : undefined,
+        park: "park" in def ? def.park : undefined,
+        center: shape.center,
+        bbox: shape.bbox,
+        polygon: shape.polygon,
+      },
+    };
+  });
+  const facts: { neighborhood: NeighborhoodSlug; sources: string[]; row: PlannedFact }[] = [];
+  const at = (p: LatLng, where: string) => {
+    const slug = neighborhoodSlugAt(p);
+    if (!slug) fail(`${where} is not in San Francisco`);
+    return slug;
+  };
+  for (const st of TRANSIT_STATIONS) {
+    const where = `station ${st.key}`;
+    facts.push({
+      neighborhood: at(st.point, where),
+      sources: st.sources.map((k) => takeSource(k, TRANSIT_SOURCES, where)),
+      row: {
+        key: st.key,
+        kind: "transit_station",
+        system: st.system,
+        name: st.name,
+        lines: [...st.lines],
+        point: { ...st.point },
+      },
+    });
+  }
+  for (const line of TRANSIT_LINES) {
+    const where = `line ${line.key}`;
+    const sources = line.sources.map((k) => takeSource(k, TRANSIT_SOURCES, where));
+    const byHood = new Map<NeighborhoodSlug, { name: string; point: LatLng }[]>();
+    for (const stop of line.stops) {
+      const slug = neighborhoodSlugAt(stop.point);
+      if (!slug) continue;
+      byHood.set(slug, [
+        ...(byHood.get(slug) ?? []),
+        { name: stop.name, point: { ...stop.point } },
+      ]);
+    }
+    for (const [slug, stops] of byHood) {
+      facts.push({
+        neighborhood: slug,
+        sources,
+        row: {
+          key: line.key,
+          kind: "transit_line",
+          system: line.system,
+          line: line.line,
+          name: line.name,
+          stops,
+        },
+      });
+    }
+  }
+  for (const c of CORRIDORS) {
+    const where = `corridor ${c.key}`;
+    if (c.path.length < 2) fail(`${where}: needs at least two points`);
+    const sources = c.sources.map((k) => takeSource(k, LANDMARK_SOURCES, where));
+    // Walk the corridor every ~25 m; it belongs to every neighborhood it passes through.
+    const hoods = new Set<NeighborhoodSlug>();
+    for (let i = 1; i < c.path.length; i++) {
+      const a = c.path[i - 1];
+      const b = c.path[i];
+      const steps = Math.max(1, Math.ceil(Math.hypot(b.lat - a.lat, b.lng - a.lng) / 0.00025));
+      for (let k = 0; k <= steps; k++) {
+        const slug = neighborhoodSlugAt({
+          lat: a.lat + ((b.lat - a.lat) * k) / steps,
+          lng: a.lng + ((b.lng - a.lng) * k) / steps,
+        });
+        if (slug) hoods.add(slug);
+      }
+    }
+    if (hoods.size === 0) fail(`${where} is not in San Francisco`);
+    for (const slug of hoods) {
+      facts.push({
+        neighborhood: slug,
+        sources,
+        row: {
+          key: c.key,
+          kind: "nightlife_corridor",
+          name: c.name,
+          detail: c.detail,
+          path: c.path.map((p) => ({ ...p })),
+        },
+      });
+    }
+  }
+  for (const c of CAMPUSES) {
+    const where = `campus ${c.key}`;
+    facts.push({
+      neighborhood: at(c.point, where),
+      sources: c.sources.map((k) => takeSource(k, LANDMARK_SOURCES, where)),
+      row: {
+        key: c.key,
+        kind: "campus",
+        name: c.name,
+        institution: c.institution,
+        detail: c.detail,
+        point: { ...c.point },
+      },
+    });
+  }
+  for (const f of facts) if (f.sources.length === 0) fail(`fact ${f.row.key} has no sources`);
+
   return {
     now,
+    externalSources: [...sourceRows].map(([key, row]) => ({ key, row: { ...row } })),
+    neighborhoods: neighborhoodRows,
+    neighborhoodFacts: facts,
     users,
     friendships: [...friendPairs.values()],
     friendRequests,
