@@ -156,6 +156,12 @@ function ReviewListings({
 
   const submit = async () => {
     if (!rows) return;
+    // A cleared price box isn't "free": Number("") would list it for $0.
+    const blank = rows.find((r) => r.price.trim() === "");
+    if (blank) {
+      setError(`Enter a price for ${blank.title.trim() || "each item"}`);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
