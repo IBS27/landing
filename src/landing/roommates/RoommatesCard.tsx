@@ -13,7 +13,7 @@ export function RoommatesCard() {
       : mine === null
         ? "Answer a few questions about how you live. Private until you share."
         : mine.shared
-          ? "Your answers are shared for roommate matching."
+          ? "See roommate candidates from your network."
           : "Your answers are private. Share them when you're ready.";
   return (
     <Card className="mb-3 overflow-hidden">
@@ -23,7 +23,7 @@ export function RoommatesCard() {
         </span>
         <span className="min-w-0 flex-1">
           <span className="block font-semibold text-[17px] text-primary leading-[22px]">
-            Roommate lifestyle
+            Roommates
           </span>
           <span className="block min-h-4 text-[13px] text-secondary leading-4">{status}</span>
         </span>
