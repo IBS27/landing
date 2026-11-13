@@ -180,6 +180,36 @@ describe("roommateCandidates", () => {
       expect(all).not.toContain(leak);
   });
 
+  test("each candidate carries a compatibility score from shared answers only", async () => {
+    const w = world();
+    const answers: Record<string, object> = {
+      V: { sleep: "regular", quietHours: "10pm", cleanliness: "tidy", dealbreakers: ["dogs"] },
+      A: { sleep: "regular", quietHours: "10pm", cleanliness: "tidy", pets: ["dog"] },
+      P: { sleep: "regular", quietHours: "11pm", cleanliness: "tidy", guests: "often" },
+    };
+    w.roommateLifestyles = w.roommateLifestyles.map((r) =>
+      answers[r.userId as string] ? { ...r, answers: answers[r.userId as string] } : r,
+    );
+    const r = await roommateCandidates(fakeCtx(w), id("V"));
+    const by = (u: string) => r?.candidates.find((c) => c.user._id === u)?.compatibility;
+    // A's dog hits V's dealbreaker: capped and listed with the answer it came from.
+    expect(by("A")).toMatchObject({ score: 40, capped: true });
+    expect(by("A")?.dealbreakers[0]).toMatchObject({
+      dealbreaker: "dogs",
+      answer: { label: "Dog" },
+    });
+    // P: budget overlaps too (both stated), quiet hours one step apart, guests never compared.
+    expect(by("P")?.basedOn).toEqual(["sleep", "quietHours", "cleanliness", "budget"]);
+    expect(by("P")?.score).toBe(Math.round((100 * (3 + 2.25 + 3 + 3)) / 12));
+    expect(JSON.stringify(by("P"))).not.toContain("often");
+    // Vd shares only sleep and quiet hours with V, and stated no budget: too little for a score.
+    expect(by("Vd")?.score).toBeNull();
+    expect(by("Vd")?.notCompared).toContain("budget");
+    // Q's budget doesn't overlap V's: compared, without amounts.
+    expect(by("Q")?.differences.map((t) => t.sentence)).toContain("Your budgets don't overlap");
+    expect(usernames(r?.candidates)).toEqual(["A", "Vd", "P", "Q"]);
+  });
+
   test("reads stay bounded on a large network", async () => {
     const w = world();
     const many = 3 * REACH_FRIENDS_MAX;
@@ -223,9 +253,18 @@ describe("ranking", () => {
     closeness: RoommateCandidate["closeness"],
     o: Partial<Overlap> = {},
     links = 1,
+    fit: { score?: number | null; dealbreaker?: boolean } = {},
   ) => ({
     links,
-    candidate: { user: { name }, closeness, overlap: overlap(o) } as RoommateCandidate,
+    candidate: {
+      user: { name },
+      closeness,
+      overlap: overlap(o),
+      compatibility: {
+        score: fit.score ?? null,
+        dealbreakers: fit.dealbreaker ? [{}] : [],
+      },
+    } as RoommateCandidate,
   });
 
   test("closeness, then overlap, then connections, then name", () => {
@@ -237,6 +276,17 @@ describe("ranking", () => {
       c("Dee", "friend"),
     ].sort(byCandidateRank);
     expect(list.map((x) => x.candidate.user.name)).toEqual(["Dee", "Cal", "Zed", "Amy", "Bea"]);
+  });
+
+  test("within a closeness: no dealbreaker first, then score, then overlap", () => {
+    const list = [
+      c("Ann", "friend_of_friend", { budget: true }, 1, { score: 40, dealbreaker: true }),
+      c("Ben", "friend_of_friend", { budget: true, moveInMonth: "2027-03" }, 1, { score: null }),
+      c("Cy", "friend_of_friend", {}, 1, { score: 61 }),
+      c("Di", "friend_of_friend", {}, 1, { score: 88 }),
+      c("Ed", "friend", {}, 1, { score: 20 }),
+    ].sort(byCandidateRank);
+    expect(list.map((x) => x.candidate.user.name)).toEqual(["Ed", "Di", "Cy", "Ben", "Ann"]);
   });
 
   test("a friend who is both a mutual friend and a voucher counts once", async () => {
