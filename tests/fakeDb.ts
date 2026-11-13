@@ -24,6 +24,7 @@ export function fakeCtx(tables: Record<string, Row[]>, stats?: ReadStats): Mutat
     for (const row of rows) byId.set(row._id, { table, row });
   let next = 0;
   const db = {
+    normalizeId: (table: string, id: string) => (byId.get(id)?.table === table ? id : null),
     get: async (id: string) => {
       const row = byId.get(id)?.row ?? null;
       if (row && stats) stats.docs++;

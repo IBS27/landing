@@ -94,49 +94,55 @@ const MATCHES_MAX = 12;
 export const matches = viewerQuery({
   args: { roomId: v.id("rooms") },
   handler: async (ctx, { roomId }) => {
-    const viewerId = ctx.viewer._id;
     const room = await ctx.db.get(roomId);
-    if (!room || room.userId !== viewerId) throw new ConvexError("Room not found");
-    if (!room.vibe) return [];
-    const [blocked, recent] = await Promise.all([
-      blockedSet(ctx, viewerId),
-      ctx.db.query("listings").withIndex("by_created").order("desc").take(MATCH_SCAN_MAX),
-    ]);
-    const candidates = recent.filter(
-      (l) =>
-        l.status === "active" &&
-        !NOT_DECOR.has(l.category) &&
-        l.sellerId !== viewerId &&
-        !blocked.has(l.sellerId),
-    );
-    const byId = new Map(candidates.map((l) => [l._id as string, l]));
-    return rankVibeMatches(
-      room.vibe,
-      candidates.map((l) => ({
-        id: l._id,
-        title: l.title,
-        description: l.description,
-        createdAt: l.createdAt,
-      })),
-    )
-      .slice(0, MATCHES_MAX)
-      .flatMap((m) => {
-        const l = byId.get(m.id);
-        return l
-          ? [
-              {
-                _id: l._id,
-                title: l.title,
-                price: l.price,
-                photo: l.photos[0] ?? null,
-                neighborhood: l.location.neighborhood ?? null,
-                reasons: m.reasons,
-              },
-            ]
-          : [];
-      });
+    if (!room || room.userId !== ctx.viewer._id) throw new ConvexError("Room not found");
+    return roomMatches(ctx, room);
   },
 });
+
+/** The ranked matches for a room the caller has already checked is the viewer's own. */
+export async function roomMatches(ctx: QueryCtx, room: Doc<"rooms">) {
+  const viewerId = room.userId;
+  if (!room.vibe) return [];
+  const vibe = room.vibe;
+  const [blocked, recent] = await Promise.all([
+    blockedSet(ctx, viewerId),
+    ctx.db.query("listings").withIndex("by_created").order("desc").take(MATCH_SCAN_MAX),
+  ]);
+  const candidates = recent.filter(
+    (l) =>
+      l.status === "active" &&
+      !NOT_DECOR.has(l.category) &&
+      l.sellerId !== viewerId &&
+      !blocked.has(l.sellerId),
+  );
+  const byId = new Map(candidates.map((l) => [l._id as string, l]));
+  return rankVibeMatches(
+    vibe,
+    candidates.map((l) => ({
+      id: l._id,
+      title: l.title,
+      description: l.description,
+      createdAt: l.createdAt,
+    })),
+  )
+    .slice(0, MATCHES_MAX)
+    .flatMap((m) => {
+      const l = byId.get(m.id);
+      return l
+        ? [
+            {
+              _id: l._id,
+              title: l.title,
+              price: l.price,
+              photo: l.photos[0] ?? null,
+              neighborhood: l.location.neighborhood ?? null,
+              reasons: m.reasons,
+            },
+          ]
+        : [];
+    });
+}
 
 /* ---------------- Writing ---------------- */
 

@@ -147,6 +147,7 @@ import type * as seed_world_neighborhoods_groups from "../seed/world/neighborhoo
 import type * as seed_world_neighborhoods_places from "../seed/world/neighborhoods/places.js";
 import type * as seed_world_neighborhoods_service from "../seed/world/neighborhoods/service.js";
 import type * as seed_world_neighborhoods_transit from "../seed/world/neighborhoods/transit.js";
+import type * as seed_world_ownedItems from "../seed/world/ownedItems.js";
 import type * as seed_world_pages from "../seed/world/pages.js";
 import type * as seed_world_people from "../seed/world/people.js";
 import type * as seed_world_posts_friends from "../seed/world/posts/friends.js";
@@ -164,6 +165,7 @@ import type * as settings from "../settings.js";
 import type * as stories from "../stories.js";
 import type * as subleases from "../subleases.js";
 import type * as trust from "../trust.js";
+import type * as unitItems from "../unitItems.js";
 import type * as users from "../users.js";
 import type * as unitScenes from "../unitScenes.js";
 import type * as validators from "../validators.js";
@@ -316,6 +318,7 @@ declare const fullApi: ApiFromModules<{
   "seed/world/neighborhoods/places": typeof seed_world_neighborhoods_places;
   "seed/world/neighborhoods/service": typeof seed_world_neighborhoods_service;
   "seed/world/neighborhoods/transit": typeof seed_world_neighborhoods_transit;
+  "seed/world/ownedItems": typeof seed_world_ownedItems;
   "seed/world/pages": typeof seed_world_pages;
   "seed/world/people": typeof seed_world_people;
   "seed/world/posts/friends": typeof seed_world_posts_friends;
@@ -333,6 +336,7 @@ declare const fullApi: ApiFromModules<{
   stories: typeof stories;
   subleases: typeof subleases;
   trust: typeof trust;
+  unitItems: typeof unitItems;
   users: typeof users;
   unitScenes: typeof unitScenes;
   validators: typeof validators;

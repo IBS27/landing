@@ -8,6 +8,7 @@ import { price } from "@/lib/format";
 import { Button, Card, IconButton, Skeleton, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { PlaceInRoom } from "./PlaceInRoom";
 
 const field =
   "w-full rounded-lg border border-divider bg-input px-3 py-2 text-[15px] text-primary outline-none placeholder:text-placeholder focus:border-fb";
@@ -26,6 +27,18 @@ const day = (ts: number) =>
 /** "Your stuff": everything the viewer owns, tracked for resale at move-out (#27). */
 export function OwnedItems() {
   const items = useQ(api.inventory.mine, {});
+  const rooms = useQ(api.rooms.mine, {});
+  const placed = useQ(api.unitItems.placed, {});
+  // A purchase placed earlier as its listing counts too.
+  const placedIn = (it: {
+    _id: Id<"ownedItems">;
+    source: { kind: "manual" } | { kind: "marketplace"; listingId: Id<"listings"> };
+  }) =>
+    placed?.find(
+      (u) =>
+        u.ownedItemIds.includes(it._id) ||
+        (it.source.kind === "marketplace" && u.listingIds.includes(it.source.listingId)),
+    )?.unitId ?? null;
   const remove = useM(api.inventory.remove);
   const [adding, setAdding] = useState(false);
 
@@ -87,6 +100,15 @@ export function OwnedItems() {
                     <span>Added by you</span>
                   )}
                 </div>
+                {rooms && placed && (
+                  <div className="mt-1.5">
+                    <PlaceInRoom
+                      item={{ placeItem: it._id }}
+                      rooms={rooms}
+                      placedIn={placedIn(it)}
+                    />
+                  </div>
+                )}
               </div>
               <IconButton
                 label={`Remove ${it.title}`}

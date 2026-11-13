@@ -1,8 +1,9 @@
 import { lazy, type ReactNode, Suspense, useEffect, useRef, useState } from "react";
 import { Button, Card, Spinner } from "@/ui/primitives";
-import type { Id } from "../../../../convex/_generated/dataModel";
 import {
   distance,
+  ITEM_KINDS,
+  itemSize,
   manualScene,
   type Placement,
   placementProblems,
@@ -10,6 +11,7 @@ import {
   sceneProblems,
   type UnitScene,
 } from "../../../../convex/lib/unitScene";
+import { ItemPicker, type PickerItem } from "./ItemPicker";
 import { sceneId } from "./id";
 import type { ViewMode, WalkInput } from "./UnitCanvas";
 import { UnitPlan } from "./UnitPlan";
@@ -23,7 +25,9 @@ export function UnitEditor({
   revision,
   onSave,
   sidebar,
-  items = [],
+  items,
+  pick,
+  pickMissing,
   onDirtyChange,
   viewKey = "saved",
   jobId,
@@ -35,7 +39,12 @@ export function UnitEditor({
   revision: number;
   onSave?: (draft: UnitDraft, revision: number) => Promise<number>;
   sidebar?: ReactNode;
-  items?: { id: Id<"listings">; title: string }[];
+  /** What can be placed (#131); undefined while loading. */
+  items?: PickerItem[];
+  /** Picker key to start with, from a "Place in my room" link, once resolved. */
+  pick?: string;
+  /** The linked item can't be placed (gone, or not the owner's). */
+  pickMissing?: boolean;
 }) {
   const [draft, setDraft] = useState(initial);
   const latest = useRef(draft);
@@ -61,7 +70,30 @@ export function UnitEditor({
   const room = draft.scene.rooms.find((r) => r.id === roomId) ?? draft.scene.rooms[0];
   const [width, setWidth] = useState(4),
     [length, setLength] = useState(5);
-  const [listing, setListing] = useState("");
+  const [choice, setChoice] = useState(pick ?? "");
+  const [shownPick, setShownPick] = useState(pick);
+  if (pick && pick !== shownPick) {
+    setShownPick(pick);
+    setChoice(pick);
+  }
+  const pickerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!shownPick && !pickMissing) return;
+    // After layout settles, bring the picker and its chosen row into view.
+    const frame = requestAnimationFrame(() => {
+      pickerRef.current?.scrollIntoView({ block: "center" });
+      pickerRef.current
+        ?.querySelector('[aria-checked="true"]')
+        ?.scrollIntoView({ block: "nearest" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [shownPick, pickMissing]);
+  const chosen = items?.find((i) => i.key === choice);
+  const placedKeys = new Set(
+    draft.placements.flatMap((p) =>
+      p.ownedItemId ? [`owned:${p.ownedItemId}`] : p.listingId ? [`listing:${p.listingId}`] : [],
+    ),
+  );
   const [calibrationWall, setCalibrationWall] = useState(initial.scene.walls[0]?.id ?? "");
   const [knownLength, setKnownLength] = useState(4);
   if (!dirty && (revision > base || baseView !== viewKey)) {
@@ -158,20 +190,21 @@ export function UnitEditor({
   const addItem = (kind: Placement["kind"]) => {
     const p = roomCenter(room),
       id = sceneId();
-    const item = items.find((i) => i.id === listing);
     change({
       ...draft,
       placements: [
         ...draft.placements,
         {
           id,
-          label: item?.title ?? `Your ${kind}`,
-          listingId: item?.id,
+          label: chosen?.title.slice(0, 120) ?? `Your ${kind}`,
+          ...(chosen?.ownedItemId
+            ? { ownedItemId: chosen.ownedItemId }
+            : chosen?.listingId
+              ? { listingId: chosen.listingId }
+              : {}),
           kind,
           ...p,
-          width: kind === "sofa" ? 2 : 1.4,
-          depth: kind === "bed" ? 2 : 0.8,
-          height: kind === "table" ? 0.75 : 0.9,
+          ...itemSize(kind),
           rotation: 0,
           color: "#76958f",
           measured: false,
@@ -381,36 +414,40 @@ export function UnitEditor({
       )}
       <div className="grid gap-4 xl:grid-cols-2">
         {onSave && (
-          <Card className="space-y-4 p-4">
-            <h2 className="font-bold text-lg text-primary">Place an item</h2>
-            <select
-              aria-label="Marketplace item"
-              className={fieldClass}
-              value={listing}
-              onChange={(e) => setListing(e.target.value)}
-            >
-              <option value="">Custom item</option>
-              {items.map((i) => (
-                <option key={i.id} value={i.id}>
-                  {i.title}
-                </option>
-              ))}
-            </select>
-            <div className="flex flex-wrap gap-2">
-              {(["sofa", "bed", "table", "storage"] as const).map((k) => (
-                <Button
-                  key={k}
-                  variant="secondary"
-                  onClick={() => addItem(k)}
-                  disabled={draft.placements.length >= 80}
-                >
-                  Add {k}
-                </Button>
-              ))}
+          <Card className="min-w-0 space-y-4 p-4">
+            <div ref={pickerRef} className="scroll-mt-20 space-y-3">
+              <h2 className="font-bold text-lg text-primary">Place an item</h2>
+              <ItemPicker items={items} value={choice} placed={placedKeys} onChange={setChoice} />
+              {pickMissing && (
+                <p className="text-secondary text-sm">
+                  That item isn't available to place any more. Choose another one.
+                </p>
+              )}
+              <p className="text-primary text-sm">
+                {chosen ? (
+                  <>
+                    Choose a shape for <span className="font-semibold">{chosen.title}</span>.
+                  </>
+                ) : (
+                  "Choose a shape."
+                )}{" "}
+                <span className="text-secondary">
+                  Shapes are placeholders. Enter the item's actual dimensions before judging fit.
+                </span>
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {ITEM_KINDS.map((k) => (
+                  <Button
+                    key={k}
+                    variant="secondary"
+                    onClick={() => addItem(k)}
+                    disabled={draft.placements.length >= 80}
+                  >
+                    Add {k}
+                  </Button>
+                ))}
+              </div>
             </div>
-            <p className="text-secondary text-sm">
-              Item shapes are placeholders. Enter the item's actual dimensions before judging fit.
-            </p>
             {draft.placements.length > 0 && (
               <select
                 className={fieldClass}

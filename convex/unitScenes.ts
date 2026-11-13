@@ -25,6 +25,7 @@ import {
 import {
   MAX_SOURCES,
   manualScene,
+  type Placement,
   placement,
   sceneProblems,
   sceneSource,
@@ -57,6 +58,27 @@ export async function ownScene(ctx: QueryCtx, id: Id<"unitScenes">, ownerId: Id<
   }
   if (doc.listingId) await accessibleListing(ctx, doc.listingId, ownerId);
   return doc;
+}
+/**
+ * Each placement names at most one source (#131). New references must be the
+ * owner's own item or a listing they can see; references already saved stay,
+ * so a placed item whose listing was later removed doesn't block saving.
+ */
+export async function checkPlacementSources(
+  ctx: QueryCtx,
+  ownerId: Id<"users">,
+  placements: Placement[],
+  saved: Placement[],
+) {
+  const known = new Set(saved.flatMap((p) => [p.listingId, p.ownedItemId].filter(Boolean)));
+  for (const p of placements) {
+    if (p.listingId && p.ownedItemId) throw new ConvexError("An item has one source");
+    if (p.ownedItemId && !known.has(p.ownedItemId)) {
+      const item = await ctx.db.get(p.ownedItemId);
+      if (!item || item.userId !== ownerId) throw new ConvexError("Item not found");
+    }
+    if (p.listingId && !known.has(p.listingId)) await accessibleListing(ctx, p.listingId, ownerId);
+  }
 }
 export function assertRevision(doc: { revision: number }, revision: number) {
   if (doc.revision !== revision)
@@ -187,8 +209,8 @@ export const save = viewerMutation({
         !/^#[0-9a-f]{6}$/i.test(p.color)
       )
         throw new ConvexError("Invalid item dimensions");
-      if (p.listingId) await accessibleListing(ctx, p.listingId, ctx.viewer._id);
     }
+    await checkPlacementSources(ctx, ctx.viewer._id, placements, doc.placements);
     await ctx.db.patch(id, {
       scene,
       sceneSources,

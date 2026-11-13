@@ -3,8 +3,10 @@ import type { RoomKind, VibeValue } from "../../lib/vibe";
 /**
  * Landing rooms for the seeded personas (#25), keyed by username. Marcus just
  * moved into an empty one-bedroom in the Mission and is furnishing it off
- * Marketplace, so his living room has a scan and a vibe he typed. Everyone
- * else starts without a room, so the scan and Muse's suggestion can be demoed.
+ * Marketplace, so his living room has a scan and a vibe he typed. Maya's new
+ * bedroom has a typed vibe too, so her Marketplace matches and owned items can
+ * be placed in 3D (#131). Everyone else starts without a room, so the scan and
+ * Muse's suggestion can be demoed.
  *
  * Photos are seed images not used by any listing (credits in
  * public/seed/ATTRIBUTION.md).
@@ -40,5 +42,20 @@ export const roomSeeds: RoomSeed[] = [
       keywords: ["walnut", "record shelf", "reading chair", "floor lamp", "wool rug"],
     },
     daysAgo: 4,
+  },
+  {
+    username: "maya.chen",
+    name: "Bedroom",
+    kind: "bedroom",
+    photos: ["/seed/rooms/bedroom-24.jpg"],
+    size: { widthFt: 11, lengthFt: 12 },
+    vibe: {
+      summary:
+        "A calm mid-century bedroom with plants: walnut nightstands, a wool rug and a reading chair in the corner.",
+      styles: ["mid_century", "botanical"],
+      palette: ["walnut", "sage", "warm_white"],
+      keywords: ["nightstand", "wool rug", "reading chair", "plants"],
+    },
+    daysAgo: 2,
   },
 ];

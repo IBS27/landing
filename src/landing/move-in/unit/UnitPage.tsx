@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { LandingPage } from "@/landing/shell/LandingPage";
 import { Button, Card, Spinner } from "@/ui/primitives";
@@ -8,8 +8,17 @@ import type { Id } from "../../../../convex/_generated/dataModel";
 import { UnitSources } from "./UnitSources";
 import { UnitWorkspace } from "./UnitWorkspace";
 
-export type UnitSearch = { unit?: string; room?: string; listing?: string };
-export function UnitPage({ unit, room, listing }: UnitSearch) {
+export type UnitSearch = {
+  unit?: string;
+  room?: string;
+  listing?: string;
+  /** An owned item or listing to have ready to place (#131). */
+  placeItem?: string;
+  placeListing?: string;
+};
+type Place = Pick<UnitSearch, "placeItem" | "placeListing">;
+export function UnitPage({ unit, room, listing, placeItem, placeListing }: UnitSearch) {
+  const place = { placeItem, placeListing };
   return (
     <LandingPage
       title="Explore your unit"
@@ -17,19 +26,36 @@ export function UnitPage({ unit, room, listing }: UnitSearch) {
       className="max-w-[1400px]"
     >
       {unit ? (
-        <SavedUnit key={unit} id={unit as Id<"unitScenes">} />
+        <SavedUnit key={unit} id={unit as Id<"unitScenes">} place={place} />
       ) : (
-        <StartUnit room={room} listing={listing} />
+        <StartUnit room={room} listing={listing} place={place} />
       )}
     </LandingPage>
   );
 }
-function StartUnit({ room, listing }: UnitSearch) {
+function StartUnit({ room, listing, place }: UnitSearch & { place: Place }) {
   const create = useM(api.unitScenes.create),
     mine = useQ(api.unitScenes.mine, {});
+  // A room that already has a unit opens it directly, keeping any item to place.
+  const existing = useQ(api.unitItems.unitForRoom, room ? { roomId: room as Id<"rooms"> } : "skip");
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
+  const { placeItem, placeListing } = place;
+  useEffect(() => {
+    if (existing)
+      void navigate({
+        to: "/landing/place/unit",
+        search: { unit: existing, placeItem, placeListing },
+        replace: true,
+      });
+  }, [existing, navigate, placeItem, placeListing]);
+  if (room && existing !== null)
+    return (
+      <div className="flex justify-center p-12">
+        <Spinner />
+      </div>
+    );
   async function start() {
     setBusy(true);
     try {
@@ -37,7 +63,7 @@ function StartUnit({ room, listing }: UnitSearch) {
         roomId: room as Id<"rooms"> | undefined,
         listingId: listing as Id<"listings"> | undefined,
       });
-      await navigate({ to: "/landing/place/unit", search: { unit } });
+      await navigate({ to: "/landing/place/unit", search: { unit, ...place } });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not open unit");
     } finally {
@@ -80,9 +106,14 @@ function StartUnit({ room, listing }: UnitSearch) {
     </div>
   );
 }
-function SavedUnit({ id }: { id: Id<"unitScenes"> }) {
+function SavedUnit({ id, place }: { id: Id<"unitScenes">; place: Place }) {
+  const pick = place.placeItem
+    ? { ownedItemId: place.placeItem as Id<"ownedItems"> }
+    : place.placeListing
+      ? { listingId: place.placeListing as Id<"listings"> }
+      : undefined;
   const doc = useQ(api.unitScenes.get, { id }),
-    saved = useQ(api.listings.saved, {});
+    items = useQ(api.unitItems.picker, { id, pick });
   const save = useM(api.unitScenes.save),
     generate = useM(api.unitScenes.requestGeneration),
     accept = useM(api.unitScenes.acceptCandidate);
@@ -102,9 +133,10 @@ function SavedUnit({ id }: { id: Id<"unitScenes"> }) {
       onGenerate={(detailsOnly) => generate({ id, revision: doc.revision, detailsOnly })}
       onAccept={() => accept({ id, revision: doc.revision })}
       onSave={(draft, revision) => save({ id, revision, ...draft })}
-      items={saved
-        ?.filter((item) => !item.rental)
-        .map((item) => ({ id: item._id, title: item.title }))}
+      items={items?.entries}
+      placing={!!pick}
+      pick={items?.picked ?? undefined}
+      pickMissing={!!pick && items?.picked === null}
       sources={<UnitSources doc={doc} />}
     />
   );
