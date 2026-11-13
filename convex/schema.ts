@@ -951,6 +951,33 @@ export default defineSchema({
     .index("by_shared", ["shared", "userId"]),
 
   /**
+   * Owned items (#27): everything a user gets, tracked for resale at move-out.
+   * Marketplace purchases agreed through Muse (#36) are added automatically;
+   * the rest are added by hand. See convex/inventory.ts.
+   */
+  ownedItems: defineTable({
+    userId: v.id("users"),
+    title: v.string(),
+    /** What the user paid, whole dollars; 0 = free. */
+    price: v.number(),
+    /** When they got it. */
+    acquiredAt: v.number(),
+    /** Served URLs (listing photos, or uploads via `posts:generateUploadUrl`). */
+    photos: v.array(v.string()),
+    source: v.union(
+      v.object({
+        kind: v.literal("marketplace"),
+        listingId: v.id("listings"),
+        conversationId: v.id("conversations"),
+      }),
+      v.object({ kind: v.literal("manual") }),
+    ),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId", "acquiredAt"])
+    .index("by_user_listing", ["userId", "source.listingId"]),
+
+  /**
    * Landing rooms (#25): a person's room scan (photos and optional floor size)
    * and its style vibe. Marketplace matching (#26) and the 3D room (#37) read
    * these; see convex/rooms.ts.
