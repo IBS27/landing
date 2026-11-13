@@ -98,7 +98,7 @@ export function SellItems() {
                     </div>
                     <div className="text-[13px] text-secondary">
                       Paid {it.price === 0 ? "nothing" : price(it.price)}
-                      {it.photos.length === 0 ? " · Add a photo in Your stuff to list it" : ""}
+                      {it.photos.length === 0 ? " · No photo, so it can't be listed" : ""}
                     </div>
                   </div>
                   {listed && (
