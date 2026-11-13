@@ -3,6 +3,7 @@ import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { action, internalQuery, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { runAgent } from "./ai/agent";
+import { blockedSet } from "./lib/blocks";
 import { assertCitable, type CitedSource, type NonEmpty, resolveCitations } from "./lib/citations";
 import { getProfile } from "./lib/cityProfile";
 import { viewerMutation, viewerQuery } from "./lib/functions";
@@ -96,8 +97,8 @@ export const matches = viewerQuery({
     const room = await ctx.db.get(roomId);
     if (!room || room.userId !== viewerId) throw new ConvexError("Room not found");
     if (!room.vibe) return [];
-    const [audience, recent] = await Promise.all([
-      loadAudience(ctx, viewerId),
+    const [blocked, recent] = await Promise.all([
+      blockedSet(ctx, viewerId),
       ctx.db.query("listings").withIndex("by_created").order("desc").take(MATCH_SCAN_MAX),
     ]);
     const candidates = recent.filter(
@@ -105,7 +106,7 @@ export const matches = viewerQuery({
         l.status === "active" &&
         !NOT_DECOR.has(l.category) &&
         l.sellerId !== viewerId &&
-        !audience.blocked.has(l.sellerId),
+        !blocked.has(l.sellerId),
     );
     const byId = new Map(candidates.map((l) => [l._id as string, l]));
     return rankVibeMatches(
