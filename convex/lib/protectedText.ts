@@ -229,10 +229,12 @@ const COUNTRIES = [
 /** Words that state a protected trait wherever they appear. */
 /**
  * Not when it names a street or stop: "Church St", "Brazil St", "Persia Ave",
- * "Church & 18th". San Francisco has several.
+ * "Church & 18th". San Francisco has several. The street word must follow on
+ * the same line with no punctuation between ("church. Street parking" is two
+ * sentences), and "@"/"&" must lead to a numbered street ("church @ 9am" isn't).
  */
 const NOT_A_STREET =
-  "(?!\\.?\\s*(?:st|street|ave|avenue|blvd|boulevard|rd|road|ln|lane|ter|terrace|pl|place|ct|court|dr|drive|station)\\b|\\s*[&@]\\s*\\d)";
+  "(?![ \\t]+(?:st|street|ave|avenue|blvd|boulevard|rd|road|ln|lane|ter|terrace|pl|place|ct|court|dr|drive|station)\\b|[ \\t]*[&@][ \\t]*\\d+(?:st|nd|rd|th)\\b)";
 
 const TERMS: string[] = [
   // Age
@@ -325,8 +327,8 @@ const TERMS: string[] = [
   "on an? [\\w-]+ visa|[\\w-]+ visa holder",
   // Patterns rather than words, for whole families of disclosures
   "(?:she|he|they|xe|ze|it)\\/(?:her|hers|him|his|them|theirs|they|she|he|xem|zir|it)",
-  // Not "transit", "transport" or "transfer".
-  "afab|amab|trans(?:sexual|masc\\w*|fem\\w*|identified|folks?|people|person)|ace|aroace|\\w+romantic|polyamor\\w*|poly",
+  // Every "trans…" word ("transgirl", "transmen") except everyday ones: "transit", "transport", "transfer"…
+  "afab|amab|trans(?!it(?:s|ed|ing)?\\b|port|fer|lat|action|cript|crib|form|mit|missi|lucent|atlantic|pacific|parent|plant|ient|istor|cend|duc|fus|gress|ept|vers|ceiv|code|ship)\\w*|ace|aroace|\\w+romantic|polyamor\\w*|poly",
   "hubby|wifey|significant other|other half|partnered|custody|child(?:free|less)",
   "(?:we['’]?re|we are|as) a family",
   "(?:i['’]?m|i am|we['’]?re|we are)\\s+(?:half|part|mixed)\\s+\\w+|afro[\\s-]?\\w+",

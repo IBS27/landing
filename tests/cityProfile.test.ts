@@ -250,7 +250,19 @@ describe("protected traits", () => {
       "Temple St",
     ])
       expect([text, hasProtected(text)]).toEqual([text, false]);
-    for (const text of ["I'm trans", "trans woman", "near my church", "I'm from Brazil", "Mosque"])
+    for (const text of [
+      "I'm trans",
+      "trans woman",
+      "transgirl here",
+      "we're transmen",
+      "transitioning",
+      "transmisogyny",
+      "near my church",
+      "I attend church @ 9am every Sunday",
+      "I attend church. Street parking matters to me",
+      "I'm from Brazil",
+      "Mosque",
+    ])
       expect([text, hasProtected(text)]).toEqual([text, true]);
   });
 
