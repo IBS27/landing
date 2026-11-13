@@ -194,7 +194,10 @@ describe("roommateCandidates", () => {
     const by = (u: string) => r?.candidates.find((c) => c.user._id === u)?.compatibility;
     // A's dog hits V's dealbreaker: capped and listed with the answer it came from.
     expect(by("A")).toMatchObject({ score: 40, capped: true });
-    expect(by("A")?.dealbreakers[0]).toMatchObject({ dealbreaker: "dogs", answer: { label: "Dog" } });
+    expect(by("A")?.dealbreakers[0]).toMatchObject({
+      dealbreaker: "dogs",
+      answer: { label: "Dog" },
+    });
     // P: budget overlaps too (both stated), quiet hours one step apart, guests never compared.
     expect(by("P")?.basedOn).toEqual(["sleep", "quietHours", "cleanliness", "budget"]);
     expect(by("P")?.score).toBe(Math.round((100 * (3 + 2.25 + 3 + 3)) / 12));

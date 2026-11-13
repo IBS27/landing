@@ -101,7 +101,7 @@ export function compatibility(viewer: RoommateInputs, candidate: RoommateInputs)
   const sum = weighted.reduce((s, t) => s + COMPATIBILITY_WEIGHTS[t.field] * t.similarity, 0);
   const hits = dealbreakers.filter((d) => d.status === "conflict");
   const raw = weighted.length >= MIN_COMPARED && total > 0 ? Math.round((100 * sum) / total) : null;
-    return {
+  return {
     score: raw === null ? null : hits.length > 0 ? Math.min(raw, DEALBREAKER_CAP) : raw,
     capped: raw !== null && hits.length > 0,
     shared: weighted.filter((t) => t.outcome === "same"),

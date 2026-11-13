@@ -13,6 +13,12 @@ import {
 } from "../convex/lib/lifestyle";
 import { cityProfileSeeds } from "../convex/seed/world/cityProfiles";
 import { roommateLifestyles } from "../convex/seed/world/roommateLifestyles";
+import {
+  dealbreakerLine,
+  differenceLine,
+  scoreText,
+  uncheckedLine,
+} from "../src/landing/roommates/candidateCopy";
 
 const me = (answers: LifestyleAnswers, extra: Partial<RoommateInputs> = {}): RoommateInputs => ({
   answers,
@@ -89,7 +95,10 @@ describe("score", () => {
   });
 
   test(`fewer than ${MIN_COMPARED} fields in common gives no score`, () => {
-    const c = compatibility(me({ sleep: "early", noise: "quiet" }), me({ sleep: "early", noise: "quiet" }));
+    const c = compatibility(
+      me({ sleep: "early", noise: "quiet" }),
+      me({ sleep: "early", noise: "quiet" }),
+    );
     expect(c.score).toBeNull();
     expect(c.shared).toHaveLength(2);
     expect(scoreLabel(c)).toBe("Not enough answers");
@@ -164,9 +173,10 @@ describe("seed", () => {
   test("Maya's candidates spread from a great match to a dealbreaker", () => {
     const score = (u: string) => compatibility(inputs("maya.chen"), inputs(u));
     const labels = Object.fromEntries(
-      ["luis.hernandez", "tasha.okafor", "sofia.alvarez", "camila.santos", "leo.novak"].map(
-        (u) => [u, [score(u).score, scoreLabel(score(u))]],
-      ),
+      ["luis.hernandez", "tasha.okafor", "sofia.alvarez", "camila.santos", "leo.novak"].map((u) => [
+        u,
+        [score(u).score, scoreLabel(score(u))],
+      ]),
     );
     expect(labels).toEqual({
       "luis.hernandez": [85, "Great match"],
@@ -176,5 +186,48 @@ describe("seed", () => {
       "leo.novak": [40, "Dealbreaker"],
     });
     expect(score("sofia.alvarez").unchecked.map((d) => d.dealbreaker)).toEqual(["dogs"]);
+  });
+});
+
+describe("copy", () => {
+  const leo = compatibility(
+    me({ ...base, dealbreakers: ["dogs"] }, { budget: { max: 2000 } }),
+    me(
+      { ...base, quietHours: "9pm", pets: ["dog"], dealbreakers: ["smoking_any"] },
+      {
+        budget: { min: 2500, max: 3000 },
+      },
+    ),
+  );
+
+  test("differences name both answers, budgets never", () => {
+    const lines = leo.differences.map((t) => differenceLine(t, "Leo"));
+    expect(lines).toContainEqual({ topic: "Quiet hours", detail: "You: 10pm · Leo: 9pm" });
+    expect(lines).toContainEqual({ topic: "Budget", detail: "Your budgets don't overlap" });
+  });
+
+  test("dealbreakers say whose and which answer", () => {
+    expect(leo.dealbreakers.map((d) => dealbreakerLine(d, "Leo"))).toEqual([
+      'Your dealbreaker "Dogs": Leo answered "Dog" for pets',
+    ]);
+    const theirs = compatibility(
+      me({ ...base, smoking: "outside" }),
+      me({ ...base, dealbreakers: ["smoking_any"] }),
+    );
+    expect(theirs.dealbreakers.map((d) => dealbreakerLine(d, "Leo"))).toEqual([
+      'Leo\'s dealbreaker "Any smoking or vaping": you answered "Only outside" for smoking and vaping',
+    ]);
+    const unknown = compatibility(me({ ...base, dealbreakers: ["cats"] }), me(base));
+    expect(uncheckedLine(unknown.unchecked[0], "Leo")).toBe(
+      "Your dealbreaker \"Cats\" couldn't be checked: Leo didn't answer pets.",
+    );
+  });
+
+  test("score text and labels", () => {
+    expect(scoreText(85)).toBe("85% match");
+    expect(scoreText(null)).toBe("No score yet");
+    expect(scoreLabel({ score: 85, dealbreakers: [] })).toBe("Great match");
+    expect(scoreLabel({ score: 65, dealbreakers: [] })).toBe("Good match");
+    expect(scoreLabel({ score: 64, dealbreakers: [] })).toBe("Some differences");
   });
 });

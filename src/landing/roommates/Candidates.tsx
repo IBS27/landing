@@ -9,13 +9,14 @@ import { Avatar, Button, Card, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { CandidateList, RoommateCandidate } from "../../../convex/lib/roommates";
+import { CardTraits, CompareDialog, type EditAnswer, ScoreBadge } from "./Compatibility";
 import { askMessage, namesShown, overlapLine } from "./candidateCopy";
 
 /** Sends the viewer's approved first message and returns the chat it went to. */
 export type AskToConnect = (userId: Id<"users">, text: string) => Promise<Id<"conversations">>;
 
 /** Roommate candidates from the viewer's network. Shown while the viewer shares their answers. */
-export function RoommateCandidates() {
+export function RoommateCandidates({ onEditAnswer }: { onEditAnswer?: EditAnswer }) {
   const data = useQ(api.roommates.candidates, {});
   const getDm = useM(api.messenger.getOrCreateDm);
   const send = useM(api.messenger.send);
@@ -24,18 +25,22 @@ export function RoommateCandidates() {
     await send({ conversationId, text });
     return conversationId;
   };
-  return <CandidatesView data={data} onAsk={ask} />;
+  return <CandidatesView data={data} onAsk={ask} onEditAnswer={onEditAnswer} />;
 }
 
 /** The candidate list without its data source. `undefined` while loading. */
 export function CandidatesView({
   data,
   onAsk,
+  onEditAnswer,
 }: {
   data: CandidateList | null | undefined;
   onAsk: AskToConnect;
+  /** Opens the viewer's own answer from a comparison's sources. */
+  onEditAnswer?: EditAnswer;
 }) {
   const [asking, setAsking] = useState<RoommateCandidate | null>(null);
+  const [comparing, setComparing] = useState<RoommateCandidate | null>(null);
   if (data === null) return null;
   return (
     <Card className="overflow-hidden" aria-labelledby="candidates-title">
@@ -68,7 +73,12 @@ export function CandidatesView({
       ) : (
         <ul className="pb-1">
           {data.candidates.map((c) => (
-            <CandidateRow key={c.user._id} candidate={c} onAsk={() => setAsking(c)} />
+            <CandidateRow
+              key={c.user._id}
+              candidate={c}
+              onAsk={() => setAsking(c)}
+              onCompare={() => setComparing(c)}
+            />
           ))}
         </ul>
       )}
@@ -79,6 +89,23 @@ export function CandidatesView({
           {data.partial && "Part of your network couldn't be checked, so someone may be missing."}
         </p>
       )}
+      {comparing && (
+        <CompareDialog
+          candidate={comparing}
+          onClose={() => setComparing(null)}
+          onAsk={() => {
+            setComparing(null);
+            setAsking(comparing);
+          }}
+          onEditAnswer={
+            onEditAnswer &&
+            ((field) => {
+              setComparing(null);
+              onEditAnswer(field);
+            })
+          }
+        />
+      )}
       {asking && <AskDialog candidate={asking} onAsk={onAsk} onClose={() => setAsking(null)} />}
     </Card>
   );
@@ -87,9 +114,11 @@ export function CandidatesView({
 function CandidateRow({
   candidate: c,
   onAsk,
+  onCompare,
 }: {
   candidate: RoommateCandidate;
   onAsk: () => void;
+  onCompare: () => void;
 }) {
   const plans = overlapLine(c.overlap);
   return (
@@ -99,9 +128,15 @@ function CandidateRow({
           <Avatar src={c.user.avatar} alt={c.user.name} size={56} />
         </PersonLink>
         <div className="min-w-0 flex-1">
-          <PersonLink person={c.user} className="font-semibold text-[15px] text-primary leading-5">
-            {c.user.name}
-          </PersonLink>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+            <PersonLink
+              person={c.user}
+              className="font-semibold text-[15px] text-primary leading-5"
+            >
+              {c.user.name}
+            </PersonLink>
+            <ScoreBadge c={c.compatibility} />
+          </div>
           <Reason icon={<Users size={14} />}>
             {c.closeness === "friend" ? (
               <>
@@ -120,6 +155,16 @@ function CandidateRow({
             </Reason>
           )}
           {plans && <Reason icon={<CalendarDays size={14} />}>{plans}</Reason>}
+          <ul className="mt-1.5 flex flex-col gap-0.5">
+            <CardTraits c={c.compatibility} firstName={c.user.firstName} />
+          </ul>
+          <button
+            type="button"
+            onClick={onCompare}
+            className="mt-1 font-semibold text-[13px] text-link hover:underline"
+          >
+            See how you compare
+          </button>
         </div>
       </div>
       <Button

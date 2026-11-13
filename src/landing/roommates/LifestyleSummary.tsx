@@ -81,7 +81,8 @@ export function SharingCard({
       <ul className="mt-3 flex flex-col gap-1.5 border-divider-soft border-t pt-3 text-[13px] text-secondary leading-[18px]">
         <li>
           <span className="font-semibold text-primary">Who sees them:</span> people in your network
-          who also share their answers. You see theirs in return.
+          who also share their answers, for the questions you both answered. You see theirs in
+          return, with a compatibility score.
         </li>
         <li>
           <span className="font-semibold text-primary">What's compared:</span> your answers below,
@@ -106,7 +107,8 @@ function profileList(p: ProfileInputs) {
   const items = [
     p.budget &&
       `your budget (${budgetLabel(p.budget)}; matches only see whether budgets overlap, never the amounts)`,
-    p.workday && `your workday (${WORKDAY_COPY[p.workday].label})`,
+    p.workday &&
+      `your workday (${WORKDAY_COPY[p.workday].label}; matches who stated theirs see it)`,
     p.moveInMonth && `your move-in month (${moveInLabel({ month: p.moveInMonth })})`,
     p.neighborhoods.length > 0 &&
       `your neighborhoods (${p.neighborhoods.map(neighborhoodLabel).join(", ")})`,
