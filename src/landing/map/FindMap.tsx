@@ -5,7 +5,7 @@ import { cn } from "@/lib/format";
 import { api } from "../../../convex/_generated/api";
 import type { PinsInBounds } from "../../../convex/lib/mapPins";
 import { LandingMap } from "./LandingMap";
-import type { Bounds, MapLayer, PinKind } from "./types";
+import type { Bounds, ListingPin, MapLayer, PinKind } from "./types";
 import { useMediaQuery } from "./useEnv";
 
 const KINDS: readonly { kind: PinKind; label: string; icon: ReactNode }[] = [
@@ -34,11 +34,15 @@ function snap(b: Bounds): Bounds {
  * Find's browse view: homes, Events and Groups across San Francisco from
  * `map.inBounds` for whatever area is on screen, over the neighborhood shapes
  * (#15). `aside` is the list beside the map (below it on narrow screens).
+ * `homes`, when given, are the pins the Homes chip shows (apartment search
+ * results, #10) instead of every home in view.
  */
-export function FindMap({ aside }: { aside?: ReactNode }) {
+export function FindMap({ aside, homes }: { aside?: ReactNode; homes?: readonly ListingPin[] }) {
   const [kinds, setKinds] = useState<readonly PinKind[]>(DEFAULT_KINDS);
   const [area, setArea] = useState<Bounds | null>(null);
-  const result = useQ(api.map.inBounds, area ? { bounds: area, kinds: [...kinds] } : "skip");
+  const showHomes = homes !== undefined && kinds.includes("homes");
+  const asked = homes ? kinds.filter((k) => k !== "homes") : kinds;
+  const result = useQ(api.map.inBounds, area ? { bounds: area, kinds: [...asked] } : "skip");
   // Keep the last pins on screen while the next area loads.
   const last = useRef<PinsInBounds | undefined>(undefined);
   if (result) last.current = result;
@@ -48,6 +52,7 @@ export function FindMap({ aside }: { aside?: ReactNode }) {
   const layers = useMemo<MapLayer[]>(
     () => [
       { kind: "neighborhoods", items: hoods ?? [] },
+      ...(showHomes ? ([{ kind: "listings", items: homes }] as const) : []),
       ...(pins
         ? ([
             { kind: "listings", items: pins.listings },
@@ -56,11 +61,15 @@ export function FindMap({ aside }: { aside?: ReactNode }) {
           ] as const)
         : []),
     ],
-    [pins, hoods],
+    [pins, hoods, homes, showHomes],
   );
   const empty =
     result !== undefined &&
-    result.listings.length + result.events.length + result.groups.length === 0;
+    result.listings.length +
+      result.events.length +
+      result.groups.length +
+      (showHomes ? homes.length : 0) ===
+      0;
 
   const toggle = (k: PinKind) =>
     setKinds((cur) => (cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]));

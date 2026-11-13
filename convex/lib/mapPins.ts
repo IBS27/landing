@@ -90,6 +90,30 @@ export function approximatePoint(id: string, p: LatLng): LatLng {
   };
 }
 
+/** A listing's pin at its approximate area; null when it has no stated point. */
+export function listingPin(l: Doc<"listings">): ListingPin | null {
+  const { lat, lng } = l.location;
+  if (lat === undefined || lng === undefined) return null;
+  return {
+    _id: l._id,
+    title: l.title,
+    price: l.price,
+    photo: l.photos[0] ?? null,
+    area: l.location.neighborhood
+      ? `${l.location.neighborhood}, ${l.location.city.split(",")[0]}`
+      : l.location.city,
+    point: approximatePoint(l._id, { lat, lng }),
+    home: l.rental
+      ? {
+          propertyType: l.rental.propertyType,
+          listingType: l.rental.listingType,
+          bedrooms: l.rental.bedrooms,
+          bathrooms: l.rental.bathrooms,
+        }
+      : null,
+  };
+}
+
 /* ───────────── Query ───────────── */
 
 export function inBounds(p: LatLng, b: Bounds) {
@@ -119,29 +143,9 @@ export async function pinsInBounds(
       if (++scanned > LISTING_SCAN_MAX || out.listings.length >= PINS_MAX) break;
       if (l.status !== "active" || audience.blocked.has(l.sellerId)) continue;
       if (!want.has(l.rental ? "homes" : "items")) continue;
-      const { lat, lng } = l.location;
-      if (lat === undefined || lng === undefined) continue;
-      const point = approximatePoint(l._id, { lat, lng });
+      const pin = listingPin(l);
       // Bounds are tested on the approximate point, so panning can't narrow down the real one.
-      if (!inBounds(point, bounds)) continue;
-      out.listings.push({
-        _id: l._id,
-        title: l.title,
-        price: l.price,
-        photo: l.photos[0] ?? null,
-        area: l.location.neighborhood
-          ? `${l.location.neighborhood}, ${l.location.city.split(",")[0]}`
-          : l.location.city,
-        point,
-        home: l.rental
-          ? {
-              propertyType: l.rental.propertyType,
-              listingType: l.rental.listingType,
-              bedrooms: l.rental.bedrooms,
-              bathrooms: l.rental.bathrooms,
-            }
-          : null,
-      });
+      if (pin && inBounds(pin.point, bounds)) out.listings.push(pin);
     }
   }
 
