@@ -40,15 +40,38 @@ export const setTerms = viewerMutation({
       );
     if (minPrice === undefined && item.saleMinPrice === undefined && muse === "active")
       throw new ConvexError("Set a lowest price first");
+    const oldFloor = item.saleMinPrice ?? 0;
+    const floor = minPrice === undefined ? undefined : Math.round(minPrice);
+    const on = (muse ?? item.saleMuse ?? "active") === "active";
     await ctx.db.patch(item._id, {
-      ...(minPrice !== undefined ? { saleMinPrice: Math.round(minPrice) } : {}),
+      ...(floor !== undefined ? { saleMinPrice: floor } : {}),
       ...(muse
         ? { saleMuse: muse }
-        : minPrice !== undefined
+        : floor !== undefined
           ? { saleMuse: item.saleMuse ?? "active" }
           : {}),
       saleTermsAt: Date.now(),
     });
+    if (floor === undefined || floor <= oldFloor) return;
+    // A raised floor withdraws every waiting draft, and Muse drafts those replies again (as #45).
+    const chats = await ctx.db
+      .query("conversations")
+      .withIndex("by_listing", (q) => q.eq("listingId", listing._id))
+      .collect();
+    for (const c of chats) {
+      const row = await ctx.db
+        .query("saleChats")
+        .withIndex("by_conversation", (q) => q.eq("conversationId", c._id))
+        .unique();
+      const p = row?.pendingProposalId ? await ctx.db.get(row.pendingProposalId) : null;
+      if (!row || p?.status !== "pending") continue;
+      await retire(ctx, row);
+      await ctx.db.patch(row._id, { pendingProposalId: undefined, handledThrough: 0 });
+      if (on)
+        await ctx.scheduler.runAfter(0, internal.moveOutSales.draftReply, {
+          conversationId: c._id,
+        });
+    }
   },
 });
 

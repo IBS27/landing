@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import type { MutationCtx } from "../convex/_generated/server";
 import {
   buyerPrice,
   type SaleInput,
@@ -6,6 +7,8 @@ import {
   saleLadder,
   saleMoveProblems,
 } from "../convex/lib/moveOutSales";
+import { saveReply, setTerms } from "../convex/moveOutSales";
+import { fakeCtx, type Row } from "./fakeDb";
 
 const base = (chat: SaleInput["chat"], yourLastPrice: number | null = null): SaleInput => ({
   item: { title: "IKEA desk lamp", askingPrice: 40, description: "Works great." },
@@ -124,5 +127,161 @@ describe("the floor stays private", () => {
       "text must not reveal the seller's lowest price",
     );
     expect(say("offer", 30, "Could you do $30?")).toEqual([]);
+  });
+});
+
+/* The waiting draft per chat, through the Convex functions. */
+
+type Handler = (ctx: MutationCtx, args: Record<string, unknown>) => Promise<unknown>;
+const call = (fn: unknown, ctx: MutationCtx, args: Record<string, unknown>) =>
+  (fn as { _handler: Handler })._handler(ctx, args);
+
+function world(extra: Record<string, Row[]> = {}) {
+  const scheduled: { fn: unknown; args: unknown }[] = [];
+  const tables: Record<string, Row[]> = {
+    users: [{ _id: "users:maya" }, { _id: "users:jordan" }],
+    listings: [
+      {
+        _id: "listings:lamp",
+        sellerId: "users:maya",
+        title: "IKEA desk lamp",
+        description: "Works great.",
+        photos: [],
+        location: { neighborhood: "Mission" },
+        price: 40,
+        status: "active",
+        createdAt: 1,
+      },
+    ],
+    ownedItems: [
+      {
+        _id: "ownedItems:lamp",
+        userId: "users:maya",
+        saleListingId: "listings:lamp",
+        saleMinPrice: 30,
+        saleMuse: "active",
+        saleTermsAt: 50,
+      },
+    ],
+    conversations: [
+      {
+        _id: "conversations:c1",
+        kind: "marketplace",
+        listingId: "listings:lamp",
+        memberIds: ["users:maya", "users:jordan"],
+      },
+    ],
+    conversationMembers: [
+      { _id: "cm1", conversationId: "conversations:c1", userId: "users:maya" },
+      { _id: "cm2", conversationId: "conversations:c1", userId: "users:jordan" },
+    ],
+    blocks: [],
+    saleChats: [],
+    proposals: [],
+    proposalEvents: [],
+    messages: [],
+    ...extra,
+  };
+  const later = async (_at: number, fn: unknown, args: unknown) => {
+    scheduled.push({ fn, args });
+  };
+  const ctx = {
+    ...fakeCtx(tables),
+    scheduler: { runAfter: later, runAt: later },
+  } as unknown as MutationCtx;
+  return { ctx, tables, scheduled };
+}
+
+const reply = (o: Record<string, unknown> = {}) => ({
+  conversationId: "conversations:c1",
+  move: "message",
+  amount: 0,
+  text: "Hi! Yes, it's still available.",
+  rationale: "Confirms it's available.",
+  handledThrough: 10,
+  termsAt: 50,
+  via: "fallback",
+  ...o,
+});
+
+const pending = (tables: Record<string, Row[]>) =>
+  tables.proposals.filter((p) => p.status === "pending");
+
+describe("saveReply keeps one waiting draft per chat", () => {
+  test("a reply is a proposal with a draft only the seller sees, nothing sent", async () => {
+    const { ctx, tables } = world();
+    await call(saveReply, ctx, reply());
+    expect(pending(tables)).toHaveLength(1);
+    expect(tables.proposals[0]).toMatchObject({ ownerId: "users:maya" });
+    expect(tables.messages).toHaveLength(1);
+    expect(tables.messages[0].status).toBe("pending_approval");
+    expect(tables.saleChats[0]).toMatchObject({ handledThrough: 10, lastMove: "message" });
+  });
+  test("a newer reply replaces the waiting one", async () => {
+    const { ctx, tables } = world();
+    await call(saveReply, ctx, reply());
+    await call(saveReply, ctx, reply({ handledThrough: 20, text: "Still here!" }));
+    expect(pending(tables)).toHaveLength(1);
+    expect(tables.proposals.map((p) => p.status)).toEqual(["expired", "pending"]);
+    expect(tables.messages).toHaveLength(1);
+    expect(tables.messages[0].text).toBe("Still here!");
+  });
+  test("an older run finishing late never replaces a newer draft", async () => {
+    const { ctx, tables } = world();
+    await call(saveReply, ctx, reply({ handledThrough: 20 }));
+    await call(saveReply, ctx, reply({ handledThrough: 10, text: "Old" }));
+    expect(tables.proposals).toHaveLength(1);
+    expect(tables.messages[0].text).not.toBe("Old");
+  });
+  test("a run drafted under older terms saves nothing and drafts again", async () => {
+    const { ctx, tables, scheduled } = world();
+    await call(saveReply, ctx, reply({ termsAt: 20 }));
+    expect(tables.proposals).toHaveLength(0);
+    expect(scheduled).toHaveLength(1);
+  });
+  test("paused, Muse saves nothing", async () => {
+    const { ctx, tables } = world();
+    tables.ownedItems[0].saleMuse = "paused";
+    await call(saveReply, ctx, reply());
+    expect(tables.proposals).toHaveLength(0);
+  });
+  test("nothing is drafted across a block", async () => {
+    const { ctx, tables } = world({
+      blocks: [{ _id: "b1", userId: "users:jordan", blockedId: "users:maya" }],
+    });
+    await expect(call(saveReply, ctx, reply())).rejects.toThrow();
+    expect(tables.proposals).toHaveLength(0);
+  });
+});
+
+describe("setTerms", () => {
+  const terms = (o: Record<string, unknown>) => ({
+    viewerId: "users:maya",
+    itemId: "ownedItems:lamp",
+    ...o,
+  });
+  test("a raised floor withdraws the waiting draft and drafts again", async () => {
+    const { ctx, tables, scheduled } = world();
+    await call(saveReply, ctx, reply({ move: "accept", amount: 32, text: "$32 works for me." }));
+    scheduled.length = 0;
+    await call(setTerms, ctx, terms({ minPrice: 35 }));
+    expect(pending(tables)).toHaveLength(0);
+    expect(tables.messages).toHaveLength(0);
+    expect(tables.saleChats[0].handledThrough).toBe(0);
+    expect(scheduled).toHaveLength(1);
+  });
+  test("a lowered floor keeps the waiting draft", async () => {
+    const { ctx, tables, scheduled } = world();
+    await call(saveReply, ctx, reply({ move: "accept", amount: 32, text: "$32 works for me." }));
+    scheduled.length = 0;
+    await call(setTerms, ctx, terms({ minPrice: 25 }));
+    expect(pending(tables)).toHaveLength(1);
+    expect(scheduled).toHaveLength(0);
+  });
+  test("only the item's owner can change its terms", async () => {
+    const { ctx } = world();
+    await expect(
+      call(setTerms, ctx, terms({ viewerId: "users:jordan", minPrice: 20 })),
+    ).rejects.toThrow("Item not found");
   });
 });
