@@ -21,7 +21,9 @@ import type { LatLng } from "./lib/geo";
 import { neighborhoodSlugAt } from "./lib/neighborhoods";
 import schema from "./schema";
 import { seedCityProfiles } from "./seed/cityProfiles";
+import { DAY } from "./seed/lib/time";
 import { buildPlan } from "./seed/plan";
+import { roommateLifestyles } from "./seed/world/roommateLifestyles";
 import { type Citations, reactionType } from "./validators";
 
 const T = schema.tables;
@@ -100,6 +102,10 @@ export const insertNeighborhoodFacts = internalMutation({
 export const insertVouches = internalMutation({
   args: { rows: v.array(T.vouches.validator) },
   handler: (ctx, { rows }) => insertAll(ctx, "vouches", rows),
+});
+export const insertRoommateLifestyles = internalMutation({
+  args: { rows: v.array(T.roommateLifestyles.validator) },
+  handler: (ctx, { rows }) => insertAll(ctx, "roommateLifestyles", rows),
 });
 export const insertGroups = internalMutation({
   args: { rows: v.array(T.groups.validator) },
@@ -418,6 +424,19 @@ export const reset = internalAction({
           updatedAt: x.createdAt,
         })),
       }),
+      // Landing roommate lifestyle answers (#21), keyed by persona username.
+      ctx.runMutation(internal.seed.insertRoommateLifestyles, {
+        rows: roommateLifestyles.map((r) => {
+          const at = started - r.answeredDaysAgo * DAY;
+          return {
+            userId: uid(r.username),
+            answers: r.answers,
+            shared: r.shared,
+            sharedAt: r.shared ? at : undefined,
+            updatedAt: at,
+          };
+        }),
+      }),
       (async () => {
         const ids: Id<"groups">[] = await ctx.runMutation(internal.seed.insertGroups, {
           rows: plan.groups.map((g) => ({
@@ -643,6 +662,7 @@ export const reset = internalAction({
         friendships: plan.friendships.length * 2,
         friendRequests: plan.friendRequests.length,
         vouches: plan.vouches.length,
+        roommateLifestyles: roommateLifestyles.length,
         groups: plan.groups.length,
         groupMembers: plan.groupMembers.length,
         listings: plan.listings.length,
