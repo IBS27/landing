@@ -48,7 +48,7 @@ export function HomePage() {
       ) : (
         <div className="flex flex-col gap-4">
           <MoveTimeline stage={t.stage} place={t.place} moveIn={t.moveIn} moveOut={t.moveOut} />
-          <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
             <NextStep step={t.nextStep} also={t.alsoSteps} />
             <ComingUp data={t.comingUp} now={now} />
           </div>
@@ -66,7 +66,7 @@ function Loading() {
         <Skeleton className="mt-5 h-6 w-full" />
         <Skeleton className="mt-5 h-4 w-48" />
       </Card>
-      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <Card className="flex gap-3 p-4">
           <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
           <div className="flex flex-1 flex-col gap-2">

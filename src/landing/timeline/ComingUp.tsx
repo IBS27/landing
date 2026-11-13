@@ -61,10 +61,12 @@ function Row({
 function Reminder({
   via,
   remindAt,
+  startAt,
   now,
 }: {
   via: "notification" | "chat";
   remindAt: number;
+  startAt: number;
   now: number;
 }) {
   if (via === "chat")
@@ -74,9 +76,11 @@ function Reminder({
       </span>
     );
   if (remindAt <= now) return null;
+  const sameDay = DAY.format(remindAt) === DAY.format(startAt);
   return (
     <span className="mt-0.5 flex items-center gap-1">
-      <BellRing size={12} aria-hidden /> Reminder {DAY.format(remindAt)} at {time(remindAt)}
+      <BellRing size={12} aria-hidden /> Reminder {sameDay ? "that morning" : DAY.format(remindAt)}{" "}
+      at {time(remindAt)}
     </span>
   );
 }
@@ -142,7 +146,7 @@ export function ComingUp({ data, now }: { data: ComingUpData; now: number }) {
                     {DAY.format(e.startAt)} · {time(e.startAt)}
                     {e.online ? " · Online" : e.venue ? ` · ${e.venue}` : ""}
                   </span>
-                  <Reminder via={e.via} remindAt={e.remindAt} now={now} />
+                  <Reminder via={e.via} remindAt={e.remindAt} startAt={e.startAt} now={now} />
                 </>
               }
             />

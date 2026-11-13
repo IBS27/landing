@@ -117,7 +117,7 @@ export function MoveTimeline({
               )}
               <span
                 className={cn(
-                  "relative flex h-6 w-6 items-center justify-center rounded-full font-semibold text-[12px]",
+                  "relative z-10 flex h-6 w-6 items-center justify-center rounded-full font-semibold text-[12px]",
                   done && "bg-fb text-white",
                   current && "bg-fb text-white ring-4 ring-fb/25",
                   !done && !current && "border-2 border-divider bg-card text-secondary",
