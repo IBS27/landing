@@ -40,7 +40,11 @@ export function CandidatesView({
   onEditAnswer?: EditAnswer;
 }) {
   const [asking, setAsking] = useState<RoommateCandidate | null>(null);
-  const [comparing, setComparing] = useState<RoommateCandidate | null>(null);
+  // Resolved from the live list, so the comparison updates with it and closes
+  // when the person stops sharing, deletes their answers or blocks the viewer.
+  const [comparingId, setComparingId] = useState<Id<"users"> | null>(null);
+  const comparing = data?.candidates.find((c) => c.user._id === comparingId) ?? null;
+  if (comparingId && data !== undefined && !comparing) setComparingId(null);
   if (data === null) return null;
   return (
     <Card className="overflow-hidden" aria-labelledby="candidates-title">
@@ -77,7 +81,7 @@ export function CandidatesView({
               key={c.user._id}
               candidate={c}
               onAsk={() => setAsking(c)}
-              onCompare={() => setComparing(c)}
+              onCompare={() => setComparingId(c.user._id)}
             />
           ))}
         </ul>
@@ -92,15 +96,15 @@ export function CandidatesView({
       {comparing && (
         <CompareDialog
           candidate={comparing}
-          onClose={() => setComparing(null)}
+          onClose={() => setComparingId(null)}
           onAsk={() => {
-            setComparing(null);
+            setComparingId(null);
             setAsking(comparing);
           }}
           onEditAnswer={
             onEditAnswer &&
             ((field) => {
-              setComparing(null);
+              setComparingId(null);
               onEditAnswer(field);
             })
           }
