@@ -40,14 +40,66 @@ export function compareSearch(s: Record<string, unknown>): CompareSearch {
   return { a, b };
 }
 
+/** Pairs to try first, when the viewer's City Profile doesn't suggest any. */
+const DEFAULT_PAIRS: readonly (readonly [NeighborhoodSlug, NeighborhoodSlug])[] = [
+  ["mission", "inner-sunset"],
+  ["hayes-valley", "north-beach"],
+  ["noe-valley", "inner-richmond"],
+];
+const FILLERS: readonly NeighborhoodSlug[] = [
+  "mission",
+  "inner-sunset",
+  "hayes-valley",
+  "north-beach",
+  "noe-valley",
+];
+
+/**
+ * Up to three pairs to suggest before two neighborhoods are picked. The
+ * viewer's City Profile neighborhoods (`yours`, in profile order) come first;
+ * with one picked, every pair starts with it. No pair repeats, in either order.
+ */
+export function suggestedPairs(
+  yours: readonly NeighborhoodSlug[],
+  picked?: NeighborhoodSlug,
+): [NeighborhoodSlug, NeighborhoodSlug][] {
+  const mine = [...new Set(yours)];
+  let pairs: [NeighborhoodSlug, NeighborhoodSlug][];
+  if (picked) {
+    pairs = [...new Set([...mine, ...FILLERS])].filter((s) => s !== picked).map((s) => [picked, s]);
+  } else {
+    const first = mine[0];
+    const second = mine[1] ?? FILLERS.find((s) => s !== first);
+    pairs = [
+      ...(first && second ? [[first, second] as [NeighborhoodSlug, NeighborhoodSlug]] : []),
+      ...DEFAULT_PAIRS.map(([x, y]) => [x, y] as [NeighborhoodSlug, NeighborhoodSlug]),
+    ];
+  }
+  const seen = new Set<string>();
+  return pairs
+    .filter(([x, y]) => {
+      const key = [x, y].sort().join(":");
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 3);
+}
+
 /* ───────────── Reading the question ───────────── */
 
-/** Everyday names beyond each neighborhood's name and short name. */
+/**
+ * Everyday names beyond each neighborhood's name and short name, each mapped to
+ * the DataSF neighborhood whose boundary holds it (checked with
+ * `neighborhoodSlugAt`): Alamo Square is in Hayes Valley, Cow Hollow in the
+ * Marina, Telegraph Hill in North Beach.
+ */
 const EVERYDAY_NAMES: readonly (readonly [string, NeighborhoodSlug])[] = [
   ["Mission District", "mission"],
   ["Sunset District", "sunset-parkside"],
   ["Upper Haight", "haight-ashbury"],
   ["Haight-Ashbury", "haight-ashbury"],
+  ["Cole Valley", "haight-ashbury"],
   ["Duboce Triangle", "castro-upper-market"],
   ["Noe", "noe-valley"],
   ["Bernal", "bernal-heights"],
@@ -55,9 +107,14 @@ const EVERYDAY_NAMES: readonly (readonly [string, NeighborhoodSlug])[] = [
   ["Dogpatch", "potrero-hill"],
   ["Financial District", "financial-district-south-beach"],
   ["NoPa", "western-addition"],
-  ["Alamo Square", "western-addition"],
   ["Fillmore", "western-addition"],
+  ["Alamo Square", "hayes-valley"],
+  ["Cow Hollow", "marina"],
+  ["Telegraph Hill", "north-beach"],
+  ["West Portal", "west-of-twin-peaks"],
+  ["Forest Hill", "west-of-twin-peaks"],
   ["Hunters Point", "bayview-hunters-point"],
+  ["Hunter's Point", "bayview-hunters-point"],
   ["Merced Heights", "oceanview-merced-ingleside"],
   ["Lake Merced", "lakeshore"],
   ["Sea Cliff", "seacliff"],
@@ -66,11 +123,15 @@ const EVERYDAY_NAMES: readonly (readonly [string, NeighborhoodSlug])[] = [
 ];
 
 /**
- * Names that are also everyday words. Lowercase and without "the" in front
- * ("sunset walks"), they count only when the question doesn't already name two
- * other neighborhoods.
+ * Names that are also everyday words ("watch the sunset", "my mission"). They
+ * count as a neighborhood when capitalized mid-sentence ("in the Mission");
+ * otherwise only to make up a pair, joined to another name ("mission vs noe").
  */
 const COMMON_WORDS = new Set(["mission", "sunset", "marina"]);
+
+/** What may sit between two names that are being compared: "vs", "or the", ", ". */
+const JOINER =
+  /^\s*[,/&]?\s*(?:(?:vs\.?|versus|or|and|compared\s+(?:to|with)|against)\s+)?(?:the\s+)?$/i;
 
 type Alias = { re: RegExp; slug: NeighborhoodSlug; common: boolean };
 
@@ -103,30 +164,59 @@ const ALIASES: readonly Alias[] = (() => {
   return out;
 })();
 
+type Found = { start: number; end: number; slug: NeighborhoodSlug; weak: boolean };
+
 /**
  * The San Francisco neighborhoods a question names, in the order it names
  * them, each once: "What's my Saturday like in the Mission vs the Inner
  * Sunset?" is `["mission", "inner-sunset"]`. Names can't overlap and the
  * longer one wins, so "Inner Sunset" isn't also the Sunset and "Outer Mission"
- * isn't also the Mission.
+ * isn't also the Mission. Everyday words ("sunset", "mission") are used only
+ * to make up a pair, joined ones first: "best sunset drinks, mission or the
+ * marina?" is the Mission and the Marina.
  */
 export function namedNeighborhoods(question: string): NeighborhoodSlug[] {
-  const found: { start: number; end: number; slug: NeighborhoodSlug; weak: boolean }[] = [];
+  const text = question.replace(/[\u2018\u2019]/g, "'");
+  const found: Found[] = [];
   for (const a of ALIASES) {
-    for (const m of question.matchAll(a.re)) {
+    for (const m of text.matchAll(a.re)) {
       const start = m.index;
-      const weak =
-        a.common && !/^\p{Lu}/u.test(m[0]) && !/\bthe\s+$/i.test(question.slice(0, start));
+      // A capital proves a name only mid-sentence: "Sunset views: …" doesn't.
+      const initial = /(?:^|[.!?:;"“(])\s*$/.test(text.slice(0, start));
+      const weak = a.common && (initial || !/^\p{Lu}/u.test(m[0]));
       found.push({ start, end: start + m[0].length, slug: a.slug, weak });
     }
   }
   found.sort((x, y) => y.end - y.start - (x.end - x.start) || x.start - y.start);
-  const kept: typeof found = [];
+  const kept: Found[] = [];
   for (const f of found) if (!kept.some((k) => f.start < k.end && k.start < f.end)) kept.push(f);
   kept.sort((x, y) => x.start - y.start);
-  const strong = kept.filter((k) => !k.weak);
-  const use = new Set(strong.map((k) => k.slug)).size >= 2 ? strong : kept;
-  return [...new Set(use.map((k) => k.slug))];
+
+  const chosen = kept.filter((k) => !k.weak);
+  const slugs = new Set(chosen.map((k) => k.slug));
+  if (slugs.size < 2) {
+    const gap = (x: Found, y: Found) =>
+      x.end <= y.start ? text.slice(x.end, y.start) : text.slice(y.end, x.start);
+    // 0: joined by a word ("mission or noe"), 1: only by a comma or space, 2: not joined.
+    const join = (k: Found) =>
+      Math.min(
+        2,
+        ...kept
+          .filter((o) => o !== k && JOINER.test(gap(k, o)))
+          .map((o) => (/\p{L}/u.test(gap(k, o).replace(/\bthe\b/i, "")) ? 0 : 1)),
+      );
+    const ranked = kept
+      .filter((k) => k.weak && !slugs.has(k.slug))
+      .sort((x, y) => join(x) - join(y));
+    for (const k of ranked) {
+      if (slugs.size >= 2) break;
+      if (slugs.has(k.slug)) continue;
+      slugs.add(k.slug);
+      chosen.push(k);
+    }
+    chosen.sort((x, y) => x.start - y.start);
+  }
+  return [...new Set(chosen.map((k) => k.slug))];
 }
 
 /* ───────────── Names in sentences ───────────── */
@@ -209,10 +299,22 @@ export type CompareAnswer = {
   /** What the verdict cites: both neighborhoods' Interest fit sources. */
   leadSources: CitedSource[];
   lines: AnswerLine[];
+  /** Whether anything from the City Profile shaped the answer. */
+  personal: boolean;
 };
 
 /** Within this many points, two scores are "about the same". */
 export const CLOSE = 0.5;
+
+/**
+ * Which of two scores is higher by at least `CLOSE`: 1 for `x`, -1 for `y`, 0
+ * when they're about the same. Scores are shown to one decimal, so this
+ * compares tenths: 8.2 vs 7.7 and 8.3 vs 7.8 are both half a point apart.
+ */
+export function apart(x: number, y: number): -1 | 0 | 1 {
+  const tenths = Math.round((x - y) * 10);
+  return tenths >= CLOSE * 10 ? 1 : tenths <= -CLOSE * 10 ? -1 : 0;
+}
 
 const SCORE_NAME = { things_to_do: "things to do", food: "food", transit: "transit" } as const;
 type ScoreKind = keyof typeof SCORE_NAME;
@@ -232,6 +334,15 @@ function merge(...lists: readonly (readonly CitedSource[])[]): CitedSource[] {
 function okScore(side: CompareSide, kind: ScoreKind) {
   const s = side.scores?.scores.find((x) => x.kind === kind);
   return s?.state === "ok" ? s : null;
+}
+
+/**
+ * True only when the neighborhood has no score for lack of public data. A
+ * score missing from `scores` exists but cites something this viewer can't
+ * see (`neighborhoodScores.get` leaves it out), so it isn't "no data".
+ */
+function noPublicData(side: CompareSide, kind: ScoreKind) {
+  return side.scores?.scores.find((x) => x.kind === kind)?.state === "no_data";
 }
 
 /**
@@ -257,11 +368,11 @@ export function compareAnswer(
   let leadSources: CitedSource[] = [];
   const fitOk = fa?.state === "ok" && fb?.state === "ok";
   if (fa?.state === "ok" && fb?.state === "ok") {
-    const diff = fa.score - fb.score;
+    const diff = apart(fa.score, fb.score);
     // Nothing matched, so there's nothing to cite: say what wasn't found.
     if (fa.score === 0 && fb.score === 0)
       lead = "We haven't found Groups, Events or places for your interests in either yet.";
-    else if (Math.abs(diff) < CLOSE)
+    else if (diff === 0)
       lead = `Both fit your interests about the same: ${one(fa.score)} and ${one(fb.score)} out of 10.`;
     else {
       const [w, l] = diff > 0 ? [nameA, nameB] : [nameB, nameA];
@@ -322,9 +433,17 @@ export function compareAnswer(
       // The first side to describe its stops says it in full; the second is shorter.
       const first = !said;
       said = true;
-      const stops = first
-        ? `${possessive(name())} ${total} Weekend Route stops`
-        : `${possessive(name())} ${total}`;
+      const whose = possessive(name());
+      if (total === 1) {
+        const noun = first ? "one Weekend Route stop" : "one stop";
+        parts.push(
+          fits.length === 1
+            ? `${whose} ${noun} ${first ? "fits your interests" : "does"} (${named})`
+            : `${whose} ${noun} ${first ? "doesn't fit your interests" : "doesn't"}`,
+        );
+        continue;
+      }
+      const stops = first ? `${whose} ${total} Weekend Route stops` : `${whose} ${total}`;
       const verb = first
         ? `${fits.length === 1 ? "fits" : "fit"} your interests`
         : fits.length === 1
@@ -363,19 +482,17 @@ export function compareAnswer(
     const sa = okScore(a, kind);
     const sb = okScore(b, kind);
     if (!sa || !sb) {
-      // A side whose scores loaded but don't have this one.
-      for (const [side, s] of [
-        [a, sa],
-        [b, sb],
-      ] as const)
-        if (side.scores && !s) noData.set(side, [...(noData.get(side) ?? []), SCORE_NAME[kind]]);
+      // Say so only for a real lack of data; a score this viewer can't see is left out.
+      for (const side of [a, b])
+        if (noPublicData(side, kind))
+          noData.set(side, [...(noData.get(side) ?? []), SCORE_NAME[kind]]);
       continue;
     }
     scoreSources.push(sa.sources, sb.sources);
-    const d = sa.score - sb.score;
+    const d = apart(sa.score, sb.score);
     const name = SCORE_NAME[kind];
-    if (d >= CLOSE) higherA.push(`${name} (${one(sa.score)} vs ${one(sb.score)})`);
-    else if (d <= -CLOSE) higherB.push(`${name} (${one(sb.score)} vs ${one(sa.score)})`);
+    if (d > 0) higherA.push(`${name} (${one(sa.score)} vs ${one(sb.score)})`);
+    else if (d < 0) higherB.push(`${name} (${one(sb.score)} vs ${one(sa.score)})`);
     else close.push(`${name} (${one(sa.score)} and ${one(sb.score)})`);
   }
   const scoreParts = [
@@ -463,9 +580,14 @@ export function compareAnswer(
   }
 
   // People who work late see late service right after the verdict.
-  if (you?.workHours === "night" || you?.workHours === "evening") {
+  const worksLate = you?.workHours === "night" || you?.workHours === "evening";
+  if (worksLate) {
     const i = lines.findIndex((l) => l.key === "night");
     if (i > 0) lines.unshift(...lines.splice(i, 1));
   }
-  return { lead, leadSources, lines };
+  const personal =
+    lead !== null ||
+    lines.some((l) => l.key === "transit") ||
+    (worksLate && lines.some((l) => l.key === "night"));
+  return { lead, leadSources, lines, personal };
 }

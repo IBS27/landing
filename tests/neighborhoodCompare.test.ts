@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { CitedSource } from "../convex/lib/citations";
 import {
+  apart,
   type CompareProfile,
   type CompareSide,
   compareAnswer,
@@ -8,6 +9,7 @@ import {
   inSentence,
   list,
   namedNeighborhoods,
+  suggestedPairs,
 } from "../src/landing/neighborhoods/compare";
 import type { ScoresData } from "../src/landing/neighborhoods/NeighborhoodScores";
 
@@ -91,6 +93,108 @@ describe("namedNeighborhoods", () => {
     ]);
     // Alone, a lowercase name is still the best reading.
     expect(namedNeighborhoods("mission vs noe")).toEqual(["mission", "noe-valley"]);
+  });
+});
+
+describe("namedNeighborhoods: everyday words", () => {
+  test("the everyday word doesn't take a real name's place", () => {
+    expect(namedNeighborhoods("Where's better to watch the sunset, Bernal or Twin Peaks?")).toEqual(
+      ["bernal-heights", "twin-peaks"],
+    );
+    // A capital at the start of the question proves nothing.
+    expect(namedNeighborhoods("Sunset views: Bernal vs Twin Peaks?")).toEqual([
+      "bernal-heights",
+      "twin-peaks",
+    ]);
+    expect(namedNeighborhoods("my mission is to find tacos: noe or bernal")).toEqual([
+      "noe-valley",
+      "bernal-heights",
+    ]);
+  });
+
+  test("to make up a pair, everyday words joined to another name come first", () => {
+    expect(namedNeighborhoods("I like sunset walks: mission or noe?")).toEqual([
+      "mission",
+      "noe-valley",
+    ]);
+    expect(namedNeighborhoods("best sunset drinks, mission or the marina?")).toEqual([
+      "mission",
+      "marina",
+    ]);
+    // A word joining two names beats a comma: "sunset, mission" isn't the pair.
+    expect(namedNeighborhoods("Where can I watch the sunset, mission or Noe?")).toEqual([
+      "mission",
+      "noe-valley",
+    ]);
+    expect(namedNeighborhoods("Where can I watch the sunset, mission or marina?")).toEqual([
+      "mission",
+      "marina",
+    ]);
+    expect(namedNeighborhoods("mission or noe? I like sunset walks")).toEqual([
+      "mission",
+      "noe-valley",
+    ]);
+    expect(namedNeighborhoods("Mission vs Noe")).toEqual(["mission", "noe-valley"]);
+    expect(namedNeighborhoods("What's the Sunset like on Saturdays?")).toEqual(["sunset-parkside"]);
+  });
+
+  test("more everyday names, each in the DataSF neighborhood that holds it", () => {
+    expect(namedNeighborhoods("Cole Valley vs Noe Valley")).toEqual([
+      "haight-ashbury",
+      "noe-valley",
+    ]);
+    expect(namedNeighborhoods("Forest Hill or the Excelsior")).toEqual([
+      "west-of-twin-peaks",
+      "excelsior",
+    ]);
+    expect(namedNeighborhoods("Hunter’s Point vs the Mission")).toEqual([
+      "bayview-hunters-point",
+      "mission",
+    ]);
+    expect(namedNeighborhoods("Cow Hollow vs Telegraph Hill")).toEqual(["marina", "north-beach"]);
+    expect(namedNeighborhoods("Alamo Square vs NoPa")).toEqual([
+      "hayes-valley",
+      "western-addition",
+    ]);
+  });
+});
+
+describe("suggestedPairs", () => {
+  test("the viewer's first two neighborhoods, then the defaults", () => {
+    expect(suggestedPairs(["noe-valley", "glen-park", "marina"])).toEqual([
+      ["noe-valley", "glen-park"],
+      ["mission", "inner-sunset"],
+      ["hayes-valley", "north-beach"],
+    ]);
+  });
+  test("a single profile neighborhood still comes first", () => {
+    expect(suggestedPairs(["glen-park"])[0]).toEqual(["glen-park", "mission"]);
+    expect(suggestedPairs(["mission"])[0]).toEqual(["mission", "inner-sunset"]);
+  });
+  test("no pair twice, in either order", () => {
+    expect(suggestedPairs(["inner-sunset", "mission"])).toEqual([
+      ["inner-sunset", "mission"],
+      ["hayes-valley", "north-beach"],
+      ["noe-valley", "inner-richmond"],
+    ]);
+  });
+  test("with one picked, every pair starts with it", () => {
+    expect(suggestedPairs(["mission", "glen-park"], "mission")).toEqual([
+      ["mission", "glen-park"],
+      ["mission", "inner-sunset"],
+      ["mission", "hayes-valley"],
+    ]);
+    expect(suggestedPairs([])).toHaveLength(3);
+  });
+});
+
+describe("apart", () => {
+  test("compares the tenths people see", () => {
+    expect(apart(8.2, 7.7)).toBe(1);
+    expect(apart(8.3, 7.8)).toBe(1);
+    expect(apart(0.7, 0.2)).toBe(1);
+    expect(apart(7.7, 8.2)).toBe(-1);
+    expect(apart(8.1, 7.7)).toBe(0);
   });
 });
 
@@ -321,7 +425,7 @@ describe("compareAnswer", () => {
       rider,
     );
     expect(line(unmatched, "route")?.text).toBe(
-      "None of the Mission's 1 Weekend Route stops fit your interests; the Inner Sunset doesn't have a Weekend Route yet.",
+      "The Mission's one Weekend Route stop doesn't fit your interests; the Inner Sunset doesn't have a Weekend Route yet.",
     );
     expect(line(unmatched, "route")?.sources.map((s) => s.key)).toEqual(["stop-Clarion Alley"]);
   });
@@ -421,6 +525,94 @@ describe("compareAnswer", () => {
     const a = compareAnswer(noFit(mission()), noFit(sunset()), null);
     expect(a.lead).toBeNull();
     expect(a.lines.map((l) => l.key)).toEqual(["scores", "night"]);
+  });
+
+  test("half a point apart is higher, however the floats round", () => {
+    const a = compareAnswer(
+      mission({
+        scores: scores({
+          slug: "mission",
+          label: "Mission",
+          things: 8.2,
+          fit: { score: 4.1, matched: [], missing: [] },
+        }),
+      }),
+      sunset({
+        scores: scores({
+          slug: "inner-sunset",
+          label: "Inner Sunset",
+          things: 7.7,
+          fit: { score: 3.6, matched: [], missing: [] },
+        }),
+      }),
+      null,
+    );
+    expect(a.lead).toBe("The Mission fits your interests better: 4.1 vs 3.6 for the Inner Sunset.");
+    expect(
+      line(a, "scores")?.text.startsWith("The Mission scores higher for things to do (8.2 vs 7.7)"),
+    ).toBe(true);
+  });
+
+  test("a score this viewer can't see isn't called a lack of data", () => {
+    const hidden = scores({
+      slug: "inner-sunset",
+      label: "Inner Sunset",
+      things: 5.0,
+      food: 9.4,
+      transit: 5.7,
+      fit: { score: 4.1, matched: [], missing: [] },
+    });
+    // `neighborhoodScores.get` leaves out a score whose sources the viewer can't all see.
+    hidden.scores = hidden.scores.filter((s) => s.kind !== "food");
+    const a = compareAnswer(mission(), sunset({ scores: hidden }), {
+      transport: [],
+      workHours: null,
+    });
+    expect(line(a, "scores")?.text).toBe(
+      "The Mission scores higher for things to do (9.7 vs 5.0) and transit (9.1 vs 5.7).",
+    );
+  });
+
+  test("routes with one stop, and no stops that fit, still read and cite", () => {
+    const a = compareAnswer(
+      mission({ stops: [stop("Twin Peaks summit", ["Hiking"])] }),
+      sunset({ stops: [stop("Grand View Park")] }),
+      rider,
+    );
+    expect(line(a, "route")?.text).toBe(
+      "The Mission's one Weekend Route stop fits your interests (Twin Peaks summit); the Inner Sunset's one stop doesn't.",
+    );
+    const none = compareAnswer(
+      mission({ stops: [stop("Clarion Alley"), stop("Velvet Owl")] }),
+      sunset({ stops: null }),
+      rider,
+    );
+    expect(line(none, "route")?.text).toBe(
+      "None of the Mission's 2 Weekend Route stops fit your interests; the Inner Sunset doesn't have a Weekend Route yet.",
+    );
+    // "None fit" cites the stops it counted.
+    expect(line(none, "route")?.sources.map((s) => s.key)).toEqual([
+      "stop-Clarion Alley",
+      "stop-Velvet Owl",
+    ]);
+  });
+
+  test("the answer is personal when the City Profile shaped it", () => {
+    const noFit = (side: CompareSide): CompareSide => ({
+      ...side,
+      scores: scores({ slug: side.slug, label: side.label, things: 9, food: 3, transit: 5 }),
+    });
+    expect(compareAnswer(mission(), sunset(), rider).personal).toBe(true);
+    // No interests, but transit and work hours from the City Profile.
+    expect(compareAnswer(noFit(mission()), noFit(sunset()), rider).personal).toBe(true);
+    expect(
+      compareAnswer(noFit(mission()), noFit(sunset()), { transport: ["car"], workHours: "night" })
+        .personal,
+    ).toBe(true);
+    expect(
+      compareAnswer(noFit(mission()), noFit(sunset()), { transport: ["car"], workHours: "day" })
+        .personal,
+    ).toBe(false);
   });
 
   test("every line that makes a claim from data cites it", () => {
