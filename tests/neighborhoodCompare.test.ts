@@ -293,7 +293,7 @@ describe("compareAnswer", () => {
     );
   });
 
-  test("Weekend Route stops that fit, citing those stops", () => {
+  test("Weekend Route stops that fit, citing every stop counted", () => {
     const a = compareAnswer(mission(), sunset(), rider);
     expect(line(a, "route")?.text).toBe(
       "2 of the Mission's 4 Weekend Route stops fit your interests (Moonrise Coffee and Kumo Ramen Bar); 1 of the Inner Sunset's 2 does (Low Cloud Coffee).",
@@ -301,8 +301,20 @@ describe("compareAnswer", () => {
     expect(line(a, "route")?.sources.map((s) => s.key)).toEqual([
       "stop-Moonrise Coffee",
       "stop-Kumo Ramen Bar",
+      "stop-Clarion Alley",
+      "stop-Velvet Owl",
       "stop-Low Cloud Coffee",
+      "stop-Grand View Park",
     ]);
+    const unmatched = compareAnswer(
+      mission({ stops: [stop("Clarion Alley")] }),
+      sunset({ stops: null }),
+      rider,
+    );
+    expect(line(unmatched, "route")?.text).toBe(
+      "None of the Mission's 1 Weekend Route stops fit your interests; the Inner Sunset doesn't have a Weekend Route yet.",
+    );
+    expect(line(unmatched, "route")?.sources.map((s) => s.key)).toEqual(["stop-Clarion Alley"]);
   });
 
   test("a missing route is said; one still loading is left out", () => {
@@ -404,6 +416,11 @@ describe("compareAnswer", () => {
 
   test("every line that makes a claim from data cites it", () => {
     const a = compareAnswer(mission(), sunset(), rider);
+    expect(a.leadSources.map((s) => s.key)).toEqual([
+      "fit-mission",
+      "shared-group",
+      "fit-inner-sunset",
+    ]);
     for (const l of a.lines) expect(l.sources.length).toBeGreaterThan(0);
   });
 });

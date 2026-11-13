@@ -466,7 +466,12 @@ function Answer({ a, b, profile }: { a: Loaded; b: Loaded; profile: CityProfile 
         Your Saturday: {a.hood.label} vs {b.hood.label}
       </h2>
       {answer.lead ? (
-        <p className="mt-1 font-semibold text-[17px] text-primary leading-[22px]">{answer.lead}</p>
+        <>
+          <p className="mt-1 font-semibold text-[17px] text-primary leading-[22px]">
+            {answer.lead}
+          </p>
+          <Sources sources={answer.leadSources} className="mt-1" />
+        </>
       ) : (
         <div className="mt-2 flex flex-col gap-3 rounded-lg bg-comment p-3 sm:flex-row sm:items-center">
           <p className="min-w-0 flex-1 text-[15px] text-primary leading-5">

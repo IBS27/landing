@@ -206,6 +206,8 @@ export type AnswerLine = {
 export type CompareAnswer = {
   /** The verdict on fit; null without interests in the City Profile. */
   lead: string | null;
+  /** What the verdict cites: both neighborhoods' Interest fit sources. */
+  leadSources: CitedSource[];
   lines: AnswerLine[];
 };
 
@@ -252,6 +254,7 @@ export function compareAnswer(
   const fa = a.scores?.interestFit;
   const fb = b.scores?.interestFit;
   let lead: string | null = null;
+  let leadSources: CitedSource[] = [];
   const fitOk = fa?.state === "ok" && fb?.state === "ok";
   if (fa?.state === "ok" && fb?.state === "ok") {
     const diff = fa.score - fb.score;
@@ -263,6 +266,7 @@ export function compareAnswer(
       const [ws, ls] = diff > 0 ? [fa.score, fb.score] : [fb.score, fa.score];
       lead = `${w(true)} fits your interests better: ${one(ws)} vs ${one(ls)} for ${l()}.`;
     }
+    leadSources = merge(fa.sources, fb.sources);
     const inA = new Set(fa.matched);
     const inB = new Set(fb.matched);
     const all = [...fa.matched, ...fb.matched.filter((x) => !inA.has(x)), ...fa.missing];
@@ -300,7 +304,11 @@ export function compareAnswer(
         continue;
       }
       const fits = side.stops.filter((s) => s.matches.length > 0);
-      sources.push(fits.flatMap((s) => s.sources));
+      // The counts are about every stop, so cite them all, the fitting ones first.
+      sources.push(
+        fits.flatMap((s) => s.sources),
+        side.stops.flatMap((s) => s.sources),
+      );
       const total = side.stops.length;
       const named =
         fits.length > 3
@@ -326,7 +334,7 @@ export function compareAnswer(
           : `${fits.length} of ${stops} ${verb} (${named})`,
       );
     }
-    if (sources.length > 0)
+    if (said)
       lines.push({
         key: "route",
         text: `${capitalize(parts.join("; "))}.`,
@@ -457,5 +465,5 @@ export function compareAnswer(
     const i = lines.findIndex((l) => l.key === "night");
     if (i > 0) lines.unshift(...lines.splice(i, 1));
   }
-  return { lead, lines };
+  return { lead, leadSources, lines };
 }
