@@ -95,6 +95,12 @@ export function moveProblems(out: MoveOutput, input: NegotiationInput): string[]
     if (input.yourLastOffer !== null && out.amount < input.yourLastOffer)
       p.push(`an offer can't go below your last offer of ${input.yourLastOffer}`);
   }
+  // Any move, priced or not, must not name a price over the max (asking aside).
+  const named = [...out.text.matchAll(/\$\s?(\d{1,3}(?:,\d{3})+|\d+)/g)].map((m) =>
+    Number(m[1].replace(/,/g, "")),
+  );
+  if (named.some((n) => n > maxPrice && n !== input.listing.askingPrice))
+    p.push(`text must not name a price over the buyer's max of ${maxPrice}`);
   if (/\b(address|zelle|venmo|cash ?app|card number|bank)\b/i.test(out.text))
     p.push("text must not share an address or payment details");
   return p;
@@ -137,6 +143,14 @@ export function ladderMove(input: NegotiationInput): MoveOutput {
       rationale: `The seller came down to $${theirs}, which is within your $${maxPrice} max.`,
     };
   }
+  // The buyer lowered their max below an offer already sent: don't repeat it.
+  if (last > maxPrice)
+    return {
+      move: "walk_away",
+      amount: 0,
+      text: "Thanks for getting back to me! My budget changed, so I'll have to pass for now.",
+      rationale: `Your max is now $${maxPrice}, under the $${last} you offered, so Muse won't repeat that offer.`,
+    };
   // Only a counter-price moves the ladder; "Yes, that works" or "No" doesn't.
   const followUp: MoveOutput = {
     move: "message",

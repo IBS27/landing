@@ -351,6 +351,7 @@ export const draftNext = internalAction({
         : move.rationale,
       compIds: c.compIds,
       handledThrough: Math.max(c.lastSellerAt, c.negotiation.handledThrough),
+      force,
       via: result.via,
       runId: result.runId,
     });
@@ -368,6 +369,8 @@ export const saveMove = internalMutation({
     /** Comparable listings behind a priced move, cited with the listing itself. */
     compIds: v.array(v.id("listings")),
     handledThrough: v.number(),
+    /** New limits from the buyer: drafts even after an agreed price. */
+    force: v.optional(v.boolean()),
     via: v.union(v.literal("model"), v.literal("cache"), v.literal("fallback")),
     runId: v.optional(v.id("aiRuns")),
   },
@@ -376,6 +379,11 @@ export const saveMove = internalMutation({
     if (n?.status !== "active") return;
     // A run that started before a newer one already answered later seller messages.
     if (a.handledThrough < n.handledThrough) return;
+    // Re-checked here: the buyer may have sent an acceptance while this run drafted.
+    const pending = n.pendingProposalId ? await ctx.db.get(n.pendingProposalId) : null;
+    const agreed =
+      n.lastMove === "accept" && (pending?.status === "approved" || pending?.status === "edited");
+    if (agreed && !a.force) return;
     const priced = a.move === "offer" || a.move === "accept";
     if (priced && a.amount > n.maxPrice) throw new ConvexError("Offer over the buyer's max");
     await retirePending(ctx, n, "expired", "system");

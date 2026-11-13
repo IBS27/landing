@@ -105,6 +105,22 @@ describe("ladderMove", () => {
     }
   });
 
+  test("a max lowered below the sent offer is never restated", () => {
+    const lowered = { maxPrice: 150, targetPrice: null, notes: null };
+    const i = input({ limits: lowered, yourLastOffer: 170, chat: [seller("Yes, that works")] });
+    expect(ladderMove(i).move).toBe("walk_away");
+    expect(moveProblems(ladderMove(i), i)).toEqual([]);
+    const restated: MoveOutput = {
+      move: "message",
+      amount: 0,
+      text: "Would $170 work?",
+      rationale: "Follow up.",
+    };
+    expect(moveProblems(restated, i)).toContain(
+      "text must not name a price over the buyer's max of 150",
+    );
+  });
+
   test("every ladder move passes the code checks", () => {
     for (const i of [
       input(),
