@@ -5,6 +5,7 @@ import { matchBy } from "./lib/crews";
 import { dismissal } from "./lib/dismissals";
 import { billCadence, choreCadence } from "./lib/house";
 import { interestId } from "./lib/interests";
+import { itemModelFields } from "./lib/itemModel";
 import { lifestyleAnswers } from "./lib/lifestyle";
 import { placeStatus } from "./lib/placeRules";
 import { profileSignal } from "./lib/profileSignals";
@@ -57,6 +58,8 @@ export default defineSchema({
     .index("by_owner", ["ownerId", "updatedAt"])
     .index("by_owner_room", ["ownerId", "roomId"])
     .index("by_owner_listing", ["ownerId", "listingId"]),
+  /** Muse's 3D models of placed Marketplace items (#150), private to their owner. See convex/apartment.ts. */
+  itemModels: defineTable(itemModelFields).index("by_owner_listing", ["ownerId", "listingId"]),
   users: defineTable({
     name: v.string(),
     firstName: v.string(),

@@ -1,6 +1,6 @@
 import { type Infer, v } from "convex/values";
 
-const xyz = v.object({ x: v.number(), y: v.number(), z: v.number() });
+export const xyz = v.object({ x: v.number(), y: v.number(), z: v.number() });
 export const finish = v.object({
   id: v.string(),
   color: v.string(),
@@ -12,6 +12,14 @@ export const finish = v.object({
   roughness: v.number(),
   // Physical repeat size in meters, independent of the mesh dimensions.
   repeat: v.number(),
+});
+/** One primitive of a fixture or item model (#150 reuses it for Marketplace item models). */
+export const part = v.object({
+  shape: v.union(v.literal("box"), v.literal("cylinder"), v.literal("sphere")),
+  position: xyz,
+  size: xyz,
+  rotation: xyz,
+  materialId: v.string(),
 });
 export const unitAppearance = v.object({
   materials: v.array(finish),
@@ -27,15 +35,7 @@ export const unitAppearance = v.object({
       rotation: v.number(),
       size: xyz,
       sources: v.array(v.string()),
-      parts: v.array(
-        v.object({
-          shape: v.union(v.literal("box"), v.literal("cylinder"), v.literal("sphere")),
-          position: xyz,
-          size: xyz,
-          rotation: xyz,
-          materialId: v.string(),
-        }),
-      ),
+      parts: v.array(part),
     }),
   ),
   notes: v.array(v.string()),
@@ -43,6 +43,7 @@ export const unitAppearance = v.object({
 export type UnitAppearance = Infer<typeof unitAppearance>;
 export type Finish = Infer<typeof finish>;
 export type ObservedObject = UnitAppearance["objects"][number];
+export type Part = Infer<typeof part>;
 
 /** Bounded data only: no shader source, executable code, arbitrary assets or model-provided URLs. */
 export function appearanceProblems(
@@ -132,7 +133,7 @@ export function appearanceProblems(
 }
 
 /** Exact support of each scaled primitive after its XYZ Euler rotation. */
-function partExtents(p: ObservedObject["parts"][number]) {
+export function partExtents(p: Part) {
   const cx = Math.cos(p.rotation.x),
     sx = Math.sin(p.rotation.x);
   const cy = Math.cos(p.rotation.y),

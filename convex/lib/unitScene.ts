@@ -40,15 +40,34 @@ export const unitScene = v.object({
     }),
   ),
 });
+/**
+ * What a placed item is. The first four are the detailed editor's proxy shapes
+ * (`ITEM_KINDS`); the rest are placed by Landing Home's Apartment tab (#150).
+ */
+export const placementKind = v.union(
+  v.literal("sofa"),
+  v.literal("bed"),
+  v.literal("table"),
+  v.literal("storage"),
+  v.literal("chair"),
+  v.literal("desk"),
+  v.literal("lamp"),
+  v.literal("rug"),
+  v.literal("art"),
+  v.literal("plant"),
+  v.literal("decor"),
+);
 export const placement = v.object({
   id: v.string(),
   /** Where the item came from: a Marketplace listing or something the owner owns (#131). At most one. */
   listingId: v.optional(v.id("listings")),
   ownedItemId: v.optional(v.id("ownedItems")),
   label: v.string(),
-  kind: v.union(v.literal("sofa"), v.literal("bed"), v.literal("table"), v.literal("storage")),
+  kind: placementKind,
   x: v.number(),
   z: v.number(),
+  /** Height of the item's base above the floor in metres (#150): wall art hangs. Default 0. */
+  y: v.optional(v.number()),
   rotation: v.number(),
   width: v.number(),
   depth: v.number(),
@@ -69,14 +88,61 @@ export type Placement = Infer<typeof placement>;
 export type SceneSource = Infer<typeof sceneSource>;
 export type Point = Infer<typeof point>;
 export type ItemKind = Placement["kind"];
+export type PlacementKind = ItemKind;
+/** The shapes the detailed editor offers. */
 export const ITEM_KINDS: readonly ItemKind[] = ["sofa", "bed", "table", "storage"];
+/** Every kind a placement can have (#150). */
+export const ALL_ITEM_KINDS: readonly ItemKind[] = [
+  ...ITEM_KINDS,
+  "chair",
+  "desk",
+  "lamp",
+  "rug",
+  "art",
+  "plant",
+  "decor",
+];
+const ITEM_SIZES: Record<ItemKind, { width: number; depth: number; height: number }> = {
+  sofa: { width: 2, depth: 0.8, height: 0.9 },
+  bed: { width: 1.4, depth: 2, height: 0.9 },
+  table: { width: 1.4, depth: 0.8, height: 0.75 },
+  storage: { width: 1.4, depth: 0.8, height: 0.9 },
+  chair: { width: 0.6, depth: 0.6, height: 0.9 },
+  desk: { width: 1.2, depth: 0.6, height: 0.75 },
+  lamp: { width: 0.4, depth: 0.4, height: 1.5 },
+  rug: { width: 1.6, depth: 2.3, height: 0.02 },
+  // Wall art: `depth` is its thickness off the wall, `height` how tall it hangs.
+  art: { width: 0.6, depth: 0.03, height: 0.8 },
+  plant: { width: 0.5, depth: 0.5, height: 1.1 },
+  decor: { width: 0.3, depth: 0.3, height: 0.3 },
+};
 /** Placeholder proxy size in meters for an item without entered dimensions. */
 export function itemSize(kind: ItemKind) {
-  return {
-    width: kind === "sofa" ? 2 : 1.4,
-    depth: kind === "bed" ? 2 : 0.8,
-    height: kind === "table" ? 0.75 : 0.9,
-  };
+  return { ...ITEM_SIZES[kind] };
+}
+/** Item limits in metres: each dimension, and how high a base may sit (#150). */
+export const ITEM_LIMITS = { min: 0.01, max: 12, yMax: 4 } as const;
+/** An item whose base is at least this high hangs on a wall (#150). */
+export const WALL_MOUNT_Y = 0.9;
+/** How far a wall-mounted item may sink into the wall's surface before it "intersects" it. */
+const WALL_FLUSH = 0.02;
+/** Whether an item stands on the floor in the way: not a rug, not hung on a wall (#150). */
+export function blocksFloor(p: Pick<Placement, "kind" | "y">) {
+  return p.kind !== "rug" && (p.y ?? 0) < WALL_MOUNT_Y;
+}
+/** The ranges every stored placement meets (`unitScenes.save`, `apartment.*`, `placementProblems`). */
+export function validPlacement(p: Placement) {
+  return (
+    !!p.id &&
+    p.id.length <= 80 &&
+    !!p.label.trim() &&
+    p.label.length <= 120 &&
+    validPoint(p) &&
+    finite(p.rotation, -Math.PI * 2, Math.PI * 2) &&
+    [p.width, p.depth, p.height].every((n) => finite(n, ITEM_LIMITS.min, ITEM_LIMITS.max)) &&
+    (p.y === undefined || finite(p.y, 0, ITEM_LIMITS.yMax)) &&
+    color(p.color)
+  );
 }
 export type Wall = UnitScene["walls"][number];
 export const MAX_SOURCES = 20;
@@ -320,7 +386,7 @@ export function canStand(scene: UnitScene, p: Point, radius = 0.18) {
 export function canWalk(scene: UnitScene, p: Point, placements: Placement[] = [], radius = 0.18) {
   if (!canStand(scene, p, radius)) return false;
   const obstacles = [
-    ...placements.map((o) => ({
+    ...placements.filter(blocksFloor).map((o) => ({
       x: o.x,
       z: o.z,
       width: o.width,
@@ -378,23 +444,17 @@ export function placementCorners(
   }));
 }
 export function placementProblems(scene: UnitScene, p: Placement): string[] {
-  if (
-    !p.id ||
-    p.id.length > 80 ||
-    !p.label.trim() ||
-    p.label.length > 120 ||
-    !validPoint(p) ||
-    !finite(p.rotation, -Math.PI * 2, Math.PI * 2) ||
-    ![p.width, p.depth, p.height].every((n) => finite(n, 0.05, 12)) ||
-    !color(p.color)
-  )
-    return ["Invalid furniture dimensions or position"];
+  if (!validPlacement(p)) return ["Invalid furniture dimensions or position"];
   const corners = placementCorners(p);
   if (!scene.rooms.some((r) => corners.every((c) => inside(c, r.polygon)) && inside(p, r.polygon)))
     return ["Item extends outside a room"];
+  const base = p.y ?? 0,
+    top = base + p.height;
+  // Wall art sits flush against the wall's surface (#150).
+  const flush = base >= WALL_MOUNT_Y ? WALL_FLUSH : 0;
   for (const w of scene.walls)
     for (const s of wallParts(w)) {
-      if (s.bottom >= p.height) continue;
+      if (s.bottom >= top || s.top <= base) continue;
       const a = along(w, s.start),
         b = along(w, s.end);
       if (
@@ -402,13 +462,16 @@ export function placementProblems(scene: UnitScene, p: Placement): string[] {
         inside(b, corners) ||
         corners.some(
           (c, i) =>
-            segmentsCross(c, corners[(i + 1) % 4], a, b) || pointSegment(c, a, b) < w.thickness / 2,
+            segmentsCross(c, corners[(i + 1) % 4], a, b) ||
+            pointSegment(c, a, b) < w.thickness / 2 - flush,
         )
       )
         return ["Item intersects a wall"];
     }
+  // Rugs lie under things and wall art hangs above them: neither collides with fixtures.
+  if (!blocksFloor(p)) return [];
   for (const object of scene.appearance?.objects ?? []) {
-    if (object.position.y >= p.height) continue;
+    if (object.position.y >= top) continue;
     const other = placementCorners({
       ...p,
       x: object.position.x,
@@ -421,7 +484,8 @@ export function placementProblems(scene: UnitScene, p: Placement): string[] {
   }
   return [];
 }
-function rectanglesOverlap(a: Point[], b: Point[]) {
+/** Whether two convex quadrilaterals (`placementCorners`) overlap by more than a hair. */
+export function rectanglesOverlap(a: Point[], b: Point[]) {
   return [a, b].every((polygon) =>
     polygon.every((point, i) => {
       const next = polygon[(i + 1) % 4];

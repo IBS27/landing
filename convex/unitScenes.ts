@@ -5,6 +5,7 @@ import {
   internalAction,
   internalMutation,
   internalQuery,
+  type MutationCtx,
   type QueryCtx,
 } from "./_generated/server";
 import { runAgent } from "./ai/agent";
@@ -30,6 +31,7 @@ import {
   sceneProblems,
   sceneSource,
   unitScene,
+  validPlacement,
 } from "./lib/unitScene";
 import { generationStatus, unitSceneRecord } from "./lib/unitSceneRecord";
 import { layoutMedia, unitSceneTask } from "./lib/unitSceneTask";
@@ -118,6 +120,80 @@ export const mine = viewerQuery({
         .take(30)
     ).map((d) => ({ id: d._id, title: d.scene.title, updatedAt: d.updatedAt })),
 });
+/** Scenes read to find a place's unit when it has no listing: the person's rooms' and these. */
+const PLACE_SCENES_SCANNED = 40;
+/**
+ * The owner's unit for their place (#150): the scene made from the place's
+ * listing, or, for a place found elsewhere (no listing), their most recently
+ * updated scene that belongs to neither a room nor a listing. The caller has
+ * checked the owner can see `listingId`.
+ */
+export async function placeScene(
+  ctx: QueryCtx,
+  ownerId: Id<"users">,
+  listingId: Id<"listings"> | undefined,
+) {
+  const scenes = await ctx.db
+    .query("unitScenes")
+    .withIndex("by_owner_listing", (q) => q.eq("ownerId", ownerId).eq("listingId", listingId))
+    .take(listingId ? 1 : PLACE_SCENES_SCANNED);
+  if (listingId) return scenes[0] ?? null;
+  return scenes.filter((u) => !u.roomId).sort((a, b) => b.updatedAt - a.updatedAt)[0] ?? null;
+}
+/**
+ * The owner's scene for a room or a listing, created as the starter scene with
+ * the room's or listing's media when there is none yet. With neither, a new
+ * scene every time: callers that want one per place look with `placeScene` first.
+ */
+export async function createScene(
+  ctx: MutationCtx,
+  ownerId: Id<"users">,
+  { roomId, listingId }: { roomId?: Id<"rooms">; listingId?: Id<"listings"> },
+): Promise<Id<"unitScenes">> {
+  const room = roomId ? await ctx.db.get(roomId) : null;
+  if (roomId && (!room || room.userId !== ownerId)) throw new ConvexError("Room not found");
+  const listing = listingId ? await accessibleListing(ctx, listingId, ownerId) : null;
+  const existing = roomId
+    ? await ctx.db
+        .query("unitScenes")
+        .withIndex("by_owner_room", (q) => q.eq("ownerId", ownerId).eq("roomId", roomId))
+        .first()
+    : listingId
+      ? await placeScene(ctx, ownerId, listingId)
+      : null;
+  if (existing) return existing._id;
+  const title = (room?.name ?? listing?.title ?? "Your unit").slice(0, 120);
+  const photos: { url: string; storageId?: Id<"_storage"> }[] =
+    room?.photos ?? listing?.photos.map((url) => ({ url })) ?? [];
+  const sources: Doc<"unitScenes">["sources"] = listing
+    ? listingSources(listing)
+    : photos.slice(0, 18).map((p, i) => ({
+        key: `photo-${i + 1}`,
+        label: `Photo ${i + 1}`,
+        kind: "photo",
+        url: p.url,
+        ...(p.storageId ? { storageId: p.storageId } : {}),
+      }));
+  const now = Date.now();
+  return ctx.db.insert("unitScenes", {
+    ownerId,
+    roomId,
+    listingId,
+    scene: manualScene(
+      room?.size ? room.size.widthFt * 0.3048 : 4,
+      room?.size ? room.size.lengthFt * 0.3048 : 5,
+      title,
+      !!room?.size,
+    ),
+    placements: [],
+    sources,
+    description: listing?.description.slice(0, 8000) ?? "",
+    revision: 0,
+    manuallyEdited: !!room?.size,
+    createdAt: now,
+    updatedAt: now,
+  });
+}
 export const create = viewerMutation({
   args: { roomId: v.optional(v.id("rooms")), listingId: v.optional(v.id("listings")) },
   returns: v.id("unitScenes"),
@@ -126,54 +202,7 @@ export const create = viewerMutation({
     const ownerId = ctx.viewer._id;
     // Neither given: start from the person's place.
     const listingId = chosen ?? (roomId ? undefined : await placeListingId(ctx, ownerId));
-    const room = roomId ? await ctx.db.get(roomId) : null;
-    if (roomId && (!room || room.userId !== ownerId)) throw new ConvexError("Room not found");
-    const listing = listingId ? await accessibleListing(ctx, listingId, ownerId) : null;
-    const existing = roomId
-      ? await ctx.db
-          .query("unitScenes")
-          .withIndex("by_owner_room", (q) => q.eq("ownerId", ownerId).eq("roomId", roomId))
-          .first()
-      : listingId
-        ? await ctx.db
-            .query("unitScenes")
-            .withIndex("by_owner_listing", (q) =>
-              q.eq("ownerId", ownerId).eq("listingId", listingId),
-            )
-            .first()
-        : null;
-    if (existing) return existing._id;
-    const title = (room?.name ?? listing?.title ?? "Your unit").slice(0, 120);
-    const photos: { url: string; storageId?: Id<"_storage"> }[] =
-      room?.photos ?? listing?.photos.map((url) => ({ url })) ?? [];
-    const sources: Doc<"unitScenes">["sources"] = listing
-      ? listingSources(listing)
-      : photos.slice(0, 18).map((p, i) => ({
-          key: `photo-${i + 1}`,
-          label: `Photo ${i + 1}`,
-          kind: "photo",
-          url: p.url,
-          ...(p.storageId ? { storageId: p.storageId } : {}),
-        }));
-    const now = Date.now();
-    return ctx.db.insert("unitScenes", {
-      ownerId,
-      roomId,
-      listingId,
-      scene: manualScene(
-        room?.size ? room.size.widthFt * 0.3048 : 4,
-        room?.size ? room.size.lengthFt * 0.3048 : 5,
-        title,
-        !!room?.size,
-      ),
-      placements: [],
-      sources,
-      description: listing?.description.slice(0, 8000) ?? "",
-      revision: 0,
-      manuallyEdited: !!room?.size,
-      createdAt: now,
-      updatedAt: now,
-    });
+    return createScene(ctx, ownerId, { roomId, listingId });
   },
 });
 export const save = viewerMutation({
@@ -195,21 +224,7 @@ export const save = viewerMutation({
     if (errors.length) throw new ConvexError(errors.join("; "));
     if (placements.length > 80 || new Set(placements.map((p) => p.id)).size !== placements.length)
       throw new ConvexError("At most 80 items with unique IDs");
-    for (const p of placements) {
-      if (
-        !p.id ||
-        p.id.length > 80 ||
-        !p.label.trim() ||
-        p.label.length > 120 ||
-        ![p.x, p.z, p.rotation, p.width, p.depth, p.height].every(Number.isFinite) ||
-        [p.width, p.depth, p.height].some((n) => n < 0.05 || n > 12) ||
-        Math.abs(p.x) > 100 ||
-        Math.abs(p.z) > 100 ||
-        Math.abs(p.rotation) > Math.PI * 2 ||
-        !/^#[0-9a-f]{6}$/i.test(p.color)
-      )
-        throw new ConvexError("Invalid item dimensions");
-    }
+    if (!placements.every(validPlacement)) throw new ConvexError("Invalid item dimensions");
     await checkPlacementSources(ctx, ctx.viewer._id, placements, doc.placements);
     await ctx.db.patch(id, {
       scene,
@@ -289,58 +304,81 @@ export function publicMediaUrl(value: string) {
     return false;
   }
 }
+/** The sources and description a generation reads: the listing's current media plus the owner's own. */
+export async function generationInputs(ctx: QueryCtx, doc: Doc<"unitScenes">) {
+  const listing = doc.listingId ? await accessibleListing(ctx, doc.listingId, doc.ownerId) : null;
+  const sources = listing ? refreshedSources(doc.sources, listing) : doc.sources;
+  const description = listing?.description.slice(0, 8000) ?? doc.description;
+  const changed =
+    canonicalJson(sources) !== canonicalJson(doc.sources) || description !== doc.description;
+  return { sources, description, changed };
+}
+/** Whether Muse can read a source: an upload, or a public HTTPS file (seed paths are local). */
+export function readableSource(s: Doc<"unitScenes">["sources"][number]) {
+  return !!s.storageId || (!!s.url && publicMediaUrl(s.url));
+}
+/** The scene's build job while it is queued or running, else null. */
+export async function liveJob(ctx: QueryCtx, doc: Doc<"unitScenes">) {
+  const job = doc.jobId ? await ctx.db.get(doc.jobId) : null;
+  return job &&
+    (job.status === "queued" || job.status === "running") &&
+    Date.now() - job.createdAt < 15 * 60_000
+    ? job
+    : null;
+}
+/**
+ * Starts (or joins) a scene's generation for its owner; the caller has checked
+ * ownership and, where it matters, the revision. Shared by `requestGeneration`
+ * and Landing Home's `apartment.build` (#150).
+ */
+export async function startGeneration(
+  ctx: MutationCtx,
+  doc: Doc<"unitScenes">,
+  detailsOnly = false,
+): Promise<Id<"aiJobs">> {
+  const id = doc._id,
+    revision = doc.revision;
+  const { sources, description, changed } = await generationInputs(ctx, doc);
+  if (!sources.length) throw new ConvexError("Add photos or a floor plan first");
+  const live = await liveJob(ctx, doc);
+  if (!changed && live) return live._id;
+  const nextRevision = revision + (changed ? 1 : 0);
+  // `generation` is cleared by every scene or source edit, so one that is still here
+  // describes this scene. Item moves bump `revision` without touching it (#150).
+  const retryDetails =
+    detailsOnly && !changed && !!doc.generation && !!(doc.candidate || !isStarterScene(doc.scene));
+  const jobId = await startJob(ctx, {
+    kind: "unitScene",
+    key: `${id}:${nextRevision}`,
+    userId: doc.ownerId,
+    action: internal.unitScenes.generate,
+    args: { id, ownerId: doc.ownerId, revision: nextRevision, detailsOnly: retryDetails },
+  });
+  await ctx.db.patch(id, {
+    sources,
+    sceneSources: savedSceneSources(doc.scene, doc.sceneSources ?? doc.sources),
+    description,
+    revision: nextRevision,
+    jobId,
+    candidate: retryDetails ? doc.candidate : undefined,
+    explanation: undefined,
+    generation: {
+      status: retryDetails ? "details" : "layout",
+      revision: nextRevision,
+      autoApply:
+        doc.manuallyEdited === false ||
+        (doc.manuallyEdited === undefined && isStarterScene(doc.scene)),
+    },
+  });
+  return jobId;
+}
 export const requestGeneration = viewerMutation({
   args: { id: v.id("unitScenes"), revision: v.number(), detailsOnly: v.optional(v.boolean()) },
   returns: v.id("aiJobs"),
   handler: async (ctx, { id, revision, detailsOnly = false }): Promise<Id<"aiJobs">> => {
     const doc = await ownScene(ctx, id, ctx.viewer._id);
     assertRevision(doc, revision);
-    const listing = doc.listingId
-      ? await accessibleListing(ctx, doc.listingId, ctx.viewer._id)
-      : null;
-    const sources = listing ? refreshedSources(doc.sources, listing) : doc.sources;
-    const description = listing?.description.slice(0, 8000) ?? doc.description;
-    const changed =
-      canonicalJson(sources) !== canonicalJson(doc.sources) || description !== doc.description;
-    if (!sources.length) throw new ConvexError("Add photos or a floor plan first");
-    const live = doc.jobId ? await ctx.db.get(doc.jobId) : null;
-    if (
-      !changed &&
-      live &&
-      (live.status === "queued" || live.status === "running") &&
-      Date.now() - live.createdAt < 15 * 60_000
-    )
-      return live._id;
-    const nextRevision = revision + (changed ? 1 : 0);
-    const retryDetails =
-      detailsOnly &&
-      !changed &&
-      doc.generation?.revision === revision &&
-      !!(doc.candidate || !isStarterScene(doc.scene));
-    const jobId = await startJob(ctx, {
-      kind: "unitScene",
-      key: `${id}:${nextRevision}`,
-      userId: ctx.viewer._id,
-      action: internal.unitScenes.generate,
-      args: { id, ownerId: ctx.viewer._id, revision: nextRevision, detailsOnly: retryDetails },
-    });
-    await ctx.db.patch(id, {
-      sources,
-      sceneSources: savedSceneSources(doc.scene, doc.sceneSources ?? doc.sources),
-      description,
-      revision: nextRevision,
-      jobId,
-      candidate: retryDetails ? doc.candidate : undefined,
-      explanation: undefined,
-      generation: {
-        status: retryDetails ? "details" : "layout",
-        revision: nextRevision,
-        autoApply:
-          doc.manuallyEdited === false ||
-          (doc.manuallyEdited === undefined && isStarterScene(doc.scene)),
-      },
-    });
-    return jobId;
+    return startGeneration(ctx, doc, detailsOnly);
   },
 });
 export const load = internalQuery({
@@ -348,7 +386,13 @@ export const load = internalQuery({
   returns: unitSceneRecord,
   handler: (ctx, { id, ownerId }) => ownScene(ctx, id, ownerId),
 });
-/** Each stage returns the revision it published; user edits invalidate the next stage. */
+/**
+ * Each stage returns the revision it published. A stage is stale when the
+ * scene's `generation.revision` is no longer the one the action last saw:
+ * every scene or source edit clears `generation` or replaces the job. Item
+ * moves (convex/apartment.ts, #150) bump `revision` only, so they don't
+ * discard a build: placements aren't generation input and are kept by it.
+ */
 export const saveCandidate = internalMutation({
   args: {
     id: v.id("unitScenes"),
@@ -367,7 +411,7 @@ export const saveCandidate = internalMutation({
   ) => {
     const doc = await ownScene(ctx, id, ownerId);
     if (doc.jobId !== jobId) return null;
-    if (doc.revision !== revision) {
+    if (doc.generation?.revision !== revision) {
       await ctx.db.patch(id, {
         explanation:
           "Sources or layout changed during generation. Generate again to use your latest version.",
@@ -381,8 +425,8 @@ export const saveCandidate = internalMutation({
       );
       if (errors.length) throw new Error(errors.join("; "));
     }
-    const autoApply = doc.generation?.autoApply ?? false;
-    const nextRevision = revision + 1;
+    const autoApply = doc.generation.autoApply;
+    const nextRevision = doc.revision + 1;
     await ctx.db.patch(id, {
       ...(candidate
         ? autoApply
@@ -444,7 +488,7 @@ export const generate = internalAction({
           id: args.id,
           ownerId: args.ownerId,
         });
-        if (doc.revision !== revision || doc.jobId !== args.jobId) return;
+        if (doc.generation?.revision !== revision || doc.jobId !== args.jobId) return;
         const publish = async (
           candidate: Doc<"unitScenes">["scene"] | null,
           explanation: string,

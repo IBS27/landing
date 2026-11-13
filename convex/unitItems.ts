@@ -40,7 +40,8 @@ export const pickerEntry = v.object({
 });
 export type PickerEntry = Infer<typeof pickerEntry>;
 
-async function ownsListing(ctx: QueryCtx, userId: Id<"users">, listingId: Id<"listings">) {
+/** Whether the user already owns what this listing sold (a Marketplace purchase in their inventory). */
+export async function ownsListing(ctx: QueryCtx, userId: Id<"users">, listingId: Id<"listings">) {
   return !!(await ctx.db
     .query("ownedItems")
     .withIndex("by_user_listing", (q) => q.eq("userId", userId).eq("source.listingId", listingId))

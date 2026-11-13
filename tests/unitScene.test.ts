@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import type { MutationCtx } from "../convex/_generated/server";
 import { checkValue } from "../convex/ai/outputSchema";
 import {
+  blocksFloor,
   canStand,
   canWalk,
   manualScene,
@@ -205,6 +206,64 @@ describe("unit geometry", () => {
     expect(placementProblems(scene, testItem).join()).toContain("overlaps");
   });
 });
+describe("rugs and wall art (#150)", () => {
+  const rug: Placement = { ...item, id: "rug", kind: "rug", width: 1.6, depth: 2.3, height: 0.02 };
+  // Hung on the north wall (thickness 0.12), its back flush with the wall's surface.
+  const art: Placement = {
+    ...item,
+    id: "art",
+    kind: "art",
+    width: 0.6,
+    depth: 0.03,
+    height: 0.8,
+    z: 0.06 + 0.015,
+    y: 1.2,
+  };
+  test("neither is in the way of walking; furniture still is", () => {
+    expect(blocksFloor(item)).toBe(true);
+    expect(blocksFloor(rug)).toBe(false);
+    expect(blocksFloor(art)).toBe(false);
+    expect(blocksFloor({ ...art, y: 0.5 })).toBe(true);
+    expect(canWalk(unit, { x: 2, z: 2 }, [rug])).toBe(true);
+    expect(canWalk(unit, { x: 2, z: 0.25 }, [art])).toBe(true);
+    expect(canWalk(unit, { x: 2, z: 0.25 }, [{ ...art, y: 0 }])).toBe(false);
+    expect(canWalk(unit, { x: 2, z: 2 }, [item])).toBe(false);
+  });
+  test("wall art may sit flush on a wall; anything still has to stay inside a room", () => {
+    expect(placementProblems(unit, art)).toEqual([]);
+    expect(placementProblems(unit, rug)).toEqual([]);
+    // Sunk a centimetre into the surface: fine hung on the wall, not standing on the floor.
+    expect(placementProblems(unit, { ...art, z: art.z - 0.01 })).toEqual([]);
+    expect(placementProblems(unit, { ...art, z: art.z - 0.01, y: 0 })).toEqual([
+      "Item intersects a wall",
+    ]);
+    expect(placementProblems(unit, { ...art, z: art.z - 0.05 })).toEqual([
+      "Item intersects a wall",
+    ]);
+    expect(placementProblems(unit, { ...art, z: -0.5 })).toEqual(["Item extends outside a room"]);
+    expect(placementProblems(unit, { ...rug, x: 0.2 })).toEqual(["Item extends outside a room"]);
+    expect(placementProblems(unit, { ...art, y: 4.5 })[0]).toContain("Invalid");
+    expect(placementProblems(unit, { ...rug, height: 0.001 })[0]).toContain("Invalid");
+  });
+  test("neither collides with the fixtures Muse found", () => {
+    const scene = detailedResult.output.scene as UnitScene;
+    const cabinet = scene.appearance!.objects[0];
+    const at = { x: cabinet.position.x, z: cabinet.position.z, width: 0.1, depth: 0.1 };
+    expect(placementProblems(scene, { ...item, ...at }).join()).toContain("overlaps");
+    expect(placementProblems(scene, { ...rug, ...at })).toEqual([]);
+    expect(placementProblems(scene, { ...art, ...at, y: 2 })).toEqual([]);
+  });
+  test("saving accepts a height above the floor within range", async () => {
+    const { ctx, tables } = db();
+    const run = (placements: Placement[], revision: number) =>
+      handler(save)(ctx, { viewerId: "u1", id: "s1", revision, scene: unit, placements });
+    await run([rug, art], 0);
+    expect(tables.unitScenes[0].placements).toEqual([rug, art]);
+    await expect(run([{ ...art, y: 4.5 }], 1)).rejects.toThrow("Invalid item dimensions");
+    await expect(run([{ ...art, y: -1 }], 1)).rejects.toThrow("Invalid item dimensions");
+    await expect(run([{ ...rug, height: 0.001 }], 1)).rejects.toThrow("Invalid item dimensions");
+  });
+});
 describe("private scene persistence", () => {
   test("another viewer cannot read or overwrite a scene", async () => {
     const { ctx } = db();
@@ -244,6 +303,8 @@ describe("private scene persistence", () => {
     const row = tables.unitScenes[0];
     row.jobId = "j1";
     row.revision = 1;
+    // The build was started at revision 1; a result from the stage before it is stale.
+    row.generation = { status: "layout", revision: 1, autoApply: false };
     await handler(saveCandidate)(ctx, {
       id: "s1",
       ownerId: "u1",
