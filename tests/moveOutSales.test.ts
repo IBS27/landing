@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   buyerPrice,
   type SaleInput,
+  type SaleMove,
   saleLadder,
   saleMoveProblems,
 } from "../convex/lib/moveOutSales";
@@ -92,5 +93,36 @@ describe("saleMoveProblems", () => {
         input,
       ),
     ).toContain("text must not share the street address");
+  });
+});
+
+describe("the floor stays private", () => {
+  test("no fallback reply names the floor unless it's the price on offer", () => {
+    const chats: [SaleInput["chat"], number | null][] = [
+      [[{ from: "buyer", text: "Is it still available?" }], null],
+      [[{ from: "buyer", text: "Is it still available?" }], 30],
+      [[{ from: "buyer", text: "Would you take 20?" }], null],
+      [[{ from: "buyer", text: "20 is my max" }], 30],
+      [[{ from: "buyer", text: "I can do 30" }], 35],
+    ];
+    for (const [chat, last] of chats) {
+      const input = base(chat, last);
+      const m = saleLadder(input);
+      expect(saleMoveProblems(m, input)).toEqual([]);
+      if (!((m.move === "offer" || m.move === "accept") && m.amount === 30))
+        expect(m.text).not.toMatch(/\b30\b/);
+    }
+  });
+  test("a reply that names the floor is rejected", () => {
+    const input = base([{ from: "buyer", text: "Would you take 20?" }], 35);
+    const say = (move: SaleMove["move"], amount: number, text: string) =>
+      saleMoveProblems({ move, amount, text, rationale: "r" }, input);
+    expect(say("walk_away", 0, "Sorry, $30 is the lowest I can go.")).toContain(
+      "text must not reveal the seller's lowest price",
+    );
+    expect(say("offer", 33, "Could you do $33? I can't go under 30.")).toContain(
+      "text must not reveal the seller's lowest price",
+    );
+    expect(say("offer", 30, "Could you do $30?")).toEqual([]);
   });
 });

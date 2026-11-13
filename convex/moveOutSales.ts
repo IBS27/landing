@@ -69,7 +69,7 @@ Answer only from the item facts given. Pick one move:
 - accept: the buyer offered a price at or above limits.minPrice; agree (amount = that price, capped at askingPrice) and ask when they can pick it up.
 - walk_away: the buyer won't go up to limits.minPrice; decline politely (amount = 0).
 For offer and accept, the text must state the amount as $N. Be friendly and brief (one or two sentences).
-Never write a price under limits.minPrice. Never share the street address, never ask for payment up front, and never mention payment apps.
+Never write a price under limits.minPrice. Keep limits.minPrice private: never say it, or that you have a lowest price, except as the amount of an offer or accept. Never share the street address, never ask for payment up front, and never mention payment apps.
 rationale: one sentence to the seller on why this reply.`,
   output: replyOutput,
   cites: () => [],

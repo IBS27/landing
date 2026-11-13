@@ -35,6 +35,8 @@ export function buyerPrice(input: SaleInput): number | null {
 }
 
 const DOLLARS = /\$\s?(\d{1,3}(?:,\d{3})+|\d+)/g;
+/** Any whole number, with or without "$" ("my lowest is 30"). */
+const NUMBER = /(?<![\d,.])(\d{1,3}(?:,\d{3})+|\d+)(?![\d,]|\.\d)/g;
 
 /** Code checks on any move, from the model or the fallback. */
 export function saleMoveProblems(out: SaleMove, input: SaleInput): string[] {
@@ -58,6 +60,13 @@ export function saleMoveProblems(out: SaleMove, input: SaleInput): string[] {
     const n = Number(m[1].replace(/,/g, ""));
     if (n < minPrice) p.push(`text names $${n}, under the seller's lowest price of ${minPrice}`);
   }
+  // The floor stays private: the text names it only as the price this move offers or accepts.
+  const floorShown =
+    ((out.move === "offer" || out.move === "accept") && out.amount === minPrice) ||
+    minPrice === ask;
+  const named = [...out.text.matchAll(NUMBER)].map((m) => Number(m[1].replace(/,/g, "")));
+  if (!floorShown && named.includes(minPrice))
+    p.push("text must not reveal the seller's lowest price");
   for (const f of phraseFlags(out.text)) p.push(`text trips a scam signal: ${f.reason}`);
   if (/\b(deposit|bank|zelle|venmo|cash ?app|wire)\b/i.test(out.text))
     p.push("text must not ask for payment details or money up front");
@@ -82,7 +91,8 @@ export function saleLadder(input: SaleInput): SaleMove {
     return {
       move: "message",
       amount: 0,
-      text: `Hi! Yes, the ${item} is still available for $${last}. When would you like to pick it up?`,
+      // The asking price until you've countered; a counter may sit at the private floor.
+      text: `Hi! Yes, the ${item} is still available${input.yourLastPrice === null ? ` for $${ask}` : ""}. When would you like to pick it up?`,
       rationale:
         "Confirms it's available at the listed price and offers pickup, with no address until you agree on a time.",
     };
@@ -99,7 +109,7 @@ export function saleLadder(input: SaleInput): SaleMove {
     return {
       move: "walk_away",
       amount: 0,
-      text: `Thanks for the offer! $${minPrice} is the lowest I can go, so no worries if that doesn't work.`,
+      text: "Thanks for the offer! That's lower than I can go, so no worries if it doesn't work for you.",
       rationale: `The buyer's $${theirs} is under your lowest price, and you're already at $${minPrice}.`,
     };
   const counter = Math.max(minPrice, Math.min(last - 1, round5((last + theirs) / 2)));
