@@ -73,6 +73,24 @@ export function fakeCtx(tables: Record<string, Row[]>, stats?: ReadStats): Mutat
           desc = dir === "desc";
           return chain;
         },
+        filter: (predicate: (q: unknown) => (row: Row) => boolean) => {
+          type Expr = unknown | ((row: Row) => unknown);
+          const value = (expr: Expr, row: Row) => (typeof expr === "function" ? expr(row) : expr);
+          const q = {
+            field: (name: string) => (row: Row) => at(row, name),
+            eq: (a: Expr, b: Expr) => (row: Row) => value(a, row) === value(b, row),
+            and:
+              (...terms: ((row: Row) => boolean)[]) =>
+              (row: Row) =>
+                terms.every((term) => term(row)),
+            or:
+              (...terms: ((row: Row) => boolean)[]) =>
+              (row: Row) =>
+                terms.some((term) => term(row)),
+          };
+          rows = rows.filter(predicate(q));
+          return chain;
+        },
         collect: async () => read(sorted()),
         first: async () => read(sorted().slice(0, 1))[0] ?? null,
         unique: async () => {

@@ -60,6 +60,7 @@ export const sceneSource = v.object({
   kind: v.union(v.literal("photo"), v.literal("floorplan"), v.literal("video")),
   url: v.optional(v.string()),
   storageId: v.optional(v.id("_storage")),
+  imported: v.optional(v.boolean()),
 });
 export type UnitScene = Infer<typeof unitScene>;
 export type Placement = Infer<typeof placement>;

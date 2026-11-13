@@ -264,8 +264,8 @@ describe("private scene persistence", () => {
       explanation: "",
       runId: "run1",
     });
-    await handler(acceptCandidate)(ctx, { viewerId: "u1", id: "s1", revision: 1 });
+    await handler(acceptCandidate)(ctx, { viewerId: "u1", id: "s1", revision: 2 });
     expect(row.placements).toEqual([item]);
-    expect(row.revision).toBe(2);
+    expect(row.revision).toBe(3);
   });
 });

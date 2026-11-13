@@ -83,6 +83,8 @@ import type * as lib_settings from "../lib/settings.js";
 import type * as lib_subleases from "../lib/subleases.js";
 import type * as lib_thumb from "../lib/thumb.js";
 import type * as lib_trust from "../lib/trust.js";
+import type * as lib_unitAppearancePartial from "../lib/unitAppearancePartial.js";
+import type * as lib_unitGeneration from "../lib/unitGeneration.js";
 import type * as lib_unitDetails from "../lib/unitDetails.js";
 import type * as lib_users from "../lib/users.js";
 import type * as lib_vibe from "../lib/vibe.js";
@@ -247,6 +249,8 @@ declare const fullApi: ApiFromModules<{
   "lib/subleases": typeof lib_subleases;
   "lib/thumb": typeof lib_thumb;
   "lib/trust": typeof lib_trust;
+  "lib/unitAppearancePartial": typeof lib_unitAppearancePartial;
+  "lib/unitGeneration": typeof lib_unitGeneration;
   "lib/unitDetails": typeof lib_unitDetails;
   "lib/users": typeof lib_users;
   "lib/vibe": typeof lib_vibe;
