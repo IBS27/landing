@@ -104,6 +104,7 @@ import { Route as MarketplaceItemListingIdRouteImport } from './routes/marketpla
 import { Route as MarketplaceYouIndexRouteImport } from './routes/marketplace/you/index'
 import { Route as MarketplaceYouSellingRouteImport } from './routes/marketplace/you/selling'
 import { Route as MessagesTConversationIdRouteImport } from './routes/messages/t/$conversationId'
+import { Route as LandingFindListingListingIdRouteImport } from './routes/landing/find/listing/$listingId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -585,6 +586,12 @@ const MessagesTConversationIdRoute = MessagesTConversationIdRouteImport.update({
   path: '/messages/t/$conversationId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LandingFindListingListingIdRoute =
+  LandingFindListingListingIdRouteImport.update({
+    id: '/find/listing/$listingId',
+    path: '/find/listing/$listingId',
+    getParentRoute: () => LandingRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -682,6 +689,7 @@ export interface FileRoutesByFullPath {
   '/marketplace/create/': typeof MarketplaceCreateIndexRoute
   '/marketplace/item/': typeof MarketplaceItemIndexRoute
   '/marketplace/you/': typeof MarketplaceYouIndexRoute
+  '/landing/find/listing/$listingId': typeof LandingFindListingListingIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -776,6 +784,7 @@ export interface FileRoutesByTo {
   '/marketplace/create': typeof MarketplaceCreateIndexRoute
   '/marketplace/item': typeof MarketplaceItemIndexRoute
   '/marketplace/you': typeof MarketplaceYouIndexRoute
+  '/landing/find/listing/$listingId': typeof LandingFindListingListingIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -874,6 +883,7 @@ export interface FileRoutesById {
   '/marketplace/create/': typeof MarketplaceCreateIndexRoute
   '/marketplace/item/': typeof MarketplaceItemIndexRoute
   '/marketplace/you/': typeof MarketplaceYouIndexRoute
+  '/landing/find/listing/$listingId': typeof LandingFindListingListingIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -973,6 +983,7 @@ export interface FileRouteTypes {
     | '/marketplace/create/'
     | '/marketplace/item/'
     | '/marketplace/you/'
+    | '/landing/find/listing/$listingId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1067,6 +1078,7 @@ export interface FileRouteTypes {
     | '/marketplace/create'
     | '/marketplace/item'
     | '/marketplace/you'
+    | '/landing/find/listing/$listingId'
   id:
     | '__root__'
     | '/'
@@ -1164,6 +1176,7 @@ export interface FileRouteTypes {
     | '/marketplace/create/'
     | '/marketplace/item/'
     | '/marketplace/you/'
+    | '/landing/find/listing/$listingId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1907,6 +1920,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesTConversationIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/landing/find/listing/$listingId': {
+      id: '/landing/find/listing/$listingId'
+      path: '/find/listing/$listingId'
+      fullPath: '/landing/find/listing/$listingId'
+      preLoaderRoute: typeof LandingFindListingListingIdRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
   }
 }
 
@@ -1946,6 +1966,7 @@ interface LandingRouteRouteChildren {
   LandingMoveOutIndexRoute: typeof LandingMoveOutIndexRoute
   LandingPlaceIndexRoute: typeof LandingPlaceIndexRoute
   LandingProfileIndexRoute: typeof LandingProfileIndexRoute
+  LandingFindListingListingIdRoute: typeof LandingFindListingListingIdRoute
 }
 
 const LandingRouteRouteChildren: LandingRouteRouteChildren = {
@@ -1958,6 +1979,7 @@ const LandingRouteRouteChildren: LandingRouteRouteChildren = {
   LandingMoveOutIndexRoute: LandingMoveOutIndexRoute,
   LandingPlaceIndexRoute: LandingPlaceIndexRoute,
   LandingProfileIndexRoute: LandingProfileIndexRoute,
+  LandingFindListingListingIdRoute: LandingFindListingListingIdRoute,
 }
 
 const LandingRouteRouteWithChildren = LandingRouteRoute._addFileChildren(
