@@ -8,6 +8,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "mission/moonrise-coffee",
     name: "Moonrise Coffee",
+    aliases: ["Moonrise"],
     kind: "cafe",
     real: false,
     neighborhood: "mission",
@@ -21,6 +22,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "mission/velvet-owl",
     name: "Velvet Owl",
+    aliases: ["the Owl"],
     kind: "music-venue",
     real: false,
     neighborhood: "mission",
@@ -34,6 +36,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "mission/kumo-ramen-bar",
     name: "Kumo Ramen Bar",
+    aliases: ["Kumo"],
     kind: "restaurant",
     real: false,
     neighborhood: "mission",
@@ -60,6 +63,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "mission/clarion-alley",
     name: "Clarion Alley",
+    aliases: ["Clarion"],
     kind: "street",
     real: true,
     neighborhood: "mission",
@@ -99,6 +103,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "mission/pocket-moth-coffee",
     name: "Pocket Moth Coffee",
+    aliases: ["Pocket Moth"],
     kind: "cafe",
     real: false,
     neighborhood: "mission",
@@ -112,6 +117,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "mission/taqueria-dos-cometas",
     name: "Taquería Dos Cometas",
+    aliases: ["Dos Cometas"],
     kind: "restaurant",
     real: false,
     neighborhood: "mission",
@@ -138,6 +144,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "mission/fruteria-doble-sol",
     name: "Frutería Doble Sol",
+    aliases: ["Doble Sol"],
     kind: "market",
     real: false,
     neighborhood: "mission",
@@ -151,6 +158,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "mission/tacos-chispa",
     name: "Tacos Chispa",
+    aliases: ["Chispa"],
     kind: "restaurant",
     real: false,
     neighborhood: "mission",
@@ -164,6 +172,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "mission/bar-zanate",
     name: "Bar Zanate",
+    aliases: ["Zanate"],
     kind: "bar",
     real: false,
     neighborhood: "mission",
@@ -255,6 +264,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "bernal-heights/alemany-farmers-market",
     name: "Alemany Farmers Market",
+    aliases: ["Alemany"],
     kind: "market",
     real: true,
     neighborhood: "bernal-heights",
@@ -320,6 +330,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "bernal-heights/coyote-bell-coffee",
     name: "Coyote Bell Coffee",
+    aliases: ["Coyote Bell"],
     kind: "cafe",
     real: false,
     neighborhood: "bernal-heights",
@@ -333,6 +344,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "bernal-heights/ladder-street-bakery",
     name: "Ladder Street Bakery",
+    aliases: ["Ladder Street"],
     kind: "bakery",
     real: false,
     neighborhood: "bernal-heights",
@@ -346,6 +358,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "bernal-heights/little-summit-pizza",
     name: "Little Summit Pizza",
+    aliases: ["Little Summit"],
     kind: "restaurant",
     real: false,
     neighborhood: "bernal-heights",
@@ -372,6 +385,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "bernal-heights/hill-larder",
     name: "Hill Larder",
+    aliases: ["Larder"],
     kind: "shop",
     real: false,
     neighborhood: "bernal-heights",
@@ -385,6 +399,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "bernal-heights/morning-shift-diner",
     name: "Morning Shift Diner",
+    aliases: ["Morning Shift"],
     kind: "restaurant",
     real: false,
     neighborhood: "bernal-heights",
@@ -411,6 +426,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "castro-upper-market/fogbow-bakery",
     name: "Fogbow Bakery",
+    aliases: ["Fogbow"],
     kind: "bakery",
     real: false,
     neighborhood: "castro-upper-market",
@@ -424,6 +440,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "castro-upper-market/tinfoil-moon",
     name: "Tinfoil Moon Sandwiches",
+    aliases: ["Tinfoil Moon"],
     kind: "restaurant",
     real: false,
     neighborhood: "castro-upper-market",
@@ -437,6 +454,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "castro-upper-market/corona-heights",
     name: "Corona Heights",
+    aliases: ["Corona"],
     kind: "park",
     real: true,
     neighborhood: "castro-upper-market",
@@ -528,6 +546,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "noe-valley/upper-douglass",
     name: "Upper Douglass Dog Park",
+    aliases: ["Upper Douglass"],
     kind: "park",
     real: true,
     neighborhood: "noe-valley",
@@ -567,6 +586,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "noe-valley/bramble-stoop",
     name: "Bramble Stoop Coffee",
+    aliases: ["Bramble Stoop"],
     kind: "cafe",
     real: false,
     neighborhood: "noe-valley",
@@ -580,6 +600,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "noe-valley/small-hours-bakery",
     name: "Small Hours Bakery",
+    aliases: ["Small Hours"],
     kind: "bakery",
     real: false,
     neighborhood: "noe-valley",
@@ -619,6 +640,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "south-of-market/steamfitter-coffee",
     name: "Steamfitter Coffee",
+    aliases: ["Steamfitter"],
     kind: "cafe",
     real: false,
     neighborhood: "south-of-market",
@@ -632,6 +654,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "south-of-market/plumb-line-coffee",
     name: "Plumb Line Coffee",
+    aliases: ["Plumb Line"],
     kind: "cafe",
     real: false,
     neighborhood: "south-of-market",
@@ -684,6 +707,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "south-of-market/signal-lamp-tavern",
     name: "Signal Lamp Tavern",
+    aliases: ["Signal Lamp"],
     kind: "bar",
     real: false,
     neighborhood: "south-of-market",
@@ -723,6 +747,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "south-of-market/victoria-manalo-draves-park",
     name: "Victoria Manalo Draves Park",
+    aliases: ["Draves Park"],
     kind: "park",
     real: true,
     neighborhood: "south-of-market",
@@ -749,6 +774,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "south-of-market/4th-and-king-caltrain",
     name: "4th & King Caltrain",
+    aliases: ["4th & King"],
     kind: "transit",
     real: true,
     neighborhood: "south-of-market",
@@ -788,6 +814,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "hayes-valley/gristmill-bakehouse",
     name: "Gristmill Bakehouse",
+    aliases: ["Gristmill"],
     kind: "bakery",
     real: false,
     neighborhood: "hayes-valley",
@@ -840,6 +867,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "hayes-valley/gearshift-tavern",
     name: "Gearshift Tavern",
+    aliases: ["Gearshift"],
     kind: "bar",
     real: false,
     neighborhood: "hayes-valley",
@@ -931,6 +959,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "potrero-hill/sutro-boulders",
     name: "Sutro Boulders",
+    aliases: ["Sutro"],
     kind: "climbing-gym",
     real: false,
     neighborhood: "potrero-hill",
@@ -957,6 +986,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "potrero-hill/slipway-diner",
     name: "Slipway Diner",
+    aliases: ["Slipway"],
     kind: "restaurant",
     real: false,
     neighborhood: "potrero-hill",
@@ -1035,6 +1065,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "potrero-hill/crane-cove-park",
     name: "Crane Cove Park",
+    aliases: ["Crane Cove"],
     kind: "park",
     real: true,
     neighborhood: "potrero-hill",
@@ -1061,6 +1092,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "western-addition/night-heron-coffee",
     name: "Night Heron Coffee",
+    aliases: ["Night Heron"],
     kind: "cafe",
     real: false,
     neighborhood: "western-addition",
@@ -1100,6 +1132,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "western-addition/slow-rise-pizza",
     name: "Slow Rise Pizza",
+    aliases: ["Slow Rise"],
     kind: "restaurant",
     real: false,
     neighborhood: "western-addition",
@@ -1139,6 +1172,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "western-addition/raymond-kimbell-playground",
     name: "Raymond Kimbell Playground",
+    aliases: ["Kimbell"],
     kind: "park",
     real: true,
     neighborhood: "western-addition",
@@ -1178,6 +1212,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "inner-sunset/low-cloud-coffee",
     name: "Low Cloud Coffee",
+    aliases: ["Low Cloud"],
     kind: "cafe",
     real: false,
     neighborhood: "inner-sunset",
@@ -1191,6 +1226,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "inner-sunset/bramble-bakehouse",
     name: "Bramble Bakehouse",
+    aliases: ["Bramble"],
     kind: "bakery",
     real: false,
     neighborhood: "inner-sunset",
@@ -1204,6 +1240,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "inner-sunset/twelve-bowls-pho",
     name: "Twelve Bowls Pho",
+    aliases: ["Twelve Bowls"],
     kind: "restaurant",
     real: false,
     neighborhood: "inner-sunset",
@@ -1217,6 +1254,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "inner-sunset/little-pleat-dumpling-house",
     name: "Little Pleat Dumpling House",
+    aliases: ["Little Pleat"],
     kind: "restaurant",
     real: false,
     neighborhood: "inner-sunset",
@@ -1230,6 +1268,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "inner-sunset/the-cozy-kelpie",
     name: "The Cozy Kelpie",
+    aliases: ["Kelpie"],
     kind: "bar",
     real: false,
     neighborhood: "inner-sunset",
@@ -1282,6 +1321,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "inner-sunset/16th-avenue-tiled-steps",
     name: "16th Avenue Tiled Steps",
+    aliases: ["Tiled Steps"],
     kind: "stairway",
     real: true,
     neighborhood: "inner-sunset",
@@ -1295,6 +1335,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "inner-sunset/grand-view-park",
     name: "Grand View Park",
+    aliases: ["Grand View"],
     kind: "viewpoint",
     real: true,
     neighborhood: "inner-sunset",
@@ -1321,6 +1362,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "inner-sunset/san-francisco-botanical-garden",
     name: "San Francisco Botanical Garden",
+    aliases: ["Botanical Garden"],
     kind: "park",
     real: true,
     neighborhood: "inner-sunset",
@@ -1412,6 +1454,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "sunset-parkside/kelpline-surf-shop",
     name: "Kelpline Surf Shop",
+    aliases: ["Kelpline"],
     kind: "shop",
     real: false,
     neighborhood: "sunset-parkside",
@@ -1451,6 +1494,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "sunset-parkside/morning-pearl-bakery",
     name: "Morning Pearl Bakery",
+    aliases: ["Morning Pearl"],
     kind: "bakery",
     real: false,
     neighborhood: "sunset-parkside",
@@ -1464,6 +1508,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "sunset-parkside/silk-thread-noodle-house",
     name: "Silk Thread Noodle House",
+    aliases: ["Silk Thread"],
     kind: "restaurant",
     real: false,
     neighborhood: "sunset-parkside",
@@ -1594,6 +1639,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "inner-richmond/ninebark-coffee",
     name: "Ninebark Coffee",
+    aliases: ["Ninebark"],
     kind: "cafe",
     real: false,
     neighborhood: "inner-richmond",
@@ -1646,6 +1692,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "inner-richmond/tiny-basket-dim-sum",
     name: "Tiny Basket Dim Sum",
+    aliases: ["Tiny Basket"],
     kind: "restaurant",
     real: false,
     neighborhood: "inner-richmond",
@@ -1737,6 +1784,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "haight-ashbury/sunset-tunnel-coffee",
     name: "Sunset Tunnel Coffee",
+    aliases: ["Sunset Tunnel"],
     kind: "cafe",
     real: false,
     neighborhood: "haight-ashbury",
@@ -1750,6 +1798,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "haight-ashbury/lupine-coffee",
     name: "Lupine Coffee",
+    aliases: ["Lupine"],
     kind: "cafe",
     real: false,
     neighborhood: "haight-ashbury",
@@ -1893,6 +1942,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "marina/fort-mason-great-meadow",
     name: "Fort Mason Great Meadow",
+    aliases: ["Great Meadow"],
     kind: "park",
     real: true,
     neighborhood: "marina",
@@ -1919,6 +1969,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "marina/crissy-field",
     name: "Crissy Field",
+    aliases: ["Crissy"],
     kind: "park",
     real: true,
     neighborhood: "marina",
@@ -1971,6 +2022,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "marina/moonrise-chestnut-cart",
     name: "Moonrise Chestnut St cart",
+    aliases: ["Moonrise cart"],
     kind: "cafe",
     real: false,
     neighborhood: "marina",
@@ -1984,6 +2036,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "marina/halyard-bagel-works",
     name: "Halyard Bagel Works",
+    aliases: ["Halyard"],
     kind: "bakery",
     real: false,
     neighborhood: "marina",
@@ -1997,6 +2050,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "marina/windsock-kitchen",
     name: "Windsock Kitchen",
+    aliases: ["Windsock"],
     kind: "restaurant",
     real: false,
     neighborhood: "marina",
@@ -2049,6 +2103,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "marina/pier-light-grocery",
     name: "Pier Light Grocery",
+    aliases: ["Pier Light"],
     kind: "grocery",
     real: false,
     neighborhood: "marina",
@@ -2114,6 +2169,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "north-beach/north-beach-branch-library",
     name: "North Beach Branch Library",
+    aliases: ["North Beach Library"],
     kind: "library",
     real: true,
     neighborhood: "north-beach",
@@ -2153,6 +2209,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "north-beach/caffe-nebbia",
     name: "Caffe Nebbia",
+    aliases: ["Nebbia"],
     kind: "cafe",
     real: false,
     neighborhood: "north-beach",
@@ -2166,6 +2223,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "north-beach/forno-del-colle",
     name: "Forno del Colle",
+    aliases: ["Forno"],
     kind: "bakery",
     real: false,
     neighborhood: "north-beach",
@@ -2192,6 +2250,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "north-beach/gelateria-scirocco",
     name: "Gelateria Scirocco",
+    aliases: ["Scirocco"],
     kind: "dessert",
     real: false,
     neighborhood: "north-beach",
@@ -2231,6 +2290,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "north-beach/undertow-jazz-club",
     name: "Undertow Jazz Club",
+    aliases: ["Undertow"],
     kind: "music-venue",
     real: false,
     neighborhood: "north-beach",
@@ -2244,6 +2304,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "pacific-heights/alta-plaza-park",
     name: "Alta Plaza Park",
+    aliases: ["Alta Plaza"],
     kind: "park",
     real: true,
     neighborhood: "pacific-heights",
@@ -2257,6 +2318,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "pacific-heights/lafayette-park",
     name: "Lafayette Park",
+    aliases: ["Lafayette"],
     kind: "park",
     real: true,
     neighborhood: "pacific-heights",
@@ -2296,6 +2358,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "pacific-heights/bay-window-espresso",
     name: "Bay Window Espresso",
+    aliases: ["Bay Window"],
     kind: "cafe",
     real: false,
     neighborhood: "pacific-heights",
@@ -2309,6 +2372,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "pacific-heights/copperleaf-bakery",
     name: "Copperleaf Bakery",
+    aliases: ["Copperleaf"],
     kind: "bakery",
     real: false,
     neighborhood: "pacific-heights",
@@ -2322,6 +2386,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "pacific-heights/two-bridges-banh-mi",
     name: "Two Bridges Banh Mi",
+    aliases: ["Two Bridges"],
     kind: "restaurant",
     real: false,
     neighborhood: "pacific-heights",
@@ -2400,6 +2465,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "nob-hill/slow-grade-coffee",
     name: "Slow Grade Coffee",
+    aliases: ["Slow Grade"],
     kind: "cafe",
     real: false,
     neighborhood: "nob-hill",
@@ -2426,6 +2492,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "nob-hill/gripman-diner",
     name: "The Gripman Diner",
+    aliases: ["Gripman"],
     kind: "restaurant",
     real: false,
     neighborhood: "nob-hill",
@@ -2439,6 +2506,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "nob-hill/brass-bell-noodle-house",
     name: "Brass Bell Noodle House",
+    aliases: ["Brass Bell"],
     kind: "restaurant",
     real: false,
     neighborhood: "nob-hill",
@@ -2465,6 +2533,7 @@ export const NEIGHBORHOOD_PLACES: readonly PlaceSeed[] = [
   {
     key: "nob-hill/neon-duet-karaoke",
     name: "Neon Duet Karaoke",
+    aliases: ["Neon Duet"],
     kind: "bar",
     real: false,
     neighborhood: "nob-hill",
