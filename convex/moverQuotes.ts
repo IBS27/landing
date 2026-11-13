@@ -101,8 +101,8 @@ const moverRates = defineTask<{ mover: string }, typeof ratesOutput>({
   name: "ember.moverRates",
   instructions: `You read a moving company's Facebook Page posts and extract its published rates.
 hourly: dollars per hour for the whole crew. crew: number of movers in that crew. minHours: the hour minimum. truckFee: any flat truck, trip or travel fee (0 if none).
-discounts: each deal the posts state, with its percent and when it applies: "weekday" (midweek or Monday to Thursday), "student" (needs a student ID), or "always".
-A deal with any other condition (booking ahead, a promo code, a minimum size) is "other".
+discounts: each deal the posts state, with its percent and when it applies: "weekday" (midweek or Monday to Thursday), "student" (needs a student ID), or "always" (no condition at all).
+A deal with any other condition (weekends, booking ahead, returning customers, a promo code, a minimum size), alone or on top of a weekday, is "other".
 Use only what the posts say; never guess a number. sourceKeys: the keys of the posts you used.`,
   output: ratesOutput,
   cites: (o) => o.sourceKeys,

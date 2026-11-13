@@ -50,6 +50,12 @@ describe("estimate", () => {
       "10% off weekday moves (Mon to Thu) booked at least a week ahead.",
     ]);
     expect(card?.discounts.map((d) => d.when)).toEqual(["other"]);
+    expect(
+      rateFromText([
+        "$155/hr. 10% off weekend moves. 5% off weekday moves for returning customers.",
+        "20% off all moves this month.",
+      ])?.discounts.map((d) => d.when),
+    ).toEqual(["other", "other", "always"]);
     const e = card && estimate(card, { size: "1br", date: "2026-12-02", stairs: false });
     expect(e?.applied).toBeNull();
     expect(e?.ifEligible).toHaveLength(1);
@@ -61,6 +67,7 @@ describe("quotedPrice", () => {
     expect(quotedPrice("$155/hr; the total quote is $679")).toBe(679);
     expect(quotedPrice("$155 an hour, so about $1,240 all in")).toBe(1240);
     expect(quotedPrice("We can do it for $640.")).toBe(640);
+    expect(quotedPrice("$155.00/hr; the total quote is $679")).toBe(679);
     expect(quotedPrice("$155 per hour")).toBeNull();
     expect(quotedPrice(undefined)).toBeNull();
   });

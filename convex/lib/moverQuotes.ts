@@ -95,6 +95,13 @@ export function rateProblems(card: RateCard): string[] {
 
 const num = (s: string | undefined) => (s === undefined ? undefined : Number(s.replace(/,/g, "")));
 
+/** Words a deal may use and still be an unconditional or weekday-only deal. */
+const PLAIN_DEAL_WORDS = new Set(
+  "labor all any every your our move moves moving local on to through the this that fall winter spring summer month week weekday weekdays midweek mid monday mondays tuesday tuesdays wednesday wednesdays thursday thursdays mon tue tues wed thu thurs".split(
+    " ",
+  ),
+);
+
 /** The non-AI reader: rates and deals from a mover's post texts, by pattern. */
 export function rateFromText(texts: readonly string[]): RateCard | null {
   const all = texts.join("\n");
@@ -107,11 +114,15 @@ export function rateFromText(texts: readonly string[]): RateCard | null {
   for (const m of all.matchAll(/(\d{1,2})%\s*off\s*([^.!\n]*)/gi)) {
     const percent = Number(m[1]);
     const rest = m[2].toLowerCase();
+    // Only conditions code can check are applied; any other word makes it "other".
+    const plain = (rest.match(/[a-z]+/g) ?? []).every((w) => PLAIN_DEAL_WORDS.has(w));
     const when: DiscountWhen = /student/.test(rest)
       ? "student"
-      : /book|ahead|advance|code|first|refer|minimum|veteran|senior|military/.test(rest)
+      : !plain
         ? "other"
-        : /week ?day|mid-?week|mon|tue|wed|thu/.test(rest)
+        : /\b(week ?days?|mid-?week|mon(days?)?|tues?(days?)?|wed(nesdays?)?|thu(rs)?(days?)?)\b/.test(
+              rest,
+            )
           ? "weekday"
           : "always";
     discounts.push({ label: `${percent}% off ${m[2].trim()}`.trim(), percent, when });
@@ -125,7 +136,7 @@ export function rateFromText(texts: readonly string[]): RateCard | null {
  */
 export function quotedPrice(text: string | undefined): number | null {
   for (const m of (text ?? "").matchAll(
-    /\$\s?(\d{1,2},\d{3}|\d{3,5})(?![\d,])(\s*(?:\/|per|an|a)\s*(?:hr|hour)\b|\s*hourly\b)?/gi,
+    /\$\s?(\d{1,2},\d{3}|\d{3,5})(?:\.\d{1,2})?(?![\d,])(\s*(?:\/|per|an|a)\s*(?:hr|hour)\b|\s*hourly\b)?/gi,
   ))
     if (!m[2]) return Number(m[1].replace(/,/g, ""));
   return null;
