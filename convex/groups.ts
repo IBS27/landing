@@ -4,6 +4,7 @@ import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { recordSignal, undoSignal } from "./lib/activity";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { activityLabel, externalPostsPerDay } from "./lib/groupActivity";
+import { admitToHouse, canSeeGroupAsHouse, recordHouseInvite } from "./lib/houseAccess";
 import { checkPoint, neighborhoodIdAt } from "./lib/neighborhoods";
 import { notify } from "./lib/notify";
 import { canView, enrichPosts, eventVisible, loadAudience } from "./lib/posts";
@@ -298,6 +299,8 @@ export const get = viewerQuery({
     const g = await resolveGroup(ctx, idOrSlug);
     if (!g) return null;
     const viewerId = ctx.viewer._id;
+    // A House Group (#38) shows only to the people who live there and those invited.
+    if (!(await canSeeGroupAsHouse(ctx, g._id, viewerId))) return null;
     const [members, friendList, stats, creator, invites] = await Promise.all([
       groupMembers(ctx, g._id),
       friendIds(ctx, viewerId),
@@ -666,6 +669,8 @@ export const join = viewerMutation({
     const g = await requireGroup(ctx, groupId);
     const viewerId = ctx.viewer._id;
     if (await membership(ctx, groupId, viewerId)) return;
+    // A House Group (#38) is invite-only; this uses the invite up.
+    await admitToHouse(ctx, groupId, viewerId);
     const now = Date.now();
     await ctx.db.insert("groupMembers", {
       groupId,
@@ -717,6 +722,8 @@ export const invite = viewerMutation({
       throw new ConvexError("Join the group to invite friends");
     for (const userId of new Set(userIds)) {
       if (await membership(ctx, groupId, userId)) continue;
+      // Inviting to a House Group (#38) records the invite `join` checks.
+      await recordHouseInvite(ctx, groupId, userId, viewerId);
       if (await alreadyInvited(ctx, groupId, userId)) continue;
       await notify(ctx, {
         userId,

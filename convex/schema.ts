@@ -3,6 +3,7 @@ import { v } from "convex/values";
 import { cityProfileFact } from "./lib/cityProfileFacts";
 import { matchBy } from "./lib/crews";
 import { dismissal } from "./lib/dismissals";
+import { billCadence, choreCadence } from "./lib/house";
 import { interestId } from "./lib/interests";
 import { lifestyleAnswers } from "./lib/lifestyle";
 import { profileSignal } from "./lib/profileSignals";
@@ -1125,4 +1126,82 @@ export default defineSchema({
     /** The week's check-in (#33), written by the same job. */
     checkIn: v.optional(journeyCheckIn),
   }).index("by_user_week", ["userId", "weekOf"]),
+
+  /**
+   * Landing House Groups (#38): marks a Facebook Group as a house. The Group
+   * is private, hidden and never located; who lives there is its
+   * `groupMembers`, checked live. Chores, bills and groceries below belong to
+   * the house and are read and written only by its members (`convex/house.ts`).
+   */
+  houses: defineTable({
+    groupId: v.id("groups"),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+  }).index("by_group", ["groupId"]),
+
+  /**
+   * Invitations to a house. House Groups are invite-only: `groups.join`
+   * admits someone only with a row here, and joining uses it up. Kept apart
+   * from notifications, which a person can turn off.
+   */
+  houseInvites: defineTable({
+    houseId: v.id("houses"),
+    userId: v.id("users"),
+    invitedBy: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_house_user", ["houseId", "userId"])
+    .index("by_user", ["userId", "createdAt"]),
+
+  /** A house chore: what, how often, and who's on it (a member). #39 suggests rotations. */
+  houseChores: defineTable({
+    houseId: v.id("houses"),
+    title: v.string(),
+    cadence: choreCadence,
+    assigneeId: v.optional(v.id("users")),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+  }).index("by_house", ["houseId", "createdAt"]),
+
+  /**
+   * A chore done for one period, San Francisco time: the week's Monday, the
+   * month's first day, or "once". The history #39's rotations read.
+   */
+  choreCompletions: defineTable({
+    choreId: v.id("houseChores"),
+    houseId: v.id("houses"),
+    period: v.string(),
+    userId: v.id("users"),
+    doneAt: v.number(),
+  }).index("by_chore", ["choreId", "period"]),
+
+  /**
+   * A house bill, in whole cents. Paying a monthly bill adds next month's
+   * (`fromBillId` points back). No split is stored here: #39 computes splits.
+   */
+  houseBills: defineTable({
+    houseId: v.id("houses"),
+    title: v.string(),
+    amountCents: v.number(),
+    /** "YYYY-MM-DD", San Francisco. */
+    dueDate: v.optional(v.string()),
+    cadence: billCadence,
+    paidBy: v.optional(v.id("users")),
+    paidAt: v.optional(v.number()),
+    fromBillId: v.optional(v.id("houseBills")),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_house", ["houseId", "createdAt"])
+    .index("by_from", ["fromBillId"]),
+
+  /** The house's shared grocery list. Checking an item off records who and when. */
+  groceryItems: defineTable({
+    houseId: v.id("houses"),
+    text: v.string(),
+    addedBy: v.id("users"),
+    checkedBy: v.optional(v.id("users")),
+    checkedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  }).index("by_house", ["houseId", "createdAt"]),
 });

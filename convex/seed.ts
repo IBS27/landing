@@ -679,6 +679,9 @@ export const reset = internalAction({
     // Muse proposals for the demo inbox (#6).
     await ctx.runMutation(internal.proposals.seedDemo, {});
 
+    // Maya, Ana and Hannah's House Group (#38): chores, bills and groceries.
+    await ctx.runMutation(internal.house.seedDemo, {});
+
     // Move-in Crew opt-ins (#30), after City Profiles.
     await ctx.runMutation(internal.crews.seedDemo, {});
 
