@@ -2,6 +2,7 @@ import type { Id } from "../_generated/dataModel";
 import type { NeighborhoodScoreKind, Source } from "../validators";
 import { sourceKey } from "./citations";
 import { type InterestId, interestsInText } from "./interests";
+import { hasProtected } from "./protectedText";
 
 /**
  * Neighborhood scores (#17): pure scoring over what a neighborhood offers.
@@ -351,9 +352,13 @@ export function interestFit(
  */
 const NIGHT =
   /\b(?:well[- ]lit|poorly lit|badly lit|brightly lit|lit up|street ?lights?|(?:gets?|getting|pretty|too|really|very|super|kinda) dark|dark (?:blocks?|streets?|stretch(?:es)?|alleys?|at night|after)|pitch[- ]dark|at night|after dark|after midnight|late at night|(?:walk|walks|walked|walking|bike|biked|biking) home|owl (?:bus|buses|line|lines|service)|(?:n|l|90|91) owl|owl (?:judah|taraval)|last (?:bart|train|bus)|late[- ]night (?:muni|bus|buses|bart|trains?|transit|service))\b/i;
-/** Labels about an area, or who's in it, never quoted (the brief: cited facts only, no labels). */
+/**
+ * Labels about an area, or who's in it, never quoted (the brief: cited facts only, no labels):
+ * safety verdicts either way, and descriptions of the people there. `hasProtected` catches the
+ * rest of who someone is (origin, religion, orientation…).
+ */
 const LABEL_WORDS =
-  /\b(?:sketchy|unsafe|dangerous|bad (?:area|part|neighborhood|block)|shady|ghetto|crime|criminals?|scary|homeless|addicts?)\b/i;
+  /\b(?:sketchy|safe|safer|safest|safely|safety|unsafe|dangerous|bad (?:area|part|neighborhood|block)|shady|ghetto|crime|criminals?|scary|homeless|addicts?|famil(?:y|ies)|kids|children|young|old|older|elderly|seniors?|retirees?)\b/i;
 /** Quotes are at most this long: the sentence that says it, cut around the words if needed. */
 const QUOTE_MAX = 200;
 /** Shorter sentences are fragments (a list item, a heading), not something a local said. */
@@ -366,7 +371,7 @@ const QUOTE_MIN = 30;
  * sentence is a question or a fragment: those ask, they don't tell.
  */
 export function nightExcerpt(text: string): string | null {
-  if (LABEL_WORDS.test(text)) return null;
+  if (LABEL_WORDS.test(text) || hasProtected(text)) return null;
   const m = NIGHT.exec(text);
   if (!m) return null;
   const at = m.index;

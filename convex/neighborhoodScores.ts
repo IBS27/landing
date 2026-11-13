@@ -1,6 +1,12 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
-import { internalMutation, type QueryCtx } from "./_generated/server";
+import {
+  internalAction,
+  internalMutation,
+  internalQuery,
+  type QueryCtx,
+} from "./_generated/server";
 import {
   assertCitable,
   type CitedSource,
@@ -33,7 +39,12 @@ import {
 } from "./lib/neighborhoodScores";
 import { loadAudience } from "./lib/posts";
 import { NEIGHBORHOOD_PLACES } from "./seed/world/neighborhoods/places";
-import type { NeighborhoodScoreKind, Source } from "./validators";
+import {
+  type NeighborhoodScoreKind,
+  neighborhoodScoreKind,
+  type Source,
+  source,
+} from "./validators";
 
 /**
  * Neighborhood scores (#17). `recompute` stores the three shared scores (things
@@ -46,10 +57,19 @@ const DAY = 86_400_000;
 const KINDS: NeighborhoodScoreKind[] = ["things_to_do", "food", "transit"];
 /** Group threads older than this don't count toward places locals recommend. */
 const THREAD_WINDOW = 365 * DAY;
+/** Caps that keep every read bounded: Groups, newest posts per Group, comments per post, all texts, and Events. */
+const MAX_GROUPS = 50;
+const POSTS_PER_GROUP = 50;
+const COMMENTS_PER_POST = 30;
+const MAX_TEXTS = 400;
+const MAX_EVENTS = 100;
 
 type ThreadText = { source: Source; text: string; reactions: number; createdAt: number };
 
-/** The neighborhood's Groups and the text of their recent posts and comments. */
+/**
+ * The neighborhood's Groups, and the text of the newest public posts in its public Groups with
+ * their comments. Only public text: it may back a score everyone sees.
+ */
 async function neighborhoodThreads(
   ctx: QueryCtx,
   neighborhoodId: Id<"neighborhoods">,
@@ -58,15 +78,18 @@ async function neighborhoodThreads(
   const groups = await ctx.db
     .query("groups")
     .withIndex("by_neighborhood", (q) => q.eq("neighborhoodId", neighborhoodId))
-    .collect();
+    .take(MAX_GROUPS);
   const texts: ThreadText[] = [];
-  // Only public, visible Groups: anything here may back a score everyone sees.
   for (const g of groups.filter((x) => x.privacy === "public" && x.visible)) {
     const posts = await ctx.db
       .query("posts")
       .withIndex("by_group", (q) => q.eq("groupId", g._id).gte("createdAt", now - THREAD_WINDOW))
-      .collect();
+      .order("desc")
+      .take(POSTS_PER_GROUP);
     for (const p of posts) {
+      if (texts.length >= MAX_TEXTS) break;
+      // A post in a public Group can still be restricted (its own audience, a wall post).
+      if (!(await isPublicSource(ctx, { kind: "post", postId: p._id }))) continue;
       texts.push({
         source: { kind: "post", postId: p._id },
         text: p.text ?? "",
@@ -76,8 +99,11 @@ async function neighborhoodThreads(
       const comments = await ctx.db
         .query("comments")
         .withIndex("by_post", (q) => q.eq("postId", p._id))
-        .collect();
+        .take(COMMENTS_PER_POST);
       for (const c of comments) {
+        if (texts.length >= MAX_TEXTS) break;
+        // A comment on a public post is public while its author exists (`isPublicSource`).
+        if (!(await ctx.db.get(c.authorId))) continue;
         texts.push({
           source: { kind: "comment", commentId: c._id },
           text: c.text,
@@ -119,7 +145,7 @@ async function gather(ctx: QueryCtx, n: Doc<"neighborhoods">, now: number): Prom
         .gte("startAt", now)
         .lt("startAt", now + 30 * DAY),
     )
-    .collect();
+    .take(MAX_EVENTS);
   for (const e of upcoming) {
     if (e.online || !(await isPublicSource(ctx, { kind: "event", eventId: e._id }))) continue;
     events.push({ id: e._id, startAt: e.startAt, category: e.category, title: e.title });
@@ -159,55 +185,114 @@ async function gather(ctx: QueryCtx, n: Doc<"neighborhoods">, now: number): Prom
   };
 }
 
-/**
- * Rewrites every neighborhood's shared scores. A score with no public source
- * isn't stored (the UI says there isn't enough to go on). Runs at the end of
- * `seed:reset` and daily (`convex/crons.ts`).
- */
-export const recompute = internalMutation({
+/** Every neighborhood (SF has 41). */
+export const neighborhoodIds = internalQuery({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<Id<"neighborhoods">[]> =>
+    (await ctx.db.query("neighborhoods").take(200)).map((n) => n._id),
+});
+
+/** What one neighborhood's shared scores count, read in its own transaction. */
+export const inputsFor = internalQuery({
+  args: { neighborhoodId: v.id("neighborhoods"), now: v.number() },
+  handler: async (ctx, { neighborhoodId, now }): Promise<ScoreInputs | null> => {
+    const n = await ctx.db.get(neighborhoodId);
+    return n ? gather(ctx, n, now) : null;
+  },
+});
+
+/**
+ * Replaces one neighborhood's shared scores. A score with no public source isn't stored (the
+ * UI says there isn't enough to go on).
+ */
+export const store = internalMutation({
+  args: {
+    neighborhoodId: v.id("neighborhoods"),
+    now: v.number(),
+    scores: v.array(
+      v.object({
+        kind: neighborhoodScoreKind,
+        score: v.number(),
+        raw: v.number(),
+        breakdown: v.string(),
+        /** Candidates, most telling first; the public ones are cited. */
+        sources: v.array(source),
+      }),
+    ),
+  },
+  handler: async (ctx, { neighborhoodId, now, scores }) => {
+    let stored = 0;
+    for (const s of scores) {
+      const old = await ctx.db
+        .query("neighborhoodScores")
+        .withIndex("by_neighborhood", (q) =>
+          q.eq("neighborhoodId", neighborhoodId).eq("kind", s.kind),
+        )
+        .collect();
+      for (const o of old) await ctx.db.delete(o._id);
+      const sources: Source[] = [];
+      for (const c of s.sources) {
+        if (sources.length === MAX_SOURCES) break;
+        if (await isPublicSource(ctx, c)) sources.push(c);
+      }
+      const citations = s.raw > 0 ? tryCite(sources) : null;
+      if (!citations) continue;
+      // Shown to everyone, so every source must be public (#7).
+      await assertCitable(ctx, citations, "everyone");
+      await ctx.db.insert("neighborhoodScores", {
+        neighborhoodId,
+        kind: s.kind,
+        score: s.score,
+        raw: Math.round(s.raw * 100) / 100,
+        label: scoreLabel(s.kind, s.score),
+        breakdown: s.breakdown,
+        citations,
+        computedAt: now,
+      });
+      stored++;
+    }
+    return { stored, withoutSources: scores.length - stored };
+  },
+});
+
+/**
+ * Rewrites every neighborhood's shared scores: each neighborhood is read and written in its own
+ * transaction, and only the ranking spans them. Runs at the end of `seed:reset` and daily
+ * (`convex/crons.ts`).
+ */
+export const recompute = internalAction({
+  args: {},
+  handler: async (ctx): Promise<{ stored: number; withoutSources: number }> => {
     const now = Date.now();
-    const neighborhoods = await ctx.db.query("neighborhoods").collect();
     const inputs = new Map<Id<"neighborhoods">, ScoreInputs>();
-    for (const n of neighborhoods) inputs.set(n._id, await gather(ctx, n, now));
+    for (const id of await ctx.runQuery(internal.neighborhoodScores.neighborhoodIds, {})) {
+      const i = await ctx.runQuery(internal.neighborhoodScores.inputsFor, {
+        neighborhoodId: id,
+        now,
+      });
+      if (i) inputs.set(id, i);
+    }
+    const ranked = KINDS.map((kind) => {
+      const raws = new Map([...inputs].map(([id, i]) => [id, RAW[kind](i)]));
+      return { kind, raws, scores: percentiles(raws) };
+    });
     let stored = 0;
     let withoutSources = 0;
-    for (const kind of KINDS) {
-      const raws = new Map([...inputs].map(([id, i]) => [id, RAW[kind](i)]));
-      const scores = percentiles(raws);
-      for (const [id, i] of inputs) {
-        const old = await ctx.db
-          .query("neighborhoodScores")
-          .withIndex("by_neighborhood", (q) => q.eq("neighborhoodId", id).eq("kind", kind))
-          .collect();
-        for (const o of old) await ctx.db.delete(o._id);
-        const raw = raws.get(id) ?? 0;
-        const sources: Source[] = [];
-        for (const s of scoreSources(kind, i)) {
-          if (sources.length === MAX_SOURCES) break;
-          if (await isPublicSource(ctx, s)) sources.push(s);
-        }
-        const citations = raw > 0 ? tryCite(sources) : null;
-        if (!citations) {
-          withoutSources++;
-          continue;
-        }
-        // Shown to everyone, so every source must be public (#7).
-        await assertCitable(ctx, citations, "everyone");
-        const score = scores.get(id) ?? 0;
-        await ctx.db.insert("neighborhoodScores", {
-          neighborhoodId: id,
+    for (const [id, i] of inputs) {
+      const r = await ctx.runMutation(internal.neighborhoodScores.store, {
+        neighborhoodId: id,
+        now,
+        scores: ranked.map(({ kind, raws, scores }) => ({
           kind,
-          score,
-          raw: Math.round(raw * 100) / 100,
-          label: scoreLabel(kind, score),
+          score: scores.get(id) ?? 0,
+          raw: raws.get(id) ?? 0,
           breakdown: breakdown(kind, i),
-          citations,
-          computedAt: now,
-        });
-        stored++;
-      }
+          // Enough candidates to find the public ones, without unbounded checks.
+          sources: scoreSources(kind, i).slice(0, 4 * MAX_SOURCES),
+        })),
+      });
+      stored += r.stored;
+      withoutSources += r.withoutSources;
     }
     return { stored, withoutSources };
   },
@@ -286,7 +371,7 @@ export const get = viewerQuery({
             .gte("startAt", now)
             .lt("startAt", now + 30 * DAY),
         )
-        .collect();
+        .take(MAX_EVENTS);
       const candidates: FitItem[] = [
         ...groups.map((g) => ({
           interests: interestsForGroup({ category: g.category, tags: g.tags, name: g.name }),

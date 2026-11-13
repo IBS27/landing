@@ -847,7 +847,8 @@ function referenceDates(feed: Gtfs): Record<DayType, string> {
   return out;
 }
 
-type StopEvent = { stop: string; t: number; row: number };
+/** `board`: riders can get on here (not a drop-off-only stop or the end of the trip). */
+type StopEvent = { stop: string; t: number; row: number; seq: number; board: boolean };
 /** Trips running on any of `services`, with their stop events (row = stop_times line index). */
 function tripsOf(feed: Gtfs, services: Set<string>) {
   const trips = new Map<string, { route: string; service: string; events: StopEvent[] }>();
@@ -858,16 +859,26 @@ function tripsOf(feed: Gtfs, services: Set<string>) {
   if (!bytes) throw new Error(`${feed.url} has no stop_times.txt`);
   const lines = new TextDecoder().decode(bytes).replace(/^﻿/, "").split(/\r?\n/);
   const header = parseCsvLine(lines[0]).map((h) => h.trim());
-  const [iTrip, iStop, iDep, iArr] = ["trip_id", "stop_id", "departure_time", "arrival_time"].map((h) =>
-    header.indexOf(h),
-  );
+  const [iTrip, iStop, iDep, iArr, iSeq, iPickup] = [
+    "trip_id",
+    "stop_id",
+    "departure_time",
+    "arrival_time",
+    "stop_sequence",
+    "pickup_type",
+  ].map((h) => header.indexOf(h));
   for (let n = 1; n < lines.length; n++) {
     if (!lines[n]) continue;
     const c = lines[n].includes('"') ? parseCsvLine(lines[n]) : lines[n].split(",");
     const trip = trips.get(c[iTrip]);
     const time = c[iDep] || c[iArr];
     if (!trip || !time) continue;
-    trip.events.push({ stop: c[iStop], t: seconds(time), row: n });
+    trip.events.push({ stop: c[iStop], t: seconds(time), row: n, seq: Number(c[iSeq]), board: c[iPickup] !== "1" });
+  }
+  // Nobody boards at the end of a trip, whatever its pickup_type says.
+  for (const trip of trips.values()) {
+    const last = trip.events.reduce<StopEvent | null>((a, e) => (a && a.seq > e.seq ? a : e), null);
+    if (last) last.board = false;
   }
   return { trips, lines };
 }
@@ -986,7 +997,8 @@ async function buildService() {
             }
             h.routes.set(route.route_id, r);
             if (!h.stopRow.has(route.route_id)) h.stopRow.set(route.route_id, stopById.get(e.stop)?.line ?? "");
-          } else {
+          } else if (e.board) {
+            // Last departures: only stops where riders can board.
             const platform = stopById.get(e.stop);
             const stationId = platform?.parent_station || e.stop;
             const station = stopById.get(stationId);

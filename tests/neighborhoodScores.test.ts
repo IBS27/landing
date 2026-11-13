@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import type { MutationCtx } from "../convex/_generated/server";
+import { type FunctionReference, getFunctionName } from "convex/server";
+import type { ActionCtx, MutationCtx } from "../convex/_generated/server";
 import type { InterestId } from "../convex/lib/interests";
 import {
   breakdown,
@@ -248,6 +249,10 @@ describe("getting around at night", () => {
   test("never quotes labels about an area or its people", () => {
     expect(isNightQuote("it gets sketchy at night")).toBe(false);
     expect(isNightQuote("well-lit, but the crime stats are scary")).toBe(false);
+    // Safety verdicts either way, and who lives or walks here.
+    expect(isNightQuote("This neighborhood is safe to walk home in after dark.")).toBe(false);
+    expect(isNightQuote("Mostly young families and immigrants walk here at night.")).toBe(false);
+    expect(isNightQuote("Lots of gay bars, so the streets stay busy at night.")).toBe(false);
   });
   test("quotes the sentence that says it, cut around the words when long", () => {
     expect(
@@ -296,6 +301,21 @@ const DAY = 86_400_000;
 type Handler = (ctx: MutationCtx, args: Record<string, unknown>) => Promise<unknown>;
 const run = (fn: unknown, ctx: MutationCtx, args: Record<string, unknown> = {}) =>
   (fn as { _handler: Handler })._handler(ctx, args);
+
+/** Runs the `recompute` action, with its queries and mutations on the fake database. */
+function recompute(ctx: MutationCtx) {
+  const fns: Record<string, unknown> = {
+    "neighborhoodScores:neighborhoodIds": scores.neighborhoodIds,
+    "neighborhoodScores:inputsFor": scores.inputsFor,
+    "neighborhoodScores:store": scores.store,
+  };
+  const call = (ref: FunctionReference<"query" | "mutation">, args: Record<string, unknown>) =>
+    run(fns[getFunctionName(ref)], ctx, args);
+  return run(scores.recompute, {
+    runQuery: call,
+    runMutation: call,
+  } as unknown as ActionCtx as never);
+}
 
 function world() {
   const cites = (id: string) => ({ first: { kind: "external", externalSourceId: id }, rest: [] });
@@ -387,7 +407,7 @@ function world() {
 describe("recompute and get", () => {
   test("scores are stored only with public sources", async () => {
     const { tables, ctx } = world();
-    await run(scores.recompute, ctx);
+    await recompute(ctx);
     const stored = tables.neighborhoodScores.map((r) => `${r.neighborhoodId}:${r.kind}`).sort();
     // Mission: an Event (things to do) and a cited BART station (transit). Inner Sunset's station
     // counts (raw > 0) but its only source is gone, so no transit score is stored. Food: no data.
@@ -399,7 +419,7 @@ describe("recompute and get", () => {
 
   test("a score is hidden when its only source turns private", async () => {
     const { tables, ctx } = world();
-    await run(scores.recompute, ctx);
+    await recompute(ctx);
     const view = async () =>
       (await run(scores.get, ctx, {
         viewerId: "users:v",
@@ -421,9 +441,45 @@ describe("recompute and get", () => {
     ]);
   });
 
+  test("only public posts are quoted, even in a public Group", async () => {
+    const { tables } = world();
+    tables.groups.push({
+      _id: "groups:g",
+      name: "Mission Neighbors",
+      slug: "mission-neighbors",
+      privacy: "public",
+      visible: true,
+      neighborhoodId: "neighborhoods:mission",
+      lastActivityAt: NOW,
+    });
+    const post = (id: string, privacy: string, text: string) => ({
+      _id: id,
+      authorId: "users:v",
+      groupId: "groups:g",
+      privacy,
+      text,
+      attachments: [],
+      reactionCount: 0,
+      commentCount: 0,
+      createdAt: NOW - DAY,
+    });
+    // The author's own only-me post isn't quoted, even to the author.
+    tables.posts.push(
+      post("posts:mine", "only_me", "We walk home along Capp, it's well lit and busy."),
+      post("posts:public", "public", "We walk home along Valencia, it's well lit and busy."),
+    );
+    const r = (await run(scores.get, fakeCtx(tables), {
+      viewerId: "users:v",
+      neighborhoodId: "neighborhoods:mission",
+    })) as { night: { quotes: { quote: string }[] } };
+    expect(r.night.quotes.map((q) => q.quote)).toEqual([
+      "We walk home along Valencia, it's well lit and busy.",
+    ]);
+  });
+
   test("interest fit asks for a City Profile when there is none", async () => {
     const { ctx } = world();
-    await run(scores.recompute, ctx);
+    await recompute(ctx);
     const r = (await run(scores.get, ctx, {
       viewerId: "users:v",
       neighborhoodId: "neighborhoods:mission",

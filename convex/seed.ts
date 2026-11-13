@@ -683,10 +683,7 @@ export const reset = internalAction({
     await ctx.runMutation(internal.crews.seedDemo, {});
 
     // Neighborhood scores (#17), from everything above. The daily cron keeps them fresh.
-    const scores: { stored: number } = await ctx.runMutation(
-      internal.neighborhoodScores.recompute,
-      {},
-    );
+    const scores = await ctx.runAction(internal.neighborhoodScores.recompute, {});
 
     const reactionRows =
       plan.posts.reduce((s, p) => s + p.reactions.length + p.commentReactions.length, 0) +
