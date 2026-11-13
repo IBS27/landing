@@ -310,10 +310,12 @@ export const phraseContext = internalQuery({
     const sources = sourcesOf(s.citations);
     const went = s.kind === "moreLike" && sources[1]?.kind === "event" ? sources[1] : null;
     const wentTo = went ? await ctx.db.get(went.eventId) : null;
-    // What Muse would read about these plans (titles and descriptions, as the
-    // cited sources carry them). Anything protected-sounding keeps the template.
-    const text = [event, group, wentTo].flatMap((d) =>
-      d ? ["title" in d ? d.title : d.name, d.description] : [],
+    // What Muse would read: the draft (which can name a past meetup) and these
+    // plans' titles and descriptions. Anything protected-sounding keeps the template.
+    const text = [s.template].concat(
+      [event, group, wentTo].flatMap((d) =>
+        d ? ["title" in d ? d.title : d.name, d.description] : [],
+      ),
     );
     if (text.some(hasProtected)) return null;
     return {

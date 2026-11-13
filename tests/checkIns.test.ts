@@ -750,6 +750,27 @@ describe("phrase", () => {
     expect(h.row(3).checkIn?.suggestion).toMatchObject({ via: "template" });
   });
 
+  test("a protected-sounding past meetup named in the draft never reaches Muse", async () => {
+    process.env.MODEL_API_KEY = "test";
+    const h = phraseHarness();
+    await checkIns.writeCheckIns(h.db, "users:v" as never, NOW);
+    const template =
+      "Your crew got together at Church coffee. Say hi in SF Coffee Lovers and catch the next one.";
+    const row = h.row(3);
+    if (row.checkIn)
+      row.checkIn.suggestion = {
+        kind: "crewGroup",
+        groupId: "groups:coffee" as never,
+        template,
+        text: template,
+        via: "template",
+        citations: { first: { kind: "group", groupId: "groups:coffee" as never }, rest: [] },
+      };
+    await h.phrase();
+    expect(requests).toEqual([]);
+    expect(h.row(3).checkIn?.suggestion).toMatchObject({ via: "template" });
+  });
+
   test("AI off: no model call, the template stays", async () => {
     const h = phraseHarness();
     await checkIns.writeCheckIns(h.db, "users:v" as never, NOW);
