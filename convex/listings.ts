@@ -1071,13 +1071,15 @@ export const unitDetails = viewerQuery({
       else continue;
       byKey.set(f._id, f);
     }
+    if (places.length === 0) return { views, point, noise: null };
     const risk = noiseRisk(point, places);
     const audience = await loadAudience(ctx, ctx.viewer._id);
-    const reasons: { text: string; sources: NonEmpty<CitedSource> | null }[] = [];
+    const reasons: { text: string; sources: NonEmpty<CitedSource> }[] = [];
     for (const r of risk.reasons) {
       const fact = byKey.get(r.placeKey);
-      const sources =
-        fact && "citations" in fact ? await resolveCitations(ctx, fact.citations, audience) : null;
+      const sources = fact ? await resolveCitations(ctx, fact.citations, audience) : null;
+      // Every reason cites its fact; without its sources there is no rating to show.
+      if (!sources) return { views, point, noise: null };
       reasons.push({ text: r.text, sources });
     }
     return { views, point, noise: { level: risk.level, reasons } };
