@@ -856,7 +856,7 @@ describe("common phrasings", () => {
 describe("evidence and facts come only from each key's own vocabulary", () => {
   const schedule = (text: string) => facts(text).find((p) => p.entry.key === "schedule");
 
-  test("a weekend quote is just the weekend word", () => {
+  test("a weekend quote holds only the schedule's own words", () => {
     for (const text of [
       "I work remote with my hubby on weekends.",
       "I work remote despite MS on weekends.",
@@ -865,7 +865,7 @@ describe("evidence and facts come only from each key's own vocabulary", () => {
       expect(s?.quote).toBe("remote");
       expect(hasProtected(s?.quote ?? "")).toBe(false);
     }
-    expect(schedule("I work remote and work Saturdays.")?.quote).toBe("remote … Saturdays");
+    expect(schedule("I work remote and work Saturdays.")?.quote).toBe("remote … work Saturdays");
   });
 
   test("conditions and things someone has aren't interests", () => {
@@ -982,5 +982,54 @@ describe("evidence and facts come only from each key's own vocabulary", () => {
     expect(entries("My birthday is March 15, 1996. Moving in April.")).toEqual([
       { key: "moveIn", value: { month: "2027-04" } },
     ]);
+  });
+});
+
+/* ---------------- Round 6 ---------------- */
+
+describe("round 6", () => {
+  test("re-narrowing a rules quote keeps it (save after confirm keeps the evidence)", () => {
+    for (const text of [
+      "Budget somewhere between $1,800 and $2,400.",
+      "I work remote and work Saturdays.",
+      "I don't own a car. I take BART and bike.",
+      "Moving March 14, looking for roommates in Noe Valley. I'm starting at Figma.",
+      "Rent of 1.8–2.4k, I love bouldering and live music.",
+    ]) {
+      for (const p of facts(text)) {
+        expect(p.quote).not.toBe("");
+        expect(narrowQuote(p.entry, p.quote, p.carFree)).toBe(p.quote);
+        const [saved] = briefFacts([p.entry], [{ slot: factSlot(p.entry), quote: p.quote }]);
+        expect(saved.evidence.quote).toBe(p.quote);
+      }
+    }
+    expect(facts("Budget somewhere between $1,800 and $2,400.")[0].quote).toBe(
+      "between $1,800 and $2,400",
+    );
+  });
+
+  test("past activities and place names aren't interests", () => {
+    expect(labels("I used to climb, now I love hiking.")).toEqual(["interest:Hiking"]);
+    expect(labels("I want to live in North Beach.")).toEqual(["neighborhood:North Beach"]);
+    expect(labels("I love beach days.")).toEqual(["interest:Beach days"]);
+    const climbing: FactEntry = { key: "interest", value: { id: "climbing" } };
+    expect(modelProblems("I used to climb.", [{ entry: climbing, quote: "climb" }])).not.toEqual(
+      [],
+    );
+  });
+
+  test("a typed employer can't carry a protected trait", () => {
+    const form: BriefForm = {
+      ...EMPTY_BRIEF,
+      budgetMax: "2400",
+      moveInMonth: "2027-03",
+      transport: ["bike"],
+      interests: ["climbing"],
+    };
+    expect(briefProblems({ ...form, employer: "Retired" }, TODAY)).toHaveLength(1);
+    expect(
+      briefProblems({ ...form, employer: "Figma", workArea: "near my church" }, TODAY),
+    ).toHaveLength(1);
+    expect(briefProblems({ ...form, employer: "Figma", workArea: "SoMa" }, TODAY)).toEqual([]);
   });
 });

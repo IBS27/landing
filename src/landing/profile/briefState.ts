@@ -12,6 +12,7 @@ import {
   type Workplace,
 } from "../../../convex/lib/cityProfileFacts";
 import type { InterestId } from "../../../convex/lib/interests";
+import { EMPLOYER_PERSONAL, hasProtected } from "../../../convex/lib/protectedText";
 
 export type CityProfile = FunctionReturnType<typeof api.cityProfile.get>;
 export type Suggestions = FunctionReturnType<typeof api.cityProfile.suggestFromText>;
@@ -117,6 +118,7 @@ export function briefProblems(
   if (moveIn) out.push(moveIn);
   if (f.transport.length === 0) out.push("Pick at least one way you'll get around");
   if (f.interests.length === 0) out.push("Pick a few interests");
+  if (hasProtected(f.employer) || hasProtected(f.workArea)) out.push(EMPLOYER_PERSONAL);
   return out;
 }
 

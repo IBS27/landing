@@ -12,6 +12,10 @@
 
 export const REDACTED = "[removed]";
 
+/** Shown when a typed field (employer, work area) says something about who someone is. */
+export const EMPLOYER_PERSONAL =
+  "Just the company or school name, please: leave out anything about you personally";
+
 const DEMONYMS = [
   "afghan",
   "african",

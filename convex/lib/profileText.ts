@@ -209,7 +209,10 @@ function lastIndex(re: RegExp, text: string): number {
  * ("Hiking, climbing and coffee."), rather than having or needing.
  */
 function isActivity(h: Hit): boolean {
-  if (CONDITION.test(phraseOf(h))) return false;
+  if (CONDITION.test(phraseOf(h)) || isPast(h)) return false;
+  // "North Beach" is a place, not a beach day.
+  if (placesIn([h.part], false).some((p) => p.hit.start < h.end && h.start < p.hit.end))
+    return false;
   const before = h.part.text.slice(0, h.start);
   return lastIndex(HAS, before) <= lastIndex(LIKES, before);
 }
@@ -443,7 +446,14 @@ function amountsIn(part: Part): Amount[] {
     const counts = Boolean(
       dollarA || kA || (isRange && (dollarB || kB)) || perMonth || BUDGET_LEAD.test(before),
     );
-    out.push({ value, hit: { part, start: m.index, end }, counts, perMonth });
+    // "between $1,800 and $2,400" keeps "between", so the quote still reads as a range.
+    const between = isRange && sep === "and" ? before.search(/\bbetween\s*$/i) : -1;
+    out.push({
+      value,
+      hit: { part, start: between === -1 ? m.index : between, end },
+      counts,
+      perMonth,
+    });
   }
   return out;
 }
@@ -568,21 +578,15 @@ const WORKS_WEEKENDS =
   /\b(?:work(?:s|ing)?|on call)\s+(?:(?:on|most|some|every|the|all|many|alternate|alternating|other)\s+){0,2}(?:weekends?|saturdays?|sundays?)\b(?!\s+off)|\bweekend shifts?\b/i;
 
 /**
- * Where they say they work weekends, as just the weekend word ("weekends",
- * "Saturdays"), so nothing between it and "work" becomes evidence. Not when
- * it's negated ("not weekends") or in the past.
+ * Where they say they work weekends ("work most Saturdays"). The pattern
+ * allows only a few fixed words between "work" and the day, so nothing else
+ * they wrote becomes evidence. Not when it's negated ("not weekends") or past.
  */
 function weekendWork(parts: Part[], negatable: boolean): Hit | null {
   for (const h of hits(parts, WORKS_WEEKENDS, false)) {
-    const text = h.part.text.slice(h.start, h.end);
-    const at = h.start + text.search(/weekend|saturday|sunday/i);
-    const word = {
-      part: h.part,
-      start: at,
-      end: at + (text.slice(at - h.start).match(/^\w+/)?.[0].length ?? 0),
-    };
+    const at = h.start + h.part.text.slice(h.start, h.end).search(/weekend|saturday|sunday/i);
     if (!negatable || (!isNegated(h.part, h.start) && !isNegated(h.part, at) && !isPast(h)))
-      return word;
+      return h;
   }
   return null;
 }
