@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Clock } from "lucide-react";
 import { useState } from "react";
 import { useQ } from "@/app/viewer";
-import { PostDialog, type PostView } from "@/features/posts";
+import { MediaThumb, PostDialog, type PostView } from "@/features/posts";
 import { shortAge } from "@/lib/format";
 import { Avatar, Button, Card, EmptyState, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -35,7 +35,8 @@ export function AdActivityPage() {
           ) : (
             ads.map((ad) => {
               const link = ad.attachments.find((a) => a.kind === "link");
-              const thumb = ad.media[0]?.url ?? (link?.kind === "link" ? link.image : null);
+              const media = ad.media[0];
+              const linkImage = link?.kind === "link" ? link.image : null;
               return (
                 <Card key={ad._id} className="flex gap-3 rounded-xl p-3">
                   <button
@@ -44,7 +45,13 @@ export function AdActivityPage() {
                     className="h-[96px] w-[96px] shrink-0 overflow-hidden rounded-lg bg-btn"
                     aria-label={`Open ad from ${ad.author.name}`}
                   >
-                    {thumb && <img src={thumb} alt="" className="h-full w-full object-cover" />}
+                    {media ? (
+                      <MediaThumb media={media} />
+                    ) : (
+                      linkImage && (
+                        <img src={linkImage} alt="" className="h-full w-full object-cover" />
+                      )
+                    )}
                   </button>
                   <div className="flex min-w-0 flex-1 flex-col">
                     <div className="flex items-center gap-2">

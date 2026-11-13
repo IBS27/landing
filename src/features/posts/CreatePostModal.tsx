@@ -19,6 +19,7 @@ import {
   TagPeopleIcon,
   TextBackgroundIcon,
 } from "./icons";
+import { MediaThumb } from "./MediaThumb";
 import { PhotoGrid } from "./PhotoGrid";
 import type { PostView } from "./types";
 import { mediaSize, uploadFile } from "./util";
@@ -373,12 +374,9 @@ export function CreatePostModal({
             {editing && editing.media.length > 0 && (
               <div className="mx-4 my-2 grid grid-cols-4 gap-1">
                 {editing.media.map((m, i) => (
-                  <img
-                    key={i}
-                    src={m.url}
-                    alt=""
-                    className="aspect-square w-full rounded-md object-cover"
-                  />
+                  <div key={i} className="aspect-square overflow-hidden rounded-md">
+                    <MediaThumb media={m} />
+                  </div>
                 ))}
               </div>
             )}

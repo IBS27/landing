@@ -5,7 +5,7 @@ import schema from "../convex/schema";
  * A tiny in-memory stand-in for `ctx.db`: get, indexed equality queries, and
  * insert / patch / delete. Rows come back in index order (the index's fields
  * from `convex/schema.ts`, then insertion order), reversed by `order("desc")`.
- * Ranges other than `eq` are not supported. Writes go to `tables`, so tests can
+ * Ranges other than `eq` are not supported. Queries are also async iterable. Writes go to `tables`, so tests can
  * inspect them.
  */
 
@@ -72,6 +72,12 @@ export function fakeCtx(tables: Record<string, Row[]>, stats?: ReadStats): Mutat
           return read(rows.slice(0, 1))[0] ?? null;
         },
         take: async (n: number) => read(sorted().slice(0, n)),
+        [Symbol.asyncIterator]: async function* () {
+          for (const row of sorted()) {
+            if (stats) stats.docs++;
+            yield row;
+          }
+        },
       };
       return chain;
     },

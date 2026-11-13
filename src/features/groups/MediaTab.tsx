@@ -1,7 +1,7 @@
 import { Play } from "lucide-react";
 import { useState } from "react";
 import { useQ } from "@/app/viewer";
-import { PhotoViewer } from "@/features/posts";
+import { MediaThumb, PhotoViewer } from "@/features/posts";
 import { cn } from "@/lib/format";
 import { Card, EmptyState, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -67,14 +67,9 @@ export function MediaTab() {
               type="button"
               onClick={() => setOpen({ postId: m.postId, index: m.index })}
               className="relative aspect-square overflow-hidden rounded-lg"
-              aria-label="Open photo"
+              aria-label={m.kind === "video" ? "Open video" : "Open photo"}
             >
-              <img
-                src={m.url}
-                alt=""
-                loading="lazy"
-                className="h-full w-full object-cover hover:brightness-95"
-              />
+              <MediaThumb media={m} className="hover:brightness-95" />
               {m.kind === "video" && (
                 <span className="absolute inset-0 flex items-center justify-center">
                   <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white">

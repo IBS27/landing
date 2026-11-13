@@ -5,6 +5,7 @@ import {
   aiJobStatus,
   aiRun,
   badge,
+  citations,
   friendRequestAudience,
   friendsListAudience,
   listingCategory,
@@ -18,6 +19,11 @@ import {
   notificationKind,
   postAttachment,
   privacy,
+  proposalAction,
+  proposalOrigin,
+  proposalPayload,
+  proposalResult,
+  proposalStatus,
   reactionTarget,
   reactionType,
   rentalDetails,
@@ -652,6 +658,45 @@ export default defineSchema({
    * calls that ended in the task's non-AI fallback. Model results are reused by
    * `inputHash` while fresh, so shared outputs are generated once.
    */
+  /**
+   * Muse proposals (#6): everything Muse wants to send or create on someone's
+   * behalf. Nothing happens until the owner approves; see convex/lib/proposals.ts.
+   */
+  proposals: defineTable({
+    ownerId: v.id("users"),
+    payload: proposalPayload,
+    /** The payload as Muse first wrote it, kept when the owner edits. */
+    original: v.optional(proposalPayload),
+    /** One line on why Muse suggests this, shown with the proposal. */
+    rationale: v.string(),
+    citations: v.optional(citations),
+    origin: proposalOrigin,
+    status: proposalStatus,
+    /** Time-sensitive proposals (offers) stop being sendable at this time. */
+    expiresAt: v.optional(v.number()),
+    /** For message and offer proposals: the `pending_approval` draft in the thread. */
+    draftMessageId: v.optional(v.id("messages")),
+    result: v.optional(proposalResult),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    decidedAt: v.optional(v.number()),
+  })
+    .index("by_owner_status", ["ownerId", "status", "createdAt"])
+    .index("by_owner", ["ownerId", "createdAt"])
+    .index("by_draft", ["draftMessageId"]),
+
+  /** Audit log: one row per thing that happened to a proposal. */
+  proposalEvents: defineTable({
+    proposalId: v.id("proposals"),
+    ownerId: v.id("users"),
+    action: proposalAction,
+    /** Who did it: the owner, Muse, or the system (expiry). */
+    actor: v.union(v.literal("owner"), v.literal("agent"), v.literal("system")),
+    at: v.number(),
+  })
+    .index("by_proposal", ["proposalId", "at"])
+    .index("by_owner", ["ownerId", "at"]),
+
   aiRuns: defineTable(aiRun)
     .index("by_hash", ["inputHash", "outcome", "createdAt"])
     .index("by_task", ["task", "createdAt"]),

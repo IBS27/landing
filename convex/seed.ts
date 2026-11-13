@@ -568,6 +568,9 @@ export const reset = internalAction({
       now: Date.now(),
     });
 
+    // Muse proposals for the demo inbox (#6).
+    await ctx.runMutation(internal.proposals.seedDemo, {});
+
     const reactionRows =
       plan.posts.reduce((s, p) => s + p.reactions.length + p.commentReactions.length, 0) +
       plan.conversations.reduce(
