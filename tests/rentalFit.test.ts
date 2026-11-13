@@ -107,6 +107,8 @@ describe("transitPart", () => {
     const [score, reason] = transitPart({ id: "a", price: 0, ...SUNSET }, STOPS, maya.modes);
     expect(score).toBe(0);
     expect(reason).toMatchObject({ tone: "bad", sources: ["f:24th"] });
+    const [, caltrain] = transitPart({ id: "a", price: 0, ...SUNSET }, STOPS, ["caltrain"]);
+    expect(caltrain?.text).toBe("No Caltrain stop within walking distance");
     expect(transitPart({ id: "a", price: 0, lat: null, lng: null }, STOPS, maya.modes)).toEqual([
       0,
       null,
@@ -278,6 +280,7 @@ describe("rentals.search", () => {
     createdAt: Number(id.replace(/\D/g, "")),
     status: "active",
     title: id,
+    description: "",
     price,
     photos: [],
     badges: [],
@@ -324,6 +327,7 @@ describe("rentals.search", () => {
     const r = await search(ctx);
     expect(r.needsBrief).toBe(false);
     expect(r.results[0]._id).toBe("listings:r2");
+    expect(r.results[0].reasons.map((x) => x.kind).sort()).toEqual(["budget", "neighborhood"]);
     for (const x of r.results) {
       expect(x.pin).not.toBeNull();
       for (const reason of x.reasons) expect(reason.sources).not.toBeNull();

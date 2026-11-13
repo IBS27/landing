@@ -70,7 +70,9 @@ async function placesIn(ctx: QueryCtx, neighborhoodId: Id<"neighborhoods">, now:
 }
 
 function toSource(key: string): Source | null {
-  const [kind, id] = key.split(":");
+  const at = key.indexOf(":");
+  const kind = key.slice(0, at);
+  const id = key.slice(at + 1);
   if (kind === "listing") return { kind: "listing", listingId: id as Id<"listings"> };
   if (kind === "group") return { kind: "group", groupId: id as Id<"groups"> };
   if (kind === "event") return { kind: "event", eventId: id as Id<"events"> };

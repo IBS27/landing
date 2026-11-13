@@ -173,6 +173,10 @@ const SYSTEM_LABEL: Record<TransitSystem, string> = {
   caltrain: "Caltrain",
 };
 
+/** "BART, Muni Metro or Caltrain" */
+const orList = (xs: string[]) =>
+  xs.length > 1 ? `${xs.slice(0, -1).join(", ")} or ${xs[xs.length - 1]}` : xs[0];
+
 /** 1 within a 5 minute walk of a stop the person uses, 0 at 25 minutes or more. */
 export function transitPart(
   listing: FitListing,
@@ -195,7 +199,7 @@ export function transitPart(
       0,
       {
         kind: "transit",
-        text: "No BART, Muni Metro or Caltrain stop within walking distance",
+        text: `No ${orList([...usable].map((x) => SYSTEM_LABEL[x]))} stop within walking distance`,
         tone: "bad",
         sources: [best.stop.factKey],
       },
