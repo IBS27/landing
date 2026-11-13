@@ -601,16 +601,48 @@ describe("home.timeline", () => {
           from: 0,
           to: 0,
           week: { events: [], groups: [], friends: [], journeyStops: [] },
-          total: { events: ["events:1", "events:2"], groups: [], friends: [], journeyStops: [] },
+          // events:gone was deleted and events:left un-RSVP'd: only events:went counts.
+          total: {
+            events: ["events:went", "events:gone", "events:left"],
+            groups: [],
+            friends: [],
+            journeyStops: [],
+          },
           computedAt: 1,
         },
+      },
+    ];
+    const past = Date.parse(`${day(-3)}T03:00:00Z`);
+    tables.events = ["went", "left"].map((id) => ({
+      _id: `events:${id}`,
+      title: id,
+      hostId: "users:lister",
+      startAt: past,
+      online: false,
+      cover: "",
+      privacy: "public",
+    }));
+    tables.eventResponses = [
+      {
+        _id: "eventResponses:1",
+        eventId: "events:went",
+        userId: "users:maya",
+        status: "going",
+        createdAt: 1,
+      },
+      {
+        _id: "eventResponses:2",
+        eventId: "events:left",
+        userId: "users:maya",
+        status: "interested",
+        createdAt: 1,
       },
     ];
     const t = await timeline(fakeCtx(tables), "maya");
     expect(t.stage).toBe("settling_in");
     expect(t.nextStep).toMatchObject({
       id: "checkIn",
-      reason: "1 week in: 2 events. Your check-in is ready.",
+      reason: "1 week in: 1 event. Your check-in is ready.",
     });
     // Already the next step, so not repeated under "Coming up".
     expect(t.comingUp.checkIn).toBeNull();

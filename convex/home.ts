@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
+import { viewActivity } from "./checkIns";
 import { daysSince } from "./lib/checkIns";
 import { resolveSources } from "./lib/citations";
 import { type CityProfile, getProfile } from "./lib/cityProfile";
@@ -165,10 +166,12 @@ async function hasSublet(ctx: QueryCtx, userId: Id<"users">, place: Doc<"places"
 
 /**
  * This week's check-in (#33), once the Journeys job has written it: the
- * same week and wording as its "Your check-in is ready" notification.
+ * same week and wording as its "Your check-in is ready" notification, with
+ * the counts Journeys shows.
  */
 async function checkInFacts(
   ctx: QueryCtx,
+  a: Audience,
   profile: CityProfile,
   now: number,
 ): Promise<StepInput["checkIn"]> {
@@ -181,7 +184,8 @@ async function checkInFacts(
     .order("desc")
     .take(1);
   if (!row?.checkIn || row.endsAt <= now) return null;
-  const { total } = row.checkIn;
+  // Counted as Journeys shows them now: un-RSVPs, leaves, unfriends and blocks drop out.
+  const total = await viewActivity(ctx, a, row.checkIn.total);
   return {
     week: row.week,
     text: checkInText(daysSince(moveInAt, now), {
@@ -219,7 +223,7 @@ export const timeline = viewerQuery({
       when("movers", () => moverFacts(ctx, userId)),
       when("items", () => itemFacts(ctx, userId)),
       when("sublet", async () => (place ? hasSublet(ctx, userId, place) : undefined)),
-      checkInFacts(ctx, profile, now),
+      checkInFacts(ctx, a, profile, now),
       upcomingReminders(ctx, userId, now, EVENTS_SHOWN),
     ]);
 
