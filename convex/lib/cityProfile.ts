@@ -338,3 +338,90 @@ export async function setLearnFromActivity(ctx: MutationCtx, userId: Id<"users">
   else if (!on)
     await ctx.db.insert("cityProfiles", { userId, learnFromActivity, updatedAt: Date.now() });
 }
+
+/* ---------------- "What Muse knows about you" (#5) ---------------- */
+
+/** A removed fact, kept so it's never inferred again; the person can undo it. */
+export type RemovedFact = Fact & { removedAt: number };
+
+/** The person's removed facts, newest first. Protected values never come back, even here. */
+export async function getRemovedFacts(ctx: QueryCtx, userId: Id<"users">): Promise<RemovedFact[]> {
+  const docs = await ctx.db
+    .query("cityProfileFacts")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .collect();
+  return docs
+    .filter((d) => d.removedAt !== undefined && !protectedValue(d))
+    .map((d) => ({ ...toFact(d), removedAt: d.removedAt as number }))
+    .sort((a, b) => b.removedAt - a.removedAt);
+}
+
+/**
+ * "Keep" on an inferred fact: it becomes something the person said, so activity
+ * never changes or drops it. Returns false unless it's the owner's live fact.
+ */
+export async function confirmFact(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  factId: Id<"cityProfileFacts">,
+): Promise<boolean> {
+  const row = await ctx.db.get(factId);
+  if (!row || row.userId !== userId || row.removedAt !== undefined || protectedValue(row))
+    return false;
+  if (row.source === "stated") return true;
+  await ctx.db.patch(factId, {
+    source: "stated",
+    confidence: 1,
+    evidence: { kind: "edit", summary: "You confirmed what Muse noticed" },
+    updatedAt: Date.now(),
+  });
+  await touchProfile(ctx, userId);
+  return true;
+}
+
+/**
+ * Undoes a removal. A stated fact comes back as it was. An inferred one isn't
+ * revived from old evidence: its tombstone is deleted so activity may infer it
+ * again if it still holds. Returns the restored fact's source, or null unless
+ * it's the owner's removed fact.
+ */
+export async function restoreFact(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  factId: Id<"cityProfileFacts">,
+): Promise<FactSource | null> {
+  const row = await ctx.db.get(factId);
+  if (!row || row.userId !== userId || row.removedAt === undefined) return null;
+  const slot = factSlot(row);
+  const live = (await rowsFor(ctx, userId, row.key)).some(
+    (r) => r._id !== row._id && r.removedAt === undefined && factSlot(r) === slot,
+  );
+  if (row.source === "inferred" || live) await ctx.db.delete(row._id);
+  else await ctx.db.patch(row._id, { removedAt: undefined, updatedAt: Date.now() });
+  return row.source;
+}
+
+/** What a removed activity fact says once the activity behind it is cleared. */
+export const CLEARED_ACTIVITY_SUMMARY = "From activity you cleared";
+
+/**
+ * After "Clear my activity" (#5): inferred facts from activity are deleted, and
+ * removed ones keep their tombstone (so they still aren't inferred again) but
+ * lose the signal ids and the reason that named Events and Groups.
+ */
+export async function forgetActivityEvidence(ctx: MutationCtx, userId: Id<"users">) {
+  const docs = await ctx.db
+    .query("cityProfileFacts")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .collect();
+  for (const d of docs) {
+    if (d.evidence.kind !== "activity") continue;
+    if (d.removedAt === undefined) {
+      if (d.source === "inferred") await ctx.db.delete(d._id);
+    } else if (d.evidence.signalIds || d.evidence.summary !== CLEARED_ACTIVITY_SUMMARY) {
+      await ctx.db.patch(d._id, {
+        evidence: { kind: "activity", summary: CLEARED_ACTIVITY_SUMMARY },
+      });
+    }
+  }
+}
