@@ -1,4 +1,5 @@
 import type { Id } from "../../../convex/_generated/dataModel";
+import { WeekendRoute } from "./WeekendRoute";
 
 /**
  * Slots on the neighborhood page for features built in their own issues. Each
@@ -13,7 +14,7 @@ export function ScoresSlot(_: SlotProps) {
   return null;
 }
 
-/** #18: the cited Weekend Route on a map. Replace with `<WeekendRoute neighborhoodId={…} />`. */
-export function WeekendRouteSlot(_: SlotProps) {
-  return null;
+/** #18: the cited Weekend Route on a map. */
+export function WeekendRouteSlot({ neighborhoodId }: SlotProps) {
+  return <WeekendRoute neighborhoodId={neighborhoodId} />;
 }
