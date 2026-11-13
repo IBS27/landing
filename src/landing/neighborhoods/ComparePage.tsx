@@ -20,8 +20,8 @@ import type { CitedSource } from "../../../convex/lib/citations";
 import type { NeighborhoodSlug } from "../../../convex/lib/cityProfileFacts";
 import {
   type AnswerLine,
+  apart,
   BY_SLUG,
-  CLOSE,
   type CompareProfile,
   type CompareSide,
   compareAnswer,
@@ -30,6 +30,7 @@ import {
   inSentence,
   isNeighborhoodSlug,
   namedNeighborhoods,
+  suggestedPairs,
 } from "./compare";
 import {
   fitDetail,
@@ -112,7 +113,10 @@ function useCompareNavigate() {
 function Ask({ a, b }: { a?: Hood; b?: Hood }) {
   const go = useCompareNavigate();
   const [q, setQ] = useState("");
-  const [note, setNote] = useState<string | null>(null);
+  // A note about the last question, shown only while the pair it was written
+  // for is still the one on screen (a suggestion, swap or Back clears it).
+  const [note, setNote] = useState<{ text: string; pair: string } | null>(null);
+  const current = pairKey(a?.slug, b?.slug);
 
   function ask(e: FormEvent) {
     e.preventDefault();
@@ -122,17 +126,30 @@ function Ask({ a, b }: { a?: Hood; b?: Hood }) {
     const [x, y] = named;
     if (x && y) {
       setNote(
-        named.length > 2 ? `Comparing the first two you named: ${label(x)} and ${label(y)}.` : null,
+        named.length > 2
+          ? {
+              text: `Comparing the first two you named: ${label(x)} and ${label(y)}.`,
+              pair: pairKey(x, y),
+            }
+          : null,
       );
       void go(x, y);
     } else if (x) {
       const other = a && a.slug !== x ? a.slug : b && b.slug !== x ? b.slug : undefined;
-      setNote(other ? null : `Pick a second neighborhood to compare with ${label(x)}.`);
+      setNote(
+        other
+          ? null
+          : {
+              text: `Pick a second neighborhood to compare with ${label(x)}.`,
+              pair: pairKey(x, undefined),
+            },
+      );
       void go(x, other);
     } else {
-      setNote(
-        "We couldn't find a San Francisco neighborhood in that. Try “the Mission vs the Inner Sunset”, or pick two below.",
-      );
+      setNote({
+        text: "We couldn't find a San Francisco neighborhood in that. Try “the Mission vs the Inner Sunset”, or pick two below.",
+        pair: current,
+      });
     }
   }
 
@@ -157,20 +174,15 @@ function Ask({ a, b }: { a?: Hood; b?: Hood }) {
           Compare
         </Button>
       </form>
-      {note && (
-        <p role="status" className="mt-2 text-secondary text-sm">
-          {note}
-        </p>
-      )}
+      <p role="status" className="text-secondary text-sm empty:hidden [&:not(:empty)]:mt-2">
+        {note?.pair === current ? note.text : ""}
+      </p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Picker
           label="First neighborhood"
           value={a?.slug}
           other={b?.slug}
-          onChange={(s) => {
-            setNote(null);
-            void go(s, b?.slug);
-          }}
+          onChange={(s) => void go(s, b?.slug)}
         />
         <button
           type="button"
@@ -185,14 +197,15 @@ function Ask({ a, b }: { a?: Hood; b?: Hood }) {
           label="Second neighborhood"
           value={b?.slug}
           other={a?.slug}
-          onChange={(s) => {
-            setNote(null);
-            void go(a?.slug, s);
-          }}
+          onChange={(s) => void go(a?.slug, s)}
         />
       </div>
     </Card>
   );
+}
+
+function pairKey(a: NeighborhoodSlug | undefined, b: NeighborhoodSlug | undefined) {
+  return `${a ?? ""}:${b ?? ""}`;
 }
 
 function label(slug: NeighborhoodSlug) {
@@ -231,27 +244,13 @@ function Picker({
 function Suggestions({ a, b }: { a?: Hood; b?: Hood }) {
   const profile = useQ(api.cityProfile.get, {});
   const go = useCompareNavigate();
-  const yours = (profile?.neighborhoods ?? [])
-    .map((f) => f.value.slug)
-    .filter((s, i, all) => all.indexOf(s) === i);
+  const yours = (profile?.neighborhoods ?? []).map((f) => f.value.slug);
   const picked = a ?? b;
-  const pairs: [NeighborhoodSlug, NeighborhoodSlug][] = picked
-    ? [...yours, "mission", "inner-sunset", "hayes-valley", "north-beach"]
-        .filter((s): s is NeighborhoodSlug => s !== picked.slug)
-        .filter((s, i, all) => all.indexOf(s) === i)
-        .slice(0, 3)
-        .map((s) => [picked.slug, s])
-    : [
-        ...(yours.length >= 2
-          ? ([[yours[0], yours[1]]] as [NeighborhoodSlug, NeighborhoodSlug][])
-          : []),
-        ["mission", "inner-sunset"],
-        ["hayes-valley", "north-beach"],
-        ["noe-valley", "inner-richmond"],
-      ];
-  const unique = pairs
-    .filter(([x, y], i) => pairs.findIndex(([p, q]) => p === x && q === y) === i)
-    .slice(0, 3);
+  const pairs = suggestedPairs(yours, picked?.slug);
+  // True when a suggestion brings in a City Profile neighborhood (not just the one picked).
+  const fromProfile = pairs.some((pair) =>
+    pair.some((s) => s !== picked?.slug && yours.includes(s)),
+  );
   return (
     <Card className="flex flex-col items-center px-6 py-10 text-center">
       <span className="flex h-12 w-12 items-center justify-center rounded-full bg-btn-soft text-btn-soft-text">
@@ -262,10 +261,10 @@ function Suggestions({ a, b }: { a?: Hood; b?: Hood }) {
       </h2>
       <p className="mt-1 max-w-[440px] text-[15px] text-secondary leading-5">
         Ask a question above, pick two, or start with one of these.
-        {yours.length > 0 && !picked && " Neighborhoods from your City Profile come first."}
+        {fromProfile && " Neighborhoods from your City Profile come first."}
       </p>
       <div className="mt-4 flex flex-wrap justify-center gap-2">
-        {unique.map(([x, y]) => (
+        {pairs.map(([x, y]) => (
           <Button key={`${x}:${y}`} variant="soft" size="sm" onClick={() => void go(x, y)}>
             {label(x)} vs {label(y)}
           </Button>
@@ -328,14 +327,14 @@ function Comparison({ a, b }: { a: Hood; b: Hood }) {
         icon={<Route size={20} aria-hidden />}
       >
         {sides.map((s) => (
-          <Cell key={s.hood.slug} hood={s.hood}>
+          <Cell key={s.hood.slug} hood={s.hood} what="Weekend Route">
             <WeekendRouteCard data={s.route} />
           </Cell>
         ))}
       </Row>
       <Row label="For you">
         {sides.map((s) => (
-          <Cell key={s.hood.slug} hood={s.hood}>
+          <Cell key={s.hood.slug} hood={s.hood} what="For you">
             {s.page === undefined ? (
               <Skeleton className="h-48 rounded-lg" />
             ) : s.page === null ? null : (
@@ -346,7 +345,7 @@ function Comparison({ a, b }: { a: Hood; b: Hood }) {
       </Row>
       <Row label="Getting around at night">
         {sides.map((s) => (
-          <Cell key={s.hood.slug} hood={s.hood}>
+          <Cell key={s.hood.slug} hood={s.hood} what="Getting around at night">
             {s.scores === undefined ? (
               <Skeleton className="h-40 rounded-lg" />
             ) : s.scores && hasNight(s.scores) ? (
@@ -409,9 +408,14 @@ function Row({
   );
 }
 
-function Cell({ hood, children }: { hood: Hood; children: ReactNode }) {
+/**
+ * One neighborhood's card in a row, under its name. The cards are reused from
+ * the neighborhood page, so their headings don't name the neighborhood; the
+ * cell is a region that does ("Weekend Route in the Mission").
+ */
+function Cell({ hood, what, children }: { hood: Hood; what: string; children: ReactNode }) {
   return (
-    <div className="min-w-0">
+    <section aria-label={`${what} in ${inSentence(hood)}`} className="min-w-0">
       <Link
         to="/landing/find/neighborhoods/$slug"
         params={{ slug: hood.slug }}
@@ -420,7 +424,7 @@ function Cell({ hood, children }: { hood: Hood; children: ReactNode }) {
         {hood.label}
       </Link>
       {children}
-    </div>
+    </section>
   );
 }
 
@@ -497,7 +501,7 @@ function Answer({ a, b, profile }: { a: Loaded; b: Loaded; profile: CityProfile 
         </ul>
       )}
       <p className="mt-3 text-secondary text-xs">
-        {answer.lead
+        {answer.personal
           ? "Written from the data below and your City Profile, without AI."
           : "Written from the data below, without AI."}
       </p>
@@ -547,7 +551,9 @@ function cellFor(s: Loaded, kind: (typeof KINDS)[number] | "fit"): CellScore {
     };
   }
   const x = s.scores.scores.find((r) => r.kind === kind);
-  if (x?.state !== "ok")
+  // Missing from `scores` means it exists but cites something this viewer can't see.
+  if (!x) return { state: "none", detail: "No score to show here." };
+  if (x.state !== "ok")
     return { state: "none", detail: "Not enough public data to score this yet." };
   return {
     state: "ok",
@@ -589,12 +595,8 @@ function ScoreTable({ a, b, yours }: { a: Loaded; b: Loaded; yours: ReadonlySet<
       {rows.map((kind) => {
         const ca = cellFor(a, kind);
         const cb = cellFor(b, kind);
-        const higher =
-          ca.state === "ok" && cb.state === "ok" && Math.abs(ca.score - cb.score) >= CLOSE
-            ? ca.score > cb.score
-              ? 0
-              : 1
-            : null;
+        const d = ca.state === "ok" && cb.state === "ok" ? apart(ca.score, cb.score) : 0;
+        const higher = d > 0 ? 0 : d < 0 ? 1 : null;
         const t = TILE[kind];
         return (
           <section
