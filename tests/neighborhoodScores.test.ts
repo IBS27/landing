@@ -223,7 +223,6 @@ describe("getting around at night", () => {
       "the little alleys (Natoma, Minna, Tehama) get dark after 6 this time of year",
       "I take the owl bus home, the N Owl runs every 30",
       "Valencia is well-lit after dark",
-      "which blocks are actually quiet at night?",
       "I bike home from the hospital at 7am",
     ]) {
       expect([t, isNightQuote(t)]).toEqual([t, true]);
@@ -238,6 +237,13 @@ describe("getting around at night", () => {
     ]) {
       expect([t, isNightQuote(t)]).toEqual([t, false]);
     }
+  });
+  test("questions and fragments ask, they don't tell", () => {
+    expect(isNightQuote("which blocks are actually quiet at night?")).toBe(false);
+    expect(isNightQuote("questions:\n- getting home late at night\n- groceries")).toBe(false);
+    expect(nightExcerpt("1. we walk home along Irving, it stays busy til 10")).toBe(
+      "we walk home along Irving, it stays busy til 10",
+    );
   });
   test("never quotes labels about an area or its people", () => {
     expect(isNightQuote("it gets sketchy at night")).toBe(false);
@@ -264,15 +270,15 @@ describe("getting around at night", () => {
     const picked = pickNightQuotes(
       [
         q("we walk home on Valencia, it's well-lit", 2, 1),
-        q("the owl bus is fine", 9, 1),
+        q("the owl bus is fine, every 30 min on Judah", 9, 1),
         q("lunch spot", 50, 1),
-        q("Capp gets dark early", 2, 5),
+        q("Capp gets dark early, stick to Mission St", 2, 5),
       ],
       3,
     );
     expect(picked.map((p) => p.quote)).toEqual([
-      "the owl bus is fine",
-      "Capp gets dark early",
+      "the owl bus is fine, every 30 min on Judah",
+      "Capp gets dark early, stick to Mission St",
       "we walk home on Valencia, it's well-lit",
     ]);
   });

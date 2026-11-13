@@ -356,11 +356,14 @@ const LABEL_WORDS =
   /\b(?:sketchy|unsafe|dangerous|bad (?:area|part|neighborhood|block)|shady|ghetto|crime|criminals?|scary|homeless|addicts?)\b/i;
 /** Quotes are at most this long: the sentence that says it, cut around the words if needed. */
 const QUOTE_MAX = 200;
+/** Shorter sentences are fragments (a list item, a heading), not something a local said. */
+const QUOTE_MIN = 30;
 
 /**
  * The part of a local's post or comment about getting around after dark: the
  * sentence with the matching phrase, verbatim (… marks a cut). Null when the
- * text isn't about that, or labels an area or its people anywhere.
+ * text isn't about that, labels an area or its people anywhere, or the
+ * sentence is a question or a fragment: those ask, they don't tell.
  */
 export function nightExcerpt(text: string): string | null {
   if (LABEL_WORDS.test(text)) return null;
@@ -383,8 +386,12 @@ export function nightExcerpt(text: string): string | null {
     from = Math.max(start, at - Math.floor(QUOTE_MAX / 3));
     end = Math.min(end, from + QUOTE_MAX);
   }
-  const body = text.slice(from, end).replace(/\s+/g, " ").trim();
-  if (!body) return null;
+  const body = text
+    .slice(from, end)
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^(?:[-*•]|\d+[.)])\s+/, "");
+  if (body.length < QUOTE_MIN || body.endsWith("?")) return null;
   return `${from > start ? "…" : ""}${body}${end < (stop ? stop.index + 1 : text.length) ? "…" : ""}`;
 }
 
