@@ -72,6 +72,19 @@ describe("progressive generation", () => {
     expect(h.tables.aiJobs[0].status).toBe("failed");
     expect(isStarterScene(h.scene().scene)).toBe(true);
   });
+  test("retry after a model-produced null layout makes a fresh request", async () => {
+    const h = generationHarness();
+    fetchModel = async () => modelCompletion({ scene: null, explanation: "Could not read plan" });
+    await h.request();
+    await h.generate();
+    expect(h.scene().generation?.status).toBe("failed");
+    let calls = 0;
+    fetchModel = async () => (++calls === 1 ? layoutReply() : detailReply());
+    await h.request();
+    await h.generate();
+    expect(calls).toBe(2);
+    expect(h.scene().generation?.status).toBe("ready");
+  });
   test("a details failure keeps usable rooms and retries only details", async () => {
     const h = generationHarness();
     let calls = 0;
@@ -128,6 +141,155 @@ describe("progressive generation", () => {
     expect(h.scene().scene.title).toBe("My edits");
     expect(h.scene().scene.appearance).toBeUndefined();
     expect(h.scene().candidate).toBeUndefined();
+  });
+  test("refreshes listing evidence before scheduling and supersedes a run using old media", async () => {
+    const h = generationHarness();
+    const listingId = await h.ctx.db.insert("listings", {
+      sellerId: "viewer",
+      title: "Updated listing",
+      description: "Latest description",
+      photos: ["https://example.com/new-photo.jpg"],
+      status: "active",
+      category: "propertyrentals",
+      price: 3000,
+      location: { neighborhood: "Demo" },
+      badges: [],
+    } as never);
+    await h.ctx.db.patch("unit" as never, {
+      listingId,
+      sources: [
+        { key: "photo-1", kind: "photo", label: "Old photo", url: "/seed/old.jpg" },
+        {
+          key: "source-personal",
+          kind: "photo",
+          label: "Personal upload",
+          url: "https://example.com/personal.jpg",
+          imported: false,
+        },
+      ],
+    });
+    const oldJob = await h.request();
+    expect(h.scene().description).toBe("Latest description");
+    expect(h.scene().sources.map((s) => s.url)).toEqual([
+      "https://example.com/new-photo.jpg",
+      "https://example.com/personal.jpg",
+    ]);
+    expect(h.scheduled[0].revision).toBe(h.scene().revision);
+    await h.ctx.db.patch(listingId, { photos: ["https://example.com/newer-photo.jpg"] });
+    const newJob = await h.request();
+    expect(newJob).not.toBe(oldJob);
+    expect(h.scene().sources[0].url).toBe("https://example.com/newer-photo.jpg");
+    expect(h.scene().sources[1].key).toBe("source-personal");
+  });
+  test("saving a manual scene retains its original evidence after listing media is replaced", async () => {
+    const h = generationHarness();
+    await h.save(generationLayout);
+    const originalSources = structuredClone(h.scene().sceneSources);
+    const listingId = await h.ctx.db.insert("listings", {
+      sellerId: "viewer",
+      title: "Updated listing",
+      description: "Updated",
+      photos: ["https://example.com/replacement.jpg"],
+      status: "active",
+      category: "propertyrentals",
+      price: 3000,
+      location: { neighborhood: "Demo" },
+      badges: [],
+    } as never);
+    // Also exercise legacy records that predate the evidence snapshot.
+    await h.ctx.db.patch("unit" as never, { listingId, sceneSources: undefined });
+    await h.request();
+    expect(h.scene().sources.some((s) => s.key === "floorplan")).toBe(false);
+    await h.save(h.scene().scene);
+    expect(h.scene().sceneSources).toEqual(originalSources);
+    expect(h.scene().sceneSources?.find((s) => s.key === "photo-1")?.url).not.toBe(
+      "https://example.com/replacement.jpg",
+    );
+  });
+  test("detail retries retain valid fixtures and materials while incorporating new details", async () => {
+    const h = generationHarness();
+    const [first, second] = generationAppearance.objects;
+    const initial = {
+      ...generationAppearance,
+      surfaces: [],
+      objects: [first, { ...second, position: { x: 999, y: 0, z: 999 } }],
+    };
+    let calls = 0;
+    fetchModel = async () =>
+      ++calls === 1
+        ? layoutReply()
+        : modelCompletion({ appearance: initial, explanation: "Some details" });
+    await h.request();
+    await h.generate();
+    expect(h.scene().generation?.status).toBe("partial");
+    expect(h.scene().scene.appearance?.objects).toEqual([first]);
+    const prior = structuredClone(h.scene().scene.appearance!);
+    const retry = {
+      ...generationAppearance,
+      surfaces: [],
+      objects: [second],
+      materials: generationAppearance.materials.map((m) => ({ ...m, color: "#123456" })),
+    };
+    fetchModel = async () => modelCompletion({ appearance: retry, explanation: "More details" });
+    await h.request(true);
+    await h.generate();
+    const result = h.scene().scene.appearance!;
+    expect(result.objects.find((o) => o.id === first.id)).toEqual(first);
+    expect(result.objects.some((o) => o.id === second.id)).toBe(true);
+    for (const material of prior.materials)
+      expect(result.materials.find((m) => m.id === material.id)).toEqual(material);
+    expect(
+      sceneProblems(
+        h.scene().scene,
+        h.scene().sources.map((s) => s.key),
+      ),
+    ).toEqual([]);
+    expect(h.scene().generation?.status).toBe("ready");
+  });
+  test("unsuccessful detail retries do not exhaust materials needed by a later valid fixture", async () => {
+    const h = generationHarness();
+    const [first, second] = generationAppearance.objects;
+    const failed = (color: string) => ({
+      ...generationAppearance,
+      surfaces: [],
+      objects: [{ ...second, position: { x: 999, y: 0, z: 999 } }],
+      materials: generationAppearance.materials.map((m) => ({ ...m, color })),
+    });
+    let calls = 0;
+    fetchModel = async () =>
+      ++calls === 1
+        ? layoutReply()
+        : modelCompletion({
+            appearance: { ...failed("#112233"), objects: [first, ...failed("#112233").objects] },
+            explanation: "Partial",
+          });
+    await h.request();
+    await h.generate();
+    const prior = structuredClone(h.scene().scene.appearance!);
+    for (const color of ["#445566", "#778899", "#aabbcc"]) {
+      fetchModel = async () =>
+        modelCompletion({ appearance: failed(color), explanation: "Still uncertain" });
+      await h.request(true);
+      await h.generate();
+      expect(h.scene().scene.appearance?.materials).toEqual(prior.materials);
+      expect(h.scene().scene.appearance?.objects).toEqual(prior.objects);
+      expect(h.scene().generation?.status).toBe("partial");
+    }
+    fetchModel = async () =>
+      modelCompletion({
+        appearance: { ...failed("#abcdef"), objects: [second] },
+        explanation: "Recovered",
+      });
+    await h.request(true);
+    await h.generate();
+    expect(h.scene().scene.appearance?.objects.map((o) => o.id)).toEqual([first.id, second.id]);
+    expect(h.scene().generation?.status).toBe("ready");
+    expect(
+      sceneProblems(
+        h.scene().scene,
+        h.scene().sources.map((s) => s.key),
+      ),
+    ).toEqual([]);
   });
   test("a superseded job cannot publish or clear the current job", async () => {
     const h = generationHarness();

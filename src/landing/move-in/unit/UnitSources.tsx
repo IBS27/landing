@@ -80,6 +80,26 @@ export function UnitSources({ doc }: { doc: Doc<"unitScenes"> }) {
           </a>
         ))}
       </div>
+      {doc.sceneSources?.some(
+        (s) =>
+          !doc.sources.some(
+            (current) =>
+              current.key === s.key && current.url === s.url && current.storageId === s.storageId,
+          ),
+      ) && (
+        <details className="text-sm text-secondary">
+          <summary>Earlier evidence used by your saved layout</summary>
+          <ul className="space-y-2 pt-2">
+            {doc.sceneSources.map((s) => (
+              <li key={s.key}>
+                <a href={s.url} target="_blank" rel="noreferrer">
+                  {s.label} ({s.key})
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
       {doc.sources.length < 20 && (
         <>
           <label className="block text-primary text-sm">

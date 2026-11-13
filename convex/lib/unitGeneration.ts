@@ -38,3 +38,17 @@ export function refreshedSources(sources: SceneSource[], listing: Doc<"listings"
   const imported = listingSources(listing).filter((s) => !keys.has(s.key));
   return [...imported.slice(0, MAX_SOURCES - personal.length), ...personal];
 }
+
+/** Snapshot only evidence cited by saved geometry, independently of current generation inputs. */
+export function savedSceneSources(scene: UnitScene, sources: SceneSource[]) {
+  const keys = new Set([
+    ...scene.rooms.flatMap((room) => room.evidence.sources),
+    ...scene.walls.flatMap((wall) => wall.evidence.sources),
+    ...(scene.appearance?.surfaces.flatMap((surface) => surface.sources) ?? []),
+    ...(scene.appearance?.objects.flatMap((object) => object.sources) ?? []),
+  ]);
+  return sources.filter(
+    (source, i) =>
+      keys.has(source.key) && sources.findIndex((other) => other.key === source.key) === i,
+  );
+}

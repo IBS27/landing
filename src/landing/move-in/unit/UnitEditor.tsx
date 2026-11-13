@@ -261,11 +261,14 @@ export function UnitEditor({
               placements={draft.placements}
               selected={selected}
               onSelect={setSelected}
-              onMove={(id, x, z) =>
-                change({
-                  ...draft,
-                  placements: draft.placements.map((p) => (p.id === id ? { ...p, x, z } : p)),
-                })
+              onMove={
+                onSave
+                  ? (id, x, z) =>
+                      change({
+                        ...draft,
+                        placements: draft.placements.map((p) => (p.id === id ? { ...p, x, z } : p)),
+                      })
+                  : undefined
               }
               onCorner={onSave ? corner : undefined}
             />

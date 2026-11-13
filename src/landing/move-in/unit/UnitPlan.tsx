@@ -19,7 +19,7 @@ export function UnitPlan({
   placements: Placement[];
   selected: string | null;
   onSelect: (id: string) => void;
-  onMove: (id: string, x: number, z: number) => void;
+  onMove?: (id: string, x: number, z: number) => void;
   onCorner?: (roomId: string, index: number, x: number, z: number) => void;
 }) {
   const svg = useRef<SVGSVGElement>(null);
@@ -46,7 +46,7 @@ export function UnitPlan({
           z = Math.round(p.y * 20) / 20;
         if (drag.current.corner !== undefined)
           onCorner?.(drag.current.id, drag.current.corner, x, z);
-        else onMove(drag.current.id, x, z);
+        else onMove?.(drag.current.id, x, z);
       }}
       onPointerUp={() => {
         drag.current = null;
@@ -170,10 +170,11 @@ export function UnitPlan({
           fill={p.color}
           stroke={selected === p.id ? "#0866ff" : "#39485a"}
           strokeWidth={selected === p.id ? 0.09 : 0.035}
-          className="cursor-move"
+          className={onMove ? "cursor-move" : "cursor-pointer"}
           onPointerDown={(e) => {
             e.stopPropagation();
             onSelect(p.id);
+            if (!onMove) return;
             drag.current = { id: p.id };
             svg.current?.setPointerCapture(e.pointerId);
           }}

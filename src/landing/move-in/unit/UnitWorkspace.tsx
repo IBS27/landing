@@ -42,7 +42,8 @@ export function UnitWorkspace({
   const partial = doc.generation?.status === "partial";
   const preview = !!doc.candidate && !showSaved && !dirty;
   const scene = preview ? doc.candidate! : doc.scene;
-  const starter = isStarterScene(scene) && (!manual || running);
+  const starter =
+    isStarterScene(scene) && !doc.manuallyEdited && !doc.placements.length && (!manual || running);
   const plan = doc.sources.find((s) => s.kind === "floorplan" && s.url);
   async function run(action: () => Promise<unknown>) {
     setBusy(true);

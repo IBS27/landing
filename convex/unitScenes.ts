@@ -15,7 +15,12 @@ import { resolveSources } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { loadAudience } from "./lib/posts";
 import { unitAppearanceTask } from "./lib/unitAppearanceTask";
-import { isStarterScene, listingSources, refreshedSources } from "./lib/unitGeneration";
+import {
+  isStarterScene,
+  listingSources,
+  refreshedSources,
+  savedSceneSources,
+} from "./lib/unitGeneration";
 import {
   MAX_SOURCES,
   manualScene,
@@ -67,7 +72,15 @@ export const get = viewerQuery({
         url: s.storageId ? ((await ctx.storage.getUrl(s.storageId)) ?? undefined) : s.url,
       })),
     );
-    return { ...doc, sources };
+    const sceneSources =
+      doc.sceneSources &&
+      (await Promise.all(
+        doc.sceneSources.map(async (s) => ({
+          ...s,
+          url: s.storageId ? ((await ctx.storage.getUrl(s.storageId)) ?? undefined) : s.url,
+        })),
+      ));
+    return { ...doc, sources, sceneSources };
   },
 });
 export const mine = viewerQuery({
@@ -149,9 +162,10 @@ export const save = viewerMutation({
   handler: async (ctx, { id, revision, scene, placements }) => {
     const doc = await ownScene(ctx, id, ctx.viewer._id);
     assertRevision(doc, revision);
+    const sceneSources = savedSceneSources(scene, [...(doc.sceneSources ?? []), ...doc.sources]);
     const errors = sceneProblems(
       scene,
-      doc.sources.map((s) => s.key),
+      sceneSources.map((s) => s.key),
     );
     if (errors.length) throw new ConvexError(errors.join("; "));
     if (placements.length > 80 || new Set(placements.map((p) => p.id)).size !== placements.length)
@@ -174,6 +188,7 @@ export const save = viewerMutation({
     }
     await ctx.db.patch(id, {
       scene,
+      sceneSources,
       placements,
       manuallyEdited: true,
       generation: undefined,
@@ -286,6 +301,7 @@ export const requestGeneration = viewerMutation({
     });
     await ctx.db.patch(id, {
       sources,
+      sceneSources: savedSceneSources(doc.scene, doc.sceneSources ?? doc.sources),
       description,
       revision: nextRevision,
       jobId,
@@ -345,7 +361,12 @@ export const saveCandidate = internalMutation({
     await ctx.db.patch(id, {
       ...(candidate
         ? autoApply
-          ? { scene: candidate, candidate: undefined, manuallyEdited: false }
+          ? {
+              scene: candidate,
+              sceneSources: savedSceneSources(candidate, doc.sources),
+              candidate: undefined,
+              manuallyEdited: false,
+            }
           : { candidate }
         : {}),
       explanation,
@@ -366,6 +387,7 @@ export const acceptCandidate = viewerMutation({
     if (!doc.candidate) throw new ConvexError("No generated layout to apply");
     await ctx.db.patch(id, {
       scene: doc.candidate,
+      sceneSources: savedSceneSources(doc.candidate, doc.sources),
       candidate: undefined,
       manuallyEdited: false,
       generation: doc.generation

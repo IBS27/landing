@@ -1,31 +1,93 @@
+import { canonicalJson } from "../ai/outputSchema";
 import type { UnitAppearance } from "./unitAppearance";
 import { sceneProblems, type UnitScene } from "./unitScene";
+
+function usedMaterials(appearance: UnitAppearance) {
+  const ids = new Set([
+    ...appearance.surfaces.map((s) => s.materialId),
+    ...appearance.objects.flatMap((o) => o.parts.map((p) => p.materialId)),
+  ]);
+  return appearance.materials.filter((m) => ids.has(m.id));
+}
 
 /** Keep only independently valid evidence; never resize or move a fixture to hide an error. */
 export function retainValidAppearance(
   scene: UnitScene,
   appearance: UnitAppearance,
   keys: string[],
+  previous?: UnitAppearance,
 ) {
   const valid = (value: UnitAppearance) => sceneProblems({ ...scene, appearance: value }, keys);
-  if (!valid(appearance).length) return { appearance, omitted: [] as string[] };
-  const kept: UnitAppearance = { materials: [], surfaces: [], objects: [], notes: [] };
+  if (!previous && !valid(appearance).length)
+    return {
+      appearance: { ...appearance, materials: usedMaterials(appearance) },
+      omitted: [] as string[],
+    };
+  const kept: UnitAppearance = previous
+    ? structuredClone(previous)
+    : { materials: [], surfaces: [], objects: [], notes: [] };
+  kept.materials = usedMaterials(kept);
+  // Retry adds missing details. Existing fixtures and finishes remain authoritative.
+  const materialIds = new Map<string, string>();
+  const reserved = new Set(
+    [...kept.materials, ...kept.objects, ...appearance.materials, ...appearance.objects].map(
+      (item) => item.id,
+    ),
+  );
   const omitted: string[] = [];
+  const incomingMaterials: UnitAppearance["materials"] = [];
   for (const material of appearance.materials.slice(0, 64)) {
-    const next = { ...kept, materials: [...kept.materials, material] };
-    if (!valid(next).length) kept.materials.push(material);
-    else omitted.push(`material ${material.id}`);
+    const existing = kept.materials.find((m) => m.id === material.id);
+    if (existing && canonicalJson(existing) === canonicalJson(material)) continue;
+    let id = material.id;
+    if (existing || kept.objects.some((o) => o.id === id)) {
+      let suffix = 1;
+      do {
+        id = `${material.id.slice(0, 48)}-retry-${suffix++}`;
+      } while (reserved.has(id));
+      reserved.add(id);
+      materialIds.set(material.id, id);
+    }
+    incomingMaterials.push({ ...material, id });
   }
+  // Commit a detail and its material dependencies together, or keep neither.
+  const withMaterials = (next: UnitAppearance) => ({
+    ...next,
+    materials: usedMaterials({
+      ...next,
+      materials: [
+        ...kept.materials,
+        ...incomingMaterials.filter((m) => !kept.materials.some((k) => k.id === m.id)),
+      ],
+    }),
+  });
   for (const surface of appearance.surfaces.slice(0, 184)) {
-    const next = { ...kept, surfaces: [...kept.surfaces, surface] };
-    if (!valid(next).length) kept.surfaces.push(surface);
-    else omitted.push(`surface ${surface.targetId}`);
+    if (kept.surfaces.some((s) => s.targetId === surface.targetId)) continue;
+    const incoming = {
+      ...surface,
+      materialId: materialIds.get(surface.materialId) ?? surface.materialId,
+    };
+    const next = withMaterials({ ...kept, surfaces: [...kept.surfaces, incoming] });
+    if (!valid(next).length) {
+      kept.surfaces.push(incoming);
+      kept.materials = next.materials;
+    } else omitted.push(`surface ${surface.targetId}`);
   }
   for (const object of appearance.objects.slice(0, 64)) {
-    const next = { ...kept, objects: [...kept.objects, object] };
+    if (kept.objects.some((o) => o.id === object.id)) continue;
+    const incoming = {
+      ...object,
+      parts: object.parts.map((part) => ({
+        ...part,
+        materialId: materialIds.get(part.materialId) ?? part.materialId,
+      })),
+    };
+    const next = withMaterials({ ...kept, objects: [...kept.objects, incoming] });
     const errors = valid(next);
-    if (!errors.length) kept.objects.push(object);
-    else omitted.push(`${object.label}: ${errors[0]}`.slice(0, 400));
+    if (!errors.length) {
+      kept.objects.push(incoming);
+      kept.materials = next.materials;
+    } else omitted.push(`${object.label}: ${errors[0]}`.slice(0, 400));
   }
   if (
     appearance.materials.length > 64 ||

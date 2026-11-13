@@ -15,6 +15,7 @@ export const unitSceneFields = {
   scene: unitScene,
   placements: v.array(placement),
   sources: v.array(sceneSource),
+  sceneSources: v.optional(v.array(sceneSource)),
   description: v.string(),
   revision: v.number(),
   manuallyEdited: v.optional(v.boolean()),

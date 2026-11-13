@@ -15,6 +15,8 @@ export const unitSceneTask = defineTask<UnitSceneInput, ReturnType<typeof output
   name: "muse.unitScene",
   model: "muse-wonder-1.0",
   effort: "high",
+  // Saved scenes are the reopen cache. An explicit Generate/Retry must not reuse a null result.
+  cacheTtlMs: 0,
   version: 3,
   output: outputValidator(),
   instructions: `Reconstruct a single-level apartment from the attached evidence as editable geometry, never executable code.
