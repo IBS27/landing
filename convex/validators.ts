@@ -481,3 +481,20 @@ export const proposalAction = v.union(
   v.literal("rejected"),
   v.literal("expired"),
 );
+
+/* ── Marketplace negotiation (#36) ─────────────────────────────────────── */
+
+/** "paused" and "stopped" are the buyer's; Muse drafts nothing while either is set. */
+export const negotiationStatus = v.union(
+  v.literal("active"),
+  v.literal("paused"),
+  v.literal("stopped"),
+);
+
+/** Muse's next move in a negotiation. Every one becomes a proposal the buyer approves. */
+export const negotiationMove = v.union(
+  v.literal("offer"),
+  v.literal("accept"),
+  v.literal("message"),
+  v.literal("walk_away"),
+);

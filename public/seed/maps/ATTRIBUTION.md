@@ -17,4 +17,8 @@ Every image carries the "© OpenStreetMap contributors © OpenMapTiles" credit i
 - `regions/*.webp`: zoom 7, 520x220, centred on each Marketplace browse city (Change location dialog).
 - `dark/**`: the same set in the dark style.
 
-The tiles were fetched once at build time; the app never loads map tiles at runtime.
+The tiles for these images were fetched once at build time.
+
+The interactive Landing map (`src/landing/map/`) loads the same OpenFreeMap vector tiles and Positron and Dark
+styles at runtime (keyless, no per-request billing), lazily, only on pages that show it. It credits
+OpenFreeMap, OpenMapTiles and OpenStreetMap in its attribution control.
