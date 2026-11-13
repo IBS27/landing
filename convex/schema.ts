@@ -778,6 +778,23 @@ export default defineSchema({
     .index("by_pair", ["voucherId", "subjectId"]),
 
   /**
+   * Landing roommate lifestyle answers (#21): one row per person, written only
+   * by them through the questionnaire. Private until `shared` is turned on, and
+   * then visible only to others who share too. Read other people's answers
+   * through `comparableLifestyles` (convex/lib/roommates.ts), never directly.
+   */
+  roommateLifestyles: defineTable({
+    userId: v.id("users"),
+    answers: lifestyleAnswers,
+    /** Opted in to roommate matching. False until the person turns it on. */
+    shared: v.boolean(),
+    sharedAt: v.optional(v.number()),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_shared", ["shared", "userId"]),
+
+  /**
    * Landing rooms (#25): a person's room scan (photos and optional floor size)
    * and its style vibe. Marketplace matching (#26) and the 3D room (#37) read
    * these; see convex/rooms.ts.
@@ -796,21 +813,4 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_user", ["userId", "createdAt"]),
-
-  /**
-   * Landing roommate lifestyle answers (#21): one row per person, written only
-   * by them through the questionnaire. Private until `shared` is turned on, and
-   * then visible only to others who share too. Read other people's answers
-   * through `comparableLifestyles` (convex/lib/roommates.ts), never directly.
-   */
-  roommateLifestyles: defineTable({
-    userId: v.id("users"),
-    answers: lifestyleAnswers,
-    /** Opted in to roommate matching. False until the person turns it on. */
-    shared: v.boolean(),
-    sharedAt: v.optional(v.number()),
-    updatedAt: v.number(),
-  })
-    .index("by_user", ["userId"])
-    .index("by_shared", ["shared", "userId"]),
 });

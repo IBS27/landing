@@ -304,7 +304,7 @@ describe("muse.roomVibe on runAgent", () => {
 });
 
 describe("vibe input", () => {
-  test("City Profile interests reach Muse, stated first, without removed or other people's", async () => {
+  test("City Profile interests reach Muse, stated first, without weak guesses, removed or other people's", async () => {
     const fact = (
       id: string,
       userId: string,
@@ -326,6 +326,7 @@ describe("vibe input", () => {
         fact("f2", "users:me", "books", { source: "stated", confidence: 1 }),
         fact("f3", "users:me", "gardening", { source: "stated", confidence: 1, removedAt: 2 }),
         fact("f4", "users:other", "surfing", { source: "stated", confidence: 1 }),
+        fact("f5", "users:me", "coffee", { source: "inferred", confidence: 0.3 }),
       ],
     });
     const interests = await profileInterests(ctx, "users:me" as Id<"users">);

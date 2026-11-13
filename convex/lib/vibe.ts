@@ -339,7 +339,7 @@ export function vibeFromSignals(signals: VibeSignals, sources: SignalSource[]): 
     xs.length > 1 ? `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}` : xs[0];
   const summary =
     ranked.length > 0
-      ? `${/^[aeiou]/i.test(names[0] ?? "") ? "An" : "A"} ${names.join(" and ")} ${room}: ${list(colors)}, with ${list(keywords.slice(0, 2))}.`
+      ? `${/^[aeiou]/i.test(names[0] ?? "") ? "An" : "A"} ${names.join(" and ")} ${room}: ${list(colors)}, with ${list(keywords.filter((k) => !colors.includes(k)).slice(0, 2))}.`
       : `A calm, simple ${room} to start from: ${list(colors)}.`;
   const fromProfile = [
     ...new Set(

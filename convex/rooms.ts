@@ -263,6 +263,7 @@ export const clearVibe = viewerMutation({
 /* ---------------- Muse's suggestion ---------------- */
 
 const CAP = {
+  interests: 12,
   follows: 15,
   savedListings: 12,
   savedPosts: 8,
@@ -270,16 +271,19 @@ const CAP = {
   reactionsScanned: 200,
 };
 
-/** City Profile interests (#3), stated first. A fixed list, so never a protected trait. */
+/** City Profile interests (#3): what they stated, plus inferences Landing is fairly sure of. */
 export async function profileInterests(ctx: QueryCtx, userId: Id<"users">) {
-  const ids = new Set((await getProfile(ctx, userId)).interests.map((f) => f.value.id));
-  return [...ids].map((id) => ({ id, label: getInterest(id).label }));
+  return (await getProfile(ctx, userId)).interests
+    .filter((f) => f.source === "stated" || f.confidence >= 0.5)
+    .slice(0, CAP.interests)
+    .map((f) => ({ id: f.value.id, label: getInterest(f.value.id).label }));
 }
 
 /**
- * What Muse reads for a room's vibe: the room, City Profile interests, followed Pages,
- * and as sources the listings and posts they saved and the posts they liked
- * (newest first). `runAgent` drops any source the viewer can't see.
+ * What Muse reads for a room's vibe: the room, the person's City Profile
+ * interests, the Pages they follow, and as sources the listings and posts they
+ * saved and the posts they liked (newest first). `runAgent` drops any source
+ * the viewer can't see.
  */
 export const vibeInput = internalQuery({
   args: { viewerId: v.id("users"), roomId: v.id("rooms") },
