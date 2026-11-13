@@ -1,6 +1,7 @@
 import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
+import { recordSignal, undoSignal } from "./lib/activity";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import {
   type Audience,
@@ -64,6 +65,7 @@ export const toggle = viewerMutation({
       .first();
     if (existing) {
       await ctx.db.delete(existing._id);
+      await undoSignal(ctx, ctx.viewer._id, ["save"], refId);
       return false;
     }
     await ctx.db.insert("saved", {
@@ -73,6 +75,8 @@ export const toggle = viewerMutation({
       collectionId: await forLater(ctx, ctx.viewer._id),
       createdAt: Date.now(),
     });
+    // Saves stand in for City Map pins (#4) until the map exists.
+    await recordSignal(ctx, ctx.viewer._id, "save", kind, refId);
     return true;
   },
 });
