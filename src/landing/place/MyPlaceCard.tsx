@@ -25,7 +25,7 @@ export function MyPlaceCard() {
   const mine = useQ(api.myPlace.mine, {});
   if (mine === undefined)
     return (
-      <Card className="mb-3 flex gap-4 p-4">
+      <Card className="mb-4 flex gap-4 p-4">
         <Skeleton className="h-24 w-24 shrink-0 rounded-lg" />
         <div className="flex flex-1 flex-col gap-2 pt-1">
           <Skeleton className="h-5 w-56" />
@@ -53,13 +53,13 @@ function PrivateNote() {
 function NoPlace() {
   const [adding, setAdding] = useState(false);
   return (
-    <Card className="mb-3 p-4">
+    <Card className="mb-4 p-4">
       <div className="flex items-start gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-highlight text-accent">
           <Home size={20} aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="font-semibold text-[17px] text-primary leading-[22px]">Your place</h2>
+          <h2 className="font-bold text-[17px] text-primary leading-[22px]">Your place</h2>
           <p className="mt-0.5 max-w-[60ch] text-[15px] text-secondary leading-5">
             Picked an apartment? Add it, and your rooms, 3D unit and City Profile start from it.
           </p>
@@ -104,7 +104,7 @@ function CurrentPlace({ place }: { place: Current }) {
   ].filter(Boolean);
 
   return (
-    <Card className="mb-3 overflow-hidden">
+    <Card className="mb-4 overflow-hidden">
       <div className="flex flex-col gap-4 p-4 sm:flex-row">
         {listing?.photo ? (
           <img
@@ -127,10 +127,9 @@ function CurrentPlace({ place }: { place: Current }) {
               Edit
             </Button>
           </div>
-          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px] text-secondary">
-            <span className="rounded-full bg-btn-soft px-2 py-0.5 font-semibold text-[13px] text-btn-soft-text">
-              {placeStatusLabel(place.status)}
-            </span>
+          <p className="mt-1 flex flex-wrap items-center gap-x-2 text-[15px] text-secondary leading-5">
+            <span className="font-semibold text-primary">{placeStatusLabel(place.status)}</span>
+            <span aria-hidden>·</span>
             <span>{when}</span>
             {facts.length > 0 && <span aria-hidden>·</span>}
             {facts.length > 0 && <span>{facts.join(", ")}</span>}
@@ -140,7 +139,7 @@ function CurrentPlace({ place }: { place: Current }) {
               The listing you took is no longer available.
             </p>
           )}
-          <nav aria-label="Your place" className="mt-3 flex flex-wrap gap-2">
+          <nav aria-label="Your place" className="mt-4 flex flex-wrap gap-2">
             {neighborhood && (
               <Link {...toNeighborhood(neighborhood.slug)} className={chip}>
                 <MapPin size={16} aria-hidden />
@@ -215,14 +214,14 @@ function CurrentPlace({ place }: { place: Current }) {
 }
 
 const chip =
-  "inline-flex h-9 items-center gap-1.5 rounded-full bg-btn px-3 font-semibold text-[15px] text-btn-text hover:brightness-95 dark:hover:brightness-125";
+  "inline-flex h-9 items-center gap-1.5 rounded-md bg-btn px-3 font-semibold text-[15px] text-btn-text transition-[filter] hover:brightness-95 dark:hover:brightness-125";
 
 function PastPlaces({ past }: { past: Past[] }) {
   const remove = useM(api.myPlace.remove);
   const [error, setError] = useState<string | null>(null);
   return (
-    <Card className="mb-3 p-4">
-      <h2 className="font-semibold text-[17px] text-primary leading-[22px]">Places you've left</h2>
+    <Card className="mb-4 p-4">
+      <h2 className="font-bold text-[17px] text-primary leading-[22px]">Places you've left</h2>
       {error && (
         <p role="alert" className="mt-1 text-[13px] text-negative">
           {error}

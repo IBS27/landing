@@ -6,7 +6,6 @@ import {
   Info,
   Lightbulb,
   MessageCircle,
-  Moon,
   Ticket,
   TrainFront,
   UtensilsCrossed,
@@ -54,11 +53,11 @@ function FullScores({ neighborhoodId }: { neighborhoodId: Id<"neighborhoods"> })
         <h2 className="font-bold text-[20px] text-primary leading-6">
           How {data.neighborhood.label} scores
         </h2>
-        <p className="mt-0.5 text-secondary text-sm">
+        <p className="mt-0.5 text-[15px] text-secondary leading-5">
           Compared with other San Francisco neighborhoods, from public data. Tap a score's sources
           to see where it comes from.
         </p>
-        <ScoreTiles data={data} className="mt-4" />
+        <ScoreTiles data={data} className="mt-3" />
         <HowCalculated lines={data.howCalculated} computedAt={data.computedAt} />
       </Card>
       <NightFacts data={data} />
@@ -83,7 +82,7 @@ export const TILE: Record<
 export function ScoreTiles({ data, className }: { data: ScoresData; className?: string }) {
   const fit = data.interestFit;
   return (
-    <div className={cn("grid grid-cols-1 gap-3 sm:grid-cols-2", className)}>
+    <div className={cn("grid grid-cols-1 gap-2 sm:grid-cols-2", className)}>
       {data.scores.map((s) =>
         s.state === "ok" ? (
           <Tile
@@ -144,33 +143,32 @@ function Tile({
   personal?: boolean;
 }) {
   const [first, ...rest] = sources ?? [];
+  const sub = [label, personal && "Just for you"].filter(Boolean).join(" · ");
   return (
-    <section
-      aria-label={title}
-      className="flex min-w-0 flex-col rounded-lg border border-divider p-3"
-    >
-      <div className="flex items-center gap-2 text-secondary">
-        {icon}
-        <h3 className="font-semibold text-[15px] text-primary">{title}</h3>
-        {personal && (
-          <span className="ml-auto rounded-full bg-btn-soft px-2 py-0.5 font-semibold text-btn-soft-text text-xs">
-            Just for you
-          </span>
+    <section aria-label={title} className="flex min-w-0 flex-col rounded-lg bg-comment p-3">
+      <div className="flex items-center gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-card text-secondary">
+          {icon}
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-semibold text-[15px] text-primary leading-5">{title}</h3>
+          {sub && <p className="truncate text-[13px] text-secondary leading-4">{sub}</p>}
+        </div>
+        {score !== undefined ? (
+          <p className="flex shrink-0 items-baseline gap-1">
+            <span className="font-bold text-[24px] text-primary tabular-nums leading-7">
+              {score.toFixed(1)}
+            </span>
+            <span className="text-[13px] text-secondary">/ 10</span>
+          </p>
+        ) : (
+          <p className="shrink-0 font-bold text-[24px] text-secondary leading-7">
+            <span aria-hidden>–</span>
+            <span className="sr-only">No score</span>
+          </p>
         )}
       </div>
-      {score !== undefined ? (
-        <p className="mt-2 flex items-baseline gap-1.5">
-          <span className="font-bold text-[28px] text-primary leading-8">{score.toFixed(1)}</span>
-          <span className="text-secondary text-sm">/ 10</span>
-          {label && <span className="ml-1 font-semibold text-[15px] text-primary">{label}</span>}
-        </p>
-      ) : (
-        <p className="mt-2 font-bold text-[28px] text-secondary leading-8">
-          <span aria-hidden>–</span>
-          <span className="sr-only">No score</span>
-        </p>
-      )}
-      <p className="mt-1 flex-1 text-secondary text-sm leading-[18px]">{detail}</p>
+      <p className="mt-2 flex-1 text-[13px] text-secondary leading-[18px]">{detail}</p>
       {first && (
         <div className="mt-2">
           <SourcesChip sources={[first, ...rest]} />
@@ -242,14 +240,11 @@ export function NightFacts({ data }: { data: ScoresData }) {
   if (!transit && !streetlights && quotes.length === 0) return null;
   return (
     <Card className="p-4">
-      <h2 className="flex items-center gap-2 font-bold text-[20px] text-primary leading-6">
-        <Moon size={20} aria-hidden />
-        Getting around at night
-      </h2>
-      <p className="mt-0.5 text-secondary text-sm">
+      <h2 className="font-bold text-[20px] text-primary leading-6">Getting around at night</h2>
+      <p className="mt-0.5 text-[15px] text-secondary leading-5">
         Cited facts and what locals say. There's no safety score.
       </p>
-      <div className="mt-3 space-y-4">
+      <div className="mt-4 space-y-5">
         {transit && (
           <NightRow
             icon={<TrainFront size={18} aria-hidden />}
@@ -290,11 +285,11 @@ export function NightFacts({ data }: { data: ScoresData }) {
         )}
         {quotes.length > 0 && (
           <div>
-            <h3 className="flex items-center gap-2 font-semibold text-[15px] text-primary">
+            <h3 className="flex items-center gap-2 font-semibold text-[15px] text-primary leading-5">
               <MessageCircle size={18} aria-hidden className="text-secondary" />
               What locals say
             </h3>
-            <ul className="mt-1.5 space-y-2">
+            <ul className="mt-2 space-y-2.5 pl-[26px]">
               {quotes.map((q) => (
                 <Quote key={q.source.key} quote={q.quote} source={q.source} />
               ))}
@@ -320,13 +315,15 @@ function NightRow({
   const [first, ...rest] = sources;
   return (
     <div>
-      <h3 className="flex items-center gap-2 font-semibold text-[15px] text-primary">
+      <h3 className="flex items-center gap-2 font-semibold text-[15px] text-primary leading-5">
         <span className="text-secondary">{icon}</span>
         {title}
       </h3>
-      <div className="mt-1 space-y-0.5 text-primary text-sm leading-[18px]">{children}</div>
+      <div className="mt-1 space-y-0.5 pl-[26px] text-[15px] text-primary leading-5">
+        {children}
+      </div>
       {first && (
-        <div className="mt-1.5">
+        <div className="mt-2 pl-[26px]">
           <SourcesChip sources={[first, ...rest]} />
         </div>
       )}
@@ -351,14 +348,14 @@ function Quote({ quote, source }: { quote: string; source: CitedSource }) {
   const who = source.kind === "post" || source.kind === "comment" ? source.author.firstName : null;
   const when = "createdAt" in source ? shortAge(source.createdAt) : null;
   return (
-    <li className="rounded-lg bg-wash px-3 py-2">
-      <p className="text-primary text-sm leading-[18px]">“{quote}”</p>
-      <div className="mt-1 flex items-center gap-2 text-secondary text-xs">
-        {who && <span>{who}</span>}
-        {when && <span>· {when}</span>}
-        <span className="ml-auto">
-          <SourcesChip sources={[source]} label="Source" />
-        </span>
+    <li className="min-w-0">
+      <div className="inline-block max-w-full rounded-[18px] bg-comment px-3 py-2">
+        {who && <p className="font-semibold text-[13px] text-primary leading-4">{who}</p>}
+        <p className="text-[15px] text-primary leading-5">“{quote}”</p>
+      </div>
+      <div className="mt-1 flex items-center gap-2 pl-3 text-secondary text-xs">
+        {when && <span>{when}</span>}
+        <SourcesChip sources={[source]} label="Source" />
       </div>
     </li>
   );
@@ -421,7 +418,7 @@ function ScoresSkeleton() {
   return (
     <Card className="space-y-3 p-4">
       <Skeleton className="h-5 w-48" />
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {[0, 1, 2, 3].map((i) => (
           <Skeleton key={i} className="h-32 rounded-lg" />
         ))}

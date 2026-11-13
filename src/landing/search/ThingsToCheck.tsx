@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { toConversation, toProfile } from "@/landing/links";
-import { cn, price, shortAge } from "@/lib/format";
+import { price, shortAge } from "@/lib/format";
 import { SourcesChip } from "@/ui/Citations";
 import { Button, Card, Spinner } from "@/ui/primitives";
 import type { api } from "../../../convex/_generated/api";
@@ -30,11 +30,11 @@ const RELATION: Record<string, string> = {
   friend_of_friend: "a friend of a friend",
 };
 
-/** The listing's verified levels as pills. Renders nothing when it has none. */
+/** The listing's verified levels, in a row. Renders nothing when it has none. */
 export function VerifiedBadges({ badges }: { badges: ListingTrust["badges"] }) {
   if (badges.length === 0) return null;
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-x-4 gap-y-1.5">
       {badges.map((b) => {
         if (b.kind === "identity")
           return (
@@ -60,7 +60,7 @@ export function VerifiedBadges({ badges }: { badges: ListingTrust["badges"] }) {
 
 function Pill({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
-    <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-[#E3F5E5] px-2.5 font-semibold text-[#24832C] text-[13px] dark:bg-[#3FBB46]/20 dark:text-[#3FBB46]">
+    <span className="inline-flex items-center gap-1.5 font-semibold text-[13px] text-positive leading-4">
       {icon}
       {children}
     </span>
@@ -232,7 +232,7 @@ export function ChatCheck({
       {byMessage.size > 0 && (
         <ul className="mt-3 flex flex-col gap-3">
           {[...byMessage.entries()].map(([id, m]) => (
-            <li key={id} className="rounded-lg bg-wash p-3 dark:bg-hover">
+            <li key={id}>
               <div className="flex items-start gap-2">
                 <MessageCircleWarning
                   size={16}
@@ -248,15 +248,11 @@ export function ChatCheck({
                   </div>
                   <ul className="mt-2 flex flex-col gap-1.5">
                     {m.items.map((f) => (
-                      <li key={f.category} className="text-[13px] leading-[18px]">
-                        <span
-                          className={cn(
-                            "mr-1.5 inline-flex rounded-full bg-[#FFF4D6] px-2 py-0.5 font-semibold text-[#8A6100] text-[12px] dark:bg-[#F7B928]/20 dark:text-[#F7B928]",
-                          )}
-                        >
-                          {CATEGORY_LABEL[f.category] ?? f.category}
-                        </span>
-                        <span className="text-primary">{f.reason}</span>
+                      <li key={f.category} className="text-[13px] text-primary leading-[18px]">
+                        <span className="font-semibold">
+                          {CATEGORY_LABEL[f.category] ?? f.category}.
+                        </span>{" "}
+                        {f.reason}
                       </li>
                     ))}
                   </ul>

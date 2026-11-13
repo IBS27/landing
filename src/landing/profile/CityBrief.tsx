@@ -114,7 +114,7 @@ export function CityBriefPage({ startEditing = false }: { startEditing?: boolean
 
 /** Sits inside Landing's layout, which provides the page background and nav. */
 function Shell({ children }: { children: ReactNode }) {
-  return <div className="mx-auto w-full max-w-[720px] px-4 pt-6 pb-10">{children}</div>;
+  return <div className="mx-auto w-full max-w-[784px] px-4 pt-6 pb-10 lg:px-8">{children}</div>;
 }
 
 function BriefEditor({
@@ -188,11 +188,11 @@ function BriefEditor({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="px-1 pb-1">
+      <div className="mb-2">
         <h1 className="font-bold text-[24px] text-primary leading-7">
           {onboarded ? "Edit your City Profile" : "Set up your City Profile"}
         </h1>
-        <p className="mt-1 text-[15px] text-secondary">
+        <p className="mt-1 text-[15px] text-secondary leading-5">
           A two-minute brief about your move to San Francisco. Landing uses it to rank apartments,
           compare neighborhoods and find people arriving when you do.
         </p>
@@ -384,7 +384,7 @@ function BriefEditor({
         }
       >
         {suggestedInterests.length > 0 && (
-          <div className="mb-3 rounded-lg bg-wash/60 p-3">
+          <div className="mb-4 rounded-lg bg-comment p-3">
             <p className="mb-2 flex items-center gap-1.5 font-semibold text-[13px] text-secondary">
               <Sparkles size={13} /> Muse noticed from your activity. Add any that fit.
             </p>
@@ -523,16 +523,14 @@ function Section({
   return (
     <Card id={id} className="scroll-mt-[72px] px-4 py-4">
       <div className="mb-3 flex items-start justify-between gap-3">
-        <div>
-          <h2 className="flex items-center gap-2 font-bold text-[17px] text-primary leading-[22px]">
+        <div className="min-w-0">
+          <h2 className="font-bold text-[17px] text-primary leading-[22px]">
             {title}
             {badge && (
-              <span className="rounded-full bg-btn px-2 py-0.5 font-semibold text-[12px] text-secondary">
-                {badge}
-              </span>
+              <span className="ml-1.5 font-normal text-[15px] text-secondary">· {badge}</span>
             )}
           </h2>
-          {help && <p className="mt-0.5 text-[13px] text-secondary">{help}</p>}
+          {help && <p className="mt-0.5 text-[13px] text-secondary leading-4">{help}</p>}
         </div>
         {aside}
       </div>

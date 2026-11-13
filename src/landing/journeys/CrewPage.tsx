@@ -6,7 +6,6 @@ import { useM, useQ } from "@/app/viewer";
 import { useToast } from "@/features/marketplace/toast";
 import { toProfile } from "@/landing/links";
 import { ChatPlansCard } from "@/landing/plans/ChatPlansCard";
-import { LandingPage } from "@/landing/shell/LandingPage";
 import { cn } from "@/lib/format";
 import { Modal } from "@/ui/overlays";
 import { Avatar, Button, Card, Spinner } from "@/ui/primitives";
@@ -31,50 +30,45 @@ const placesLabel = (slugs: string[]) =>
  * Landing → Crew & Journeys (`/landing/crew`): the Move-in Crew (#30). Opt in,
  * pick what you're matched on, and see the people arriving with you and what
  * you have in common. Journeys (#32 and later) join this page, and plans from
- * your group chats (#34).
+ * your group chats (#34). The page header and tabs come from `CrewTabs`.
  */
 export function CrewPage() {
   const status = useQ(api.crews.status, {});
   const crew = useQ(api.crews.myCrew, {});
   return (
-    <LandingPage
-      title="Crew & Journeys"
-      description="Meet people arriving when you do, matched on what you're into, before move day."
-    >
-      <div className="flex max-w-[760px] flex-col gap-4">
-        {status === undefined ? (
-          <div className="flex justify-center py-16">
-            <Spinner />
+    <div className="flex max-w-[760px] flex-col gap-4">
+      {status === undefined ? (
+        <div className="flex justify-center py-16">
+          <Spinner />
+        </div>
+      ) : !status.briefDone ? (
+        <Card className="flex flex-wrap items-center gap-4 p-4">
+          <div className="min-w-0 flex-1">
+            <h2 className="font-bold text-[17px] text-primary leading-5">
+              Set up your City Profile first
+            </h2>
+            <p className="mt-0.5 text-[15px] text-secondary leading-5">
+              Your crew is matched on your move-in month, neighborhoods and interests.
+            </p>
           </div>
-        ) : !status.briefDone ? (
-          <Card className="flex flex-wrap items-center gap-4 p-4">
-            <div className="min-w-0 flex-1">
-              <h2 className="font-bold text-[17px] text-primary leading-5">
-                Set up your City Profile first
-              </h2>
-              <p className="mt-0.5 text-[15px] text-secondary leading-5">
-                Your crew is matched on your move-in month, neighborhoods and interests.
-              </p>
-            </div>
-            <Link
-              to="/landing/welcome"
-              className="flex h-9 shrink-0 items-center rounded-md bg-btn-primary px-3 font-semibold text-[15px] text-white hover:bg-btn-primary-hover"
-            >
-              Set up your City Profile
-            </Link>
-          </Card>
-        ) : !status.optedIn ? (
-          <JoinCard status={status} />
-        ) : (
-          <>
-            <CrewList crew={crew} status={status} />
-            <CrewGroupCard crewSize={crew?.members.length ?? 0} />
-            <CrewSettings status={status} />
-          </>
-        )}
-        {status !== undefined && <ChatPlansCard />}
-      </div>
-    </LandingPage>
+          <Link
+            to="/landing/welcome"
+            className="flex h-9 shrink-0 items-center rounded-md bg-btn-primary px-3 font-semibold text-[15px] text-white hover:bg-btn-primary-hover"
+          >
+            Set up your City Profile
+          </Link>
+        </Card>
+      ) : !status.optedIn ? (
+        <JoinCard status={status} />
+      ) : (
+        <>
+          <CrewList crew={crew} status={status} />
+          <CrewGroupCard crewSize={crew?.members.length ?? 0} />
+          <CrewSettings status={status} />
+        </>
+      )}
+      {status !== undefined && <ChatPlansCard />}
+    </div>
   );
 }
 
@@ -110,14 +104,14 @@ function AnchorToggles({
     },
   ];
   return (
-    <ul className="flex flex-col gap-1">
+    <ul className="-mx-2 flex flex-col">
       {rows.map((r) => {
         const usable = status.usable[r.key];
         return (
           <li key={r.key}>
             <label
               className={cn(
-                "flex items-center gap-3 rounded-lg px-2 py-2",
+                "flex items-center gap-3 rounded-lg p-2",
                 usable ? "cursor-pointer hover:bg-hover" : "opacity-60",
               )}
             >
@@ -149,8 +143,8 @@ function AnchorToggles({
 
 function PrivacyNote() {
   return (
-    <p className="flex items-start gap-2 text-[13px] text-secondary">
-      <Lock size={14} className="mt-0.5 shrink-0" />
+    <p className="flex items-start gap-2 text-[13px] text-secondary leading-[18px]">
+      <Lock size={14} className="mt-0.5 shrink-0" aria-hidden />
       Others in your crew see your name and photo and only what you have in common: the month,
       neighborhoods and workplace you both turned on, and shared interests (including ones Landing
       learned from your activity, which you can remove in your City Profile). A crew Group intro may
@@ -167,22 +161,23 @@ function JoinCard({ status }: { status: Status }) {
   const [busy, setBusy] = useState(false);
   return (
     <Card className="p-4">
-      <div className="mb-2 flex items-center gap-3">
+      <div className="flex items-center gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-highlight text-accent">
-          <UsersRound size={22} />
+          <UsersRound size={20} />
         </span>
-        <div>
-          <h2 className="font-bold text-[20px] text-primary leading-6">Join your Move-in Crew</h2>
-          <p className="text-[13px] text-secondary">
+        <div className="min-w-0">
+          <h2 className="font-bold text-[17px] text-primary leading-5">Join your Move-in Crew</h2>
+          <p className="mt-0.5 text-[13px] text-secondary leading-4">
             People arriving when you do, matched on the interests you share.
           </p>
         </div>
       </div>
-      <p className="mt-2 mb-1 font-semibold text-[13px] text-secondary">Match me with people…</p>
+      <p className="mt-4 mb-1 font-semibold text-[15px] text-primary">Match me with people…</p>
       <AnchorToggles status={status} value={value} onChange={setValue} />
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-divider border-t pt-3">
+      <div className="mt-3 flex flex-col gap-3 border-divider border-t pt-3">
         <PrivacyNote />
         <Button
+          className="self-end"
           variant="primary"
           disabled={busy}
           onClick={async () => {
@@ -209,19 +204,19 @@ function JoinCard({ status }: { status: Status }) {
 function anchorText(a: Anchor) {
   switch (a.kind) {
     case "month":
-      return { icon: <CalendarDays size={13} />, text: `Arriving ${monthLabel(a.month)}` };
+      return { icon: <CalendarDays size={14} />, text: `Arriving ${monthLabel(a.month)}` };
     case "neighborhood":
-      return { icon: <MapPin size={13} />, text: `Both looking in ${placesLabel(a.slugs)}` };
+      return { icon: <MapPin size={14} />, text: `Both looking in ${placesLabel(a.slugs)}` };
     case "employer":
-      return { icon: <Building2 size={13} />, text: `Both at ${a.name}` };
+      return { icon: <Building2 size={14} />, text: `Both at ${a.name}` };
   }
 }
 
 function CrewList({ crew, status }: { crew: Crew | null | undefined; status: Status }) {
   return (
     <Card className="p-4">
-      <h2 className="font-bold text-[20px] text-primary leading-6">Your Move-in Crew</h2>
-      <p className="mb-3 text-[13px] text-secondary">
+      <h2 className="font-bold text-[17px] text-primary leading-5">Your Move-in Crew</h2>
+      <p className="mt-0.5 mb-1 text-[13px] text-secondary leading-4">
         {status.values.month ? `Arriving ${monthLabel(status.values.month)}. ` : ""}Matched on what
         you share, best first.
       </p>
@@ -230,7 +225,7 @@ function CrewList({ crew, status }: { crew: Crew | null | undefined; status: Sta
           <Spinner />
         </div>
       ) : !crew || crew.members.length === 0 ? (
-        <div className="rounded-lg bg-wash/60 px-4 py-6 text-center">
+        <div className="mt-2 rounded-lg bg-comment px-4 py-6 text-center">
           <p className="font-semibold text-[15px] text-primary">No crew yet</p>
           <p className="mt-1 text-[13px] text-secondary">
             Nobody else who joined shares your month, neighborhoods or workplace and an interest. As
@@ -238,9 +233,9 @@ function CrewList({ crew, status }: { crew: Crew | null | undefined; status: Sta
           </p>
         </div>
       ) : (
-        <ul className="flex flex-col divide-y divide-divider">
+        <ul className="-mb-1 flex flex-col divide-y divide-divider">
           {crew.members.map((m) => (
-            <li key={m.user._id} className="flex items-start gap-3 py-3">
+            <li key={m.user._id} className="flex items-start gap-3 py-3 last:pb-2">
               <Link {...toProfile(m.user)} className="shrink-0">
                 <Avatar src={m.user.avatar} alt={m.user.name} size={48} />
               </Link>
@@ -251,13 +246,13 @@ function CrewList({ crew, status }: { crew: Crew | null | undefined; status: Sta
                 >
                   {m.user.name}
                 </Link>
-                <div className="mt-1 flex flex-wrap gap-1.5">
+                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5">
                   {m.anchors.map((a) => {
                     const t = anchorText(a);
                     return (
                       <span
                         key={a.kind}
-                        className="inline-flex items-center gap-1 rounded-full bg-btn px-2 py-0.5 text-[13px] text-primary"
+                        className="inline-flex items-center gap-1 text-[13px] text-primary leading-[18px] [&>svg]:shrink-0 [&>svg]:text-secondary"
                       >
                         {t.icon}
                         {t.text}
@@ -265,7 +260,7 @@ function CrewList({ crew, status }: { crew: Crew | null | undefined; status: Sta
                     );
                   })}
                 </div>
-                <p className="mt-1.5 text-[13px] text-secondary">
+                <p className="mt-0.5 text-[13px] text-secondary leading-[18px]">
                   You both like{" "}
                   {m.shared
                     .slice(0, 4)
@@ -311,7 +306,7 @@ function CrewSettings({ status }: { status: Status }) {
 
   return (
     <Card className="p-4">
-      <h2 className="mb-1 font-bold text-[17px] text-primary leading-5">What you're matched on</h2>
+      <h2 className="mb-2 font-bold text-[17px] text-primary leading-5">What you're matched on</h2>
       <AnchorToggles status={status} value={value} onChange={setValue} />
       <div className="mt-3 flex flex-col gap-3 border-divider border-t pt-3">
         <PrivacyNote />

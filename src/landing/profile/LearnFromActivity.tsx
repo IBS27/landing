@@ -38,7 +38,7 @@ export function LearnFromActivity() {
     <Card className="p-4">
       <div className="flex items-center gap-4">
         <div className="min-w-0 flex-1">
-          <h2 className="font-semibold text-[15px] text-primary leading-5">
+          <h2 className="font-bold text-[17px] text-primary leading-[22px]">
             Learn from your activity
           </h2>
           <p className="mt-0.5 text-[13px] text-secondary leading-4">

@@ -70,9 +70,11 @@ export function UnitWorkspace({
   }
   return (
     <div className="space-y-4">
-      <Card className="space-y-3 p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-bold text-primary">{doc.scene.title}</h2>
+      <Card className="space-y-1.5 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <h2 className="min-w-0 font-bold text-[17px] text-primary leading-5">
+            {doc.scene.title}
+          </h2>
           <div className="flex flex-wrap gap-2">
             <Button
               disabled={busy || running || dirty || !doc.sources.length || !aiEnabled}
@@ -100,14 +102,18 @@ export function UnitWorkspace({
                 >
                   {showSaved ? "View generated layout" : "View saved layout"}
                 </Button>
-                <Button disabled={busy || running || dirty} onClick={() => run(onAccept)}>
+                <Button
+                  variant="primary"
+                  disabled={busy || running || dirty}
+                  onClick={() => run(onAccept)}
+                >
                   Use generated layout
                 </Button>
               </>
             )}
           </div>
         </div>
-        <p role="status" aria-live="polite" className="text-secondary text-sm">
+        <p role="status" aria-live="polite" className="text-[13px] text-secondary leading-[18px]">
           {running
             ? (job?.progress?.label ?? "Building your apartment…")
             : partial
@@ -121,40 +127,51 @@ export function UnitWorkspace({
                     : "Generate your apartment from these photos and floor plan."}
         </p>
         {dirty && (
-          <p className="text-secondary text-sm">
+          <p className="text-[13px] text-secondary leading-[18px]">
             Save your edits before generating or switching layouts.
           </p>
         )}
         {!aiEnabled && (
-          <p className="text-secondary text-sm">
+          <p className="text-[13px] text-secondary leading-[18px]">
             Muse is off. Manual layout and furniture placement still work.
           </p>
         )}
         {doc.explanation && (
-          <details className="text-secondary text-sm">
-            <summary className="cursor-pointer">Generation details</summary>
-            <p className="mt-2">{doc.explanation}</p>
+          <details className="text-[13px] text-secondary leading-[18px]">
+            <summary className="cursor-pointer font-semibold hover:underline">
+              Generation details
+            </summary>
+            <p className="mt-1.5">{doc.explanation}</p>
           </details>
         )}
       </Card>
       {(error || failed) && (
-        <p role="alert" className="rounded-lg bg-red-50 p-3 text-red-800 text-sm">
+        <p
+          role="alert"
+          className="rounded-lg bg-card p-3 text-[15px] text-negative leading-5 shadow-base"
+        >
           {error || job?.error || doc.explanation || "Please retry generation."}
         </p>
       )}
       {starter ? (
         <>
-          <Card className="flex min-h-[480px] flex-col items-center justify-center gap-4 p-6">
+          <Card className="flex min-h-[480px] flex-col items-center justify-center gap-3 p-6">
             {running && <Spinner />}
-            <p className="font-semibold text-primary">
+            <p className="font-semibold text-[17px] text-primary leading-5">
               {running ? "Building your apartment…" : "Your source floor plan"}
             </p>
             {plan ? (
-              <img className="max-h-80 max-w-full object-contain" src={plan.url} alt={plan.label} />
+              <img
+                className="max-h-80 max-w-full rounded-lg object-contain"
+                src={plan.url}
+                alt={plan.label}
+              />
             ) : (
-              <p className="text-secondary">Add a floor plan or room photos to get started.</p>
+              <p className="text-[15px] text-secondary">
+                Add a floor plan or room photos to get started.
+              </p>
             )}
-            <p className="max-w-lg text-center text-secondary text-sm">
+            <p className="max-w-lg text-center text-[13px] text-secondary leading-[18px]">
               Rooms appear here as soon as they’re ready. Finishes and fixtures follow
               automatically.
             </p>
@@ -201,8 +218,10 @@ class ViewerBoundary extends Component<
   }
   render() {
     return this.state.failed ? (
-      <Card className="space-y-3 p-5">
-        <p role="alert">The viewer could not open. Your saved apartment is safe.</p>
+      <Card className="space-y-3 p-4">
+        <p role="alert" className="text-[15px] text-primary">
+          The viewer could not open. Your saved apartment is safe.
+        </p>
         <Button onClick={() => this.setState({ failed: false })}>Retry viewer</Button>
       </Card>
     ) : (

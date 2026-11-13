@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
+import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { LandingPage } from "@/landing/shell/LandingPage";
@@ -23,7 +24,7 @@ export function UnitPage({ unit, room, listing, placeItem, placeListing }: UnitS
     <LandingPage
       title="Explore your unit"
       description="Walk through the layout, check the source material, and try furniture in your space."
-      className="max-w-[1400px]"
+      width="wide"
     >
       {unit ? (
         <SavedUnit key={unit} id={unit as Id<"unitScenes">} place={place} />
@@ -72,13 +73,15 @@ function StartUnit({ room, listing, place }: UnitSearch & { place: Place }) {
   }
   return (
     <div className="space-y-4">
-      <Card className="space-y-3 p-5">
-        <h2 className="font-bold text-lg text-primary">Build a layout you can explore</h2>
-        <p className="text-secondary">
+      <Card className="flex flex-col items-start gap-3 p-4">
+        <h2 className="font-bold text-[17px] text-primary leading-5">
+          Build a layout you can explore
+        </h2>
+        <p className="-mt-1.5 text-[15px] text-secondary leading-5">
           Start with your room or listing photos, add a floor plan, and let Muse suggest a layout.
           You can also enter measurements manually.
         </p>
-        <Button disabled={busy} onClick={start}>
+        <Button variant="primary" disabled={busy} onClick={start}>
           {busy
             ? "Opening…"
             : listing
@@ -88,21 +91,26 @@ function StartUnit({ room, listing, place }: UnitSearch & { place: Place }) {
                 : "Create a unit"}
         </Button>
         {error && (
-          <p role="alert" className="text-red-700">
+          <p role="alert" className="text-[13px] text-negative">
             {error}
           </p>
         )}
       </Card>
-      {mine?.map((item) => (
-        <Link
-          key={item.id}
-          to="/landing/place/unit"
-          search={{ unit: item.id }}
-          className="block rounded-lg border border-divider bg-card p-4 font-semibold text-primary hover:bg-hover"
-        >
-          {item.title}
-        </Link>
-      ))}
+      {mine && mine.length > 0 && (
+        <Card className="overflow-hidden py-1">
+          {mine.map((item) => (
+            <Link
+              key={item.id}
+              to="/landing/place/unit"
+              search={{ unit: item.id }}
+              className="flex items-center gap-3 px-4 py-2.5 font-semibold text-[15px] text-primary hover:bg-hover"
+            >
+              <span className="min-w-0 flex-1 truncate">{item.title}</span>
+              <ChevronRight size={20} className="shrink-0 text-icon-secondary" aria-hidden />
+            </Link>
+          ))}
+        </Card>
+      )}
     </div>
   );
 }

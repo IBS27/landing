@@ -45,8 +45,8 @@ export function Sublets({
 
   return (
     <Card className="mb-4 overflow-hidden">
-      <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-2">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-3 px-4 pt-4 pb-3">
+        <div className="min-w-[240px] flex-1">
           <h2 className="font-bold text-[17px] text-primary leading-5">Sublease your place</h2>
           <p className="mt-0.5 text-[13px] text-secondary leading-[18px]">
             Your sublet is listed on Marketplace. Muse drafts replies to renters, never under your
@@ -92,7 +92,7 @@ function SubletRow({ r }: { r: Row }) {
 
   return (
     <li className="px-4 py-3">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 sm:flex-nowrap">
         {r.photo ? (
           <img src={r.photo} alt="" className="h-14 w-14 shrink-0 rounded-md object-cover" />
         ) : (
@@ -106,13 +106,13 @@ function SubletRow({ r }: { r: Row }) {
           >
             {r.title}
           </Link>
-          <div className="text-[13px] text-secondary">
+          <div className="text-[13px] text-secondary leading-[18px]">
             {price(r.rent)}/mo · {shortDate(r.availableFrom)} to {shortDate(r.availableTo)}
             {r.neighborhood ? ` · ${r.neighborhood}` : ""}
           </div>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[13px]">
-            <span className="text-primary">
-              Lowest rent <b>{price(r.minRent)}</b>
+          <div className="flex flex-wrap items-center gap-x-2 text-[13px] leading-[18px]">
+            <span className="text-secondary">
+              Lowest rent <b className="font-semibold text-primary">{price(r.minRent)}</b>
             </span>
             <span className="text-secondary">
               · {r.chats} {r.chats === 1 ? "chat" : "chats"}
@@ -379,9 +379,10 @@ function SubletForm({ prefill, onDone }: { prefill?: Prefill; onDone: () => void
             onChange={(e) => set({ bathrooms: e.target.value })}
           />
         </label>
-        <label className="flex items-center gap-2 self-end pb-2">
+        <label className="flex cursor-pointer items-center gap-2 self-end pb-2.5">
           <input
             type="checkbox"
+            className="size-4 accent-[var(--accent)]"
             checked={f.furnished}
             onChange={(e) => set({ furnished: e.target.checked })}
           />
@@ -435,7 +436,7 @@ function SubletForm({ prefill, onDone }: { prefill?: Prefill; onDone: () => void
           </div>
         </div>
       </div>
-      {error && <p className="mt-2 text-[13px] text-[#E41E3F]">{error}</p>}
+      {error && <p className="mt-2 text-[13px] text-negative">{error}</p>}
       <div className="mt-3 flex justify-end gap-2">
         <Button variant="ghost" size="sm" onClick={onDone} disabled={busy}>
           Cancel

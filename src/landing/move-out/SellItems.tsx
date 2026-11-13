@@ -3,7 +3,7 @@ import { Sparkles, Store } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { toListing } from "@/landing/links";
-import { price } from "@/lib/format";
+import { cn, price } from "@/lib/format";
 import { Button, Card, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -32,8 +32,8 @@ export function SellItems() {
 
   return (
     <Card className="mb-4 overflow-hidden">
-      <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-2">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-3 px-4 pt-4 pb-3">
+        <div className="min-w-[240px] flex-1">
           <h2 className="font-bold text-[17px] text-primary leading-5">Sell your stuff</h2>
           <p className="mt-0.5 text-[13px] text-secondary leading-[18px]">
             Pick what you're not taking. Landing creates the Marketplace listings with your photos
@@ -72,13 +72,19 @@ export function SellItems() {
         <ul className="divide-y divide-divider border-divider border-t">
           {items.map((it) => {
             const listed = it.saleListingId;
+            const disabled = !!listed || reviewing || it.photos.length === 0;
             return (
               <li key={it._id}>
-                <label className="flex cursor-pointer items-center gap-3 px-4 py-2.5 hover:bg-hover">
+                <label
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-2.5",
+                    !disabled && "cursor-pointer hover:bg-hover",
+                  )}
+                >
                   <input
                     type="checkbox"
-                    className="h-4 w-4"
-                    disabled={!!listed || reviewing || it.photos.length === 0}
+                    className="size-4 shrink-0 accent-[var(--accent)]"
+                    disabled={disabled}
                     checked={picked.has(it._id)}
                     onChange={() => toggle(it._id)}
                     aria-label={`Sell ${it.title}`}
@@ -96,7 +102,7 @@ export function SellItems() {
                     <div className="truncate font-semibold text-[15px] text-primary">
                       {it.title}
                     </div>
-                    <div className="text-[13px] text-secondary">
+                    <div className="text-[13px] text-secondary leading-[18px]">
                       Paid {it.price === 0 ? "nothing" : price(it.price)}
                       {it.photos.length === 0 ? " · No photo, so it can't be listed" : ""}
                     </div>
@@ -142,8 +148,8 @@ function MuseTerms({ item }: { item: Item }) {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2 px-4 pb-2.5 pl-[76px] text-[13px]">
-      <Sparkles size={12} className="text-[#8A3FFC]" aria-hidden />
+    <div className="-mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 pr-4 pb-2 pl-[104px] text-[13px] max-sm:pl-4">
+      <Sparkles size={12} className="shrink-0 text-[#8A3FFC]" aria-hidden />
       {item.saleMinPrice !== null ? (
         <span className="text-secondary">
           {on ? "Muse replies to buyers" : "Muse paused"} · lowest{" "}
@@ -187,7 +193,7 @@ function MuseTerms({ item }: { item: Item }) {
           )}
         </>
       )}
-      {error && <span className="text-[#E41E3F]">{error}</span>}
+      {error && <span className="text-negative">{error}</span>}
     </div>
   );
 }
@@ -332,7 +338,7 @@ function ReviewListings({
               </li>
             ))}
           </ul>
-          <label className="mt-3 flex items-center gap-2">
+          <label className="mt-3 flex flex-wrap items-center gap-2">
             <span className="font-semibold text-[13px] text-secondary">Pickup neighborhood</span>
             <select
               className={`${field} w-48`}
@@ -348,7 +354,7 @@ function ReviewListings({
           </label>
         </>
       )}
-      {error && <p className="mt-2 text-[13px] text-[#E41E3F]">{error}</p>}
+      {error && <p className="mt-2 text-[13px] text-negative">{error}</p>}
       <div className="mt-3 flex justify-end gap-2">
         <Button variant="ghost" size="sm" onClick={() => onDone(false)} disabled={busy}>
           Cancel

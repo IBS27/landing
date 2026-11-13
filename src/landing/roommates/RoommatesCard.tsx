@@ -16,7 +16,7 @@ export function RoommatesCard() {
           ? "See roommate candidates from your network."
           : "Your answers are private. Share them when you're ready.";
   return (
-    <Card className="mb-3 overflow-hidden">
+    <Card className="mb-4 overflow-hidden">
       <Link to="/landing/place/roommates" className="flex items-center gap-3 p-4 hover:bg-hover">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-highlight text-accent">
           {mine?.shared ? <UsersRound size={20} /> : <Lock size={20} />}

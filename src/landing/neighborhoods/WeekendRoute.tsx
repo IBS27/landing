@@ -96,7 +96,7 @@ export function WeekendRoutePeek({
       <ol className="mt-2">
         {route.stops.slice(0, PEEK_STOPS).map((s) => (
           <li key={s.key} className="flex items-start gap-3 py-1.5">
-            <span className="w-[76px] shrink-0 pt-0.5 font-semibold text-secondary text-xs uppercase tracking-wide">
+            <span className="w-[76px] shrink-0 font-semibold text-[13px] text-secondary leading-5">
               {timeLabel(s)}
             </span>
             <div className="min-w-0 flex-1">
@@ -263,7 +263,7 @@ function StopRow({ stop, n }: { stop: WeekendStopView; n: number | null }) {
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-semibold text-secondary text-xs uppercase tracking-wide">
+        <p className="font-semibold text-[13px] text-secondary leading-4">
           {timeLabel(stop)}
           {stop.eventId && " · Event"}
         </p>
@@ -276,7 +276,16 @@ function StopRow({ stop, n }: { stop: WeekendStopView; n: number | null }) {
             stop.name
           )}
         </h3>
-        <p className="mt-0.5 text-primary text-sm leading-[18px]">{stop.why}</p>
+        <p className="mt-0.5 text-[15px] text-primary leading-5">{stop.why}</p>
+        {stop.matches.length > 0 && (
+          <p className="mt-1.5 flex items-center gap-1.5 text-[13px] text-secondary leading-4">
+            <Sparkles size={13} strokeWidth={2.4} className="shrink-0 text-link" aria-hidden />
+            Fits your interest in {stop.matches.join(", ").toLowerCase()}
+          </p>
+        )}
+        <div className="mt-2">
+          <SourcesChip sources={stop.sources} />
+        </div>
         {stop.disagreement && (
           <div className="mt-2 flex items-start gap-2 rounded-lg bg-comment px-2.5 py-2">
             <MessageCircleWarning size={16} className="mt-px shrink-0 text-secondary" aria-hidden />
@@ -289,15 +298,6 @@ function StopRow({ stop, n }: { stop: WeekendStopView; n: number | null }) {
             </div>
           </div>
         )}
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <SourcesChip sources={stop.sources} />
-          {stop.matches.length > 0 && (
-            <span className="inline-flex h-6 items-center gap-1 rounded-full bg-btn-soft px-2 font-semibold text-btn-soft-text text-xs">
-              <Sparkles size={12} aria-hidden />
-              Fits your interest in {stop.matches.join(", ").toLowerCase()}
-            </span>
-          )}
-        </div>
       </div>
     </li>
   );

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Plus, Trash2 } from "lucide-react";
+import { Box, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { useToast } from "@/features/marketplace/toast";
@@ -72,13 +72,21 @@ export function RoomPage({ roomId }: { roomId?: string }) {
               <div className="flex flex-col gap-4">
                 <RoomScan room={room} />
                 <RoomDetails key={room._id} room={room} />
-                <Link
-                  to="/landing/place/unit"
-                  search={{ room: room._id }}
-                  className="block rounded-lg border border-divider bg-card p-4 font-semibold text-link"
-                >
-                  Explore in 3D and place furniture
-                </Link>
+                <Card className="overflow-hidden">
+                  <Link
+                    to="/landing/place/unit"
+                    search={{ room: room._id }}
+                    className="flex items-center gap-3 p-4 hover:bg-hover"
+                  >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-highlight text-accent">
+                      <Box size={20} aria-hidden />
+                    </span>
+                    <span className="min-w-0 flex-1 font-semibold text-[15px] text-primary leading-5">
+                      Explore in 3D and place furniture
+                    </span>
+                    <ChevronRight size={20} className="shrink-0 text-icon-secondary" aria-hidden />
+                  </Link>
+                </Card>
               </div>
               <div className="flex flex-col gap-4">
                 <VibeCard key={room._id} room={room} />
@@ -137,10 +145,10 @@ function NewRoomCard({ first, onDone }: { first?: boolean; onDone: () => void })
 
   return (
     <Card className="p-4">
-      <h2 className="font-bold text-[20px] text-primary leading-6">
+      <h2 className="font-bold text-[17px] text-primary leading-5">
         {first ? "Start with a room" : "Add a room"}
       </h2>
-      <p className="mt-0.5 mb-3 text-[13px] text-secondary">
+      <p className="mt-0.5 mb-3 text-[13px] text-secondary leading-[18px]">
         {first
           ? "Pick the room you're setting up first. You'll add photos and its vibe next."
           : "Each room gets its own photos and vibe."}
@@ -222,7 +230,7 @@ function RoomDetails({ room }: { room: Room }) {
 
   return (
     <Card className="p-4">
-      <h2 className="mb-3 font-bold text-[20px] text-primary leading-6">Details</h2>
+      <h2 className="mb-3 font-bold text-[17px] text-primary leading-5">Details</h2>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1">
           <span className="font-semibold text-[13px] text-secondary">Name</span>
@@ -251,7 +259,7 @@ function RoomDetails({ room }: { room: Room }) {
             placeholder="Width"
             value={width}
             onChange={(e) => setWidth(e.target.value.replace(/[^\d.]/g, ""))}
-            className={cn(inputCls, "w-28")}
+            className={cn(inputCls, "min-w-0 flex-1")}
           />
           <span className="text-secondary">×</span>
           <input
@@ -260,7 +268,7 @@ function RoomDetails({ room }: { room: Room }) {
             placeholder="Length"
             value={length}
             onChange={(e) => setLength(e.target.value.replace(/[^\d.]/g, ""))}
-            className={cn(inputCls, "w-28")}
+            className={cn(inputCls, "min-w-0 flex-1")}
           />
           <span className="text-[15px] text-secondary">ft</span>
         </div>

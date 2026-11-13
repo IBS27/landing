@@ -44,8 +44,8 @@ export function OwnedItems() {
 
   return (
     <Card className="mb-4 overflow-hidden">
-      <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-2">
-        <div>
+      <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-3">
+        <div className="min-w-0">
           <h2 className="font-bold text-[17px] text-primary leading-5">Your stuff</h2>
           <p className="mt-0.5 text-[13px] text-secondary leading-[18px]">
             What you own, with what you paid, so it's ready to resell when you move out. Deals you
@@ -72,36 +72,40 @@ export function OwnedItems() {
       ) : (
         <ul className="divide-y divide-divider border-divider border-t">
           {items.map((it) => (
-            <li key={it._id} className="flex items-center gap-3 px-4 py-2.5">
+            <li key={it._id} className="flex items-center gap-3 px-4 py-3">
               {it.photos[0] ? (
                 <img
                   src={it.photos[0]}
                   alt=""
-                  className="h-12 w-12 shrink-0 rounded-md object-cover"
+                  className="h-14 w-14 shrink-0 rounded-lg object-cover"
                 />
               ) : (
-                <div className="h-12 w-12 shrink-0 rounded-md bg-wash" />
+                <div className="h-14 w-14 shrink-0 rounded-lg bg-btn" />
               )}
-              <div className="min-w-0 flex-1">
-                <div className="truncate font-semibold text-[15px] text-primary">{it.title}</div>
-                <div className="flex flex-wrap items-center gap-x-1.5 text-[13px] text-secondary">
-                  <span>{it.price === 0 ? "Free" : price(it.price)}</span>
-                  <span aria-hidden>·</span>
-                  <span>{day(it.acquiredAt)}</span>
-                  <span aria-hidden>·</span>
-                  {it.source.kind === "marketplace" ? (
-                    <Link
-                      {...toListing(it.source.listingId)}
-                      className="inline-flex items-center gap-1 text-link hover:underline"
-                    >
-                      <Store size={12} aria-hidden /> From Marketplace
-                    </Link>
-                  ) : (
-                    <span>Added by you</span>
-                  )}
+              <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-semibold text-[15px] text-primary leading-5">
+                    {it.title}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-1 text-[13px] text-secondary leading-[18px]">
+                    <span>{it.price === 0 ? "Free" : price(it.price)}</span>
+                    <span aria-hidden>·</span>
+                    <span>{day(it.acquiredAt)}</span>
+                    <span aria-hidden>·</span>
+                    {it.source.kind === "marketplace" ? (
+                      <Link
+                        {...toListing(it.source.listingId)}
+                        className="inline-flex items-center gap-1 text-link hover:underline"
+                      >
+                        <Store size={12} aria-hidden /> From Marketplace
+                      </Link>
+                    ) : (
+                      <span>Added by you</span>
+                    )}
+                  </div>
                 </div>
                 {rooms && placed && (
-                  <div className="mt-1.5">
+                  <div className="shrink-0">
                     <PlaceInRoom
                       item={{ placeItem: it._id }}
                       rooms={rooms}
@@ -236,7 +240,7 @@ function AddItemForm({ onDone }: { onDone: () => void }) {
           )}
         </div>
       </div>
-      {error && <p className="mt-2 text-[13px] text-[#E41E3F]">{error}</p>}
+      {error && <p className="mt-2 text-[13px] text-negative">{error}</p>}
       <div className="mt-3 flex justify-end gap-2">
         <Button variant="ghost" size="sm" onClick={onDone} disabled={busy}>
           Cancel

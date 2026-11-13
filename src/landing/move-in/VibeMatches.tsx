@@ -18,7 +18,7 @@ export function VibeMatches({ roomId }: { roomId: Id<"rooms"> }) {
   const rooms = [{ _id: roomId, name: "" }];
   return (
     <Card className="overflow-hidden">
-      <div className="px-4 pt-4 pb-2">
+      <div className="px-4 pt-4 pb-3">
         <h2 className="font-bold text-[17px] text-primary leading-5">Matches for this room</h2>
         <p className="mt-0.5 text-[13px] text-secondary leading-[18px]">
           Marketplace pieces that fit this room's vibe, best first.
@@ -33,35 +33,34 @@ export function VibeMatches({ roomId }: { roomId: Id<"rooms"> }) {
           Nothing on Marketplace matches this vibe right now. Try adding a few keywords to it.
         </p>
       ) : (
-        <ul className="divide-y divide-divider">
+        <ul className="divide-y divide-divider border-divider border-t">
           {matches.map((m) => (
-            <li key={m._id} className="flex gap-3 px-4 py-2.5">
+            <li key={m._id} className="flex gap-3 px-4 py-3">
               <Link {...toListing(m._id)} className="shrink-0 self-start" tabIndex={-1} aria-hidden>
                 {m.photo ? (
-                  <img src={m.photo} alt="" className="h-14 w-14 rounded-md object-cover" />
+                  <img src={m.photo} alt="" className="h-14 w-14 rounded-lg object-cover" />
                 ) : (
-                  <div className="h-14 w-14 rounded-md bg-wash" />
+                  <div className="h-14 w-14 rounded-lg bg-btn" />
                 )}
               </Link>
               <div className="min-w-0 flex-1">
                 <Link
                   {...toListing(m._id)}
-                  className="block truncate font-semibold text-[15px] text-primary hover:underline"
+                  className="block truncate font-semibold text-[15px] text-primary leading-5 hover:underline"
                 >
                   {m.title}
                 </Link>
-                <div className="text-[13px] text-secondary">
+                <div className="text-[13px] text-secondary leading-[18px]">
                   {m.price === 0 ? "Free" : price(m.price)}
                   {m.neighborhood ? ` · ${m.neighborhood}` : ""}
                 </div>
                 <ul className="mt-1 flex flex-col gap-0.5">
                   {m.reasons.map((r) => (
-                    <li key={r} className="flex items-start gap-1 text-[12px] text-primary">
-                      <Sparkles
-                        size={11}
-                        className="mt-[3px] shrink-0 text-[#8A3FFC]"
-                        aria-hidden
-                      />
+                    <li
+                      key={r}
+                      className="flex items-start gap-1.5 text-[13px] text-secondary leading-[18px]"
+                    >
+                      <Sparkles size={12} className="mt-[3px] shrink-0 text-accent" aria-hidden />
                       {r}
                     </li>
                   ))}

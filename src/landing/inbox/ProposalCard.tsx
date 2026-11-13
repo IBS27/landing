@@ -28,26 +28,10 @@ import type { ProposalPayload } from "../../../convex/validators";
 /* ── Shared bits ──────────────────────────────────────────────────────── */
 
 const KIND = {
-  message: {
-    Icon: MessageCircle,
-    tint: "bg-[#E7F0FF] text-[#0866FF] dark:bg-[#0866FF]/20",
-    noun: "Message",
-  },
-  offer: {
-    Icon: Tag,
-    tint: "bg-[#E3F5E5] text-[#24832C] dark:bg-[#3FBB46]/20 dark:text-[#3FBB46]",
-    noun: "Offer",
-  },
-  event: {
-    Icon: CalendarDays,
-    tint: "bg-[#FFE8EC] text-[#E41E3F] dark:bg-[#E41E3F]/20",
-    noun: "Event",
-  },
-  group: {
-    Icon: UsersRound,
-    tint: "bg-[#F1E8FF] text-[#8A3FFC] dark:bg-[#8A3FFC]/25 dark:text-[#B48BFF]",
-    noun: "Group",
-  },
+  message: { Icon: MessageCircle, noun: "Message" },
+  offer: { Icon: Tag, noun: "Offer" },
+  event: { Icon: CalendarDays, noun: "Event" },
+  group: { Icon: UsersRound, noun: "Group" },
 } as const;
 
 function useNow(everyMs = 30_000) {
@@ -75,11 +59,11 @@ export function MuseMark({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex h-5 items-center gap-1 rounded-full bg-gradient-to-r from-[#0866FF] to-[#A033FF] px-2 font-semibold text-[12px] text-white leading-none",
+        "inline-flex items-center gap-1 font-semibold text-[13px] text-accent leading-4",
         className,
       )}
     >
-      <Sparkles size={11} strokeWidth={2.5} aria-hidden />
+      <Sparkles size={13} aria-hidden />
       Muse
     </span>
   );
@@ -189,9 +173,9 @@ function useActions(p: ProposalView) {
 /** "Why Muse suggests this" with its sources. */
 function WhyBox({ p, compact }: { p: ProposalView; compact?: boolean }) {
   return (
-    <div className={cn("rounded-lg bg-wash px-3 py-2.5 dark:bg-hover", compact && "py-2")}>
+    <div className={cn("rounded-lg bg-comment px-3 py-2.5", compact && "py-2")}>
       <div className="flex items-start gap-2">
-        <Sparkles size={14} className="mt-[3px] shrink-0 text-[#8A3FFC]" aria-hidden />
+        <Sparkles size={14} className="mt-0.5 shrink-0 text-secondary" aria-hidden />
         <div className="min-w-0 flex-1">
           {!compact && (
             <div className="font-semibold text-[13px] text-primary leading-4">
@@ -205,7 +189,7 @@ function WhyBox({ p, compact }: { p: ProposalView; compact?: boolean }) {
             <div className="mt-2 flex flex-wrap items-center gap-2">
               {p.sources && <SourcesChip sources={p.sources} />}
               {p.origin.via === "fallback" && (
-                <span className="text-[12px] text-secondary">
+                <span className="text-[13px] text-secondary">
                   Written by Landing's rules, not AI
                 </span>
               )}
@@ -294,7 +278,7 @@ function Preview({ p }: { p: ProposalView }) {
                 <div className="text-[13px] text-secondary">Asking {price(p.listing.price)}</div>
               </div>
               <div className="shrink-0 text-right">
-                <div className="text-[12px] text-secondary">Your offer</div>
+                <div className="text-[13px] text-secondary leading-4">Your offer</div>
                 <div className="font-bold text-[20px] text-positive leading-6">
                   {price(pay.amount)}
                 </div>
@@ -311,8 +295,8 @@ function Preview({ p }: { p: ProposalView }) {
       const d = new Date(pay.startAt);
       return (
         <div className="flex gap-3 rounded-lg border border-divider p-3">
-          <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center overflow-hidden rounded-lg bg-wash dark:bg-hover">
-            <span className="font-bold text-[11px] text-[#E41E3F] uppercase leading-4">
+          <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center overflow-hidden rounded-lg bg-comment">
+            <span className="font-semibold text-[12px] text-badge uppercase leading-4">
               {d.toLocaleDateString(undefined, { month: "short" })}
             </span>
             <span className="font-bold text-[22px] text-primary leading-6">{d.getDate()}</span>
@@ -499,7 +483,7 @@ function EditForm({
           </div>
           <textarea
             aria-label="Details"
-            className={cn(field, "min-h-[64px] resize-y")}
+            className={cn(field, "min-h-[96px] resize-y")}
             value={draft.description}
             onChange={(e) => onChange({ ...draft, description: e.target.value })}
           />
@@ -518,7 +502,7 @@ function EditForm({
           />
           <textarea
             aria-label="Description"
-            className={cn(field, "min-h-[64px] resize-y")}
+            className={cn(field, "min-h-[96px] resize-y")}
             value={draft.description}
             onChange={(e) => onChange({ ...draft, description: e.target.value })}
           />
@@ -552,34 +536,34 @@ export function ProposalCard({ p }: { p: ProposalView }) {
 
   return (
     <Card className="overflow-hidden">
-      <div className="flex items-start gap-3 px-4 pt-4">
-        <span
-          className={cn(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
-            meta.tint,
-          )}
-        >
-          <meta.Icon size={20} strokeWidth={2.2} aria-hidden />
+      <div className="flex items-center gap-3 px-4 pt-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-btn text-primary">
+          <meta.Icon size={20} aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate font-semibold text-[15px] text-primary leading-5">
+          <div className="flex flex-wrap items-center gap-x-2">
+            <h3 className="min-w-0 truncate font-semibold text-[15px] text-primary leading-5">
               {title(p)}
             </h3>
             <MuseMark />
-            {p.edited && <span className="text-[12px] text-secondary">Edited by you</span>}
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[13px] text-secondary leading-4">
             <span>
               Drafted by {agentName(p.origin.agent)} · {shortAge(p.createdAt, now)}
             </span>
+            {p.edited && (
+              <>
+                <span aria-hidden>·</span>
+                <span>Edited by you</span>
+              </>
+            )}
             {expires && (
               <>
                 <span aria-hidden>·</span>
                 <span
                   className={cn(
                     "inline-flex items-center gap-1",
-                    soon && "font-semibold text-[#E41E3F]",
+                    soon && "font-semibold text-negative",
                   )}
                 >
                   <Clock size={12} aria-hidden />
@@ -600,11 +584,15 @@ export function ProposalCard({ p }: { p: ProposalView }) {
         <WhyBox p={p} />
       </div>
 
-      {error && <p className="px-4 pt-2 text-[13px] text-[#E41E3F]">{error}</p>}
+      {error && (
+        <p role="alert" className="px-4 pt-2 text-[13px] text-negative">
+          {error}
+        </p>
+      )}
 
-      <div className="mt-3 flex items-center justify-between gap-2 border-divider border-t px-4 py-3">
-        <div className="flex items-center gap-1 text-[12px] text-secondary">
-          <Lock size={12} aria-hidden />
+      <div className="mx-4 mt-3 flex flex-wrap items-center justify-between gap-x-2 gap-y-2 border-divider border-t py-3">
+        <div className="flex items-center gap-1.5 text-[13px] text-secondary">
+          <Lock size={13} aria-hidden />
           Nothing is sent until you approve
         </div>
         {draft ? (
@@ -686,16 +674,16 @@ export function ChatDraft({ p, compact }: { p: ProposalView; compact?: boolean }
     <div className="mt-3 mb-1 flex justify-end">
       <div
         className={cn(
-          "flex w-full flex-col gap-2 rounded-2xl border-2 border-[#A033FF]/40 border-dashed bg-card p-2.5",
+          "flex w-full flex-col gap-2 rounded-lg border border-divider border-dashed bg-card p-3",
           compact ? "max-w-full" : "max-w-[440px]",
         )}
       >
-        <div className="flex flex-wrap items-center gap-1.5 text-[12px] text-secondary">
+        <div className="flex flex-wrap items-center gap-x-1.5 text-[13px] text-secondary leading-4">
           <MuseMark />
           <span>Draft · only you can see this</span>
           {expires && (
             <span className="inline-flex items-center gap-1">
-              · <Clock size={11} aria-hidden /> {expires}
+              · <Clock size={12} aria-hidden /> {expires}
             </span>
           )}
         </div>
@@ -705,7 +693,7 @@ export function ChatDraft({ p, compact }: { p: ProposalView; compact?: boolean }
           <>
             {pay.kind === "offer" && (
               <div className="flex justify-end">
-                <span className="rounded-full bg-[#E3F5E5] px-2.5 py-0.5 font-semibold text-[#24832C] text-[13px] dark:bg-[#3FBB46]/20 dark:text-[#3FBB46]">
+                <span className="font-semibold text-[13px] text-positive">
                   Offer {price(pay.amount)}
                 </span>
               </div>
@@ -719,7 +707,11 @@ export function ChatDraft({ p, compact }: { p: ProposalView; compact?: boolean }
           </>
         )}
         {!compact && <WhyBox p={p} compact />}
-        {error && <p className="text-[13px] text-[#E41E3F]">{error}</p>}
+        {error && (
+          <p role="alert" className="text-[13px] text-negative">
+            {error}
+          </p>
+        )}
         <div className="flex flex-wrap justify-end gap-1.5">
           {draft ? (
             <>
@@ -774,20 +766,11 @@ export function ChatDraft({ p, compact }: { p: ProposalView; compact?: boolean }
 type HistoryItem = ProposalView & { events: { action: string; actor: string; at: number }[] };
 
 const OUTCOME: Record<string, { label: string; className: string }> = {
-  approved: {
-    label: "Approved",
-    className: "bg-[#E3F5E5] text-[#24832C] dark:bg-[#3FBB46]/20 dark:text-[#3FBB46]",
-  },
-  edited: {
-    label: "Edited & approved",
-    className: "bg-[#E3F5E5] text-[#24832C] dark:bg-[#3FBB46]/20 dark:text-[#3FBB46]",
-  },
-  rejected: { label: "Discarded", className: "bg-btn text-secondary" },
-  expired: {
-    label: "Expired",
-    className: "bg-[#FFF4D6] text-[#8A6100] dark:bg-[#F7B928]/20 dark:text-[#F7B928]",
-  },
-  pending: { label: "Pending", className: "bg-btn text-secondary" },
+  approved: { label: "Approved", className: "text-positive" },
+  edited: { label: "Edited & approved", className: "text-positive" },
+  rejected: { label: "Discarded", className: "text-secondary" },
+  expired: { label: "Expired", className: "text-secondary" },
+  pending: { label: "Pending", className: "text-secondary" },
 };
 
 const ACTION_LABEL: Record<string, string> = {
@@ -842,22 +825,17 @@ export function HistoryRow({ p }: { p: HistoryItem }) {
 
   return (
     <li className="flex gap-3 px-4 py-3">
-      <span
-        className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-full", meta.tint)}
-      >
-        <meta.Icon size={18} strokeWidth={2.2} aria-hidden />
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-btn text-primary">
+        <meta.Icon size={20} aria-hidden />
       </span>
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-semibold text-[15px] text-primary leading-5">{title(p)}</span>
-          <span
-            className={cn("rounded-full px-2 py-0.5 font-semibold text-[12px]", outcome.className)}
-          >
-            {outcome.label}
-          </span>
+        <div className="font-semibold text-[15px] text-primary leading-5">{title(p)}</div>
+        <div className="mt-0.5 text-[13px] text-secondary leading-4">
+          <span className={cn("font-semibold", outcome.className)}>{outcome.label}</span>
+          {p.decidedAt ? ` · ${shortAge(p.decidedAt)}` : ""}
         </div>
-        <p className="mt-0.5 line-clamp-2 text-[13px] text-secondary leading-[18px]">{summary}</p>
-        <div className="mt-1 flex items-center gap-3">
+        <p className="mt-1 line-clamp-2 text-[15px] text-primary leading-5">{summary}</p>
+        <div className="mt-1.5 flex items-center gap-3">
           {link}
           <button
             type="button"
@@ -870,16 +848,13 @@ export function HistoryRow({ p }: { p: HistoryItem }) {
         {open && (
           <ol className="mt-2 flex flex-col gap-1 border-divider border-l-2 pl-3">
             {p.events.map((e) => (
-              <li key={`${e.action}-${e.at}`} className="text-[12px] text-secondary">
+              <li key={`${e.action}-${e.at}`} className="text-[13px] text-secondary leading-4">
                 {ACTION_LABEL[e.action] ?? e.action} · {new Date(e.at).toLocaleString()}
               </li>
             ))}
           </ol>
         )}
       </div>
-      <span className="shrink-0 text-[12px] text-secondary">
-        {p.decidedAt ? shortAge(p.decidedAt) : ""}
-      </span>
     </li>
   );
 }

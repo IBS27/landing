@@ -145,7 +145,7 @@ export function ChatPoll({
         {poll.voterCount} voted
         {poll.closesAt !== null && ` · ${closesLabel(poll.closesAt, now)}`}
       </div>
-      {error && <p className="mt-1 text-[12px] text-[#E41E3F]">{error}</p>}
+      {error && <p className="mt-1 text-[12px] text-negative">{error}</p>}
     </div>
   );
 }

@@ -47,13 +47,13 @@ export function RoomScan({ room }: { room: Room }) {
 
   return (
     <Card className="p-4">
-      <div className="mb-1 flex items-center justify-between gap-3">
-        <h2 className="font-bold text-[20px] text-primary leading-6">Room scan</h2>
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="font-bold text-[17px] text-primary leading-5">Room scan</h2>
         <span className="text-[13px] text-secondary">
           {room.photos.length} / {MAX_PHOTOS} photos
         </span>
       </div>
-      <p className="mb-3 text-[13px] text-secondary">
+      <p className="mt-0.5 mb-3 text-[13px] text-secondary leading-[18px]">
         Stand in each corner and take a photo of the opposite wall, plus one of the windows. Only
         you can see these.
       </p>

@@ -38,7 +38,7 @@ export function Negotiations() {
           Message a seller on Marketplace and the chat shows up here.
         </p>
       ) : (
-        <ul className="divide-y divide-divider">
+        <ul className="divide-y divide-divider border-divider border-t">
           {rows.map((r) => (
             <NegotiationRow key={r.conversationId} r={r} />
           ))}
@@ -76,7 +76,7 @@ function NegotiationRow({ r }: { r: Row }) {
 
   return (
     <li className="px-4 py-3">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         {r.listing.photo ? (
           <img
             src={r.listing.photo}
@@ -118,7 +118,8 @@ function NegotiationRow({ r }: { r: Row }) {
             </div>
           )}
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        {/* On phones the actions take their own line under the title, so it keeps its room. */}
+        <div className="flex shrink-0 items-center gap-2 max-sm:basis-full max-sm:pl-[68px]">
           {!n || n.status === "stopped" ? (
             !editing && (
               <Button variant="primary" size="sm" onClick={() => setEditing(true)}>
@@ -168,7 +169,7 @@ function NegotiationRow({ r }: { r: Row }) {
 }
 
 const field =
-  "rounded-lg border border-divider bg-input px-3 py-2 text-[15px] text-primary outline-none placeholder:text-placeholder focus:border-fb";
+  "rounded-md border border-divider bg-card px-3 py-2 text-[15px] text-primary outline-none placeholder:text-placeholder focus:border-fb";
 
 function LimitsForm({
   listingId,
@@ -240,7 +241,7 @@ function LimitsForm({
           />
         </label>
       </div>
-      {error && <p className="mt-2 text-[13px] text-[#E41E3F]">{error}</p>}
+      {error && <p className="mt-2 text-[13px] text-negative">{error}</p>}
       <div className="mt-3 flex justify-end gap-2">
         <Button variant="ghost" size="sm" onClick={onDone} disabled={busy}>
           Cancel

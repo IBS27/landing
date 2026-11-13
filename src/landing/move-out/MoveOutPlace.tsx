@@ -3,10 +3,20 @@ import { Home, KeyRound, Store } from "lucide-react";
 import { useQ } from "@/app/viewer";
 import { toRentalCheck } from "@/landing/links";
 import { dateLabel } from "@/landing/place/placeParts";
-import { Button, Card, Skeleton } from "@/ui/primitives";
+import { cn } from "@/lib/format";
+import { Card, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import { placeStatusLabel } from "../../../convex/lib/placeRules";
 import { subletStateLabel, toSubletMyPlace } from "./placeSublet";
+
+/** A link that looks like a small `Button` (a button can't sit inside a link). */
+const linkButton = (primary?: boolean) =>
+  cn(
+    "inline-flex h-8 select-none items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 font-semibold text-sm transition-[filter,background-color] active:scale-[0.98]",
+    primary
+      ? "bg-btn-primary text-white hover:bg-btn-primary-hover"
+      : "bg-btn text-btn-text hover:brightness-95 dark:hover:brightness-125",
+  );
 
 /**
  * The top of Move out (#141): the place you're leaving, when you leave, and
@@ -34,10 +44,8 @@ export function MoveOutPlace() {
           <p className="mt-0.5 text-[13px] text-secondary leading-[18px]">
             Add the place you're leaving on My Place, and your sublet fills in from it.
           </p>
-          <Link to="/landing/place" className="mt-2 inline-block">
-            <Button variant="secondary" size="sm">
-              Go to My Place
-            </Button>
+          <Link to="/landing/place" className={cn(linkButton(), "mt-3")}>
+            Go to My Place
           </Link>
         </div>
       </Card>
@@ -60,39 +68,28 @@ export function MoveOutPlace() {
         </span>
       )}
       <div className="min-w-0 flex-1">
-        <p className="font-semibold text-[13px] text-secondary">Your place</p>
-        <h2 className="truncate font-bold text-[17px] text-primary leading-5">{title}</h2>
-        <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-secondary">
-          <span className="rounded-full bg-btn-soft px-2 py-0.5 font-semibold text-btn-soft-text">
-            {placeStatusLabel(place.status)}
-          </span>
-          {place.moveOut && <span>Move-out {dateLabel(place.moveOut)}</span>}
-          {sublet && (
-            <span className="inline-flex items-center gap-1">
-              <KeyRound size={13} aria-hidden />
-              {subletStateLabel(sublet)}
-            </span>
-          )}
+        <p className="text-[13px] text-secondary leading-4">Your place</p>
+        <h2 className="mt-0.5 truncate font-bold text-[17px] text-primary leading-5">{title}</h2>
+        <p className="mt-1 text-[13px] text-secondary leading-4">
+          <span className="font-semibold text-primary">{placeStatusLabel(place.status)}</span>
+          {place.moveOut && <> · Move-out {dateLabel(place.moveOut)}</>}
+          {sublet && <> · {subletStateLabel(sublet)}</>}
         </p>
       </div>
       <div className="flex shrink-0 flex-wrap gap-2">
         {sublet && sublet.status !== "sold" ? (
-          <Link {...toRentalCheck(sublet.listingId)}>
-            <Button variant="secondary" size="sm" icon={<Store size={15} />}>
-              View sublet
-            </Button>
+          <Link {...toRentalCheck(sublet.listingId)} className={linkButton()}>
+            <Store size={16} aria-hidden />
+            View sublet
           </Link>
         ) : (
-          <Link {...toSubletMyPlace()}>
-            <Button variant="primary" size="sm" icon={<KeyRound size={15} />}>
-              Sublet my place
-            </Button>
+          <Link {...toSubletMyPlace()} className={linkButton(true)}>
+            <KeyRound size={16} aria-hidden />
+            Sublet my place
           </Link>
         )}
-        <Link to="/landing/place">
-          <Button variant="secondary" size="sm">
-            Edit on My Place
-          </Button>
+        <Link to="/landing/place" className={linkButton()}>
+          Edit on My Place
         </Link>
       </div>
     </Card>

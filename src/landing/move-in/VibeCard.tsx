@@ -88,7 +88,7 @@ export function VibeCard({ room }: { room: Room }) {
   let body: ReactNode;
   if (busy === "suggest") {
     body = (
-      <div className="flex items-center gap-3 py-6 text-[15px] text-secondary">
+      <div className="flex items-center gap-3 py-4 text-[15px] text-secondary">
         <Spinner size={20} />
         Muse is looking at what you've saved, liked and follow…
       </div>
@@ -112,9 +112,9 @@ export function VibeCard({ room }: { room: Room }) {
   } else if (suggestion) {
     body = (
       <div className="flex flex-col gap-4">
-        <div className="rounded-lg border border-divider bg-wash/60 p-4">
-          <p className="mb-3 flex items-center gap-1.5 font-semibold text-[13px] text-secondary">
-            <Sparkles size={14} className="text-accent" />
+        <div className="flex flex-col gap-3 rounded-lg bg-wash p-3 dark:bg-hover">
+          <p className="flex items-start gap-1.5 text-[13px] text-secondary leading-[18px]">
+            <Sparkles size={14} className="mt-0.5 shrink-0 text-accent" aria-hidden />
             {suggestion.basis.length === 0 && !suggestion.sources
               ? "There isn't much to go on yet, so this is a simple starting point. Edit it to make it yours."
               : suggestion.via === "fallback"
@@ -169,7 +169,7 @@ export function VibeCard({ room }: { room: Room }) {
     );
   } else {
     body = (
-      <div className="flex flex-col items-start gap-3 py-2">
+      <div className="flex flex-col items-start gap-3">
         <p className="text-[15px] text-secondary">
           A vibe is the look you're going for: a few words, some styles and colors. Landing uses it
           to find Marketplace pieces that fit.
@@ -188,7 +188,7 @@ export function VibeCard({ room }: { room: Room }) {
 
   return (
     <Card className="p-4">
-      <h2 className="mb-3 font-bold text-[20px] text-primary leading-6">Vibe</h2>
+      <h2 className="mb-3 font-bold text-[17px] text-primary leading-5">Vibe</h2>
       {body}
       {toast.node}
     </Card>
@@ -199,8 +199,8 @@ export function VibeCard({ room }: { room: Room }) {
 function Basis({ basis, sources }: { basis: string[]; sources: NonEmpty<CitedSource> | null }) {
   if (basis.length === 0 && !sources) return null;
   return (
-    <div className="mt-3 flex flex-col gap-2">
-      <p className="font-semibold text-[13px] text-secondary">Based on</p>
+    <div className="flex flex-col gap-1.5">
+      <p className="font-semibold text-[13px] text-secondary leading-4">Based on</p>
       {basis.length > 0 && (
         <ul className="flex flex-col gap-1">
           {basis.map((b) => (

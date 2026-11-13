@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
 import {
   CalendarCheck,
+  CalendarDays,
   Footprints,
   MapPin,
   MessageCircle,
@@ -14,7 +15,6 @@ import { useToast } from "@/features/marketplace/toast";
 import { CheckInCard, WeekActivity } from "@/landing/journeys/CheckInCard";
 import { toEvent, toGroup, toProfile } from "@/landing/links";
 import { LandingMap, type RouteStop } from "@/landing/map/LandingMap";
-import { LandingPage } from "@/landing/shell/LandingPage";
 import { cn } from "@/lib/format";
 import { SourcesChip } from "@/ui/Citations";
 import { Tooltip } from "@/ui/overlays";
@@ -73,21 +73,17 @@ const timeLabel = (s: JourneyStopView) =>
  * Landing → Crew & Journeys → Journeys (#32): this weekend's route for each
  * week of the first 90 days, from real Events and Group plans, with the Move-in
  * Crew members who are going and a Muse-drafted "Mind if I join you?" that waits
- * in Landing Inbox. Earlier weeks are listed below.
+ * in Landing Inbox. Earlier weeks are listed below. The page header and tabs
+ * come from `CrewTabs`.
  */
 export function JourneysPage() {
   const data = useQ(api.journeys.thisWeek, {});
   return (
-    <LandingPage
-      title="Journeys"
-      description="A plan for each weekend of your first 90 days, from real Events and Group plans near you."
-    >
-      <div className="flex max-w-[760px] flex-col gap-4">
-        <CheckInCard />
-        {data === undefined ? <Loading /> : <ThisWeekView data={data} />}
-        <PastWeeks currentWeekOf={data?.week?.weekOf ?? null} />
-      </div>
-    </LandingPage>
+    <div className="flex max-w-[760px] flex-col gap-4">
+      <CheckInCard />
+      {data === undefined ? <Loading /> : <ThisWeekView data={data} />}
+      <PastWeeks currentWeekOf={data?.week?.weekOf ?? null} />
+    </div>
   );
 }
 
@@ -154,11 +150,11 @@ function WeekHeader({
 }) {
   return (
     <Card className="p-4">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2 className="font-bold text-[20px] text-primary leading-6">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
+        <h2 className="font-bold text-[17px] text-primary leading-5">
           Week {week} of {JOURNEY_WEEKS}
         </h2>
-        <p className="text-[15px] text-secondary">This weekend, {weekendLabel(start)}</p>
+        <p className="text-[13px] text-secondary">This weekend, {weekendLabel(start)}</p>
       </div>
       <div
         className="mt-3 grid gap-1"
@@ -171,14 +167,14 @@ function WeekHeader({
             key={i}
             className={cn(
               "h-1.5 rounded-full",
-              i < week - 1 ? "bg-fb/45" : i === week - 1 ? "bg-fb" : "bg-btn",
+              i < week - 1 ? "bg-fb/40" : i === week - 1 ? "bg-fb" : "bg-btn",
             )}
           />
         ))}
       </div>
       {journey && journey.neighborhoods.length > 0 && (
         <p className="mt-3 flex items-center gap-1.5 text-secondary text-sm">
-          <MapPin size={14} aria-hidden />
+          <MapPin size={14} className="shrink-0" aria-hidden />
           From Events and Group plans in {nameList(journey.neighborhoods)}
         </p>
       )}
@@ -202,8 +198,8 @@ function JourneyCards({ journey }: { journey: Journey }) {
       {journey.stops.length > 0 && (
         <Card className="overflow-hidden">
           <header className="px-4 pt-4 pb-3">
-            <h2 className="font-bold text-lg text-primary leading-6">Your weekend route</h2>
-            <p className="mt-0.5 text-secondary text-sm">
+            <h2 className="font-bold text-[17px] text-primary leading-5">Your weekend route</h2>
+            <p className="mt-0.5 text-secondary text-sm leading-4">
               Real plans, with places locals recommend around them
             </p>
           </header>
@@ -224,7 +220,7 @@ function JourneyCards({ journey }: { journey: Journey }) {
       )}
       {journey.more.length > 0 && (
         <Card className="overflow-hidden">
-          <h2 className="px-4 pt-4 pb-1 font-bold text-lg text-primary leading-6">
+          <h2 className="px-4 pt-4 pb-1 font-bold text-[17px] text-primary leading-5">
             Also this weekend
           </h2>
           <ul className="px-2 pb-2">
@@ -305,12 +301,12 @@ function StopRow({
         {!last && n !== null && <span className="mt-1 w-px flex-1 bg-divider" aria-hidden />}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-semibold text-secondary text-xs uppercase tracking-wide">
+        <p className="font-semibold text-[13px] text-secondary leading-4">
           {timeLabel(stop)}
           {stop.group ? " · Group plan" : isEvent ? " · Event" : ""}
           {stop.over && " · Ended"}
         </p>
-        <h3 className="mt-0.5 font-semibold text-base text-primary leading-5">
+        <h3 className="mt-1 font-semibold text-[15px] text-primary leading-5">
           {stop.eventId ? (
             <Link {...toEvent(stop.eventId)} className="hover:underline">
               {stop.name}
@@ -328,11 +324,11 @@ function StopRow({
           </p>
         )}
         <p className="mt-1 line-clamp-2 text-primary text-sm leading-[18px]">{stop.why}</p>
-        <div className="mt-2 flex flex-wrap items-center gap-2">
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <SourcesChip sources={stop.sources} />
           {stop.matches.length > 0 && (
-            <span className="inline-flex h-6 items-center gap-1 rounded-full bg-btn-soft px-2 font-semibold text-btn-soft-text text-xs">
-              <Sparkles size={12} aria-hidden />
+            <span className="inline-flex items-center gap-1 text-secondary text-sm">
+              <Sparkles size={14} className="shrink-0" aria-hidden />
               Fits your interest in {stop.matches.join(", ").toLowerCase()}
             </span>
           )}
@@ -517,16 +513,18 @@ function PastWeeks({ currentWeekOf }: { currentWeekOf: string | null }) {
   if (past.length === 0) return null;
   return (
     <Card className="p-4">
-      <h2 className="font-bold text-lg text-primary leading-6">Past weeks</h2>
-      <ol className="mt-3 flex flex-col gap-4">
+      <h2 className="font-bold text-[17px] text-primary leading-5">Past weeks</h2>
+      <ol className="mt-1 flex flex-col divide-y divide-divider">
         {past.map((w) => (
-          <li key={w._id} className="flex gap-3">
-            <span className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-lg bg-btn leading-none">
-              <span className="font-semibold text-[10px] text-secondary uppercase">Week</span>
-              <span className="font-bold text-[15px] text-primary">{w.week}</span>
+          <li key={w._id} className="flex gap-3 py-3 last:pb-0">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-btn text-icon">
+              <CalendarDays size={20} aria-hidden />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="font-semibold text-[15px] text-primary">{weekendLabel(w.startsAt)}</p>
+              <p className="font-semibold text-[15px] text-primary leading-5">
+                Week {w.week}
+                <span className="font-normal text-secondary"> · {weekendLabel(w.startsAt)}</span>
+              </p>
               <p className="mt-0.5 text-secondary text-sm leading-[18px]">
                 {w.stops.length === 0
                   ? "No plans that weekend"

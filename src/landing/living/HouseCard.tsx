@@ -22,7 +22,7 @@ export function HouseCard() {
           ? `${house.name} · ${plural(house.memberCount, "person", "people")}. Chores, bills and groceries.`
           : "Share chores, bills and a grocery list with the people you live with.";
   return (
-    <Card className="mb-3 overflow-hidden">
+    <Card className="mb-4 overflow-hidden">
       <Link
         to="/landing/place/house"
         search={house ? { group: house.slug } : {}}
