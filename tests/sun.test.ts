@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { compass, sfTime, sunDay } from "../src/landing/search/sun";
+import { compass, keyDays, sfTime, sunDay } from "../src/landing/search/sun";
 import { viewStory } from "../src/landing/search/viewStory";
 
 const MISSION = { lat: 37.7599, lng: -122.4148 };
@@ -22,6 +22,14 @@ describe("sunDay", () => {
         sunDay(MISSION.lat, MISSION.lng, new Date(Date.UTC(2026, 11, 21, 12))).sunriseAzimuth,
       ),
     ).toBe("east-southeast");
+  });
+});
+
+describe("keyDays", () => {
+  test("today is San Francisco's date, even after UTC midnight", () => {
+    // 5 PM PST on March 7 is already March 8 in UTC.
+    const [today] = keyDays(new Date("2026-03-08T01:00:00Z"));
+    expect(today.date.toISOString()).toBe("2026-03-07T12:00:00.000Z");
   });
 });
 

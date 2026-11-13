@@ -132,9 +132,13 @@ export function hoursMinutes(min: number): string {
 
 /** The key days of the year for this year: today, both solstices and the fall equinox. */
 export function keyDays(now = new Date()) {
-  const y = now.getFullYear();
+  // San Francisco's calendar day, as UTC noon, since `sunDay` reads the UTC date.
+  const [y, m, d] = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" })
+    .format(now)
+    .split("-")
+    .map(Number);
   return [
-    { id: "today", label: "Today", date: now },
+    { id: "today", label: "Today", date: new Date(Date.UTC(y, m - 1, d, 12)) },
     { id: "summer", label: "Summer solstice (Jun 21)", date: new Date(Date.UTC(y, 5, 21, 12)) },
     { id: "fall", label: "Fall equinox (Sep 22)", date: new Date(Date.UTC(y, 8, 22, 12)) },
     { id: "winter", label: "Winter solstice (Dec 21)", date: new Date(Date.UTC(y, 11, 21, 12)) },
