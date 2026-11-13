@@ -26,7 +26,16 @@ export type ContentPart =
   | { type: "text"; text: string }
   | { type: "image_url"; image_url: { url: string } }
   | { type: "video_url"; video_url: { url: string } };
-export type Message = { role: "user" | "assistant"; content: string | ContentPart[] };
+/** A function call the model asked for. `arguments` is JSON text as the model wrote it: parse and check it. */
+export type ToolCall = { id: string; name: string; arguments: string };
+/** A function the model may call. `parameters` is the JSON Schema of its arguments (an object). */
+export type ToolSpec = { name: string; description: string; parameters: Record<string, unknown> };
+export type Message =
+  | { role: "user"; content: string | ContentPart[] }
+  /** `toolCalls` replays the calls the model made, ahead of their `tool` messages. */
+  | { role: "assistant"; content: string; toolCalls?: ToolCall[] }
+  /** One call's result, as text (JSON). */
+  | { role: "tool"; toolCallId: string; content: string };
 
 export type Usage = {
   /** Input tokens not served from Meta's prompt cache. */
@@ -44,7 +53,9 @@ export type Reply = {
   text: string;
   /** Set when the model declined; `text` is then not an answer. */
   refusal?: string;
-  /** "stop", "length", "content_filter"... */
+  /** The functions the model wants called before it answers; empty when it answered. */
+  toolCalls: ToolCall[];
+  /** "stop", "length", "tool_calls", "content_filter"... */
   finishReason: string | null;
   usage: Usage;
   costUsd: number | undefined;
@@ -57,6 +68,8 @@ export type Request = {
   messages: Message[];
   /** JSON Schema the answer is decoded against. Its root must be an object. */
   schema: Record<string, unknown>;
+  /** Functions the model may call instead of answering. It chooses whether to (`tool_choice` is "auto"). */
+  tools?: ToolSpec[];
   effort: Effort;
   /** Aborts the request and any retry wait. */
   signal: AbortSignal;
@@ -88,7 +101,10 @@ export class ModelError extends Error {
 export async function complete(req: Request): Promise<Reply> {
   const body = JSON.stringify({
     model: req.model ?? MODEL,
-    messages: [...req.system.map((content) => ({ role: "developer", content })), ...req.messages],
+    messages: [
+      ...req.system.map((content) => ({ role: "developer", content })),
+      ...req.messages.map(wireMessage),
+    ],
     max_completion_tokens: MAX_COMPLETION_TOKENS,
     reasoning_effort: req.effort,
     // Decoding follows the schema either way; strict mode would also require every property.
@@ -96,6 +112,12 @@ export async function complete(req: Request): Promise<Reply> {
       type: "json_schema",
       json_schema: { name: "output", schema: req.schema, strict: false },
     },
+    ...(req.tools?.length && {
+      tools: req.tools.map((t) => ({
+        type: "function",
+        function: { name: t.name, description: t.description, parameters: t.parameters },
+      })),
+    }),
     stream: true,
     stream_options: { include_usage: true },
   });
@@ -116,6 +138,28 @@ export async function complete(req: Request): Promise<Reply> {
     } catch (error) {
       throw toModelError(error, tally.total());
     }
+  }
+}
+
+/** A message as Chat Completions takes it. */
+function wireMessage(m: Message) {
+  switch (m.role) {
+    case "user":
+      return { role: m.role, content: m.content };
+    case "assistant":
+      return {
+        role: m.role,
+        content: m.content,
+        ...(m.toolCalls?.length && {
+          tool_calls: m.toolCalls.map((c) => ({
+            id: c.id,
+            type: "function",
+            function: { name: c.name, arguments: c.arguments },
+          })),
+        }),
+      };
+    case "tool":
+      return { role: m.role, tool_call_id: m.toolCallId, content: m.content };
   }
 }
 
@@ -171,7 +215,7 @@ class Tally {
   }
 }
 
-type Answer = Pick<Reply, "text" | "refusal" | "finishReason">;
+type Answer = Pick<Reply, "text" | "refusal" | "toolCalls" | "finishReason">;
 
 async function attempt(
   body: string,
@@ -235,7 +279,18 @@ async function attempt(
 type Chunk = {
   model?: string;
   choices?: {
-    delta?: { content?: string | null; refusal?: string | null };
+    delta?: {
+      content?: string | null;
+      refusal?: string | null;
+      /** Fragments of the calls being made, each for the call at `index`. */
+      tool_calls?:
+        | {
+            index: number;
+            id?: string | null;
+            function?: { name?: string | null; arguments?: string | null } | null;
+          }[]
+        | null;
+    };
     finish_reason?: string | null;
   }[];
   usage?: {
@@ -258,6 +313,8 @@ async function readStream(
   let refusal = "";
   let finishReason: string | null = null;
   let done = false;
+  // Tool calls arrive in pieces, keyed by their position in the reply.
+  const calls = new Map<number, ToolCall>();
 
   const handle = (line: string) => {
     if (!line.startsWith("data:")) return;
@@ -272,6 +329,13 @@ async function readStream(
     for (const choice of chunk.choices ?? []) {
       text += choice.delta?.content ?? "";
       refusal += choice.delta?.refusal ?? "";
+      for (const piece of choice.delta?.tool_calls ?? []) {
+        const call = calls.get(piece.index) ?? { id: "", name: "", arguments: "" };
+        call.id += piece.id ?? "";
+        call.name += piece.function?.name ?? "";
+        call.arguments += piece.function?.arguments ?? "";
+        calls.set(piece.index, call);
+      }
       if (choice.finish_reason) finishReason = choice.finish_reason;
     }
     if (chunk.usage) {
@@ -297,7 +361,11 @@ async function readStream(
   }
   if (!done) handle(buffer + decoder.decode());
   if (!done) throw new Retryable("The stream ended early");
-  return { text, ...(refusal ? { refusal } : {}), finishReason };
+  const toolCalls = [...calls].sort(([a], [b]) => a - b).map(([, call]) => call);
+  // A result can't be sent back for a call with no id, and a call with no name can't be run.
+  if (toolCalls.some((c) => !c.id || !c.name))
+    throw new Retryable("The stream had a tool call without an id or a name");
+  return { text, ...(refusal ? { refusal } : {}), toolCalls, finishReason };
 }
 
 async function errorMessage(res: Response) {

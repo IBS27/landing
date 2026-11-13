@@ -33,7 +33,10 @@ import {
  * it. Never inputs: name, photo, age, gender, network closeness, mutual
  * friends, employer, move-in month, neighborhoods or any other profile or
  * Facebook field. Budget enters only as "do the ranges overlap" (no amounts),
- * workplace "not working" is never compared, and nothing is sent to a model.
+ * workplace "not working" is never compared, and no model computes the score.
+ * Its result, as the Roommates page shows it to the viewer (the score, what
+ * the two share and where they differ), is also what Muse reads in that
+ * viewer's own Landing Home chat (#154): never the answers themselves.
  */
 
 /** How much each allowlisted field counts. Keys are exactly `ROOMMATE_MATCH_FIELDS`. */

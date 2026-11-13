@@ -2,7 +2,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { FurnishReply } from "../../../convex/apartment";
 import type { RulesWhy } from "../../../convex/lib/chatText";
 import {
+  CHAT_ACTIONS_MAX,
+  CHAT_CARD_KINDS,
   CHAT_CARDS_MAX,
+  CHAT_INFO_CARDS_MAX,
+  CHAT_SHOWN_MAX,
+  type ChatAction,
+  type ChatActionCard,
+  type ChatCard,
   type ChatCommand,
   type ChatRentalCard,
   type ChatSource,
@@ -21,6 +28,8 @@ export type ChatTally = { total: number; spent: number; budget: number | null };
  */
 export type ChatWhy = RulesWhy | "offline";
 const WHYS: readonly string[] = ["off", "busy", "unsure", "offline"] satisfies ChatWhy[];
+/** What became of an action the chat offered: the person ran it, or said "Not now". */
+export type ActionOutcome = "done" | "dismissed";
 
 export type ChatMessage = {
   id: string;
@@ -43,6 +52,15 @@ export type ChatMessage = {
   /** Items placed in the apartment, with their running total. */
   items?: ChatItemCard[];
   tally?: ChatTally;
+  /** What else Muse found: items, Events, Groups, places, neighborhoods, drafts. */
+  cards?: ChatCard[];
+  /** What Muse suggests doing. Each runs only on the person's click. */
+  actions?: ChatActionCard[];
+  /**
+   * What became of this turn's actions (suggested, or on a card), by
+   * `actionKey`: a reload doesn't offer again what was done or dismissed.
+   */
+  outcomes?: Record<string, ActionOutcome>;
 };
 
 export type ChatSession = {
@@ -58,6 +76,9 @@ const MAX_MESSAGES = 80;
 export const CHAT_ITEMS_MAX = 12;
 const SAVED_MAX = 6;
 const SOURCES_MAX = 8;
+/** Lines on a card, and actions it carries. */
+const CARD_LINES_MAX = 3;
+const CARD_ACTIONS_MAX = 2;
 /** A chat this recent is still open after a reload; an older one waits under "Chats". */
 const RESUME_MS = 12 * 60 * 60 * 1000;
 
@@ -115,6 +136,192 @@ const isTally = (v: unknown): v is ChatTally =>
   typeof v.spent === "number" &&
   (v.budget === null || typeof v.budget === "number");
 
+const str = (v: unknown): v is string => typeof v === "string" && v.length > 0;
+const num = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+const optional = <T>(v: unknown, ok: (x: unknown) => x is T): v is T | undefined =>
+  v === undefined || ok(v);
+const oneOf =
+  <T extends string>(...values: T[]) =>
+  (v: unknown): v is T =>
+    (values as readonly unknown[]).includes(v);
+const isDay = (v: unknown): v is string => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+
+/**
+ * An action exactly as the page can run it. A stored action runs a mutation
+ * when clicked, so every field of every kind is checked, and extra fields go.
+ */
+export function readAction(v: unknown): ChatAction | null {
+  if (!isObject(v)) return null;
+  switch (v.kind) {
+    case "rsvp":
+      return str(v.eventId) && oneOf("going", "interested")(v.status)
+        ? { kind: "rsvp", eventId: v.eventId, status: v.status }
+        : null;
+    case "join_group":
+      return str(v.groupId) ? { kind: "join_group", groupId: v.groupId } : null;
+    case "save_listing":
+      return str(v.listingId) ? { kind: "save_listing", listingId: v.listingId } : null;
+    case "choose_place":
+      return str(v.listingId) && isDay(v.moveIn)
+        ? { kind: "choose_place", listingId: v.listingId, moveIn: v.moveIn }
+        : null;
+    case "negotiate":
+      return str(v.listingId) &&
+        num(v.maxPrice) &&
+        optional(v.targetPrice, num) &&
+        optional(v.notes, str)
+        ? {
+            kind: "negotiate",
+            listingId: v.listingId,
+            maxPrice: v.maxPrice,
+            ...(v.targetPrice !== undefined && { targetPrice: v.targetPrice }),
+            ...(v.notes !== undefined && { notes: cut(v.notes, 500) }),
+          }
+        : null;
+    case "set_negotiation":
+      return str(v.negotiationId) && oneOf("active", "paused", "stopped")(v.status)
+        ? { kind: "set_negotiation", negotiationId: v.negotiationId, status: v.status }
+        : null;
+    case "approve_draft":
+    case "discard_draft":
+      return str(v.proposalId) ? { kind: v.kind, proposalId: v.proposalId } : null;
+    case "add_grocery":
+      return str(v.houseId) && str(v.text)
+        ? { kind: "add_grocery", houseId: v.houseId, text: cut(v.text, 200) }
+        : null;
+    case "add_chore":
+      return str(v.houseId) && str(v.title) && oneOf("once", "weekly", "monthly")(v.cadence)
+        ? { kind: "add_chore", houseId: v.houseId, title: cut(v.title, 200), cadence: v.cadence }
+        : null;
+    case "add_bill":
+      return str(v.houseId) &&
+        str(v.title) &&
+        num(v.amount) &&
+        oneOf("once", "monthly")(v.cadence) &&
+        optional(v.dueDate, isDay)
+        ? {
+            kind: "add_bill",
+            houseId: v.houseId,
+            title: cut(v.title, 200),
+            amount: v.amount,
+            cadence: v.cadence,
+            ...(v.dueDate !== undefined && { dueDate: v.dueDate }),
+          }
+        : null;
+    case "ask_roommate":
+      return str(v.userId) && str(v.text)
+        ? { kind: "ask_roommate", userId: v.userId, text: cut(v.text, 1000) }
+        : null;
+    default:
+      return null;
+  }
+}
+
+/** One action, the same for the same action: where its outcome is kept. */
+export function actionKey(a: ChatAction): string {
+  switch (a.kind) {
+    case "rsvp":
+      return `rsvp:${a.eventId}:${a.status}`;
+    case "join_group":
+      return `join_group:${a.groupId}`;
+    case "save_listing":
+    case "choose_place":
+    case "negotiate":
+      return `${a.kind}:${a.listingId}`;
+    case "set_negotiation":
+      return `set_negotiation:${a.negotiationId}:${a.status}`;
+    case "approve_draft":
+    case "discard_draft":
+      return `${a.kind}:${a.proposalId}`;
+    case "add_grocery":
+      return `add_grocery:${a.houseId}:${a.text}`;
+    case "add_chore":
+      return `add_chore:${a.houseId}:${a.cadence}:${a.title}`;
+    case "add_bill":
+      return `add_bill:${a.houseId}:${a.cadence}:${a.amount}:${a.title}`;
+    case "ask_roommate":
+      return `ask_roommate:${a.userId}`;
+  }
+}
+
+function readActionCard(v: unknown): ChatActionCard | null {
+  if (!isObject(v) || !str(v.label) || !str(v.confirm) || !optional(v.detail, str)) return null;
+  const action = readAction(v.action);
+  return (
+    action && {
+      action,
+      label: cut(v.label, 200),
+      ...(v.detail !== undefined && { detail: cut(v.detail, 1000) }),
+      confirm: cut(v.confirm, 40),
+    }
+  );
+}
+
+const isPoint = (v: unknown): v is { lat: number; lng: number } =>
+  isObject(v) && num(v.lat) && num(v.lng) && Math.abs(v.lat) <= 90 && Math.abs(v.lng) <= 180;
+
+function readCard(v: unknown): ChatCard | null {
+  if (
+    !isObject(v) ||
+    !str(v.key) ||
+    !oneOf(...CHAT_CARD_KINDS)(v.kind) ||
+    !str(v.title) ||
+    !Array.isArray(v.lines) ||
+    !(v.photo === undefined || v.photo === null || typeof v.photo === "string") ||
+    !optional(v.price, num) ||
+    !optional(v.href, str) ||
+    !optional(v.point, isPoint)
+  )
+    return null;
+  const actions = (Array.isArray(v.actions) ? v.actions : [])
+    .flatMap((a) => readActionCard(a) ?? [])
+    .slice(0, CARD_ACTIONS_MAX);
+  return {
+    key: cut(v.key, 200),
+    kind: v.kind,
+    title: cut(v.title, 160),
+    lines: v.lines
+      .filter((l): l is string => typeof l === "string")
+      .slice(0, CARD_LINES_MAX)
+      .map((l) => cut(l, 160)),
+    ...(v.photo !== undefined && { photo: v.photo }),
+    ...(v.price !== undefined && { price: v.price }),
+    ...(v.href !== undefined && { href: v.href }),
+    ...(v.point && { point: { lat: v.point.lat, lng: v.point.lng } }),
+    ...(actions.length && { actions }),
+  };
+}
+
+/** The outcomes kept for a turn: only for actions it still carries. */
+function readOutcomes(
+  v: unknown,
+  cards: readonly ChatCard[] | undefined,
+  actions: readonly ChatActionCard[] | undefined,
+): Record<string, ActionOutcome> | undefined {
+  if (!isObject(v)) return undefined;
+  const keys = [...(actions ?? []), ...(cards ?? []).flatMap((c) => c.actions ?? [])].map((a) =>
+    actionKey(a.action),
+  );
+  const kept = keys.flatMap((k): [string, ActionOutcome][] => {
+    const o = Object.hasOwn(v, k) ? v[k] : undefined;
+    return o === "done" || o === "dismissed" ? [[k, o]] : [];
+  });
+  return kept.length ? Object.fromEntries(kept) : undefined;
+}
+
+/**
+ * The keys of what a turn showed (cards, and `listing:<id>` for each rental):
+ * they go back with the next message, so Muse knows what "the second one" is.
+ */
+export function shownKeys(m: Pick<ChatMessage, "cards" | "rentals">): string[] {
+  return [
+    ...new Set([
+      ...(m.rentals ?? []).map((r) => `listing:${r.id}`),
+      ...(m.cards ?? []).map((c) => c.key),
+    ]),
+  ].slice(0, CHAT_SHOWN_MAX);
+}
+
 /**
  * A message as it's kept: cards and sources capped, long text cut, so a chat
  * full of cards stays small in localStorage.
@@ -147,7 +354,25 @@ export function storedMessage(m: ChatMessage): ChatMessage {
         .map((i) => ({ ...i, title: cut(i.title, 160), reason: cut(i.reason, 200) })),
     }),
     ...(m.tally && { tally: m.tally }),
+    // Cards, actions and their outcomes go through the same checks as a read: what is kept can be run.
+    ...cardsAndActions(m),
   };
+}
+
+/** A message's cards, actions and outcomes, each checked and capped. */
+function cardsAndActions(v: {
+  cards?: unknown;
+  actions?: unknown;
+  outcomes?: unknown;
+}): Pick<ChatMessage, "cards" | "actions" | "outcomes"> {
+  const list = <T>(x: unknown, read: (i: unknown) => T | null, max: number): T[] | undefined => {
+    const items = (Array.isArray(x) ? x : []).flatMap((i) => read(i) ?? []).slice(0, max);
+    return items.length ? items : undefined;
+  };
+  const cards = list(v.cards, readCard, CHAT_INFO_CARDS_MAX);
+  const actions = list(v.actions, readActionCard, CHAT_ACTIONS_MAX);
+  const outcomes = readOutcomes(v.outcomes, cards, actions);
+  return { ...(cards && { cards }), ...(actions && { actions }), ...(outcomes && { outcomes }) };
 }
 
 /** A stored message read back: anything that isn't the expected shape is dropped, not trusted. */
@@ -176,6 +401,7 @@ function readMessage(v: unknown): ChatMessage | null {
     ...(rentals && { rentals }),
     ...(items && { items }),
     ...(isTally(v.tally) && { tally: v.tally }),
+    ...cardsAndActions(v),
   };
 }
 
@@ -293,6 +519,24 @@ export function useChatLog(viewerId: string | undefined, greeting: string) {
     });
   }, []);
 
+  /** Records what became of an action a message offered, wherever that message's chat is. */
+  const setOutcome = useCallback((messageId: string, key: string, outcome: ActionOutcome) => {
+    const mark = (s: ChatSession): ChatSession =>
+      s.messages.some((x) => x.id === messageId)
+        ? {
+            ...s,
+            messages: s.messages.map((x) =>
+              x.id === messageId ? { ...x, outcomes: { ...x.outcomes, [key]: outcome } } : x,
+            ),
+          }
+        : s;
+    setLog((prev) => ({
+      ...prev,
+      current: mark(prev.current),
+      sessions: prev.sessions.map(mark),
+    }));
+  }, []);
+
   const isCurrent = useCallback((sessionId: string) => currentId.current === sessionId, []);
   const open = useCallback(
     (s: ChatSession) => setLog((prev) => ({ ...prev, current: s, resumed: false })),
@@ -308,6 +552,7 @@ export function useChatLog(viewerId: string | undefined, greeting: string) {
     sessions: log.sessions,
     resumed: log.resumed,
     add,
+    setOutcome,
     isCurrent,
     open,
     reset,

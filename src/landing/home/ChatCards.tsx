@@ -1,5 +1,20 @@
 import { Link } from "@tanstack/react-router";
-import { Box, Check, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import {
+  Box,
+  CalendarDays,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Handshake,
+  Landmark,
+  type LucideIcon,
+  Map as MapIcon,
+  MapPin,
+  PenLine,
+  Tag,
+  UserRound,
+  UsersRound,
+} from "lucide-react";
 import {
   type FormEvent,
   type ReactNode,
@@ -13,14 +28,24 @@ import { toLandingPage, toListing, toRentalCheck } from "@/landing/links";
 import { dateLabel, defaultMoveIn, errorText, todayInSF } from "@/landing/place/placeParts";
 import { cn, price } from "@/lib/format";
 import type { Id } from "../../../convex/_generated/dataModel";
-import type { ChatRentalCard, ChatSource } from "../../../convex/lib/homeChatRules";
+import { actionDone } from "../../../convex/lib/homeChatActions";
+import type {
+  ChatAction,
+  ChatActionCard,
+  ChatCard,
+  ChatCardKind,
+  ChatRentalCard,
+  ChatSource,
+} from "../../../convex/lib/homeChatRules";
 import { placeProblem } from "../../../convex/lib/placeRules";
-import type { ChatItemCard, ChatTally } from "./useChatLog";
+import { type ActionOutcome, actionKey, type ChatItemCard, type ChatTally } from "./useChatLog";
 
 /**
  * The cards a reply in Landing Home's chat carries: rentals to choose from,
- * the items Muse placed in the apartment, and the line saying what a message
- * saved. Code builds every card from the reply's data; Muse writes none of it.
+ * the items Muse placed in the apartment, whatever else it found (items,
+ * Events, Groups, places, neighborhoods, drafts: #154), the actions it
+ * suggests, and the line saying what a message saved. Code builds every card
+ * from the reply's data; Muse writes none of it.
  */
 
 /** What the rental cards need from the page. */
@@ -496,3 +521,305 @@ const KIND_LABEL: Record<string, string> = {
   plant: "Plant",
   decor: "Decor",
 };
+
+/* ───────────── What Muse found, and what it suggests doing (#154) ───────────── */
+
+/** What a turn's cards and action rows need to run an action and remember what became of it. */
+export type ActionRunner = {
+  /** Runs it as the person, with the mutation Landing uses. Rejects (a `ConvexError`) when it can't. */
+  run: (action: ChatAction) => Promise<void>;
+  /** What became of this turn's actions so far, by `actionKey`. */
+  outcomes: Readonly<Record<string, ActionOutcome>> | undefined;
+  onOutcome: (key: string, outcome: ActionOutcome) => void;
+};
+
+/** Runs one action at a time, on a click only, and keeps the error when it fails. */
+function useActionRun(runner: ActionRunner) {
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const go = async (action: ChatAction) => {
+    if (busy) return;
+    const key = actionKey(action);
+    setBusy(key);
+    setError(null);
+    try {
+      await runner.run(action);
+      runner.onOutcome(key, "done");
+    } catch (err) {
+      setError(errorText(err));
+    } finally {
+      setBusy(null);
+    }
+  };
+  return { busy, error, go };
+}
+
+const KIND_ICON: Record<ChatCardKind, LucideIcon> = {
+  item: Tag,
+  event: CalendarDays,
+  group: UsersRound,
+  place: Landmark,
+  neighborhood: MapIcon,
+  person: UserRound,
+  draft: PenLine,
+  negotiation: Handshake,
+};
+
+/** The glyph for a kind of card, where it has no photo and on its map marker. */
+export function CardIcon({ kind, size = 16 }: { kind: ChatCardKind; size?: number }) {
+  const Icon = KIND_ICON[kind];
+  return <Icon size={size} aria-hidden />;
+}
+
+export function InfoCards({
+  cards,
+  onSource,
+  locate,
+  runner,
+}: {
+  cards: readonly ChatCard[];
+  onSource: (href: string) => void;
+  /** Shows a point on the map. */
+  locate: (point: { lat: number; lng: number }) => void;
+  runner: ActionRunner;
+}) {
+  return (
+    <CardRow label="What Muse found">
+      {cards.map((c) => (
+        <InfoCard key={c.key} card={c} onSource={onSource} locate={locate} runner={runner} />
+      ))}
+    </CardRow>
+  );
+}
+
+function InfoCard({
+  card: c,
+  onSource,
+  locate,
+  runner,
+}: {
+  card: ChatCard;
+  onSource: (href: string) => void;
+  locate: (point: { lat: number; lng: number }) => void;
+  runner: ActionRunner;
+}) {
+  const { busy, error, go } = useActionRun(runner);
+  /** An action whose words the person is reading before it runs. */
+  const [reading, setReading] = useState<ChatActionCard | null>(null);
+  const actions = c.actions?.slice(0, 2) ?? [];
+  // One of them ran (a draft approved, or discarded): the card says so instead of offering both again.
+  const done = actions.find((a) => runner.outcomes?.[actionKey(a.action)] === "done");
+  const [first, ...rest] = c.lines;
+  const { href, point } = c;
+  // A card has room for one line of a draft: before "Approve" sends it, show all of it.
+  if (reading && !done)
+    return (
+      <li className="lh-card lh-info lh-glass">
+        <p className="truncate font-semibold text-[13px] text-primary leading-[18px]">
+          {reading.label}
+        </p>
+        {error ? (
+          <p
+            role="alert"
+            className="min-h-0 flex-1 overflow-y-auto text-[12px] text-negative leading-4"
+          >
+            {error}
+          </p>
+        ) : (
+          <section
+            aria-label="What will be sent"
+            // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrolling region has to take keyboard focus to be read.
+            tabIndex={0}
+            className="lh-focus min-h-0 flex-1 overflow-y-auto whitespace-pre-line break-words rounded-sm text-[12px] text-secondary leading-4"
+          >
+            {reading.detail}
+          </section>
+        )}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            disabled={!!busy}
+            className="lh-btn lh-btn-quiet lh-focus"
+            onClick={() => setReading(null)}
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            disabled={!!busy}
+            // biome-ignore lint/a11y/noAutofocus: the person just asked for this; the next key confirms or goes back.
+            autoFocus
+            aria-label={`${reading.confirm}: ${reading.label}`}
+            className="lh-btn lh-btn-primary lh-btn-grow lh-focus"
+            onClick={() => void go(reading.action)}
+          >
+            {busy ? "Working…" : reading.confirm}
+          </button>
+        </div>
+      </li>
+    );
+  return (
+    <li className="lh-card lh-info lh-glass">
+      <div className="flex gap-2.5">
+        <div className="flex h-[52px] w-[52px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-comment text-secondary">
+          {c.photo ? (
+            <img src={c.photo} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <CardIcon kind={c.kind} size={22} />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p
+            className="truncate font-semibold text-[13px] text-primary leading-[18px]"
+            title={c.title}
+          >
+            {c.title}
+          </p>
+          <p className="truncate text-[13px] text-secondary leading-[18px]" title={first}>
+            {c.price !== undefined && <b className="text-primary tabular-nums">{price(c.price)}</b>}
+            {c.price !== undefined && first && " · "}
+            {first}
+          </p>
+        </div>
+      </div>
+      {error ? (
+        <p role="alert" className="line-clamp-2 min-h-0 flex-1 text-[12px] text-negative leading-4">
+          {error}
+        </p>
+      ) : (
+        <div className="min-h-0 flex-1 overflow-hidden">
+          {rest.slice(0, 2).map((line) => (
+            <p key={line} className="truncate text-[12px] text-secondary leading-4" title={line}>
+              {line}
+            </p>
+          ))}
+        </div>
+      )}
+      <div className="flex items-center gap-1.5">
+        {done ? (
+          <p className="lh-done lh-btn-grow text-[13px]">
+            <Check size={14} strokeWidth={3} className="shrink-0 text-positive" aria-hidden />
+            <span className="truncate">{actionDone(done.action)}</span>
+          </p>
+        ) : (
+          actions.map((a, i) => (
+            <button
+              key={actionKey(a.action)}
+              type="button"
+              title={a.label}
+              aria-label={a.label}
+              disabled={!!busy}
+              className={cn(
+                "lh-btn lh-focus min-w-0",
+                i === 0 ? "lh-btn-primary lh-btn-grow" : "lh-btn-quiet",
+              )}
+              onClick={() => (a.detail ? setReading(a) : void go(a.action))}
+            >
+              <span className="truncate">
+                {busy === actionKey(a.action) ? "Working…" : a.confirm}
+              </span>
+            </button>
+          ))
+        )}
+        {href && (
+          <button
+            type="button"
+            className={cn(
+              "lh-btn lh-btn-quiet lh-focus",
+              !done && actions.length === 0 && "lh-btn-grow",
+            )}
+            aria-label={`View ${c.title}`}
+            onClick={() => onSource(href)}
+          >
+            View
+          </button>
+        )}
+        {point && (
+          <button
+            type="button"
+            className="lh-btn lh-btn-quiet lh-btn-icon lh-focus"
+            aria-label={`Show ${c.title} on the map`}
+            title="Show on the map"
+            onClick={() => locate(point)}
+          >
+            <MapPin size={16} aria-hidden />
+          </button>
+        )}
+      </div>
+    </li>
+  );
+}
+
+/**
+ * What Muse suggests doing, one row each. Nothing runs until the person
+ * clicks; "Not now" puts a suggestion away for good.
+ */
+export function ActionCards({
+  actions,
+  runner,
+}: {
+  actions: readonly ChatActionCard[];
+  runner: ActionRunner;
+}) {
+  const open = actions.filter((a) => runner.outcomes?.[actionKey(a.action)] !== "dismissed");
+  if (!open.length) return null;
+  return (
+    <ul aria-label="What Muse suggests doing" className="lh-actions">
+      {open.map((a) => (
+        <ActionRow key={actionKey(a.action)} card={a} runner={runner} />
+      ))}
+    </ul>
+  );
+}
+
+function ActionRow({ card: a, runner }: { card: ChatActionCard; runner: ActionRunner }) {
+  const { busy, error, go } = useActionRun(runner);
+  const key = actionKey(a.action);
+  const done = runner.outcomes?.[key] === "done";
+  return (
+    <li className="lh-action lh-glass">
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold text-[13px] text-primary leading-[18px]">{a.label}</p>
+        {error ? (
+          <p role="alert" className="line-clamp-2 text-[12px] text-negative leading-4">
+            {error}
+          </p>
+        ) : (
+          a.detail && (
+            // In full: for a draft or an intro these are the words the button sends.
+            <p className="whitespace-pre-line break-words text-[12px] text-secondary leading-4">
+              {a.detail}
+            </p>
+          )
+        )}
+      </div>
+      {done ? (
+        <p className="lh-done text-[13px]">
+          <Check size={14} strokeWidth={3} className="shrink-0 text-positive" aria-hidden />
+          {actionDone(a.action)}
+        </p>
+      ) : (
+        <div className="flex shrink-0 gap-1.5">
+          <button
+            type="button"
+            disabled={!!busy}
+            aria-label={`${a.confirm}: ${a.label}`}
+            className="lh-btn lh-btn-primary lh-focus"
+            onClick={() => void go(a.action)}
+          >
+            {busy ? "Working…" : a.confirm}
+          </button>
+          <button
+            type="button"
+            disabled={!!busy}
+            aria-label={`Not now: ${a.label}`}
+            className="lh-btn lh-btn-quiet lh-focus"
+            onClick={() => runner.onOutcome(key, "dismissed")}
+          >
+            Not now
+          </button>
+        </div>
+      )}
+    </li>
+  );
+}

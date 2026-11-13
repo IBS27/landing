@@ -210,7 +210,7 @@ async function visibleListings(ctx: QueryCtx, ownerId: Id<"users">, ids: Id<"lis
  * can no longer see, uses their most recently updated scene that belongs to
  * neither a room nor a listing (`placeScene`).
  */
-async function viewerUnit(
+export async function viewerUnit(
   ctx: QueryCtx,
   ownerId: Id<"users">,
 ): Promise<{
@@ -238,7 +238,7 @@ function modelRow(ctx: QueryCtx, ownerId: Id<"users">, listingId: Id<"listings">
  * listing the owner can no longer see keeps only its saved label: no photo,
  * price or model. Reads are bounded by the 80-item limit.
  */
-async function placedItems(ctx: QueryCtx, ownerId: Id<"users">, placements: Placement[]) {
+export async function placedItems(ctx: QueryCtx, ownerId: Id<"users">, placements: Placement[]) {
   const visible = await visibleListings(
     ctx,
     ownerId,
@@ -303,7 +303,7 @@ async function placedItems(ctx: QueryCtx, ownerId: Id<"users">, placements: Plac
  * finishes and fixtures, or most of them (`buildOutcome`, `buildIsPartial`).
  * `ready`: everything else, a hand-edited scene included.
  */
-function stateOf(doc: Doc<"unitScenes">, building: boolean): Infer<typeof unitState> {
+export function stateOf(doc: Doc<"unitScenes">, building: boolean): Infer<typeof unitState> {
   if (building) return "building";
   const status = doc.generation?.status;
   if (isStarterScene(doc.scene))

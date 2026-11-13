@@ -1,17 +1,32 @@
 import { describe, expect, test } from "bun:test";
-import { type ChatRentalCard, ruleReply } from "../convex/lib/homeChatRules";
+import { approveDraftAction, joinGroupAction, rsvpAction } from "../convex/lib/homeChatActions";
+import {
+  CHAT_ACTION_KINDS,
+  CHAT_ACTIONS_MAX,
+  CHAT_INFO_CARDS_MAX,
+  CHAT_SHOWN_MAX,
+  type ChatAction,
+  type ChatActionCard,
+  type ChatCard,
+  type ChatRentalCard,
+  ruleReply,
+} from "../convex/lib/homeChatRules";
 import { suggestions } from "../src/landing/home/suggestions";
 import {
+  actionKey,
   CHAT_ITEMS_MAX,
   type ChatMessage,
+  readAction,
   readSessions,
+  shownKeys,
   storedMessage,
   viaLabel,
 } from "../src/landing/home/useChatLog";
 import { defaultMoveIn } from "../src/landing/place/placeParts";
 
-/* Landing Home (#150): the chat log kept in the browser, the move-in date a
-   rental card starts on, and the suggestion chips. */
+/* Landing Home (#150, #154): the chat log kept in the browser (cards, the
+   actions Muse suggests and what became of them), the move-in date a rental
+   card starts on, and the suggestion chips. */
 
 describe("defaultMoveIn", () => {
   const today = "2026-11-13";
@@ -201,6 +216,207 @@ describe("the stored chat log", () => {
   });
 });
 
+/* ---------- What Muse found and suggests (#154) ---------- */
+
+const eventCard = (id: string, more: Partial<ChatCard> = {}): ChatCard => ({
+  key: `event:${id}`,
+  kind: "event",
+  title: `Event ${id}`,
+  lines: ["Sat, Nov 16 · 8 AM", "Dolores Park", "12 going"],
+  photo: "/seed/e.jpg",
+  href: `/events/${id}`,
+  point: { lat: 37.76, lng: -122.43 },
+  actions: [rsvpAction({ id, title: `Event ${id}`, startsAt: "2026-11-16T16:00:00Z" }, "going")],
+  ...more,
+});
+
+/** One valid action of every kind the page can run. */
+const ACTIONS: ChatAction[] = [
+  { kind: "rsvp", eventId: "e1", status: "interested" },
+  { kind: "join_group", groupId: "g1" },
+  { kind: "save_listing", listingId: "l1" },
+  { kind: "choose_place", listingId: "l1", moveIn: "2026-12-01" },
+  { kind: "negotiate", listingId: "l2", maxPrice: 120, targetPrice: 90, notes: "Pickup only" },
+  { kind: "set_negotiation", negotiationId: "n1", status: "paused" },
+  { kind: "approve_draft", proposalId: "p1" },
+  { kind: "discard_draft", proposalId: "p1" },
+  { kind: "add_grocery", houseId: "h1", text: "Oat milk" },
+  { kind: "add_chore", houseId: "h1", title: "Take out the bins", cadence: "weekly" },
+  { kind: "add_bill", houseId: "h1", title: "Internet", amount: 59.99, cadence: "monthly" },
+  { kind: "ask_roommate", userId: "u1", text: "Hi! Want to compare notes on the Mission?" },
+];
+
+describe("the stored chat log: cards and actions", () => {
+  const action = (a: ChatAction): ChatActionCard => ({ action: a, label: "Do it", confirm: "OK" });
+  const stored = (messages: unknown[]) =>
+    readSessions(JSON.stringify([{ id: "s1", title: "Chat", updatedAt: 1, messages }]))[0]
+      ?.messages;
+
+  test("cards and actions round-trip, with what became of each action", () => {
+    const approve = approveDraftAction({
+      id: "p1",
+      summary: "Offer of $120",
+      text: "Would $120 work?",
+    });
+    const m: ChatMessage = {
+      id: "m1",
+      who: "muse",
+      text: "Here's what's on, and a draft that's waiting.",
+      via: "muse",
+      cards: [
+        eventCard("e1"),
+        { key: "place:dolores", kind: "place", title: "Dolores Park", lines: [] },
+      ],
+      actions: [approve, joinGroupAction({ id: "g1", name: "Mission Runners" })],
+      outcomes: {
+        [actionKey(approve.action)]: "done",
+        "join_group:g1": "dismissed",
+        [actionKey(eventCard("e1").actions?.[0].action as ChatAction)]: "done",
+      },
+    };
+    const kept = storedMessage(m);
+    expect(kept).toEqual(m);
+    expect(stored([JSON.parse(JSON.stringify(kept))])).toEqual([m]);
+  });
+
+  test("they are capped before they're kept", () => {
+    const kept = storedMessage({
+      id: "m1",
+      who: "muse",
+      text: "Lots.",
+      cards: Array.from({ length: 20 }, (_, i) =>
+        eventCard(`e${i}`, {
+          title: "t".repeat(500),
+          lines: Array.from({ length: 9 }, (_, j) => `${j}`.repeat(400)),
+          actions: ACTIONS.slice(0, 5).map(action),
+        }),
+      ),
+      actions: ACTIONS.map((a) => ({
+        action: a,
+        label: "l".repeat(900),
+        detail: "d".repeat(5000),
+        confirm: "OK",
+      })),
+    });
+    expect(kept.cards).toHaveLength(CHAT_INFO_CARDS_MAX);
+    expect(kept.cards?.[0].title).toHaveLength(160);
+    expect(kept.cards?.[0].lines).toHaveLength(3);
+    expect(kept.cards?.[0].lines[0]).toHaveLength(160);
+    expect(kept.cards?.[0].actions).toHaveLength(2);
+    expect(kept.actions).toHaveLength(CHAT_ACTIONS_MAX);
+    expect(kept.actions?.[0].label).toHaveLength(200);
+    expect(kept.actions?.[0].detail).toHaveLength(1000);
+  });
+
+  test("every kind of action reads back exactly, without extra fields", () => {
+    expect(ACTIONS.map((a) => a.kind).sort()).toEqual([...CHAT_ACTION_KINDS].sort());
+    for (const a of ACTIONS) {
+      expect(readAction(JSON.parse(JSON.stringify(a)))).toEqual(a);
+      expect(readAction({ ...a, viewerId: "someone-else", extra: { nested: true } })).toEqual(a);
+    }
+    // Two actions on the same thing are told apart; the same action is the same key.
+    expect(new Set(ACTIONS.map(actionKey)).size).toBe(ACTIONS.length);
+    expect(actionKey({ kind: "rsvp", eventId: "e1", status: "going" })).not.toBe(
+      actionKey({ kind: "rsvp", eventId: "e1", status: "interested" }),
+    );
+  });
+
+  test("a malformed or unknown action is dropped: a stored action runs on a click", () => {
+    const bad: unknown[] = [
+      null,
+      "rsvp",
+      { kind: "delete_everything", id: "x" },
+      { kind: "rsvp", eventId: "e1", status: "none" },
+      { kind: "rsvp", eventId: 7, status: "going" },
+      { kind: "join_group" },
+      { kind: "join_group", groupId: "" },
+      { kind: "choose_place", listingId: "l1", moveIn: "next month" },
+      { kind: "negotiate", listingId: "l1", maxPrice: "120" },
+      { kind: "negotiate", listingId: "l1", maxPrice: Number.NaN },
+      { kind: "negotiate", listingId: "l1", maxPrice: 120, targetPrice: "90" },
+      { kind: "set_negotiation", negotiationId: "n1", status: "deleted" },
+      { kind: "approve_draft", proposalId: ["p1"] },
+      { kind: "add_chore", houseId: "h1", title: "Bins", cadence: "daily" },
+      { kind: "add_bill", houseId: "h1", title: "Internet", amount: 60, cadence: "weekly" },
+      {
+        kind: "add_bill",
+        houseId: "h1",
+        title: "Internet",
+        amount: 60,
+        cadence: "once",
+        dueDate: 5,
+      },
+      { kind: "ask_roommate", userId: "u1" },
+    ];
+    for (const b of bad) expect([b, readAction(b)]).toEqual([b, null]);
+
+    const read = stored([
+      {
+        id: "m1",
+        who: "muse",
+        text: "Here.",
+        actions: [
+          action({ kind: "join_group", groupId: "g1" }),
+          { action: { kind: "join_group", groupId: "g2" }, label: "No button" },
+          { action: { kind: "wire_money", to: "x" }, label: "Send", confirm: "Send" },
+          "join",
+        ],
+        cards: [
+          eventCard("e1", {
+            actions: [
+              action({ kind: "rsvp", eventId: "e1", status: "going" }),
+              { action: null } as never,
+            ],
+          }),
+          { key: "thing:1", kind: "thing", title: "Unknown kind", lines: [] },
+          { key: "event:e2", kind: "event", lines: [] },
+          {
+            key: "event:e3",
+            kind: "event",
+            title: "Bad point",
+            lines: [],
+            point: { lat: "x", lng: 1 },
+          },
+          { key: "event:e4", kind: "event", title: "Bad lines", lines: "soon" },
+          { key: "place:p1", kind: "place", title: "Twin Peaks", lines: [1, "Viewpoint", null] },
+        ],
+        outcomes: { "join_group:g1": "done", "join_group:g2": "done", "rsvp:e1:going": "maybe" },
+      },
+    ]);
+    expect(read).toEqual([
+      {
+        id: "m1",
+        who: "muse",
+        text: "Here.",
+        cards: [
+          eventCard("e1", { actions: [action({ kind: "rsvp", eventId: "e1", status: "going" })] }),
+          { key: "place:p1", kind: "place", title: "Twin Peaks", lines: ["Viewpoint"] },
+        ],
+        actions: [action({ kind: "join_group", groupId: "g1" })],
+        // Only an outcome of an action the turn still carries is kept.
+        outcomes: { "join_group:g1": "done" },
+      },
+    ]);
+  });
+
+  test("a turn goes back to Muse with the keys of what it showed", () => {
+    expect(shownKeys({})).toEqual([]);
+    expect(
+      shownKeys({
+        rentals: [rental("l1"), rental("l2")],
+        cards: [
+          eventCard("e1"),
+          eventCard("e1"),
+          { key: "listing:l1", kind: "item", title: "Desk", lines: [] },
+        ],
+      }),
+    ).toEqual(["listing:l1", "listing:l2", "event:e1"]);
+    expect(
+      shownKeys({ cards: Array.from({ length: 30 }, (_, i) => eventCard(`e${i}`)) }),
+    ).toHaveLength(CHAT_SHOWN_MAX);
+  });
+});
+
 describe("suggestions", () => {
   const go = {
     apartment: () => undefined,
@@ -285,5 +501,42 @@ describe("suggestions", () => {
     expect(labels({ ...base, view: "map", apartment: undefined, needsBrief: true })[0]).toBe(
       "Set up my City Profile",
     );
+  });
+
+  test("the map shows what Muse can reach: drafts waiting, what's on, things for their place", () => {
+    const withPlace = { place: true, model: true, items: 0 };
+    expect(labels({ ...base, view: "map", apartment: undefined })).toEqual([
+      "Show me the move",
+      "Rooms in my budget",
+      "What's happening this week?",
+    ]);
+    expect(labels({ ...base, view: "map", apartment: undefined, waiting: 2 })[2]).toBe(
+      "What's waiting for my approval?",
+    );
+    expect(labels({ ...base, view: "map", apartment: withPlace })).toEqual([
+      "What's happening this week?",
+      "Marketplace finds for my place",
+      "Open my apartment",
+    ]);
+    expect(labels({ ...base, view: "map", apartment: withPlace, waiting: 1 })[0]).toBe(
+      "What's waiting for my approval?",
+    );
+    // Never more than three chips, whatever the state.
+    for (const waiting of [0, 3])
+      for (const apartment of [undefined, withPlace])
+        for (const view of ["map", "apartment"] as const)
+          expect(labels({ ...base, view, apartment, waiting }).length).toBeLessThanOrEqual(3);
+  });
+
+  test("with AI off, Landing's rules still answer the new chips", () => {
+    const rules = (text: string) =>
+      ruleReply(
+        text,
+        { stage: "city", view: "map" },
+        { neighborhoods: [], apartment: { hasModel: true }, today: "2026-11-13" },
+      ).command;
+    expect(rules("What's waiting for my approval?")).toEqual({ kind: "open_page", page: "inbox" });
+    expect(rules("What's happening this week?")).toEqual({ kind: "show_pins", layer: "events" });
+    expect(rules("Marketplace finds for my place").kind).not.toBe("none");
   });
 });

@@ -9,6 +9,7 @@ import {
   vibeWords,
 } from "../convex/lib/chatText";
 import { SF_NEIGHBORHOODS } from "../convex/lib/cityProfileFacts";
+import { negotiateAction } from "../convex/lib/homeChatActions";
 import {
   CHAT_HELP,
   CHAT_PAGES,
@@ -627,5 +628,15 @@ describe("furnishRequest: a mood inside a thing's own phrase (#153)", () => {
     expect(furnishRequest("cozy, lots of plants").type).toBe("room");
     expect(furnishRequest("cozy with plants").type).toBe("room");
     expect(furnishRequest("make it cozy with a big rug").type).toBe("room");
+  });
+});
+
+describe("action cards (#154)", () => {
+  test("a negotiation shows everything it will be told, notes included", () => {
+    const desk = { id: "l1", title: "Walnut desk", price: 180 };
+    const card = negotiateAction(desk, { maxPrice: 120, notes: "pickup this weekend" });
+    expect(card.label).toBe("Have Muse negotiate Walnut desk, up to $120");
+    expect(card.detail).toContain('Notes for Muse: "pickup this weekend"');
+    expect(negotiateAction(desk, { maxPrice: 120 }).detail).not.toContain("Notes");
   });
 });
