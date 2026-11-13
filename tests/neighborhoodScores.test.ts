@@ -534,6 +534,42 @@ describe("recompute and get", () => {
     ]);
   });
 
+  test("shared: the same shared scores as get, without reading Group threads", async () => {
+    const { tables, ctx } = world();
+    await recompute(ctx);
+    const args = { viewerId: "users:v", neighborhoodId: "neighborhoods:mission" };
+    const full = (await run(scores.get, ctx, args)) as { scores: unknown[] };
+    const queried: string[] = [];
+    const db = ctx.db;
+    const light = (await run(
+      scores.shared,
+      {
+        ...ctx,
+        db: {
+          ...db,
+          query: (table: string) => {
+            queried.push(table);
+            return db.query(table as never);
+          },
+        },
+      } as unknown as MutationCtx,
+      args,
+    )) as { neighborhood: { slug: string }; scores: { kind: string; state: string }[] };
+    expect(light.neighborhood.slug).toBe("mission");
+    expect(light.scores).toEqual(full.scores as typeof light.scores);
+    expect(queried).not.toContain("posts");
+    expect(queried).not.toContain("comments");
+    expect(queried).not.toContain("neighborhoodFacts");
+    // A score whose source turns private is hidden here too.
+    const e = tables.events.find((x) => x._id === "events:e1");
+    if (e) e.privacy = "friends";
+    const after = (await run(scores.shared, ctx, args)) as { scores: { kind: string }[] };
+    expect(after.scores.map((s) => s.kind)).toEqual(["food", "transit"]);
+    expect(
+      await run(scores.shared, ctx, { viewerId: "users:v", neighborhoodId: "neighborhoods:nope" }),
+    ).toBeNull();
+  });
+
   test("only public posts are quoted, even in a public Group", async () => {
     const { tables } = world();
     tables.groups.push({

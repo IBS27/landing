@@ -2,13 +2,13 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeftRight, ChevronRight, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQ } from "@/app/viewer";
+import { toCompare, toNeighborhood } from "@/landing/links";
 import { LandingMap, type MapLayer } from "@/landing/map/LandingMap";
 import { useMediaQuery } from "@/landing/map/useEnv";
 import { plural } from "@/lib/format";
 import { Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { DirectoryEntry } from "../../../convex/lib/neighborhoodPage";
-import { compareSearch } from "./compare";
 import { NeighborhoodCrumbs } from "./NeighborhoodPage";
 
 /**
@@ -31,8 +31,7 @@ export function NeighborhoodsIndexView({ data }: { data: Directory | undefined }
       {
         kind: "neighborhoods",
         items: data?.neighborhoods ?? [],
-        onSelect: (n) =>
-          navigate({ to: "/landing/find/neighborhoods/$slug", params: { slug: n.slug } }),
+        onSelect: (n) => navigate(toNeighborhood(n)),
       },
     ],
     [data, navigate],
@@ -55,8 +54,7 @@ export function NeighborhoodsIndexView({ data }: { data: Directory | undefined }
           Groups, events and people in each part of San Francisco, and what fits you.
         </p>
         <Link
-          to="/landing/find/neighborhoods/compare"
-          search={compareSearch({ a: mine[0]?.slug, b: mine[1]?.slug })}
+          {...toCompare(mine[0]?.slug, mine[1]?.slug)}
           className="mt-3 flex h-9 items-center justify-center gap-1.5 rounded-md bg-btn-soft px-3 font-semibold text-[15px] text-btn-soft-text transition-[filter] hover:brightness-95 active:scale-[0.98] dark:hover:brightness-125"
         >
           <ArrowLeftRight size={16} aria-hidden />
@@ -151,8 +149,7 @@ function Row({ n, hasProfile }: { n: DirectoryEntry; hasProfile: boolean }) {
           .join(" · ");
   return (
     <Link
-      to="/landing/find/neighborhoods/$slug"
-      params={{ slug: n.slug }}
+      {...toNeighborhood(n)}
       className="group flex min-h-14 items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-hover active:bg-pressed"
     >
       <span className="min-w-0 flex-1">

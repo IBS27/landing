@@ -356,6 +356,62 @@ describe("listingTrust", () => {
   });
 });
 
+describe("listingTrust: the listing's neighborhood", () => {
+  const MISSION = {
+    _id: "nb1",
+    slug: "mission",
+    name: "Mission",
+    center: { lat: 37.76, lng: -122.415 },
+    bbox: { west: -122.43, south: 37.74, east: -122.4, north: 37.77 },
+    polygon: [
+      [
+        [
+          [-122.43, 37.74],
+          [-122.4, 37.74],
+          [-122.4, 37.77],
+          [-122.43, 37.74],
+        ],
+      ],
+    ],
+  };
+
+  test("its neighborhood, from neighborhoodId, and the pin at the approximate area only", async () => {
+    const w = { ...world(), neighborhoods: [MISSION] };
+    w.listings[0] = {
+      ...w.listings[0],
+      neighborhoodId: id("nb1"),
+      location: {
+        city: "San Francisco, CA",
+        neighborhood: "Lower Mission",
+        lat: 37.7599,
+        lng: -122.4148,
+      },
+    };
+    const t = await listingTrust(fakeCtx(w), id("V"), id("lst"));
+    expect(t?.neighborhood).toEqual({
+      _id: id("nb1"),
+      slug: "mission",
+      label: "Mission",
+      park: false,
+      center: MISSION.center,
+      bbox: MISSION.bbox,
+      polygon: MISSION.polygon,
+    });
+    expect(t?.pin?._id).toBe(id("lst"));
+    expect(t?.pin?.point).not.toEqual({ lat: 37.7599, lng: -122.4148 });
+    // The lister sees it too.
+    expect((await listingTrust(fakeCtx(w), id("L"), id("lst")))?.neighborhood?.slug).toBe(
+      "mission",
+    );
+  });
+
+  test("none without a neighborhoodId, whatever name was typed", async () => {
+    const t = await listingTrust(fakeCtx(world()), id("V"), id("lst"));
+    expect(t?.listing.neighborhood).toBe("Mission");
+    expect(t?.neighborhood).toBeNull();
+  });
+});
+
 describe("chat check", () => {
   test("only the renter in the chat gets notes", async () => {
     const w = world();

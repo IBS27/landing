@@ -12,6 +12,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { LISTING_REPORT_REASONS } from "../../../convex/lib/reports";
 import { ListerNetwork } from "./ListerNetwork";
+import { ListingNeighborhood } from "./ListingNeighborhood";
 import { ChatCheck, ThingsToCheck, VerifiedBadges } from "./ThingsToCheck";
 import { UnitDetails } from "./UnitDetails";
 import { useChatCheck } from "./useChatCheck";
@@ -132,6 +133,7 @@ export function ListingTrustPage({ listingId }: { listingId: Id<"listings"> }) {
               </p>
             </div>
           </Card>
+          <ListingNeighborhood neighborhood={data.neighborhood} pin={data.pin} />
           {data.chat && lister && (
             <ChatCheck chat={data.chat} listerFirstName={lister.firstName} onRetry={retryCheck} />
           )}

@@ -29,7 +29,22 @@ import type { CitedSource } from "../../../convex/lib/citations";
  * `NeighborhoodScores` loads one neighborhood. "Try the neighborhood" (#19)
  * loads two and lays the same pieces side by side (`ComparePage`).
  */
-export function NeighborhoodScores({ neighborhoodId }: { neighborhoodId: Id<"neighborhoods"> }) {
+export function NeighborhoodScores({
+  neighborhoodId,
+  compact = false,
+}: {
+  neighborhoodId: Id<"neighborhoods">;
+  /** Just the three shared scores, as rows: for pages that link on to the neighborhood (a listing). */
+  compact?: boolean;
+}) {
+  return compact ? (
+    <CompactScores neighborhoodId={neighborhoodId} />
+  ) : (
+    <FullScores neighborhoodId={neighborhoodId} />
+  );
+}
+
+function FullScores({ neighborhoodId }: { neighborhoodId: Id<"neighborhoods"> }) {
   const data = useQ(api.neighborhoodScores.get, { neighborhoodId });
   if (data === undefined) return <ScoresSkeleton />;
   if (data === null) return null;
@@ -346,6 +361,59 @@ function Quote({ quote, source }: { quote: string; source: CitedSource }) {
         </span>
       </div>
     </li>
+  );
+}
+
+/**
+ * The compact form: things to do, food and transit from `neighborhoodScores.shared`,
+ * which reads only the stored scores (no Group threads), each with its sources.
+ */
+function CompactScores({ neighborhoodId }: { neighborhoodId: Id<"neighborhoods"> }) {
+  const data = useQ(api.neighborhoodScores.shared, { neighborhoodId });
+  if (data === undefined)
+    return (
+      <div aria-busy className="space-y-2">
+        {[0, 1, 2].map((i) => (
+          <Skeleton key={i} className="h-11 w-full rounded-lg" />
+        ))}
+      </div>
+    );
+  if (data === null || data.scores.length === 0) return null;
+  return (
+    <ul className="divide-y divide-divider">
+      {data.scores.map((s) => {
+        const { title, icon } = TILE[s.kind];
+        return (
+          <li key={s.kind} className="flex min-h-14 items-center gap-3 py-2">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-btn text-secondary">
+              {icon}
+            </span>
+            <div className="min-w-0 flex-1">
+              <h4 className="truncate font-semibold text-[15px] text-primary leading-5">{title}</h4>
+              <p className="truncate text-secondary text-sm leading-4">
+                {s.state === "ok" ? s.label : "Not enough public data yet"}
+              </p>
+            </div>
+            {s.state === "ok" ? (
+              <>
+                <p className="flex shrink-0 items-baseline gap-0.5">
+                  <span className="font-bold text-[20px] text-primary tabular-nums leading-6">
+                    {s.score.toFixed(1)}
+                  </span>
+                  <span className="text-secondary text-xs">/ 10</span>
+                </p>
+                <SourcesChip sources={s.sources} className="shrink-0" />
+              </>
+            ) : (
+              <p className="shrink-0 font-bold text-[20px] text-secondary leading-6">
+                <span aria-hidden>–</span>
+                <span className="sr-only">No score</span>
+              </p>
+            )}
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 

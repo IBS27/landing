@@ -1,5 +1,6 @@
 import { linkOptions } from "@tanstack/react-router";
 import type { Id, TableNames } from "../../convex/_generated/dataModel";
+import { compareSearch } from "./neighborhoods/compare";
 
 /**
  * Links from Landing to the Facebook objects it shows. Landing never renders
@@ -49,6 +50,25 @@ export function toRentalCheck(listing: Ref<"listings">) {
   return linkOptions({
     to: "/landing/find/listing/$listingId",
     params: { listingId: idOf(listing) },
+  });
+}
+
+/** A neighborhood's page (#16), by slug. */
+export function toNeighborhood(neighborhood: string | { slug: string }) {
+  return linkOptions({
+    to: "/landing/find/neighborhoods/$slug",
+    params: { slug: typeof neighborhood === "string" ? neighborhood : neighborhood.slug },
+  });
+}
+
+/**
+ * "Try the neighborhood" (#19) with `a` and `b` picked when given. Unknown
+ * slugs, and `b` when it repeats `a`, are dropped, so the page asks for them.
+ */
+export function toCompare(a?: string, b?: string) {
+  return linkOptions({
+    to: "/landing/find/neighborhoods/compare",
+    search: compareSearch({ a, b }),
   });
 }
 

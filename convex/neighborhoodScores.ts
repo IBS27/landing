@@ -40,7 +40,7 @@ import {
   scoreSources,
 } from "./lib/neighborhoodScores";
 import { mentions, placesIn } from "./lib/places";
-import { loadAudience } from "./lib/posts";
+import { type Audience, loadAudience } from "./lib/posts";
 import {
   type NeighborhoodScoreKind,
   neighborhoodScoreKind,
@@ -326,29 +326,7 @@ export const get = viewerQuery({
     const now = Date.now();
     const audience = await loadAudience(ctx, ctx.viewer._id);
 
-    // Shared scores.
-    const rows = await ctx.db
-      .query("neighborhoodScores")
-      .withIndex("by_neighborhood", (q) => q.eq("neighborhoodId", neighborhoodId))
-      .collect();
-    const scores: SharedScore[] = [];
-    for (const kind of KINDS) {
-      const r = rows.find((x) => x.kind === kind);
-      if (!r) {
-        scores.push({ kind, state: "no_data" });
-        continue;
-      }
-      const sources = await resolveCitations(ctx, r.citations, audience);
-      if (!sources) continue;
-      scores.push({
-        kind,
-        state: "ok",
-        score: r.score,
-        label: r.label,
-        breakdown: r.breakdown,
-        sources,
-      });
-    }
+    const { scores, computedAt } = await sharedScores(ctx, neighborhoodId, audience);
 
     // Interest fit: personal, from what this viewer can see here.
     const { groups, texts } = await neighborhoodThreads(ctx, neighborhoodId, now);
@@ -468,7 +446,60 @@ export const get = viewerQuery({
         quotes,
       },
       howCalculated: HOW_CALCULATED,
-      computedAt: rows.reduce((t, r) => Math.max(t, r.computedAt), 0) || null,
+      computedAt,
+    };
+  },
+});
+
+/**
+ * The three stored shared scores as this viewer may see them: a score whose
+ * sources they can't all see is left out, and a kind with no stored score is
+ * `no_data`. Reads only the score rows and their citations.
+ */
+export async function sharedScores(
+  ctx: QueryCtx,
+  neighborhoodId: Id<"neighborhoods">,
+  audience: Audience,
+) {
+  const rows = await ctx.db
+    .query("neighborhoodScores")
+    .withIndex("by_neighborhood", (q) => q.eq("neighborhoodId", neighborhoodId))
+    .collect();
+  const scores: SharedScore[] = [];
+  for (const kind of KINDS) {
+    const r = rows.find((x) => x.kind === kind);
+    if (!r) {
+      scores.push({ kind, state: "no_data" });
+      continue;
+    }
+    const sources = await resolveCitations(ctx, r.citations, audience);
+    if (!sources) continue;
+    scores.push({
+      kind,
+      state: "ok",
+      score: r.score,
+      label: r.label,
+      breakdown: r.breakdown,
+      sources,
+    });
+  }
+  return { scores, computedAt: rows.reduce((t, r) => Math.max(t, r.computedAt), 0) || null };
+}
+
+/**
+ * Just the shared scores, for pages that link on to the neighborhood (a
+ * listing): no interest fit or night facts, so no Group threads are read.
+ * Null for an unknown neighborhood.
+ */
+export const shared = viewerQuery({
+  args: { neighborhoodId: v.id("neighborhoods") },
+  handler: async (ctx, { neighborhoodId }) => {
+    const n = await ctx.db.get(neighborhoodId);
+    if (!n) return null;
+    const audience = await loadAudience(ctx, ctx.viewer._id);
+    return {
+      neighborhood: { _id: n._id, slug: n.slug, label: n.shortName ?? n.name },
+      ...(await sharedScores(ctx, neighborhoodId, audience)),
     };
   },
 });
