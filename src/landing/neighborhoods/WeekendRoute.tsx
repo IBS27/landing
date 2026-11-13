@@ -31,20 +31,31 @@ export function WeekendRoute({
   neighborhoodId: Id<"neighborhoods">;
   className?: string;
 }) {
-  const data = useQ(api.weekendRoutes.get, { neighborhoodId });
+  const data = useWeekendRoute(neighborhoodId);
+  return <WeekendRouteCard data={data} className={className} />;
+}
+
+/**
+ * A neighborhood's Weekend Route data (undefined while loading, or when
+ * `neighborhoodId` is undefined). Starts a build when there's no route or it's
+ * over a week old, once per neighborhood per mount.
+ */
+export function useWeekendRoute(neighborhoodId: Id<"neighborhoods"> | undefined) {
+  const data = useQ(api.weekendRoutes.get, neighborhoodId ? { neighborhoodId } : "skip");
   const request = useM(api.weekendRoutes.request);
   const asked = useRef<string | null>(null);
   const due =
+    neighborhoodId !== undefined &&
     data !== undefined &&
     !data.building &&
     !data.failed &&
     (!data.route || Date.now() - data.route.generatedAt > WEEK);
   useEffect(() => {
-    if (!due || asked.current === neighborhoodId) return;
+    if (!due || !neighborhoodId || asked.current === neighborhoodId) return;
     asked.current = neighborhoodId;
     void request({ neighborhoodId }).catch(() => {});
   }, [due, neighborhoodId, request]);
-  return <WeekendRouteCard data={data} className={className} />;
+  return data;
 }
 
 /** The card itself, for whatever data `api.weekendRoutes.get` returned (undefined while loading). */

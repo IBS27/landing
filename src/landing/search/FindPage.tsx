@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQ } from "@/app/viewer";
 import { FindMap } from "@/landing/map/FindMap";
 import { NeighborhoodsLink } from "@/landing/neighborhoods/NeighborhoodsLink";
-import { ComingSoon } from "@/landing/shell/LandingPage";
 import { api } from "../../../convex/_generated/api";
 import type { RentalFilters } from "../../../convex/lib/rentalFit";
 import { RentalResults } from "./RentalResults";
@@ -22,12 +21,6 @@ export function FindPage() {
         <>
           <NeighborhoodsLink />
           <RentalResults data={data} filters={filters} onFilters={setFilters} />
-          <ComingSoon
-            items={[
-              "Cited neighborhood scores for things to do, food, transit and fit",
-              "Try the neighborhood: compare two places side by side",
-            ]}
-          />
         </>
       }
     />
