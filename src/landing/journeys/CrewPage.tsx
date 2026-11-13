@@ -155,8 +155,9 @@ function PrivacyNote() {
     <p className="flex items-start gap-2 text-[13px] text-secondary">
       <Lock size={14} className="mt-0.5 shrink-0" />
       Others in your crew see your name and photo and only what you have in common: the month,
-      neighborhoods and workplace you both turned on, and shared interests. Matching never uses age,
-      gender, ethnicity, religion, health or family status.
+      neighborhoods and workplace you both turned on, and shared interests (including ones Landing
+      learned from your activity, which you can remove in your City Profile). Matching never uses
+      age, gender, ethnicity, religion, health or family status.
     </p>
   );
 }

@@ -122,7 +122,7 @@ export type CrewMember = {
  */
 export const myCrew = viewerQuery({
   args: {},
-  handler: async (ctx): Promise<{ members: CrewMember[]; others: number } | null> => {
+  handler: async (ctx): Promise<{ members: CrewMember[] } | null> => {
     const mine = await optInRow(ctx, ctx.viewer._id);
     if (!mine) return null;
     const [viewerProfile, rows, blocked] = await Promise.all([
@@ -144,7 +144,7 @@ export const myCrew = viewerQuery({
       const user = users.get(m.userId as Id<"users">);
       if (user) members.push({ user, anchors: m.anchors, shared: m.shared, score: m.score });
     }
-    return { members, others: others.length };
+    return { members };
   },
 });
 

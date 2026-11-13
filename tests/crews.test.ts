@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import type { MutationCtx } from "../convex/_generated/server";
+import { myCrew, optIn, optOut } from "../convex/crews";
 import type { CityProfile } from "../convex/lib/cityProfile";
 import {
   type CrewProfile,
@@ -12,6 +14,7 @@ import {
   usableAnchors,
 } from "../convex/lib/crews";
 import type { InterestId } from "../convex/lib/interests";
+import { fakeCtx, type Row } from "./fakeDb";
 
 const ALL: MatchBy = { month: true, neighborhood: true, employer: true };
 
@@ -160,5 +163,103 @@ describe("crewProfile", () => {
   test("employer names normalize", () => {
     expect(employerKey("Google LLC")).toBe(employerKey("google"));
     expect(employerKey("Salesforce, Inc.")).toBe("salesforce");
+  });
+});
+
+/* ---------------- Privacy, through the Convex functions ---------------- */
+
+describe("myCrew privacy", () => {
+  type Handler = (ctx: MutationCtx, args: Record<string, unknown>) => Promise<unknown>;
+  const call = (fn: unknown, ctx: MutationCtx, viewer: string, args = {}) =>
+    (fn as { _handler: Handler })._handler(ctx, { viewerId: `users:${viewer}`, ...args });
+  type Result = { members: { user: { username: string }; shared: string[] }[] } | null;
+  const crewOf = async (ctx: MutationCtx, viewer: string) => {
+    const r = (await call(myCrew, ctx, viewer)) as Result;
+    return r?.members.map((m) => m.user.username) ?? null;
+  };
+
+  let n = 0;
+  const factRow = (userId: string, key: string, value: unknown): Row => ({
+    _id: `cityProfileFacts:${++n}`,
+    userId,
+    key,
+    value,
+    source: "stated",
+    evidence: { kind: "brief", summary: "You said so in your brief" },
+    confidence: 1,
+    updatedAt: 1,
+  });
+  /** Everyone arrives in February 2027, looks in the Mission and climbs; only `v` likes coffee. */
+  function world(people: string[], optedIn: string[], blocks: [string, string][] = []) {
+    const tables: Record<string, Row[]> = {
+      users: people.map((p) => ({ _id: `users:${p}`, name: p, firstName: p, username: p })),
+      cityProfiles: people.map((p) => ({
+        _id: `cityProfiles:${p}`,
+        userId: `users:${p}`,
+        briefCompletedAt: 1,
+      })),
+      cityProfileFacts: people.flatMap((p) => [
+        factRow(`users:${p}`, "moveIn", { month: "2027-02" }),
+        factRow(`users:${p}`, "neighborhood", { slug: "mission" }),
+        factRow(`users:${p}`, "interest", { id: "climbing" }),
+        factRow(`users:${p}`, "interest", { id: p === "v" ? "coffee" : "board_games" }),
+      ]),
+      crewOptIns: optedIn.map((p) => ({
+        _id: `crewOptIns:${p}`,
+        userId: `users:${p}`,
+        matchBy: DEFAULT_MATCH_BY,
+        createdAt: 1,
+        updatedAt: 1,
+      })),
+      blocks: blocks.map(([a, b], i) => ({
+        _id: `blocks:${i}`,
+        userId: `users:${a}`,
+        blockedId: `users:${b}`,
+      })),
+    };
+    return fakeCtx(tables);
+  }
+
+  test("you see no crew until you opt in, and nobody who hasn't", async () => {
+    const ctx = world(["v", "a", "b"], ["a"]);
+    expect(await crewOf(ctx, "v")).toBeNull();
+    await call(optIn, ctx, "v", { matchBy: DEFAULT_MATCH_BY });
+    expect(await crewOf(ctx, "v")).toEqual(["a"]);
+    expect(await crewOf(ctx, "a")).toEqual(["v"]);
+  });
+
+  test("leaving takes you out of everyone's crew at once", async () => {
+    const ctx = world(["v", "a"], ["v", "a"]);
+    expect(await crewOf(ctx, "a")).toEqual(["v"]);
+    await call(optOut, ctx, "v");
+    expect(await crewOf(ctx, "a")).toEqual([]);
+    expect(await crewOf(ctx, "v")).toBeNull();
+  });
+
+  test("blocks hide people in both directions", async () => {
+    const ctx = world(
+      ["v", "a", "b"],
+      ["v", "a", "b"],
+      [
+        ["v", "a"],
+        ["b", "v"],
+      ],
+    );
+    expect(await crewOf(ctx, "v")).toEqual([]);
+    expect(await crewOf(ctx, "a")).toEqual(["b"]);
+    expect(await crewOf(ctx, "b")).toEqual(["a"]);
+  });
+
+  test("a match shows only the interests you share", async () => {
+    const ctx = world(["v", "a"], ["v", "a"]);
+    const r = (await call(myCrew, ctx, "v")) as Result;
+    expect(r?.members.map((m) => m.shared)).toEqual([["climbing"]]);
+  });
+
+  test("joining needs a finished City Profile", async () => {
+    const ctx = fakeCtx({ users: [{ _id: "users:w", name: "w", username: "w" }] });
+    await expect(call(optIn, ctx, "w", { matchBy: DEFAULT_MATCH_BY })).rejects.toThrow(
+      "City Profile",
+    );
   });
 });
