@@ -1,7 +1,8 @@
 /**
  * Apartment search tuned to the City Profile (#10). A pure, deterministic
- * ranking: each rental gets a 0–1 score for budget, transit and interests,
- * each with a plain-language reason, combined with visible weights.
+ * ranking: each rental gets a 0–1 score for budget, transit, interests, target
+ * neighborhood and move-in date, each with a plain-language reason, combined
+ * with visible weights. Must-haves (`RentalFilters`) filter; they aren't scored.
  *
  * No AI and no device location: distances come from the listing's stated
  * point and #15's cited station facts. No protected traits are read.
@@ -17,6 +18,10 @@ export type FitProfile = {
   interests: ReadonlyMap<string, number>;
   /** Interest id → label, for reasons ("climbing"). */
   interestLabels: ReadonlyMap<string, string>;
+  /** Target neighborhoods: neighborhood id → label ("Mission"). */
+  neighborhoods: ReadonlyMap<string, string>;
+  /** Move-in day (UTC midnight, ms); null when unknown. */
+  moveIn: number | null;
 };
 
 export type FitStop = {
@@ -36,16 +41,40 @@ export type FitListing = {
   price: number;
   lat: number | null;
   lng: number | null;
+  /** DataSF neighborhood (#15); null outside San Francisco. */
+  neighborhoodId?: string | null;
+  /** `rental.availableFrom` (ms); null or absent means available now. */
+  availableFrom?: number | null;
 };
 
-export type ReasonKind = "budget" | "transit" | "interests";
+/** Hard requirements the person picks. A listing that misses one is left out, not ranked lower. */
+export type RentalFilters = {
+  /** Fewest bedrooms (0 = studios count). */
+  bedrooms?: number;
+  maxPrice?: number;
+  pets?: boolean;
+  furnished?: boolean;
+};
+
+export function meetsFilters(
+  l: { price: number; bedrooms: number; petsAllowed?: boolean; furnished?: boolean },
+  f: RentalFilters,
+): boolean {
+  if (f.bedrooms !== undefined && l.bedrooms < f.bedrooms) return false;
+  if (f.maxPrice !== undefined && l.price > f.maxPrice) return false;
+  if (f.pets && l.petsAllowed !== true) return false;
+  if (f.furnished && l.furnished !== true) return false;
+  return true;
+}
+
+export type ReasonKind = "budget" | "transit" | "interests" | "neighborhood" | "moveIn";
 
 export type Reason = {
   kind: ReasonKind;
   /** "$1,650, inside your budget" */
   text: string;
   tone: "good" | "bad";
-  /** Source keys behind the reason (a station fact, Groups, Events). */
+  /** Source keys behind the reason (the listing, a station fact, Groups, Events). */
   sources: string[];
 };
 
@@ -57,25 +86,49 @@ export type Fit = {
   reasons: Reason[];
 };
 
-/** How strongly each part counts. Transit counts more without a car, less with one. */
+/**
+ * How strongly each part counts, over the parts the profile has. Transit counts
+ * more without a car, less with one, and not at all when the person uses none of
+ * BART, Muni or Caltrain.
+ */
 export function weights(profile: FitProfile): Record<ReasonKind, number> {
   const car = profile.modes ? profile.modes.includes("car") : null;
-  const transit = car === null ? 0.3 : car ? 0.15 : 0.45;
-  const budget = profile.budget ? 0.4 : 0;
-  const interests = profile.interests.size > 0 ? 0.3 : 0;
-  const total = budget + transit + interests;
-  return { budget: budget / total, transit: transit / total, interests: interests / total };
+  const raw: Record<ReasonKind, number> = {
+    budget: profile.budget ? 0.4 : 0,
+    transit: usableSystems(profile.modes).size === 0 ? 0 : car === null ? 0.3 : car ? 0.15 : 0.45,
+    interests: profile.interests.size > 0 ? 0.3 : 0,
+    neighborhood: profile.neighborhoods.size > 0 ? 0.25 : 0,
+    moveIn: profile.moveIn !== null ? 0.15 : 0,
+  };
+  const total = Object.values(raw).reduce((a, b) => a + b, 0) || 1;
+  return {
+    budget: raw.budget / total,
+    transit: raw.transit / total,
+    interests: raw.interests / total,
+    neighborhood: raw.neighborhood / total,
+    moveIn: raw.moveIn / total,
+  };
 }
 
 const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 
-/** 1 inside the budget (cheaper isn't rewarded more), falling to 0 at 15% over the max. */
-export function budgetPart(price: number, budget: FitProfile["budget"]): [number, Reason | null] {
+const listingKey = (id: string) => `listing:${id}`;
+
+/**
+ * 1 inside the budget (cheaper isn't rewarded more), falling to 0 at 15% over
+ * the max. The reason cites the listing, where the price comes from.
+ */
+export function budgetPart(
+  listing: Pick<FitListing, "id" | "price">,
+  budget: FitProfile["budget"],
+): [number, Reason | null] {
   if (!budget) return [0, null];
+  const { price } = listing;
+  const sources = [listingKey(listing.id)];
   if (price <= budget.max)
     return [
       1,
-      { kind: "budget", text: `${usd(price)}, inside your budget`, tone: "good", sources: [] },
+      { kind: "budget", text: `${usd(price)}, inside your budget`, tone: "good", sources },
     ];
   const over = price - budget.max;
   const score = Math.max(0, 1 - over / (budget.max * 0.15));
@@ -85,7 +138,7 @@ export function budgetPart(price: number, budget: FitProfile["budget"]): [number
       kind: "budget",
       text: `${usd(over)} over your ${usd(budget.max)} max`,
       tone: "bad",
-      sources: [],
+      sources,
     },
   ];
 }
@@ -135,14 +188,16 @@ export function transitPart(
     const min = walkMinutes(metersBetween(here, s));
     if (!best || min < best.min) best = { stop: s, min };
   }
-  if (!best || best.min > 40)
+  if (!best) return [0, null];
+  // Too far to walk: a drawback, citing the nearest stop's fact.
+  if (best.min > 40)
     return [
       0,
       {
         kind: "transit",
         text: "No BART, Muni Metro or Caltrain stop within walking distance",
         tone: "bad",
-        sources: [],
+        sources: [best.stop.factKey],
       },
     ];
   const score = Math.min(1, Math.max(0, (25 - best.min) / 20));
@@ -177,16 +232,8 @@ export function interestsPart(
     for (const i of hits)
       byInterest.set(i, (byInterest.get(i) ?? 0) + (profile.interests.get(i) ?? 0));
   }
-  if (total === 0)
-    return [
-      0,
-      {
-        kind: "interests",
-        text: "No Groups or Events for your interests nearby",
-        tone: "bad",
-        sources: [],
-      },
-    ];
+  // Nothing matching scores 0 without a reason: an absence has no source to cite.
+  if (total === 0) return [0, null];
   // The two interests with the most weight nearby name the reason.
   const labels = [...byInterest.entries()]
     .sort((a, b) => b[1] - a[1])
@@ -204,26 +251,91 @@ export function interestsPart(
   ];
 }
 
+/** 1 in one of the profile's target neighborhoods. Elsewhere scores 0 with no reason: not a drawback worth a chip. */
+export function neighborhoodPart(
+  listing: FitListing,
+  profile: FitProfile,
+): [number, Reason | null] {
+  const label = listing.neighborhoodId
+    ? profile.neighborhoods.get(listing.neighborhoodId)
+    : undefined;
+  if (label === undefined) return [0, null];
+  return [
+    1,
+    {
+      kind: "neighborhood",
+      text: `In ${label}, one of your neighborhoods`,
+      tone: "good",
+      sources: [listingKey(listing.id)],
+    },
+  ];
+}
+
+const DAY = 24 * 60 * 60 * 1000;
+const SHORT_DATE = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+
+/**
+ * 1 when the rental is free within two weeks of the move-in day, falling to 0
+ * at two months either side. No `availableFrom` means available now. A move-in
+ * day that has passed counts as today.
+ */
+export function moveInPart(
+  listing: FitListing,
+  moveIn: number | null,
+  now: number,
+): [number, Reason | null] {
+  if (moveIn === null) return [0, null];
+  const target = Math.max(moveIn, now);
+  const from = Math.max(listing.availableFrom ?? now, now);
+  const days = Math.round((from - target) / DAY);
+  const off = Math.abs(days);
+  const score = Math.min(1, Math.max(0, (60 - off) / 46));
+  const when =
+    listing.availableFrom && listing.availableFrom > now
+      ? `Available ${SHORT_DATE.format(from)}`
+      : "Available now";
+  const weeks = Math.round(off / 7);
+  const text =
+    off <= 14
+      ? `${when}, around your move-in`
+      : `${when}, ${weeks} weeks ${days > 0 ? "after" : "before"} your move-in`;
+  return [
+    score,
+    { kind: "moveIn", text, tone: off <= 14 ? "good" : "bad", sources: [listingKey(listing.id)] },
+  ];
+}
+
 /**
  * Ranks rentals for a profile, best first. Ties go to the cheaper listing.
- * `context` gives each listing's stops (all of them) and its neighborhood's places.
+ * `context` gives every stop, each listing's neighborhood places, and the time.
  */
 export function rankRentals(
   profile: FitProfile,
   listings: readonly FitListing[],
-  context: { stops: readonly FitStop[]; placesFor: (id: string) => readonly FitPlace[] },
+  context: {
+    stops: readonly FitStop[];
+    placesFor: (id: string) => readonly FitPlace[];
+    now: number;
+  },
 ): Fit[] {
   const w = weights(profile);
   const fits = listings.map((l): Fit => {
-    const [b, br] = budgetPart(l.price, profile.budget);
+    const [b, br] = budgetPart(l, profile.budget);
     const [t, tr] = transitPart(l, context.stops, profile.modes);
     const [i, ir] = interestsPart(context.placesFor(l.id), profile);
-    const parts = { budget: b, transit: t, interests: i };
-    const score = w.budget * b + w.transit * t + w.interests * i;
+    const [n, nr] = neighborhoodPart(l, profile);
+    const [m, mr] = moveInPart(l, profile.moveIn, context.now);
+    const parts = { budget: b, transit: t, interests: i, neighborhood: n, moveIn: m };
+    const score =
+      w.budget * b + w.transit * t + w.interests * i + w.neighborhood * n + w.moveIn * m;
     // Reasons in order of how much they moved the score, up or down; three at most.
     const impact = (r: Reason) =>
       w[r.kind] * (r.tone === "good" ? parts[r.kind] : 1 - parts[r.kind]);
-    const reasons = [br, tr, ir]
+    const reasons = [br, tr, ir, nr, mr]
       .filter((r): r is Reason => r !== null && w[r.kind] > 0)
       .sort((x, y) => impact(y) - impact(x))
       .slice(0, 3);

@@ -1,14 +1,18 @@
+import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { type CitedSource, cite, type NonEmpty, resolveCitations } from "./lib/citations";
 import { getProfile, interestWeights } from "./lib/cityProfile";
+import { neighborhoodLabel } from "./lib/cityProfileFacts";
 import { viewerQuery } from "./lib/functions";
 import { getInterest, interestsForEvent, interestsForGroup } from "./lib/interests";
+import { listingPin } from "./lib/mapPins";
 import { type Audience, loadAudience } from "./lib/posts";
 import {
   type FitPlace,
   type FitProfile,
   type FitStop,
+  meetsFilters,
   type Reason,
   rankRentals,
 } from "./lib/rentalFit";
@@ -17,8 +21,8 @@ import type { Citations, Source } from "./validators";
 /**
  * Apartment search tuned to the City Profile (#10). Ranks active rentals with
  * `rankRentals` (convex/lib/rentalFit.ts) and returns each result's reasons
- * with their sources: the station fact for transit, the Groups and Events for
- * interests.
+ * with their sources: the listing for price, neighborhood and availability, the
+ * station fact for transit, the Groups and Events for interests.
  */
 
 const RESULTS_MAX = 30;
@@ -67,6 +71,7 @@ async function placesIn(ctx: QueryCtx, neighborhoodId: Id<"neighborhoods">, now:
 
 function toSource(key: string): Source | null {
   const [kind, id] = key.split(":");
+  if (kind === "listing") return { kind: "listing", listingId: id as Id<"listings"> };
   if (kind === "group") return { kind: "group", groupId: id as Id<"groups"> };
   if (kind === "event") return { kind: "event", eventId: id as Id<"events"> };
   return null;
@@ -99,16 +104,26 @@ function card(l: Doc<"listings">) {
     verified: l.badges.some(
       (b) => b.kind === "identity_verified" || b.kind === "property_verified",
     ),
+    /** Its pin on Find's map (#75), at the approximate area only. */
+    pin: listingPin(l),
   };
 }
 
+/** Must-haves the person picks on Find. They filter; they aren't scored. */
+const filtersArg = v.object({
+  bedrooms: v.optional(v.number()),
+  maxPrice: v.optional(v.number()),
+  pets: v.optional(v.boolean()),
+  furnished: v.optional(v.boolean()),
+});
+
 /**
- * Rentals ranked for the viewer, with the reasons behind each rank. Without a
- * City Profile, newest first and `needsBrief: true`.
+ * Rentals that meet the viewer's must-haves, ranked for them, with the reasons
+ * behind each rank. Without a City Profile, newest first and `needsBrief: true`.
  */
 export const search = viewerQuery({
-  args: {},
-  handler: async (ctx) => {
+  args: { filters: v.optional(filtersArg) },
+  handler: async (ctx, { filters = {} }) => {
     const viewerId = ctx.viewer._id;
     const now = Date.now();
     const [profile, audience, rows] = await Promise.all([
@@ -126,10 +141,16 @@ export const search = viewerQuery({
         l.rental &&
         l.rental.listingType !== "sale" &&
         l.sellerId !== viewerId &&
-        !audience.blocked.has(l.sellerId),
+        !audience.blocked.has(l.sellerId) &&
+        meetsFilters({ ...l.rental, price: l.price }, filters),
     );
 
-    const hasProfile = !!profile.budget || profile.interests.length > 0 || !!profile.transport;
+    const hasProfile =
+      !!profile.budget ||
+      profile.interests.length > 0 ||
+      !!profile.transport ||
+      profile.neighborhoods.length > 0 ||
+      !!profile.moveIn;
     if (!hasProfile)
       return {
         needsBrief: true,
@@ -137,11 +158,24 @@ export const search = viewerQuery({
       };
 
     const weights = interestWeights(profile);
+    const hoods = new Map<string, string>();
+    for (const f of profile.neighborhoods) {
+      const row = await ctx.db
+        .query("neighborhoods")
+        .withIndex("by_slug", (q) => q.eq("slug", f.value.slug))
+        .unique();
+      if (row) hoods.set(row._id, neighborhoodLabel(f.value.slug));
+    }
+    const moveIn = profile.moveIn
+      ? Date.parse(`${profile.moveIn.value.date ?? `${profile.moveIn.value.month}-01`}T00:00:00Z`)
+      : Number.NaN;
     const fitProfile: FitProfile = {
       budget: profile.budget?.value ?? null,
       modes: profile.transport?.value.modes ?? null,
       interests: weights,
       interestLabels: new Map([...weights.keys()].map((id) => [id, getInterest(id).label])),
+      neighborhoods: hoods,
+      moveIn: Number.isNaN(moveIn) ? null : moveIn,
     };
     const { stops, citations } = await transitStops(ctx);
     const placesByHood = new Map<string, FitPlace[]>();
@@ -157,8 +191,11 @@ export const search = viewerQuery({
         price: l.price,
         lat: l.location.lat ?? null,
         lng: l.location.lng ?? null,
+        neighborhoodId: l.neighborhoodId ?? null,
+        availableFrom: l.rental?.availableFrom ?? null,
       })),
       {
+        now,
         stops,
         placesFor: (id) => {
           const hood = byId.get(id)?.neighborhoodId;
@@ -171,14 +208,12 @@ export const search = viewerQuery({
     for (const f of ranked) {
       const l = byId.get(f.id);
       if (!l) continue;
+      // Every reason shown is cited (#7): one whose sources the viewer can't see is left out.
       const reasons = [];
-      for (const r of f.reasons)
-        reasons.push({
-          kind: r.kind,
-          text: r.text,
-          tone: r.tone,
-          sources: await reasonSources(ctx, r, citations, audience),
-        });
+      for (const r of f.reasons) {
+        const sources = await reasonSources(ctx, r, citations, audience);
+        if (sources) reasons.push({ kind: r.kind, text: r.text, tone: r.tone, sources });
+      }
       results.push({ ...card(l), reasons });
     }
     return { needsBrief: false, results };

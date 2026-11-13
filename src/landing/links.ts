@@ -41,6 +41,17 @@ export function toListing(listing: Ref<"listings">) {
   });
 }
 
+/**
+ * Landing's view of a rental: its verified levels and things to check (#73) and
+ * the lister's network (#65), linking on to the Marketplace listing.
+ */
+export function toRentalCheck(listing: Ref<"listings">) {
+  return linkOptions({
+    to: "/landing/find/listing/$listingId",
+    params: { listingId: idOf(listing) },
+  });
+}
+
 /** A Messenger chat, full page. */
 export function toConversation(conversation: Ref<"conversations">) {
   return linkOptions({
