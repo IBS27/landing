@@ -12,6 +12,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { LISTING_REPORT_REASONS } from "../../../convex/lib/reports";
 import { ListerNetwork } from "./ListerNetwork";
 import { ChatCheck, ThingsToCheck, VerifiedBadges } from "./ThingsToCheck";
+import { UnitDetails } from "./UnitDetails";
 import { useChatCheck } from "./useChatCheck";
 
 /** `/landing/find/listing/:id`: a rental with its verified levels and things to check. */
@@ -153,6 +154,7 @@ export function ListingTrustPage({ listingId }: { listingId: Id<"listings"> }) {
         </div>
 
         <div className="flex flex-col gap-4">
+          <UnitDetails listingId={listing._id} />
           {!data.isOwn && <ThingsToCheck signals={data.signals} lister={lister} />}
           {lister && (
             <Card className="p-4">

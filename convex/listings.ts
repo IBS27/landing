@@ -2,6 +2,7 @@ import { ConvexError, type Infer, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { isBlockedEitherWay } from "./lib/blocks";
+import { type CitedSource, type NonEmpty, resolveCitations } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import {
   type CategoryMeta,
@@ -19,8 +20,9 @@ import {
 import { afterChatMessage } from "./lib/negotiations";
 import { locationPoint, neighborhoodIdAt } from "./lib/neighborhoods";
 import { notify } from "./lib/notify";
-import { isSaved } from "./lib/posts";
+import { isSaved, loadAudience } from "./lib/posts";
 import { badgesAfterEdit } from "./lib/trust";
+import { type NoisePlace, noiseRisk } from "./lib/unitDetails";
 import { getSummaries, getSummary, type UserSummary } from "./lib/users";
 import {
   listingCategory,
@@ -791,7 +793,8 @@ export const update = viewerMutation({
       video: listingVideo(args.video),
       location,
       neighborhoodId: await neighborhoodIdAt(ctx, locationPoint(location)),
-      rental: args.rental,
+      // The listing form has no views picker yet (#13), so keep the lister's stated views.
+      rental: args.rental && { ...args.rental, views: args.rental.views ?? l.rental?.views },
       vehicle: args.vehicle,
       meetup: args.meetup,
       groupIds: args.groupIds?.length ? args.groupIds : undefined,
@@ -1025,5 +1028,60 @@ export const hideAd = viewerMutation({
         reason,
         createdAt: Date.now(),
       });
+  },
+});
+
+/* ───────────────────────── Unit details (#13) ───────────────────────── */
+
+/** Per kind; SF has a few dozen campus and corridor facts (corridors repeat per neighborhood). */
+const NOISE_FACTS_MAX = 500;
+
+/**
+ * A rental's view (as the lister states it) and its noise risk, computed from
+ * the campuses and nightlife corridors near it in #15's cited neighborhood
+ * facts. Noise is null outside San Francisco, where there are no such facts.
+ */
+export const unitDetails = viewerQuery({
+  args: { listingId: v.id("listings") },
+  handler: async (ctx, { listingId }) => {
+    const l = await ctx.db.get(listingId);
+    if (!l?.rental) return null;
+    const views = l.rental.views ?? [];
+    const { lat, lng } = l.location;
+    const point =
+      lat === undefined || lng === undefined
+        ? null
+        : { lat, lng, neighborhood: l.location.neighborhood ?? null };
+    if (!l.neighborhoodId || !point) return { views, point, noise: null };
+    const [campuses, corridors] = await Promise.all(
+      (["campus", "nightlife_corridor"] as const).map((kind) =>
+        ctx.db
+          .query("neighborhoodFacts")
+          .withIndex("by_kind", (q) => q.eq("kind", kind))
+          .take(NOISE_FACTS_MAX),
+      ),
+    );
+    const places: NoisePlace[] = [];
+    const byKey = new Map<string, Doc<"neighborhoodFacts">>();
+    for (const f of [...campuses, ...corridors]) {
+      if (f.kind === "campus")
+        places.push({ key: f._id, kind: "campus", name: f.name, point: f.point });
+      else if (f.kind === "nightlife_corridor")
+        places.push({ key: f._id, kind: "nightlife", name: f.name, path: f.path });
+      else continue;
+      byKey.set(f._id, f);
+    }
+    if (places.length === 0) return { views, point, noise: null };
+    const risk = noiseRisk(point, places);
+    const audience = await loadAudience(ctx, ctx.viewer._id);
+    const reasons: { text: string; sources: NonEmpty<CitedSource> }[] = [];
+    for (const r of risk.reasons) {
+      const fact = byKey.get(r.placeKey);
+      const sources = fact ? await resolveCitations(ctx, fact.citations, audience) : null;
+      // Every reason cites its fact; without its sources there is no rating to show.
+      if (!sources) return { views, point, noise: null };
+      reasons.push({ text: r.text, sources });
+    }
+    return { views, point, noise: { level: risk.level, reasons } };
   },
 });
