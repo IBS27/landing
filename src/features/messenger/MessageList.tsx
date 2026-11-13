@@ -5,6 +5,7 @@ import { useM, useQ, useViewer } from "@/app/viewer";
 import { StoryReplyAttachment } from "@/features/feed/StoryReplyAttachment";
 import { useViewerPaginated } from "@/features/posts";
 import { ChatDraft } from "@/landing/inbox/ProposalCard";
+import { ChatCheckNote, useChatNotes } from "@/landing/search/ChatCheckNote";
 import { cn, price } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger, Modal, Tooltip } from "@/ui/overlays";
 import { Avatar, Button, Spinner } from "@/ui/primitives";
@@ -151,6 +152,8 @@ export function MessageList({
   const memberMap = new Map(detail.members.map((m) => [m._id, m]));
   // Muse drafts waiting for approval render as ChatDraft cards at the bottom (#6).
   const drafts = useQ(api.proposals.forConversation, { conversationId });
+  // Landing's rental chat check: notes under the lister's flagged messages (#11).
+  const chatNotes = useChatNotes(conversationId, detail.kind);
   const chronological = [...results].reverse();
   const items = buildItems(chronological, detail.members, viewer._id);
   const lastMine = [...chronological].reverse().find((m) => m.senderId === viewer._id);
@@ -196,6 +199,14 @@ export function MessageList({
                 onReply={onReply}
                 onCall={(media) => startCall(detail, media)}
               />
+              {chatNotes.listingId && chatNotes.byMessage.has(it.m._id) && (
+                <ChatCheckNote
+                  flags={chatNotes.byMessage.get(it.m._id) ?? []}
+                  listingId={chatNotes.listingId}
+                  compact={variant === "dock"}
+                  indent={avatarSize + 8}
+                />
+              )}
               {it.readers.length > 0 ? (
                 <div className="flex justify-end gap-0.5 pt-0.5 pr-0.5 pb-1">
                   {it.readers.slice(0, 8).map((r) => (

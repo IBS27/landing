@@ -59,6 +59,7 @@ import { Route as GroupsFeedRouteImport } from './routes/groups/feed'
 import { Route as GroupsJoinsRouteImport } from './routes/groups/joins'
 import { Route as LandingIndexRouteImport } from './routes/landing/index'
 import { Route as LandingSplatRouteImport } from './routes/landing/$'
+import { Route as LandingWelcomeRouteImport } from './routes/landing/welcome'
 import { Route as LiveProducerRouteImport } from './routes/live.producer'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace/index'
 import { Route as MarketplaceGroupsRouteImport } from './routes/marketplace/groups'
@@ -91,6 +92,7 @@ import { Route as LandingFindIndexRouteImport } from './routes/landing/find/inde
 import { Route as LandingInboxIndexRouteImport } from './routes/landing/inbox/index'
 import { Route as LandingMoveOutIndexRouteImport } from './routes/landing/move-out/index'
 import { Route as LandingPlaceIndexRouteImport } from './routes/landing/place/index'
+import { Route as LandingPlaceRoommatesRouteImport } from './routes/landing/place/roommates'
 import { Route as LandingProfileIndexRouteImport } from './routes/landing/profile/index'
 import { Route as MarketplaceCategoryCategoryRouteImport } from './routes/marketplace/category/$category'
 import { Route as MarketplaceCreateIndexRouteImport } from './routes/marketplace/create/index'
@@ -103,6 +105,7 @@ import { Route as MarketplaceItemListingIdRouteImport } from './routes/marketpla
 import { Route as MarketplaceYouIndexRouteImport } from './routes/marketplace/you/index'
 import { Route as MarketplaceYouSellingRouteImport } from './routes/marketplace/you/selling'
 import { Route as MessagesTConversationIdRouteImport } from './routes/messages/t/$conversationId'
+import { Route as LandingFindListingListingIdRouteImport } from './routes/landing/find/listing/$listingId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -354,6 +357,11 @@ const LandingSplatRoute = LandingSplatRouteImport.update({
   path: '/$',
   getParentRoute: () => LandingRouteRoute,
 } as any)
+const LandingWelcomeRoute = LandingWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
 const LiveProducerRoute = LiveProducerRouteImport.update({
   id: '/live/producer',
   path: '/live/producer',
@@ -515,6 +523,11 @@ const LandingPlaceIndexRoute = LandingPlaceIndexRouteImport.update({
   path: '/place/',
   getParentRoute: () => LandingRouteRoute,
 } as any)
+const LandingPlaceRoommatesRoute = LandingPlaceRoommatesRouteImport.update({
+  id: '/place/roommates',
+  path: '/place/roommates',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
 const LandingProfileIndexRoute = LandingProfileIndexRouteImport.update({
   id: '/profile/',
   path: '/profile/',
@@ -579,6 +592,12 @@ const MessagesTConversationIdRoute = MessagesTConversationIdRouteImport.update({
   path: '/messages/t/$conversationId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LandingFindListingListingIdRoute =
+  LandingFindListingListingIdRouteImport.update({
+    id: '/find/listing/$listingId',
+    path: '/find/listing/$listingId',
+    getParentRoute: () => LandingRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -625,6 +644,7 @@ export interface FileRoutesByFullPath {
   '/groups/feed': typeof GroupsFeedRoute
   '/groups/joins': typeof GroupsJoinsRoute
   '/landing/$': typeof LandingSplatRoute
+  '/landing/welcome': typeof LandingWelcomeRoute
   '/live/producer': typeof LiveProducerRoute
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
@@ -657,6 +677,7 @@ export interface FileRoutesByFullPath {
   '/groups/$groupId/files': typeof GroupsGroupIdFilesRoute
   '/groups/$groupId/media': typeof GroupsGroupIdMediaRoute
   '/groups/$groupId/members': typeof GroupsGroupIdMembersRoute
+  '/landing/place/roommates': typeof LandingPlaceRoommatesRoute
   '/marketplace/category/$category': typeof MarketplaceCategoryCategoryRoute
   '/marketplace/create/item': typeof MarketplaceCreateItemRoute
   '/marketplace/create/rental': typeof MarketplaceCreateRentalRoute
@@ -675,6 +696,7 @@ export interface FileRoutesByFullPath {
   '/marketplace/create/': typeof MarketplaceCreateIndexRoute
   '/marketplace/item/': typeof MarketplaceItemIndexRoute
   '/marketplace/you/': typeof MarketplaceYouIndexRoute
+  '/landing/find/listing/$listingId': typeof LandingFindListingListingIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -718,6 +740,7 @@ export interface FileRoutesByTo {
   '/groups/feed': typeof GroupsFeedRoute
   '/groups/joins': typeof GroupsJoinsRoute
   '/landing/$': typeof LandingSplatRoute
+  '/landing/welcome': typeof LandingWelcomeRoute
   '/live/producer': typeof LiveProducerRoute
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
@@ -750,6 +773,7 @@ export interface FileRoutesByTo {
   '/groups/$groupId/files': typeof GroupsGroupIdFilesRoute
   '/groups/$groupId/media': typeof GroupsGroupIdMediaRoute
   '/groups/$groupId/members': typeof GroupsGroupIdMembersRoute
+  '/landing/place/roommates': typeof LandingPlaceRoommatesRoute
   '/marketplace/category/$category': typeof MarketplaceCategoryCategoryRoute
   '/marketplace/create/item': typeof MarketplaceCreateItemRoute
   '/marketplace/create/rental': typeof MarketplaceCreateRentalRoute
@@ -768,6 +792,7 @@ export interface FileRoutesByTo {
   '/marketplace/create': typeof MarketplaceCreateIndexRoute
   '/marketplace/item': typeof MarketplaceItemIndexRoute
   '/marketplace/you': typeof MarketplaceYouIndexRoute
+  '/landing/find/listing/$listingId': typeof LandingFindListingListingIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -815,6 +840,7 @@ export interface FileRoutesById {
   '/groups/feed': typeof GroupsFeedRoute
   '/groups/joins': typeof GroupsJoinsRoute
   '/landing/$': typeof LandingSplatRoute
+  '/landing/welcome': typeof LandingWelcomeRoute
   '/live/producer': typeof LiveProducerRoute
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
@@ -847,6 +873,7 @@ export interface FileRoutesById {
   '/groups/$groupId/files': typeof GroupsGroupIdFilesRoute
   '/groups/$groupId/media': typeof GroupsGroupIdMediaRoute
   '/groups/$groupId/members': typeof GroupsGroupIdMembersRoute
+  '/landing/place/roommates': typeof LandingPlaceRoommatesRoute
   '/marketplace/category/$category': typeof MarketplaceCategoryCategoryRoute
   '/marketplace/create/item': typeof MarketplaceCreateItemRoute
   '/marketplace/create/rental': typeof MarketplaceCreateRentalRoute
@@ -865,6 +892,7 @@ export interface FileRoutesById {
   '/marketplace/create/': typeof MarketplaceCreateIndexRoute
   '/marketplace/item/': typeof MarketplaceItemIndexRoute
   '/marketplace/you/': typeof MarketplaceYouIndexRoute
+  '/landing/find/listing/$listingId': typeof LandingFindListingListingIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -913,6 +941,7 @@ export interface FileRouteTypes {
     | '/groups/feed'
     | '/groups/joins'
     | '/landing/$'
+    | '/landing/welcome'
     | '/live/producer'
     | '/marketplace/groups'
     | '/marketplace/inbox'
@@ -945,6 +974,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId/files'
     | '/groups/$groupId/media'
     | '/groups/$groupId/members'
+    | '/landing/place/roommates'
     | '/marketplace/category/$category'
     | '/marketplace/create/item'
     | '/marketplace/create/rental'
@@ -963,6 +993,7 @@ export interface FileRouteTypes {
     | '/marketplace/create/'
     | '/marketplace/item/'
     | '/marketplace/you/'
+    | '/landing/find/listing/$listingId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1006,6 +1037,7 @@ export interface FileRouteTypes {
     | '/groups/feed'
     | '/groups/joins'
     | '/landing/$'
+    | '/landing/welcome'
     | '/live/producer'
     | '/marketplace/groups'
     | '/marketplace/inbox'
@@ -1038,6 +1070,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId/files'
     | '/groups/$groupId/media'
     | '/groups/$groupId/members'
+    | '/landing/place/roommates'
     | '/marketplace/category/$category'
     | '/marketplace/create/item'
     | '/marketplace/create/rental'
@@ -1056,6 +1089,7 @@ export interface FileRouteTypes {
     | '/marketplace/create'
     | '/marketplace/item'
     | '/marketplace/you'
+    | '/landing/find/listing/$listingId'
   id:
     | '__root__'
     | '/'
@@ -1102,6 +1136,7 @@ export interface FileRouteTypes {
     | '/groups/feed'
     | '/groups/joins'
     | '/landing/$'
+    | '/landing/welcome'
     | '/live/producer'
     | '/marketplace/groups'
     | '/marketplace/inbox'
@@ -1134,6 +1169,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId/files'
     | '/groups/$groupId/media'
     | '/groups/$groupId/members'
+    | '/landing/place/roommates'
     | '/marketplace/category/$category'
     | '/marketplace/create/item'
     | '/marketplace/create/rental'
@@ -1152,6 +1188,7 @@ export interface FileRouteTypes {
     | '/marketplace/create/'
     | '/marketplace/item/'
     | '/marketplace/you/'
+    | '/landing/find/listing/$listingId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1580,6 +1617,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LandingSplatRouteImport
       parentRoute: typeof LandingRouteRoute
     }
+    '/landing/welcome': {
+      id: '/landing/welcome'
+      path: '/welcome'
+      fullPath: '/landing/welcome'
+      preLoaderRoute: typeof LandingWelcomeRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
     '/live/producer': {
       id: '/live/producer'
       path: '/live/producer'
@@ -1804,6 +1848,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LandingPlaceIndexRouteImport
       parentRoute: typeof LandingRouteRoute
     }
+    '/landing/place/roommates': {
+      id: '/landing/place/roommates'
+      path: '/place/roommates'
+      fullPath: '/landing/place/roommates'
+      preLoaderRoute: typeof LandingPlaceRoommatesRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
     '/landing/profile/': {
       id: '/landing/profile/'
       path: '/profile'
@@ -1888,6 +1939,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesTConversationIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/landing/find/listing/$listingId': {
+      id: '/landing/find/listing/$listingId'
+      path: '/find/listing/$listingId'
+      fullPath: '/landing/find/listing/$listingId'
+      preLoaderRoute: typeof LandingFindListingListingIdRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
   }
 }
 
@@ -1919,24 +1977,30 @@ const UsernameRouteRouteWithChildren = UsernameRouteRoute._addFileChildren(
 
 interface LandingRouteRouteChildren {
   LandingSplatRoute: typeof LandingSplatRoute
+  LandingWelcomeRoute: typeof LandingWelcomeRoute
   LandingIndexRoute: typeof LandingIndexRoute
+  LandingPlaceRoommatesRoute: typeof LandingPlaceRoommatesRoute
   LandingCrewIndexRoute: typeof LandingCrewIndexRoute
   LandingFindIndexRoute: typeof LandingFindIndexRoute
   LandingInboxIndexRoute: typeof LandingInboxIndexRoute
   LandingMoveOutIndexRoute: typeof LandingMoveOutIndexRoute
   LandingPlaceIndexRoute: typeof LandingPlaceIndexRoute
   LandingProfileIndexRoute: typeof LandingProfileIndexRoute
+  LandingFindListingListingIdRoute: typeof LandingFindListingListingIdRoute
 }
 
 const LandingRouteRouteChildren: LandingRouteRouteChildren = {
   LandingSplatRoute: LandingSplatRoute,
+  LandingWelcomeRoute: LandingWelcomeRoute,
   LandingIndexRoute: LandingIndexRoute,
+  LandingPlaceRoommatesRoute: LandingPlaceRoommatesRoute,
   LandingCrewIndexRoute: LandingCrewIndexRoute,
   LandingFindIndexRoute: LandingFindIndexRoute,
   LandingInboxIndexRoute: LandingInboxIndexRoute,
   LandingMoveOutIndexRoute: LandingMoveOutIndexRoute,
   LandingPlaceIndexRoute: LandingPlaceIndexRoute,
   LandingProfileIndexRoute: LandingProfileIndexRoute,
+  LandingFindListingListingIdRoute: LandingFindListingListingIdRoute,
 }
 
 const LandingRouteRouteWithChildren = LandingRouteRoute._addFileChildren(

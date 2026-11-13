@@ -5,7 +5,7 @@ import schema from "../convex/schema";
  * A tiny in-memory stand-in for `ctx.db`: get, indexed equality queries, and
  * insert / patch / delete. Rows come back in index order (the index's fields
  * from `convex/schema.ts`, then insertion order), reversed by `order("desc")`.
- * Ranges other than `eq` are not supported. Queries are also async iterable. Writes go to `tables`, so tests can
+ * Ranges support `eq`, `lt`, `lte`, `gt` and `gte`. Queries are also async iterable. Writes go to `tables`, so tests can
  * inspect them.
  */
 
@@ -50,15 +50,23 @@ export function fakeCtx(tables: Record<string, Row[]>, stats?: ReadStats): Mutat
       const chain = {
         withIndex: (index: string, range?: (q: unknown) => unknown) => {
           fields = indexFields(table, index);
-          const conds: [string, unknown][] = [];
+          const conds: ((r: Row) => boolean)[] = [];
+          const op = (test: (c: number) => boolean) => (field: string, value: unknown) => {
+            conds.push((r) => r[field] !== undefined && test(compare(r[field], value)));
+            return q;
+          };
           const q = {
             eq: (field: string, value: unknown) => {
-              conds.push([field, value]);
+              conds.push((r) => r[field] === value);
               return q;
             },
+            lt: op((c) => c < 0),
+            lte: op((c) => c <= 0),
+            gt: op((c) => c > 0),
+            gte: op((c) => c >= 0),
           };
           range?.(q);
-          rows = rows.filter((r) => conds.every(([f, val]) => r[f] === val));
+          rows = rows.filter((r) => conds.every((c) => c(r)));
           return chain;
         },
         order: (dir: "asc" | "desc") => {
