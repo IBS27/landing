@@ -47,8 +47,9 @@ export function PreviewCard({
     <div
       role="dialog"
       aria-label={titleOf(selected)}
+      tabIndex={-1}
       className={cn(
-        "lm-card relative overflow-hidden bg-card text-left shadow-elevated",
+        "lm-card relative overflow-hidden bg-card text-left shadow-elevated outline-none ring-[0.5px] ring-[var(--lm-edge)]",
         compact ? "w-full rounded-[12px]" : "w-[288px] rounded-[12px]",
       )}
     >

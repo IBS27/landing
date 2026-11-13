@@ -326,19 +326,28 @@ export default function MapCanvas({
     });
   };
 
-  // Keep an opened card fully on screen: nudge the map, never the card.
+  // Keep an opened card fully on screen, and on phones keep its pin clear of
+  // the sheet: nudge the map, never the card.
   const card = useRef<HTMLDivElement>(null);
   // biome-ignore lint/correctness/useExhaustiveDependencies: runs when a different card opens.
   useEffect(() => {
     if (!selectedKey) return;
     const frame = requestAnimationFrame(() => {
-      card.current?.querySelector<HTMLElement>("a[href], button")?.focus({ preventScroll: true });
-      if (!map || compact) return;
+      card.current?.querySelector<HTMLElement>("[role=dialog]")?.focus({ preventScroll: true });
       const el = card.current;
       const box = container.current?.getBoundingClientRect();
-      if (!el || !box) return;
+      if (!map || !el || !box || !selectedPoint) return;
       const r = el.getBoundingClientRect();
       const top = box.top + insets.top + EDGE;
+      if (compact) {
+        const pin = map.project([selectedPoint.lng, selectedPoint.lat]);
+        const pinY = box.top + pin.y;
+        const below = pinY + 32 - (r.top - EDGE);
+        const above = top + 24 - pinY;
+        const dy = below > 0 ? below : above > 0 ? -above : 0;
+        if (dy) map.panBy([0, dy], motion(reduced));
+        return;
+      }
       const bottom = box.bottom - insets.bottom - EDGE;
       const left = box.left + insets.left + EDGE;
       const right = box.right - insets.right - EDGE;
