@@ -6,6 +6,7 @@
 
 import type { Move } from "./negotiations";
 import { statesAmount } from "./proposals";
+import { phraseFlags } from "./trust";
 
 export type SubletInput = {
   listing: {
@@ -67,8 +68,10 @@ export function subletMoveProblems(out: SubletMove, input: SubletInput): string[
   // Whatever the move, the text never names a rent under the floor.
   for (const r of rents(out.text))
     if (r < minRent) p.push(`text names ${r}, under the lister's lowest rent of ${minRent}`);
-  // Scam-shaped asks and private details stay out of the lister's messages too.
-  if (/\b(deposit|zelle|venmo|cash ?app|wire|gift ?card|bank)\b/i.test(out.text))
+  // The lister's messages never read like #73's scam signals, and never ask for
+  // a deposit or bank details before the viewing and sublease.
+  for (const f of phraseFlags(out.text)) p.push(`text trips a scam signal: ${f.reason}`);
+  if (/\b(deposit|bank)\b/i.test(out.text))
     p.push("text must not ask for money or payment details before a viewing and lease");
   if (/\b\d{2,5}\s+\w+\s+(st|street|ave|avenue|blvd|rd|road)\b/i.test(out.text))
     p.push("text must not share the street address");

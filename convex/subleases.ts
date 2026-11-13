@@ -321,6 +321,7 @@ export const draftReply = internalAction({
       conversationId,
       ...move,
       handledThrough: c.lastRenterAt,
+      termsAt: c.sublet.updatedAt,
       via: result.via,
       runId: result.runId,
     });
@@ -335,6 +336,8 @@ export const saveReply = internalMutation({
     text: v.string(),
     rationale: v.string(),
     handledThrough: v.number(),
+    /** The terms revision this run drafted under (`sublets.updatedAt`, as #80's `limitsSetAt`). */
+    termsAt: v.number(),
     via: v.union(v.literal("model"), v.literal("cache"), v.literal("fallback")),
     runId: v.optional(v.id("aiRuns")),
   },
@@ -348,6 +351,13 @@ export const saveReply = internalMutation({
       .unique();
     const listing = await ctx.db.get(listingId);
     if (sublet?.museReplies !== "active" || !listing) return;
+    // Drafted under terms the lister has since changed: draft again under the new ones.
+    if (a.termsAt !== sublet.updatedAt) {
+      await ctx.scheduler.runAfter(0, internal.subleases.draftReply, {
+        conversationId: a.conversationId,
+      });
+      return;
+    }
     const priced = a.move === "offer" || a.move === "accept";
     if (priced && (a.amount < sublet.minRent || a.amount > listing.price))
       throw new ConvexError("Rent outside the lister's limits");

@@ -118,6 +118,8 @@ describe("subletMoveProblems", () => {
     expect(subletMoveProblems(ok, i)).toEqual([]);
     expect(subletMoveProblems({ ...ok, text: "I could do 1,500." }, i)).not.toEqual([]);
     expect(subletMoveProblems({ ...ok, text: "$1500, deposit by Venmo" }, i)).not.toEqual([]);
+    // #73's scam signals apply to the lister's own messages.
+    expect(subletMoveProblems({ ...ok, text: "$1500. Text me on WhatsApp" }, i)).not.toEqual([]);
     expect(subletMoveProblems({ ...ok, text: "$1500, come by 123 Valencia St" }, i)).not.toEqual(
       [],
     );
