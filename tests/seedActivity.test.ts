@@ -51,12 +51,26 @@ test("the resolved plan has 100+ upcoming Events with valid hosts and neighborho
 
 test("90 new Group Events stay in the next six weeks when the seed date rolls", () => {
   expect(added).toHaveLength(90);
-  for (const now of [NOW, NOW + DAY, NOW + 5 * DAY, Date.UTC(2027, 2, 13, 20)]) {
+  for (const now of [
+    ...Array.from({ length: 7 }, (_, day) => NOW + day * DAY),
+    NOW + DAY + 11 * 60 * 60 * 1000,
+    Date.UTC(2027, 2, 13, 20),
+  ]) {
     const clock = new Clock(now);
     for (const e of added) {
       expect(e.in).toBeDefined();
       expect(clock.at(e.start)).toBeGreaterThan(now);
       expect(clock.at(e.start)).toBeLessThan(now + 43 * DAY);
+      const weekday = (time: number) =>
+        new Intl.DateTimeFormat("en-US", {
+          timeZone: "America/Los_Angeles",
+          weekday: "long",
+        }).format(time);
+      expect(weekday(clock.at(e.start))).toBe(weekday(new Clock(NOW).at(e.start)));
+      if (e.key.startsWith("activity-noe-1")) expect(weekday(clock.at(e.start))).toBe("Saturday");
+      if (e.key.startsWith("activity-inner-richmond-1")) {
+        expect(weekday(clock.at(e.start))).toBe("Sunday");
+      }
       expect(e.hours).toBeGreaterThan(0);
       expect(e.hours).toBeLessThanOrEqual(4);
     }
@@ -101,4 +115,15 @@ test("Maya's original story counts remain explicit and new address data survives
   const mapSource = readFileSync("scripts/maps/build.py", "utf8");
   const venueBlock = /VENUES = \{([\s\S]*?)\n\}/.exec(mapSource)?.[1] ?? "";
   for (const e of added) expect(venueBlock).toContain(JSON.stringify(e.address));
+});
+
+test("adding Group plans preserves existing video post keys and random streams", () => {
+  // These unkeyed videos immediately followed the old Group posts in the plan.
+  // Their key drives reactions and other deterministic content.
+  const firstVideo = plan.posts.find((p) => p.key === "post-276");
+  expect(firstVideo?.author).toBe("fogcityledger");
+  expect(firstVideo?.row.media[0]?.url).toBe("/seed/videos/bay-bridge-wide.mp4");
+  expect(firstVideo?.reactions[0]?.user).toBe("nina.petrova");
+  expect(plan.posts.find((p) => p.key === "post-320")?.share).toBe("video-noodles-tall");
+  expect(plan.posts.slice(-45).map((p) => p.key)).toEqual(activityPosts.map((p) => p.key!));
 });

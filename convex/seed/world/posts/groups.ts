@@ -1,6 +1,5 @@
 import { daysAgo, hoursAgo } from "../../lib/time";
 import type { PostSeed } from "../../types";
-import { activityPosts } from "./activity";
 
 /**
  * Group posts. Every post has `in`, and every author/commenter is a member
@@ -2525,5 +2524,4 @@ export const groupPosts: readonly PostSeed[] = [
     reactions: 58,
     comments: [{ by: "sam.rivera", text: "chowder line was 40 min at noon fyi", after: 25 }],
   },
-  ...activityPosts,
 ];

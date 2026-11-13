@@ -1291,7 +1291,9 @@ export const events: readonly EventSeed[] = [
     [0, 14, 28].map((offset) => ({
       ...event,
       key: `${event.key}-${offset / 14 + 1}`,
-      start: daysFromNow(day + offset, time),
+      // The demo is authored on Thursday (4). Keep its promised weekdays
+      // when reseeded on another day; second-week plans stay a week later.
+      start: daysFromNow(Math.floor((day - 1) / 7) * 7 + offset, time, (4 + day) % 7),
     })),
   ),
 ];

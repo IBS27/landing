@@ -215,7 +215,7 @@ export const pagePosts: readonly PostSeed[] = [
     comments: [
       {
         by: "amara.diallo",
-        text: "group study night in moffitt on the 6th, details in the class of 2027 group 📚",
+        text: "our SF study afternoon is at Main Library on Larkin, 1 to 4pm. Quiet reading tables, no room reservation. Details in the class of 2027 group.",
       },
       { by: "hannah.lee", text: "the free coffee is the only thing getting me through" },
     ],
@@ -223,7 +223,7 @@ export const pagePosts: readonly PostSeed[] = [
   {
     by: "sathergatecampuslife",
     at: daysAgo(4, "16:00"),
-    text: "Golden Bear Hacks is less than two weeks out and we still have spots! 24 hours, free food, prizes, and the designers-are-welcome track is back. Teams of up to 4, solo signups get matched at check-in.",
+    text: "Golden Bear Hacks SF project sprint: four quiet hours at Noe Valley Library, 10am to 2pm. Bring a laptop and work on your project at the public reading tables, then compare demos outside. No reserved room or guaranteed seats; buy your own lunch nearby.",
     event: "golden-bear-hacks",
     reactions: 29,
     comments: [
@@ -234,11 +234,11 @@ export const pagePosts: readonly PostSeed[] = [
       },
       {
         by: "jiho.choi",
-        text: "is it ok to come if it's my first hackathon?",
+        text: "is it ok to come if it's my first project sprint?",
         replies: [
           {
             by: "sathergatecampuslife",
-            text: "100%! about a third of people every year are first timers",
+            text: "Yes! Bring whatever you are working on, even if it is just an idea.",
           },
         ],
       },
