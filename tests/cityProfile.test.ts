@@ -1115,4 +1115,23 @@ describe("round 6", () => {
       [],
     );
   });
+
+  test("past time, other people and work areas carry across coordinated items", () => {
+    expect(facts("I used to love climbing and live music.")).toEqual([]);
+    expect(facts("My roommate likes hiking and climbing.")).toEqual([]);
+    expect(labels("I used to climb, now I love hiking.")).toEqual(["interest:Hiking"]);
+    const live: FactEntry = { key: "interest", value: { id: "live_music" } };
+    expect(
+      modelProblems("I used to love climbing and live music.", [
+        { entry: live, quote: "live music" },
+      ]),
+    ).not.toEqual([]);
+    const employer = (workArea: string) => [
+      { entry: { key: "employer" as const, value: { name: "Figma", workArea } }, quote: "Figma" },
+    ];
+    expect(
+      modelProblems("I work at Figma and want to live in Noe Valley.", employer("Noe Valley")),
+    ).not.toEqual([]);
+    expect(modelProblems("I work at Figma in SoMa.", employer("SoMa"))).toEqual([]);
+  });
 });

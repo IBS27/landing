@@ -157,10 +157,32 @@ const PAST =
 const OTHERS =
   /\b(?:(?:my|our|his|her|their)\s+(?:roommates?|friends?|coworkers?|colleagues?|boss|partner|sister|brother|neighbou?rs?)|he|she|they)\b/i;
 
+/**
+ * Where a statement's subject or time can change: a contrast, punctuation, or
+ * "and"/"," before a new subject ("…, now I work remote"). Coordinated items
+ * keep theirs: "I used to love climbing and live music" is all past, "my
+ * roommate likes hiking and climbing" is all the roommate's.
+ */
+const SUBJECT_BREAK =
+  /[;:()]|\b(?:but|while|because|though|although|so|whereas|now)\b|(?:,|\band\b)\s+(?=(?:i|we|now)\b)/gi;
+
+function statementOf({ part, start }: Hit): string {
+  let from = 0;
+  let to = part.text.length;
+  for (const m of part.text.matchAll(SUBJECT_BREAK)) {
+    if (m.index + m[0].length <= start) from = m.index + m[0].length;
+    else if (m.index > start) {
+      to = m.index;
+      break;
+    }
+  }
+  return part.text.slice(from, to);
+}
+
 /** Whether a mention isn't about the person now: in the past, or about someone else. */
 function isPast(hit: Hit): boolean {
-  const phrase = phraseOf(hit);
-  return PAST.test(phrase) || OTHERS.test(phrase);
+  const statement = statementOf(hit);
+  return PAST.test(statement) || OTHERS.test(statement);
 }
 
 /** The first current, un-negated match: not something they used to do or have. */
@@ -926,8 +948,14 @@ export function employerProblem(
     const m = hit.part.text.slice(hit.start).match(EMPLOYER_RE);
     if (!m || !same(m[1]).startsWith(name)) continue;
     if (value.workArea === undefined) return null;
+    // The area must describe the workplace: "at Figma in SoMa", not "… and want to live in Noe Valley".
     const area = value.workArea.trim();
-    if (/^[A-Z0-9]/.test(area) && same(hit.part.text).includes(same(area))) return null;
+    const after = hit.part.text.slice(hit.start + m[0].length);
+    const where = new RegExp(
+      `^\\s*,?\\s*(?:in|at|near|by|on|out of|based in|downtown)\\s+(?:the\\s+)?${area.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+      "i",
+    );
+    if (/^[A-Z0-9]/.test(area) && where.test(after)) return null;
     return `work area "${value.workArea}" isn't where they say ${value.name} is`;
   }
   return `"${value.name}" isn't named in the text as where they work or are joining`;
