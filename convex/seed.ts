@@ -593,6 +593,9 @@ export const reset = internalAction({
     // Muse proposals for the demo inbox (#6).
     await ctx.runMutation(internal.proposals.seedDemo, {});
 
+    // Move-in Crew opt-ins (#30), after City Profiles.
+    await ctx.runMutation(internal.crews.seedDemo, {});
+
     const reactionRows =
       plan.posts.reduce((s, p) => s + p.reactions.length + p.commentReactions.length, 0) +
       plan.conversations.reduce(

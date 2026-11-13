@@ -1,6 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { cityProfileFact } from "./lib/cityProfileFacts";
+import { matchBy } from "./lib/crews";
 import { lifestyleAnswers } from "./lib/lifestyle";
 import {
   aiJobStatus,
@@ -790,4 +791,16 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_shared", ["shared", "userId"]),
+
+  /**
+   * Landing Move-in Crew opt-ins (#30): one row per person who opted in, with
+   * what they agreed to be matched on. Crews are computed when read
+   * (convex/crews.ts), so leaving deletes the row and takes effect at once.
+   */
+  crewOptIns: defineTable({
+    userId: v.id("users"),
+    matchBy,
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
 });

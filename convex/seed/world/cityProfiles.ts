@@ -96,4 +96,43 @@ export const cityProfileSeeds: CityProfileSeed[] = [
     goals: ["meet_people", "build_routine"],
     briefDaysAgo: 9,
   },
+  // Three Cal students moving to SF after graduation, the same month as Maya, so
+  // her Move-in Crew (#30) has people in it.
+  {
+    // Design student and film photographer.
+    username: "zoe.nguyen",
+    budget: { min: 1500, max: 2100 },
+    moveInMonthsFromNow: 3,
+    neighborhoods: ["mission", "inner-sunset"],
+    transport: ["walk", "muni", "bart"],
+    schedule: { workHours: "day", workplace: "hybrid", weekendsFree: true },
+    interests: ["photography", "making_art", "coffee", "climbing", "live_music"],
+    goals: ["meet_people", "find_place"],
+    briefDaysAgo: 5,
+  },
+  {
+    // Mechanical engineer who runs the fire trails at 6am.
+    username: "daniel.reyes",
+    budget: { min: 1700, max: 2300 },
+    moveInMonthsFromNow: 3,
+    neighborhoods: ["bernal-heights", "noe-valley"],
+    transport: ["bike", "bart"],
+    schedule: { workHours: "day", workplace: "office", weekendsFree: true },
+    interests: ["running", "hiking", "climbing", "camping", "board_games"],
+    goals: ["meet_people", "explore_city"],
+    briefDaysAgo: 8,
+  },
+  {
+    // CS new grad starting at Salesforce.
+    username: "ethan.park",
+    budget: { min: 1800, max: 2600 },
+    moveInMonthsFromNow: 3,
+    neighborhoods: ["south-of-market", "mission"],
+    transport: ["walk", "muni", "bart"],
+    schedule: { workHours: "day", workplace: "office", weekendsFree: true },
+    employerFromWork: true,
+    interests: ["tech_meetups", "board_games", "coffee", "video_games", "hackathons"],
+    goals: ["meet_people", "find_roommates"],
+    briefDaysAgo: 2,
+  },
 ];
