@@ -38,7 +38,7 @@ def collect(slug):
             groups.append(group)
         if group:
             group['photos'].append(photo)
-    excluded = re.compile(r'exterior|entrance|stairs|lobby|mail|elevator|hallway|unit #|courtyard|fitness|party|conference|terrace|bbq|pool|garage|parking|shared|view|backyard|deck|patio|balcony', re.I)
+    excluded = re.compile(r'exterior|entrance|stairs|lobby|mail|elevator|hallway|unit #|courtyard|fitness|party|conference|terrace|bbq|pool|garage|parking|charger|tennis|shared|view|backyard|deck|patio|balcony', re.I)
     groups = [g for g in groups if not excluded.search(g['label']) and not re.search(r'laundry', g['label'], re.I)]
     # All distinct rooms first, then alternate views. Never truncate away a bathroom/bedroom.
     counts = {}

@@ -49,6 +49,13 @@ describe("same-unit rental evidence", () => {
     }
   });
 
+  test("shared parking and sports photos never enter a unit's 3D inputs", () => {
+    const unit = units.find((u) => u.slug === "208-north-lake-merced-hills-3a")!;
+    const sources = rentalSources(unit.media);
+    expect(sources.some((s) => /charger|tennis/i.test(s.label))).toBe(false);
+    expect(sources.some((s) => /kp2d93Lopb4|dQzkk1qutAj/.test(s.url ?? ""))).toBe(false);
+  });
+
   test("creating a listing scene imports the plan as topology and every labeled public photo", async () => {
     const rental = rentals.find((r) => r.rental?.bedrooms === 3)!;
     const media = rental.rentalMedia!;
