@@ -179,11 +179,13 @@ async function setPlace(
   const prev = await currentPlace(ctx, userId);
   if (prev?.status === "moving_in") await ctx.db.delete(prev._id);
   else if (prev) {
+    // They left by the first of their planned move-out, the new move-in and
+    // today, and not before they moved in. "YYYY-MM-DD" sorts as dates.
     const today = todayInSF(now);
-    const left = next.moveIn < today ? next.moveIn : today;
+    const [left] = [prev.moveOut ?? today, next.moveIn, today].sort();
     await ctx.db.patch(prev._id, {
       status: "moved_out",
-      moveOut: prev.moveOut ?? (left < prev.moveIn ? prev.moveIn : left),
+      moveOut: [left, prev.moveIn].sort()[1],
       endedAt: now,
       updatedAt: now,
     });
