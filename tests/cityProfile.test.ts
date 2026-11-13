@@ -242,6 +242,8 @@ describe("protected traits", () => {
       "Good transit matters to me",
       "close to public transportation",
       "transfer at Embarcadero",
+      "I take the Transbay bus",
+      "Salesforce Transit Center",
       "Sunny room near Church St",
       "1BR on Church St. & Market",
       "Church & 18th",

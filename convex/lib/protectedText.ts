@@ -328,7 +328,7 @@ const TERMS: string[] = [
   // Patterns rather than words, for whole families of disclosures
   "(?:she|he|they|xe|ze|it)\\/(?:her|hers|him|his|them|theirs|they|she|he|xem|zir|it)",
   // Every "trans…" word ("transgirl", "transmen") except everyday ones: "transit", "transport", "transfer"…
-  "afab|amab|trans(?!it(?:s|ed|ing)?\\b|port|fer|lat|action|cript|crib|form|mit|missi|lucent|atlantic|pacific|parent|plant|ient|istor|cend|duc|fus|gress|ept|vers|ceiv|code|ship)\\w*|ace|aroace|\\w+romantic|polyamor\\w*|poly",
+  "afab|amab|trans(?!it(?:s|ed|ing)?\\b|port|fer|lat|action|cript|crib|form|mit|missi|lucent|atlantic|pacific|parent|plant|ient|istor|cend|duc|fus|gress|ept|vers|ceiv|code|ship|bay\\b)\\w*|ace|aroace|\\w+romantic|polyamor\\w*|poly",
   "hubby|wifey|significant other|other half|partnered|custody|child(?:free|less)",
   "(?:we['’]?re|we are|as) a family",
   "(?:i['’]?m|i am|we['’]?re|we are)\\s+(?:half|part|mixed)\\s+\\w+|afro[\\s-]?\\w+",
