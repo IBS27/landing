@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
 import { BadgeCheck, CircleAlert, CircleCheck } from "lucide-react";
 import type { ReactNode } from "react";
-import { toRentalCheck } from "@/landing/links";
+import { toNeighborhood, toRentalCheck } from "@/landing/links";
 import { cn, price } from "@/lib/format";
 import { SourcesChip } from "@/ui/Citations";
 import { Button, Card, Skeleton } from "@/ui/primitives";
@@ -132,7 +132,16 @@ export function RentalResults({
                     <div className="text-[13px] text-secondary">
                       {price(r.price)}/mo
                       {r.listingType === "sublet" ? " · Sublet" : ""}
-                      {r.neighborhood ? ` · ${r.neighborhood}` : ""}
+                      {r.area ? (
+                        <>
+                          {" · "}
+                          <Link {...toNeighborhood(r.area)} className="hover:underline">
+                            {r.area.label}
+                          </Link>
+                        </>
+                      ) : (
+                        r.neighborhood && ` · ${r.neighborhood}`
+                      )}
                     </div>
                     {r.reasons.length > 0 && (
                       <ul className="mt-1.5 flex flex-wrap gap-1.5">

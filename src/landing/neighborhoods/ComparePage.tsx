@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { type FormEvent, type ReactNode, useMemo, useState } from "react";
 import { useQ } from "@/app/viewer";
+import { toCompare, toNeighborhood } from "@/landing/links";
 import { cn } from "@/lib/format";
 import { SourcesChip } from "@/ui/Citations";
 import { Button, Card, Skeleton } from "@/ui/primitives";
@@ -103,10 +104,7 @@ function Crumbs() {
 function useCompareNavigate() {
   const navigate = useNavigate();
   return (a: NeighborhoodSlug | undefined, b: NeighborhoodSlug | undefined) =>
-    navigate({
-      to: "/landing/find/neighborhoods/compare",
-      search: { a, b: b === a ? undefined : b },
-    });
+    navigate(toCompare(a, b));
 }
 
 /** The question box and the two pickers. */
@@ -416,8 +414,7 @@ function Cell({ hood, what, children }: { hood: Hood; what: string; children: Re
   return (
     <section aria-label={`${what} in ${inSentence(hood)}`} className="min-w-0">
       <Link
-        to="/landing/find/neighborhoods/$slug"
-        params={{ slug: hood.slug }}
+        {...toNeighborhood(hood)}
         className="mb-1.5 inline-block px-1 font-semibold text-[15px] text-primary hover:underline"
       >
         {hood.label}
@@ -582,8 +579,7 @@ function ScoreTable({ a, b, yours }: { a: Loaded; b: Loaded; yours: ReadonlySet<
         {[a, b].map((s) => (
           <div key={s.hood.slug} className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
             <Link
-              to="/landing/find/neighborhoods/$slug"
-              params={{ slug: s.hood.slug }}
+              {...toNeighborhood(s.hood)}
               className="truncate font-bold text-[17px] text-primary hover:underline"
             >
               {s.hood.label}

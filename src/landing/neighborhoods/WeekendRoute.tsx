@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
-import { MapPin, MessageCircleWarning, Route, Sparkles } from "lucide-react";
+import { ChevronRight, MapPin, MessageCircleWarning, Route, Sparkles } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useM, useQ } from "@/app/viewer";
-import { toEvent } from "@/landing/links";
+import { toEvent, toNeighborhood } from "@/landing/links";
 import { LandingMap, type RouteStop } from "@/landing/map/LandingMap";
 import { timeAgo } from "@/lib/citations";
 import { cn } from "@/lib/format";
@@ -56,6 +56,75 @@ export function useWeekendRoute(neighborhoodId: Id<"neighborhoods"> | undefined)
     void request({ neighborhoodId }).catch(() => {});
   }, [due, neighborhoodId, request]);
   return data;
+}
+
+/** Stops shown by `WeekendRoutePeek`. */
+const PEEK_STOPS = 3;
+
+/**
+ * The first stops of a neighborhood's Weekend Route, with their sources and a
+ * link to the whole route on the neighborhood page. For pages that link on to
+ * the neighborhood (a listing): it reads the stored route and never starts a
+ * build (the cron keeps routes fresh). Renders nothing without a route.
+ */
+export function WeekendRoutePeek({
+  neighborhoodId,
+  slug,
+}: {
+  neighborhoodId: Id<"neighborhoods">;
+  slug: string;
+}) {
+  const data = useQ(api.weekendRoutes.get, { neighborhoodId });
+  if (data === undefined)
+    return (
+      <div aria-busy className="space-y-2">
+        <Skeleton className="h-4 w-40" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+    );
+  const route = data.route;
+  if (!route || route.stops.length === 0) return null;
+  const more = route.stops.length - PEEK_STOPS;
+  return (
+    <section aria-labelledby={`peek-${neighborhoodId}`}>
+      <h3 id={`peek-${neighborhoodId}`} className="font-bold text-[17px] text-primary leading-5">
+        Weekend Route
+      </h3>
+      <p className="mt-0.5 text-secondary text-sm leading-[18px]">
+        <RouteMeta via={route.via} generatedAt={route.generatedAt} />
+      </p>
+      <ol className="mt-2 space-y-1">
+        {route.stops.slice(0, PEEK_STOPS).map((s) => (
+          <li key={s.key} className="flex items-start gap-3 py-1.5">
+            <span className="w-[76px] shrink-0 pt-0.5 font-semibold text-secondary text-xs uppercase tracking-wide">
+              {timeLabel(s)}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-[15px] text-primary leading-5">
+                {s.eventId ? (
+                  <Link {...toEvent(s.eventId)} className="hover:underline">
+                    {s.name}
+                  </Link>
+                ) : (
+                  s.name
+                )}
+              </p>
+              <p className="line-clamp-1 text-secondary text-sm leading-[18px]">{s.why}</p>
+            </div>
+            <SourcesChip sources={s.sources} className="max-w-[112px] shrink-0" />
+          </li>
+        ))}
+      </ol>
+      <Link
+        {...toNeighborhood(slug)}
+        hash="weekend-route"
+        className="mt-1 inline-flex items-center gap-0.5 font-semibold text-[15px] text-link hover:underline"
+      >
+        {more > 0 ? `See all ${route.stops.length} stops on the map` : "See the route on the map"}
+        <ChevronRight size={16} aria-hidden />
+      </Link>
+    </section>
+  );
 }
 
 /** The card itself, for whatever data `api.weekendRoutes.get` returned (undefined while loading). */

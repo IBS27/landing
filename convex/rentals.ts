@@ -95,13 +95,31 @@ async function reasonSources(
   return resolveCitations(ctx, cite([sources[0], ...sources.slice(1)]), a);
 }
 
-function card(l: Doc<"listings">) {
+type Area = { slug: string; label: string };
+
+/** Finds results' DataSF neighborhoods (#86) to link them, reading each one once. */
+export function areaLookup(ctx: QueryCtx) {
+  const seen = new Map<Id<"neighborhoods">, Promise<Area | null>>();
+  return (id: Id<"neighborhoods"> | undefined): Promise<Area | null> => {
+    if (!id) return Promise.resolve(null);
+    let area = seen.get(id);
+    if (!area) {
+      area = ctx.db.get(id).then((n) => n && { slug: n.slug, label: n.shortName ?? n.name });
+      seen.set(id, area);
+    }
+    return area;
+  };
+}
+
+async function card(l: Doc<"listings">, areaOf: ReturnType<typeof areaLookup>) {
   return {
     _id: l._id,
     title: l.title,
     price: l.price,
     photo: l.photos[0] ?? null,
     neighborhood: l.location.neighborhood ?? null,
+    /** The neighborhood's page, from the listing's `neighborhoodId` (never the typed name). */
+    area: await areaOf(l.neighborhoodId),
     listingType: l.rental?.listingType ?? "rent",
     verified: l.badges.some(
       (b) => b.kind === "identity_verified" || b.kind === "property_verified",
@@ -137,6 +155,7 @@ export const search = viewerQuery({
         .order("desc")
         .take(500),
     ]);
+    const areaOf = areaLookup(ctx);
     const listings = rows.filter(
       (l) =>
         l.status === "active" &&
@@ -156,7 +175,11 @@ export const search = viewerQuery({
     if (!hasProfile)
       return {
         needsBrief: true,
-        results: listings.slice(0, RESULTS_MAX).map((l) => ({ ...card(l), reasons: [] })),
+        results: await Promise.all(
+          listings
+            .slice(0, RESULTS_MAX)
+            .map(async (l) => ({ ...(await card(l, areaOf)), reasons: [] })),
+        ),
       };
 
     const weights = interestWeights(profile);
@@ -216,7 +239,7 @@ export const search = viewerQuery({
         const sources = await reasonSources(ctx, r, citations, audience);
         if (sources) reasons.push({ kind: r.kind, text: r.text, tone: r.tone, sources });
       }
-      results.push({ ...card(l), reasons });
+      results.push({ ...(await card(l, areaOf)), reasons });
     }
     return { needsBrief: false, results };
   },

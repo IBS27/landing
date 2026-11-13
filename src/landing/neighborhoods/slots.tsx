@@ -21,5 +21,10 @@ export function ScoresSlot({ neighborhoodId }: SlotProps) {
 
 /** #18: the cited Weekend Route on a map. */
 export function WeekendRouteSlot({ neighborhoodId }: SlotProps) {
-  return <WeekendRoute neighborhoodId={neighborhoodId} />;
+  // `id`: listings link straight to the route (`WeekendRoutePeek`).
+  return (
+    <div id="weekend-route" className="scroll-mt-[72px]">
+      <WeekendRoute neighborhoodId={neighborhoodId} />
+    </div>
+  );
 }

@@ -251,7 +251,12 @@ describe("rentals.search", () => {
   type Handler = (ctx: MutationCtx, args: Record<string, unknown>) => Promise<unknown>;
   type Result = {
     needsBrief: boolean;
-    results: { _id: string; reasons: { kind: string; sources: unknown }[]; pin: unknown }[];
+    results: {
+      _id: string;
+      reasons: { kind: string; sources: unknown }[];
+      pin: unknown;
+      area: { slug: string; label: string } | null;
+    }[];
   };
   const search = (ctx: MutationCtx, args: Record<string, unknown> = {}) =>
     (rentals.search as unknown as { _handler: Handler })._handler(ctx, {
@@ -297,8 +302,8 @@ describe("rentals.search", () => {
       cityProfiles: [],
       cityProfileFacts: facts,
       neighborhoods: [
-        { _id: "neighborhoods:mission", slug: "mission" },
-        { _id: "neighborhoods:bernal-heights", slug: "bernal-heights" },
+        { _id: "neighborhoods:mission", slug: "mission", name: "Mission" },
+        { _id: "neighborhoods:bernal-heights", slug: "bernal-heights", name: "Bernal Heights" },
       ],
       neighborhoodFacts: [],
       listings: [
@@ -317,6 +322,18 @@ describe("rentals.search", () => {
     const r = await search(world([]));
     expect(r.needsBrief).toBe(true);
     expect(r.results.map((x) => x._id)).toEqual(["listings:r3", "listings:r2", "listings:r1"]);
+  });
+
+  test("each result links its neighborhood from neighborhoodId, not the typed name", async () => {
+    for (const r of [
+      await search(world([])),
+      await search(world([fact("budget", { max: 2400 }, 1)])),
+    ])
+      expect(Object.fromEntries(r.results.map((x) => [x._id, x.area]))).toEqual({
+        "listings:r1": { slug: "mission", label: "Mission" },
+        "listings:r2": { slug: "bernal-heights", label: "Bernal Heights" },
+        "listings:r3": null,
+      });
   });
 
   test("ranks by the profile, cites every reason, and filters must-haves", async () => {

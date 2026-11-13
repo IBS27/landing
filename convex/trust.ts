@@ -12,6 +12,7 @@ import { defineTask, runAgent } from "./ai/agent";
 import { runJob, startJob } from "./ai/jobs";
 import { type CitedSource, type NonEmpty, resolveSources } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
+import { listingPin } from "./lib/mapPins";
 import { neighborhoodIdAt } from "./lib/neighborhoods";
 import type { Audience } from "./lib/posts";
 import {
@@ -253,7 +254,8 @@ export async function listingTrust(
   const lister = await ctx.db.get(listing.sellerId);
   if (!lister) return null;
   const isOwn = lister._id === viewerId;
-  const [recent, older, network, badges, thread, report, audience] = await Promise.all([
+  const [hood, recent, older, network, badges, thread, report, audience] = await Promise.all([
+    listing.neighborhoodId ? ctx.db.get(listing.neighborhoodId) : null,
     isOwn ? [] : recentRentals(ctx),
     isOwn ? [] : olderRentals(ctx, listing.createdAt),
     isOwn ? null : listerNetwork(ctx, viewerId, lister._id),
@@ -273,11 +275,7 @@ export async function listingTrust(
   const raw: ListingSignal[] = isOwn
     ? []
     : [
-        lowPriceSignal(
-          listing,
-          visible(recent),
-          listing.neighborhoodId ? await ctx.db.get(listing.neighborhoodId) : null,
-        ),
+        lowPriceSignal(listing, visible(recent), hood),
         newAccountSignal(lister, networkEvidence(network)),
         reusedPhotosSignal(listing, visible(older)),
         farAwaySignal(listing, lister),
@@ -301,6 +299,20 @@ export async function listingTrust(
       rental: listing.rental,
       createdAt: listing.createdAt,
     },
+    /** The DataSF neighborhood the listing is in (#86), with its shape for a map. */
+    neighborhood: hood
+      ? {
+          _id: hood._id,
+          slug: hood.slug,
+          label: hood.shortName ?? hood.name,
+          park: hood.park ?? false,
+          center: hood.center,
+          bbox: hood.bbox,
+          polygon: hood.polygon,
+        }
+      : null,
+    /** Its pin at the approximate area only, as on Find's map. */
+    pin: listingPin(listing),
     lister: summary ? { ...summary, city: lister.city ?? null, joinedAt: lister.joinedAt } : null,
     isOwn,
     badges,
