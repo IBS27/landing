@@ -1102,9 +1102,14 @@ export default defineSchema({
     conversationId: v.id("conversations"),
     proposalId: v.id("proposals"),
     requestedAt: v.number(),
+    /** Muse's latest negotiation draft in this chat, if any. */
+    counterProposalId: v.optional(v.id("proposals")),
+    /** Time of the last mover reply Muse has answered. */
+    handledThrough: v.optional(v.number()),
   })
     .index("by_user", ["userId", "requestedAt"])
-    .index("by_user_page", ["userId", "pageId"]),
+    .index("by_user_page", ["userId", "pageId"])
+    .index("by_conversation", ["conversationId"]),
 
   /**
    * Landing rooms (#25): a person's room scan (photos and optional floor size)

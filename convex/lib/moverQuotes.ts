@@ -115,3 +115,80 @@ export function rateFromText(texts: readonly string[]): RateCard | null {
   }
   return { hourly, crew, minHours, truckFee, discounts };
 }
+
+/* ── Negotiating a quote ───────────────────────────────────────────────── */
+
+export type CounterInput = {
+  mover: string;
+  /** The price this mover just quoted. */
+  theirQuote: number;
+  /** The lowest other price the user has: another mover's quote, or an estimate from posted rates. */
+  bestOther: { mover: string; price: number; kind: "quote" | "estimate" } | null;
+  /** This mover's own posted deals that fit the move. */
+  dealsToAsk: { label: string; percent: number }[];
+  move: { size: string; date: string };
+};
+
+export type CounterMove = { move: "counter" | "accept"; text: string; rationale: string };
+
+const DOLLARS = /\$\s?(\d{1,2},\d{3}|\d{2,5})(?![\d,])/g;
+
+/** Muse may only cite prices and percents that are really in the input. */
+export function counterProblems(out: CounterMove, input: CounterInput): string[] {
+  const p: string[] = [];
+  if (!out.text.trim() || out.text.length > 450) p.push("text must be 1 to 450 characters");
+  if (!out.rationale.trim()) p.push("rationale is empty");
+  const allowed = new Set([input.theirQuote, ...(input.bestOther ? [input.bestOther.price] : [])]);
+  for (const m of out.text.matchAll(DOLLARS)) {
+    const n = Number(m[1].replace(/,/g, ""));
+    if (!allowed.has(n)) p.push(`text names $${n}, which isn't a quote or estimate the user has`);
+  }
+  for (const m of out.text.matchAll(/(\d{1,2})\s?%/g))
+    if (!input.dealsToAsk.some((d) => d.percent === Number(m[1])))
+      p.push(`text names ${m[1]}%, which isn't one of this mover's posted deals`);
+  const lower = input.bestOther && input.bestOther.price < input.theirQuote;
+  if (out.move === "counter" && !lower && input.dealsToAsk.length === 0)
+    p.push("nothing to counter with: no lower price and no posted deal to ask for");
+  if (out.move === "accept" && lower)
+    p.push("don't accept: the user has a lower price to ask this mover to match");
+  if (
+    out.move === "counter" &&
+    lower &&
+    input.bestOther?.kind === "quote" &&
+    !out.text.includes(input.bestOther.mover)
+  )
+    p.push("when citing another mover's quote, name that mover");
+  return p;
+}
+
+/**
+ * The non-AI negotiator: ask this mover to match a lower price the user has,
+ * or to apply their own posted deal; if they're already the best, accept.
+ */
+export function counterLadder(input: CounterInput): CounterMove {
+  const lower =
+    input.bestOther && input.bestOther.price < input.theirQuote ? input.bestOther : null;
+  const deal = input.dealsToAsk[0];
+  if (lower) {
+    const ask =
+      lower.kind === "quote"
+        ? `${lower.mover} quoted $${lower.price} for the same move`
+        : `${lower.mover}'s posted rates come to about $${lower.price} for the same move`;
+    return {
+      move: "counter",
+      text: `Thanks for the quote! ${ask}. Could you match or beat that?${deal ? ` Your ${deal.label} would help too.` : ""}`,
+      rationale: `Asks ${input.mover} to match the lowest price you have, $${lower.price} from ${lower.mover}.`,
+    };
+  }
+  if (deal)
+    return {
+      move: "counter",
+      text: `Thanks for the quote! Does that include your ${deal.label}? My move is on ${input.move.date}.`,
+      rationale: `${input.mover} posted this deal and your move qualifies, so Muse asks them to apply it.`,
+    };
+  return {
+    move: "accept",
+    text: `Thanks, $${input.theirQuote} works for me. Can we lock in ${input.move.date}?`,
+    rationale: `$${input.theirQuote} is the best price you have, so Muse suggests booking.`,
+  };
+}

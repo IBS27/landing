@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HouseCard } from "@/landing/living/HouseCard";
 import { Negotiations } from "@/landing/living/Negotiations";
+import { MoverQuotes } from "@/landing/move-in/MoverQuotes";
 import { OwnedItems } from "@/landing/move-in/OwnedItems";
 import { RoomCard } from "@/landing/move-in/RoomCard";
 import { MyPlaceCard } from "@/landing/place/MyPlaceCard";
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/landing/place/")({
       <HouseCard />
       <RoomCard />
       <OwnedItems />
+      <MoverQuotes />
     </LandingPage>
   ),
 });

@@ -8,7 +8,12 @@ import { type CitedSource, type NonEmpty, resolveCitations } from "./lib/citatio
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { NEIGHBORHOODS } from "./lib/listings";
 import {
+  type CounterInput,
+  type CounterMove,
+  counterLadder,
+  counterProblems,
   estimate,
+  isWeekdayMove,
   MOVE_SIZES,
   type Move,
   type RateCard,
@@ -16,7 +21,7 @@ import {
   rateProblems,
 } from "./lib/moverQuotes";
 import { loadAudience } from "./lib/posts";
-import { propose } from "./lib/proposals";
+import { dropDraft, logEvent, propose } from "./lib/proposals";
 import { getSummary } from "./lib/users";
 import { moveSize, rateCard } from "./validators";
 
@@ -373,10 +378,14 @@ export const mine = viewerQuery({
           }
         }
       }
+      // Muse's counter or acceptance still waiting for the user's OK.
+      const counter = out?.counterProposalId ? await ctx.db.get(out.counterProposalId) : null;
+      const counterWaiting = counter?.status === "pending";
       const sources: NonEmpty<CitedSource> | null = r.citations
         ? await resolveCitations(ctx, r.citations, audience)
         : null;
       movers.push({
+        counterWaiting,
         page,
         card: r.card as RateCard,
         via: r.via,
@@ -394,6 +403,186 @@ export const mine = viewerQuery({
         (a.quoted?.price ?? a.estimate?.total ?? 0) - (b.quoted?.price ?? b.estimate?.total ?? 0),
     );
     return { request: req, movers };
+  },
+});
+
+/* ── Negotiating ──────────────────────────────────────────────────────── */
+
+const counterOutput = v.object({
+  move: v.union(v.literal("counter"), v.literal("accept")),
+  text: v.string(),
+  rationale: v.string(),
+});
+
+const moverCounter = defineTask<CounterInput, typeof counterOutput>({
+  agent: "spark",
+  name: "spark.moverCounter",
+  instructions: `A moving company just quoted the user. Write the user's next Messenger message.
+- counter: if bestOther is lower than theirQuote, politely ask them to match or beat it, naming that mover and price. Otherwise, if dealsToAsk has a deal, ask them to apply it.
+- accept: only when there is no lower price and no deal to ask for; agree and ask to lock in the date.
+Cite only prices and percents from the input. Friendly, two or three sentences. No address, phone number or payment details.
+rationale: one sentence to the user on why this message.`,
+  output: counterOutput,
+  cites: () => [],
+  check: (o, input) => counterProblems(o, input),
+  fallback: (input) => counterLadder(input),
+  effort: "low",
+  cacheTtlMs: 0,
+});
+
+/** Everything the negotiator needs after a mover's reply in this chat. */
+export const counterContext = internalQuery({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, { conversationId }) => {
+    const out = await ctx.db
+      .query("moverOutreach")
+      .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
+      .first();
+    if (!out) return null;
+    const [req, page] = await Promise.all([
+      ctx.db
+        .query("moveRequests")
+        .withIndex("by_user", (q) => q.eq("userId", out.userId))
+        .unique(),
+      ctx.db.get(out.pageId),
+    ]);
+    if (!req || !page) return null;
+    const msgs = await ctx.db
+      .query("messages")
+      .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
+      .order("desc")
+      .take(20);
+    const reply = msgs.find((m) => m.senderId === out.pageId && m.status === "sent" && !m.unsent);
+    const priced = reply?.text?.match(PRICE);
+    if (!reply || !priced) return null;
+    const theirQuote = Number(priced[1].replace(/,/g, ""));
+    const move: Move = { size: req.size, date: req.date, stairs: req.stairs };
+
+    // The lowest other price: another mover's quoted reply, else their estimate.
+    const others = await ctx.db
+      .query("moverOutreach")
+      .withIndex("by_user", (q) => q.eq("userId", out.userId))
+      .collect();
+    let bestOther: CounterInput["bestOther"] = null;
+    for (const o of others) {
+      if (o.pageId === out.pageId) continue;
+      const other = await ctx.db.get(o.pageId);
+      const rates = await ctx.db
+        .query("moverRates")
+        .withIndex("by_page", (q) => q.eq("pageId", o.pageId))
+        .unique();
+      const om = await ctx.db
+        .query("messages")
+        .withIndex("by_conversation", (q) => q.eq("conversationId", o.conversationId))
+        .order("desc")
+        .take(20);
+      const oq = om.find((m) => m.senderId === o.pageId && m.status === "sent")?.text?.match(PRICE);
+      const cand = oq
+        ? {
+            mover: other?.name ?? "Another mover",
+            price: Number(oq[1].replace(/,/g, "")),
+            kind: "quote" as const,
+          }
+        : rates
+          ? {
+              mover: other?.name ?? "Another mover",
+              price: estimate(rates.card as RateCard, move).total,
+              kind: "estimate" as const,
+            }
+          : null;
+      if (cand && (!bestOther || cand.price < bestOther.price)) bestOther = cand;
+    }
+    const own = await ctx.db
+      .query("moverRates")
+      .withIndex("by_page", (q) => q.eq("pageId", out.pageId))
+      .unique();
+    // This mover's own deals that fit the move, worth asking about when their quote is above
+    // what their posted rates and deal would come to.
+    const ownEst = own ? estimate(own.card as RateCard, move) : null;
+    const dealsToAsk =
+      own && ownEst && theirQuote > ownEst.total
+        ? (own.card as RateCard).discounts
+            .filter((d) => d.when === "always" || (d.when === "weekday" && isWeekdayMove(req.date)))
+            .map(({ label, percent }) => ({ label, percent }))
+        : [];
+    const input: CounterInput = {
+      mover: page.name,
+      theirQuote,
+      bestOther,
+      dealsToAsk,
+      move: {
+        size: MOVE_SIZES.find((s) => s.id === req.size)?.label ?? req.size,
+        date: prettyDate(req.date),
+      },
+    };
+    return {
+      outreachId: out._id,
+      userId: out.userId,
+      handledThrough: out.handledThrough ?? 0,
+      replyAt: reply.createdAt,
+      input,
+    };
+  },
+});
+
+/** After a mover replies with a price, draft the user's counter or acceptance for approval. */
+export const draftCounter = internalAction({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, { conversationId }) => {
+    const c = await ctx.runQuery(internal.moverQuotes.counterContext, { conversationId });
+    if (!c || c.replyAt <= c.handledThrough) return;
+    const result = await runAgent(ctx, moverCounter, {
+      input: c.input,
+      sources: [],
+      shownTo: c.userId,
+    });
+    // `check` already rejects bad drafts; this re-check keeps every cited number real.
+    const move: CounterMove =
+      counterProblems(result.output, c.input).length === 0 ? result.output : counterLadder(c.input);
+    if (counterProblems(move, c.input).length > 0) return;
+    await ctx.runMutation(internal.moverQuotes.saveCounter, {
+      conversationId,
+      text: move.text,
+      rationale: move.rationale,
+      replyAt: c.replyAt,
+      via: result.via,
+      runId: result.runId,
+    });
+  },
+});
+
+export const saveCounter = internalMutation({
+  args: {
+    conversationId: v.id("conversations"),
+    text: v.string(),
+    rationale: v.string(),
+    replyAt: v.number(),
+    via: v.union(v.literal("model"), v.literal("cache"), v.literal("fallback")),
+    runId: v.optional(v.id("aiRuns")),
+  },
+  handler: async (ctx, a) => {
+    const out = await ctx.db
+      .query("moverOutreach")
+      .withIndex("by_conversation", (q) => q.eq("conversationId", a.conversationId))
+      .first();
+    // An older run finishing late never replaces a newer draft.
+    if (!out || (out.handledThrough ?? 0) >= a.replyAt) return;
+    if (out.counterProposalId) {
+      const old = await ctx.db.get(out.counterProposalId);
+      if (old?.status === "pending") {
+        const now = Date.now();
+        await dropDraft(ctx, old);
+        await ctx.db.patch(old._id, { status: "expired", decidedAt: now, updatedAt: now });
+        await logEvent(ctx, old._id, old.ownerId, "expired", "system", now);
+      }
+    }
+    const counterProposalId = await propose(ctx, {
+      ownerId: out.userId,
+      payload: { kind: "message", conversationId: a.conversationId, text: a.text },
+      rationale: a.rationale,
+      origin: { agent: "spark", task: "spark.moverCounter", runId: a.runId, via: a.via },
+    });
+    await ctx.db.patch(out._id, { counterProposalId, handledThrough: a.replyAt });
   },
 });
 
