@@ -12,6 +12,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { MAX_ROOMS, ROOM_KINDS, type RoomKind, SIZE_FT } from "../../../convex/lib/vibe";
 import { RoomScan } from "./RoomScan";
 import { type Room, VibeCard } from "./VibeCard";
+import { VibeMatches } from "./VibeMatches";
 
 const inputCls =
   "h-10 w-full rounded-md border border-divider bg-card px-3 text-[15px] text-primary outline-none placeholder:text-placeholder focus:border-fb focus:shadow-[0_0_0_1px_var(--fb-blue)]";
@@ -72,7 +73,10 @@ export function RoomPage({ roomId }: { roomId?: string }) {
                 <RoomScan room={room} />
                 <RoomDetails key={room._id} room={room} />
               </div>
-              <VibeCard key={room._id} room={room} />
+              <div className="flex flex-col gap-4">
+                <VibeCard key={room._id} room={room} />
+                {room.vibe && <VibeMatches roomId={room._id} />}
+              </div>
             </div>
           )}
         </div>
