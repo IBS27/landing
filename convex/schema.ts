@@ -2,6 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { cityProfileFact } from "./lib/cityProfileFacts";
 import { matchBy } from "./lib/crews";
+import { dismissal } from "./lib/dismissals";
 import { lifestyleAnswers } from "./lib/lifestyle";
 import { profileSignal } from "./lib/profileSignals";
 import { roomKind, roomVibe } from "./lib/vibe";
@@ -906,6 +907,13 @@ export default defineSchema({
     .index("by_user", ["userId", "at"])
     .index("by_user_target", ["userId", "targetId", "kind"])
     .index("by_user_updated", ["userId", "updatedAt"]),
+
+  /**
+   * "Not for me" (#100): Event, Group and listing cards someone dismissed, kept
+   * whether or not they learn from activity. Private to its owner. Undo deletes
+   * the row. Written and read only through `convex/lib/dismissals.ts`.
+   */
+  dismissals: defineTable(dismissal).index("by_user_target", ["userId", "targetId"]),
 
   /**
    * Landing network vouching: `voucherId` says they know `subjectId` (usually a

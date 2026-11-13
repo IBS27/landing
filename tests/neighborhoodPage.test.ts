@@ -253,16 +253,13 @@ describe("For you", () => {
         groupMembers: [member(joined._id, "users:viewer")],
         eventResponses: [rsvp(going._id, "users:viewer")],
         cityProfileFacts: [fact("users:viewer", "interest", { id: "climbing" })],
-        profileSignals: [
+        dismissals: [
           {
-            _id: "profileSignals:1",
+            _id: "dismissals:1",
             userId: "users:viewer",
-            kind: "skip",
             targetKind: "group",
             targetId: skipped._id,
-            interestIds: ["climbing"],
             at: 1,
-            updatedAt: 1,
           },
         ],
       }),
@@ -276,21 +273,18 @@ describe("For you", () => {
   test("skipped picks don't take a slot; they follow, flagged, for Undo", async () => {
     const climbs = [1, 2, 3, 4].map((i) => group({ name: `Climbers ${i}`, tags: ["Climbing"] }));
     const skip = (g: Row, i: number): Row => ({
-      _id: `profileSignals:s${i}`,
+      _id: `dismissals:s${i}`,
       userId: "users:viewer",
-      kind: "skip",
       targetKind: "group",
       targetId: g._id,
-      interestIds: ["climbing"],
       at: 1,
-      updatedAt: 1,
     });
     const r = await run(
       world({
         groups: climbs,
         cityProfileFacts: [fact("users:viewer", "interest", { id: "climbing" })],
         // The least active one is the only one not skipped.
-        profileSignals: climbs.slice(1).map(skip),
+        dismissals: climbs.slice(1).map(skip),
       }),
     );
     if (r?.forYou.state !== "ready") throw new Error("expected ready");
@@ -299,21 +293,35 @@ describe("For you", () => {
     expect(r.forYou.items).toHaveLength(4);
   });
 
-  test("Not for me is offered only where it's saved", async () => {
-    const climb = group({ tags: ["Climbing"] });
+  test("skips come from dismissals, with learning off and on cards with no interest", async () => {
     const plain = group({ name: "Neighbors", tags: [], category: "Neighborhood" });
-    const tables = world({
-      groups: [climb, plain],
-      cityProfiles: [{ _id: "cityProfiles:v", userId: "users:viewer", updatedAt: 1 }],
-    });
-    const on = await run(tables);
-    expect(on?.groups.map((g) => [g._id, g.skippable])).toEqual([
-      [plain._id, false],
-      [climb._id, true],
-    ]);
-    tables.cityProfiles[0].learnFromActivity = false;
-    const off = await run(tables);
-    expect(off?.groups.every((g) => !g.skippable)).toBe(true);
+    const other = group({ name: "Gardeners", tags: [], category: "Neighborhood" });
+    const party = event({ title: "Block party", category: "Neighborhood" });
+    const mine = { userId: "users:viewer", at: 1 };
+    const r = await run(
+      world({
+        groups: [plain, other],
+        events: [party],
+        cityProfiles: [
+          { _id: "cityProfiles:v", userId: "users:viewer", updatedAt: 1, learnFromActivity: false },
+        ],
+        dismissals: [
+          { _id: "dismissals:1", ...mine, targetKind: "group", targetId: plain._id },
+          { _id: "dismissals:2", ...mine, targetKind: "event", targetId: party._id },
+          // Someone else's dismissal doesn't hide anything for the viewer.
+          {
+            _id: "dismissals:3",
+            userId: "users:friend",
+            at: 1,
+            targetKind: "group",
+            targetId: other._id,
+          },
+        ],
+      }),
+    );
+    const skipped = new Map(r?.groups.map((g) => [g._id, g.skipped]));
+    expect([skipped.get(plain._id), skipped.get(other._id)]).toEqual([true, false]);
+    expect(r?.events.map((e) => e.skipped)).toEqual([true]);
   });
 
   test("places match by kind and cite the Group posts that name them", async () => {

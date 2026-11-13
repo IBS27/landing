@@ -10,9 +10,10 @@ type Target =
   | { targetKind: "listing"; targetId: Id<"listings"> };
 
 /**
- * "Not for me" on a Landing Event, Group or listing card (#4). It counts against
- * the card's interests in the City Profile, and offers Undo. `onChange` lets the
- * card hide or dim itself.
+ * "Not for me" on a Landing Event, Group or listing card (#4). The dismissal is
+ * always kept (#100); it also counts against the card's interests in the City
+ * Profile when learning is on. Offers Undo. `onChange` lets the card hide or dim
+ * itself.
  */
 export function NotForMe({
   onChange,
@@ -20,22 +21,23 @@ export function NotForMe({
 }: Target & { onChange?: (skipped: boolean) => void }) {
   const skip = useM(api.profileSignals.skip);
   const unskip = useM(api.profileSignals.unskip);
-  const [skipped, setSkipped] = useState(false);
+  /** Null until skipped; then whether the skip counted against the card's interests. */
+  const [learned, setLearned] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const run = (next: boolean) => {
     setBusy(true);
     const args = { targetKind: target.targetKind, targetId: target.targetId };
-    (next ? skip(args) : unskip(args))
-      .then(() => {
-        setSkipped(next);
+    (next ? skip(args).then((r) => r.learned) : unskip(args).then(() => null))
+      .then((result) => {
+        setLearned(result);
         onChange?.(next);
       })
       .finally(() => setBusy(false));
   };
-  if (skipped)
+  if (learned !== null)
     return (
       <span className="inline-flex items-center gap-1 text-[13px] text-secondary">
-        Got it. You'll see less like this.
+        {learned ? "Got it. You'll see less like this." : "Got it. We'll hide this."}
         <button
           type="button"
           disabled={busy}

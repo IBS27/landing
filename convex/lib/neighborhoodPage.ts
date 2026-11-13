@@ -3,14 +3,9 @@ import type { QueryCtx } from "../_generated/server";
 import { NEIGHBORHOOD_PLACES } from "../seed/world/neighborhoods/places";
 import type { Source } from "../validators";
 import { type CitedSource, type NonEmpty, resolveSources } from "./citations";
-import {
-  type CityProfile,
-  type Fact,
-  getProfile,
-  interestWeights,
-  learnsFromActivity,
-} from "./cityProfile";
+import { type CityProfile, type Fact, getProfile, interestWeights } from "./cityProfile";
 import type { Anchor } from "./crews";
+import { isDismissed } from "./dismissals";
 import {
   getInterest,
   type InterestId,
@@ -221,10 +216,8 @@ export type HoodGroup = {
   memberCount: number;
   point: LatLng | null;
   joined: boolean;
-  /** The viewer said "Not for me" (#4). */
+  /** The viewer said "Not for me" (#100). */
   skipped: boolean;
-  /** "Not for me" would be saved: learning is on and the Group maps to an interest. */
-  skippable: boolean;
   /** Up to 3 friends who are members, when the member list is visible to the viewer. */
   friends: UserSummary[];
   friendCount: number;
@@ -243,8 +236,6 @@ export type HoodEvent = {
   interestedCount: number;
   viewerStatus: Doc<"eventResponses">["status"] | null;
   skipped: boolean;
-  /** "Not for me" would be saved: learning is on and the Event maps to an interest. */
-  skippable: boolean;
   /** Up to 3 friends going. */
   friendsGoing: UserSummary[];
 };
@@ -361,17 +352,6 @@ async function visibleEvents(
     if (await canSeeEvent(ctx, e, a)) out.push(e);
   }
   return out;
-}
-
-/** Whether the viewer has an active "Not for me" on the target (#4). */
-async function isSkipped(ctx: QueryCtx, viewerId: Id<"users">, targetId: string) {
-  const rows = await ctx.db
-    .query("profileSignals")
-    .withIndex("by_user_target", (q) =>
-      q.eq("userId", viewerId).eq("targetId", targetId).eq("kind", "skip"),
-    )
-    .collect();
-  return rows.some((r) => r.undoneAt === undefined);
 }
 
 /** Member lists Facebook shows the viewer: public Groups, and Groups they're in. */
@@ -697,7 +677,7 @@ export async function neighborhoodPage(
     .unique();
   if (!n) return null;
   const a = await loadAudience(ctx, viewer._id);
-  const [groupDocs, eventDocs, profile, myResponses, learning] = await Promise.all([
+  const [groupDocs, eventDocs, profile, myResponses] = await Promise.all([
     visibleGroups(ctx, n._id, a),
     visibleEvents(ctx, n._id, a, now),
     getProfile(ctx, viewer),
@@ -705,7 +685,6 @@ export async function neighborhoodPage(
       .query("eventResponses")
       .withIndex("by_user", (q) => q.eq("userId", viewer._id))
       .collect(),
-    learnsFromActivity(ctx, viewer._id),
   ]);
   const status = new Map(myResponses.map((r) => [r.eventId, r.status]));
   const seen = await attendance(ctx, groupDocs, eventDocs, a);
@@ -732,8 +711,7 @@ export async function neighborhoodPage(
         memberCount: g.memberCount,
         point: g.point ?? null,
         joined: a.groups.has(g._id),
-        skipped: await isSkipped(ctx, viewer._id, g._id),
-        skippable: learning && interestsForGroup(g).length > 0,
+        skipped: await isDismissed(ctx, viewer._id, g._id),
         friends: f.list,
         friendCount: f.count,
       };
@@ -753,8 +731,7 @@ export async function neighborhoodPage(
         goingCount: e.externalGoingCount + going.length,
         interestedCount: e.externalInterestedCount + (seen.interested.get(e._id) ?? 0),
         viewerStatus: status.get(e._id) ?? null,
-        skipped: await isSkipped(ctx, viewer._id, e._id),
-        skippable: learning && interestsForEvent(e).length > 0,
+        skipped: await isDismissed(ctx, viewer._id, e._id),
         friendsGoing: friendsIn(going).list,
       };
     }),
