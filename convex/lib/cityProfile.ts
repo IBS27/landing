@@ -52,6 +52,13 @@ function safeEvidence(e: FactEvidence): FactEvidence {
   return { kind: e.kind, summary: e.summary };
 }
 
+/** A typed value (an employer, a work area) that names a protected trait is never read back. */
+function protectedValue(d: FactDoc): boolean {
+  return (
+    d.key === "employer" && (hasProtected(d.value.name) || hasProtected(d.value.workArea ?? ""))
+  );
+}
+
 function toFact(d: FactDoc): Fact {
   return {
     _id: d._id,
@@ -96,7 +103,7 @@ export async function getProfile(
       .collect(),
   ]);
   const facts = docs
-    .filter((d) => d.removedAt === undefined)
+    .filter((d) => d.removedAt === undefined && !protectedValue(d))
     .map(toFact)
     .sort(rank);
   return {

@@ -150,12 +150,17 @@ function phraseOf({ part, start, end }: Hit): string {
   return t.slice(from, to).trim();
 }
 
-/** Something they used to do or have ("I used to work nights", "I had a car"), not now. */
+/** Something they used to do, have or already did ("I used to work nights", "I moved in March"). */
 const PAST =
-  /\b(?:used to|formerly|previously|no longer|anymore|last (?:job|year)|old job|was working|worked|had)\b/i;
+  /\b(?:used to|formerly|previously|no longer|anymore|last (?:job|year)|old job|was working|worked|had|already|bought|moved (?:here|to|in)|arrived|landed)\b/i;
+/** Someone else's facts ("my roommate works nights", "she likes climbing"). */
+const OTHERS =
+  /\b(?:(?:my|our|his|her|their)\s+(?:roommates?|friends?|coworkers?|colleagues?|boss|partner|sister|brother|neighbou?rs?)|he|she|they)\b/i;
 
+/** Whether a mention isn't about the person now: in the past, or about someone else. */
 function isPast(hit: Hit): boolean {
-  return PAST.test(phraseOf(hit));
+  const phrase = phraseOf(hit);
+  return PAST.test(phrase) || OTHERS.test(phrase);
 }
 
 /** The first current, un-negated match: not something they used to do or have. */
@@ -209,7 +214,13 @@ function lastIndex(re: RegExp, text: string): number {
  * ("Hiking, climbing and coffee."), rather than having or needing.
  */
 function isActivity(h: Hit): boolean {
-  if (CONDITION.test(phraseOf(h)) || isPast(h)) return false;
+  // "I work at a coffee shop" is a job, not an interest.
+  if (
+    CONDITION.test(phraseOf(h)) ||
+    isPast(h) ||
+    /\bwork(?:s|ing|ed)?\s+(?:at|in|for)\b/i.test(phraseOf(h))
+  )
+    return false;
   // "North Beach" is a place, not a beach day.
   if (placesIn([h.part], false).some((p) => p.hit.start < h.end && h.start < p.hit.end))
     return false;
@@ -277,7 +288,7 @@ const NEIGHBORHOOD_PATTERNS: { re: RegExp; slug: NeighborhoodSlug }[] = [
 
 /** Breaks between "I work in X" and "and want to live in Y". */
 const PLACE_BREAK =
-  /[;:()]|\b(?:but|while|because|though|although|so|whereas)\b|(?:,|\band\b|\bor\b)\s+(?=(?:i|we|want\w*|would|hope\w*|plan\w*|looking|live|living|move|moving|prefer\w*|ideally|into|to)\b)/gi;
+  /[;:()]|\b(?:but|while|because|though|although|so|whereas)\b|(?:,|\band\b|\bor\b)\s+(?=(?:i|we|want\w*|would|hope\w*|plan\w*|looking|live|living|move|moving|prefer\w*|ideally|into|to|work\w*|commut\w*|stud\w*)\b)/gi;
 /** A place they're leaving or used to live in. */
 const PAST_PLACE =
   /\b(?:used to|lived|grew up|visit\w*|out of|leaving|away from|(?:moving|coming|relocating) from)\b/i;
@@ -392,7 +403,9 @@ const BUDGET_WORDS = /\b(?:budget|afford|spend|up to|max(?:imum)?)\b/i;
 /** Money that isn't the rent they're looking for: pay, savings, deposits, other spending, rent now. */
 const NOT_RENT = new RegExp(
   [
-    "\\b(?:salary|income|make|makes|making|earn\\w*|paid|paycheck|savings|saved|deposit|bonus|stipend|loans?|debt)\\b",
+    "\\b(?:salary|income|take[\\s-]home|make|makes|making|earn\\w*|paid|paycheck|savings|saved|deposit|bonus|stipend|loans?|debt)\\b",
+    // Another period, or a floor rather than a ceiling: not a monthly rent budget.
+    "\\b(?:annual\\w*|yearly|weekly|a year|per year|a week|per week|at least|or more|minimum)\\b",
     "\\b(?:on|for|towards?)\\s+(?:(?:a|an|my|the|new|some)\\s+)*(?:furniture|couch|sofa|bed|groceries|food|utilities|internet|gym|travel|moving|movers|car|parking|tuition|deposit)\\b",
     // "my utilities budget", "an entertainment budget": a budget for something else.
     "\\b(?!(?:rent|rental|housing|my|our|the|a|an|total|monthly|apartment|max\\w*|overall|new|current|whole|realistic|ideal|budget|is|of)\\b)[a-z]+\\s+budget\\b",
@@ -539,6 +552,7 @@ function monthsIn(parts: Part[], negatable: boolean): MonthMention[] {
 function moveInFrom(parts: Part[], today: string): ProposedFact | null {
   const found: { value: { month: string; date?: string }; hit: Hit; score: number }[] = [];
   for (const m of monthsIn(parts, true)) {
+    if (isPast(m.hit)) continue;
     const score = MOVING.test(phraseOf(m.hit)) ? 2 : MOVE_RELATED.test(m.hit.part.text) ? 1 : 0;
     if (score === 0) continue;
     let year = m.year ?? Number(today.slice(0, 4));
@@ -572,6 +586,10 @@ const WORKPLACE_PATTERNS: { re: RegExp; place: Workplace }[] = [
   { re: /\b(remote|work from home|wfh)\b/i, place: "remote" },
   { re: /\bhybrid\b/i, place: "hybrid" },
   { re: /\b(in the office|in-office|in office|commut\w*)/i, place: "office" },
+  {
+    re: /\b(not working|between jobs|no job|unemployed|on a career break|taking (a )?(break|time off))\b/i,
+    place: "none",
+  },
 ];
 /** "Work weekends", "work most Saturdays", "weekend shifts", "on call every weekend": the work is on the weekend. */
 const WORKS_WEEKENDS =
@@ -611,7 +629,7 @@ function scheduleFrom(parts: Part[]): ProposedFact | null {
 }
 
 const EMPLOYER_RE =
-  /\b(?:work(?:ing)? (?:at|for)|job at|joining|starting at|engineer at|designer at|nurse at|intern(?:ing)? at)\s+((?:[A-Z][\w&'.-]*)(?:\s+[A-Z][\w&'.-]*){0,3})/;
+  /\b(?:work(?:s|ing)? (?:at|for)|job at|joining|starting at|engineer at|designer at|nurse at|intern(?:ing)? at)\s+((?:[A-Z][\w&'.-]*)(?:\s+(?:(?:of|for|the|and|de|&)\s+)?[A-Z][\w&'.-]*){0,4})/;
 
 function employerFrom(parts: Part[]): ProposedFact | null {
   for (const hit of hits(parts, EMPLOYER_RE)) {
@@ -683,7 +701,7 @@ export function extractFacts(text: string, today: string): ProposedFact[] {
   }
 
   for (const { re, id } of GOAL_PATTERNS) {
-    const hit = firstHit(parts, re);
+    const hit = firstNow(parts, re);
     if (hit) {
       const entry: FactEntry = { key: "goal", value: { id } };
       add({ entry, quote: spanQuote([hit]), label: factLabel(entry) });
@@ -810,6 +828,7 @@ export function quoteProblem(
   entry: FactEntry,
   quote: string,
   carFree?: boolean,
+  today?: string,
 ): string | null {
   const q = quote.trim();
   const spans = factSpans(entry, clauses(q), carFree);
@@ -835,7 +854,7 @@ export function quoteProblem(
     }));
     const live = spots.filter((h) => !isNegated(h.part, h.start));
     if (live.length === 0) return `the text says the opposite ("${words}" is negated there)`;
-    const fits = live.filter((h) => fitsFact(entry, h, textParts));
+    const fits = live.filter((h) => fitsFact(entry, h, textParts, today));
     if (fits.length === 0) return `"${words}" doesn't mean this ${entry.key} in the text`;
   }
   if (entry.key === "schedule" && entry.value.weekendsFree && weekendWork(textParts, true))
@@ -844,13 +863,20 @@ export function quoteProblem(
 }
 
 /** Whether the fact's words at `h` mean the fact in context (see `quoteProblem`). */
-function fitsFact(entry: FactEntry, h: Hit, textParts: Part[]): boolean {
+function fitsFact(entry: FactEntry, h: Hit, textParts: Part[], today?: string): boolean {
   switch (entry.key) {
     case "budget": {
       const amount = amountsIn(h.part).find((a) => a.hit.start === h.start);
       return amount ? isRentAmount(amount) : !NOT_RENT.test(phraseOf(h));
     }
     case "moveIn": {
+      if (isPast(h)) return false;
+      // No year in the text: it's the next such month, not one Muse picks.
+      const said = monthsIn([h.part], false).find((m) => m.hit.start === h.start);
+      if (said && said.year === undefined && today) {
+        const year = Number(today.slice(0, 4)) + (said.month < Number(today.slice(5, 7)) ? 1 : 0);
+        if (entry.value.month.slice(0, 4) !== String(year)) return false;
+      }
       if (MOVING.test(phraseOf(h))) return true;
       // "I start work in March, but move in April": March isn't the move.
       return !monthsIn(textParts, true).some((m) => MOVING.test(phraseOf(m.hit)));
@@ -866,6 +892,7 @@ function fitsFact(entry: FactEntry, h: Hit, textParts: Part[]): boolean {
     case "employer":
     case "schedule":
     case "transport":
+    case "goal":
       return !isPast(h);
     default:
       return true;
@@ -881,4 +908,27 @@ function fitsFact(entry: FactEntry, h: Hit, textParts: Part[]): boolean {
 export function narrowQuote(entry: FactEntry, quote: string, carFree?: boolean): string {
   const spans = factSpans(entry, clauses(quote), carFree);
   return spans ? spanQuote(spans) : "";
+}
+
+/**
+ * Why an employer doesn't fit `text`, or null: the name must be what they say
+ * they work at or are joining ("I work at Figma"), not any mention ("hiking
+ * near Google"), now and for themselves; a work area must be a place named in
+ * that same clause ("I work at Figma in SoMa").
+ */
+export function employerProblem(
+  text: string,
+  value: { name: string; workArea?: string },
+): string | null {
+  const name = same(value.name.trim());
+  for (const hit of hits(clauses(redactProtected(text)), EMPLOYER_RE)) {
+    if (isPast(hit)) continue;
+    const m = hit.part.text.slice(hit.start).match(EMPLOYER_RE);
+    if (!m || !same(m[1]).startsWith(name)) continue;
+    if (value.workArea === undefined) return null;
+    const area = value.workArea.trim();
+    if (/^[A-Z0-9]/.test(area) && same(hit.part.text).includes(same(area))) return null;
+    return `work area "${value.workArea}" isn't where they say ${value.name} is`;
+  }
+  return `"${value.name}" isn't named in the text as where they work or are joining`;
 }

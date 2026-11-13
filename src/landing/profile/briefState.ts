@@ -118,6 +118,8 @@ export function briefProblems(
   if (moveIn) out.push(moveIn);
   if (f.transport.length === 0) out.push("Pick at least one way you'll get around");
   if (f.interests.length === 0) out.push("Pick a few interests");
+  if (f.interests.length > 25 || f.neighborhoods.length > 10 || f.goals.length > 10)
+    out.push("That's too many to save");
   if (hasProtected(f.employer) || hasProtected(f.workArea)) out.push(EMPLOYER_PERSONAL);
   return out;
 }

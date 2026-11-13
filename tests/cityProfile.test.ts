@@ -1032,4 +1032,87 @@ describe("round 6", () => {
     ).toHaveLength(1);
     expect(briefProblems({ ...form, employer: "Figma", workArea: "SoMa" }, TODAY)).toEqual([]);
   });
+
+  test("employer values can't carry a protected trait, typed or proposed", async () => {
+    const tables: Record<string, Row[]> = { cityProfiles: [], cityProfileFacts: [] };
+    const ctx = writableCtx(tables);
+    const user = "users:derek" as Id<"users">;
+    const brief = { kind: "brief" as const, summary: "You said so in your brief" };
+    // Stored before the guard (or by any other writer): never read back.
+    await saveStatedFacts(
+      ctx,
+      user,
+      ["employer"],
+      [{ entry: { key: "employer", value: { name: "Stay-at-home mom" } }, evidence: brief }],
+    );
+    expect((await getProfile(ctx, user)).employer).toBeNull();
+    const at = (workArea: string) => [
+      { entry: { key: "employer" as const, value: { name: "Figma", workArea } }, quote: "Figma" },
+    ];
+    expect(
+      modelProblems(
+        "I work at Figma. I have a gluten sensitivity.",
+        at("I have a gluten sensitivity"),
+      ),
+    ).not.toEqual([]);
+  });
+
+  test("employers need employment context; work areas need the same clause", () => {
+    const employer = (name: string, workArea?: string) => [
+      {
+        entry: { key: "employer" as const, value: workArea ? { name, workArea } : { name } },
+        quote: name,
+      },
+    ];
+    expect(modelProblems("I love hiking near Google.", employer("Google"))).not.toEqual([]);
+    expect(
+      modelProblems(
+        "I work at Figma. I want to live in Noe Valley.",
+        employer("Figma", "Noe Valley"),
+      ),
+    ).not.toEqual([]);
+    expect(modelProblems("I work at Figma in SoMa.", employer("Figma", "SoMa"))).toEqual([]);
+    expect(labels("I work at City College of San Francisco.")).toEqual([
+      "employer:City College of San Francisco",
+    ]);
+  });
+
+  test("past, other people's and occupational mentions aren't facts", () => {
+    expect(facts("I used to love climbing.")).toEqual([]);
+    expect(facts("I moved to SF in March.")).toEqual([]);
+    expect(facts("I bought furniture already.")).toEqual([]);
+    expect(facts("I work at a coffee shop.")).toEqual([]);
+    expect(labels("My roommate likes climbing. I prefer reading.")).toEqual([
+      "interest:Books & writing",
+    ]);
+    expect(entries("My roommate works nights; I work days.")).toEqual([
+      { key: "schedule", value: { workHours: "day", weekendsFree: true } },
+    ]);
+    expect(entries("I live in Mountain View and work in SoMa.")).toEqual([]);
+  });
+
+  test("other periods and floors aren't a monthly rent budget", () => {
+    for (const text of [
+      "My take-home is $4,500 a month.",
+      "I can pay $2,000 per week.",
+      "My annual housing budget is $20,000.",
+      "My budget is at least $2,000.",
+    ])
+      expect(entries(text)).toEqual([]);
+  });
+
+  test("Muse can't pick a move year or an unsupported workplace", () => {
+    const moveIn = (month: string) => [
+      { entry: { key: "moveIn" as const, value: { month } }, quote: "March" },
+    ];
+    expect(modelProblems("I am moving in March.", moveIn("2028-03"))).not.toEqual([]);
+    expect(modelProblems("I am moving in March.", moveIn("2027-03"))).toEqual([]);
+    const none = {
+      key: "schedule" as const,
+      value: { workHours: "night" as const, workplace: "none" as const, weekendsFree: true },
+    };
+    expect(modelProblems("I work nights.", [{ entry: none, quote: "work nights" }])).not.toEqual(
+      [],
+    );
+  });
 });

@@ -322,7 +322,7 @@ const TERMS: string[] = [
   "hubby|wifey|significant other|other half|partnered|custody|child(?:free|less)",
   "(?:we['’]?re|we are|as) a family",
   "(?:i['’]?m|i am|we['’]?re|we are)\\s+(?:half|part|mixed)\\s+\\w+|afro[\\s-]?\\w+",
-  "allerg\\w*|intoleran\\w*|stutter\\w*|pacemaker|autoimmune|pcos|hrt|ivf|fertility|ssris?|rehab|survivors?",
+  "sensitivit\\w*|remission|tourette\\w*|sufferers?|gluten|allerg\\w*|intoleran\\w*|stutter\\w*|pacemaker|autoimmune|pcos|hrt|ivf|fertility|ssris?|rehab|survivors?",
   "(?:heart|health|medical|mental|back|knee|hip|lung|kidney|liver|thyroid) (?:problems?|issues?|conditions?)",
   "hard[\\s-]of[\\s-]hearing|(?:despite|because of|due to) ms|emotional support \\w+|support (?:animal|dog|cat)",
   "shinto|taoist|confucian|registered \\w+|\\w+ voter",

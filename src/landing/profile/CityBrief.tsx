@@ -348,7 +348,7 @@ function BriefEditor({
 
       <Section
         title="Interests"
-        help="Pick at least 3. These match you with Groups, Events and your crew."
+        help="Pick a few. These match you with Groups, Events and your crew."
         aside={
           <span
             className={cn(

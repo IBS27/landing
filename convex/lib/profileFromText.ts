@@ -13,7 +13,7 @@ import {
   WORKPLACES,
 } from "./cityProfileFacts";
 import { INTEREST_SECTIONS, INTERESTS } from "./interests";
-import { extractFacts, narrowQuote, quoteProblem } from "./profileText";
+import { employerProblem, extractFacts, narrowQuote, quoteProblem } from "./profileText";
 import { hasProtected, REDACTED, redactProtected } from "./protectedText";
 
 /**
@@ -132,7 +132,7 @@ export const profileFromText = defineTask({
       else if (!text.includes(quote))
         problems.push(`${at}.quote "${f.quote}" isn't copied exactly from the text`);
       else {
-        const problem = quoteProblem(input.text, f.entry, f.quote, f.carFree);
+        const problem = quoteProblem(input.text, f.entry, f.quote, f.carFree, input.today);
         if (problem) problems.push(`${at}: ${problem}; drop it`);
       }
       const slot = factSlot(f.entry);
@@ -162,15 +162,12 @@ export const profileFromText = defineTask({
           if (f.carFree && e.value.modes.includes("car"))
             problems.push(`${at}: carFree but modes include car`);
           break;
-        case "employer":
-          if (!text.includes(loose(e.value.name)) || hasProtected(e.value.name))
-            problems.push(`${at}: employer "${e.value.name}" isn't named in the text`);
-          if (
-            e.value.workArea !== undefined &&
-            (!text.includes(loose(e.value.workArea)) || hasProtected(e.value.workArea))
-          )
-            problems.push(`${at}: work area "${e.value.workArea}" isn't named in the text`);
+        case "employer": {
+          const problem = employerProblem(input.text, e.value);
+          if (problem || hasProtected(e.value.name) || hasProtected(e.value.workArea ?? ""))
+            problems.push(`${at}: ${problem ?? "the employer says something about who they are"}`);
           break;
+        }
         default:
           break;
       }
