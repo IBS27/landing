@@ -273,6 +273,49 @@ describe("For you", () => {
     expect(r.groups.find((g) => g._id === joined._id)?.skipped).toBe(false);
   });
 
+  test("skipped picks don't take a slot; they follow, flagged, for Undo", async () => {
+    const climbs = [1, 2, 3, 4].map((i) => group({ name: `Climbers ${i}`, tags: ["Climbing"] }));
+    const skip = (g: Row, i: number): Row => ({
+      _id: `profileSignals:s${i}`,
+      userId: "users:viewer",
+      kind: "skip",
+      targetKind: "group",
+      targetId: g._id,
+      interestIds: ["climbing"],
+      at: 1,
+      updatedAt: 1,
+    });
+    const r = await run(
+      world({
+        groups: climbs,
+        cityProfileFacts: [fact("users:viewer", "interest", { id: "climbing" })],
+        // The least active one is the only one not skipped.
+        profileSignals: climbs.slice(1).map(skip),
+      }),
+    );
+    if (r?.forYou.state !== "ready") throw new Error("expected ready");
+    const shown = r.forYou.items.filter((i) => i.kind === "group" && !i.group.skipped);
+    expect(shown.map((i) => i.key)).toEqual([`group:${climbs[0]._id}`]);
+    expect(r.forYou.items).toHaveLength(4);
+  });
+
+  test("Not for me is offered only where it's saved", async () => {
+    const climb = group({ tags: ["Climbing"] });
+    const plain = group({ name: "Neighbors", tags: [], category: "Neighborhood" });
+    const tables = world({
+      groups: [climb, plain],
+      cityProfiles: [{ _id: "cityProfiles:v", userId: "users:viewer", updatedAt: 1 }],
+    });
+    const on = await run(tables);
+    expect(on?.groups.map((g) => [g._id, g.skippable])).toEqual([
+      [plain._id, false],
+      [climb._id, true],
+    ]);
+    tables.cityProfiles[0].learnFromActivity = false;
+    const off = await run(tables);
+    expect(off?.groups.every((g) => !g.skippable)).toBe(true);
+  });
+
   test("places match by kind and cite the Group posts that name them", async () => {
     const locals = group({ name: "Mission Locals" });
     const secret = group({ privacy: "private", visible: true });

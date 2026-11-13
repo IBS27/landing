@@ -3,7 +3,13 @@ import type { QueryCtx } from "../_generated/server";
 import { NEIGHBORHOOD_PLACES } from "../seed/world/neighborhoods/places";
 import type { Source } from "../validators";
 import { type CitedSource, type NonEmpty, resolveSources } from "./citations";
-import { type CityProfile, type Fact, getProfile, interestWeights } from "./cityProfile";
+import {
+  type CityProfile,
+  type Fact,
+  getProfile,
+  interestWeights,
+  learnsFromActivity,
+} from "./cityProfile";
 import type { Anchor } from "./crews";
 import {
   getInterest,
@@ -217,6 +223,8 @@ export type HoodGroup = {
   joined: boolean;
   /** The viewer said "Not for me" (#4). */
   skipped: boolean;
+  /** "Not for me" would be saved: learning is on and the Group maps to an interest. */
+  skippable: boolean;
   /** Up to 3 friends who are members, when the member list is visible to the viewer. */
   friends: UserSummary[];
   friendCount: number;
@@ -235,6 +243,8 @@ export type HoodEvent = {
   interestedCount: number;
   viewerStatus: Doc<"eventResponses">["status"] | null;
   skipped: boolean;
+  /** "Not for me" would be saved: learning is on and the Event maps to an interest. */
+  skippable: boolean;
   /** Up to 3 friends going. */
   friendsGoing: UserSummary[];
 };
@@ -487,8 +497,8 @@ export function diverse<T>(
 /**
  * The "For you" picks: Groups, Events and places sharing the viewer's
  * interests, best first. Groups the viewer is in and Events they're going to
- * are left out (they're not news). Skipped ones stay, flagged, so a card the
- * viewer just skipped can still offer Undo.
+ * are left out (they're not news). Skipped ones don't take a slot; they
+ * follow the picks, flagged, so a card the viewer just skipped keeps its Undo.
  */
 async function forYou(
   ctx: QueryCtx,
@@ -559,12 +569,20 @@ async function forYou(
     return [{ kind: "place" as const, key: `place:${p.key}`, place, sources: cited, ...m }];
   });
 
-  const items = [
-    ...pick(eventItems, FOR_YOU_MAX.event),
-    ...pick(groupItems, FOR_YOU_MAX.group),
+  const isSkipped = (x: ForYouItem) =>
+    (x.kind === "event" && x.event.skipped) || (x.kind === "group" && x.group.skipped);
+  const live = [
+    ...pick(
+      eventItems.filter((x) => !isSkipped(x)),
+      FOR_YOU_MAX.event,
+    ),
+    ...pick(
+      groupItems.filter((x) => !isSkipped(x)),
+      FOR_YOU_MAX.group,
+    ),
     ...pick(placeItems, FOR_YOU_MAX.place),
   ].sort((x, y) => y.score - x.score || KIND_ORDER[x.kind] - KIND_ORDER[y.kind]);
-  return { state: "ready", items };
+  return { state: "ready", items: [...live, ...[...eventItems, ...groupItems].filter(isSkipped)] };
 }
 
 /** Friends and friends of friends active here, plus crew members who share it as an anchor. */
@@ -679,7 +697,7 @@ export async function neighborhoodPage(
     .unique();
   if (!n) return null;
   const a = await loadAudience(ctx, viewer._id);
-  const [groupDocs, eventDocs, profile, myResponses] = await Promise.all([
+  const [groupDocs, eventDocs, profile, myResponses, learning] = await Promise.all([
     visibleGroups(ctx, n._id, a),
     visibleEvents(ctx, n._id, a, now),
     getProfile(ctx, viewer),
@@ -687,6 +705,7 @@ export async function neighborhoodPage(
       .query("eventResponses")
       .withIndex("by_user", (q) => q.eq("userId", viewer._id))
       .collect(),
+    learnsFromActivity(ctx, viewer._id),
   ]);
   const status = new Map(myResponses.map((r) => [r.eventId, r.status]));
   const seen = await attendance(ctx, groupDocs, eventDocs, a);
@@ -714,6 +733,7 @@ export async function neighborhoodPage(
         point: g.point ?? null,
         joined: a.groups.has(g._id),
         skipped: await isSkipped(ctx, viewer._id, g._id),
+        skippable: learning && interestsForGroup(g).length > 0,
         friends: f.list,
         friendCount: f.count,
       };
@@ -734,6 +754,7 @@ export async function neighborhoodPage(
         interestedCount: e.externalInterestedCount + (seen.interested.get(e._id) ?? 0),
         viewerStatus: status.get(e._id) ?? null,
         skipped: await isSkipped(ctx, viewer._id, e._id),
+        skippable: learning && interestsForEvent(e).length > 0,
         friendsGoing: friendsIn(going).list,
       };
     }),
