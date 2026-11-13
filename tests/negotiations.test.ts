@@ -8,6 +8,8 @@ import {
   sellerFlags,
   sellerPrice,
 } from "../convex/lib/negotiations";
+import { saveMove } from "../convex/negotiations";
+import { fakeCtx, type Row } from "./fakeDb";
 
 const seller = (text: string) => ({ from: "seller" as const, text });
 const you = (text: string) => ({ from: "you" as const, text });
@@ -141,4 +143,53 @@ test("comparableMedian needs enough comparables", () => {
 test("sellerFlags keeps #73's rules that apply to goods", () => {
   expect(sellerFlags([seller("Venmo me and it's yours"), you("text me")])).toHaveLength(1);
   expect(sellerFlags([seller("Can you pick up Saturday?")])).toEqual([]);
+});
+
+describe("saveMove drops drafts that lost a race", () => {
+  type Args = Parameters<typeof saveMove._handler>[1];
+  const neg = (extra: Partial<Row> = {}): Row => ({
+    _id: "n1",
+    buyerId: "buyer",
+    listingId: "l1",
+    conversationId: "c1",
+    maxPrice: 150,
+    status: "active",
+    handledThrough: 10,
+    limitsSetAt: 50,
+    createdAt: 1,
+    updatedAt: 50,
+    ...extra,
+  });
+  const args = (extra: Partial<Args> = {}): Args => ({
+    negotiationId: "n1" as never,
+    move: "message",
+    amount: 0,
+    text: "Would $170 work?",
+    rationale: "Follow up.",
+    compIds: [],
+    handledThrough: 10,
+    limitsSetAt: 50,
+    via: "fallback",
+    ...extra,
+  });
+  const run = async (tables: Record<string, Row[]>, a: Args) => {
+    const before = JSON.stringify(tables);
+    await saveMove._handler(fakeCtx(tables), a);
+    return JSON.stringify(tables) === before;
+  };
+
+  test("a run begun under older limits saves nothing", async () => {
+    expect(await run({ negotiations: [neg()], proposals: [] }, args({ limitsSetAt: 20 }))).toBe(
+      true,
+    );
+  });
+
+  test("new limits don't reopen an acceptance approved under them", async () => {
+    const approved: Row = { _id: "p1", status: "approved", createdAt: 60 };
+    const tables = {
+      negotiations: [neg({ lastMove: "accept", pendingProposalId: "p1" })],
+      proposals: [approved],
+    };
+    expect(await run(tables, args({ force: true }))).toBe(true);
+  });
 });

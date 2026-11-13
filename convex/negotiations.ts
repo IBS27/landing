@@ -91,7 +91,7 @@ export const start = viewerMutation({
       .query("negotiations")
       .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
       .first();
-    const limits = { maxPrice, targetPrice, notes: notes?.trim() || undefined };
+    const limits = { maxPrice, targetPrice, notes: notes?.trim() || undefined, limitsSetAt: now };
     let negotiationId: Id<"negotiations">;
     if (existing) {
       // A waiting draft was written for the old limits; don't leave it approvable.
@@ -352,6 +352,7 @@ export const draftNext = internalAction({
       compIds: c.compIds,
       handledThrough: Math.max(c.lastSellerAt, c.negotiation.handledThrough),
       force,
+      limitsSetAt: limitsRevision(c.negotiation),
       via: result.via,
       runId: result.runId,
     });
@@ -371,6 +372,8 @@ export const saveMove = internalMutation({
     handledThrough: v.number(),
     /** New limits from the buyer: drafts even after an agreed price. */
     force: v.optional(v.boolean()),
+    /** The limits revision this run drafted under (`limitsRevision`). */
+    limitsSetAt: v.number(),
     via: v.union(v.literal("model"), v.literal("cache"), v.literal("fallback")),
     runId: v.optional(v.id("aiRuns")),
   },
@@ -379,11 +382,18 @@ export const saveMove = internalMutation({
     if (n?.status !== "active") return;
     // A run that started before a newer one already answered later seller messages.
     if (a.handledThrough < n.handledThrough) return;
+    // Drafted under limits the buyer has since changed.
+    const rev = limitsRevision(n);
+    if (a.limitsSetAt !== rev) return;
     // Re-checked here: the buyer may have sent an acceptance while this run drafted.
+    // New limits (`force`) reopen only an acceptance made under older limits.
     const pending = n.pendingProposalId ? await ctx.db.get(n.pendingProposalId) : null;
-    const agreed =
-      n.lastMove === "accept" && (pending?.status === "approved" || pending?.status === "edited");
-    if (agreed && !a.force) return;
+    if (
+      n.lastMove === "accept" &&
+      (pending?.status === "approved" || pending?.status === "edited") &&
+      !(a.force && pending.createdAt < rev)
+    )
+      return;
     const priced = a.move === "offer" || a.move === "accept";
     if (priced && a.amount > n.maxPrice) throw new ConvexError("Offer over the buyer's max");
     await retirePending(ctx, n, "expired", "system");
@@ -417,6 +427,9 @@ export const saveMove = internalMutation({
     });
   },
 });
+
+/** When the limits were last set; rows from before `limitsSetAt` use `createdAt`. */
+const limitsRevision = (n: Doc<"negotiations">) => n.limitsSetAt ?? n.createdAt;
 
 /** Takes a waiting draft out of the queue: replaced by a newer move, or the buyer stopped. */
 async function retirePending(
