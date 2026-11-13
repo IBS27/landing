@@ -793,7 +793,7 @@ export const update = viewerMutation({
       groupIds: args.groupIds?.length ? args.groupIds : undefined,
       // A different unit loses the badges about the old one (#11).
       badges: badgesAfterEdit(l, {
-        location: placeFor(args.neighborhood),
+        location,
         photos,
         rental: args.rental,
       }),

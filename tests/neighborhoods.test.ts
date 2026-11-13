@@ -26,6 +26,7 @@ import {
   neighborhoodsNear,
   SF_NEIGHBORHOODS,
 } from "../convex/lib/neighborhoods";
+import * as listings from "../convex/listings";
 import { neighborhoods as places } from "../convex/seed/lib/places";
 import { buildPlan } from "../convex/seed/plan";
 import type { CommentSeed, ReplySeed } from "../convex/seed/types";
@@ -264,6 +265,34 @@ describe("neighborhoodId assignment", () => {
     const nb = (r: unknown) =>
       tables.groups.find((g) => g._id === (r as { groupId: string }).groupId)?.neighborhoodId;
     expect([nb(based), nb(none)]).toEqual(["neighborhoods:inner-sunset", undefined]);
+  });
+
+  test("listings: set on create; an edit in the same place keeps the point and badges", async () => {
+    const { tables, ctx } = world();
+    tables.listings = [];
+    const fields = {
+      title: "Room near Valencia",
+      price: 1800,
+      category: "propertyrentals",
+      description: "",
+      photos: [{ url: "/seed/a.jpg" }],
+      neighborhood: "Mission",
+    };
+    const id = await call(listings.create, ctx, fields);
+    const row = () => tables.listings.find((l) => l._id === id);
+    expect(row()?.neighborhoodId).toBe("neighborhoods:mission");
+    // A rental at its cross streets, verified: a price edit keeps both.
+    const badges = [{ kind: "property_verified", label: "Property verified" }];
+    const location = { city: "San Francisco, CA", neighborhood: "Mission", ...VALENCIA };
+    Object.assign(row() ?? {}, { location, badges });
+    await call(listings.update, ctx, { ...fields, listingId: id, price: 1700 });
+    expect([row()?.location, row()?.badges, row()?.neighborhoodId]).toEqual([
+      location,
+      badges,
+      "neighborhoods:mission",
+    ]);
+    await call(listings.update, ctx, { ...fields, listingId: id, neighborhood: "Inner Sunset" });
+    expect([row()?.badges, row()?.neighborhoodId]).toEqual([[], "neighborhoods:inner-sunset"]);
   });
 });
 
