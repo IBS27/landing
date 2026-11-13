@@ -1,11 +1,13 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { type FunctionReference, getFunctionName } from "convex/server";
+import type { Id } from "../convex/_generated/dataModel";
 import type { ActionCtx } from "../convex/_generated/server";
 import { review, runAgent } from "../convex/ai/agent";
 import { MODEL } from "../convex/ai/model";
 import { agentSources } from "../convex/ai/sources";
 import { type RoomVibeInput, roomVibeTask } from "../convex/lib/roomVibeTask";
 import { cleanVibe, type VibeValue, vibeFromSignals, vibeProblems } from "../convex/lib/vibe";
+import { profileInterests } from "../convex/rooms";
 import type { Source } from "../convex/validators";
 import { fakeCtx, type Row } from "./fakeDb";
 
@@ -298,5 +300,36 @@ describe("muse.roomVibe on runAgent", () => {
     expect(result.cited?.first).toEqual(L1);
     // Sutro Boulders hints "outdoorsy", which the listing outweighed, so it isn't named.
     expect(result.output.fromProfile).not.toContain("Sutro Boulders");
+  });
+});
+
+describe("vibe input", () => {
+  test("City Profile interests reach Muse, stated first, without removed or other people's", async () => {
+    const fact = (
+      id: string,
+      userId: string,
+      interest: string,
+      extra: Record<string, unknown>,
+    ) => ({
+      _id: id,
+      userId,
+      key: "interest",
+      value: { id: interest },
+      evidence: { kind: "brief", summary: "Picked in the brief" },
+      updatedAt: 1,
+      ...extra,
+    });
+    const ctx = fakeCtx({
+      cityProfiles: [],
+      cityProfileFacts: [
+        fact("f1", "users:me", "hiking", { source: "inferred", confidence: 0.6 }),
+        fact("f2", "users:me", "books", { source: "stated", confidence: 1 }),
+        fact("f3", "users:me", "gardening", { source: "stated", confidence: 1, removedAt: 2 }),
+        fact("f4", "users:other", "surfing", { source: "stated", confidence: 1 }),
+      ],
+    });
+    const interests = await profileInterests(ctx, "users:me" as Id<"users">);
+    expect(interests.map((i) => i.id)).toEqual(["books", "hiking"]);
+    expect(interests.every((i) => i.label.length > 0)).toBe(true);
   });
 });

@@ -4,7 +4,9 @@ import type { Doc, Id } from "./_generated/dataModel";
 import { action, internalQuery, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { runAgent } from "./ai/agent";
 import { assertCitable, type CitedSource, type NonEmpty, resolveCitations } from "./lib/citations";
+import { getProfile } from "./lib/cityProfile";
 import { viewerMutation, viewerQuery } from "./lib/functions";
+import { getInterest } from "./lib/interests";
 import { type Audience, loadAudience } from "./lib/posts";
 import { type RoomVibeInput, roomVibeTask } from "./lib/roomVibeTask";
 import {
@@ -268,8 +270,14 @@ const CAP = {
   reactionsScanned: 200,
 };
 
+/** City Profile interests (#3), stated first. A fixed list, so never a protected trait. */
+export async function profileInterests(ctx: QueryCtx, userId: Id<"users">) {
+  const ids = new Set((await getProfile(ctx, userId)).interests.map((f) => f.value.id));
+  return [...ids].map((id) => ({ id, label: getInterest(id).label }));
+}
+
 /**
- * What Muse reads for a room's vibe: the room, the Pages the person follows,
+ * What Muse reads for a room's vibe: the room, City Profile interests, followed Pages,
  * and as sources the listings and posts they saved and the posts they liked
  * (newest first). `runAgent` drops any source the viewer can't see.
  */
@@ -340,8 +348,7 @@ export const vibeInput = internalQuery({
     return {
       input: {
         room: { name: room.name, kind: room.kind, size: room.size ?? null },
-        // City Profile interests (#3) join here once #63 is merged.
-        interests: [],
+        interests: await profileInterests(ctx, viewerId),
         follows,
       },
       sources,
