@@ -23,7 +23,7 @@ const FUNDRAISERS: Fundraiser[] = [
   {
     id: "food-bank",
     title: "Stock the shelves for the winter",
-    org: "Lake City Community Pantry",
+    org: "Excelsior Neighbors Pantry",
     category: "Hunger",
     raised: 18420,
     goal: 25000,
