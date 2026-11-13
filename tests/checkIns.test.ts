@@ -739,6 +739,17 @@ describe("phrase", () => {
     expect(h.row(3).checkIn?.suggestion).toMatchObject({ via: "template" });
   });
 
+  test("a protected-sounding plan or description never reaches Muse", async () => {
+    process.env.MODEL_API_KEY = "test";
+    const h = phraseHarness();
+    await checkIns.writeCheckIns(h.db, "users:v" as never, NOW);
+    const climb = h.tables.events?.find((e) => e._id === "events:climb");
+    if (climb) climb.description = "A climbing night for our church youth group";
+    await h.phrase();
+    expect(requests).toEqual([]);
+    expect(h.row(3).checkIn?.suggestion).toMatchObject({ via: "template" });
+  });
+
   test("AI off: no model call, the template stays", async () => {
     const h = phraseHarness();
     await checkIns.writeCheckIns(h.db, "users:v" as never, NOW);

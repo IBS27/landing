@@ -310,6 +310,12 @@ export const phraseContext = internalQuery({
     const sources = sourcesOf(s.citations);
     const went = s.kind === "moreLike" && sources[1]?.kind === "event" ? sources[1] : null;
     const wentTo = went ? await ctx.db.get(went.eventId) : null;
+    // What Muse would read about these plans (titles and descriptions, as the
+    // cited sources carry them). Anything protected-sounding keeps the template.
+    const text = [event, group, wentTo].flatMap((d) =>
+      d ? ["title" in d ? d.title : d.name, d.description] : [],
+    );
+    if (text.some(hasProtected)) return null;
     return {
       userId: user._id,
       sources,
@@ -324,7 +330,7 @@ export const phraseContext = internalQuery({
           ? { title: event.title, when: planWhen(event.startAt), venue: event.venue ?? null }
           : null,
         group: group && (await canSeeGroup(ctx, group, user._id)) ? group.name : null,
-        wentTo: wentTo && !hasProtected(wentTo.title) ? wentTo.title : null,
+        wentTo: wentTo?.title ?? null,
         draft: s.template,
       },
     };
@@ -409,7 +415,8 @@ export async function viewActivity(
   const events: ActivityView["events"] = [];
   for (const id of act.events) {
     const e = await ctx.db.get(id);
-    if (!e || a.blocked.has(e.hostId) || !(await goingTo(ctx, id, a.viewerId))) continue;
+    if (!e || e.online || !isOver(e, Date.now()) || a.blocked.has(e.hostId)) continue;
+    if (!(await goingTo(ctx, id, a.viewerId))) continue;
     if (!(await canSeeEvent(ctx, e, a))) continue;
     events.push({ _id: e._id, title: e.title, startAt: e.startAt });
   }
