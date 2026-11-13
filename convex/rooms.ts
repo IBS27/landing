@@ -3,6 +3,7 @@ import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { action, internalQuery, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { runAgent } from "./ai/agent";
+import { blockedSet } from "./lib/blocks";
 import { assertCitable, type CitedSource, type NonEmpty, resolveCitations } from "./lib/citations";
 import { getProfile } from "./lib/cityProfile";
 import { viewerMutation, viewerQuery } from "./lib/functions";
@@ -22,6 +23,7 @@ import {
   vibeProblems,
   vibeValue,
 } from "./lib/vibe";
+import { NOT_DECOR, rankVibeMatches } from "./lib/vibeMatch";
 import { type Citations, citations, type Source } from "./validators";
 
 /**
@@ -77,6 +79,61 @@ export const mine = viewerQuery({
       .collect();
     const a = await loadAudience(ctx, ctx.viewer._id);
     return Promise.all(rows.map((r) => roomView(ctx, r, a)));
+  },
+});
+
+/** How many recent listings are scanned, and how many matches are returned. */
+const MATCH_SCAN_MAX = 400;
+const MATCHES_MAX = 12;
+
+/**
+ * Marketplace items that fit a room's vibe (#26), best first, each with the
+ * words that matched. Empty when the room has no vibe yet.
+ */
+export const matches = viewerQuery({
+  args: { roomId: v.id("rooms") },
+  handler: async (ctx, { roomId }) => {
+    const viewerId = ctx.viewer._id;
+    const room = await ctx.db.get(roomId);
+    if (!room || room.userId !== viewerId) throw new ConvexError("Room not found");
+    if (!room.vibe) return [];
+    const [blocked, recent] = await Promise.all([
+      blockedSet(ctx, viewerId),
+      ctx.db.query("listings").withIndex("by_created").order("desc").take(MATCH_SCAN_MAX),
+    ]);
+    const candidates = recent.filter(
+      (l) =>
+        l.status === "active" &&
+        !NOT_DECOR.has(l.category) &&
+        l.sellerId !== viewerId &&
+        !blocked.has(l.sellerId),
+    );
+    const byId = new Map(candidates.map((l) => [l._id as string, l]));
+    return rankVibeMatches(
+      room.vibe,
+      candidates.map((l) => ({
+        id: l._id,
+        title: l.title,
+        description: l.description,
+        createdAt: l.createdAt,
+      })),
+    )
+      .slice(0, MATCHES_MAX)
+      .flatMap((m) => {
+        const l = byId.get(m.id);
+        return l
+          ? [
+              {
+                _id: l._id,
+                title: l.title,
+                price: l.price,
+                photo: l.photos[0] ?? null,
+                neighborhood: l.location.neighborhood ?? null,
+                reasons: m.reasons,
+              },
+            ]
+          : [];
+      });
   },
 });
 

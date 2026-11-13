@@ -77,6 +77,7 @@ import type * as lib_thumb from "../lib/thumb.js";
 import type * as lib_trust from "../lib/trust.js";
 import type * as lib_users from "../lib/users.js";
 import type * as lib_vibe from "../lib/vibe.js";
+import type * as lib_vibeMatch from "../lib/vibeMatch.js";
 import type * as lib_vouchNote from "../lib/vouchNote.js";
 import type * as lib_vouches from "../lib/vouches.js";
 import type * as lib_weekendRoute from "../lib/weekendRoute.js";
@@ -227,6 +228,7 @@ declare const fullApi: ApiFromModules<{
   "lib/trust": typeof lib_trust;
   "lib/users": typeof lib_users;
   "lib/vibe": typeof lib_vibe;
+  "lib/vibeMatch": typeof lib_vibeMatch;
   "lib/vouchNote": typeof lib_vouchNote;
   "lib/vouches": typeof lib_vouches;
   "lib/weekendRoute": typeof lib_weekendRoute;
