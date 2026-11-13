@@ -922,14 +922,15 @@ const plural = (n: number, one: string) =>
   `${n.toLocaleString("en-US")} ${one}${n === 1 ? "" : "s"}`;
 
 /**
- * Where someone is or lives, as a post may say it ("I'm at 18th and Dolores
- * right now", "currently near the park", "I live on Valencia"): no live
- * location or home reaches Muse or the chat. A plan's meeting place stays.
+ * Where someone is or lives, as a post may say it ("I'm at St. Mary's Park
+ * right now", "currently near the park", "we live in the Mission"): the rest
+ * of that line goes, so no live location or home reaches Muse or the chat.
+ * Plans ("meet at Mission Cliffs Saturday") stay; "I'm in!" isn't a place.
  */
 const WHEREABOUTS = [
-  /\b(?:i['’]?m|i am|we['’]?re|we are)\s+(?:currently\s+|now\s+)?(?:at|on|near|by|outside|around|in front of)\b[^.!?\n]*?\b(?:right now|currently|now|rn|atm|at the moment)\b[^.!?\n]*/gi,
-  /\b(?:currently|right now)\s+(?:at|on|near|by|outside|around)\b[^.!?\n]*/gi,
-  /\b(?:i|we)\s+live\s+(?:at|on|near|by|off|around)\b[^.!?\n]*/gi,
+  /\b(?:[Ii]['’]?m|I am|[Ww]e['’]?re|[Ww]e are)\s+(?:(?:currently|now|still|already|just|right)\s+)*(?:at|near|by|outside|around|on|in front of|in(?=\s+(?:the\s+)?[A-Z]))\b[^!?\n]*/g,
+  /\b(?:[Cc]urrently|[Rr]ight now)\s+(?:at|near|by|outside|around|on|in)\b[^!?\n]*/g,
+  /\b(?:I|[Ww]e)\s+(?:also\s+)?live\s+(?:at|on|in|near|by|off|around)\b[^!?\n]*/g,
 ];
 const withoutWhereabouts = (text: string) =>
   WHEREABOUTS.reduce((t, re) => t.replace(re, "…"), text);

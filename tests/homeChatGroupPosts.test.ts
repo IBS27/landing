@@ -254,17 +254,30 @@ describe("search_group_posts", () => {
         "pNear",
         "gClimb",
         "S",
-        "Currently near Dolores Park with snacks. Join the hike Saturday.",
+        "Join the hike Saturday!\nCurrently near Dolores Park with snacks.",
       ),
       post("pHome", "gClimb", "S", "We live on Valencia near 20th, come by for board games."),
+      post("pSaint", "gClimb", "S", "I'm at St. Mary's Park right now."),
+      post("pPark", "gClimb", "S", "Bring chalk!\nI'm at Bernal Heights Park"),
+      post("pHood", "gClimb", "S", "I live in the Mission near 20th and Valencia."),
+      post("pIn", "gClimb", "S", "I'm in! Meet at Mission Cliffs Saturday at 7."),
     );
     const out = await run("search_group_posts", { group: "gClimb" }, tables);
     const text = JSON.stringify(out);
-    for (const where of ["18th and Dolores", "Dolores Park", "Valencia near 20th"])
+    for (const where of [
+      "18th and Dolores",
+      "Dolores Park",
+      "Valencia near 20th",
+      "Mary's Park",
+      "Bernal Heights",
+      "20th and Valencia",
+    ])
       expect(text).not.toContain(where);
-    // The plan itself stays.
+    // The plans themselves stay, with where to meet.
     expect(text).toContain("Join the hike Saturday");
     expect(text).toContain("Climbing later!");
+    expect(text).toContain("Bring chalk!");
+    expect(text).toContain("I'm in! Meet at Mission Cliffs Saturday at 7.");
   });
 
   test("arguments are checked", async () => {
@@ -484,6 +497,14 @@ describe("what's happening in a Group", () => {
     );
     expect(
       homeChatProblems(answer({ text: both, show: ["post:pHike", "post:pGames"] }), two.input),
+    ).toEqual([]);
+    // Two posts by one author need two citations too.
+    const same = "Sname posted about a hike Saturday and posted about board games Sunday.";
+    expect(homeChatProblems(answer({ text: same, show: ["post:pHike"] }), c.input)).toContain(
+      "sourceIds: cite the key of every Group post you mention",
+    );
+    expect(
+      homeChatProblems(answer({ text: same, show: ["post:pHike", "post:pProtected"] }), c.input),
     ).toEqual([]);
     // Naming the Group cites it too.
     expect(

@@ -750,14 +750,16 @@ export function homeChatProblems(
       problems.push(`sourceIds: cite ${f.key}, which the reply names`);
   }
   // A Group post has no title to spot: a reply that talks about posts cites the ones it means,
-  // and one by each author it names.
+  // one by each author it names, and one for each time it says someone posted.
   const posts = [...known.values()].filter((f) => f.kind === "post");
   if (posts.length && MENTIONS_POSTS.test(text)) {
+    const citedPosts = posts.filter((p) => cited.has(p.key));
     const named = posts.filter((p) => saidText.includes(` ${plain(p.author).trim()} `));
-    const authors = new Set(named.map((p) => p.author));
+    const described = text.match(/\bposted\b/gi)?.length ?? 0;
     if (
-      !posts.some((p) => cited.has(p.key)) ||
-      [...authors].some((a) => !named.some((p) => p.author === a && cited.has(p.key)))
+      citedPosts.length === 0 ||
+      citedPosts.length < Math.min(described, posts.length) ||
+      named.some((p) => !citedPosts.some((c) => c.kind === "post" && c.author === p.author))
     )
       problems.push("sourceIds: cite the key of every Group post you mention");
   }
@@ -917,7 +919,7 @@ Answer this message, and only this message. Earlier turns are context for what "
 
 you.inbox.waiting is how many drafts are waiting in the Inbox now: when it is 0, say nothing is waiting right now, and never say or imply that a draft is. When it is more, get_my_move reads them.
 
-Groups: an Event's hostedBy is the Group hosting it. A Group post is not an Event: it is something a member wrote, with no RSVP, no set time and no guarantee it happens. When you mention a plan from a post, say plainly that it is a post in that Group (by its author's first name, on the day it was posted), not an Event, and cite the post's key for every post you mention (and the Group's key when you name the Group). Show the posts you mention as cards so they can open them. You never comment, reply, post or join for them: a post's card opens it, and only join_group joins a public Group, on their click.
+Groups: an Event's hostedBy is the Group hosting it. A Group post is not an Event: it is something a member wrote, with no RSVP, no set time and no guarantee it happens. When you mention a plan from a post, say plainly that it is a post in that Group (by its author's first name, on the day it was posted), not an Event, and cite the post's key for every post you mention, one key for each post you describe (and the Group's key when you name the Group). Show the posts you mention as cards so they can open them. You never comment, reply, post or join for them: a post's card opens it, and only join_group joins a public Group, on their click.
 
 People: a rental's lister comes with how they're connected to the person and, when both share their lifestyle answers, Landing's roommate compatibility (lister.compatibility: a score, what they have in common, where they differ). To compare listers, use those and say which fits best and why. When compatibility is null, say what's missing (both need to share their lifestyle answers on the Roommates page, and be connected) instead of guessing. Use first names only.
 
