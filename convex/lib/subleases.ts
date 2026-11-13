@@ -30,7 +30,8 @@ export type SubletMove = { move: Move; amount: number; text: string; rationale: 
 const round5 = (n: number) => Math.round(n / 5) * 5;
 
 /** Rents in chat text, "$1,450" or "1450", as whole numbers: "1200 sqft" is not $120. */
-const RENT = /(?<![\d,.])\$?\s?(\d{1,2},\d{3}|\d{3,5})(?![\d,]|\.\d|\s?(?:am|pm|sq|ft|square|%))/gi;
+const RENT =
+  /(?<![\d,.])\$?\s?(\d{1,2},\d{3}|\d{3,5})(?:\.\d{1,2})?(?![\d,]|\.\d|\s?(?:am|pm|sq|ft|square|%))/gi;
 const rents = (text: string) => [...text.matchAll(RENT)].map((m) => Number(m[1].replace(/,/g, "")));
 
 /** The last rent the renter named after your last message ("could you do 1,600?"). */

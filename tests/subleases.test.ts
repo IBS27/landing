@@ -51,6 +51,9 @@ describe("subletMoveProblems, any move", () => {
     };
     expect(subletMoveProblems(message, i)).not.toEqual([]);
     expect(subletMoveProblems({ ...message, text: "I can do 1300/month." }, i)).not.toEqual([]);
+    expect(subletMoveProblems({ ...message, text: "I can do $1,300.00/month." }, i)).not.toEqual(
+      [],
+    );
     expect(subletMoveProblems({ ...message, text: "I can do $1,500/month." }, i)).toEqual([]);
   });
 });
