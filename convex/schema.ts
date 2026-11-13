@@ -1,10 +1,13 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { cityProfileFact } from "./lib/cityProfileFacts";
+import { lifestyleAnswers } from "./lib/lifestyle";
 import { roomKind, roomVibe } from "./lib/vibe";
 import {
   aiJobStatus,
   aiRun,
   badge,
+  chatFlag,
   citations,
   friendRequestAudience,
   friendsListAudience,
@@ -656,6 +659,23 @@ export default defineSchema({
     .index("by_user", ["userId", "lastPlayedAt"])
     .index("by_user_game", ["userId", "gameId"]),
   /**
+   * Things to check in a Marketplace chat about a rental (#11): which of the
+   * lister's messages Ember flagged, for one viewer. Refreshed when new
+   * messages arrive.
+   */
+  chatChecks: defineTable({
+    conversationId: v.id("conversations"),
+    viewerId: v.id("users"),
+    listingId: v.id("listings"),
+    flags: v.array(chatFlag),
+    /** The conversation's `lastMessageAt` when it was checked; newer means stale. */
+    checkedThrough: v.number(),
+    via: v.union(v.literal("model"), v.literal("cache"), v.literal("fallback")),
+    runId: v.optional(v.id("aiRuns")),
+    createdAt: v.number(),
+  }).index("by_conversation_viewer", ["conversationId", "viewerId"]),
+
+  /**
    * One row per model call made through `runAgent` (convex/ai/agent.ts), including
    * calls that ended in the task's non-AI fallback. Model results are reused by
    * `inputHash` while fresh, so shared outputs are generated once.
@@ -721,6 +741,24 @@ export default defineSchema({
     finishedAt: v.optional(v.number()),
   }).index("by_kind_key", ["kind", "key", "createdAt"]),
 
+  /* ---------------- Landing ---------------- */
+
+  /** Landing City Profile (#3): one row per person who started the brief. Facts live in `cityProfileFacts`. */
+  cityProfiles: defineTable({
+    userId: v.id("users"),
+    /** When the onboarding brief was last submitted; unset = not onboarded yet. */
+    briefCompletedAt: v.optional(v.number()),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  /**
+   * City Profile facts (#3): one row per fact, each with its source, evidence and
+   * confidence. Read through `getProfile` (convex/lib/cityProfile.ts), never directly.
+   */
+  cityProfileFacts: defineTable(cityProfileFact)
+    .index("by_user", ["userId", "updatedAt"])
+    .index("by_user_key", ["userId", "key"]),
+
   /**
    * Landing network vouching: `voucherId` says they know `subjectId` (usually a
    * lister). One row per pair; vouching again updates it. About the person, not
@@ -738,6 +776,23 @@ export default defineSchema({
     .index("by_subject", ["subjectId", "updatedAt"])
     .index("by_voucher", ["voucherId", "updatedAt"])
     .index("by_pair", ["voucherId", "subjectId"]),
+
+  /**
+   * Landing roommate lifestyle answers (#21): one row per person, written only
+   * by them through the questionnaire. Private until `shared` is turned on, and
+   * then visible only to others who share too. Read other people's answers
+   * through `comparableLifestyles` (convex/lib/roommates.ts), never directly.
+   */
+  roommateLifestyles: defineTable({
+    userId: v.id("users"),
+    answers: lifestyleAnswers,
+    /** Opted in to roommate matching. False until the person turns it on. */
+    shared: v.boolean(),
+    sharedAt: v.optional(v.number()),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_shared", ["shared", "userId"]),
 
   /**
    * Landing rooms (#25): a person's room scan (photos and optional floor size)

@@ -4,7 +4,9 @@ import type { Doc, Id } from "./_generated/dataModel";
 import { action, internalQuery, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { runAgent } from "./ai/agent";
 import { assertCitable, type CitedSource, type NonEmpty, resolveCitations } from "./lib/citations";
+import { getProfile } from "./lib/cityProfile";
 import { viewerMutation, viewerQuery } from "./lib/functions";
+import { getInterest } from "./lib/interests";
 import { type Audience, loadAudience } from "./lib/posts";
 import { type RoomVibeInput, roomVibeTask } from "./lib/roomVibeTask";
 import {
@@ -261,6 +263,7 @@ export const clearVibe = viewerMutation({
 /* ---------------- Muse's suggestion ---------------- */
 
 const CAP = {
+  interests: 12,
   follows: 15,
   savedListings: 12,
   savedPosts: 8,
@@ -269,9 +272,10 @@ const CAP = {
 };
 
 /**
- * What Muse reads for a room's vibe: the room, the Pages the person follows,
- * and as sources the listings and posts they saved and the posts they liked
- * (newest first). `runAgent` drops any source the viewer can't see.
+ * What Muse reads for a room's vibe: the room, the person's City Profile
+ * interests, the Pages they follow, and as sources the listings and posts they
+ * saved and the posts they liked (newest first). `runAgent` drops any source
+ * the viewer can't see.
  */
 export const vibeInput = internalQuery({
   args: { viewerId: v.id("users"), roomId: v.id("rooms") },
@@ -293,6 +297,13 @@ export const vibeInput = internalQuery({
       if (page?.kind === "page")
         follows.push({ name: page.name, category: page.pageCategory ?? "Page" });
     }
+
+    // City Profile interests (#3): what they stated, plus inferences Landing is fairly sure of.
+    const profile = await getProfile(ctx, viewerId);
+    const interests = profile.interests
+      .filter((f) => f.source === "stated" || f.confidence >= 0.5)
+      .slice(0, CAP.interests)
+      .map((f) => ({ id: f.value.id, label: getInterest(f.value.id).label }));
 
     const sources: Source[] = [];
     const seenPosts = new Set<string>();
@@ -340,8 +351,7 @@ export const vibeInput = internalQuery({
     return {
       input: {
         room: { name: room.name, kind: room.kind, size: room.size ?? null },
-        // City Profile interests (#3) join here once #63 is merged.
-        interests: [],
+        interests,
         follows,
       },
       sources,

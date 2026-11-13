@@ -18,8 +18,10 @@ import {
   type MutationCtx,
 } from "./_generated/server";
 import schema from "./schema";
+import { seedCityProfiles } from "./seed/cityProfiles";
 import { DAY } from "./seed/lib/time";
 import { buildPlan } from "./seed/plan";
+import { roommateLifestyles } from "./seed/world/roommateLifestyles";
 import { roomSeeds } from "./seed/world/rooms";
 import { reactionType } from "./validators";
 
@@ -38,6 +40,12 @@ async function insertAll<N extends TableNames>(
 }
 
 // ── Mutations ────────────────────────────────────────────────────────────────
+
+/** Landing City Profiles (#3), after users, Groups and Events exist. */
+export const insertCityProfiles = internalMutation({
+  args: { now: v.number() },
+  handler: (ctx, { now }) => seedCityProfiles(ctx, now),
+});
 
 /** Deletes up to one batch of a table; returns how many were deleted. */
 export const clearTable = internalMutation({
@@ -108,6 +116,10 @@ export const insertFriendRequests = internalMutation({
 export const insertVouches = internalMutation({
   args: { rows: v.array(T.vouches.validator) },
   handler: (ctx, { rows }) => insertAll(ctx, "vouches", rows),
+});
+export const insertRoommateLifestyles = internalMutation({
+  args: { rows: v.array(T.roommateLifestyles.validator) },
+  handler: (ctx, { rows }) => insertAll(ctx, "roommateLifestyles", rows),
 });
 export const insertGroups = internalMutation({
   args: { rows: v.array(T.groups.validator) },
@@ -394,6 +406,19 @@ export const reset = internalAction({
           updatedAt: x.createdAt,
         })),
       }),
+      // Landing roommate lifestyle answers (#21), keyed by persona username.
+      ctx.runMutation(internal.seed.insertRoommateLifestyles, {
+        rows: roommateLifestyles.map((r) => {
+          const at = started - r.answeredDaysAgo * DAY;
+          return {
+            userId: uid(r.username),
+            answers: r.answers,
+            shared: r.shared,
+            sharedAt: r.shared ? at : undefined,
+            updatedAt: at,
+          };
+        }),
+      }),
       (async () => {
         const ids: Id<"groups">[] = await ctx.runMutation(internal.seed.insertGroups, {
           rows: plan.groups.map((g) => ({ ...g.row, createdBy: uid(g.createdBy) })),
@@ -586,6 +611,14 @@ export const reset = internalAction({
       }),
     ]);
 
+    // 9. Landing City Profiles for the personas.
+    const cityProfileFacts: number = await ctx.runMutation(internal.seed.insertCityProfiles, {
+      now: Date.now(),
+    });
+
+    // Demo rentals for "Things to check" (#11).
+    await ctx.runMutation(internal.trust.seedDemo, {});
+
     // Muse proposals for the demo inbox (#6).
     await ctx.runMutation(internal.proposals.seedDemo, {});
 
@@ -602,10 +635,12 @@ export const reset = internalAction({
         friendships: plan.friendships.length * 2,
         friendRequests: plan.friendRequests.length,
         vouches: plan.vouches.length,
+        roommateLifestyles: roommateLifestyles.length,
         groups: plan.groups.length,
         groupMembers: plan.groupMembers.length,
         listings: plan.listings.length,
         events: plan.events.length,
+        cityProfileFacts,
         rooms,
         eventResponses: plan.eventResponses.length,
         posts: plan.posts.length,
