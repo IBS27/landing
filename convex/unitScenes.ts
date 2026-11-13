@@ -12,6 +12,7 @@ import { runJob, startJob } from "./ai/jobs";
 import type { MediaInput } from "./ai/model";
 import { resolveSources } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
+import { placeListingId } from "./lib/myPlace";
 import { loadAudience } from "./lib/posts";
 import { rentalSources } from "./lib/rentalMedia";
 import { unitAppearanceTask } from "./lib/unitAppearanceTask";
@@ -84,9 +85,11 @@ export const mine = viewerQuery({
 export const create = viewerMutation({
   args: { roomId: v.optional(v.id("rooms")), listingId: v.optional(v.id("listings")) },
   returns: v.id("unitScenes"),
-  handler: async (ctx, { roomId, listingId }) => {
-    if (roomId && listingId) throw new ConvexError("Choose a room or a listing");
+  handler: async (ctx, { roomId, listingId: chosen }) => {
+    if (roomId && chosen) throw new ConvexError("Choose a room or a listing");
     const ownerId = ctx.viewer._id;
+    // Neither given: start from the person's place.
+    const listingId = chosen ?? (roomId ? undefined : await placeListingId(ctx, ownerId));
     const room = roomId ? await ctx.db.get(roomId) : null;
     if (roomId && (!room || room.userId !== ownerId)) throw new ConvexError("Room not found");
     const listing = listingId ? await accessibleListing(ctx, listingId, ownerId) : null;

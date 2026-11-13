@@ -8,6 +8,7 @@ import { assertCitable, type CitedSource, type NonEmpty, resolveCitations } from
 import { getProfile } from "./lib/cityProfile";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { getInterest } from "./lib/interests";
+import { placeListingId } from "./lib/myPlace";
 import { type Audience, loadAudience } from "./lib/posts";
 import { hasProtected, redactProtected } from "./lib/protectedText";
 import { type RoomVibeInput, roomVibeTask } from "./lib/roomVibeTask";
@@ -176,6 +177,8 @@ export const create = viewerMutation({
       name: cleanName(name),
       kind,
       photos: [],
+      // A new room is in the person's place.
+      listingId: await placeListingId(ctx, ctx.viewer._id),
       createdAt: now,
       updatedAt: now,
     });

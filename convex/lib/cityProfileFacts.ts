@@ -136,9 +136,14 @@ export const scheduleValue = v.object({
 export const employerValue = v.object({ name: v.string(), workArea: v.optional(v.string()) });
 export const interestValue = v.object({ id: interestId });
 export const goalValue = v.object({ id: goalId });
+/**
+ * Where the person lives now, from their place (convex/myPlace.ts). Separate
+ * from `neighborhood` (where they'd consider living, which search, crews and
+ * Journeys read), so it never feeds matching.
+ */
+export const homeValue = v.object({ slug: neighborhoodSlug });
 
-/** A fact's key and typed value, without provenance (proposals, inference input). */
-export const factEntry = v.union(
+const briefEntries = [
   v.object({ key: v.literal("budget"), value: budgetValue }),
   v.object({ key: v.literal("moveIn"), value: moveInValue }),
   v.object({ key: v.literal("neighborhood"), value: neighborhoodValue }),
@@ -147,13 +152,30 @@ export const factEntry = v.union(
   v.object({ key: v.literal("employer"), value: employerValue }),
   v.object({ key: v.literal("interest"), value: interestValue }),
   v.object({ key: v.literal("goal"), value: goalValue }),
+] as const;
+
+/** A fact the brief asks for or Muse may propose from what the person wrote. */
+export const briefFactEntry = v.union(...briefEntries);
+export type BriefFactEntry = Infer<typeof briefFactEntry>;
+
+/** A fact's key and typed value, without provenance (proposals, inference input). */
+export const factEntry = v.union(
+  ...briefEntries,
+  v.object({ key: v.literal("home"), value: homeValue }),
 );
 export type FactEntry = Infer<typeof factEntry>;
 export type FactKey = FactEntry["key"];
 export type FactValue<K extends FactKey> = Extract<FactEntry, { key: K }>["value"];
 
 /** Keys with one value per person; the rest (interest, neighborhood, goal) have one row per item. */
-export const SINGLE_KEYS = ["budget", "moveIn", "transport", "schedule", "employer"] as const;
+export const SINGLE_KEYS = [
+  "budget",
+  "moveIn",
+  "transport",
+  "schedule",
+  "employer",
+  "home",
+] as const;
 export type SingleKey = (typeof SINGLE_KEYS)[number];
 export type MultiKey = Exclude<FactKey, SingleKey>;
 export function isSingleKey(key: FactKey): key is SingleKey {
@@ -244,9 +266,10 @@ export const factEvidence = v.object({
   /**
    * brief: the onboarding form · free_text: the "Tell us about you" box ·
    * activity: inferred from RSVPs, joins, likes, skips and pins (#4) ·
-   * edit: an inferred fact the person kept on "What Muse knows about you" (#5).
+   * edit: an inferred fact the person kept on "What Muse knows about you" (#5) ·
+   * place: kept in sync with the place they set on My Place (convex/myPlace.ts).
    */
-  kind: literals("brief", "free_text", "activity", "edit"),
+  kind: literals("brief", "free_text", "activity", "edit", "place"),
   /** Shown to the person: "You said so in your brief", "RSVP'd to 3 climbing events". */
   summary: v.string(),
   /** free_text: the person's own words this fact came from. */
@@ -277,6 +300,7 @@ export const cityProfileFact = v.union(
   v.object({ ...provenance, key: v.literal("employer"), value: employerValue }),
   v.object({ ...provenance, key: v.literal("interest"), value: interestValue }),
   v.object({ ...provenance, key: v.literal("goal"), value: goalValue }),
+  v.object({ ...provenance, key: v.literal("home"), value: homeValue }),
 );
 
 /* ---------------- Labels ---------------- */
@@ -357,6 +381,8 @@ export function factLabel(e: FactEntry): string {
       return interestLabel(e.value.id);
     case "goal":
       return goalLabel(e.value.id);
+    case "home":
+      return neighborhoodLabel(e.value.slug);
   }
 }
 
@@ -374,4 +400,5 @@ export const FACT_KEY_LABELS: Record<FactKey, string> = {
   employer: "Work",
   interest: "Interests",
   goal: "Goals",
+  home: "Lives in",
 };
