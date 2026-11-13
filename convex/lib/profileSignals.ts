@@ -91,6 +91,14 @@ export function confidenceFor(score: number): number {
   return Math.min(0.9, Math.max(0.4, 0.4 + (score - THRESHOLD) * 0.05));
 }
 
+/**
+ * How long until a score decays under the threshold with no new activity. Every
+ * weight halves at the same rate, so the whole score does too.
+ */
+export function msUntilBelowThreshold(score: number): number {
+  return HALF_LIFE_MS * Math.log2(score / THRESHOLD);
+}
+
 export type Inference<S extends SignalLike = SignalLike> = {
   score: number;
   confidence: number;

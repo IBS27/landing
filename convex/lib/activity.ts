@@ -20,6 +20,7 @@ import {
   inferFromSignals,
   MAX_AGE_MS,
   MAX_EVIDENCE,
+  msUntilBelowThreshold,
   neighborhoodIn,
   type SignalKind,
   type SignalTargetKind,
@@ -112,8 +113,12 @@ export async function upsertSignal(
   else await ctx.db.insert("profileSignals", { userId, kind, targetKind, targetId, ...fields });
 }
 
-async function scheduleRecompute(ctx: MutationCtx, userId: Id<"users">) {
-  await ctx.scheduler.runAfter(RECOMPUTE_DEBOUNCE_MS, internal.profileSignals.recompute, {
+async function scheduleRecompute(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  delay = RECOMPUTE_DEBOUNCE_MS,
+) {
+  await ctx.scheduler.runAfter(delay, internal.profileSignals.recompute, {
     userId,
     after: Date.now(),
   });
@@ -218,6 +223,14 @@ export async function recomputeInferred(ctx: MutationCtx, userId: Id<"users">) {
       },
     });
   }
+  // Come back when the weakest one decays under the threshold, so inferred
+  // facts fade without new activity. A newer signal's recompute supersedes this.
+  if (inferred.length > 0)
+    await scheduleRecompute(
+      ctx,
+      userId,
+      Math.min(...inferred.map(([, inf]) => msUntilBelowThreshold(inf.score))) + 60_000,
+    );
   const keep = new Set(inferred.map(([subject]) => factSlot(subject)));
   const profile = await getProfile(ctx, userId);
   for (const f of [...profile.interests, ...profile.neighborhoods]) {

@@ -9,6 +9,7 @@ import {
   HALF_LIFE_MS,
   inferFromSignals,
   isPositiveReaction,
+  msUntilBelowThreshold,
   neighborhoodIn,
   type SignalLike,
   signalWeight,
@@ -88,6 +89,11 @@ describe("rules", () => {
         NOW,
       ).interests.size,
     ).toBe(0);
+  });
+
+  test("a score decays under the threshold on the half-life clock", () => {
+    expect(msUntilBelowThreshold(8)).toBe(HALF_LIFE_MS);
+    expect(msUntilBelowThreshold(4)).toBe(0);
   });
 
   test("confidence maps from the score and never reaches stated", () => {
@@ -221,8 +227,13 @@ describe("hooks and recompute", () => {
     expect(climbing?.evidence.summary).toMatch(
       /^RSVP'd to (Bouldering Night and Climb & Coffee|Climb & Coffee and Bouldering Night)$/,
     );
-    expect(climbing?.evidence.signalIds).toEqual(tables.profileSignals.map((s) => s._id) as never);
+    expect([...(climbing?.evidence.signalIds ?? [])].sort()).toEqual(
+      tables.profileSignals.map((s) => s._id).sort() as never,
+    );
     expect(profile.neighborhoods.map((f) => f.value.slug)).toEqual(["mission"]);
+    // A follow-up recompute is due when the score (6) decays under 4, so it fades without new activity.
+    const followUp = scheduled[scheduled.length - 1].delay;
+    expect(followUp).toBeCloseTo(HALF_LIFE_MS * Math.log2(6 / 4) + 60_000, -4);
   });
 
   test("undo marks the signal undone, and the inferred fact is dropped below the threshold", async () => {
