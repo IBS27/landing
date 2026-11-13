@@ -203,7 +203,7 @@ type ProposalStatus = Doc<"proposals">["status"];
  * Where the owner's crew Group stands, from their own proposals: the latest
  * `muse.crewGroup` and `muse.crewMeetup` ones, and what approving them made.
  */
-async function crewGroupState(ctx: QueryCtx, ownerId: Id<"users">) {
+export async function crewGroupState(ctx: QueryCtx, ownerId: Id<"users">) {
   const rows = await ctx.db
     .query("proposals")
     .withIndex("by_owner", (q) => q.eq("ownerId", ownerId))

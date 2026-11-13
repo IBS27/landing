@@ -79,6 +79,13 @@ export function journeyPhase(moveIn: MoveIn, now: number): "before" | "during" |
   return weekendOf(now).end <= moveInStart(moveIn) ? "before" : "after";
 }
 
+/** Events without an end time count as over this long after they start. */
+const EVENT_LENGTH_MS = 3 * 60 * 60_000;
+
+/** Whether an Event has ended. */
+export const isOver = (e: { startAt: number; endAt?: number }, now: number) =>
+  (e.endAt ?? e.startAt + EVENT_LENGTH_MS) < now;
+
 /* ---------- Ranking plans ---------- */
 
 /** How well an Event fits someone's interests: the summed weight of the interests it serves. */
