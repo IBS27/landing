@@ -135,8 +135,7 @@ const PHRASE_BREAK = new RegExp(
   "gi",
 );
 
-/** The phrase a hit sits in, for deciding what an amount, a month or a place is about. */
-function phraseOf({ part, start, end }: Hit): string {
+function phraseSpan({ part, start, end }: Hit): { from: number; to: number } {
   const t = part.text;
   let from = 0;
   let to = t.length;
@@ -147,7 +146,13 @@ function phraseOf({ part, start, end }: Hit): string {
       break;
     }
   }
-  return t.slice(from, to).trim();
+  return { from, to };
+}
+
+/** The phrase a hit sits in, for deciding what an amount, a month or a place is about. */
+function phraseOf(hit: Hit): string {
+  const { from, to } = phraseSpan(hit);
+  return hit.part.text.slice(from, to).trim();
 }
 
 /** Something they used to do, have or already did ("I used to work nights", "I moved in March"). */
@@ -311,14 +316,17 @@ const NEIGHBORHOOD_PATTERNS: { re: RegExp; slug: NeighborhoodSlug }[] = [
 /** Breaks between "I work in X" and "and want to live in Y". */
 const PLACE_BREAK =
   /[;:()]|\b(?:but|while|because|though|although|so|whereas)\b|(?:,|\band\b|\bor\b)\s+(?=(?:i|we|want\w*|would|hope\w*|plan\w*|looking|live|living|move|moving|prefer\w*|ideally|into|to|work\w*|commut\w*|stud\w*)\b)/gi;
-/** A place they're leaving or used to live in. */
-const PAST_PLACE =
-  /\b(?:used to|lived|grew up|visit\w*|out of|leaving|away from|(?:moving|coming|relocating) from)\b/i;
+/** A place they used to live in or only visit. */
+const PAST_PLACE = /\b(?:used to|lived|grew up|visit\w*)\b/i;
+/** Cues that the next place named is where they're coming from... */
+const ORIGIN_CUE = /\b(?:from|out of|leaving|away from)\b/gi;
+/** ...and cues that switch to where they're going ("from the Mission to SoMa", "leaving Oakland for the Sunset"). */
+const DESTINATION_CUE = /\b(?:to|into|towards?|for)\b/gi;
 const WORK_PLACE =
   /\b(?:work\w*|office|job|commut\w*|based|campus|school|stud(?:y|ying|ent)|class(?:es)?)\b/i;
 const HOME_PLACE = /\b(?:live|living|move|moving|apartment|place|rent|stay|neighborhood)\b/i;
 
-function placePhrase(part: Part, at: number): string {
+function placeSpan(part: Part, at: number): { from: number; to: number } {
   let from = 0;
   let to = part.text.length;
   for (const m of part.text.matchAll(PLACE_BREAK)) {
@@ -328,18 +336,37 @@ function placePhrase(part: Part, at: number): string {
       break;
     }
   }
+  return { from, to };
+}
+
+function placePhrase(part: Part, at: number): string {
+  const { from, to } = placeSpan(part, at);
   return part.text.slice(from, to);
 }
 
 /**
+ * Whether the place at `at` is where they're coming from: the latest cue
+ * before it in its phrase is "from", "out of", "leaving" or "away from", with
+ * no "to"/"into" after it. In "moving from the Mission to SoMa" the Mission is
+ * the origin and SoMa isn't.
+ */
+function isOrigin(part: Part, at: number): boolean {
+  const before = part.text.slice(placeSpan(part, at).from, at);
+  const origin = lastIndex(ORIGIN_CUE, before);
+  return origin !== -1 && lastIndex(DESTINATION_CUE, before) < origin;
+}
+
+/**
  * Whether a place named at `at` is somewhere they'd consider living: not
- * where they work, study, do an activity, are leaving or used to live ("I
+ * where they work, study, do an activity, are coming from or used to live ("I
  * work at Google in SoMa", "I climb in the Mission", "moving out of the
- * Mission"), unless the same phrase is about living there.
+ * Mission"), unless the same phrase is about living there. In "moving from
+ * the Mission to SoMa" only SoMa counts.
  */
 function isHomePlace(part: Part, at: number): boolean {
   const phrase = placePhrase(part, at);
-  if (PAST_PLACE.test(phrase)) return false;
+  // "My sister lives in the Mission" is her place, not one they'd consider.
+  if (PAST_PLACE.test(phrase) || OTHERS.test(phrase) || isOrigin(part, at)) return false;
   if (HOME_PLACE.test(phrase)) return true;
   if (WORK_PLACE.test(phrase)) return false;
   // "I climb in the Mission": an activity's location.
@@ -498,9 +525,24 @@ function rentScore(phrase: string, amount: Amount): number {
   return BUDGET_WORDS.test(phrase) ? 1 : 0;
 }
 
+/**
+ * An amount's own words: its phrase, cut where the amounts before and after it
+ * end and start. In "budget is $2,500 including $300 for utilities" the $300
+ * is for utilities, the $2,500 isn't.
+ */
+function ownPhrase(amount: Amount): string {
+  const { part, start, end } = amount.hit;
+  let { from, to } = phraseSpan(amount.hit);
+  for (const other of amountsIn(part)) {
+    if (other.hit.end <= start) from = Math.max(from, other.hit.end);
+    else if (other.hit.start >= end) to = Math.min(to, other.hit.start);
+  }
+  return part.text.slice(from, to).trim();
+}
+
 /** Whether an amount reads as rent they'd pay, not pay, savings or another expense. */
 function isRentAmount(amount: Amount): boolean {
-  return !NOT_RENT.test(phraseOf(amount.hit));
+  return !NOT_RENT.test(ownPhrase(amount));
 }
 
 /** The monthly rent they're looking for: a stated rent budget first, else the first amount that reads as rent. */
@@ -547,6 +589,11 @@ const MOVE_RELATED = /\b(mov|land|arriv|start|relocat|get(ting)? to|coming)/i;
 
 type MonthMention = { month: number; day?: number; year?: number; hit: Hit };
 
+/** "3/15/2027", "3/15/27", "03/01": US month/day order, as the app is for San Francisco. */
+const US_DATE = /\b(0?[1-9]|1[0-2])\/(0?[1-9]|[12]\d|3[01])(?:\/(\d{4}|\d{2}))?\b(?!\/)/g;
+/** "2027-03-15", or "2027-03" for a month. */
+const ISO_DATE = /\b(20\d\d)-(0[1-9]|1[0-2])(?:-(0[1-9]|[12]\d|3[01]))?\b(?!-)/g;
+
 function monthsIn(parts: Part[], negatable: boolean): MonthMention[] {
   const out: MonthMention[] = [];
   for (const hit of hits(parts, MONTH_RE, negatable)) {
@@ -561,7 +608,26 @@ function monthsIn(parts: Part[], negatable: boolean): MonthMention[] {
       hit,
     });
   }
-  return out;
+  for (const hit of hits(parts, US_DATE, negatable)) {
+    const m = hit.part.text.slice(hit.start, hit.end).match(new RegExp(US_DATE.source));
+    if (!m) continue;
+    const year = m[3] ? (m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3])) : undefined;
+    out.push({ month: Number(m[1]), day: Number(m[2]), year, hit });
+  }
+  for (const hit of hits(parts, ISO_DATE, negatable)) {
+    const m = hit.part.text.slice(hit.start, hit.end).match(new RegExp(ISO_DATE.source));
+    if (!m) continue;
+    out.push({
+      month: Number(m[2]),
+      day: m[3] ? Number(m[3]) : undefined,
+      year: Number(m[1]),
+      hit,
+    });
+  }
+  // Reading order, so "the first month they mention" stays the first.
+  return out.sort(
+    (a, b) => parts.indexOf(a.hit.part) - parts.indexOf(b.hit.part) || a.hit.start - b.hit.start,
+  );
 }
 
 /**
@@ -669,6 +735,48 @@ function employerFrom(parts: Part[]): ProposedFact | null {
     };
   }
   return null;
+}
+
+/* ---------------- What the model may read ---------------- */
+
+/** Words about the move itself, which give a month or a place its meaning. */
+const MOVE_WORDS =
+  /\b(?:mov\w*|land\w*|arriv\w*|relocat\w*|rent\w*|budget|afford|apartment|studio|room|place|neighbou?rhood|live|living)\b/i;
+
+/** Whether a sentence holds anything a profile fact could come from. */
+function hasProfileWords(part: Part): boolean {
+  const one = [part];
+  const t = part.text;
+  return (
+    MOVE_WORDS.test(t) ||
+    amountsIn(part).some((a) => a.counts) ||
+    monthsIn(one, false).length > 0 ||
+    placesIn(one, false).length > 0 ||
+    NO_CAR.test(t) ||
+    TRANSPORT_PATTERNS.some((p) => p.re.test(t)) ||
+    WORK_HOURS_PATTERNS.some((p) => p.re.test(t)) ||
+    WORKPLACE_PATTERNS.some((p) => p.re.test(t)) ||
+    new RegExp(WORKS_WEEKENDS.source, "i").test(t) ||
+    EMPLOYER_RE.test(t) ||
+    GOAL_PATTERNS.some((p) => p.re.test(t)) ||
+    [...INTEREST_RES.values()].some((res) => res.some((re) => hits(one, re, false).length > 0))
+  );
+}
+
+/**
+ * The only sentences of what someone wrote that Muse reads: those with words
+ * a profile fact could come from (an amount, a month, a place, how they get
+ * around, work, an activity, a goal, or the move itself), one per line, after
+ * `redactProtected`. A sentence with none of these, including anything about
+ * who someone is that the deny list missed, never reaches the model. Muse's
+ * check already requires each quote to contain its fact's own words, so
+ * nothing it could use is lost.
+ */
+export function profileSentences(text: string): string {
+  return clauses(redactProtected(text.slice(0, MAX_TEXT_LENGTH)))
+    .filter(hasProfileWords)
+    .map((p) => p.text)
+    .join("\n");
 }
 
 /* ---------------- Entry point ---------------- */

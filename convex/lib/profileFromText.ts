@@ -13,8 +13,14 @@ import {
   WORKPLACES,
 } from "./cityProfileFacts";
 import { INTEREST_SECTIONS, INTERESTS } from "./interests";
-import { employerProblem, extractFacts, narrowQuote, quoteProblem } from "./profileText";
-import { hasProtected, REDACTED, redactProtected } from "./protectedText";
+import {
+  employerProblem,
+  extractFacts,
+  narrowQuote,
+  profileSentences,
+  quoteProblem,
+} from "./profileText";
+import { hasProtected, REDACTED } from "./protectedText";
 
 /**
  * Muse's "Tell us about you" task (#3 on #8's `runAgent`): reads what the
@@ -33,15 +39,19 @@ import { hasProtected, REDACTED, redactProtected } from "./protectedText";
  */
 
 export type ProfileTextInput = {
-  /** What the person wrote, trimmed, with protected traits replaced by `REDACTED`. */
+  /** What the person wrote: only sentences with profile vocabulary, protected traits replaced by `REDACTED`. */
   text: string;
   /** "YYYY-MM-DD" in San Francisco, so "in March" resolves to the right year. */
   today: string;
 };
 
-/** The task's input: the only form of the person's text that reaches the model. */
+/**
+ * The task's input: the only form of the person's text that reaches the model.
+ * Protected traits are redacted, and only sentences with profile vocabulary
+ * are kept (`profileSentences`), so the rest of what they wrote never leaves.
+ */
 export function profileInput(text: string, now = Date.now()): ProfileTextInput {
-  return { text: redactProtected(text.trim()), today: todayInSF(now) };
+  return { text: profileSentences(text.trim()), today: todayInSF(now) };
 }
 
 const proposedFact = v.object({
@@ -71,9 +81,9 @@ const INSTRUCTIONS = `The person is setting up their Landing City Profile before
 
 Each fact is { entry: { key, value }, quote, carFree? }. At most one fact per key, except interest, neighborhood and goal, which get one fact per item.
 - quote: the shortest phrase from the text that supports the fact and contains its own words (the activity, the place, the amount, the month, each transport mode), copied character for character (same spelling, no added words, no ellipses). Only those words are kept as evidence.
-- budget: monthly rent in whole US dollars. "$2k" = 2000, "1.8–2.4k" = min 1800 and max 2400. A single number or "under X" is max only.
-- moveIn: month "YYYY-MM", the next such month on or after today unless they give a year. Add date "YYYY-MM-DD" only when they give a day.
-- neighborhood: only San Francisco neighborhoods they name as places they'd consider living, using these slugs: ${neighborhoodList}. Map everyday names: "the Mission" = mission, "Outer Sunset" or "the Sunset" = sunset-parkside, "SoMa" = south-of-market, "Dogpatch" = potrero-hill, "NoPa" = western-addition, "the Haight" = haight-ashbury. Skip places outside these, and places they only work in or visit.
+- budget: monthly rent in whole US dollars. "$2k" = 2000, "1.8–2.4k" = min 1800 and max 2400. A single number or "under X" is max only. Other amounts in the same sentence aren't rent: "$2,500 including $300 for utilities" is max 2500.
+- moveIn: month "YYYY-MM", the next such month on or after today unless they give a year. Add date "YYYY-MM-DD" only when they give a day. Numeric dates are US month/day: "3/15/2027" and "2027-03-15" are both 2027-03-15.
+- neighborhood: only San Francisco neighborhoods they name as places they'd consider living, using these slugs: ${neighborhoodList}. Map everyday names: "the Mission" = mission, "Outer Sunset" or "the Sunset" = sunset-parkside, "SoMa" = south-of-market, "Dogpatch" = potrero-hill, "NoPa" = western-addition, "the Haight" = haight-ashbury. Skip places outside these, places they only work in or visit, and places they're moving from: "moving from the Mission to SoMa" is SoMa only.
 - transport: modes from ${TRANSPORT_MODES.map((m) => m.id).join(", ")} that they'll use to get around ("N Judah", "the bus" and "streetcar" are muni). Include "car" only if they'll have one. Set carFree true only when they say they won't have a car.
 - schedule: workHours ${WORK_HOURS.map((w) => w.id).join(" | ")}, workplace ${WORKPLACES.map((w) => w.id).join(" | ")} (only if they say), weekendsFree false only if they say they work weekends. Propose a schedule only when they say something about work hours or where they work.
 - employer: the company or school by the name they use, only if they name it. workArea only if they say where it is.
@@ -185,5 +195,6 @@ export const profileFromText = defineTask({
   effort: "low",
   maxAttempts: 2,
   // 3: quotes must contain the fact's own words, which are all that's kept as evidence.
-  version: 3,
+  // 4: only sentences with profile vocabulary reach the model; origin places, numeric dates (#77).
+  version: 4,
 });
