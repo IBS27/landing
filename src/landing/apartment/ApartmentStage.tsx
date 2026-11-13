@@ -66,7 +66,7 @@ export type ApartmentStageProps = {
 type Unit = NonNullable<ApartmentView["unit"]>;
 type Place = NonNullable<ApartmentView["place"]>;
 
-/** What the tabs (above) and the chat dock (below) cover, for framing the model between them. */
+/** What the tabs (above) and a short chat dock (below) cover, for framing the model between them. */
 const INSET = { top: 84, bottom: 236 } as const;
 const UNDO_MS = 5000;
 const NUDGE_SAVE_MS = 350;
@@ -206,6 +206,11 @@ function Apartment({
   focusItemId: string | null;
   onAsk: (text: string) => void;
 }) {
+  // A reply with cards makes the dock taller: keep the whole model in view above it.
+  const inset = useMemo(
+    () => ({ top: INSET.top, bottom: Math.max(INSET.bottom, dock.above + 16) }),
+    [dock.above],
+  );
   const unitId = unit.id;
   const dark = useDark();
   const still = useReducedMotion();
@@ -621,7 +626,7 @@ function Apartment({
                 arrivals={arrivals.current}
                 focus={focus}
                 home={home}
-                inset={INSET}
+                inset={inset}
                 walk={walk}
                 handle={handle}
                 onSelect={setSelected}
