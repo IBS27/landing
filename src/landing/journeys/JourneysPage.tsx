@@ -435,7 +435,7 @@ function CrewOverlap({
           <p className="min-w-0 flex-1 text-[15px] text-primary leading-5">
             {stop.viewerGoing ? (
               <>
-                <span className="font-semibold">You and {nameList(names)}</span> are going
+                <span className="font-semibold">{nameList(["You", ...names])}</span> are going
               </>
             ) : (
               <>
