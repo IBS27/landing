@@ -7,6 +7,7 @@ import {
   isBayArea,
   lowPriceSignal,
   MIN_COMPS,
+  neighborhoodArea,
   newAccountSignal,
   phraseFlags,
   reusedPhotosSignal,
@@ -48,6 +49,8 @@ const rental = (
   price: number,
   o: {
     hood?: string;
+    /** DataSF neighborhood id (#15). */
+    nb?: string;
     city?: string;
     bedrooms?: number;
     createdAt?: number;
@@ -64,6 +67,7 @@ const rental = (
     description: "A place",
     photos: o.photos ?? [`/p/${_id}.jpg`],
     location: { city: o.city ?? "San Francisco, CA", neighborhood: o.hood, lat: 0, lng: 0 },
+    neighborhoodId: o.nb,
     status: "active",
     rental: {
       propertyType: "apartment",
@@ -92,27 +96,71 @@ describe("isBayArea", () => {
 });
 
 describe("lowPriceSignal", () => {
-  const me = rental("me", "L", 1500, { hood: "Mission" });
+  const MISSION = { name: "Mission" };
+  const me = rental("me", "L", 1500, { hood: "Mission", nb: "nb:mission" });
   test("needs MIN_COMPS comparables, otherwise no signal", () => {
-    const two = [rental("a", "x", 3000, { hood: "Mission" }), rental("b", "x", 3100)];
+    const two = [
+      rental("a", "x", 3000, { hood: "Mission", nb: "nb:mission" }),
+      rental("b", "x", 3100),
+    ];
     expect(MIN_COMPS).toBe(3);
-    expect(lowPriceSignal(me, two)).toBeNull();
+    expect(lowPriceSignal(me, two, MISSION)).toBeNull();
   });
   test("neighborhood first, then the city, citing the comparables", () => {
     const comps = [
-      rental("a", "x", 3000, { hood: "Mission" }),
-      rental("b", "x", 3200, { hood: "Mission" }),
-      rental("c", "x", 3100, { hood: "Mission" }),
-      rental("d", "x", 9000, { hood: "Mission", bedrooms: 3 }),
+      rental("a", "x", 3000, { hood: "Mission", nb: "nb:mission" }),
+      rental("b", "x", 3200, { hood: "Mission", nb: "nb:mission" }),
+      rental("c", "x", 3100, { hood: "Mission", nb: "nb:mission" }),
+      rental("d", "x", 9000, { hood: "Mission", nb: "nb:mission", bedrooms: 3 }),
     ];
-    const s = lowPriceSignal(me, comps);
-    expect(s).toMatchObject({ kind: "low_price", area: "the Mission", comps: 3, median: 3100 });
+    const s = lowPriceSignal(me, comps, MISSION);
+    expect(s).toMatchObject({
+      kind: "low_price",
+      area: "the Mission neighborhood",
+      comps: 3,
+      median: 3100,
+    });
     expect(s?.kind === "low_price" && [...s.compIds].sort()).toEqual(id(["a", "b", "c"]));
-    const cityOnly = comps.map((c) => ({
-      ...c,
-      location: { ...c.location, neighborhood: "SoMa" },
-    }));
-    expect(lowPriceSignal(me, cityOnly)).toMatchObject({ area: "San Francisco", comps: 3 });
+    const cityOnly = comps.map((c) => ({ ...c, neighborhoodId: "nb:soma" as never }));
+    expect(lowPriceSignal(me, cityOnly, MISSION)).toMatchObject({
+      area: "San Francisco",
+      comps: 3,
+    });
+  });
+  test("groups by neighborhoodId, not the typed neighborhood", () => {
+    // "Dogpatch" and "Potrero Hill" typed by different listers, one DataSF neighborhood.
+    const dogpatch = rental("me", "L", 1500, { hood: "Dogpatch", nb: "nb:potrero-hill" });
+    const comps = ["a", "b", "c"].map((x) =>
+      rental(x, "x", 3000, { hood: "Potrero Hill", nb: "nb:potrero-hill" }),
+    );
+    expect(lowPriceSignal(dogpatch, comps, { name: "Potrero Hill" })).toMatchObject({
+      area: "the Potrero Hill neighborhood",
+      comps: 3,
+    });
+    // The same typed name in a different DataSF neighborhood doesn't count as nearby.
+    const sameText = ["a", "b", "c"].map((x) =>
+      rental(x, "x", 3000, { hood: "Dogpatch", nb: "nb:bayview-hunters-point" }),
+    );
+    expect(lowPriceSignal(dogpatch, sameText, { name: "Potrero Hill" })).toMatchObject({
+      area: "San Francisco",
+    });
+  });
+  test("a listing with no neighborhoodId skips to the city", () => {
+    const loose = rental("me", "L", 1500, { hood: "Mission" });
+    const comps = ["a", "b", "c"].map((x) =>
+      rental(x, "x", 3000, { hood: "Mission", nb: "nb:mission" }),
+    );
+    expect(lowPriceSignal(loose, comps)).toMatchObject({ area: "San Francisco" });
+  });
+  test("the cited area uses the short name when there is one", () => {
+    expect(neighborhoodArea({ name: "Castro/Upper Market", shortName: "Castro" })).toBe(
+      "the Castro neighborhood",
+    );
+    expect(neighborhoodArea({ name: "South of Market", shortName: "SoMa" })).toBe(
+      "the SoMa neighborhood",
+    );
+    expect(neighborhoodArea({ name: "Glen Park" })).toBe("the Glen Park neighborhood");
+    expect(neighborhoodArea(null)).toBe("this neighborhood");
   });
   test("a city with the same name in another state doesn't count", () => {
     const rich = rental("me", "L", 1500, { city: "Richmond, CA" });
