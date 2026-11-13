@@ -12,7 +12,7 @@ import {
   type UnitScene,
   unitScene,
 } from "../convex/lib/unitScene";
-import { unitSceneTask } from "../convex/lib/unitSceneTask";
+import { layoutMedia, unitSceneTask } from "../convex/lib/unitSceneTask";
 import { acceptCandidate, create, ownScene, save, saveCandidate } from "../convex/unitScenes";
 import result from "../scripts/unit-scenes/heathmead.result.json";
 import detailedResult from "../scripts/unit-scenes/heathmead-detailed.result.json";
@@ -126,6 +126,14 @@ describe("unit geometry", () => {
         [],
       ).scene,
     ).toBeNull();
+  });
+  test("uses a supplied floor plan for topology and falls back to photos when no plan exists", () => {
+    const media = [
+      { key: "plan", kind: "image" as const, url: "https://example.com/plan.png" },
+      { key: "photo", kind: "image" as const, url: "https://example.com/room.jpg" },
+    ];
+    expect(layoutMedia(media, [{ key: "plan", kind: "floorplan" }])).toEqual([media[0]]);
+    expect(layoutMedia(media.slice(1), [{ key: "photo", kind: "photo" }])).toEqual(media.slice(1));
   });
   test("unmodified real Muse output validates and all eight spaces connect through doorways", () => {
     for (const generated of [result, videoResult, detailedResult]) {

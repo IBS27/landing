@@ -1,0 +1,1044 @@
+{
+  "listingUrl": "https://www.holroydhomes.co.uk/property/great-heathmead-haywards-heath-rh16/143312-000227/1",
+  "generatedAt": "2026-11-13T05:34:12.511Z",
+  "output": {
+    "explanation": "Corrected openings against the floor-plan white wall breaks while preserving the estimated geometry: sliding door moved to the lounge north wall, a window restored on the lounge west wall, and the unsupported south-kitchen window removed. All citations are limited to the supplied floorplan evidence.",
+    "scene": {
+      "notes": [
+        "No metric dimensions are printed on the floor plan; every length, wall thickness and ceiling height is estimated and the existing estimated scale, room polygons, wall coordinates and IDs are preserved without rescaling or rearrangement.",
+        "CORRECTION - Kitchen south wall w-s-kitchen: removed the previous window. The south/bottom kitchen boundary is a solid wall in floorplan; the sink/drainer and hob symbols are internal fixtures on that side, not wall openings.",
+        "CORRECTION - Lounge north wall w-n-lounge: the wide full-height sliding-door opening is placed on the north/top boundary near the left/west corner (offset 0.5m, width 1.8m), replacing the previous ordinary window at that position. The separate narrower north window near the east side is retained.",
+        "CORRECTION - Lounge west wall w-w-lounge: changed from a sliding door to a separate sill window, following the white wall break on the west/left boundary in floorplan. The previous layout appears to have swapped the north sliding door and the west window.",
+        "Other exterior openings audited against the white breaks in floorplan and retained: north windows to Bedroom 2 and Bedroom 1, the kitchen west external door with the small window south of it, and the east Entrance Hall front door. No other exterior windows were added.",
+        "Internal door openings were retained where their positions correspond to door swings/breaks in floorplan: Lounge, Bedroom 1, Bedroom 2, Kitchen, Bathroom and the south-east storage compartment to the Entrance Hall. Shared walls occur once and room polygons are unchanged.",
+        "Uncertainty retained: the small partitioned lobby/cupboards at the north-west of the Kitchen are not modelled as separate rooms and the Kitchen polygon is unchanged; kitchen cabinets/fixtures are not rooms. The access position for the small storage compartment east of the Bathroom remains uncertain from floorplan alone, so its existing opening was not moved. No furniture or outdoor views are modelled."
+      ],
+      "rooms": [
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#D2D2CE",
+          "id": "lounge",
+          "name": "Lounge/Dining Room",
+          "polygon": [
+            {
+              "x": 0,
+              "z": 0
+            },
+            {
+              "x": 5,
+              "z": 0
+            },
+            {
+              "x": 5,
+              "z": 4.2
+            },
+            {
+              "x": 0,
+              "z": 4.2
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#C9C9C9",
+          "id": "bed2",
+          "name": "Bedroom 2",
+          "polygon": [
+            {
+              "x": 5,
+              "z": 0
+            },
+            {
+              "x": 7.1,
+              "z": 0
+            },
+            {
+              "x": 7.1,
+              "z": 3.2
+            },
+            {
+              "x": 6.6,
+              "z": 3.2
+            },
+            {
+              "x": 6.6,
+              "z": 4.2
+            },
+            {
+              "x": 5,
+              "z": 4.2
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#C9C9C9",
+          "id": "bed1",
+          "name": "Bedroom 1",
+          "polygon": [
+            {
+              "x": 7.1,
+              "z": 0
+            },
+            {
+              "x": 11,
+              "z": 0
+            },
+            {
+              "x": 11,
+              "z": 5.5
+            },
+            {
+              "x": 8.5,
+              "z": 5.5
+            },
+            {
+              "x": 8.5,
+              "z": 4.2
+            },
+            {
+              "x": 6.6,
+              "z": 4.2
+            },
+            {
+              "x": 6.6,
+              "z": 3.2
+            },
+            {
+              "x": 7.1,
+              "z": 3.2
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#C4B8A8",
+          "id": "kitchen",
+          "name": "Kitchen",
+          "polygon": [
+            {
+              "x": 0,
+              "z": 4.2
+            },
+            {
+              "x": 4,
+              "z": 4.2
+            },
+            {
+              "x": 4,
+              "z": 7.2
+            },
+            {
+              "x": 0,
+              "z": 7.2
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#C9C4B8",
+          "id": "hall",
+          "name": "Entrance Hall",
+          "polygon": [
+            {
+              "x": 4,
+              "z": 4.2
+            },
+            {
+              "x": 8.5,
+              "z": 4.2
+            },
+            {
+              "x": 8.5,
+              "z": 6.05
+            },
+            {
+              "x": 11,
+              "z": 6.05
+            },
+            {
+              "x": 11,
+              "z": 7.2
+            },
+            {
+              "x": 7.2,
+              "z": 7.2
+            },
+            {
+              "x": 7.2,
+              "z": 5.5
+            },
+            {
+              "x": 4,
+              "z": 5.5
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#8FA6B5",
+          "id": "bathroom",
+          "name": "Bathroom",
+          "polygon": [
+            {
+              "x": 4,
+              "z": 5.5
+            },
+            {
+              "x": 6.5,
+              "z": 5.5
+            },
+            {
+              "x": 6.5,
+              "z": 7.2
+            },
+            {
+              "x": 4,
+              "z": 7.2
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#B8CBD6",
+          "id": "bath-store",
+          "name": "Storage",
+          "polygon": [
+            {
+              "x": 6.5,
+              "z": 5.5
+            },
+            {
+              "x": 7.2,
+              "z": 5.5
+            },
+            {
+              "x": 7.2,
+              "z": 7.2
+            },
+            {
+              "x": 6.5,
+              "z": 7.2
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#D8CFC0",
+          "id": "store-se",
+          "name": "Storage",
+          "polygon": [
+            {
+              "x": 8.5,
+              "z": 5.5
+            },
+            {
+              "x": 11,
+              "z": 5.5
+            },
+            {
+              "x": 11,
+              "z": 6.05
+            },
+            {
+              "x": 8.5,
+              "z": 6.05
+            }
+          ]
+        }
+      ],
+      "title": "Great Heathmead, Haywards Heath - estimated ground floor reconstruction",
+      "version": 1,
+      "walls": [
+        {
+          "a": {
+            "x": 0,
+            "z": 0
+          },
+          "b": {
+            "x": 5,
+            "z": 0
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-n-lounge",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 0.5,
+              "width": 1.8
+            },
+            {
+              "bottom": 0.9,
+              "height": 1.2,
+              "kind": "window",
+              "offset": 3.6,
+              "width": 0.9
+            }
+          ],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 5,
+            "z": 0
+          },
+          "b": {
+            "x": 7.1,
+            "z": 0
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-n-bed2",
+          "openings": [
+            {
+              "bottom": 0.9,
+              "height": 1.2,
+              "kind": "window",
+              "offset": 0.6,
+              "width": 1.2
+            }
+          ],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 7.1,
+            "z": 0
+          },
+          "b": {
+            "x": 11,
+            "z": 0
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-n-bed1",
+          "openings": [
+            {
+              "bottom": 0.85,
+              "height": 1.25,
+              "kind": "window",
+              "offset": 1.9,
+              "width": 1.4
+            }
+          ],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 11,
+            "z": 0
+          },
+          "b": {
+            "x": 11,
+            "z": 5.5
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-e-bed1",
+          "openings": [],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 11,
+            "z": 5.5
+          },
+          "b": {
+            "x": 11,
+            "z": 6.05
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-e-store",
+          "openings": [],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 11,
+            "z": 6.05
+          },
+          "b": {
+            "x": 11,
+            "z": 7.2
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-e-hall",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 0.25,
+              "width": 0.9
+            }
+          ],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 7.2
+          },
+          "b": {
+            "x": 4,
+            "z": 7.2
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-s-kitchen",
+          "openings": [],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 4,
+            "z": 7.2
+          },
+          "b": {
+            "x": 7.2,
+            "z": 7.2
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-s-bath",
+          "openings": [],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 7.2,
+            "z": 7.2
+          },
+          "b": {
+            "x": 11,
+            "z": 7.2
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-s-hall",
+          "openings": [],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 0
+          },
+          "b": {
+            "x": 0,
+            "z": 4.2
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-w-lounge",
+          "openings": [
+            {
+              "bottom": 0.9,
+              "height": 1.2,
+              "kind": "window",
+              "offset": 1.4,
+              "width": 1.1
+            }
+          ],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 4.2
+          },
+          "b": {
+            "x": 0,
+            "z": 7.2
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-w-kitchen",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 1.2,
+              "width": 0.85
+            },
+            {
+              "bottom": 0.9,
+              "height": 1.1,
+              "kind": "window",
+              "offset": 2.35,
+              "width": 0.55
+            }
+          ],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 5,
+            "z": 0
+          },
+          "b": {
+            "x": 5,
+            "z": 4.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-lounge-bed2",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 7.1,
+            "z": 0
+          },
+          "b": {
+            "x": 7.1,
+            "z": 3.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bed2-bed1-n",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 6.6,
+            "z": 3.2
+          },
+          "b": {
+            "x": 7.1,
+            "z": 3.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bed-notch-h",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 6.6,
+            "z": 3.2
+          },
+          "b": {
+            "x": 6.6,
+            "z": 4.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bed-notch-v",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 4.2
+          },
+          "b": {
+            "x": 4,
+            "z": 4.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-lounge-kitchen",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 4,
+            "z": 4.2
+          },
+          "b": {
+            "x": 5,
+            "z": 4.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-lounge-hall",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 0.1,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 5,
+            "z": 4.2
+          },
+          "b": {
+            "x": 6.6,
+            "z": 4.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bed2-hall",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 0.7,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 6.6,
+            "z": 4.2
+          },
+          "b": {
+            "x": 8.5,
+            "z": 4.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bed1-hall",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 0.9,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 4,
+            "z": 4.2
+          },
+          "b": {
+            "x": 4,
+            "z": 5.5
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-kitchen-hall",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 0.25,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 4,
+            "z": 5.5
+          },
+          "b": {
+            "x": 4,
+            "z": 7.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-kitchen-bath",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 4,
+            "z": 5.5
+          },
+          "b": {
+            "x": 6.5,
+            "z": 5.5
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-hall-bath",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 1.4,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 6.5,
+            "z": 5.5
+          },
+          "b": {
+            "x": 7.2,
+            "z": 5.5
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-hall-bathstore",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 6.5,
+            "z": 5.5
+          },
+          "b": {
+            "x": 6.5,
+            "z": 7.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bath-store",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 0.9,
+              "width": 0.7
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 7.2,
+            "z": 5.5
+          },
+          "b": {
+            "x": 7.2,
+            "z": 7.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-store-hall-e",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 8.5,
+            "z": 4.2
+          },
+          "b": {
+            "x": 8.5,
+            "z": 5.5
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bed1-hall-w",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 8.5,
+            "z": 5.5
+          },
+          "b": {
+            "x": 11,
+            "z": 5.5
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bed1-store",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 8.5,
+            "z": 5.5
+          },
+          "b": {
+            "x": 8.5,
+            "z": 6.05
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-store-hall-w",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 8.5,
+            "z": 6.05
+          },
+          "b": {
+            "x": 11,
+            "z": 6.05
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-store-hall-s",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 0.6,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.1
+        }
+      ]
+    }
+  },
+  "via": "model",
+  "cited": null,
+  "validation": [],
+  "log": {
+    "agent": "muse",
+    "task": "muse.unitScene",
+    "inputHash": "fcc0c9c29ba8f9ce55d06028d1280368b915903e72ae5c589a48f88e0ce2a000",
+    "outcome": "model",
+    "cited": [],
+    "model": "muse-wonder-1.0",
+    "attempts": 1,
+    "latencyMs": 42479,
+    "usage": {
+      "inputTokens": 10534,
+      "outputTokens": 6264,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "costUsd": 0.167416,
+    "createdAt": 1794548052511
+  }
+}

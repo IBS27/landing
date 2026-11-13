@@ -349,7 +349,9 @@ export function roomCenter(room: UnitScene["rooms"][number]): Point {
     for (let z = minZ + 0.25; z < maxZ; z += 0.25) if (inside({ x, z }, p)) return { x, z };
   return p[0];
 }
-export function placementCorners(p: Placement): Point[] {
+export function placementCorners(
+  p: Pick<Placement, "x" | "z" | "rotation" | "width" | "depth">,
+): Point[] {
   const c = Math.cos(p.rotation),
     s = Math.sin(p.rotation);
   return [

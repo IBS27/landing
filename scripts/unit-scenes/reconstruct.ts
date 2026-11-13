@@ -8,10 +8,10 @@ import { getFunctionName, type FunctionReference } from "convex/server";
 import type { ActionCtx } from "../../convex/_generated/server";
 import type { Id } from "../../convex/_generated/dataModel";
 import { runAgent } from "../../convex/ai/agent";
-import { unitSceneTask } from "../../convex/lib/unitSceneTask";
-import { sceneProblems, type SceneSource } from "../../convex/lib/unitScene";
+import { layoutMedia, unitSceneTask } from "../../convex/lib/unitSceneTask";
+import { sceneProblems, type SceneSource, type UnitScene } from "../../convex/lib/unitScene";
 
-const [sourceFile, outputFile] = process.argv.slice(2);
+const [sourceFile, outputFile, layoutFile] = process.argv.slice(2);
 if (!sourceFile || !outputFile || !process.env.MODEL_API_KEY)
   throw new Error("Supply sources.json, output.json and MODEL_API_KEY");
 const fixture = JSON.parse(await readFile(sourceFile, "utf8")) as {
@@ -20,6 +20,12 @@ const fixture = JSON.parse(await readFile(sourceFile, "utf8")) as {
   listingUrl: string;
   sources: (SceneSource & { localFile?: string })[];
 };
+const prior = layoutFile
+  ? (JSON.parse(await readFile(layoutFile, "utf8")) as { output: { scene: UnitScene } })
+  : undefined;
+const currentLayout = prior
+  ? (({ appearance: _appearance, ...geometry }) => geometry)(prior.output.scene)
+  : undefined;
 let log: Record<string, unknown> = {};
 const ctx = {
   runQuery: async (ref: FunctionReference<"query">) => {
@@ -34,14 +40,8 @@ const ctx = {
     return "experiment-run" as Id<"aiRuns">;
   },
 } as unknown as ActionCtx;
-const result = await runAgent(ctx, unitSceneTask, {
-  input: {
-    title: fixture.title,
-    description: fixture.description,
-    measurements: null,
-    evidence: fixture.sources.map(({ key, label, kind }) => ({ key, label, kind })),
-  },
-  media: await Promise.all(
+const media = layoutMedia(
+  await Promise.all(
     fixture.sources.map(async (s) => ({
       key: s.key,
       kind: s.kind === "video" ? ("video" as const) : ("image" as const),
@@ -50,20 +50,35 @@ const result = await runAgent(ctx, unitSceneTask, {
         : s.url!,
     })),
   ),
+  fixture.sources,
+);
+const result = await runAgent(ctx, unitSceneTask, {
+  input: {
+    title: fixture.title,
+    description: fixture.description,
+    measurements: null,
+    ...(currentLayout ? { currentLayout } : {}),
+    evidence: fixture.sources
+      .filter((s) => media.some((m) => m.key === s.key))
+      .map(({ key, label, kind }) => ({ key, label, kind })),
+  },
+  media,
   sources: [],
   shownTo: "offline-experiment" as Id<"users">,
 });
+const { output: _output, userId: _user, ...metrics } = log;
+const { runId: _run, ...resultData } = result;
 const output = {
   listingUrl: fixture.listingUrl,
   generatedAt: new Date().toISOString(),
-  ...result,
+  ...resultData,
   validation: result.output.scene
     ? sceneProblems(
         result.output.scene,
         fixture.sources.map((s) => s.key),
       )
     : [],
-  log,
+  log: metrics,
 };
 await mkdir(dirname(outputFile), { recursive: true });
 await writeFile(outputFile, JSON.stringify(output, null, 2) + "\n");

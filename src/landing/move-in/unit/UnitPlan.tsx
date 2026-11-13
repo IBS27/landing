@@ -106,6 +106,29 @@ export function UnitPlan({
           </g>
         );
       })}
+      {scene.appearance?.objects
+        .filter((o) => o.position.y < 1.8)
+        .map((o) => (
+          <polygon
+            key={`observed-${o.id}`}
+            points={placementCorners({
+              x: o.position.x,
+              z: o.position.z,
+              width: o.size.x,
+              depth: o.size.z,
+              rotation: o.rotation,
+            })
+              .map((p) => `${p.x},${p.z}`)
+              .join(" ")}
+            fill="#64748b"
+            fillOpacity={0.2}
+            stroke="#64748b"
+            strokeWidth={0.02}
+            pointerEvents="none"
+          >
+            <title>{o.label} · inferred footprint</title>
+          </polygon>
+        ))}
       {scene.walls.map((w) => (
         <g key={w.id}>
           <line

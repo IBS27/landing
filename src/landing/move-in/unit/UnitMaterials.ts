@@ -4,6 +4,8 @@ import {
   type BufferGeometry,
   Color,
   DataTexture,
+  LinearFilter,
+  LinearMipmapLinearFilter,
   MeshStandardMaterial,
   RepeatWrapping,
   RGBAFormat,
@@ -43,6 +45,10 @@ function texture(pattern: string, repeat: number, bump: boolean) {
     }
   const map = new DataTexture(data, n, n, RGBAFormat);
   map.wrapS = map.wrapT = RepeatWrapping;
+  map.magFilter = LinearFilter;
+  map.minFilter = LinearMipmapLinearFilter;
+  map.generateMipmaps = true;
+  map.anisotropy = 4;
   map.repeat.set(1 / repeat, 1 / repeat);
   if (!bump) map.colorSpace = SRGBColorSpace;
   map.needsUpdate = true;

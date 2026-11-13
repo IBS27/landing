@@ -115,11 +115,13 @@ export function appearanceProblems(
       )
         errors.push(`${o.id}: invalid part`);
       const [hx, hy, hz] = partExtents(p);
+      // Relative rounding allowance stays invariant when the user calibrates the unit's scale.
+      const tolerance = 0.01 * Math.max(o.size.x, o.size.y, o.size.z);
       if (
-        Math.abs(p.position.x) + hx > o.size.x / 2 + 0.01 ||
-        p.position.y - hy < -0.01 ||
-        p.position.y + hy > o.size.y + 0.01 ||
-        Math.abs(p.position.z) + hz > o.size.z / 2 + 0.01
+        Math.abs(p.position.x) + hx > o.size.x / 2 + tolerance ||
+        p.position.y - hy < -tolerance ||
+        p.position.y + hy > o.size.y + tolerance ||
+        Math.abs(p.position.z) + hz > o.size.z / 2 + tolerance
       )
         errors.push(`${o.id}: part outside object bounds`);
     }

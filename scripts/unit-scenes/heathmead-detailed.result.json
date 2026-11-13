@@ -1,25 +1,23 @@
 {
   "listingUrl": "https://www.holroydhomes.co.uk/property/great-heathmead-haywards-heath-rh16/143312-000227/1",
-  "generatedAt": "2026-11-13T05:28:47.486Z",
+  "generatedAt": "2026-11-13T05:36:30.568Z",
   "output": {
     "scene": {
       "notes": [
-        "No metric dimensions are printed on the floor plan in the input description; every length, wall thickness and ceiling height below is estimated and must not be treated as measured.",
-        "Floor plan determines the rectangular topology, the Bedroom 2 south-east notch into Bedroom 1, the central Entrance Hall, the south-east storage cupboard and the small cupboard east of the Bathroom.",
-        "Photos 5-6 and video c.1:36-2:11 show the Lounge/Dining Room has full-height sliding doors in addition to two windows; this conflicts with the simple window symbol on the west wall of the plan, so a sliding door is modelled on the west wall and windows are retained on the north wall.",
-        "Kitchen external door and adjacent window are shown on the plan west wall and in photo-2/video c.1:10-1:33; the small partitioned lobby/cupboards at the north-west of the Kitchen on the plan are not clearly readable and are included within the Kitchen polygon, noted as uncertain.",
-        "The light-blue compartment east of the Bathroom on the plan is modelled as Storage; its access door position is uncertain from photos/video. The south-east compartment north of the front-door lobby is modelled as Storage from the plan door swing.",
-        "Exterior photos 1, 4, 11 and 12 are not used for interior geometry or outdoor views. No furniture is modelled."
+        "No metric dimensions are printed on the floor plan; every length, wall thickness and ceiling height is estimated and the existing estimated scale, room polygons, wall coordinates and IDs are preserved without rescaling or rearrangement.",
+        "CORRECTION - Kitchen south wall w-s-kitchen: removed the previous window. The south/bottom kitchen boundary is a solid wall in floorplan; the sink/drainer and hob symbols are internal fixtures on that side, not wall openings.",
+        "CORRECTION - Lounge north wall w-n-lounge: the wide full-height sliding-door opening is placed on the north/top boundary near the left/west corner (offset 0.5m, width 1.8m), replacing the previous ordinary window at that position. The separate narrower north window near the east side is retained.",
+        "CORRECTION - Lounge west wall w-w-lounge: changed from a sliding door to a separate sill window, following the white wall break on the west/left boundary in floorplan. The previous layout appears to have swapped the north sliding door and the west window.",
+        "Other exterior openings audited against the white breaks in floorplan and retained: north windows to Bedroom 2 and Bedroom 1, the kitchen west external door with the small window south of it, and the east Entrance Hall front door. No other exterior windows were added.",
+        "Internal door openings were retained where their positions correspond to door swings/breaks in floorplan: Lounge, Bedroom 1, Bedroom 2, Kitchen, Bathroom and the south-east storage compartment to the Entrance Hall. Shared walls occur once and room polygons are unchanged.",
+        "Uncertainty retained: the small partitioned lobby/cupboards at the north-west of the Kitchen are not modelled as separate rooms and the Kitchen polygon is unchanged; kitchen cabinets/fixtures are not rooms. The access position for the small storage compartment east of the Bathroom remains uncertain from floorplan alone, so its existing opening was not moved. No furniture or outdoor views are modelled."
       ],
       "rooms": [
         {
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "photo-5",
-              "photo-6",
-              "video-tour"
+              "floorplan"
             ]
           },
           "floorColor": "#D2D2CE",
@@ -48,9 +46,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "photo-10",
-              "video-tour"
+              "floorplan"
             ]
           },
           "floorColor": "#C9C9C9",
@@ -87,10 +83,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "photo-8",
-              "photo-9",
-              "video-tour"
+              "floorplan"
             ]
           },
           "floorColor": "#C9C9C9",
@@ -135,10 +128,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "photo-2",
-              "photo-3",
-              "video-tour"
+              "floorplan"
             ]
           },
           "floorColor": "#C4B8A8",
@@ -167,8 +157,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "video-tour"
+              "floorplan"
             ]
           },
           "floorColor": "#C9C4B8",
@@ -213,9 +202,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "photo-7",
-              "video-tour"
+              "floorplan"
             ]
           },
           "floorColor": "#8FA6B5",
@@ -273,8 +260,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "video-tour"
+              "floorplan"
             ]
           },
           "floorColor": "#D8CFC0",
@@ -323,11 +309,11 @@
           "id": "w-n-lounge",
           "openings": [
             {
-              "bottom": 0.9,
-              "height": 1.2,
-              "kind": "window",
-              "offset": 0.8,
-              "width": 1.6
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 0.5,
+              "width": 1.8
             },
             {
               "bottom": 0.9,
@@ -352,8 +338,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "photo-10"
+              "floorplan"
             ]
           },
           "height": 2.4,
@@ -382,8 +367,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "photo-9"
+              "floorplan"
             ]
           },
           "height": 2.4,
@@ -454,8 +438,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "video-tour"
+              "floorplan"
             ]
           },
           "height": 2.4,
@@ -484,21 +467,12 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "photo-2"
+              "floorplan"
             ]
           },
           "height": 2.4,
           "id": "w-s-kitchen",
-          "openings": [
-            {
-              "bottom": 0.95,
-              "height": 1.1,
-              "kind": "window",
-              "offset": 1,
-              "width": 1.1
-            }
-          ],
+          "openings": [],
           "thickness": 0.25
         },
         {
@@ -556,21 +530,18 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "photo-5",
-              "photo-6",
-              "video-tour"
+              "floorplan"
             ]
           },
           "height": 2.4,
           "id": "w-w-lounge",
           "openings": [
             {
-              "bottom": 0,
-              "height": 2.1,
-              "kind": "door",
-              "offset": 1,
-              "width": 1.8
+              "bottom": 0.9,
+              "height": 1.2,
+              "kind": "window",
+              "offset": 1.4,
+              "width": 1.1
             }
           ],
           "thickness": 0.25
@@ -588,9 +559,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "photo-2",
-              "video-tour"
+              "floorplan"
             ]
           },
           "height": 2.4,
@@ -731,8 +700,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "video-tour"
+              "floorplan"
             ]
           },
           "height": 2.4,
@@ -761,8 +729,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "video-tour"
+              "floorplan"
             ]
           },
           "height": 2.4,
@@ -791,8 +758,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "video-tour"
+              "floorplan"
             ]
           },
           "height": 2.4,
@@ -821,9 +787,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "photo-3",
-              "video-tour"
+              "floorplan"
             ]
           },
           "height": 2.4,
@@ -873,8 +837,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "video-tour"
+              "floorplan"
             ]
           },
           "height": 2.4,
@@ -1037,8 +1000,7 @@
           "evidence": {
             "basis": "estimated",
             "sources": [
-              "floorplan",
-              "video-tour"
+              "floorplan"
             ]
           },
           "height": 2.4,
@@ -1172,14 +1134,16 @@
         ],
         "notes": [
           "Estimated reconstruction; dimensions and exact positions are not measured.",
-          "Hidden carcasses, pipework and rear faces omitted; no freestanding furniture was visible.",
-          "Bathroom patterned floor is represented by one averaged tile colour.",
-          "Curtain, kitchen-unit and basin positions were moved clear of the flagged doorways and approaches; exact side-panel positions are approximate."
+          "Corrections applied: lounge sliding door is on the north wall near the west corner (opening centred about x=1.40, z=0) and the west wall has a sill window; curtains were moved to flank the north sliding door outside its x=0.50-2.30 span, and no radiator or other footprint crosses that door or its 0.35m approach.",
+          "Lounge radiators are now beneath the west sill window and against the solid east internal wall, as seen in photo-5/photo-6; the former radiator beneath the sliding door was removed from that position.",
+          "Kitchen south wall is solid in the fixed geometry: the south run has continuous white wall units with the extractor aligned over the hob, and no unit covers a south window. The sink is at the west end of the south run, near the small west-wall window south of the external door; its tap remains on the south run as photographed in photo-2.",
+          "Hidden carcasses, pipework and rear faces omitted; no freestanding furniture was visible. Bathroom patterned floor is represented by one averaged tile colour.",
+          "Exact curtain bunching, extractor underside and side-panel positions are approximate; hidden surfaces are not observed."
         ],
         "objects": [
           {
             "id": "kitchen-base-south",
-            "label": "Fitted kitchen base units, worktop, sink, hob and oven along south wall",
+            "label": "Fitted kitchen base units, worktop, west-end sink, hob and oven along solid south wall",
             "parts": [
               {
                 "materialId": "mat-white-shaker",
@@ -1601,13 +1565,13 @@
           },
           {
             "id": "kitchen-wall-south",
-            "label": "White Shaker wall units and extractor over south kitchen run",
+            "label": "Continuous white Shaker wall units and extractor over hob on solid south kitchen wall",
             "parts": [
               {
                 "materialId": "mat-white-shaker",
                 "position": {
                   "x": -1.2,
-                  "y": 0.42,
+                  "y": 0.47,
                   "z": 0
                 },
                 "rotation": {
@@ -1617,16 +1581,54 @@
                 },
                 "shape": "box",
                 "size": {
+                  "x": 1.15,
+                  "y": 0.9,
+                  "z": 0.34
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -0.05,
+                  "y": 0.47,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1.15,
+                  "y": 0.9,
+                  "z": 0.34
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 1.6,
+                  "y": 0.47,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.5,
+                  "y": 0.9,
+                  "z": 0.34
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
                   "x": 1,
-                  "y": 0.84,
-                  "z": 0.34
-                }
-              },
-              {
-                "materialId": "mat-white-shaker",
-                "position": {
-                  "x": -0.1,
-                  "y": 0.42,
+                  "y": 0.65,
                   "z": 0
                 },
                 "rotation": {
@@ -1636,27 +1638,8 @@
                 },
                 "shape": "box",
                 "size": {
-                  "x": 1.1,
-                  "y": 0.84,
-                  "z": 0.34
-                }
-              },
-              {
-                "materialId": "mat-white-shaker",
-                "position": {
-                  "x": 1.05,
-                  "y": 0.42,
-                  "z": 0
-                },
-                "rotation": {
-                  "x": 0,
-                  "y": 0,
-                  "z": 0
-                },
-                "shape": "box",
-                "size": {
-                  "x": 1.1,
-                  "y": 0.84,
+                  "x": 0.62,
+                  "y": 0.55,
                   "z": 0.34
                 }
               },
@@ -1664,7 +1647,7 @@
                 "materialId": "mat-white-shaker",
                 "position": {
                   "x": -1.2,
-                  "y": 0.42,
+                  "y": 0.47,
                   "z": -0.18
                 },
                 "rotation": {
@@ -1674,149 +1657,73 @@
                 },
                 "shape": "box",
                 "size": {
-                  "x": 0.92,
-                  "y": 0.72,
-                  "z": 0.02
-                }
-              },
-              {
-                "materialId": "mat-white-shaker",
-                "position": {
-                  "x": -0.35,
-                  "y": 0.42,
-                  "z": -0.18
-                },
-                "rotation": {
-                  "x": 0,
-                  "y": 0,
-                  "z": 0
-                },
-                "shape": "box",
-                "size": {
-                  "x": 0.48,
-                  "y": 0.72,
-                  "z": 0.02
-                }
-              },
-              {
-                "materialId": "mat-white-shaker",
-                "position": {
-                  "x": 0.15,
-                  "y": 0.42,
-                  "z": -0.18
-                },
-                "rotation": {
-                  "x": 0,
-                  "y": 0,
-                  "z": 0
-                },
-                "shape": "box",
-                "size": {
-                  "x": 0.48,
-                  "y": 0.72,
-                  "z": 0.02
-                }
-              },
-              {
-                "materialId": "mat-white-shaker",
-                "position": {
-                  "x": 0.8,
-                  "y": 0.42,
-                  "z": -0.18
-                },
-                "rotation": {
-                  "x": 0,
-                  "y": 0,
-                  "z": 0
-                },
-                "shape": "box",
-                "size": {
-                  "x": 0.48,
-                  "y": 0.72,
-                  "z": 0.02
-                }
-              },
-              {
-                "materialId": "mat-white-shaker",
-                "position": {
-                  "x": 1.3,
-                  "y": 0.42,
-                  "z": -0.18
-                },
-                "rotation": {
-                  "x": 0,
-                  "y": 0,
-                  "z": 0
-                },
-                "shape": "box",
-                "size": {
-                  "x": 0.48,
-                  "y": 0.72,
-                  "z": 0.02
-                }
-              },
-              {
-                "materialId": "mat-steel",
-                "position": {
-                  "x": -0.62,
-                  "y": 0.42,
-                  "z": -0.2
-                },
-                "rotation": {
-                  "x": 0,
-                  "y": 0,
-                  "z": 0
-                },
-                "shape": "box",
-                "size": {
-                  "x": 0.04,
-                  "y": 0.22,
-                  "z": 0.03
-                }
-              },
-              {
-                "materialId": "mat-steel",
-                "position": {
-                  "x": -0.22,
-                  "y": 0.42,
-                  "z": -0.2
-                },
-                "rotation": {
-                  "x": 0,
-                  "y": 0,
-                  "z": 0
-                },
-                "shape": "box",
-                "size": {
-                  "x": 0.04,
-                  "y": 0.22,
-                  "z": 0.03
-                }
-              },
-              {
-                "materialId": "mat-steel",
-                "position": {
-                  "x": 0.55,
-                  "y": 0.42,
-                  "z": -0.2
-                },
-                "rotation": {
-                  "x": 0,
-                  "y": 0,
-                  "z": 0
-                },
-                "shape": "box",
-                "size": {
-                  "x": 0.04,
-                  "y": 0.22,
-                  "z": 0.03
-                }
-              },
-              {
-                "materialId": "mat-steel",
-                "position": {
                   "x": 1.05,
-                  "y": 0.42,
+                  "y": 0.78,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -0.05,
+                  "y": 0.47,
+                  "z": -0.18
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1.05,
+                  "y": 0.78,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 1.6,
+                  "y": 0.47,
+                  "z": -0.18
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.44,
+                  "y": 0.78,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 1,
+                  "y": 0.65,
+                  "z": -0.18
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.56,
+                  "y": 0.45,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.65,
+                  "y": 0.47,
                   "z": -0.2
                 },
                 "rotation": {
@@ -1832,11 +1739,11 @@
                 }
               },
               {
-                "materialId": "mat-white-shaker",
+                "materialId": "mat-steel",
                 "position": {
-                  "x": -1.4,
-                  "y": 0.55,
-                  "z": 0
+                  "x": 0.5,
+                  "y": 0.47,
+                  "z": -0.2
                 },
                 "rotation": {
                   "x": 0,
@@ -1845,17 +1752,55 @@
                 },
                 "shape": "box",
                 "size": {
-                  "x": 0.5,
-                  "y": 0.55,
-                  "z": 0.34
+                  "x": 0.04,
+                  "y": 0.22,
+                  "z": 0.03
                 }
               },
               {
                 "materialId": "mat-steel",
                 "position": {
-                  "x": -1.4,
-                  "y": 0.22,
-                  "z": -0.05
+                  "x": 1,
+                  "y": 0.45,
+                  "z": -0.2
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.3,
+                  "y": 0.03,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 1,
+                  "y": 0.32,
+                  "z": -0.02
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.58,
+                  "y": 0.07,
+                  "z": 0.4
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 1,
+                  "y": 0.05,
+                  "z": -0.02
                 },
                 "rotation": {
                   "x": 0,
@@ -1865,22 +1810,22 @@
                 "shape": "box",
                 "size": {
                   "x": 0.5,
-                  "y": 0.06,
+                  "y": 0.04,
                   "z": 0.34
                 }
               }
             ],
             "position": {
-              "x": 2.45,
-              "y": 1.42,
-              "z": 6.98
+              "x": 2,
+              "y": 1.35,
+              "z": 6.99
             },
             "roomId": "kitchen",
             "rotation": 0,
             "size": {
-              "x": 3.4,
-              "y": 0.9,
-              "z": 0.44
+              "x": 3.7,
+              "y": 0.95,
+              "z": 0.42
             },
             "sources": [
               "photo-2",
@@ -2428,7 +2373,7 @@
           },
           {
             "id": "kitchen-washing-machine",
-            "label": "White front-load washing machine at end of kitchen run",
+            "label": "White front-load washing machine at west end of kitchen run beside sink",
             "parts": [
               {
                 "materialId": "mat-white-ceramic",
@@ -3166,8 +3111,8 @@
             ]
           },
           {
-            "id": "radiator-lounge-north",
-            "label": "White panel radiator under lounge north window",
+            "id": "radiator-lounge-west",
+            "label": "White panel radiator under lounge west sill window, clear of north sliding door",
             "parts": [
               {
                 "materialId": "mat-radiator",
@@ -3183,7 +3128,7 @@
                 },
                 "shape": "box",
                 "size": {
-                  "x": 1.35,
+                  "x": 1.05,
                   "y": 0.55,
                   "z": 0.09
                 }
@@ -3202,7 +3147,7 @@
                 },
                 "shape": "box",
                 "size": {
-                  "x": 1.38,
+                  "x": 1.08,
                   "y": 0.04,
                   "z": 0.11
                 }
@@ -3210,7 +3155,7 @@
               {
                 "materialId": "mat-steel",
                 "position": {
-                  "x": -0.62,
+                  "x": -0.48,
                   "y": 0.08,
                   "z": 0
                 },
@@ -3229,7 +3174,7 @@
               {
                 "materialId": "mat-steel",
                 "position": {
-                  "x": 0.62,
+                  "x": 0.48,
                   "y": 0.08,
                   "z": 0
                 },
@@ -3248,7 +3193,7 @@
               {
                 "materialId": "mat-white-ceramic",
                 "position": {
-                  "x": 0.68,
+                  "x": 0.53,
                   "y": 0.18,
                   "z": 0
                 },
@@ -3266,20 +3211,21 @@
               }
             ],
             "position": {
-              "x": 1.6,
+              "x": 0.16,
               "y": 0.12,
-              "z": 0.16
+              "z": 1.95
             },
             "roomId": "lounge",
-            "rotation": 0,
+            "rotation": 1.5708,
             "size": {
-              "x": 1.45,
+              "x": 1.15,
               "y": 0.68,
               "z": 0.12
             },
             "sources": [
               "photo-6",
-              "video-tour"
+              "video-tour",
+              "floorplan"
             ]
           },
           {
@@ -3578,7 +3524,7 @@
           },
           {
             "id": "radiator-kitchen",
-            "label": "White panel radiator in kitchen",
+            "label": "White panel radiator on solid kitchen west wall north of external door",
             "parts": [
               {
                 "materialId": "mat-radiator",
@@ -3660,7 +3606,7 @@
             "position": {
               "x": 0.16,
               "y": 0.12,
-              "z": 5.2
+              "z": 4.85
             },
             "roomId": "kitchen",
             "rotation": 1.5708,
@@ -3671,12 +3617,13 @@
             },
             "sources": [
               "photo-3",
-              "video-tour"
+              "video-tour",
+              "floorplan"
             ]
           },
           {
-            "id": "curtains-lounge-west-north",
-            "label": "Grey full-length curtain panel north of lounge sliding doors, clear of doorway",
+            "id": "curtains-lounge-north-west",
+            "label": "Grey full-length curtain panel west of lounge north sliding door, outside doorway span",
             "parts": [
               {
                 "materialId": "mat-steel",
@@ -3686,9 +3633,9 @@
                   "z": 0
                 },
                 "rotation": {
-                  "x": 1.5708,
+                  "x": 0,
                   "y": 0,
-                  "z": 0
+                  "z": 1.5708
                 },
                 "shape": "cylinder",
                 "size": {
@@ -3711,33 +3658,34 @@
                 },
                 "shape": "box",
                 "size": {
-                  "x": 0.14,
+                  "x": 0.28,
                   "y": 2.1,
-                  "z": 0.3
+                  "z": 0.12
                 }
               }
             ],
             "position": {
-              "x": 0.2,
+              "x": 0.32,
               "y": 0,
-              "z": 0.8
+              "z": 0.18
             },
             "roomId": "lounge",
             "rotation": 0,
             "size": {
-              "x": 0.2,
+              "x": 0.36,
               "y": 2.25,
-              "z": 0.36
+              "z": 0.18
             },
             "sources": [
               "photo-5",
               "photo-6",
-              "video-tour"
+              "video-tour",
+              "floorplan"
             ]
           },
           {
-            "id": "curtains-lounge-west-south",
-            "label": "Grey full-length curtain panel south of lounge sliding doors, clear of doorway",
+            "id": "curtains-lounge-north-east",
+            "label": "Grey full-length curtain panel east of lounge north sliding door, outside doorway span",
             "parts": [
               {
                 "materialId": "mat-steel",
@@ -3747,9 +3695,9 @@
                   "z": 0
                 },
                 "rotation": {
-                  "x": 1.5708,
+                  "x": 0,
                   "y": 0,
-                  "z": 0
+                  "z": 1.5708
                 },
                 "shape": "cylinder",
                 "size": {
@@ -3772,28 +3720,29 @@
                 },
                 "shape": "box",
                 "size": {
-                  "x": 0.14,
+                  "x": 0.28,
                   "y": 2.1,
-                  "z": 0.3
+                  "z": 0.12
                 }
               }
             ],
             "position": {
-              "x": 0.2,
+              "x": 2.48,
               "y": 0,
-              "z": 3
+              "z": 0.18
             },
             "roomId": "lounge",
             "rotation": 0,
             "size": {
-              "x": 0.2,
+              "x": 0.36,
               "y": 2.25,
-              "z": 0.36
+              "z": 0.18
             },
             "sources": [
               "photo-5",
               "photo-6",
-              "video-tour"
+              "video-tour",
+              "floorplan"
             ]
           },
           {
@@ -4238,30 +4187,26 @@
         ]
       }
     },
-    "explanation": "Moved the kitchen tall unit west to x=2.05 and the drawer return south to z=6.40, so neither footprint is within 35cm of the w-kitchen-hall opening at z 4.45-5.25 on x=4 or its approach at (3.65,4.85). The lounge curtains and bathroom basin clearances from the previous version are retained, with all curtain parts inside their bounds and notes shortened. No other objects, materials or surfaces changed."
+    "explanation": "Moved lounge curtains from the west wall to flank the corrected north-wall sliding door (x=0.50-2.30) outside its span, moved the obstructing north radiator to beneath the west sill window, kept the east-wall radiator, made the kitchen south wall units continuous with extractor over the hob, and retained the west-end sink near the small west kitchen window and all previously valid internal doorway clearances."
   },
   "via": "model",
   "validation": [],
   "log": {
     "agent": "muse",
     "task": "muse.unitAppearance",
-    "inputHash": "8184ca644b2487ea4f4cd070b16d1a8c991ce588a8a2650543b655e458539d8e",
+    "inputHash": "66575c146651060417b93fe9b65c71a48c57840a8b4c17d4c986e288c870f98d",
     "outcome": "model",
     "cited": [],
     "model": "muse-wonder-1.0",
-    "attempts": 3,
-    "errors": [
-      "Attempt 1: curtains-lounge-west-north: part outside object bounds; curtains-lounge-west-south: part outside object bounds; Appearance notes exceed limits; Keep explanation under 1000 characters",
-      "Attempt 2: Observed fixtures obstruct doorway w-kitchen-hall near (3.65, 4.85). Keep the opening and approach clear"
-    ],
-    "latencyMs": 210325,
+    "attempts": 1,
+    "latencyMs": 95580,
     "usage": {
-      "inputTokens": 102516,
-      "outputTokens": 54496,
-      "cacheReadTokens": 157928,
+      "inputTokens": 71073,
+      "outputTokens": 19267,
+      "cacheReadTokens": 0,
       "cacheWriteTokens": 0
     },
-    "costUsd": 1.5315696,
-    "createdAt": 1794547727486
+    "costUsd": 0.669632,
+    "createdAt": 1794548190568
   }
 }

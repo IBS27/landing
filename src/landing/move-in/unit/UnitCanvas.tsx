@@ -66,10 +66,10 @@ export function UnitCanvas({
         }}
       >
         <color attach="background" args={["#e8edf1"]} />
-        <hemisphereLight args={["#fffaf2", "#b5ad9d", 1.45]} />
-        <ambientLight intensity={0.25} />
+        <hemisphereLight args={["#fffaf2", "#b5ad9d", 0.9]} />
+        <ambientLight intensity={0.15} />
         {appearance && (
-          <Environment resolution={128} frames={1}>
+          <Environment resolution={128} frames={1} environmentIntensity={0.4}>
             <Lightformer
               position={[x, 8, z]}
               rotation={[Math.PI / 2, 0, 0]}
@@ -86,7 +86,7 @@ export function UnitCanvas({
         )}
         <directionalLight
           position={[x - 8, 18, z - 10]}
-          intensity={2.5}
+          intensity={2}
           castShadow
           shadow-mapSize={[2048, 2048]}
           shadow-normalBias={0.015}

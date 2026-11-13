@@ -23,7 +23,7 @@ import {
   unitScene,
 } from "./lib/unitScene";
 import { unitSceneRecord } from "./lib/unitSceneRecord";
-import { unitSceneTask } from "./lib/unitSceneTask";
+import { layoutMedia, unitSceneTask } from "./lib/unitSceneTask";
 
 export async function accessibleListing(
   ctx: QueryCtx,
@@ -338,6 +338,7 @@ export const generate = internalAction({
           "No readable media. Upload photos or a floor plan; local seed paths cannot be read by Muse.",
         );
       const { appearance: _appearance, ...currentLayout } = doc.scene;
+      const geometryMedia = layoutMedia(media, doc.sources);
       const result = await runAgent(ctx, unitSceneTask, {
         input: {
           title: doc.scene.title,
@@ -355,10 +356,10 @@ export const generate = internalAction({
                 }
               : null,
           evidence: doc.sources
-            .filter((s) => media.some((m) => m.key === s.key))
+            .filter((s) => geometryMedia.some((m) => m.key === s.key))
             .map((s) => ({ key: s.key, label: s.label, kind: s.kind })),
         },
-        media,
+        media: geometryMedia,
         sources: [],
         shownTo: args.ownerId,
         jobId: args.jobId,
