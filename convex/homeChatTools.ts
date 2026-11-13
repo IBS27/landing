@@ -11,6 +11,7 @@ import {
   parseKey,
   type Recall,
   type ToolOutput,
+  withRelated,
 } from "./lib/homeChatThings";
 
 /**
@@ -43,7 +44,9 @@ export async function runHomeTool(
   if (!tool) throw new ConvexError(`There is no tool named ${name}`);
   const { errors } = checkValue(tool.args, args);
   if (errors.length) throw new ConvexError(`Wrong arguments: ${errors.join("; ")}`);
-  return tool.run(ctx, viewer, args as Record<string, unknown>);
+  const out = await tool.run(ctx, viewer, args as Record<string, unknown>);
+  // What the things found name (an Event's Group, a Group's posts) may be cited and shown too.
+  return { result: out.result, found: withRelated(out.found) };
 }
 
 export const run = internalQuery({
@@ -78,5 +81,5 @@ export async function recallFound(
       }
     }),
   );
-  return found.filter((f): f is Found => f !== null);
+  return withRelated(found.filter((f): f is Found => f !== null));
 }

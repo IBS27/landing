@@ -11,9 +11,10 @@ import {
   type QueryCtx,
 } from "./_generated/server";
 import { type AgentTool, defineTask, runAgent, type ToolCallRecord } from "./ai/agent";
+import type { Json } from "./ai/outputSchema";
 import { aiEnabled } from "./ai/status";
 import { viewerCrew } from "./crews";
-import { cardReasons, findEvents, findRentals } from "./homeChatFind";
+import { cardReasons, findEvents, findRentals, groupAskedAbout } from "./homeChatFind";
 import { viewerHouse } from "./homeChatMine";
 import { HOME_TOOLS, RECALL_MAX, recallFound } from "./homeChatTools";
 import {
@@ -76,6 +77,7 @@ import {
   type ChatView,
   cleanVibe,
   commandSources,
+  groupAsked,
   PIN_LAYERS,
   pageSource,
   replyCards,
@@ -89,6 +91,7 @@ import {
   type FoundKind,
   factsIn,
   type ToolOutput,
+  withRelated,
 } from "./lib/homeChatThings";
 import {
   moveInDateProblem,
@@ -327,6 +330,7 @@ const chatCard = v.object({
   photo: v.optional(v.union(v.string(), v.null())),
   price: v.optional(v.number()),
   href: v.optional(v.string()),
+  host: v.optional(chatSource),
   point: v.optional(v.object({ lat: v.number(), lng: v.number() })),
   actions: v.optional(v.array(chatActionCard)),
 });
@@ -398,6 +402,12 @@ export type HomeChatInput = {
   events: FactsOf<"event">[];
   /** What earlier replies in this chat showed, read again now: "the second one" is one of these. */
   earlier: Facts[];
+  /**
+   * The Group this message asks about ("what's happening in the climbing
+   * Group?"), already looked up with its `upcomingEvents` and `recentPosts`;
+   * null when it asks about none, or none they can see matches.
+   */
+  group: FactsOf<"group"> | null;
   pages: string[];
 };
 
@@ -423,7 +433,8 @@ export function knownFacts(
   calls: readonly ToolCallRecord[] = [],
 ): Map<string, Facts> {
   const known = new Map<string, Facts>();
-  for (const f of [...input.rentals, ...input.events, ...input.earlier]) known.set(f.key, f);
+  for (const f of [...input.rentals, ...input.events, ...input.earlier, input.group ?? []].flat())
+    factsIn(f as Json, known);
   for (const c of calls) factsIn(c.result, known);
   return known;
 }
@@ -462,6 +473,7 @@ const NOUN: Record<FoundKind, string> = {
   person: "person",
   draft: "draft",
   negotiation: "negotiation",
+  post: "Group post",
 };
 
 /** Why words can't go on an action, or null: 1 to `max` characters, no contact details, no protected traits. */
@@ -737,16 +749,90 @@ export function homeChatProblems(
     )
       problems.push(`sourceIds: cite ${f.key}, which the reply names`);
   }
+  // A Group post has no title to spot: a reply that talks about posts cites the ones it means,
+  // one by each author it names, and one for each time it says someone posted.
+  const posts = [...known.values()].filter((f) => f.kind === "post");
+  if (posts.length && MENTIONS_POSTS.test(text)) {
+    const citedPosts = posts.filter((p) => cited.has(p.key));
+    const named = posts.filter((p) => saidText.includes(` ${plain(p.author).trim()} `));
+    const described = text.match(/\bposted\b/gi)?.length ?? 0;
+    if (
+      citedPosts.length === 0 ||
+      citedPosts.length < Math.min(described, posts.length) ||
+      named.some((p) => !citedPosts.some((c) => c.kind === "post" && c.author === p.author))
+    )
+      problems.push("sourceIds: cite the key of every Group post you mention");
+  }
   problems.push(...actionProblems(out, input, known));
   problems.push(...planProblems(out.plan, input.message, planContext(input)));
   return [...new Set(problems)];
 }
 
+/** Words that say a reply talks about Group posts. */
+const MENTIONS_POSTS = /\b(?:posts?|posted|posting)\b/i;
+
+/** Things as a list in a sentence: "a", "a and b", "a, b and c". */
+const sentenceList = (xs: readonly string[]) =>
+  xs.length < 2 ? (xs[0] ?? "") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`;
+
+const dayOf = (iso: string) =>
+  new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: "America/Los_Angeles",
+  }).format(new Date(iso));
+
+const factsList = <K extends FoundKind>(x: Json | undefined, kind: K): FactsOf<K>[] =>
+  Array.isArray(x)
+    ? x.filter(
+        (f): f is FactsOf<K> & Json =>
+          !!f && typeof f === "object" && "kind" in f && f.kind === kind,
+      )
+    : [];
+
+/**
+ * The rules' answer to "what's happening in <Group>": its upcoming Events and
+ * recent posts, each shown as a card that links to it, with the Group cited.
+ * Posts are named as posts, never as Events.
+ */
+export function groupActivityOutput(input: HomeChatInput, g: FactsOf<"group">): HomeChatOutput {
+  const events = factsList(g.upcomingEvents, "event");
+  const posts = factsList(g.recentPosts, "post");
+  const lines = [`Here's what's going on in ${g.name}.`];
+  if (events.length)
+    lines.push(
+      `Coming up: ${sentenceList(events.map((e) => `${e.title} (${dayOf(e.startsAt)})`))}.`,
+    );
+  if (posts.length)
+    lines.push(
+      `Recent posts, which are informal plans rather than Events: ${sentenceList(posts.map((p) => `${p.author} on ${dayOf(p.postedAt)}`))}.`,
+    );
+  if (!events.length && !posts.length)
+    lines.push(
+      typeof g.postsNote === "string"
+        ? "There are no upcoming Events you can see, and its posts are for members."
+        : "There are no upcoming Events or recent posts you can see there.",
+    );
+  else if (typeof g.postsNote === "string") lines.push("Its posts are for members.");
+  if (events.length || posts.length) lines.push("Open a card to read more.");
+  return {
+    text: lines.join(" ").slice(0, REPLY_MAX),
+    command: { kind: "none" },
+    sourceIds: [g.key],
+    show: [...events, ...posts].map((f) => f.key).slice(0, CHAT_INFO_CARDS_MAX),
+    actions: [],
+    plan: planIn(input.message, planContext(input)),
+  };
+}
+
 /**
  * Landing's keyword rules as the task's output, citing only rentals it was
- * given, with the move plan the message states (`planIn`).
+ * given, with the move plan the message states (`planIn`). "What's happening
+ * in <Group>" lists the Group's upcoming Events and recent posts.
  */
 export function rulesOutput(input: HomeChatInput): HomeChatOutput {
+  if (input.group) return groupActivityOutput(input, input.group);
   const keys = new Set(input.rentals.map((r) => r.key));
   const r = ruleRoute(
     input.message,
@@ -788,13 +874,13 @@ export const homeChatTask = defineTask<HomeChatInput, typeof homeChatOutput>({
   instructions: `You are the person's agent for their move to San Francisco, in Landing Home's chat. You can look up anything in Landing for them, show it, and line up things for them to do. The page has two tabs: a map of San Francisco, and Apartment, a 3D model of the place they chose. input.map.view says which one is showing.
 
 How you work:
-1. Read <input>: who they are (input.you), where the page is (input.map), the conversation so far (input.recent), and what is already looked up: input.rentals (their top ranked rentals, each with its lister), input.events (upcoming Events) and input.earlier (other things your earlier replies showed). Each earlier reply lists in shown the keys of its cards, in the order they appeared: "the second one" is the second key of the latest reply that showed cards, and its facts are in input.rentals, input.events or input.earlier.
-2. When the answer needs more, call tools, several at once when they don't depend on each other: search_rentals and get_details for rentals and who lists them; search_marketplace for things to buy, by name or by look; search_events, search_groups and search_places for what's around; get_neighborhood for a neighborhood's scores and facts (call it for each one you compare); get_weekend_route; get_my_move for their own place, house, crew, roommate matches, Journey, drafts waiting for approval, negotiations, movers, move-out, City Profile and saved things. Don't look up what <input> already holds. Never say you can't see something before trying the tool that covers it.
+1. Read <input>: who they are (input.you), where the page is (input.map), the conversation so far (input.recent), and what is already looked up: input.rentals (their top ranked rentals, each with its lister), input.events (upcoming Events), input.earlier (other things your earlier replies showed) and input.group (the Group this message asks about, with its upcomingEvents and recentPosts, when it asks "what's happening in" one). Each earlier reply lists in shown the keys of its cards, in the order they appeared: "the second one" is the second key of the latest reply that showed cards, and its facts are in input.rentals, input.events or input.earlier.
+2. When the answer needs more, call tools, several at once when they don't depend on each other: search_rentals and get_details for rentals and who lists them; search_marketplace for things to buy, by name or by look; search_events, search_groups and search_places for what's around; search_group_posts for plans people post in Groups without making an Event ("any hikes this weekend?", "anyone doing board games?"): search it alongside search_events whenever they ask what's planned; get_details on a Group for what's happening in it (its next Events and newest posts); get_neighborhood for a neighborhood's scores and facts (call it for each one you compare); get_weekend_route; get_my_move for their own place, house, crew, roommate matches, Journey, drafts waiting for approval, negotiations, movers, move-out, City Profile and saved things. Don't look up what <input> already holds. Never say you can't see something before trying the tool that covers it.
 3. Answer with JSON: text, command, show, sourceIds, actions, plan.
 
 text: your reply, two to five sentences, under ${REPLY_MAX} characters. Answer the question with the facts you read: prices, dates, scores, what a rental's reasons say, what they have in common with a lister. Say why something fits them. Mention prices, dates, names and titles only as they appear in what you read; when what you read doesn't answer it, say so plainly. Don't list in text everything the cards already show.
 
-show: keys of the things to put under your reply as cards (rentals, Marketplace items, Events, Groups, places, neighborhoods, people, drafts, negotiations), best first, at most ${CHAT_INFO_CARDS_MAX}, of which at most ${CHAT_CARDS_MAX} rentals. Show what you recommend or list.
+show: keys of the things to put under your reply as cards (rentals, Marketplace items, Events, Groups, Group posts, places, neighborhoods, people, drafts, negotiations), best first, at most ${CHAT_INFO_CARDS_MAX}, of which at most ${CHAT_CARDS_MAX} rentals. Show what you recommend or list.
 
 sourceIds: the key of everything your reply rests on, including every thing you name (at most ${CITES_MAX}; what is in show counts as cited). Cite a neighborhood when you describe its scores or facts. Cite nothing you don't use.
 
@@ -832,6 +918,8 @@ The move goes in steps: the person tells you their plan, you show rentals, they 
 Answer this message, and only this message. Earlier turns are context for what "it", "there" or "the second one" means, never a request to repeat: never furnish or add items again because an earlier turn did. The Apartment tab showing (map.view is "apartment") doesn't make a message a furnishing request: "show my apartment", "open my apartment" and "see my place" are show_apartment, opening a page is open_page, and a question is none.
 
 you.inbox.waiting is how many drafts are waiting in the Inbox now: when it is 0, say nothing is waiting right now, and never say or imply that a draft is. When it is more, get_my_move reads them.
+
+Groups: an Event's hostedBy is the Group hosting it. A Group post is not an Event: it is something a member wrote, with no RSVP, no set time and no guarantee it happens. When you mention a plan from a post, say plainly that it is a post in that Group (by its author's first name, on the day it was posted), not an Event, and cite the post's key for every post you mention, one key for each post you describe (and the Group's key when you name the Group). Show the posts you mention as cards so they can open them. You never comment, reply, post or join for them: a post's card opens it, and only join_group joins a public Group, on their click.
 
 People: a rental's lister comes with how they're connected to the person and, when both share their lifestyle answers, Landing's roommate compatibility (lister.compatibility: a score, what they have in common, where they differ). To compare listers, use those and say which fits best and why. When compatibility is null, say what's missing (both need to share their lifestyle answers on the Roommates page, and be connected) instead of guessing. Use first names only.
 
@@ -926,11 +1014,20 @@ export async function homeChatContext(
     ...new Set(recent.toReversed().flatMap((t) => (t.shown ?? []).slice(0, CHAT_SHOWN_MAX))),
   ].slice(0, RECALL_MAX);
 
-  const [profile, place, hoodRows, crew, ranked, upcoming, house, recalled, drafts] =
+  const message = a.message.trim().slice(0, CHAT_MESSAGE_MAX);
+  const hoodRows = await ctx.db.query("neighborhoods").take(200);
+  const askedGroup = groupAsked(
+    message,
+    hoodRows.map((n) => ({
+      slug: n.slug,
+      name: n.name,
+      ...(n.shortName ? { aliases: [n.shortName] } : {}),
+    })),
+  );
+  const [profile, place, crew, ranked, upcoming, house, recalled, drafts, group] =
     await Promise.all([
       getProfile(ctx, a.viewerId),
       currentPlace(ctx, a.viewerId),
-      ctx.db.query("neighborhoods").take(200),
       viewerCrew(ctx, viewer),
       findRentals(ctx, viewer),
       findEvents(ctx, viewer),
@@ -938,6 +1035,8 @@ export async function homeChatContext(
       recallFound(ctx, a.viewerId, shown),
       // The viewer's own pending drafts, as the Inbox and its badge count them.
       waitingProposals(ctx, a.viewerId, now),
+      // "What's happening in the climbing Group?": its Events and posts, for Muse and the rules.
+      askedGroup ? groupAskedAbout(ctx, viewer, askedGroup) : null,
     ]);
   const apartment = await apartmentOf(ctx, a.viewerId, place);
   const slugOf = new Map<Id<"neighborhoods">, string>(hoodRows.map((n) => [n._id, n.slug]));
@@ -954,7 +1053,6 @@ export async function homeChatContext(
   const earlier = recalled.filter((f) => !given.has(f.key));
   const readable = new Set([...given, ...recalled.map((f) => f.key)]);
 
-  const message = a.message.trim().slice(0, CHAT_MESSAGE_MAX);
   const crewHoods = new Set<string>();
   for (const m of crew ?? [])
     for (const an of m.anchors)
@@ -1003,9 +1101,11 @@ export async function homeChatContext(
     rentals: rentals.map((f) => f.facts as FactsOf<"listing">),
     events: events.map((f) => f.facts as FactsOf<"event">),
     earlier: earlier.map((f) => f.facts),
+    group: group ? (group.facts as FactsOf<"group">) : null,
     pages: [...CHAT_PAGES],
   };
-  return { input, found: [...rentals, ...events, ...earlier], house, limited };
+  const found = withRelated([...rentals, ...events, ...earlier, ...(group ? [group] : [])]);
+  return { input, found, house, limited };
 }
 
 /**

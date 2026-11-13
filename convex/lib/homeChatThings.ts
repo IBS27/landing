@@ -29,6 +29,7 @@ export const FOUND_KINDS = [
   "person",
   "draft",
   "negotiation",
+  "post",
 ] as const;
 export type FoundKind = (typeof FOUND_KINDS)[number];
 
@@ -70,6 +71,17 @@ export type ListerFacts = {
   } | null;
 };
 
+/** A Group as Muse reads it: on its own, or as the Group that hosts an Event or holds a post. */
+export type GroupFacts = {
+  kind: "group";
+  key: string;
+  id: string;
+  name: string;
+  privacy: "public" | "private";
+  joined: boolean;
+  neighborhood: string | null;
+} & More;
+
 /** What Muse reads about a thing. The named fields are the ones the chat's checks use. */
 export type Facts =
   | ({
@@ -95,15 +107,7 @@ export type Facts =
       neighborhood: string | null;
       yourResponse: "going" | "interested" | null;
     } & More)
-  | ({
-      kind: "group";
-      key: string;
-      id: string;
-      name: string;
-      privacy: "public" | "private";
-      joined: boolean;
-      neighborhood: string | null;
-    } & More)
+  | GroupFacts
   | ({
       kind: "place";
       key: string;
@@ -145,6 +149,20 @@ export type Facts =
       status: "active" | "paused" | "stopped";
       /** The most the person said they'd pay, whole dollars. */
       maxPrice: number;
+    } & More)
+  | ({
+      kind: "post";
+      key: string;
+      id: string;
+      /** The Group it was posted in. A post is an informal plan or note, never an Event. */
+      group: GroupFacts;
+      /** First name only. */
+      author: string;
+      /** ISO time. */
+      postedAt: string;
+      /** The start of its text, cleaned with `said()`. */
+      excerpt: string;
+      comments: number;
     } & More);
 
 export type FactsOf<K extends FoundKind> = Extract<Facts, { kind: K }>;
@@ -160,7 +178,25 @@ export type Found = {
   /** The card when the reply shows it: a rental's own card, or a `ChatCard`. */
   rental?: ChatRentalCard;
   card?: ChatCard;
+  /**
+   * Other things its facts name, so a reply may cite and show them too: the
+   * Group hosting an Event, a Group's upcoming Events and recent posts.
+   * `withRelated` lays them out flat before they leave the query.
+   */
+  related?: Found[];
 };
+
+/** Things with everything they name, flat and once each, without `related`. */
+export function withRelated(found: readonly Found[]): Found[] {
+  const out = new Map<string, Found>();
+  const add = (f: Found) => {
+    const { related, ...thing } = f;
+    if (!out.has(f.key)) out.set(f.key, thing);
+    for (const r of related ?? []) add(r);
+  };
+  for (const f of found) add(f);
+  return [...out.values()];
+}
 
 /** What a tool returns: `result` is all Muse reads; `found` is what the reply may then cite or show. */
 export type ToolOutput = { result: Json; found: Found[] };
@@ -220,7 +256,9 @@ export function factsIn(result: Json, into = new Map<string, Facts>()): Map<stri
       typeof key === "string" &&
       typeof kind === "string" &&
       (FOUND_KINDS as readonly string[]).includes(kind) &&
-      parseKey(key)?.kind === kind
+      parseKey(key)?.kind === kind &&
+      // The thing itself comes before the Group a post or Event names: keep the fuller facts.
+      !into.has(key)
     )
       into.set(key, result as Facts);
     for (const x of Object.values(result)) if (x !== undefined) factsIn(x, into);

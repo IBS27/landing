@@ -233,6 +233,7 @@ describe("tools", () => {
       "search_marketplace",
       "search_events",
       "search_groups",
+      "search_group_posts",
       "search_places",
       "get_neighborhood",
       "get_details",
