@@ -181,12 +181,11 @@ export function CompareDialog({
                   <span className="font-semibold">{topic}</span>
                   <span
                     className={cn(
-                      "ml-1.5 rounded px-1 py-px text-[12px]",
-                      t.outcome === "close"
-                        ? "bg-btn text-secondary"
-                        : "bg-negative/10 text-negative",
+                      "text-[13px]",
+                      t.outcome === "close" ? "text-secondary" : "text-negative",
                     )}
                   >
+                    {" · "}
                     {t.outcome === "close" ? "Close" : "Different"}
                   </span>
                   <span className="block text-[13px] text-secondary leading-4">{detail}</span>

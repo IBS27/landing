@@ -42,10 +42,10 @@ export function ProfileSummary({
   return (
     <Card className="overflow-hidden">
       {showHeader ? (
-        <div className="flex items-center justify-between gap-3 px-4 pt-4 pb-2">
-          <div>
+        <div className="flex items-start justify-between gap-4 px-4 pt-4 pb-2">
+          <div className="min-w-0">
             <h2 className="font-bold text-[20px] text-primary leading-6">Your City Profile</h2>
-            <p className="text-[13px] text-secondary">
+            <p className="mt-1 text-[13px] text-secondary leading-4">
               What Landing uses to tune search, neighborhoods and crews. Only you can see it.
               Everything comes from your brief unless it's marked.
             </p>
@@ -53,7 +53,7 @@ export function ProfileSummary({
           {action}
         </div>
       ) : (
-        <p className="px-4 pt-3 text-[13px] text-secondary">
+        <p className="px-4 pt-3 text-[13px] text-secondary leading-4">
           Everything comes from your brief unless it's marked.
         </p>
       )}
@@ -109,7 +109,9 @@ export function ProfileSummary({
                         </span>
                         {i.label}
                       </p>
-                      <p className="text-[13px] text-secondary">{f.evidence.summary}</p>
+                      <p className="mt-0.5 text-[13px] text-secondary leading-4">
+                        {f.evidence.summary}
+                      </p>
                     </div>
                     <SourceBadge
                       source={f.source}
@@ -131,7 +133,7 @@ function Row({ k, fact, children }: { k: FactKey; fact: AnyFact | null; children
   return (
     <div className="flex items-start justify-between gap-4 py-3">
       <dt className="w-32 shrink-0 font-semibold text-[15px] text-primary">{FACT_KEY_LABELS[k]}</dt>
-      <dd className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 text-right text-[15px] text-primary">
+      <dd className="flex min-w-0 flex-1 flex-wrap items-center gap-2 text-[15px] text-primary">
         {fact ? (
           <>
             <span>{children}</span>
@@ -163,7 +165,7 @@ function ListRow<F extends AnyFact>({
   return (
     <div className="flex items-start justify-between gap-4 py-3">
       <dt className="w-32 shrink-0 font-semibold text-[15px] text-primary">{FACT_KEY_LABELS[k]}</dt>
-      <dd className="flex min-w-0 flex-1 flex-wrap justify-end gap-1.5">
+      <dd className="flex min-w-0 flex-1 flex-wrap gap-1.5">
         {facts.length === 0 ? (
           <span className="text-[15px] text-secondary">Not set</span>
         ) : (

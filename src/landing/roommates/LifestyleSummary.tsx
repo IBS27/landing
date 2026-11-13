@@ -154,7 +154,7 @@ export function LifestyleSummary({
     <Card className="overflow-hidden">
       <div className="flex items-center justify-between gap-3 px-4 pt-4 pb-2">
         <div>
-          <h2 className="font-semibold text-[17px] text-primary leading-[22px]">Your answers</h2>
+          <h2 className="font-bold text-[17px] text-primary leading-[22px]">Your answers</h2>
           <p className="text-[13px] text-secondary">
             {answeredCount(answers)} of {QUESTION_COUNT} answered. Skipped questions aren't used.
           </p>

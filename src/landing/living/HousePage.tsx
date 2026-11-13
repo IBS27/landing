@@ -68,12 +68,12 @@ function HouseView({ data }: { data: MemberData }) {
         <InviteRow key={i._id} invite={{ house: i, invitedBy: i.invitedBy }} />
       ))}
       <Card className="mb-4 p-4">
-        <h2 className="font-semibold text-[15px] text-primary">Who lives here</h2>
-        <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
+        <h2 className="font-bold text-[17px] text-primary leading-[22px]">Who lives here</h2>
+        <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
           {members.map((m) => (
             <li key={m._id} className="flex items-center gap-2">
-              <Avatar src={m.avatar} size={28} />
-              <span className="text-[15px] text-primary">{m.name}</span>
+              <Avatar src={m.avatar} size={36} />
+              <span className="font-semibold text-[15px] text-primary">{m.name}</span>
             </li>
           ))}
         </ul>
@@ -145,7 +145,7 @@ function InviteRow({
     }
   };
   return (
-    <Card className="mb-3 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+    <Card className="mb-4 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
       <Avatar src={invite.invitedBy.avatar} size={40} />
       <div className="min-w-0 flex-1">
         <p className="text-[15px] text-primary leading-5">
@@ -192,7 +192,7 @@ function NoHouse({ missing }: { missing: boolean }) {
       description="A House Group for you and your roommates: chores, bills and a shared grocery list, seen only by the people who live there."
     >
       {missing && (
-        <Card className="mb-3 p-4 text-[15px] text-secondary">
+        <Card className="mb-4 p-4 text-[15px] text-secondary">
           That house isn't one you live in. Start one below, or ask a roommate to invite you.
         </Card>
       )}

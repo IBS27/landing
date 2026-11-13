@@ -70,11 +70,11 @@ export function CheckInView({ data }: { data: CheckIn }) {
     <Card className="overflow-hidden" aria-labelledby={titleId}>
       <header className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 px-4 pt-4">
         <div className="min-w-0">
-          <h2 id={titleId} className="font-bold text-[20px] text-primary leading-6">
+          <h2 id={titleId} className="font-bold text-[17px] text-primary leading-5">
             {weeks < 1 ? "Your first week" : `${plural(weeks, "week", "weeks")} in`}
           </h2>
-          <p className="mt-0.5 flex items-center gap-1.5 text-secondary text-sm">
-            <Lock size={12} aria-hidden />
+          <p className="mt-0.5 flex items-center gap-1 text-secondary text-sm leading-4">
+            <Lock size={12} className="shrink-0" aria-hidden />
             Your check-in. Only you can see it.
           </p>
         </div>
@@ -178,7 +178,7 @@ function Stat({
   const body = (
     <>
       <span className="font-bold text-[24px] text-primary tabular-nums leading-7">{n}</span>
-      <span className="flex items-center gap-1 text-secondary text-sm leading-4">
+      <span className="flex min-w-0 max-w-full items-center gap-1 text-secondary text-sm leading-4 [&>svg]:shrink-0">
         {icon}
         <span className="truncate">{label}</span>
       </span>

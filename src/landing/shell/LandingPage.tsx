@@ -2,6 +2,18 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/format";
 import { Card } from "@/ui/primitives";
 
+/** Column widths (padding included): content is 64px narrower at lg. */
+const WIDTHS = {
+  /** 896px content: the default. */
+  default: "max-w-[960px]",
+  /** 720px content: forms and profile pages. */
+  narrow: "max-w-[784px]",
+  /** 680px content: Facebook's feed column, for message-style lists. */
+  feed: "max-w-[744px]",
+  /** Editors that need the whole screen. */
+  wide: "max-w-[1400px]",
+} as const;
+
 /**
  * A standard Landing page: title, optional description and actions, then a
  * centered column. Full-bleed pages (maps) can render without it.
@@ -11,16 +23,18 @@ export function LandingPage({
   description,
   actions,
   children,
+  width = "default",
   className,
 }: {
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
   children: ReactNode;
+  width?: keyof typeof WIDTHS;
   className?: string;
 }) {
   return (
-    <div className={cn("mx-auto w-full max-w-[960px] px-4 pt-6 pb-10 lg:px-8", className)}>
+    <div className={cn("mx-auto w-full px-4 pt-6 pb-10 lg:px-8", WIDTHS[width], className)}>
       <header className="mb-5 flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="font-bold text-[24px] text-primary leading-7">{title}</h1>

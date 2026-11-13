@@ -321,7 +321,6 @@ function Comparison({ a, b }: { a: Hood; b: Hood }) {
       <Row
         title="Your Saturday"
         sub="Each neighborhood's Weekend Route: what locals agree on, morning to night."
-        icon={<Route size={20} aria-hidden />}
       >
         {sides.map((s) => (
           <Cell key={s.hood.slug} hood={s.hood} what="Weekend Route">
@@ -379,25 +378,20 @@ function Missing() {
 function Row({
   title,
   sub,
-  icon,
   label,
   children,
 }: {
   title?: string;
   sub?: string;
-  icon?: ReactNode;
   label?: string;
   children: ReactNode;
 }) {
   return (
     <section aria-label={title ?? label}>
       {title && (
-        <div className="mb-2 flex items-center gap-2 px-1">
-          <span className="text-secondary">{icon}</span>
-          <div className="min-w-0">
-            <h2 className="font-bold text-[20px] text-primary leading-6">{title}</h2>
-            {sub && <p className="text-secondary text-sm leading-[18px]">{sub}</p>}
-          </div>
+        <div className="mt-2 mb-3 px-1">
+          <h2 className="font-bold text-[20px] text-primary leading-6">{title}</h2>
+          {sub && <p className="mt-0.5 text-[15px] text-secondary leading-5">{sub}</p>}
         </div>
       )}
       <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">{children}</div>
@@ -415,7 +409,7 @@ function Cell({ hood, what, children }: { hood: Hood; what: string; children: Re
     <section aria-label={`${what} in ${inSentence(hood)}`} className="min-w-0">
       <Link
         {...toNeighborhood(hood)}
-        className="mb-1.5 inline-block px-1 font-semibold text-[15px] text-primary hover:underline"
+        className="mb-2 inline-block px-1 font-semibold text-[17px] text-primary leading-5 hover:underline"
       >
         {hood.label}
       </Link>
@@ -571,7 +565,7 @@ function ScoreTable({ a, b, yours }: { a: Loaded; b: Loaded; yours: ReadonlySet<
   return (
     <Card className="p-4">
       <h2 className="font-bold text-[20px] text-primary leading-6">Scores side by side</h2>
-      <p className="mt-0.5 text-secondary text-sm">
+      <p className="mt-0.5 text-[15px] text-secondary leading-5">
         Compared with other San Francisco neighborhoods, from public data. Interest fit is just for
         you.
       </p>
@@ -585,9 +579,7 @@ function ScoreTable({ a, b, yours }: { a: Loaded; b: Loaded; yours: ReadonlySet<
               {s.hood.label}
             </Link>
             {yours.has(s.hood.slug) && (
-              <span className="rounded-full bg-btn-soft px-2 py-0.5 font-semibold text-btn-soft-text text-xs">
-                On your list
-              </span>
+              <span className="text-[13px] text-secondary">On your list</span>
             )}
           </div>
         ))}
@@ -608,9 +600,7 @@ function ScoreTable({ a, b, yours }: { a: Loaded; b: Loaded; yours: ReadonlySet<
               <span className="text-secondary">{t.icon}</span>
               {t.title}
               {kind === "fit" && (
-                <span className="rounded-full bg-btn-soft px-2 py-0.5 font-semibold text-btn-soft-text text-xs">
-                  Just for you
-                </span>
+                <span className="font-normal text-[13px] text-secondary">· Just for you</span>
               )}
             </h3>
             <div className="grid grid-cols-2 gap-x-3">
@@ -637,26 +627,28 @@ function ScoreCell({ cell, higher, where }: { cell: CellScore; higher: boolean; 
     <div className="min-w-0">
       <span className="sr-only">{where}: </span>
       {cell.state === "ok" ? (
-        <p className="flex flex-wrap items-baseline gap-x-1.5">
-          <span
-            className={cn(
-              "font-bold text-[24px] leading-7",
-              higher ? "text-accent" : "text-primary",
-            )}
-          >
-            {cell.score.toFixed(1)}
-          </span>
-          <span className="text-secondary text-sm">/ 10</span>
-          <span className="font-semibold text-[15px] text-primary">{cell.label}</span>
-          {higher && <span className="sr-only">(higher)</span>}
-        </p>
+        <>
+          <p className="flex items-baseline gap-1">
+            <span
+              className={cn(
+                "font-bold text-[24px] tabular-nums leading-7",
+                higher ? "text-accent" : "text-primary",
+              )}
+            >
+              {cell.score.toFixed(1)}
+            </span>
+            <span className="text-[13px] text-secondary">/ 10</span>
+            {higher && <span className="sr-only">(higher)</span>}
+          </p>
+          <p className="font-semibold text-[15px] text-primary leading-5">{cell.label}</p>
+        </>
       ) : (
         <p className="font-bold text-[24px] text-secondary leading-7">
           <span aria-hidden>–</span>
           <span className="sr-only">No score</span>
         </p>
       )}
-      <p className="mt-0.5 text-secondary text-sm leading-[18px]">{cell.detail}</p>
+      <p className="mt-0.5 text-[13px] text-secondary leading-[18px]">{cell.detail}</p>
       {cell.state === "ok" && <Sources sources={cell.sources} className="mt-1.5" />}
     </div>
   );

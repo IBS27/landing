@@ -51,10 +51,10 @@ function Row({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-3 py-3">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3">
       <span
         aria-hidden
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-highlight text-[20px]"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-btn text-[20px]"
       >
         {emoji}
       </span>
@@ -235,7 +235,7 @@ export function ChatPlansCard() {
   const onError = (m: string) => toast.show(m);
   const empty = data && data.plans.length === 0 && data.spotted.length === 0;
   return (
-    <Card className="px-4 pt-3 pb-1">
+    <Card className="px-4 pt-4 pb-1">
       <h2 className="font-bold text-[17px] text-primary leading-5">Plans from your chats</h2>
       <p className="mt-0.5 text-[13px] text-secondary leading-[18px]">
         When someone in a group chat says “we should hike sometime”, Muse suggests a time, place and
@@ -247,7 +247,9 @@ export function ChatPlansCard() {
           <Spinner />
         </div>
       ) : empty ? (
-        <p className="py-4 text-[15px] text-secondary">No plan talk in your group chats lately.</p>
+        <p className="pt-3 pb-4 text-[15px] text-secondary">
+          No plan talk in your group chats lately.
+        </p>
       ) : (
         <div className="mt-1 divide-y divide-divider">
           {data.plans.map((p) => (

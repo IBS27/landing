@@ -27,9 +27,9 @@ import type { UserSummary } from "../../../convex/lib/users";
  */
 
 export const field =
-  "w-full rounded-lg border border-divider bg-input px-3 py-2 text-[15px] text-primary outline-none placeholder:text-placeholder focus:border-fb";
+  "w-full rounded-md border border-divider bg-card px-3 py-2 text-[15px] text-primary outline-none placeholder:text-placeholder focus:border-fb";
 const select =
-  "h-8 rounded-full bg-btn px-3 font-semibold text-[13px] text-primary outline-none focus-visible:ring-2 focus-visible:ring-accent";
+  "h-8 rounded-md bg-btn px-2.5 font-semibold text-[13px] text-btn-text outline-none focus-visible:ring-2 focus-visible:ring-accent";
 
 /** The message a Convex error carries, or a plain fallback. */
 export function errorText(e: unknown) {

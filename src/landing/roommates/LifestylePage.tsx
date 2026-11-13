@@ -36,7 +36,7 @@ export function LifestylePage() {
     <LandingPage
       title="Roommates"
       description="Find a roommate through people you know, matched on how you like to live at home."
-      className="max-w-[720px]"
+      width="narrow"
     >
       {data === undefined ? (
         <Card className="p-4">

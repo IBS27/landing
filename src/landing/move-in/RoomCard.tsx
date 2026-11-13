@@ -15,7 +15,7 @@ export function RoomCard() {
       ? `${room.name} · ${room.vibe.styles.map(styleLabel).join(", ")}${rooms && rooms.length > 1 ? ` · ${rooms.length} rooms` : ""}`
       : `${room.name} · ${room.photos.length} photos · no vibe yet`;
   return (
-    <Card className="mb-3 overflow-hidden">
+    <Card className="mb-4 overflow-hidden">
       <Link to="/landing/place/room" className="flex items-center gap-3 p-4 hover:bg-hover">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-highlight text-accent">
           <Sofa size={20} />

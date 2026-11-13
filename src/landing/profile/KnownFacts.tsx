@@ -233,14 +233,12 @@ function Provenance({ fact: f }: { fact: KnownFact }) {
   if (f.source === "inferred")
     return (
       <div className={line}>
-        <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-          <span className="inline-flex items-center gap-1 rounded-full border border-divider border-dashed px-1.5 font-semibold text-[12px]">
-            <Sparkles size={11} aria-hidden />
+        <p>
+          <span className="font-semibold">
+            <Sparkles size={12} aria-hidden className="mr-1 inline align-[-1px]" />
             Inferred
-          </span>
-          <span>
-            {confidenceText(f.confidence)} · {f.evidence.summary}
-          </span>
+          </span>{" "}
+          · {confidenceText(f.confidence)} · {f.evidence.summary}
         </p>
         {f.evidenceLinks && (
           <EvidenceLinks links={f.evidenceLinks.links} unavailable={f.evidenceLinks.unavailable} />
@@ -283,7 +281,7 @@ function EvidenceLinks({ links, unavailable }: { links: EvidenceLink[]; unavaila
   const more = links.length - shown.length;
   if (links.length === 0 && unavailable === 0) return null;
   return (
-    <ul aria-label="Based on" className="mt-1.5 flex flex-wrap items-center gap-1.5">
+    <ul aria-label="Based on" className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
       {shown.map((l) => (
         <li key={linkKey(l)} className="min-w-0 max-w-full">
           <EvidenceChip link={l} />
@@ -294,14 +292,14 @@ function EvidenceLinks({ links, unavailable }: { links: EvidenceLink[]; unavaila
           <button
             type="button"
             onClick={() => setAll(true)}
-            className="h-6 rounded-full px-1.5 font-semibold text-[12px] text-link hover:underline"
+            className="font-semibold text-[13px] text-link hover:underline"
           >
             {more} more
           </button>
         </li>
       )}
       {unavailable > 0 && (
-        <li className="text-[12px]">
+        <li>
           {links.length > 0 ? `+${unavailable} ` : `${unavailable} `}
           {unavailable === 1 ? "isn't" : "aren't"} available to you now
         </li>
@@ -324,7 +322,7 @@ function linkKey(l: EvidenceLink) {
 }
 
 const CHIP =
-  "inline-flex h-6 max-w-full items-center gap-1 rounded-full bg-btn px-2 font-semibold text-[12px] text-primary transition-colors hover:bg-hover";
+  "inline-flex max-w-full items-center gap-1 text-[13px] text-primary leading-5 hover:underline [&>svg]:text-secondary";
 
 function EvidenceChip({ link: l }: { link: EvidenceLink }) {
   const body = (icon: ReactNode, text: string) => (
@@ -338,25 +336,25 @@ function EvidenceChip({ link: l }: { link: EvidenceLink }) {
     case "event":
       return (
         <Link {...toEvent(l.eventId)} className={CHIP} aria-label={label(l.title)}>
-          {body(<CalendarDays size={12} aria-hidden className="shrink-0" />, l.title)}
+          {body(<CalendarDays size={14} aria-hidden className="shrink-0" />, l.title)}
         </Link>
       );
     case "group":
       return (
         <Link {...toGroup({ slug: l.slug })} className={CHIP} aria-label={label(l.name)}>
-          {body(<UsersRound size={12} aria-hidden className="shrink-0" />, l.name)}
+          {body(<UsersRound size={14} aria-hidden className="shrink-0" />, l.name)}
         </Link>
       );
     case "post":
       return (
         <Link {...toPost(l)} className={CHIP} aria-label={label(l.label)}>
-          {body(<MessageSquare size={12} aria-hidden className="shrink-0" />, l.label)}
+          {body(<MessageSquare size={14} aria-hidden className="shrink-0" />, l.label)}
         </Link>
       );
     case "listing":
       return (
         <Link {...toListing(l.listingId)} className={CHIP} aria-label={label(l.title)}>
-          {body(<Tag size={12} aria-hidden className="shrink-0" />, l.title)}
+          {body(<Tag size={14} aria-hidden className="shrink-0" />, l.title)}
         </Link>
       );
   }

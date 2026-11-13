@@ -28,11 +28,14 @@ export function Chip({
   return (
     <span
       className={cn(
-        "inline-flex h-5 shrink-0 items-center gap-1 rounded-full px-2 font-semibold text-[12px]",
-        tone === "accent" ? "bg-btn-soft text-btn-soft-text" : "bg-btn text-secondary",
+        "inline-flex shrink-0 items-center gap-1",
+        tone === "accent" && "font-semibold text-link",
       )}
     >
-      {tone === "accent" && <Check size={11} strokeWidth={3} aria-hidden />}
+      <span aria-hidden className="font-normal text-secondary">
+        ·
+      </span>
+      {tone === "accent" && <Check size={12} strokeWidth={3} aria-hidden />}
       {children}
     </span>
   );
@@ -61,7 +64,7 @@ export function ItemPicker({
       className="max-h-[340px] overflow-y-auto rounded-lg border border-divider"
     >
       <Row selected={value === ""} onSelect={() => onChange("")}>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-wash text-secondary">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-btn text-icon">
           <PenLine size={18} aria-hidden />
         </div>
         <div className="min-w-0 flex-1">
@@ -80,7 +83,7 @@ export function ItemPicker({
           if (!rows.length) return null;
           return (
             <div key={g.id} role="group" aria-label={g.label}>
-              <div className="sticky top-0 border-divider border-t bg-card px-3 pt-2.5 pb-1 font-semibold text-[13px] text-secondary">
+              <div className="sticky top-0 z-[1] border-divider border-t bg-card px-3 pt-2.5 pb-1 font-semibold text-[13px] text-secondary">
                 {g.label}
               </div>
               {rows.map((i) => (
@@ -89,14 +92,14 @@ export function ItemPicker({
                     <img
                       src={i.photo}
                       alt=""
-                      className="h-10 w-10 shrink-0 rounded-md object-cover"
+                      className="h-10 w-10 shrink-0 rounded-lg object-cover"
                     />
                   ) : (
-                    <div className="h-10 w-10 shrink-0 rounded-md bg-wash" />
+                    <div className="h-10 w-10 shrink-0 rounded-lg bg-btn" />
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-semibold text-[15px] text-primary">{i.title}</div>
-                    <div className="flex flex-wrap items-center gap-1.5 text-[13px] text-secondary">
+                    <div className="flex flex-wrap items-center gap-x-1 text-[13px] text-secondary leading-[18px]">
                       <span>
                         {i.group === "yours" ? "Paid " : ""}
                         {i.price === 0 ? "Free" : price(i.price)}

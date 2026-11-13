@@ -20,6 +20,8 @@ export function CityProfilePage() {
   const onboarded = Boolean(known?.briefCompletedAt);
   return (
     <LandingPage
+      // One 720px column, so the header and its "Edit brief" line up with the cards.
+      width="narrow"
       title="What Muse knows about you"
       description="Everything Landing uses to tune search, neighborhoods and crews, where each piece came from, and how to change it. Only you can see it."
       actions={
@@ -35,7 +37,7 @@ export function CityProfilePage() {
         ) : undefined
       }
     >
-      <div className="max-w-[720px]">
+      <div>
         {known === undefined ? (
           <div className="flex justify-center py-16">
             <Spinner />

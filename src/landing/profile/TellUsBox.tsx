@@ -60,13 +60,13 @@ export function TellUsBox({ onAdd }: { onAdd: (picked: Proposal[]) => void }) {
           onChange={(e) => setText(e.target.value)}
           rows={4}
           placeholder="e.g. Moving from Chicago in March for a job in SoMa. No car, I bike and take BART. Budget around $2,000. I boulder, love live music and want to meet people."
-          className="w-full resize-none rounded-lg border border-divider bg-card px-3 py-2.5 text-[15px] text-primary leading-5 outline-none placeholder:text-placeholder focus:border-fb focus:shadow-[0_0_0_1px_var(--fb-blue)]"
+          className="w-full resize-none rounded-lg border border-divider bg-card px-3 pt-2.5 pb-7 text-[15px] text-primary leading-5 outline-none placeholder:text-placeholder focus:border-fb focus:shadow-[0_0_0_1px_var(--fb-blue)]"
         />
         <span className="absolute right-2 bottom-2 text-[12px] text-secondary">
           {text.length}/{MAX}
         </span>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Button
           variant="soft"
           disabled={busy || text.trim().length < 10}
@@ -80,7 +80,7 @@ export function TellUsBox({ onAdd }: { onAdd: (picked: Proposal[]) => void }) {
       {error && <p className="text-[13px] text-negative">{error}</p>}
 
       {proposals && (
-        <div className="rounded-lg border border-divider bg-wash/60 p-3">
+        <div className="rounded-lg bg-comment p-3">
           {proposals.length === 0 ? (
             <p className="text-[15px] text-secondary">
               Muse didn't find anything to add. Try mentioning your budget, when you're moving, how
@@ -91,7 +91,7 @@ export function TellUsBox({ onAdd }: { onAdd: (picked: Proposal[]) => void }) {
               <p className="font-semibold text-[15px] text-primary">
                 Here's what Muse picked up. Untick anything that's wrong.
               </p>
-              <p className="mb-2 text-[13px] text-secondary">
+              <p className="mt-0.5 mb-2 text-[13px] text-secondary leading-4">
                 {via === "fallback"
                   ? "Muse's AI is off right now, so these come from simple keyword matching."
                   : "Each one shows the words it came from."}

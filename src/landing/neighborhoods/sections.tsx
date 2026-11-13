@@ -172,11 +172,11 @@ function ReasonLine({ reason, className }: { reason: Reason; className?: string 
     <p
       title={full}
       className={cn(
-        "flex min-w-0 items-center gap-1.5 text-[13px] text-btn-soft-text leading-4",
+        "flex min-w-0 items-center gap-1.5 text-[13px] text-secondary leading-4",
         className,
       )}
     >
-      <Sparkles size={13} strokeWidth={2.4} className="shrink-0" aria-hidden />
+      <Sparkles size={13} strokeWidth={2.4} className="shrink-0 text-link" aria-hidden />
       <span className="truncate">
         <span className="font-semibold">{reason.label}</span>
         <span> · {reason.because}</span>
@@ -291,7 +291,7 @@ export function ForYouSection({ forYou, label }: { forYou: ForYou; label: string
           they're posted.
         </Empty>
       ) : (
-        <ul className="grid grid-cols-1 gap-2 @min-[600px]:grid-cols-2">
+        <ul className="-mx-2 grid grid-cols-1 gap-x-3 gap-y-1 @min-[600px]:grid-cols-2">
           {items.map((item) => (
             <li key={item.key} className="min-w-0">
               <ForYouCard item={item} />
@@ -472,7 +472,7 @@ export function GroupsSection({ groups, label }: { groups: HoodGroup[]; label: s
         <Empty icon={<UsersRound size={18} />}>No Groups are based in {label} yet.</Empty>
       ) : (
         <>
-          <ul className="grid grid-cols-1 gap-1 @min-[600px]:grid-cols-2 @min-[600px]:gap-x-3">
+          <ul className="-mx-2 grid grid-cols-1 gap-1 @min-[600px]:grid-cols-2 @min-[600px]:gap-x-3">
             {(all ? list : list.slice(0, GROUPS_SHOWN)).map((g) => (
               <li key={g._id} className="min-w-0">
                 <GroupRow group={g} />
@@ -496,10 +496,10 @@ function GroupRow({ group: g }: { group: HoodGroup }) {
     many: "are members",
   });
   return (
-    <article className="flex gap-3 rounded-lg p-2 transition-colors hover:bg-hover">
+    <article className="rounded-lg p-2 transition-colors hover:bg-hover">
       <Link
         {...toGroup(g)}
-        className={cn("flex min-w-0 flex-1 gap-3", skips.has(key) && "opacity-50")}
+        className={cn("flex min-w-0 gap-3 transition-opacity", skips.has(key) && "opacity-50")}
       >
         <Thumb src={g.cover} size={60} />
         <div className="min-w-0 flex-1">
@@ -518,8 +518,9 @@ function GroupRow({ group: g }: { group: HoodGroup }) {
           )}
         </div>
       </Link>
+      {/* Under the text, so a long name or member line isn't squeezed. */}
       {!g.joined && (
-        <div className="-mr-1 shrink-0 self-center">
+        <div className="mt-1 flex min-h-8 items-center pl-[64px]">
           <NotForMe targetKind="group" targetId={g._id} onChange={(on) => skips.set(key, on)} />
         </div>
       )}
@@ -542,7 +543,7 @@ export function PeopleSection({ people, label }: { people: HoodPerson[]; label: 
           None of your friends or their friends are in {label}'s Groups or Events yet.
         </Empty>
       ) : (
-        <ul className="grid grid-cols-1 gap-1 @min-[600px]:grid-cols-2 @min-[600px]:gap-x-3">
+        <ul className="-mx-2 grid grid-cols-1 gap-1 @min-[600px]:grid-cols-2 @min-[600px]:gap-x-3">
           {people.map((p) => (
             <li key={p.user._id} className="min-w-0">
               <PersonRow person={p} />

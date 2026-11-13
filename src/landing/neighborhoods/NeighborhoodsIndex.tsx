@@ -47,7 +47,7 @@ export function NeighborhoodsIndexView({ data }: { data: Directory | undefined }
 
   return (
     <div className="grid grid-cols-1 min-[1200px]:h-[calc(100dvh-56px)] min-[1200px]:grid-cols-[400px_minmax(0,1fr)] min-[1200px]:grid-rows-[auto_minmax(0,1fr)]">
-      <header className="px-4 pt-5 pb-3 min-[1200px]:col-start-1 min-[1200px]:row-start-1">
+      <header className="bg-card px-4 pt-5 pb-3 min-[1200px]:col-start-1 min-[1200px]:row-start-1">
         <NeighborhoodCrumbs />
         <h1 className="font-bold text-[24px] text-primary leading-7">Neighborhoods</h1>
         <p className="mt-1 text-[15px] text-secondary leading-5">
@@ -80,7 +80,7 @@ export function NeighborhoodsIndexView({ data }: { data: Directory | undefined }
           className="absolute inset-0"
         />
       </div>
-      <div className="px-2 pt-2 pb-10 min-[1200px]:col-start-1 min-[1200px]:row-start-2 min-[1200px]:overflow-y-auto min-[1200px]:pt-0">
+      <div className="bg-card px-2 pt-2 pb-10 min-[1200px]:col-start-1 min-[1200px]:row-start-2 min-[1200px]:overflow-y-auto min-[1200px]:pt-0">
         {data === undefined ? (
           <div className="flex flex-col gap-2 px-2 pt-2">
             {Array.from({ length: 8 }, (_, i) => (

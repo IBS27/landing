@@ -133,7 +133,7 @@ export function NeighborhoodPageView({ data }: { data: NeighborhoodPageData }) {
           </div>
           <Link
             {...toCompare(n.slug)}
-            className="flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-btn px-3 font-semibold text-[15px] text-btn-text transition-[filter] hover:brightness-95 active:scale-[0.98] dark:hover:brightness-125"
+            className="flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-btn-soft px-3 font-semibold text-[15px] text-btn-soft-text transition-[filter] hover:brightness-95 active:scale-[0.98] dark:hover:brightness-125"
           >
             <ArrowLeftRight size={16} aria-hidden />
             Compare

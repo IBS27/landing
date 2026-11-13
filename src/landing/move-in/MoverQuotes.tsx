@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BadgePercent, Check, Sparkles, Truck } from "lucide-react";
+import { BadgePercent, Check, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { toConversation } from "@/landing/links";
@@ -18,7 +18,7 @@ const STATUS = {
   none: { label: "Not asked yet", tone: "text-secondary" },
   waiting: { label: "Request waiting for your OK", tone: "text-link" },
   sent: { label: "Request sent", tone: "text-secondary" },
-  replied: { label: "Replied", tone: "text-[#24832C] dark:text-[#3FBB46]" },
+  replied: { label: "Replied", tone: "text-positive" },
   discarded: { label: "You discarded the request", tone: "text-secondary" },
 } as const;
 
@@ -76,17 +76,15 @@ export function MoverQuotes() {
 
   return (
     <Card className="mb-4 overflow-hidden">
-      <div className="px-4 pt-4 pb-2">
-        <h2 className="flex items-center gap-2 font-bold text-[17px] text-primary leading-5">
-          <Truck size={18} aria-hidden /> Mover quotes
-        </h2>
+      <div className="px-4 pt-4 pb-3">
+        <h2 className="font-bold text-[17px] text-primary leading-5">Mover quotes</h2>
         <p className="mt-0.5 text-[13px] text-secondary leading-[18px]">
           Muse reads moving companies' Pages for their rates and deals, asks each one for a quote,
           and pushes for a better price when they reply. You approve every message in your Inbox.
         </p>
       </div>
 
-      <div className="mx-4 mb-3 grid grid-cols-2 gap-2 rounded-lg bg-wash p-3 sm:grid-cols-[110px_150px_1fr_1fr_auto] dark:bg-hover">
+      <div className="grid grid-cols-2 gap-2 px-4 sm:grid-cols-[130px_160px_minmax(0,1fr)_minmax(0,1fr)]">
         <select
           aria-label="Move size"
           className={field}
@@ -130,37 +128,40 @@ export function MoverQuotes() {
             </option>
           ))}
         </select>
-        <label className="flex items-center gap-2 text-[15px] text-primary">
+      </div>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 pt-3 pb-4">
+        <label className="flex cursor-pointer items-center gap-2 text-[15px] text-primary">
           <input
             type="checkbox"
+            className="h-4 w-4 accent-fb"
             checked={f.stairs}
             onChange={(e) => setF({ ...f, stairs: e.target.checked })}
           />
           Stairs
         </label>
-        <div className="col-span-2 flex items-center justify-end gap-3 sm:col-span-5">
+        <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-3">
           {running && (
             <span className="inline-flex items-center gap-1.5 text-[13px] text-secondary">
               <Spinner size={14} /> {job?.progress?.label ?? "Working…"}
             </span>
           )}
-          {error && <span className="text-[13px] text-[#E41E3F]">{error}</span>}
-          <Button variant="primary" size="sm" disabled={!f.date || !!running} onClick={getQuotes}>
+          {error && <span className="text-[13px] text-negative">{error}</span>}
+          <Button variant="primary" disabled={!f.date || !!running} onClick={getQuotes}>
             {data?.movers.length ? "Get new quotes" : "Get quotes"}
           </Button>
         </div>
       </div>
 
       {data === undefined ? (
-        <div className="p-4">
+        <div className="border-divider border-t p-4">
           <Skeleton className="h-24 w-full" />
         </div>
       ) : data.movers.length === 0 ? (
-        <p className="px-4 pb-4 text-[15px] text-secondary">
+        <p className="border-divider border-t px-4 py-3 text-[15px] text-secondary">
           Pick your move and Muse will gather quotes from movers on Facebook.
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-3 px-4 pb-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 border-divider border-t p-4 sm:grid-cols-2 lg:grid-cols-3">
           {data.movers.map((m, i) => {
             const st = m.counterWaiting
               ? { label: "Muse drafted a reply. Waiting for your OK", tone: "text-link" }
@@ -169,57 +170,47 @@ export function MoverQuotes() {
             return (
               <div
                 key={m.page._id}
-                className={cn(
-                  "flex flex-col rounded-lg border p-3",
-                  best ? "border-[#24832C] dark:border-[#3FBB46]" : "border-divider",
-                )}
+                className="flex min-w-0 flex-col rounded-lg border border-divider p-3"
               >
-                <div className="flex items-center gap-2">
-                  <Avatar src={m.page.avatar} size={32} />
-                  <div className="min-w-0 flex-1 truncate font-semibold text-[15px] text-primary">
-                    {m.page.name}
+                <div className="flex items-center gap-2.5">
+                  <Avatar src={m.page.avatar} size={36} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-semibold text-[15px] text-primary leading-5">
+                      {m.page.name}
+                    </div>
+                    {best && (
+                      <div className="font-semibold text-[13px] text-positive leading-4">
+                        Best price
+                      </div>
+                    )}
                   </div>
-                  {best && (
-                    <span className="rounded-full bg-[#E3F5E5] px-2 py-0.5 font-semibold text-[#24832C] text-[11px] dark:bg-[#3FBB46]/20 dark:text-[#3FBB46]">
-                      Best price
-                    </span>
-                  )}
                 </div>
 
-                <div className="mt-3">
-                  {m.quoted ? (
-                    <>
-                      <div className="text-[12px] text-secondary">Their quote</div>
-                      <div className="font-bold text-[24px] text-primary leading-7">
-                        {price(m.quoted.price)}
+                {(m.quoted || m.estimate) && (
+                  <div className="mt-3">
+                    <div className="text-[13px] text-secondary leading-4">
+                      {m.quoted ? "Their quote" : "Estimate from their posted rates"}
+                    </div>
+                    <div className="mt-0.5 font-bold text-[24px] text-primary leading-7">
+                      {price(m.quoted ? m.quoted.price : (m.estimate?.total ?? 0))}
+                    </div>
+                    {m.quoted && m.estimate && (
+                      <div className="text-[13px] text-secondary leading-4">
+                        Estimate was {price(m.estimate.total)}
                       </div>
-                      {m.estimate && (
-                        <div className="text-[12px] text-secondary">
-                          Estimate was {price(m.estimate.total)}
-                        </div>
-                      )}
-                    </>
-                  ) : m.estimate ? (
-                    <>
-                      <div className="text-[12px] text-secondary">
-                        Estimate from their posted rates
-                      </div>
-                      <div className="font-bold text-[24px] text-primary leading-7">
-                        {price(m.estimate.total)}
-                      </div>
-                    </>
-                  ) : null}
-                </div>
+                    )}
+                  </div>
+                )}
 
                 {m.estimate && (
-                  <ul className="mt-2 flex flex-col gap-0.5 text-[12px] text-secondary leading-4">
+                  <ul className="mt-2 flex flex-col gap-0.5 text-[13px] text-secondary leading-[18px]">
                     <li>
                       {m.estimate.hours} h × {price(m.card.hourly)}/h ({m.card.crew} movers) ={" "}
                       {price(m.estimate.labor)}
                     </li>
                     <li>Truck fee {price(m.estimate.truckFee)}</li>
                     {m.estimate.applied && (
-                      <li className="font-semibold text-[#24832C] dark:text-[#3FBB46]">
+                      <li className="font-semibold text-positive">
                         −{price(m.estimate.applied.amount)} {m.estimate.applied.label}
                       </li>
                     )}
@@ -227,39 +218,40 @@ export function MoverQuotes() {
                 )}
 
                 {m.card.discounts.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {m.card.discounts.map((d) => (
-                      <span
-                        key={d.label}
-                        className="inline-flex items-center gap-1 rounded-full bg-[#FFF4D6] px-2 py-0.5 text-[#8A6100] text-[11px] dark:bg-[#F7B928]/20 dark:text-[#F7B928]"
-                      >
-                        <BadgePercent size={11} aria-hidden /> {d.label}
-                      </span>
-                    ))}
-                  </div>
+                  <p className="mt-2 flex items-start gap-1.5 text-[13px] text-secondary leading-[18px]">
+                    <BadgePercent size={14} className="mt-0.5 shrink-0" aria-hidden />
+                    <span>{m.card.discounts.map((d) => d.label).join(" · ")}</span>
+                  </p>
                 )}
 
-                <div className="mt-auto flex flex-wrap items-center gap-2 pt-3 text-[12px]">
+                <div className="mt-auto flex flex-wrap items-center gap-2 pt-3 text-[13px]">
                   {m.sources && <SourcesChip sources={m.sources} label="Rates" />}
                   {m.via === "fallback" && <span className="text-secondary">Read by rules</span>}
                 </div>
-                <div className={cn("mt-2 flex items-center gap-1 text-[12px]", st.tone)}>
+                <div
+                  className={cn(
+                    "mt-3 flex items-center gap-1.5 border-divider border-t pt-2.5 text-[13px] leading-4",
+                    st.tone,
+                  )}
+                >
                   {m.status === "replied" && !m.counterWaiting ? (
-                    <Check size={12} aria-hidden />
+                    <Check size={14} className="shrink-0" aria-hidden />
                   ) : (
-                    <Sparkles size={12} aria-hidden />
+                    <Sparkles size={14} className="shrink-0" aria-hidden />
                   )}
-                  {m.status === "waiting" || m.counterWaiting ? (
-                    <Link to="/landing/inbox" className="font-semibold hover:underline">
-                      {st.label}
-                    </Link>
-                  ) : (
-                    st.label
-                  )}
+                  <span className="min-w-0">
+                    {m.status === "waiting" || m.counterWaiting ? (
+                      <Link to="/landing/inbox" className="font-semibold hover:underline">
+                        {st.label}
+                      </Link>
+                    ) : (
+                      st.label
+                    )}
+                  </span>
                   {m.conversationId && m.status !== "waiting" && m.status !== "none" && (
                     <Link
                       {...toConversation(m.conversationId)}
-                      className="ml-auto font-semibold text-link hover:underline"
+                      className="ml-auto shrink-0 font-semibold text-link hover:underline"
                     >
                       Open chat
                     </Link>

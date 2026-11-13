@@ -141,9 +141,7 @@ function ViewDetails({
               </p>
             ))}
           </div>
-          <div className="mt-2 font-semibold text-[12px] text-secondary uppercase tracking-wide">
-            Good to know
-          </div>
+          <div className="mt-3 font-semibold text-[13px] text-primary">Good to know</div>
           <ul className="mt-1 flex list-disc flex-col gap-1 pl-4">
             {s.facts.map((f) => (
               <li key={f} className="text-[13px] text-primary leading-[18px]">
@@ -151,7 +149,7 @@ function ViewDetails({
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-[11px] text-secondary leading-4">
+          <p className="mt-2 text-[12px] text-secondary leading-4">
             Sun times are calculated for this listing's location with NOAA's solar equations.
             Weather notes describe typical San Francisco seasons, not a forecast.
           </p>

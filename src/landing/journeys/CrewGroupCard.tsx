@@ -44,13 +44,13 @@ function Row({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-3 py-3">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:flex-nowrap">
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-highlight text-accent">
         {icon}
       </span>
       <div className="min-w-0 flex-1">
         <div className="font-semibold text-[15px] text-primary leading-5">{title}</div>
-        <div className="text-[13px] text-secondary leading-4">{body}</div>
+        <div className="mt-0.5 text-[13px] text-secondary leading-[18px]">{body}</div>
       </div>
       {action}
     </div>
@@ -188,8 +188,8 @@ export function CrewGroupCard({ crewSize }: { crewSize: number }) {
   }
 
   return (
-    <Card className="px-4 py-1">
-      <h2 className="pt-3 font-bold text-[17px] text-primary leading-5">Crew Group</h2>
+    <Card className="px-4 pt-4 pb-1">
+      <h2 className="font-bold text-[17px] text-primary leading-5">Crew Group</h2>
       {body}
       {toast.node}
     </Card>

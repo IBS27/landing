@@ -58,34 +58,26 @@ export function Swatch({ id, size = 16 }: { id: ColorId; size?: number }) {
 export function VibeView({ vibe }: { vibe: VibeValue }) {
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[17px] text-primary leading-[22px]">{vibe.summary}</p>
-      <div className="flex flex-wrap gap-1.5">
-        {vibe.styles.map((s) => (
-          <span
-            key={s}
-            className="rounded-full bg-btn-soft px-3 py-1 font-semibold text-[13px] text-btn-soft-text"
-          >
-            {styleLabel(s)}
-          </span>
-        ))}
-      </div>
-      <div className="flex flex-wrap items-center gap-3">
-        {vibe.palette.map((c) => (
-          <span key={c} className="inline-flex items-center gap-1.5 text-[13px] text-secondary">
-            <Swatch id={c} size={20} />
-            {colorOf(c).label}
-          </span>
-        ))}
-      </div>
-      {vibe.keywords.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {vibe.keywords.map((k) => (
-            <span key={k} className="rounded-md bg-btn px-2 py-0.5 text-[13px] text-primary">
-              {k}
+      <p className="text-[15px] text-primary leading-5">{vibe.summary}</p>
+      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-[15px] leading-5">
+        <dt className="text-secondary">Styles</dt>
+        <dd className="font-semibold text-primary">{vibe.styles.map(styleLabel).join(", ")}</dd>
+        <dt className="text-secondary">Colors</dt>
+        <dd className="flex flex-wrap gap-x-3 gap-y-1 text-primary">
+          {vibe.palette.map((c) => (
+            <span key={c} className="inline-flex items-center gap-1.5">
+              <Swatch id={c} />
+              {colorOf(c).label}
             </span>
           ))}
-        </div>
-      )}
+        </dd>
+        {vibe.keywords.length > 0 && (
+          <>
+            <dt className="text-secondary">Keywords</dt>
+            <dd className="text-primary">{vibe.keywords.join(", ")}</dd>
+          </>
+        )}
+      </dl>
     </div>
   );
 }

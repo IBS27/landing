@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import { lazy, type ReactNode, Suspense, useEffect, useRef, useState } from "react";
 import { Button, Card, Spinner } from "@/ui/primitives";
 import {
@@ -18,7 +19,19 @@ import { UnitPlan } from "./UnitPlan";
 
 const UnitCanvas = lazy(() => import("./UnitCanvas").then((m) => ({ default: m.UnitCanvas })));
 export const fieldClass =
-  "w-full rounded-md border border-divider bg-card px-2 py-2 text-sm text-primary";
+  "h-9 w-full rounded-md border border-divider bg-card px-2.5 text-[15px] text-primary outline-none placeholder:text-placeholder focus:border-fb";
+/** A label stacked over its control. */
+export const labelClass = "flex flex-col gap-1 text-[13px] text-secondary";
+/** Collapsible editor sections in "Layout and evidence". */
+const summaryClass =
+  "flex cursor-pointer list-none items-center justify-between gap-2 py-2.5 font-semibold text-[15px] text-primary [&::-webkit-details-marker]:hidden";
+const chevron = (
+  <ChevronDown
+    size={18}
+    className="shrink-0 text-icon-secondary transition-transform group-open:rotate-180"
+    aria-hidden
+  />
+);
 export type UnitDraft = { scene: UnitScene; placements: Placement[] };
 export function UnitEditor({
   initial,
@@ -232,7 +245,7 @@ export function UnitEditor({
   return (
     <div className="space-y-4">
       <Card className="overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-divider border-b p-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-divider border-b px-3 py-2">
           <div className="flex flex-wrap gap-1" role="group" aria-label="View mode">
             {(
               [
@@ -243,7 +256,8 @@ export function UnitEditor({
             ).map(([id, label]) => (
               <Button
                 key={id}
-                variant={mode === id ? "primary" : "secondary"}
+                variant={mode === id ? "soft" : "ghost"}
+                className={mode === id ? undefined : "text-primary!"}
                 onClick={() => {
                   input.current = { forward: 0, turn: 0 };
                   setMode(id);
@@ -256,7 +270,7 @@ export function UnitEditor({
           </div>
           <select
             aria-label="Current room"
-            className={`${fieldClass} max-w-48`}
+            className="h-9 min-w-0 max-w-[240px] truncate rounded-md border border-divider bg-card px-2.5 text-[15px] text-primary outline-none focus:border-fb"
             value={room.id}
             onChange={(e) => setRoomId(e.target.value)}
           >
@@ -266,25 +280,31 @@ export function UnitEditor({
               </option>
             ))}
           </select>
-          {draft.scene.appearance && (
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={details}
-                onChange={(e) => setDetails(e.target.checked)}
-              />
-              Show observed finishes and fixtures
-            </label>
-          )}
-          {mode === "dollhouse" && (
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={cutaway}
-                onChange={(e) => setCutaway(e.target.checked)}
-              />
-              Cutaway walls
-            </label>
+          {(draft.scene.appearance || mode === "dollhouse") && (
+            <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-1">
+              {draft.scene.appearance && (
+                <label className="flex cursor-pointer items-center gap-2 text-[13px] text-primary">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-fb"
+                    checked={details}
+                    onChange={(e) => setDetails(e.target.checked)}
+                  />
+                  Show observed finishes and fixtures
+                </label>
+              )}
+              {mode === "dollhouse" && (
+                <label className="flex cursor-pointer items-center gap-2 text-[13px] text-primary">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-fb"
+                    checked={cutaway}
+                    onChange={(e) => setCutaway(e.target.checked)}
+                  />
+                  Cutaway walls
+                </label>
+              )}
+            </div>
           )}
         </div>
         <div className="relative h-[480px] min-h-[320px]">
@@ -327,15 +347,15 @@ export function UnitEditor({
               />
             </Suspense>
           )}
-          <div className="pointer-events-none absolute top-3 left-3 rounded-full bg-white/95 px-3 py-1.5 text-xs text-slate-700 shadow-sm">
+          <div className="pointer-events-none absolute top-3 left-3 rounded-md bg-card/95 px-2.5 py-1 text-[13px] text-secondary shadow-base">
             {draft.scene.appearance && details
               ? "Photo-informed reconstruction"
               : "Estimated layout"}{" "}
             · verify dimensions
           </div>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-divider border-t p-3">
-          <p className="max-w-lg text-secondary text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-divider border-t px-3 py-2.5">
+          <p className="min-w-0 max-w-lg text-[13px] text-secondary leading-4">
             {mode === "walk"
               ? "Click the scene, then W/S to walk and A/D to turn. Drag to look. Choose a room to jump there."
               : mode === "plan"
@@ -345,7 +365,7 @@ export function UnitEditor({
                 : "Drag to orbit. Scroll or pinch to zoom. Switch to Floor plan to edit."}
           </p>
           {mode === "walk" && (
-            <div className="flex gap-1">
+            <div className="flex flex-wrap gap-1">
               {(
                 [
                   ["Turn left", 0, 1],
@@ -388,7 +408,10 @@ export function UnitEditor({
         </div>
       </Card>
       {problems.length > 0 && (
-        <p role="alert" className="rounded-lg bg-red-50 p-3 text-red-800 text-sm">
+        <p
+          role="alert"
+          className="rounded-lg bg-card p-3 text-[15px] text-negative leading-5 shadow-base"
+        >
           {problems.join(". ")}. Correct the floor plan before saving. The 3D view shows the last
           valid layout.
         </p>
@@ -396,7 +419,7 @@ export function UnitEditor({
       {remoteChanged && (
         <div
           role="alert"
-          className="flex flex-wrap items-center gap-2 rounded-lg bg-amber-50 p-3 text-amber-900 text-sm"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-card p-3 text-[15px] text-primary leading-5 shadow-base"
         >
           A newer version is available. Your unsaved changes are still here.
           <Button
@@ -412,18 +435,18 @@ export function UnitEditor({
           </Button>
         </div>
       )}
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid items-start gap-4 xl:grid-cols-2">
         {onSave && (
           <Card className="min-w-0 space-y-4 p-4">
             <div ref={pickerRef} className="scroll-mt-20 space-y-3">
-              <h2 className="font-bold text-lg text-primary">Place an item</h2>
+              <h2 className="font-bold text-[17px] text-primary leading-5">Place an item</h2>
               <ItemPicker items={items} value={choice} placed={placedKeys} onChange={setChoice} />
               {pickMissing && (
-                <p className="text-secondary text-sm">
+                <p className="text-[13px] text-negative">
                   That item isn't available to place any more. Choose another one.
                 </p>
               )}
-              <p className="text-primary text-sm">
+              <p className="text-[15px] text-primary leading-5">
                 {chosen ? (
                   <>
                     Choose a shape for <span className="font-semibold">{chosen.title}</span>.
@@ -431,7 +454,7 @@ export function UnitEditor({
                 ) : (
                   "Choose a shape."
                 )}{" "}
-                <span className="text-secondary">
+                <span className="block text-[13px] text-secondary leading-4">
                   Shapes are placeholders. Enter the item's actual dimensions before judging fit.
                 </span>
               </p>
@@ -464,8 +487,8 @@ export function UnitEditor({
               </select>
             )}
             {selectedItem && (
-              <div className="space-y-3">
-                <label className="block text-primary text-sm">
+              <div className="space-y-3 border-divider border-t pt-4">
+                <label className={labelClass}>
                   Item name
                   <input
                     className={fieldClass}
@@ -489,18 +512,20 @@ export function UnitEditor({
                     onChange={(n) => editItem({ rotation: (n * Math.PI) / 180 })}
                   />
                 </div>
-                <label className="flex items-center gap-2 text-primary text-sm">
+                <label className="flex cursor-pointer items-center gap-2 text-[15px] text-primary">
                   <input
                     type="checkbox"
+                    className="h-4 w-4 accent-fb"
                     checked={selectedItem.measured}
                     onChange={(e) => editItem({ measured: e.target.checked })}
                   />
                   I entered measured item dimensions
                 </label>
-                <label className="flex items-center gap-2 text-primary text-sm">
+                <label className="flex items-center gap-2 text-[15px] text-primary">
                   Color
                   <input
                     type="color"
+                    className="h-8 w-10 cursor-pointer rounded-md border border-divider bg-card p-0.5"
                     value={selectedItem.color}
                     onChange={(e) => editItem({ color: e.target.value })}
                   />
@@ -521,7 +546,7 @@ export function UnitEditor({
             )}
             {draft.placements.flatMap((p) =>
               placementProblems(draft.scene, p).map((error) => (
-                <p key={`${p.id}-${error}`} className="text-amber-700 text-sm">
+                <p key={`${p.id}-${error}`} className="text-[13px] text-negative">
                   {p.label}: {error}
                 </p>
               )),
@@ -529,141 +554,169 @@ export function UnitEditor({
           </Card>
         )}
         <div className="space-y-4">
-          <Card className="space-y-3 p-4">
-            <h2 className="font-bold text-lg text-primary">Layout and evidence</h2>
-            {draft.scene.notes.map((note, i) => (
-              <p key={i} className="text-secondary text-sm">
-                {note}
-              </p>
-            ))}
-            {draft.scene.appearance && (
-              <details>
-                <summary className="cursor-pointer font-semibold text-sm">
-                  Observed finishes and fixtures ({draft.scene.appearance.objects.length})
-                </summary>
-                <p className="my-2 text-secondary text-sm">
-                  Materials and shapes are inferred from the media. Surface texture, trim profiles
-                  and hidden details are approximations.
+          <Card className="p-4">
+            <h2 className="mb-2 font-bold text-[17px] text-primary leading-5">
+              Layout and evidence
+            </h2>
+            <div className="space-y-1.5">
+              {draft.scene.notes.map((note, i) => (
+                <p key={i} className="text-[13px] text-secondary leading-[18px]">
+                  {note}
                 </p>
-                {draft.scene.appearance.notes.map((note, i) => (
-                  <p key={i} className="my-2 text-secondary text-sm">
-                    {note}
-                  </p>
-                ))}
-                {draft.scene.appearance.objects.map((o) => (
-                  <p key={o.id} className="my-1 text-secondary text-sm">
-                    {o.label} · sources: {o.sources.join(", ")}
-                  </p>
-                ))}
-              </details>
-            )}
-            <p className="text-primary text-sm">
+              ))}
+            </div>
+            <p className="mt-3 text-[15px] text-primary leading-5">
               {room.name}: {room.evidence.basis}. Sources:{" "}
               {room.evidence.sources.join(", ") || "Manual layout"}.
             </p>
-            {onSave && (
-              <details>
-                <summary className="cursor-pointer font-semibold text-primary text-sm">
-                  Edit room corners
-                </summary>
-                <div className="mt-2 space-y-2">
-                  {draft.scene.appearance && (
-                    <p className="text-secondary text-sm">
-                      Changing the room outline clears generated finishes and fixtures. Generate
-                      again to align them to the revised layout.
-                    </p>
-                  )}
-                  {room.polygon.map((p, i) => (
-                    <div key={i} className="grid grid-cols-2 gap-2">
-                      <NumberField
-                        label={`Corner ${i + 1} x (m)`}
-                        value={p.x}
-                        onChange={(n) => corner(room.id, i, n, p.z)}
-                      />
-                      <NumberField
-                        label={`Corner ${i + 1} z (m)`}
-                        value={p.z}
-                        onChange={(n) => corner(room.id, i, p.x, n)}
-                      />
+            {(draft.scene.appearance || onSave) && (
+              <div className="mt-3 divide-y divide-divider border-divider border-t">
+                {draft.scene.appearance && (
+                  <details className="group">
+                    <summary className={summaryClass}>
+                      Observed finishes and fixtures ({draft.scene.appearance.objects.length})
+                      {chevron}
+                    </summary>
+                    <div className="pb-3">
+                      <p className="mb-2 text-[13px] text-secondary leading-[18px]">
+                        Materials and shapes are inferred from the media. Surface texture, trim
+                        profiles and hidden details are approximations.
+                      </p>
+                      {draft.scene.appearance.notes.map((note, i) => (
+                        <p key={i} className="mb-2 text-[13px] text-secondary leading-[18px]">
+                          {note}
+                        </p>
+                      ))}
+                      <ul className="space-y-1">
+                        {draft.scene.appearance.objects.map((o) => (
+                          <li key={o.id} className="text-[13px] text-primary leading-[18px]">
+                            {o.label}{" "}
+                            <span className="text-secondary">
+                              · sources: {o.sources.join(", ")}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  ))}
-                </div>
-              </details>
-            )}
-            {onSave && measuredWall && (
-              <details>
-                <summary className="cursor-pointer font-semibold text-primary text-sm">
-                  Calibrate scale from a measured wall
-                </summary>
-                <p className="my-2 text-secondary text-sm">
-                  Select a wall and enter its measured length. This scales the unit and its inferred
-                  fixtures uniformly. Your placed item's dimensions stay unchanged.
-                </p>
-                <label className="block text-primary text-sm">
-                  Reference wall
-                  <select
-                    className={fieldClass}
-                    value={measuredWall.id}
-                    onChange={(e) => setCalibrationWall(e.target.value)}
-                  >
-                    {draft.scene.walls.map((w) => (
-                      <option key={w.id} value={w.id}>
-                        {w.id} · {distance(w.a, w.b).toFixed(2)} m
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <NumberField
-                  label="Measured wall length (m)"
-                  value={knownLength}
-                  onChange={setKnownLength}
-                />
-                <Button
-                  className="mt-2"
-                  variant="secondary"
-                  disabled={knownLength < 0.3 || knownLength > 50}
-                  onClick={calibrate}
-                >
-                  Apply measured scale
-                </Button>
-              </details>
-            )}
-            {onSave && (
-              <details>
-                <summary className="cursor-pointer font-semibold text-primary text-sm">
-                  Start a measured rectangular room
-                </summary>
-                <p className="my-2 text-secondary text-sm">
-                  Replaces the current walls and rooms. Furniture stays and may need repositioning.
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  <NumberField label="Room width (m)" value={width} onChange={setWidth} />
-                  <NumberField label="Room length (m)" value={length} onChange={setLength} />
-                </div>
-                <Button
-                  className="mt-2"
-                  variant="secondary"
-                  disabled={width < 1 || width > 50 || length < 1 || length > 50}
-                  onClick={() => {
-                    const scene = manualScene(width, length, draft.scene.title, true);
-                    change({ ...draft, scene });
-                    setRoomId(scene.rooms[0].id);
-                  }}
-                >
-                  Use these room dimensions
-                </Button>
-              </details>
+                  </details>
+                )}
+                {onSave && (
+                  <details className="group">
+                    <summary className={summaryClass}>
+                      Edit room corners
+                      {chevron}
+                    </summary>
+                    <div className="space-y-2 pb-3">
+                      {draft.scene.appearance && (
+                        <p className="text-[13px] text-secondary leading-[18px]">
+                          Changing the room outline clears generated finishes and fixtures. Generate
+                          again to align them to the revised layout.
+                        </p>
+                      )}
+                      {room.polygon.map((p, i) => (
+                        <div key={i} className="grid grid-cols-2 gap-2">
+                          <NumberField
+                            label={`Corner ${i + 1} x (m)`}
+                            value={p.x}
+                            onChange={(n) => corner(room.id, i, n, p.z)}
+                          />
+                          <NumberField
+                            label={`Corner ${i + 1} z (m)`}
+                            value={p.z}
+                            onChange={(n) => corner(room.id, i, p.x, n)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                )}
+                {onSave && measuredWall && (
+                  <details className="group">
+                    <summary className={summaryClass}>
+                      Calibrate scale from a measured wall
+                      {chevron}
+                    </summary>
+                    <div className="space-y-2 pb-3">
+                      <p className="text-[13px] text-secondary leading-[18px]">
+                        Select a wall and enter its measured length. This scales the unit and its
+                        inferred fixtures uniformly. Your placed item's dimensions stay unchanged.
+                      </p>
+                      <label className={labelClass}>
+                        Reference wall
+                        <select
+                          className={fieldClass}
+                          value={measuredWall.id}
+                          onChange={(e) => setCalibrationWall(e.target.value)}
+                        >
+                          {draft.scene.walls.map((w) => (
+                            <option key={w.id} value={w.id}>
+                              {w.id} · {distance(w.a, w.b).toFixed(2)} m
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <NumberField
+                        label="Measured wall length (m)"
+                        value={knownLength}
+                        onChange={setKnownLength}
+                      />
+                      <Button
+                        className="mt-1"
+                        variant="secondary"
+                        disabled={knownLength < 0.3 || knownLength > 50}
+                        onClick={calibrate}
+                      >
+                        Apply measured scale
+                      </Button>
+                    </div>
+                  </details>
+                )}
+                {onSave && (
+                  <details className="group">
+                    <summary className={summaryClass}>
+                      Start a measured rectangular room
+                      {chevron}
+                    </summary>
+                    <div className="space-y-2 pb-3">
+                      <p className="text-[13px] text-secondary leading-[18px]">
+                        Replaces the current walls and rooms. Furniture stays and may need
+                        repositioning.
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <NumberField label="Room width (m)" value={width} onChange={setWidth} />
+                        <NumberField label="Room length (m)" value={length} onChange={setLength} />
+                      </div>
+                      <Button
+                        className="mt-1"
+                        variant="secondary"
+                        disabled={width < 1 || width > 50 || length < 1 || length > 50}
+                        onClick={() => {
+                          const scene = manualScene(width, length, draft.scene.title, true);
+                          change({ ...draft, scene });
+                          setRoomId(scene.rooms[0].id);
+                        }}
+                      >
+                        Use these room dimensions
+                      </Button>
+                    </div>
+                  </details>
+                )}
+              </div>
             )}
           </Card>
           {sidebar}
         </div>
       </div>
       {onSave && (
-        <div className="flex flex-wrap items-center gap-3">
-          <Button onClick={save} disabled={busy || !dirty || !!problems.length || remoteChanged}>
+        <div className="sticky bottom-3 z-10 flex flex-wrap items-center gap-3 rounded-lg bg-card p-3 shadow-elevated">
+          <Button
+            variant="primary"
+            onClick={save}
+            disabled={busy || !dirty || !!problems.length || remoteChanged}
+          >
             {busy ? "Saving…" : "Save layout"}
           </Button>
-          <span role="status" className="text-secondary text-sm">
+          <span role="status" className="text-[13px] text-secondary">
             {message || (dirty ? "Unsaved changes" : "Saved layout")}
           </span>
         </div>
@@ -681,7 +734,7 @@ export function NumberField({
   onChange: (n: number) => void;
 }) {
   return (
-    <label className="block text-primary text-xs">
+    <label className={labelClass}>
       {label}
       <input
         className={fieldClass}

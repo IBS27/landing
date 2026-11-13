@@ -14,13 +14,16 @@ export const Route = createFileRoute("/landing/place/")({
       title="My Place"
       description="Move in, decorate and run the house with your roommates."
     >
-      <MyPlaceCard />
-      <Negotiations />
-      <RoommatesCard />
-      <HouseCard />
-      <RoomCard />
-      <OwnedItems />
-      <MoverQuotes />
+      {/* One 16px rhythm between every card, whatever margin each card brings. */}
+      <div className="flex flex-col gap-4 *:mb-0">
+        <MyPlaceCard />
+        <Negotiations />
+        <RoommatesCard />
+        <HouseCard />
+        <RoomCard />
+        <OwnedItems />
+        <MoverQuotes />
+      </div>
     </LandingPage>
   ),
 });

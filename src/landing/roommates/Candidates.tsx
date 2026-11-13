@@ -43,7 +43,7 @@ export function CandidatesView({
   if (data === null) return null;
   return (
     <Card className="overflow-hidden" aria-labelledby="candidates-title">
-      <div className="px-4 pt-4 pb-1">
+      <div className="px-4 pt-4 pb-2">
         <h2 id="candidates-title" className="font-bold text-[17px] text-primary leading-[22px]">
           From your network
         </h2>
@@ -70,7 +70,7 @@ export function CandidatesView({
           here.
         </p>
       ) : (
-        <ul className="pb-1">
+        <ul className="divide-y divide-divider-soft border-divider-soft border-t">
           {data.candidates.map((c) => (
             <CandidateRow
               key={c.user._id}
