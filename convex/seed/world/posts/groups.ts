@@ -885,7 +885,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "mission-neighbors",
     at: daysAgo(8, "07:40"),
     text: "is jackhammering on 18th St at 7am legal?? I work from home fridays and I'm losing my mind",
-    photos: ["construction"],
+    photos: ["posts/construction-01.jpg"],
     reactions: 9,
     mood: "haha",
     comments: [
@@ -1566,7 +1566,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "bay-area-hikers",
     at: daysAgo(4, "18:30"),
     text: "Cataract Falls on Saturday: muddy, then slippery, then gorgeous. Falls are finally running after the rain, the stairs near the top were slick so wear real shoes. Cell service dies right after the parking lot",
-    photos: ["forest river", "forest trail", "foggy hills"],
+    photos: ["posts/mount-tam-03.jpg", "foggy hills"],
     tagged: ["sofia.alvarez"],
     reactions: 26,
     mood: "love",
@@ -1596,7 +1596,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "bay-area-hikers",
     at: daysAgo(7, "15:30"),
     text: "ran Mount Tam from Mill Valley to East Peak and back in 1:52 this morning. trail is wet, fog sits right on the ridge. headlamp needed by 5",
-    photos: ["posts/forest-trail-03.jpg"],
+    photos: ["posts/mount-tam-01.jpg"],
     reactions: 15,
     comments: [
       { by: "luis.hernandez", text: "1:52 is wild", after: 30 },
@@ -1613,7 +1613,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "bay-area-hikers",
     at: daysAgo(2, "16:00"),
     text: "Lands End in the fog today. 3 herons, zero people",
-    photos: ["beach", "heron"],
+    photos: ["posts/sunset-02.jpg", "heron"],
     reactions: 22,
     comments: [
       { by: "theo.grant", text: "the labyrinth is so good in the fog", after: 40 },

@@ -2384,20 +2384,6 @@
     "width": 1280,
     "height": 960
   },
-  "posts/construction-02.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:Tower_12_under_construction,_April_2016.jpg",
-    "creator": "SounderBruce",
-    "creator_url": null,
-    "license": "CC BY-SA 3.0",
-    "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
-    "title": "Tower 12 under construction, April 2016",
-    "tags": [
-      "construction"
-    ],
-    "provider": "wikimedia",
-    "width": 933,
-    "height": 1400
-  },
   "posts/corgi-01.jpg": {
     "source_url": "https://commons.wikimedia.org/wiki/File:Fawn_and_white_Welsh_Corgi_puppy_standing_on_rear_legs_and_sticking_out_the_tongue.jpg",
     "creator": "Huoadg5888Minor edits made by Subsidiary account",
@@ -2958,20 +2944,6 @@
     "width": 1280,
     "height": 960
   },
-  "posts/forest-river-01.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:Eagle_Falls,_Skykomish_River_swimming_hole_03.jpg",
-    "creator": "Joe Mabel",
-    "creator_url": null,
-    "license": "CC BY-SA 4.0",
-    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-    "title": "Eagle Falls, Skykomish River swimming hole 03",
-    "tags": [
-      "forest river"
-    ],
-    "provider": "wikimedia",
-    "width": 1280,
-    "height": 850
-  },
   "posts/forest-trail-01.jpg": {
     "source_url": "https://www.flickr.com/photos/62915351@N04/51142750330",
     "creator": "Mike J Maguire",
@@ -2992,34 +2964,6 @@
     "provider": "flickr",
     "width": 1024,
     "height": 683
-  },
-  "posts/forest-trail-02.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:Boardwalk_on_Rain_Forest_Nature_Trail_(57f57280-35a8-4750-88a2-3d7651d441b3).JPG",
-    "creator": "NPS Photo",
-    "creator_url": null,
-    "license": "Public domain",
-    "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-    "title": "Boardwalk on Rain Forest Nature Trail",
-    "tags": [
-      "forest trail"
-    ],
-    "provider": "wikimedia",
-    "width": 1050,
-    "height": 1400
-  },
-  "posts/forest-trail-03.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:Moss_covered_tree,_Hall_of_Mosses_Trail,_Hoh_Rainforest.jpg",
-    "creator": "Ron Clausen",
-    "creator_url": null,
-    "license": "CC BY-SA 4.0",
-    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-    "title": "Moss covered tree, Hall of Mosses Trail, Hoh Rainforest",
-    "tags": [
-      "forest trail"
-    ],
-    "provider": "wikimedia",
-    "width": 1050,
-    "height": 1400
   },
   "posts/forest-trail-04.jpg": {
     "source_url": "https://commons.wikimedia.org/wiki/File:Fort_Circle_Park_Hiker-Biker_Trail-9_(4540043849).jpg",
@@ -3075,34 +3019,6 @@
     ],
     "provider": "wikimedia",
     "width": 1050,
-    "height": 1400
-  },
-  "posts/forest-trail-08.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:Snow_Lake_Trail_1013_-_20250825-005129746.jpg",
-    "creator": "Sikander Iqbal",
-    "creator_url": null,
-    "license": "CC BY-SA 4.0",
-    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-    "title": "Snow Lake Trail 1013 - 20250825-005129746",
-    "tags": [
-      "forest trail"
-    ],
-    "provider": "wikimedia",
-    "width": 787,
-    "height": 1400
-  },
-  "posts/forest-trail-09.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:Snow_Lake_Trail_1013_-_20250825-010106928.jpg",
-    "creator": "Sikander Iqbal",
-    "creator_url": null,
-    "license": "CC BY-SA 4.0",
-    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-    "title": "Snow Lake Trail 1013 - 20250825-010106928",
-    "tags": [
-      "forest trail"
-    ],
-    "provider": "wikimedia",
-    "width": 787,
     "height": 1400
   },
   "posts/friends-01.jpg": {
@@ -5553,20 +5469,6 @@
     "provider": "wikimedia",
     "width": 1280,
     "height": 720
-  },
-  "posts/sunset-04.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:Atardecer_Golden_Gardens_Park_14.JPG",
-    "creator": "Miguel Hermoso Cuesta",
-    "creator_url": null,
-    "license": "CC BY-SA 4.0",
-    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-    "title": "Atardecer Golden Gardens Park 14",
-    "tags": [
-      "sunset"
-    ],
-    "provider": "wikimedia",
-    "width": 1280,
-    "height": 853
   },
   "posts/tacos-01.jpg": {
     "source_url": "https://commons.wikimedia.org/wiki/File:001_Tacos_de_carnitas,_carne_asada_y_al_pastor.jpg",

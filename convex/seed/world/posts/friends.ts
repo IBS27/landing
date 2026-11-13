@@ -1483,7 +1483,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "grace.liu",
     at: daysAgo(19, "18:00"),
     text: "probably the last dry weekend at castle rock. sandstone szn is over (never climb it wet) 😔 see you in april",
-    photos: ["castle rock", "castle rock", "forest river"],
+    photos: ["castle rock", "castle rock", "posts/castle-rock-03.jpg"],
     place: "Castle Rock State Park",
     tagged: ["arjun.mehta"],
     reactions: 23,
@@ -1491,7 +1491,7 @@ export const friendPosts: readonly PostSeed[] = [
     comments: [
       { by: "arjun.mehta", after: 25, text: "my hands are shredded" },
       { by: "maya.chen", after: 40, text: "take me in april!!" },
-      { by: "sofia.alvarez", after: 70, text: "the river photo 😍" },
+      { by: "sofia.alvarez", after: 70, text: "the last photo 😍" },
     ],
   },
   {
@@ -1688,7 +1688,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "zoe.nguyen",
     at: daysAgo(11, "20:00"),
     text: "finally developed my roll from lands end. portra 400 in the fog is a mood",
-    photos: ["lighthouse", "beach", "forest trail", "beach", "film camera"],
+    photos: ["lighthouse", "beach", "posts/sunset-03.jpg", "film camera"],
     place: "Lands End Trail",
     reactions: 34,
     likedBy: ["maya.chen"],
@@ -2146,7 +2146,7 @@ export const friendPosts: readonly PostSeed[] = [
     at: daysAgo(17, "19:00"),
     privacy: "friends",
     text: "Back from 10 days on the research vessel. Saw orcas, broke one sensor, ate approximately 30 sandwiches",
-    photos: ["research ship", "ocean", "sunset", "lab"],
+    photos: ["research ship", "ocean", "lab"],
     reactions: 30,
     comments: [
       { by: "priya.raman", after: 25, text: "ORCAS?? jealous" },
@@ -2209,7 +2209,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "maddie.collins",
     at: daysAgo(7, "15:30"),
     text: "Pickles got so muddy that a stranger offered to hose him off at the trailhead",
-    photos: ["muddy dog", "forest trail"],
+    photos: ["muddy dog"],
     place: "Cataract Falls Trail",
     reactions: 25,
     comments: [

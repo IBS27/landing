@@ -1655,13 +1655,6 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
       w: 1280,
     },
     {
-      path: "/seed/posts/construction-02.jpg",
-      topic: "construction",
-      tags: ["construction", "tower 12 under construction, april 2016"],
-      h: 1400,
-      w: 933,
-    },
-    {
       path: "/seed/posts/corgi-01.jpg",
       topic: "corgi",
       tags: [
@@ -2173,13 +2166,6 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
       w: 1280,
     },
     {
-      path: "/seed/posts/forest-river-01.jpg",
-      topic: "forest river",
-      tags: ["forest river", "eagle falls, skykomish river swimming hole 03"],
-      h: 850,
-      w: 1280,
-    },
-    {
       path: "/seed/posts/forest-trail-01.jpg",
       topic: "forest trail",
       tags: [
@@ -2195,20 +2181,6 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
       ],
       h: 683,
       w: 1024,
-    },
-    {
-      path: "/seed/posts/forest-trail-02.jpg",
-      topic: "forest trail",
-      tags: ["forest trail", "boardwalk on rain forest nature trail"],
-      h: 1400,
-      w: 1050,
-    },
-    {
-      path: "/seed/posts/forest-trail-03.jpg",
-      topic: "forest trail",
-      tags: ["forest trail", "moss covered tree, hall of mosses trail, hoh rainforest"],
-      h: 1400,
-      w: 1050,
     },
     {
       path: "/seed/posts/forest-trail-04.jpg",
@@ -2237,20 +2209,6 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
       tags: ["forest trail", "foggy mountain trail 2 montsoflo switzerland"],
       h: 1400,
       w: 1050,
-    },
-    {
-      path: "/seed/posts/forest-trail-08.jpg",
-      topic: "forest trail",
-      tags: ["forest trail", "snow lake trail 1013 - 20250825-005129746"],
-      h: 1400,
-      w: 787,
-    },
-    {
-      path: "/seed/posts/forest-trail-09.jpg",
-      topic: "forest trail",
-      tags: ["forest trail", "snow lake trail 1013 - 20250825-010106928"],
-      h: 1400,
-      w: 787,
     },
     {
       path: "/seed/posts/friends-01.jpg",
@@ -3510,13 +3468,6 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
         "lands end, san francisco 11-19-23 - explored - flickr - sharon mollerus",
       ],
       h: 720,
-      w: 1280,
-    },
-    {
-      path: "/seed/posts/sunset-04.jpg",
-      topic: "sunset",
-      tags: ["sunset", "atardecer golden gardens park 14"],
-      h: 853,
       w: 1280,
     },
     {
