@@ -92,6 +92,7 @@ import { Route as LandingFindIndexRouteImport } from './routes/landing/find/inde
 import { Route as LandingInboxIndexRouteImport } from './routes/landing/inbox/index'
 import { Route as LandingMoveOutIndexRouteImport } from './routes/landing/move-out/index'
 import { Route as LandingPlaceIndexRouteImport } from './routes/landing/place/index'
+import { Route as LandingPlaceRoomRouteImport } from './routes/landing/place/room'
 import { Route as LandingPlaceRoommatesRouteImport } from './routes/landing/place/roommates'
 import { Route as LandingProfileIndexRouteImport } from './routes/landing/profile/index'
 import { Route as MarketplaceCategoryCategoryRouteImport } from './routes/marketplace/category/$category'
@@ -523,6 +524,11 @@ const LandingPlaceIndexRoute = LandingPlaceIndexRouteImport.update({
   path: '/place/',
   getParentRoute: () => LandingRouteRoute,
 } as any)
+const LandingPlaceRoomRoute = LandingPlaceRoomRouteImport.update({
+  id: '/place/room',
+  path: '/place/room',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
 const LandingPlaceRoommatesRoute = LandingPlaceRoommatesRouteImport.update({
   id: '/place/roommates',
   path: '/place/roommates',
@@ -677,6 +683,7 @@ export interface FileRoutesByFullPath {
   '/groups/$groupId/files': typeof GroupsGroupIdFilesRoute
   '/groups/$groupId/media': typeof GroupsGroupIdMediaRoute
   '/groups/$groupId/members': typeof GroupsGroupIdMembersRoute
+  '/landing/place/room': typeof LandingPlaceRoomRoute
   '/landing/place/roommates': typeof LandingPlaceRoommatesRoute
   '/marketplace/category/$category': typeof MarketplaceCategoryCategoryRoute
   '/marketplace/create/item': typeof MarketplaceCreateItemRoute
@@ -773,6 +780,7 @@ export interface FileRoutesByTo {
   '/groups/$groupId/files': typeof GroupsGroupIdFilesRoute
   '/groups/$groupId/media': typeof GroupsGroupIdMediaRoute
   '/groups/$groupId/members': typeof GroupsGroupIdMembersRoute
+  '/landing/place/room': typeof LandingPlaceRoomRoute
   '/landing/place/roommates': typeof LandingPlaceRoommatesRoute
   '/marketplace/category/$category': typeof MarketplaceCategoryCategoryRoute
   '/marketplace/create/item': typeof MarketplaceCreateItemRoute
@@ -873,6 +881,7 @@ export interface FileRoutesById {
   '/groups/$groupId/files': typeof GroupsGroupIdFilesRoute
   '/groups/$groupId/media': typeof GroupsGroupIdMediaRoute
   '/groups/$groupId/members': typeof GroupsGroupIdMembersRoute
+  '/landing/place/room': typeof LandingPlaceRoomRoute
   '/landing/place/roommates': typeof LandingPlaceRoommatesRoute
   '/marketplace/category/$category': typeof MarketplaceCategoryCategoryRoute
   '/marketplace/create/item': typeof MarketplaceCreateItemRoute
@@ -974,6 +983,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId/files'
     | '/groups/$groupId/media'
     | '/groups/$groupId/members'
+    | '/landing/place/room'
     | '/landing/place/roommates'
     | '/marketplace/category/$category'
     | '/marketplace/create/item'
@@ -1070,6 +1080,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId/files'
     | '/groups/$groupId/media'
     | '/groups/$groupId/members'
+    | '/landing/place/room'
     | '/landing/place/roommates'
     | '/marketplace/category/$category'
     | '/marketplace/create/item'
@@ -1169,6 +1180,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId/files'
     | '/groups/$groupId/media'
     | '/groups/$groupId/members'
+    | '/landing/place/room'
     | '/landing/place/roommates'
     | '/marketplace/category/$category'
     | '/marketplace/create/item'
@@ -1848,6 +1860,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LandingPlaceIndexRouteImport
       parentRoute: typeof LandingRouteRoute
     }
+    '/landing/place/room': {
+      id: '/landing/place/room'
+      path: '/place/room'
+      fullPath: '/landing/place/room'
+      preLoaderRoute: typeof LandingPlaceRoomRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
     '/landing/place/roommates': {
       id: '/landing/place/roommates'
       path: '/place/roommates'
@@ -1979,6 +1998,7 @@ interface LandingRouteRouteChildren {
   LandingSplatRoute: typeof LandingSplatRoute
   LandingWelcomeRoute: typeof LandingWelcomeRoute
   LandingIndexRoute: typeof LandingIndexRoute
+  LandingPlaceRoomRoute: typeof LandingPlaceRoomRoute
   LandingPlaceRoommatesRoute: typeof LandingPlaceRoommatesRoute
   LandingCrewIndexRoute: typeof LandingCrewIndexRoute
   LandingFindIndexRoute: typeof LandingFindIndexRoute
@@ -1993,6 +2013,7 @@ const LandingRouteRouteChildren: LandingRouteRouteChildren = {
   LandingSplatRoute: LandingSplatRoute,
   LandingWelcomeRoute: LandingWelcomeRoute,
   LandingIndexRoute: LandingIndexRoute,
+  LandingPlaceRoomRoute: LandingPlaceRoomRoute,
   LandingPlaceRoommatesRoute: LandingPlaceRoommatesRoute,
   LandingCrewIndexRoute: LandingCrewIndexRoute,
   LandingFindIndexRoute: LandingFindIndexRoute,

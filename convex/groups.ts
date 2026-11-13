@@ -3,10 +3,12 @@ import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { activityLabel, externalPostsPerDay } from "./lib/groupActivity";
+import { checkPoint, neighborhoodIdAt } from "./lib/neighborhoods";
 import { notify } from "./lib/notify";
 import { canView, enrichPosts, eventVisible, loadAudience } from "./lib/posts";
 import { visibleDetails } from "./lib/settings";
 import { friendIds, getSummaries, type UserSummary, userSummary } from "./lib/users";
+import { latLng } from "./validators";
 
 /**
  * Groups: discovery, membership, the group page (header, About, People,
@@ -743,6 +745,8 @@ export const create = viewerMutation({
     privacy: v.union(v.literal("public"), v.literal("private")),
     visible: v.optional(v.boolean()),
     invite: v.optional(v.array(v.id("users"))),
+    /** Where the Group is based (e.g. a neighborhood's center); sets its neighborhood. */
+    point: v.optional(latLng),
   },
   handler: async (ctx, args) => {
     const name = args.name.trim();
@@ -761,6 +765,7 @@ export const create = viewerMutation({
     )
       slug = `${base}-${i}`;
     const now = Date.now();
+    const point = args.point && checkPoint(args.point);
     const groupId = await ctx.db.insert("groups", {
       name,
       slug,
@@ -777,6 +782,8 @@ export const create = viewerMutation({
       externalMemberCount: 0,
       memberCount: 1,
       lastActivityAt: now,
+      point,
+      neighborhoodId: await neighborhoodIdAt(ctx, point),
     });
     await ctx.db.insert("groupMembers", {
       groupId,
