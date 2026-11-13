@@ -8,6 +8,7 @@ import { getProfile } from "./lib/cityProfile";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { getInterest } from "./lib/interests";
 import { type Audience, loadAudience } from "./lib/posts";
+import { hasProtected, redactProtected } from "./lib/protectedText";
 import { type RoomVibeInput, roomVibeTask } from "./lib/roomVibeTask";
 import {
   cleanVibe,
@@ -271,6 +272,18 @@ const CAP = {
   reactionsScanned: 200,
 };
 
+/** Reactions that say the person liked something; a Sad or Angry one isn't taste. */
+const TASTE_REACTIONS = new Set<Doc<"reactions">["type"]>(["like", "love", "care"]);
+
+/** Whether none of these texts names a protected trait; anything that does never reaches Muse. */
+const safeText = (...texts: (string | undefined)[]) => !texts.some((t) => t && hasProtected(t));
+
+/** Whether a post's words (and its Group's name, which the model also sees) are safe to send. */
+async function safePost(ctx: QueryCtx, post: Doc<"posts">) {
+  const group = post.groupId ? await ctx.db.get(post.groupId) : null;
+  return safeText(post.text, group?.name);
+}
+
 /** City Profile interests (#3): what they stated, plus inferences Landing is fairly sure of. */
 export async function profileInterests(ctx: QueryCtx, userId: Id<"users">) {
   return (await getProfile(ctx, userId)).interests
@@ -283,81 +296,87 @@ export async function profileInterests(ctx: QueryCtx, userId: Id<"users">) {
  * What Muse reads for a room's vibe: the room, the person's City Profile
  * interests, the Pages they follow, and as sources the listings and posts they
  * saved and the posts they liked (newest first). `runAgent` drops any source
- * the viewer can't see.
+ * the viewer can't see; anything naming a protected trait is left out here.
  */
-export const vibeInput = internalQuery({
-  args: { viewerId: v.id("users"), roomId: v.id("rooms") },
-  handler: async (
-    ctx,
-    { viewerId, roomId },
-  ): Promise<{ input: RoomVibeInput; sources: Source[] }> => {
-    if (!(await ctx.db.get(viewerId))) throw new ConvexError("Unknown viewer");
-    const room = await ownRoom(ctx, viewerId, roomId);
+export async function loadVibeInput(
+  ctx: QueryCtx,
+  viewerId: Id<"users">,
+  roomId: Id<"rooms">,
+): Promise<{ input: RoomVibeInput; sources: Source[] }> {
+  if (!(await ctx.db.get(viewerId))) throw new ConvexError("Unknown viewer");
+  const room = await ownRoom(ctx, viewerId, roomId);
 
-    const followRows = await ctx.db
-      .query("follows")
-      .withIndex("by_user", (q) => q.eq("userId", viewerId))
-      .order("desc")
-      .take(CAP.follows);
-    const follows: RoomVibeInput["follows"] = [];
-    for (const f of followRows) {
-      const page = await ctx.db.get(f.targetId);
-      if (page?.kind === "page")
-        follows.push({ name: page.name, category: page.pageCategory ?? "Page" });
-    }
+  const followRows = await ctx.db
+    .query("follows")
+    .withIndex("by_user", (q) => q.eq("userId", viewerId))
+    .order("desc")
+    .take(CAP.follows);
+  const follows: RoomVibeInput["follows"] = [];
+  for (const f of followRows) {
+    const page = await ctx.db.get(f.targetId);
+    if (page?.kind === "page" && safeText(page.name, page.pageCategory))
+      follows.push({ name: page.name, category: page.pageCategory ?? "Page" });
+  }
 
-    const sources: Source[] = [];
-    const seenPosts = new Set<string>();
-    const savedRows = await ctx.db
-      .query("saved")
-      .withIndex("by_user", (q) => q.eq("userId", viewerId))
-      .order("desc")
-      .take(100);
-    let listings = 0;
-    let savedPosts = 0;
-    for (const s of savedRows) {
-      if (s.kind === "listing" && listings < CAP.savedListings) {
-        const id = ctx.db.normalizeId("listings", s.refId);
-        if (id && (await ctx.db.get(id))) {
-          sources.push({ kind: "listing", listingId: id });
-          listings++;
-        }
-      } else if (s.kind === "post" && savedPosts < CAP.savedPosts) {
-        const id = ctx.db.normalizeId("posts", s.refId);
-        if (id && (await ctx.db.get(id))) {
-          sources.push({ kind: "post", postId: id });
-          seenPosts.add(id);
-          savedPosts++;
-        }
+  const sources: Source[] = [];
+  const seenPosts = new Set<string>();
+  const savedRows = await ctx.db
+    .query("saved")
+    .withIndex("by_user", (q) => q.eq("userId", viewerId))
+    .order("desc")
+    .take(100);
+  let listings = 0;
+  let savedPosts = 0;
+  for (const s of savedRows) {
+    if (s.kind === "listing" && listings < CAP.savedListings) {
+      const id = ctx.db.normalizeId("listings", s.refId);
+      const listing = id ? await ctx.db.get(id) : null;
+      if (id && listing && safeText(listing.title, listing.description)) {
+        sources.push({ kind: "listing", listingId: id });
+        listings++;
+      }
+    } else if (s.kind === "post" && savedPosts < CAP.savedPosts) {
+      const id = ctx.db.normalizeId("posts", s.refId);
+      const post = id ? await ctx.db.get(id) : null;
+      if (id && post && (await safePost(ctx, post))) {
+        sources.push({ kind: "post", postId: id });
+        seenPosts.add(id);
+        savedPosts++;
       }
     }
+  }
 
-    const reactions = await ctx.db
-      .query("reactions")
-      .withIndex("by_user", (q) => q.eq("userId", viewerId))
-      .order("desc")
-      .take(CAP.reactionsScanned);
-    let liked = 0;
-    for (const r of reactions) {
-      if (liked >= CAP.likedPosts) break;
-      if (r.targetType !== "post" || seenPosts.has(r.targetId)) continue;
-      const id = ctx.db.normalizeId("posts", r.targetId);
-      const post = id ? await ctx.db.get(id) : null;
-      if (!post?.text?.trim()) continue;
-      seenPosts.add(r.targetId);
-      sources.push({ kind: "post", postId: post._id });
-      liked++;
-    }
+  const reactions = await ctx.db
+    .query("reactions")
+    .withIndex("by_user", (q) => q.eq("userId", viewerId))
+    .order("desc")
+    .take(CAP.reactionsScanned);
+  let liked = 0;
+  for (const r of reactions) {
+    if (liked >= CAP.likedPosts) break;
+    if (r.targetType !== "post" || !TASTE_REACTIONS.has(r.type) || seenPosts.has(r.targetId))
+      continue;
+    const id = ctx.db.normalizeId("posts", r.targetId);
+    const post = id ? await ctx.db.get(id) : null;
+    if (!post?.text?.trim() || !(await safePost(ctx, post))) continue;
+    seenPosts.add(r.targetId);
+    sources.push({ kind: "post", postId: post._id });
+    liked++;
+  }
 
-    return {
-      input: {
-        room: { name: room.name, kind: room.kind, size: room.size ?? null },
-        interests: await profileInterests(ctx, viewerId),
-        follows,
-      },
-      sources,
-    };
-  },
+  return {
+    input: {
+      room: { name: redactProtected(room.name), kind: room.kind, size: room.size ?? null },
+      interests: await profileInterests(ctx, viewerId),
+      follows,
+    },
+    sources,
+  };
+}
+
+export const vibeInput = internalQuery({
+  args: { viewerId: v.id("users"), roomId: v.id("rooms") },
+  handler: (ctx, { viewerId, roomId }) => loadVibeInput(ctx, viewerId, roomId),
 });
 
 /** A suggestion's citations as the viewer sees them, for the sources chip. */

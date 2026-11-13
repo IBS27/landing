@@ -314,7 +314,7 @@ export function vibeFromSignals(signals: VibeSignals, sources: SignalSource[]): 
       const quote = clipWords(first, 48);
       return {
         source: m.source.key,
-        why: m.source.key.startsWith("listing:") ? `Saved “${quote}”` : `Liked a post: “${quote}”`,
+        why: m.source.key.startsWith("listing:") ? `Saved “${quote}”` : `From a post: “${quote}”`,
       };
     });
 

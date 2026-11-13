@@ -7,7 +7,7 @@ import { MODEL } from "../convex/ai/model";
 import { agentSources } from "../convex/ai/sources";
 import { type RoomVibeInput, roomVibeTask } from "../convex/lib/roomVibeTask";
 import { cleanVibe, type VibeValue, vibeFromSignals, vibeProblems } from "../convex/lib/vibe";
-import { profileInterests } from "../convex/rooms";
+import { loadVibeInput, profileInterests } from "../convex/rooms";
 import type { Source } from "../convex/validators";
 import { fakeCtx, type Row } from "./fakeDb";
 
@@ -332,5 +332,60 @@ describe("vibe input", () => {
     const interests = await profileInterests(ctx, "users:me" as Id<"users">);
     expect(interests.map((i) => i.id)).toEqual(["books", "hiking"]);
     expect(interests.every((i) => i.label.length > 0)).toBe(true);
+  });
+
+  test("leaves out non-taste reactions and anything naming a protected trait", async () => {
+    const me = "users:me";
+    const post = (id: string, text: string, extra: Record<string, unknown> = {}) => ({
+      _id: id,
+      authorId: "users:a",
+      text,
+      createdAt: 1,
+      ...extra,
+    });
+    const react = (id: string, targetId: string, type: string) => ({
+      _id: id,
+      targetType: "post",
+      targetId,
+      userId: me,
+      type,
+      createdAt: 1,
+    });
+    const ctx = fakeCtx({
+      users: [
+        { _id: me, kind: "user", name: "Me" },
+        { _id: "users:p1", kind: "page", name: "Moonrise Coffee Co.", pageCategory: "Coffee shop" },
+        { _id: "users:p2", kind: "page", name: "Women Who Climb", pageCategory: "Community" },
+      ],
+      rooms: [{ _id: "rooms:r", userId: me, name: "Kids' room", kind: "bedroom", photos: [] }],
+      follows: [
+        { _id: "follows:1", userId: me, targetId: "users:p1", createdAt: 1 },
+        { _id: "follows:2", userId: me, targetId: "users:p2", createdAt: 2 },
+      ],
+      groups: [{ _id: "groups:g", name: "Church friends" }],
+      posts: [
+        post("posts:loved", "Walnut credenza, mid-century"),
+        post("posts:angry", "I hate this industrial steel room"),
+        post("posts:church", "Rattan chair for sale", { groupId: "groups:g" }),
+      ],
+      reactions: [
+        react("reactions:1", "posts:loved", "love"),
+        react("reactions:2", "posts:angry", "angry"),
+        react("reactions:3", "posts:church", "like"),
+      ],
+      saved: [],
+      cityProfiles: [],
+      cityProfileFacts: [],
+    });
+    const db = ctx.db as unknown as { normalizeId: (t: string, id: string) => string | null };
+    db.normalizeId = (t, id) => (id.startsWith(`${t}:`) ? id : null);
+    const { input, sources } = await loadVibeInput(
+      ctx,
+      me as Id<"users">,
+      "rooms:r" as Id<"rooms">,
+    );
+    expect(sources).toEqual([{ kind: "post", postId: "posts:loved" as Id<"posts"> }]);
+    expect(input.follows.map((f) => f.name)).toEqual(["Moonrise Coffee Co."]);
+    expect(input.room.name).not.toMatch(/kid/i);
   });
 });

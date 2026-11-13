@@ -115,9 +115,11 @@ export function VibeCard({ room }: { room: Room }) {
         <div className="rounded-lg border border-divider bg-wash/60 p-4">
           <p className="mb-3 flex items-center gap-1.5 font-semibold text-[13px] text-secondary">
             <Sparkles size={14} className="text-accent" />
-            {suggestion.via === "fallback"
-              ? "Muse's AI is off right now, so this comes from simple matching on what you saved, liked and follow."
-              : "Muse suggests this from what you saved, liked and follow."}
+            {suggestion.basis.length === 0 && !suggestion.sources
+              ? "There isn't much to go on yet, so this is a simple starting point. Edit it to make it yours."
+              : suggestion.via === "fallback"
+                ? "Muse's AI isn't available right now, so this comes from simple matching on what you saved, liked and follow."
+                : "Muse suggests this from what you saved, liked and follow."}
           </p>
           <VibeView vibe={suggestion.vibe} />
           <Basis basis={suggestion.basis} sources={suggestion.sources} />
