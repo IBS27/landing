@@ -112,13 +112,25 @@ export function median(values: number[]) {
 const sameCity = (a: string, b: string) => parsePlace(a).key === parsePlace(b).key;
 
 /**
+ * The cited area for a DataSF neighborhood: its everyday short name when it has
+ * one ("SoMa", "Castro" for Castro/Upper Market, "FiDi"), else its name, as
+ * "the Castro neighborhood" so every name reads naturally after "in".
+ */
+export function neighborhoodArea(n: { name: string; shortName?: string } | null | undefined) {
+  return n ? `the ${n.shortName ?? n.name} neighborhood` : "this neighborhood";
+}
+
+/**
  * Price far below comparable rentals: same unit class, active, for rent or
- * sublet. Uses the neighborhood when it has MIN_COMPS, else the city, else the
- * Bay Area (Bay Area listings only). With too few comparables anywhere, no signal.
+ * sublet. Compares within the listing's DataSF neighborhood (`neighborhoodId`,
+ * never the typed `location.neighborhood`) when it has MIN_COMPS, else the
+ * city, else the Bay Area (Bay Area listings only). With too few comparables
+ * anywhere, no signal. `hood` is that neighborhood's record, for the cited area.
  */
 export function lowPriceSignal(
   listing: Doc<"listings">,
   others: Doc<"listings">[],
+  hood?: { name: string; shortName?: string } | null,
 ): ListingSignal | null {
   const r = listing.rental;
   if (!r || r.listingType === "sale" || listing.price <= 0) return null;
@@ -134,9 +146,9 @@ export function lowPriceSignal(
   );
   const city = listing.location.city;
   const inCity = comparable.filter((o) => sameCity(o.location.city, city));
-  const hood = listing.location.neighborhood;
+  const hoodId = listing.neighborhoodId;
   const tiers: [Doc<"listings">[], string][] = [
-    [hood ? inCity.filter((o) => o.location.neighborhood === hood) : [], `the ${hood}`],
+    [hoodId ? comparable.filter((o) => o.neighborhoodId === hoodId) : [], neighborhoodArea(hood)],
     [inCity, city.split(",")[0].trim()],
     [isBayArea(city) ? comparable.filter((o) => isBayArea(o.location.city)) : [], "the Bay Area"],
   ];
