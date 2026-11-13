@@ -4,6 +4,7 @@ import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { isBlockedEitherWay } from "./blocks";
 import { type CityProfile, getProfile } from "./cityProfile";
 import type { NeighborhoodSlug } from "./cityProfileFacts";
+import { type Compatibility, compatibility } from "./compatibility";
 import {
   answeredCount,
   type BudgetRange,
@@ -237,8 +238,8 @@ export function overlapCount(o: Overlap): number {
 }
 
 /**
- * A roommate candidate as the viewer may see them. #23 adds its compatibility
- * score to this shape. Carries no lifestyle answers.
+ * A roommate candidate as the viewer may see them. Lifestyle answers appear
+ * only inside `compatibility`, and only for fields both people answered.
  */
 export type RoommateCandidate = {
   user: UserSummary;
@@ -250,6 +251,8 @@ export type RoommateCandidate = {
   vouchedBy: UserSummary[];
   vouchCount: number;
   overlap: Overlap;
+  /** The compatibility score (#23), with the shared traits and answers it's based on. */
+  compatibility: Compatibility;
 };
 
 export type CandidateList = {
@@ -263,7 +266,8 @@ export type CandidateList = {
 
 /**
  * Network closeness first (friend, vouched for by a friend, friend of
- * friends), then how many plans overlap (move-in month, a neighborhood,
+ * friends), then no dealbreaker before a dealbreaker, then compatibility score
+ * (no score last), then how many plans overlap (move-in month, a neighborhood,
  * budget), then how many of the viewer's friends connect them (`links`:
  * distinct mutual friends and vouchers), then name.
  */
@@ -273,6 +277,9 @@ export function byCandidateRank(
 ): number {
   return (
     CLOSENESS.indexOf(a.candidate.closeness) - CLOSENESS.indexOf(b.candidate.closeness) ||
+    Number(a.candidate.compatibility.dealbreakers.length > 0) -
+      Number(b.candidate.compatibility.dealbreakers.length > 0) ||
+    (b.candidate.compatibility.score ?? -1) - (a.candidate.compatibility.score ?? -1) ||
     overlapCount(b.candidate.overlap) - overlapCount(a.candidate.overlap) ||
     b.links - a.links ||
     a.candidate.user.name.localeCompare(b.candidate.user.name)
@@ -366,6 +373,7 @@ export async function roommateCandidates(
           user,
           closeness,
           overlap: overlapOf(comparable.mine, theirs),
+          compatibility: compatibility(comparable.mine, theirs),
           mutualFriends: [],
           mutualFriendCount: r.mutualIds.length,
           vouchedBy: [],

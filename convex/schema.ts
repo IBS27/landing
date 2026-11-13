@@ -39,6 +39,7 @@ import {
   rentalDetails,
   vehicleDetails,
   vouchRelationship,
+  weekendStop,
 } from "./validators";
 
 export default defineSchema({
@@ -950,4 +951,22 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_user", ["userId"]),
+
+  /**
+   * Landing Weekend Routes (#18): one shared route per neighborhood, built from
+   * its public Group threads by Ember and Spark (or the "Most discussed"
+   * fallback) and its upcoming weekend Events. Written only by
+   * `internal.weekendRoutes.save`; read through `api.weekendRoutes.get`.
+   */
+  weekendRoutes: defineTable({
+    neighborhoodId: v.id("neighborhoods"),
+    /** In day order. Empty when the threads didn't support a route. */
+    stops: v.array(weekendStop),
+    /** "fallback" is the non-AI "Most discussed" route. */
+    via: v.union(v.literal("model"), v.literal("fallback")),
+    generatedAt: v.number(),
+    runIds: v.array(v.id("aiRuns")),
+    /** Group posts the route was built from, for the "lots of new threads" rebuild. */
+    postCount: v.number(),
+  }).index("by_neighborhood", ["neighborhoodId"]),
 });

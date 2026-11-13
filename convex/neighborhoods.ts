@@ -1,8 +1,10 @@
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
+import { viewerCrew } from "./crews";
 import { type CitedSource, type NonEmpty, resolveCitations } from "./lib/citations";
 import { viewerQuery } from "./lib/functions";
+import { neighborhoodDirectory, neighborhoodPage } from "./lib/neighborhoodPage";
 import { neighborhoodSlugAt } from "./lib/neighborhoods";
 import { loadAudience } from "./lib/posts";
 import type { NeighborhoodFact } from "./validators";
@@ -113,4 +115,22 @@ export const get = viewerQuery({
       facts,
     };
   },
+});
+
+/**
+ * A neighborhood page (#16), everything filtered for the viewer: the
+ * neighborhood, its Groups, upcoming Events, people the viewer knows there and
+ * "For you" matches from their City Profile. Null for an unknown slug. See
+ * `convex/lib/neighborhoodPage.ts`.
+ */
+export const page = viewerQuery({
+  args: { slug: v.string() },
+  handler: async (ctx, { slug }) =>
+    neighborhoodPage(ctx, ctx.viewer, slug, { crew: await viewerCrew(ctx, ctx.viewer) }),
+});
+
+/** The neighborhoods index (#16): every neighborhood with its shape and counts for the viewer. */
+export const directory = viewerQuery({
+  args: {},
+  handler: (ctx) => neighborhoodDirectory(ctx, ctx.viewer),
 });
