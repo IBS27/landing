@@ -180,7 +180,7 @@ export function activitySummary(
   const joined = of("join");
   if (joined.length) parts.push(`joined ${named(joined) ?? noun(joined.length, "Group")}`);
   const interested = of("interested");
-  if (interested.length) parts.push(`were interested in ${noun(interested.length, "Event")}`);
+  if (interested.length) parts.push(`interested in ${noun(interested.length, "Event")}`);
   const saved = of("save");
   if (saved.length) parts.push(`saved ${plural(saved.length, "related item")}`);
   const liked = of("like");
