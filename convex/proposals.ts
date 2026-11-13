@@ -3,6 +3,7 @@ import type { Doc, Id } from "./_generated/dataModel";
 import { internalMutation, type QueryCtx } from "./_generated/server";
 import { type CitedSource, cite, type NonEmpty, resolveCitations } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
+import { afterProposalApproved } from "./lib/inventory";
 import { type Audience, loadAudience } from "./lib/posts";
 import {
   assertPayload,
@@ -91,6 +92,8 @@ export const approve = viewerMutation({
       updatedAt: now,
     });
     await logEvent(ctx, p._id, p.ownerId, "approved", "owner", now);
+    // An agreed Marketplace deal joins the buyer's inventory (#27).
+    await afterProposalApproved(ctx, p, now);
     return result;
   },
 });

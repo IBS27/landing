@@ -39,7 +39,7 @@ export function fakeCtx(tables: Record<string, Row[]>, stats?: ReadStats): Mutat
           .map((row, i) => ({ row, i }))
           .sort((a, b) => {
             for (const f of fields) {
-              const c = compare(a.row[f], b.row[f]);
+              const c = compare(at(a.row, f), at(b.row, f));
               if (c) return c;
             }
             return a.i - b.i;
@@ -52,12 +52,12 @@ export function fakeCtx(tables: Record<string, Row[]>, stats?: ReadStats): Mutat
           fields = indexFields(table, index);
           const conds: ((r: Row) => boolean)[] = [];
           const op = (test: (c: number) => boolean) => (field: string, value: unknown) => {
-            conds.push((r) => r[field] !== undefined && test(compare(r[field], value)));
+            conds.push((r) => at(r, field) !== undefined && test(compare(at(r, field), value)));
             return q;
           };
           const q = {
             eq: (field: string, value: unknown) => {
-              conds.push((r) => r[field] === value);
+              conds.push((r) => at(r, field) === value);
               return q;
             },
             lt: op((c) => c < 0),
@@ -111,6 +111,13 @@ export function fakeCtx(tables: Record<string, Row[]>, stats?: ReadStats): Mutat
     },
   };
   return { db } as unknown as MutationCtx;
+}
+
+/** A field by path, as Convex indexes read nested fields ("source.listingId"). */
+function at(row: Row, path: string): unknown {
+  let v: unknown = row;
+  for (const key of path.split(".")) v = (v as Record<string, unknown> | undefined)?.[key];
+  return v;
 }
 
 function indexFields(table: string, index: string): string[] {
