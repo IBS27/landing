@@ -7,6 +7,7 @@ import { cite } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { neighborhoodIdAt } from "./lib/neighborhoods";
 import { dropDraft, logEvent, propose } from "./lib/proposals";
+import { redactProtected } from "./lib/protectedText";
 import {
   type SubletInput,
   type SubletMove,
@@ -118,12 +119,32 @@ export const updateTerms = viewerMutation({
       (!Number.isFinite(minRent) || minRent <= 0 || (listing && minRent > listing.price))
     )
       throw new ConvexError("Your lowest rent must be above $0 and no more than the rent");
+    const floor = minRent !== undefined ? Math.round(minRent) : s.minRent;
     await ctx.db.patch(s._id, {
-      ...(minRent !== undefined ? { minRent: Math.round(minRent) } : {}),
+      minRent: floor,
       ...(notes !== undefined ? { notes: notes.trim() || undefined } : {}),
       ...(museReplies ? { museReplies } : {}),
       updatedAt: Date.now(),
     });
+    if (floor <= s.minRent) return;
+    // A raised floor withdraws waiting drafts under it, and Muse drafts those replies again.
+    const chats = await ctx.db
+      .query("conversations")
+      .withIndex("by_listing", (q) => q.eq("listingId", s.listingId))
+      .collect();
+    for (const c of chats) {
+      const row = await ctx.db
+        .query("subletChats")
+        .withIndex("by_conversation", (q) => q.eq("conversationId", c._id))
+        .unique();
+      const p = row?.pendingProposalId ? await ctx.db.get(row.pendingProposalId) : null;
+      if (!row || p?.status !== "pending" || p.payload.kind !== "offer") continue;
+      if (p.payload.amount >= floor) continue;
+      await retire(ctx, row);
+      await ctx.db.patch(row._id, { pendingProposalId: undefined, handledThrough: 0 });
+      if ((museReplies ?? s.museReplies) === "active")
+        await ctx.scheduler.runAfter(0, internal.subleases.draftReply, { conversationId: c._id });
+    }
   },
 });
 
@@ -193,7 +214,7 @@ Answer only from the listing facts given. Pick one move:
 - accept: the renter offered a rent at or above limits.minRent; agree (amount = that rent, capped at askingRent) and suggest seeing the place first.
 - walk_away: the renter won't go up to limits.minRent; decline politely (amount = 0).
 Be friendly and brief (one to three sentences). Use the lister's notes.
-Never share the street address, never ask for a deposit or any payment before a viewing and a signed sublease, and never mention payment apps.
+Never write a rent under limits.minRent, not even to quote the renter. Never share the street address, never ask for a deposit or any payment before a viewing and a signed sublease, and never mention payment apps.
 rationale: one sentence to the lister on why this reply.`,
   output: replyOutput,
   cites: () => [],
@@ -226,7 +247,7 @@ export const context = internalQuery({
     const sent = rows.reverse().filter((m) => m.status === "sent" && !m.unsent && m.text);
     const chat = sent.map((m) => ({
       from: m.senderId === sublet.ownerId ? ("you" as const) : ("renter" as const),
-      text: m.text ?? "",
+      text: redactProtected(m.text ?? ""),
     }));
     const lastRenterAt = Math.max(
       0,
@@ -247,7 +268,7 @@ export const context = internalQuery({
     const r = listing.rental;
     const input: SubletInput = {
       listing: {
-        title: listing.title,
+        title: redactProtected(listing.title),
         askingRent: listing.price,
         neighborhood: listing.location.neighborhood ?? null,
         bedrooms: r.bedrooms,
@@ -255,9 +276,12 @@ export const context = internalQuery({
         furnished: r.furnished ?? null,
         availableFrom: shortDate(r.availableFrom),
         availableTo: shortDate(r.availableTo),
-        description: listing.description.slice(0, 600),
+        description: redactProtected(listing.description.slice(0, 600)),
       },
-      limits: { minRent: sublet.minRent, notes: sublet.notes ?? null },
+      limits: {
+        minRent: sublet.minRent,
+        notes: sublet.notes ? redactProtected(sublet.notes) : null,
+      },
       yourLastPrice: lastSent?.payload.kind === "offer" ? lastSent.payload.amount : null,
       chat,
     };
@@ -280,7 +304,8 @@ export const draftReply = internalAction({
     if (c.lastRenterAt <= (c.chatRow?.handledThrough ?? 0)) return;
     const result = await runAgent(ctx, subletReply, {
       input: c.input,
-      sources: [{ kind: "listing", listingId: c.sublet.listingId }],
+      // The listing facts come redacted in `input`; its raw description stays out of the model.
+      sources: [],
       shownTo: c.sublet.ownerId,
     });
     // `check` already rejects bad moves; this re-check keeps the floor no matter what.
@@ -328,6 +353,8 @@ export const saveReply = internalMutation({
       .query("subletChats")
       .withIndex("by_conversation", (q) => q.eq("conversationId", a.conversationId))
       .unique();
+    // An older run finishing late never replaces a newer draft.
+    if (row && row.handledThrough >= a.handledThrough) return;
     if (row) await retire(ctx, row);
     const proposalId = await propose(ctx, {
       ownerId: sublet.ownerId,

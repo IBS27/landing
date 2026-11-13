@@ -32,6 +32,26 @@ describe("renterPrice", () => {
     expect(renterPrice([renter("$1400 ok?")])).toBe(1400);
     expect(renterPrice([renter("1300?"), you("I could do $1525"), renter("Hi!")])).toBe(null);
   });
+
+  test("ignores parts of other numbers", () => {
+    expect(renterPrice([renter("Is it 1200 sqft?")])).toBe(null);
+    expect(renterPrice([renter("Is it 1200 square feet?")])).toBe(null);
+    expect(renterPrice([renter("Unit 12345678?")])).toBe(null);
+  });
+});
+
+describe("subletMoveProblems, any move", () => {
+  test("no move names a rent under the floor", () => {
+    const i = input([renter("1300?")]);
+    const message = {
+      move: "message" as const,
+      amount: 0,
+      text: "I can do $1300/month.",
+      rationale: "r",
+    };
+    expect(subletMoveProblems(message, i)).not.toEqual([]);
+    expect(subletMoveProblems({ ...message, text: "I can do $1,500/month." }, i)).toEqual([]);
+  });
 });
 
 describe("subletLadder", () => {

@@ -34,7 +34,10 @@ export function renterPrice(chat: SubletInput["chat"]): number | null {
   for (let i = chat.length - 1; i >= 0; i--) {
     const m = chat[i];
     if (m.from === "you") return null;
-    const match = m.text.match(/\$?\s?(\d{1,2},\d{3}|\d{3,5})(?!\s?(?:am|pm|sq|ft|%))/i);
+    // Whole numbers only: "1200 sqft" is not a rent of $120.
+    const match = m.text.match(
+      /(?<![\d,.])\$?\s?(\d{1,2},\d{3}|\d{3,5})(?![\d,]|\.\d|\s?(?:am|pm|sq|ft|square|%))/i,
+    );
     if (match) return Number(match[1].replace(/,/g, ""));
   }
   return null;
@@ -59,6 +62,10 @@ export function subletMoveProblems(out: SubletMove, input: SubletInput): string[
   }
   if (out.move === "offer" && input.yourLastPrice !== null && out.amount > input.yourLastPrice)
     p.push(`a counter can't go above your last price of ${input.yourLastPrice}`);
+  // Whatever the move, the text never names a rent under the floor.
+  for (const m of out.text.matchAll(/\$\s?(\d{1,3}(?:,\d{3})+|\d+)/g))
+    if (Number(m[1].replace(/,/g, "")) < minRent)
+      p.push(`text names $${m[1]}, under the lister's lowest rent of ${minRent}`);
   // Scam-shaped asks and private details stay out of the lister's messages too.
   if (/\b(deposit|zelle|venmo|cash ?app|wire|gift ?card|bank)\b/i.test(out.text))
     p.push("text must not ask for money or payment details before a viewing and lease");
@@ -111,7 +118,7 @@ export function subletLadder(input: SubletInput): SubletMove {
   return {
     move: "offer",
     amount: counter,
-    text: `I can't do $${theirs}, but I could do $${counter}/month. Would that work?`,
+    text: `That's a bit low for me, but I could do $${counter}/month. Would that work?`,
     rationale: `Meeting the renter's $${theirs} partway, staying at or above your lowest rent of $${minRent}.`,
   };
 }
