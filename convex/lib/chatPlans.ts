@@ -432,7 +432,6 @@ const planOutput = v.object({
   title: v.string(),
   placeSource: v.string(),
   place: v.string(),
-  route: v.array(v.string()),
   timeIds: v.array(v.string()),
   question: v.string(),
   text: v.string(),
@@ -442,7 +441,6 @@ export type ChatPlanOutput = {
   title: string;
   placeSource: string;
   place: string;
-  route: string[];
   timeIds: string[];
   question: string;
   text: string;
@@ -455,10 +453,9 @@ Return:
 - title: a short name for the plan, at most 60 characters, e.g. "Lands End hike".
 - placeSource: the key of the one place that suits the chat best. Prefer somewhere in San Francisco that fits what people said.
 - place: where to meet or go, named exactly as that source names it (e.g. "Lands End Lookout"), at most 80 characters.
-- route: 0 to 3 short steps in order (where to meet, the main stop, what's after), each at most 100 characters, using only places and directions the source gives. Empty when the source gives no route.
 - timeIds: the ids of the 2 or 3 times that best fit what people said ("weekends only", "not before 9"). Only ids from times. A time marked with an Event ("with Bay Area Hikers") is that Event's own time, for going along with it; consider it when you pick that Event.
 - question: the poll question, at most 140 characters, e.g. "When works for the Lands End hike?".
-- text: the message that goes with the poll, in the owner's voice, at most 400 characters: the plan, the place and the route, warm and short. Don't state a time; the poll asks that.
+- text: the message that goes with the poll, in the owner's voice, at most 400 characters: the plan and the place, warm and short. Don't state a time; the poll asks that.
 - rationale: one sentence for the owner on why this plan (who floated it, who's in, why this place), at most 200 characters.`;
 
 /** A clock time ("10am", "8:30"), which the poll text shouldn't state. */
@@ -483,9 +480,6 @@ export function planProblems(o: ChatPlanOutput, input: ChatPlanInput): string[] 
   if (!place || place.length > 80) problems.push("place: 1–80 characters");
   else if (opt && !namesPlace(opt, place))
     problems.push(`place: "${place}" isn't named in ${o.placeSource}; use the name it gives`);
-  if (o.route.length > 3) problems.push("route: at most 3 steps");
-  if (o.route.some((s) => !s.trim() || s.length > 100))
-    problems.push("route: each step 1–100 characters");
   const ids = new Set(o.timeIds);
   if (ids.size !== o.timeIds.length || ids.size < 2 || ids.size > 3)
     problems.push("timeIds: 2 or 3 different ids");
@@ -559,6 +553,14 @@ export function routeSteps(description: string): string[] {
   return steps;
 }
 
+/**
+ * The plan's route, taken by code from the place's source: an Event's own
+ * steps, none for a post. Muse doesn't write it, so it can't invent a stop.
+ */
+export function planRoute(o: PlaceOption | undefined): string[] {
+  return o?.kind === "event" ? routeSteps(o.text) : [];
+}
+
 /** "Saturday Urban Hike: Dolores Park to Bernal Hill" → "Urban Hike: Dolores Park to Bernal Hill". */
 export function planTitle(activityLabel: string, o: PlaceOption | undefined, place = ""): string {
   if (o?.kind !== "event") {
@@ -616,7 +618,7 @@ export function planTemplate(input: ChatPlanInput): ChatPlanOutput {
   const o = input.places.find((p) => p.kind === "event") ?? input.places[0];
   const place = placeFor(o, input.activity.id);
   const title = planTitle(input.activity.label, o, place);
-  const route = o?.kind === "event" ? routeSteps(o.text) : [];
+  const route = planRoute(o);
   const quote = talkQuote(input.talk.text);
   const plan = route.length
     ? `${route.join(" → ")}.`
@@ -640,7 +642,6 @@ export function planTemplate(input: ChatPlanInput): ChatPlanOutput {
     title,
     placeSource: o?.source ?? "",
     place,
-    route,
     timeIds: [
       ...new Set([o?.timeId, ...input.times.filter((t) => t.id.startsWith("t")).map((t) => t.id)]),
     ]

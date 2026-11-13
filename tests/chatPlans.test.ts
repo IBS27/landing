@@ -10,6 +10,7 @@ import {
   excerptAbout,
   type PlaceOption,
   placeOptions,
+  planRoute,
   planStage,
   planTalkActivity,
   planTemplate,
@@ -185,7 +186,7 @@ describe("templates", () => {
       timeIds: ["t1", "t2", "t3"],
       question: "When works for Urban Hike: Dolores Park to Bernal Hill?",
     });
-    expect(out.route).toHaveLength(3);
+    expect(planRoute(input.places.find((p) => p.source === out.placeSource))).toHaveLength(3);
     expect(out.text.length).toBeLessThanOrEqual(400);
     expect(out.text).not.toMatch(/\d(am|pm| am| pm)|\d:\d\d/i);
     expect(out.rationale).toBe(
@@ -272,7 +273,6 @@ const answer = (over: Record<string, unknown> = {}) =>
     title: "Lands End hike",
     placeSource: "post:p1",
     place: "Lands End",
-    route: ["Meet at Lands End", "Loop the trail in the fog"],
     timeIds: ["t1", "t3"],
     question: "When works for the Lands End hike?",
     text: "🥾 Let's do the Lands End hike Zoe floated! Pick the times that work.",
@@ -490,7 +490,7 @@ async function planIt(ctx: MutationCtx) {
     plan: {
       title: out.title,
       place: out.place,
-      route: out.route,
+      route: planRoute(c.input.places.find((p) => p.source === out.placeSource)),
       question: out.question,
       text: out.text,
       rationale: out.rationale,
@@ -640,9 +640,7 @@ describe("chat plans, end to end", () => {
     const open = await post("public");
     await post("only_me");
     const { options } = await placeOptions(ctx, "users:maya" as never, "hiking", Date.now());
-    expect(options.filter((o) => o.kind === "post").map((o) => o.source)).toEqual([
-      `post:${open}`,
-    ]);
+    expect(options.filter((o) => o.kind === "post").map((o) => o.source)).toEqual([`post:${open}`]);
   });
 
   test("an Event planned in a chat may invite that chat's members, and no one else", async () => {
