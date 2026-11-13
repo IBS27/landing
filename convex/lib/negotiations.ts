@@ -194,6 +194,14 @@ export async function afterChatMessage(
   if (n?.status === "active" && n.buyerId !== senderId)
     await ctx.scheduler.runAfter(0, internal.negotiations.draftNext, { negotiationId: n._id });
 
+  // A mover replying to a quote request prompts Muse's counter or acceptance (#28).
+  const outreach = await ctx.db
+    .query("moverOutreach")
+    .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
+    .first();
+  if (outreach && outreach.pageId === senderId)
+    await ctx.scheduler.runAfter(0, internal.moverQuotes.draftCounter, { conversationId });
+
   const conv = await ctx.db.get(conversationId);
   if (!conv?.listingId) return;
   const listingId = conv.listingId;
