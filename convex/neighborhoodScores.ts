@@ -20,13 +20,14 @@ import {
 } from "./lib/citations";
 import { getProfile, interestWeights } from "./lib/cityProfile";
 import { viewerQuery } from "./lib/functions";
-import { getInterest, interestsForEvent } from "./lib/interests";
+import { getInterest } from "./lib/interests";
 import {
   breakdown,
   clockTime,
   type FitItem,
   HOW_CALCULATED,
   interestFit,
+  interestsForLocalEvent,
   interestsForLocalGroup,
   interestsForPlace,
   MAX_SOURCES,
@@ -379,7 +380,7 @@ export const get = viewerQuery({
           source: { kind: "group", groupId: g._id } as Source,
         })),
         ...events.map((e) => ({
-          interests: interestsForEvent({ category: e.category, title: e.title }),
+          interests: interestsForLocalEvent({ category: e.category, title: e.title }),
           source: { kind: "event", eventId: e._id } as Source,
         })),
         ...placeMentions(n.slug, texts).map((p) => ({

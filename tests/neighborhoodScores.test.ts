@@ -8,6 +8,7 @@ import {
   foodRaw,
   hasEnoughData,
   interestFit,
+  interestsForLocalEvent,
   interestsForLocalGroup,
   interestsForPlace,
   isFoodPlace,
@@ -253,6 +254,9 @@ describe("interest fit", () => {
         name: "North Beach & Telegraph Hill Neighbors",
       }),
     ).not.toContain("beach_days");
+    expect(
+      interestsForLocalEvent({ category: "Trivia", title: "North Beach trivia night" }),
+    ).not.toContain("beach_days");
     expect(withoutNeighborhoodNames("Ocean Beach in the Outer Sunset")).toContain("Ocean Beach");
     expect(interestsForPlace({ kind: "shop", name: "The Rind Line" })).toEqual([]);
     expect(interestsForPlace({ kind: "market", name: "Rivet Market" })).not.toContain(
@@ -272,6 +276,8 @@ describe("getting around at night", () => {
       "Valencia is well-lit after dark",
       "some side streets east of folsom have long gaps between streetlights",
       "I walk home from the Velvet Owl around 2am most weekends.",
+      "there's no lighting on the loop at the top, so use your phone light and come down the folsom side",
+      "the lighting on Cortland is good when I walk home",
     ]) {
       expect([t, isNightQuote(t)]).toEqual([t, true]);
     }
@@ -290,6 +296,7 @@ describe("getting around at night", () => {
       "how bad is the uphill walk home from 24th St BART, honestly",
       "board game night is two blocks from BART, every thursday",
       "I bike home from the hospital at 7am",
+      "photographer opinion: Bernal Hill for the sunset itself, Dolores Park for the skyline lighting up right after.",
     ]) {
       expect([t, isNightQuote(t)]).toEqual([t, false]);
     }
@@ -297,6 +304,11 @@ describe("getting around at night", () => {
   test("questions and fragments ask, they don't tell", () => {
     expect(isNightQuote("which blocks are actually quiet at night?")).toBe(false);
     expect(isNightQuote("questions:\n- getting home late at night\n- groceries")).toBe(false);
+    expect(
+      isNightQuote(
+        "2. walking home from BART after 10pm, which streets are well lit / have people around",
+      ),
+    ).toBe(false);
     expect(nightExcerpt("1. we walk home along Irving at night, it stays busy til 10")).toBe(
       "we walk home along Irving at night, it stays busy til 10",
     );

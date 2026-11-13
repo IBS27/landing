@@ -1,7 +1,12 @@
 import type { Id } from "../_generated/dataModel";
 import type { NeighborhoodScoreKind, Source } from "../validators";
 import { sourceKey } from "./citations";
-import { type InterestId, interestsForGroup, interestsInText } from "./interests";
+import {
+  type InterestId,
+  interestsForEvent,
+  interestsForGroup,
+  interestsInText,
+} from "./interests";
 import { SF_NEIGHBORHOODS } from "./neighborhoods";
 import { hasProtected } from "./protectedText";
 
@@ -133,6 +138,11 @@ export function interestsForLocalGroup(g: {
     tags: g.tags.map(withoutNeighborhoodNames).filter((t) => t.trim()),
     name: withoutNeighborhoodNames(g.name),
   });
+}
+
+/** An Event's interests, ignoring neighborhood names in its title. */
+export function interestsForLocalEvent(e: { category: string; title: string }): InterestId[] {
+  return interestsForEvent({ category: e.category, title: withoutNeighborhoodNames(e.title) });
 }
 
 /* ---------- Raw scores ---------- */
@@ -407,15 +417,15 @@ export function interestFit(
  * the night (at night, after dark, past 9pm, an Owl line…) and getting around
  * (walking or biking home, buses and trains, streets and blocks). Bare words that
  * also mean other things ("owl" in a bar's name, "too dark" coffee, "game night",
- * "downtown lights up") don't count on their own.
+ * "downtown lights up", "the skyline lighting up") don't count on their own.
  */
 const NIGHT_CUE =
-  /\b(?:at night|after dark|after midnight|late at night|late[- ]night|(?:9|10|11) ?pm|(?:12|1|2|3|4) ?am|owl (?:bus|buses|line|lines|service)|(?:n|l|90|91) owl|owl (?:judah|taraval)|last (?:bart|train|bus))\b/i;
+  /\b(?:at night|after dark|after midnight|late at night|late[- ]night|(?:9|10|11) ?pm|(?:12|1|2|3|4) ?am|owl (?:bus|buses|line|lines|service)|(?:n|l|90|91) owl|owl (?:judah|taraval)|last (?:bart|train|bus)|lighting)\b/i;
 const MOVE_CUE =
   /\b(?:walk(?:s|ed|ing)?|bik(?:e|es|ed|ing)|bus(?:es)?|trains?|bart|muni|caltrain|n judah|uber|lyft|(?:get|gets|getting|got|ride|riding) home|streets?|blocks?|sidewalks?|alleys?|corners?|crosswalks?)\b/i;
 /** Street lighting: about the night on its own. */
 const LIGHT_CUE =
-  /\b(?:street ?lights?|(?:well|poorly|badly|brightly)[- ]lit|unlit|lighting|gets? dark|(?:dark|unlit) (?:blocks?|streets?|stretch(?:es)?|alleys?|sidewalks?|corners?))\b/i;
+  /\b(?:street ?lights?|(?:well|poorly|badly|brightly)[- ]lit|unlit|(?:no|street|poor|dim) lighting|gets? dark|(?:dark|unlit) (?:blocks?|streets?|stretch(?:es)?|alleys?|sidewalks?|corners?))\b/i;
 /**
  * Labels about an area, or who's in it, never quoted (the brief: cited facts only, no labels):
  * safety verdicts either way, crime, and descriptions of the people there. `hasProtected`
@@ -426,6 +436,8 @@ const LABEL_WORDS =
 /** Openers that make a sentence a question even without a question mark. */
 const QUESTION =
   /^(?:how|what|which|where|when|why|who|is|are|does|do|did|can|could|should|would|will|anyone|any)\b/i;
+/** A question after a comma ("walking home after 10pm, which streets are well lit"). */
+const QUESTION_CLAUSE = /[,;:]\s*(?:how|what|which|where|who|anyone)\b/i;
 /** Quotes are at most this long, cut around the words if needed. */
 const QUOTE_MAX = 200;
 /** Shorter sentences are fragments (a list item, a heading), not something a local said. */
@@ -448,6 +460,7 @@ export function nightExcerpt(text: string): string | null {
       .trim()
       .replace(/^(?:[-*•]|\d+[.)])\s+/, "");
     if (body.length < QUOTE_MIN || body.endsWith("?") || QUESTION.test(body)) continue;
+    if (QUESTION_CLAUSE.test(body)) continue;
     if (!balanced(body)) continue;
     const cue = LIGHT_CUE.exec(body) ?? (MOVE_CUE.test(body) ? NIGHT_CUE.exec(body) : null);
     if (!cue) continue;
