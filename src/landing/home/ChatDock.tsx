@@ -1,5 +1,13 @@
-import { ArrowUp } from "lucide-react";
-import { type FormEvent, useLayoutEffect, useRef, useState } from "react";
+import { ArrowUp, Maximize2, Minimize2 } from "lucide-react";
+import {
+  type FormEvent,
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { cn } from "@/lib/format";
 import { CHAT_MESSAGE_MAX, type ChatAction, pageHref } from "../../../convex/lib/homeChatRules";
 import {
@@ -32,6 +40,20 @@ export type FoundActions = {
   onOutcome: (messageId: string, key: string, outcome: ActionOutcome) => void;
 };
 
+/** How long expanding or collapsing animates (home.css), plus a frame or two. */
+const EXPAND_MS = 450;
+
+/** Whether the chat is expanded, kept for the browser session. */
+const EXPANDED_KEY = "landing:home-chat-expanded";
+
+function readExpanded(): boolean {
+  try {
+    return sessionStorage.getItem(EXPANDED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 /**
  * The chat dock, shared by the Map and Apartment tabs: the last two messages
  * as glass bubbles over the stage, with what a reply carries under its bubble:
@@ -39,6 +61,9 @@ export type FoundActions = {
  * choose from, pieces placed in the apartment, whatever else it found). Scroll
  * over them for older ones; the stage never scrolls from here. Then
  * suggestions and the "Ask Muse" input.
+ *
+ * Expanded (#162), it's a taller, wider column of the whole conversation on
+ * lighter glass, still over the stage. The button by Send and Esc collapse it.
  */
 export function ChatDock({
   messages,
@@ -63,10 +88,59 @@ export function ChatDock({
   onFocusItem: (itemId: string) => void;
 }) {
   const log = useRef<HTMLDivElement>(null);
+  const logId = useId();
   const [text, setText] = useState("");
   const [more, setMore] = useState(false);
+  const [expanded, setExpanded] = useState(readExpanded);
   /** The newest turn the log last scrolled to. */
   const shown = useRef<string | null>(null);
+  /** Whether the log is scrolled to its newest turn, so resizing keeps it there. */
+  const atEnd = useRef(true);
+  /** Until when the log stays on its newest turn whatever it scrolls by: while expanding or collapsing. */
+  const pinned = useRef(0);
+
+  const expand = useCallback((on: boolean) => {
+    setExpanded(on);
+    try {
+      sessionStorage.setItem(EXPANDED_KEY, on ? "1" : "0");
+    } catch {
+      // Storage blocked: it lasts until the page goes.
+    }
+  }, []);
+  const onScrolled = useCallback((el: HTMLElement) => {
+    setMore(el.scrollTop > 2);
+    atEnd.current =
+      performance.now() < pinned.current || el.scrollHeight - el.scrollTop - el.clientHeight < 4;
+  }, []);
+
+  // Esc collapses, unless something else used it (a menu, a dialog, the apartment's selection).
+  useEffect(() => {
+    if (!expanded) return;
+    let timer = 0;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.isComposing) return;
+      // Listeners added later on the window run after this one: decide once they have.
+      clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        if (!e.defaultPrevented) expand(false);
+      });
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      clearTimeout(timer);
+    };
+  }, [expanded, expand]);
+
+  // Expanding or collapsing goes to the newest turn; the resize observer keeps it there as the dock animates.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs when `expanded` changes
+  useLayoutEffect(() => {
+    const el = log.current;
+    if (!el) return;
+    atEnd.current = true;
+    pinned.current = performance.now() + EXPAND_MS;
+    el.scrollTop = el.scrollHeight;
+  }, [expanded]);
 
   // The log is as tall as its last two turns (CSS caps it against the
   // stage), scrolled to the newest. Cards have fixed heights, so nothing
@@ -86,7 +160,7 @@ export function ChatDock({
       const h = items.reduce((sum, c) => sum + c.offsetHeight, 0) + (items.length - 1) * gap + 8;
       el.style.setProperty("--lh-log-h", `${h}px`);
       if (toEnd) el.scrollTop = el.scrollHeight;
-      setMore(el.scrollTop > 2);
+      onScrolled(el);
     };
     // Only a new turn (or the pending bubble) goes to the end: acting on a card
     // further up changes `messages` too, and must not scroll away from it.
@@ -95,17 +169,24 @@ export function ChatDock({
     shown.current = newest;
     const last = el.lastElementChild as HTMLElement | null;
     let width = el.clientWidth;
+    let tall = el.clientHeight;
     let height = last?.offsetHeight ?? 0;
     let frame = 0;
     const obs = new ResizeObserver(() => {
+      // The log itself got taller or shorter (expanding, collapsing): stay on the newest turn if it was there.
+      if (el.clientHeight !== tall) {
+        tall = el.clientHeight;
+        if (atEnd.current) el.scrollTop = el.scrollHeight;
+      }
       const grew = (last?.offsetHeight ?? 0) !== height;
       if (el.clientWidth === width && !grew) return;
       width = el.clientWidth;
       height = last?.offsetHeight ?? 0;
       // Next frame: resizing the log inside its own observer would loop.
       cancelAnimationFrame(frame);
-      // The newest turn changed height (an action reported an error): re-measure where it is.
-      frame = requestAnimationFrame(() => fit(false));
+      // The newest turn changed height (an action reported an error, the column got wider or
+      // narrower): re-measure, staying on the newest turn if the log was there.
+      frame = requestAnimationFrame(() => fit(atEnd.current));
     });
     obs.observe(el);
     if (last) obs.observe(last);
@@ -113,7 +194,7 @@ export function ChatDock({
       obs.disconnect();
       cancelAnimationFrame(frame);
     };
-  }, [messages, pending]);
+  }, [messages, pending, onScrolled]);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -123,13 +204,14 @@ export function ChatDock({
   };
 
   return (
-    <div className="lh-dock">
+    <div className={cn("lh-dock", expanded && "lh-dock-x")}>
       <div
         ref={log}
+        id={logId}
         role="log"
         aria-label="Chat with Muse"
         className={cn("lh-log", more && "lh-more")}
-        onScroll={(e) => setMore(e.currentTarget.scrollTop > 2)}
+        onScroll={(e) => onScrolled(e.currentTarget)}
         onWheel={(e) => e.stopPropagation()}
       >
         {messages.map((m) => (
@@ -192,6 +274,21 @@ export function ChatDock({
           aria-label="Ask Muse"
           className="min-w-0 flex-1 bg-transparent px-1.5 text-[16px] text-primary outline-none placeholder:text-secondary"
         />
+        <button
+          type="button"
+          onClick={() => expand(!expanded)}
+          aria-expanded={expanded}
+          aria-controls={logId}
+          aria-label={expanded ? "Collapse chat" : "Expand chat"}
+          title={expanded ? "Collapse chat (Esc)" : "Expand chat"}
+          className="lh-focus flex h-[34px] w-[34px] flex-none items-center justify-center rounded-full text-secondary transition-colors hover:bg-hover hover:text-primary"
+        >
+          {expanded ? (
+            <Minimize2 size={16} strokeWidth={2.2} aria-hidden />
+          ) : (
+            <Maximize2 size={16} strokeWidth={2.2} aria-hidden />
+          )}
+        </button>
         <button
           type="submit"
           aria-label="Send"

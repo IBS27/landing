@@ -252,9 +252,15 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  /* Expanding animates its height from "auto" where the browser can. */
+  interpolate-size: allow-keywords;
   transition:
     left 0.3s ease,
-    width 0.3s ease;
+    width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    padding 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.35s ease,
+    box-shadow 0.35s ease;
   /* Only the bubbles, cards and controls take the pointer: the stage stays draggable between them. */
   pointer-events: none;
 }
@@ -517,6 +523,145 @@
   opacity: 1;
 }
 
+/* ── Chat dock, expanded: the whole conversation in a taller, wider column on lighter glass ── */
+.lh-dock.lh-dock-x {
+  width: min(880px, calc(100% - 96px));
+  height: min(78cqh, calc(100cqh - 76px));
+  padding: 12px;
+  border-radius: 28px;
+  background: rgb(255 255 255 / 0.3);
+  backdrop-filter: blur(3px) saturate(1.15);
+  -webkit-backdrop-filter: blur(3px) saturate(1.15);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.55),
+    0 18px 50px rgb(15 20 30 / 0.14);
+  pointer-events: auto;
+}
+.dark .lh-dock.lh-dock-x {
+  background: rgb(24 25 26 / 0.36);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.08),
+    0 18px 50px rgb(0 0 0 / 0.4);
+}
+.lh-dock-x .lh-log {
+  /* Its height comes from the dock's, so the dock grows from where it was, not from the whole conversation. */
+  flex: 1 1 0;
+  min-height: 0;
+  max-height: none;
+}
+.lh-history-open .lh-dock.lh-dock-x {
+  width: min(880px, calc(100% - 400px));
+}
+@media (prefers-reduced-transparency: reduce) {
+  .lh-dock.lh-dock-x {
+    background: rgb(240 242 245 / 0.94);
+  }
+  .dark .lh-dock.lh-dock-x {
+    background: rgb(24 25 26 / 0.94);
+  }
+}
+
+/* ── Status spine: where the person is in their move, at the stage's left edge ── */
+.lh-spine {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  padding: 12px 16px 12px 13px;
+  border-radius: 18px;
+  background: rgb(255 255 255 / 0.74);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.6),
+    0 6px 24px rgb(15 20 30 / 0.08);
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s;
+}
+.dark .lh-spine {
+  background: rgb(52 54 57 / 0.78);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.06),
+    0 6px 24px rgb(0 0 0 / 0.3);
+}
+/* The expanded chat has the stage to itself. */
+.lh-stage:has(.lh-dock-x) .lh-spine {
+  opacity: 0;
+  visibility: hidden;
+}
+.lh-spine-stop {
+  position: relative;
+  display: grid;
+  grid-template-columns: 9px auto;
+  column-gap: 10px;
+  align-items: start;
+  padding-bottom: 9px;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--secondary-text);
+}
+.lh-spine-stop:last-child {
+  padding-bottom: 0;
+}
+/* The rail between one stop and the next: solid once passed. */
+.lh-spine-stop:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 3.75px;
+  top: 16px;
+  bottom: -1px;
+  width: 1.5px;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--secondary-text) 22%, transparent);
+}
+.lh-spine-done:not(:last-child)::after {
+  background: color-mix(in srgb, var(--secondary-text) 55%, transparent);
+}
+.lh-spine-dot {
+  width: 9px;
+  height: 9px;
+  margin-top: 4px;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--secondary-text) 45%, transparent);
+}
+.lh-spine-done .lh-spine-dot {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--secondary-text) 70%, transparent);
+}
+.lh-spine-stop[aria-current] .lh-spine-label {
+  color: var(--primary-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+.lh-spine-stop[aria-current] .lh-spine-dot {
+  border-color: var(--fb-blue);
+  background: var(--fb-blue);
+  box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--fb-blue) 22%, transparent);
+}
+/* Nothing known yet: they're at the start, not somewhere they've reached. */
+.lh-spine-fresh .lh-spine-stop[aria-current] .lh-spine-dot {
+  background: transparent;
+}
+.lh-spine-next .lh-spine-label {
+  opacity: 0.8;
+}
+.lh-spine-now {
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
+}
+.lh-spine-now:hover .lh-spine-label {
+  text-decoration: underline;
+}
+.lh-spine-line {
+  color: var(--secondary-text);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 /* Past chats panel */
 .lh-history {
   position: absolute;
@@ -565,6 +710,67 @@
 @container lh-stage (max-width: 560px) {
   .lh-dock {
     width: calc(100% - 24px);
+  }
+  /* Expanded is nearly the whole stage, under the top row. */
+  .lh-dock.lh-dock-x,
+  .lh-history-open .lh-dock.lh-dock-x {
+    bottom: 8px;
+    width: calc(100% - 16px);
+    height: calc(100cqh - 64px);
+    padding: 8px;
+    border-radius: 24px;
+  }
+  /* The spine folds into one row under the top row: its stops, and the current one named. */
+  .lh-spine {
+    top: 56px;
+    transform: none;
+    max-width: calc(100% - 24px);
+    padding: 7px 14px 7px 12px;
+    border-radius: 999px;
+  }
+  .lh-spine-list {
+    display: flex;
+    align-items: center;
+  }
+  .lh-spine-stop {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0;
+  }
+  .lh-spine-stop:not(:last-child)::after {
+    position: static;
+    flex: none;
+    width: 10px;
+    height: 1.5px;
+    margin-right: 7px;
+  }
+  .lh-spine-dot {
+    flex: none;
+    margin: 0;
+  }
+  .lh-spine-stop:not([aria-current]) .lh-spine-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .lh-spine-now {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .lh-spine-line {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* The layer chips go under it. */
+  .lh-stage:has(.lh-spine) .lh-layers {
+    top: 100px;
   }
   .lh-history-open .lh-dock {
     width: calc(100% - 24px);
@@ -632,7 +838,8 @@
     animation: none;
   }
   .lh-dock,
-  .lh-history {
+  .lh-history,
+  .lh-spine {
     transition: none;
   }
 }
