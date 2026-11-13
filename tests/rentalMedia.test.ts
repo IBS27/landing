@@ -85,7 +85,9 @@ describe("same-unit rental evidence", () => {
     )._handler;
     const id = await handler(ctx, { viewerId: "viewer", listingId: "listing" });
     const scene = tables.unitScenes.find((s) => s._id === id)!;
-    expect(scene.sources).toEqual(rentalSources(media));
+    expect(scene.sources).toEqual(
+      rentalSources(media).map((source) => ({ ...source, imported: true })),
+    );
     const sources = rentalSources(media);
     expect(sources.length).toBeLessThanOrEqual(20);
     const inputs = sources.map((s) => ({ key: s.key, kind: "image" as const, url: s.url! }));

@@ -29,7 +29,9 @@ export function UnitCanvas({
   input,
   details = true,
   cutaway = true,
+  jobId,
 }: {
+  jobId?: string;
   details?: boolean;
   cutaway?: boolean;
   scene: UnitScene;
@@ -53,7 +55,7 @@ export function UnitCanvas({
   const z = (Math.min(...points.map((p) => p.z)) + Math.max(...points.map((p) => p.z))) / 2;
   const size = Math.max(5, ...points.map((p) => Math.hypot(p.x - x, p.z - z) * 2));
   return (
-    <CanvasError>
+    <CanvasError jobId={jobId}>
       <Canvas
         shadows
         frameloop={mode === "walk" ? "always" : "demand"}
@@ -289,9 +291,16 @@ function WalkCamera({
   const keys = useRef(new Set<string>());
   const yaw = useRef(0);
   const pitch = useRef(-0.05);
+  const lastRoom = useRef("");
 
   useEffect(() => {
     const room = scene.rooms.find((r) => r.id === roomId) ?? scene.rooms[0];
+    const roomKey = `${room.id}:${JSON.stringify(room.polygon)}`;
+    const sameRoom = lastRoom.current === roomKey;
+    // Appearance updates must not teleport a walker who is still in clear space.
+    if (sameRoom && canWalk(scene, { x: camera.position.x, z: camera.position.z }, placements))
+      return;
+    lastRoom.current = roomKey;
     let p = roomCenter(room);
     if (!canWalk(scene, p, placements)) {
       const candidate = room.polygon
@@ -315,7 +324,7 @@ function WalkCamera({
       camera.fov = 72;
       camera.updateProjectionMatrix();
     }
-    yaw.current = 0;
+    if (!sameRoom) yaw.current = 0;
   }, [camera, scene, roomId, placements]);
   useEffect(() => {
     const canvas = gl.domElement;
@@ -396,10 +405,13 @@ function WalkCamera({
   });
   return null;
 }
-class CanvasError extends Component<{ children: ReactNode }, { failed: boolean }> {
+class CanvasError extends Component<{ children: ReactNode; jobId?: string }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
+  }
+  componentDidCatch(error: Error) {
+    console.error("Unit 3D renderer failed", { jobId: this.props.jobId, error });
   }
   render() {
     return this.state.failed ? (

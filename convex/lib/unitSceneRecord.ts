@@ -1,6 +1,13 @@
 import { v } from "convex/values";
 import { placement, sceneSource, unitScene } from "./unitScene";
 
+export const generationStatus = v.union(
+  v.literal("layout"),
+  v.literal("details"),
+  v.literal("ready"),
+  v.literal("partial"),
+  v.literal("failed"),
+);
 export const unitSceneFields = {
   ownerId: v.id("users"),
   roomId: v.optional(v.id("rooms")),
@@ -10,6 +17,14 @@ export const unitSceneFields = {
   sources: v.array(sceneSource),
   description: v.string(),
   revision: v.number(),
+  manuallyEdited: v.optional(v.boolean()),
+  generation: v.optional(
+    v.object({
+      status: generationStatus,
+      revision: v.number(),
+      autoApply: v.boolean(),
+    }),
+  ),
   jobId: v.optional(v.id("aiJobs")),
   candidate: v.optional(unitScene),
   explanation: v.optional(v.string()),

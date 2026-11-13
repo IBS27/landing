@@ -1,4 +1,4 @@
-import { lazy, type ReactNode, Suspense, useRef, useState } from "react";
+import { lazy, type ReactNode, Suspense, useEffect, useRef, useState } from "react";
 import { Button, Card, Spinner } from "@/ui/primitives";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import {
@@ -24,7 +24,13 @@ export function UnitEditor({
   onSave,
   sidebar,
   items = [],
+  onDirtyChange,
+  viewKey = "saved",
+  jobId,
 }: {
+  jobId?: string;
+  onDirtyChange?: (dirty: boolean) => void;
+  viewKey?: string;
   initial: UnitDraft;
   revision: number;
   onSave?: (draft: UnitDraft, revision: number) => Promise<number>;
@@ -35,7 +41,11 @@ export function UnitEditor({
   const latest = useRef(draft);
   latest.current = draft;
   const [base, setBase] = useState(revision);
+  const [baseView, setBaseView] = useState(viewKey);
   const [dirty, setDirty] = useState(false);
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [mode, setMode] = useState<ViewMode>("dollhouse");
@@ -54,7 +64,8 @@ export function UnitEditor({
   const [listing, setListing] = useState("");
   const [calibrationWall, setCalibrationWall] = useState(initial.scene.walls[0]?.id ?? "");
   const [knownLength, setKnownLength] = useState(4);
-  if (!dirty && revision > base) {
+  if (!dirty && (revision > base || baseView !== viewKey)) {
+    setBaseView(viewKey);
     setDraft(initial);
     setBase(revision);
   }
@@ -267,6 +278,7 @@ export function UnitEditor({
               }
             >
               <UnitCanvas
+                jobId={jobId}
                 scene={lastValid.current}
                 placements={draft.placements}
                 mode={mode}

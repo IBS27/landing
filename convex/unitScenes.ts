@@ -10,11 +10,12 @@ import {
 import { runAgent } from "./ai/agent";
 import { runJob, startJob } from "./ai/jobs";
 import type { MediaInput } from "./ai/model";
+import { canonicalJson } from "./ai/outputSchema";
 import { resolveSources } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { loadAudience } from "./lib/posts";
-import { rentalSources } from "./lib/rentalMedia";
 import { unitAppearanceTask } from "./lib/unitAppearanceTask";
+import { isStarterScene, listingSources, refreshedSources } from "./lib/unitGeneration";
 import {
   MAX_SOURCES,
   manualScene,
@@ -23,7 +24,7 @@ import {
   sceneSource,
   unitScene,
 } from "./lib/unitScene";
-import { unitSceneRecord } from "./lib/unitSceneRecord";
+import { generationStatus, unitSceneRecord } from "./lib/unitSceneRecord";
 import { layoutMedia, unitSceneTask } from "./lib/unitSceneTask";
 
 export async function accessibleListing(
@@ -107,8 +108,8 @@ export const create = viewerMutation({
     const title = (room?.name ?? listing?.title ?? "Your unit").slice(0, 120);
     const photos: { url: string; storageId?: Id<"_storage"> }[] =
       room?.photos ?? listing?.photos.map((url) => ({ url })) ?? [];
-    const sources: Doc<"unitScenes">["sources"] = listing?.rentalMedia
-      ? rentalSources(listing.rentalMedia)
+    const sources: Doc<"unitScenes">["sources"] = listing
+      ? listingSources(listing)
       : photos.slice(0, 18).map((p, i) => ({
           key: `photo-${i + 1}`,
           label: `Photo ${i + 1}`,
@@ -116,13 +117,6 @@ export const create = viewerMutation({
           url: p.url,
           ...(p.storageId ? { storageId: p.storageId } : {}),
         }));
-    if (listing?.video)
-      sources.push({
-        key: "listing-video",
-        label: "Listing video",
-        kind: "video",
-        url: listing.video.url,
-      });
     const now = Date.now();
     return ctx.db.insert("unitScenes", {
       ownerId,
@@ -138,6 +132,7 @@ export const create = viewerMutation({
       sources,
       description: listing?.description.slice(0, 8000) ?? "",
       revision: 0,
+      manuallyEdited: !!room?.size,
       createdAt: now,
       updatedAt: now,
     });
@@ -180,6 +175,9 @@ export const save = viewerMutation({
     await ctx.db.patch(id, {
       scene,
       placements,
+      manuallyEdited: true,
+      generation: undefined,
+      jobId: undefined,
       candidate: undefined,
       revision: revision + 1,
       updatedAt: Date.now(),
@@ -209,6 +207,7 @@ export const addSource = viewerMutation({
       source.label.length > 120
     )
       throw new ConvexError("Invalid source or media limit reached");
+    source = { ...source, imported: false };
     if (source.storageId) {
       const meta = await ctx.db.system.get(source.storageId);
       const types =
@@ -224,6 +223,8 @@ export const addSource = viewerMutation({
     }
     await ctx.db.patch(id, {
       sources: [...doc.sources, source],
+      generation: undefined,
+      jobId: undefined,
       candidate: undefined,
       revision: revision + 1,
       updatedAt: Date.now(),
@@ -249,20 +250,55 @@ export function publicMediaUrl(value: string) {
   }
 }
 export const requestGeneration = viewerMutation({
-  args: { id: v.id("unitScenes"), revision: v.number() },
+  args: { id: v.id("unitScenes"), revision: v.number(), detailsOnly: v.optional(v.boolean()) },
   returns: v.id("aiJobs"),
-  handler: async (ctx, { id, revision }): Promise<Id<"aiJobs">> => {
+  handler: async (ctx, { id, revision, detailsOnly = false }): Promise<Id<"aiJobs">> => {
     const doc = await ownScene(ctx, id, ctx.viewer._id);
     assertRevision(doc, revision);
-    if (!doc.sources.length) throw new ConvexError("Add photos or a floor plan first");
+    const listing = doc.listingId
+      ? await accessibleListing(ctx, doc.listingId, ctx.viewer._id)
+      : null;
+    const sources = listing ? refreshedSources(doc.sources, listing) : doc.sources;
+    const description = listing?.description.slice(0, 8000) ?? doc.description;
+    const changed =
+      canonicalJson(sources) !== canonicalJson(doc.sources) || description !== doc.description;
+    if (!sources.length) throw new ConvexError("Add photos or a floor plan first");
+    const live = doc.jobId ? await ctx.db.get(doc.jobId) : null;
+    if (
+      !changed &&
+      live &&
+      (live.status === "queued" || live.status === "running") &&
+      Date.now() - live.createdAt < 15 * 60_000
+    )
+      return live._id;
+    const nextRevision = revision + (changed ? 1 : 0);
+    const retryDetails =
+      detailsOnly &&
+      !changed &&
+      doc.generation?.revision === revision &&
+      !!(doc.candidate || !isStarterScene(doc.scene));
     const jobId = await startJob(ctx, {
       kind: "unitScene",
-      key: `${id}:${revision}`,
+      key: `${id}:${nextRevision}`,
       userId: ctx.viewer._id,
       action: internal.unitScenes.generate,
-      args: { id, ownerId: ctx.viewer._id, revision },
+      args: { id, ownerId: ctx.viewer._id, revision: nextRevision, detailsOnly: retryDetails },
     });
-    await ctx.db.patch(id, { jobId, candidate: undefined, explanation: undefined });
+    await ctx.db.patch(id, {
+      sources,
+      description,
+      revision: nextRevision,
+      jobId,
+      candidate: retryDetails ? doc.candidate : undefined,
+      explanation: undefined,
+      generation: {
+        status: retryDetails ? "details" : "layout",
+        revision: nextRevision,
+        autoApply:
+          doc.manuallyEdited === false ||
+          (doc.manuallyEdited === undefined && isStarterScene(doc.scene)),
+      },
+    });
     return jobId;
   },
 });
@@ -271,6 +307,7 @@ export const load = internalQuery({
   returns: unitSceneRecord,
   handler: (ctx, { id, ownerId }) => ownScene(ctx, id, ownerId),
 });
+/** Each stage returns the revision it published; user edits invalidate the next stage. */
 export const saveCandidate = internalMutation({
   args: {
     id: v.id("unitScenes"),
@@ -279,22 +316,45 @@ export const saveCandidate = internalMutation({
     jobId: v.id("aiJobs"),
     candidate: v.union(unitScene, v.null()),
     explanation: v.string(),
-    runId: v.id("aiRuns"),
+    runId: v.optional(v.id("aiRuns")),
+    status: v.optional(generationStatus),
   },
-  returns: v.null(),
-  handler: async (ctx, { id, ownerId, revision, jobId, candidate, explanation, runId }) => {
+  returns: v.union(v.number(), v.null()),
+  handler: async (
+    ctx,
+    { id, ownerId, revision, jobId, candidate, explanation, runId, status = "ready" },
+  ) => {
     const doc = await ownScene(ctx, id, ownerId);
     if (doc.jobId !== jobId) return null;
-    await ctx.db.patch(
-      id,
-      doc.revision !== revision
-        ? {
-            explanation:
-              "Sources or layout changed during generation. Generate again to use your latest version.",
-          }
-        : { candidate: candidate ?? undefined, explanation, runId },
-    );
-    return null;
+    if (doc.revision !== revision) {
+      await ctx.db.patch(id, {
+        explanation:
+          "Sources or layout changed during generation. Generate again to use your latest version.",
+      });
+      return null;
+    }
+    if (candidate) {
+      const errors = sceneProblems(
+        candidate,
+        doc.sources.map((s) => s.key),
+      );
+      if (errors.length) throw new Error(errors.join("; "));
+    }
+    const autoApply = doc.generation?.autoApply ?? false;
+    const nextRevision = revision + 1;
+    await ctx.db.patch(id, {
+      ...(candidate
+        ? autoApply
+          ? { scene: candidate, candidate: undefined, manuallyEdited: false }
+          : { candidate }
+        : {}),
+      explanation,
+      ...(runId ? { runId } : {}),
+      revision: nextRevision,
+      updatedAt: Date.now(),
+      generation: { status, revision: nextRevision, autoApply },
+    });
+    return nextRevision;
   },
 });
 export const acceptCandidate = viewerMutation({
@@ -307,6 +367,11 @@ export const acceptCandidate = viewerMutation({
     await ctx.db.patch(id, {
       scene: doc.candidate,
       candidate: undefined,
+      manuallyEdited: false,
+      generation: doc.generation
+        ? { ...doc.generation, autoApply: true, revision: revision + 1 }
+        : undefined,
+      jobId: undefined,
       revision: revision + 1,
       updatedAt: Date.now(),
     });
@@ -319,83 +384,134 @@ export const generate = internalAction({
     ownerId: v.id("users"),
     revision: v.number(),
     jobId: v.id("aiJobs"),
+    detailsOnly: v.optional(v.boolean()),
   },
   returns: v.null(),
   handler: async (ctx, args): Promise<null> => {
-    await runJob(ctx, args.jobId, async (progress) => {
-      const deadline = Date.now() + 8 * 60_000;
-      const doc = await ctx.runQuery(internal.unitScenes.load, {
+    let revision = args.revision;
+    let hasLayout = !!args.detailsOnly;
+    try {
+      await runJob(ctx, args.jobId, async (progress) => {
+        const deadline = Date.now() + 8 * 60_000;
+        const doc = await ctx.runQuery(internal.unitScenes.load, {
+          id: args.id,
+          ownerId: args.ownerId,
+        });
+        if (doc.revision !== revision || doc.jobId !== args.jobId) return;
+        const publish = async (
+          candidate: Doc<"unitScenes">["scene"] | null,
+          explanation: string,
+          status: "details" | "ready" | "partial",
+          runId?: Id<"aiRuns">,
+        ) => {
+          const next: number | null = await ctx.runMutation(internal.unitScenes.saveCandidate, {
+            id: args.id,
+            ownerId: args.ownerId,
+            jobId: args.jobId,
+            revision,
+            candidate,
+            explanation,
+            status,
+            runId,
+          });
+          if (next === null) return false;
+          revision = next;
+          return true;
+        };
+        await progress("Reading floor plans and listing media", 1, 3);
+        const media: MediaInput[] = [];
+        for (const s of doc.sources) {
+          const url = s.storageId ? await ctx.storage.getUrl(s.storageId) : s.url;
+          if (url && publicMediaUrl(url))
+            media.push({ key: s.key, kind: s.kind === "video" ? "video" : "image", url });
+        }
+        if (!media.length)
+          throw new Error(
+            "No readable media. Upload photos or a floor plan; local seed paths cannot be read by Muse.",
+          );
+        let candidate = args.detailsOnly ? structuredClone(doc.candidate ?? doc.scene) : null;
+        let explanation = "Layout preserved. ";
+        if (!candidate) {
+          const { appearance: _appearance, ...currentLayout } = doc.scene;
+          const geometryMedia = layoutMedia(media, doc.sources);
+          const result = await runAgent(ctx, unitSceneTask, {
+            input: {
+              title: doc.scene.title,
+              description: doc.description,
+              currentLayout,
+              measurements:
+                doc.scene.rooms.length === 1 && doc.scene.rooms[0].evidence.basis === "measured"
+                  ? {
+                      width:
+                        Math.max(...doc.scene.rooms[0].polygon.map((p) => p.x)) -
+                        Math.min(...doc.scene.rooms[0].polygon.map((p) => p.x)),
+                      length:
+                        Math.max(...doc.scene.rooms[0].polygon.map((p) => p.z)) -
+                        Math.min(...doc.scene.rooms[0].polygon.map((p) => p.z)),
+                    }
+                  : null,
+              evidence: doc.sources
+                .filter((s) => geometryMedia.some((m) => m.key === s.key))
+                .map(({ key, label, kind }) => ({ key, label, kind })),
+            },
+            media: geometryMedia,
+            sources: [],
+            shownTo: args.ownerId,
+            jobId: args.jobId,
+            deadline,
+          });
+          candidate = result.output.scene;
+          if (!candidate) throw new Error(result.output.explanation);
+          explanation = result.output.explanation;
+          if (!(await publish(candidate, explanation, "details", result.runId))) return;
+          hasLayout = true;
+        }
+        await progress("Your layout is ready. Adding finishes and fixtures…", 2, 3);
+        const details = await runAgent(
+          ctx,
+          args.detailsOnly ? { ...unitAppearanceTask, cacheTtlMs: 0 } : unitAppearanceTask,
+          {
+            input: {
+              scene: candidate,
+              evidence: doc.sources
+                .filter((s) => media.some((m) => m.key === s.key))
+                .map(({ key, label, kind }) => ({ key, label, kind })),
+            },
+            media,
+            sources: [],
+            shownTo: args.ownerId,
+            jobId: args.jobId,
+            deadline,
+          },
+        );
+        if (details.output.appearance) candidate.appearance = details.output.appearance;
+        const partial = !details.output.appearance || !!details.output.omitted?.length;
+        if (
+          !(await publish(
+            candidate,
+            `${explanation} ${details.output.explanation}`,
+            partial ? "partial" : "ready",
+            details.runId,
+          ))
+        )
+          return;
+        await progress(
+          partial ? "Layout ready; some details unavailable" : "Apartment ready",
+          3,
+          3,
+        );
+      });
+    } catch (error) {
+      await ctx.runMutation(internal.unitScenes.saveCandidate, {
         id: args.id,
         ownerId: args.ownerId,
-      });
-      if (doc.revision !== args.revision) throw new Error("Layout changed. Generate again.");
-      await progress("Reading floor plans and listing media", 1, 3);
-      const media: MediaInput[] = [];
-      for (const s of doc.sources) {
-        const url = s.storageId ? await ctx.storage.getUrl(s.storageId) : s.url;
-        if (!url || !publicMediaUrl(url)) continue;
-        media.push({ key: s.key, kind: s.kind === "video" ? "video" : "image", url });
-      }
-      if (!media.length)
-        throw new Error(
-          "No readable media. Upload photos or a floor plan; local seed paths cannot be read by Muse.",
-        );
-      const { appearance: _appearance, ...currentLayout } = doc.scene;
-      const geometryMedia = layoutMedia(media, doc.sources);
-      const result = await runAgent(ctx, unitSceneTask, {
-        input: {
-          title: doc.scene.title,
-          description: doc.description,
-          currentLayout,
-          measurements:
-            doc.scene.rooms.length === 1 && doc.scene.rooms[0].evidence.basis === "measured"
-              ? {
-                  width:
-                    Math.max(...doc.scene.rooms[0].polygon.map((p) => p.x)) -
-                    Math.min(...doc.scene.rooms[0].polygon.map((p) => p.x)),
-                  length:
-                    Math.max(...doc.scene.rooms[0].polygon.map((p) => p.z)) -
-                    Math.min(...doc.scene.rooms[0].polygon.map((p) => p.z)),
-                }
-              : null,
-          evidence: doc.sources
-            .filter((s) => geometryMedia.some((m) => m.key === s.key))
-            .map((s) => ({ key: s.key, label: s.label, kind: s.kind })),
-        },
-        media: geometryMedia,
-        sources: [],
-        shownTo: args.ownerId,
         jobId: args.jobId,
-        deadline,
+        revision,
+        candidate: null,
+        explanation: error instanceof Error ? error.message : "Generation failed. Please retry.",
+        status: hasLayout ? "partial" : "failed",
       });
-      await progress("Reconstructing visible materials and fixtures", 2, 3);
-      const candidate = result.output.scene;
-      let explanation = result.output.explanation;
-      if (candidate) {
-        const details = await runAgent(ctx, unitAppearanceTask, {
-          input: {
-            scene: candidate,
-            evidence: doc.sources
-              .filter((s) => media.some((m) => m.key === s.key))
-              .map(({ key, label, kind }) => ({ key, label, kind })),
-          },
-          media,
-          sources: [],
-          shownTo: args.ownerId,
-          jobId: args.jobId,
-          deadline,
-        });
-        if (details.output.appearance) candidate.appearance = details.output.appearance;
-        explanation += ` ${details.output.explanation}`;
-      }
-      await ctx.runMutation(internal.unitScenes.saveCandidate, {
-        ...args,
-        candidate,
-        explanation,
-        runId: result.runId,
-      });
-      await progress("Preview ready", 3, 3);
-    });
+    }
     return null;
   },
 });

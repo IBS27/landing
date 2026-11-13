@@ -5,8 +5,8 @@ import { LandingPage } from "@/landing/shell/LandingPage";
 import { Button, Card, Spinner } from "@/ui/primitives";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
-import { UnitEditor } from "./UnitEditor";
 import { UnitSources } from "./UnitSources";
+import { UnitWorkspace } from "./UnitWorkspace";
 
 export type UnitSearch = { unit?: string; room?: string; listing?: string };
 export function UnitPage({ unit, room, listing }: UnitSearch) {
@@ -88,97 +88,24 @@ function SavedUnit({ id }: { id: Id<"unitScenes"> }) {
     accept = useM(api.unitScenes.acceptCandidate);
   const job = useQ(api.ai.jobs.get, doc?.jobId ? { jobId: doc.jobId } : "skip");
   const ai = useQ(api.ai.status.get, {});
-  const [error, setError] = useState(""),
-    [busy, setBusy] = useState(false),
-    [preview, setPreview] = useState(false);
   if (!doc)
     return (
       <div className="flex justify-center p-12">
         <Spinner />
       </div>
     );
-  const running = job?.status === "queued" || job?.status === "running";
-  async function run(action: () => Promise<unknown>) {
-    setBusy(true);
-    setError("");
-    try {
-      await action();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
-    } finally {
-      setBusy(false);
-    }
-  }
   return (
-    <div className="space-y-4">
-      <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
-        <div>
-          <h2 className="font-bold text-primary">{doc.scene.title}</h2>
-          <p className="text-secondary text-sm">
-            {running
-              ? (job?.progress?.label ?? "Queued")
-              : (doc.explanation ??
-                "Generate a preview from your source material. Save edits before generating.")}
-          </p>
-          {ai && !ai.enabled && (
-            <p className="text-secondary text-sm">
-              Muse is off. Manual layout and furniture placement still work.
-            </p>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            disabled={busy || running || !doc.sources.length || !ai?.enabled}
-            onClick={() => run(() => generate({ id, revision: doc.revision }))}
-          >
-            {running ? "Generating…" : "Generate with Muse"}
-          </Button>
-          {doc.candidate && (
-            <>
-              <Button variant="secondary" onClick={() => setPreview(!preview)}>
-                {preview ? "Close preview" : "Review generated layout"}
-              </Button>
-              <Button
-                onClick={() =>
-                  run(async () => {
-                    await accept({ id, revision: doc.revision });
-                    setPreview(false);
-                  })
-                }
-              >
-                Apply generated layout
-              </Button>
-            </>
-          )}
-        </div>
-      </Card>
-      {(error || job?.status === "failed") && (
-        <p role="alert" className="rounded-lg bg-red-50 p-3 text-red-800 text-sm">
-          {error || job?.error}
-        </p>
-      )}
-      {preview && doc.candidate && (
-        <Card className="p-4">
-          <p className="mb-3 font-semibold text-primary">
-            Generated preview. Applying it keeps your placed items; check them against the new
-            walls.
-          </p>
-          <UnitEditor
-            key={`candidate-${doc.runId}`}
-            initial={{ scene: doc.candidate, placements: [] }}
-            revision={0}
-          />
-        </Card>
-      )}
-      <UnitEditor
-        initial={{ scene: doc.scene, placements: doc.placements }}
-        revision={doc.revision}
-        onSave={(draft, revision) => save({ id, revision, ...draft })}
-        items={saved
-          ?.filter((item) => !item.rental)
-          .map((item) => ({ id: item._id, title: item.title }))}
-        sidebar={<UnitSources doc={doc} />}
-      />
-    </div>
+    <UnitWorkspace
+      doc={doc}
+      job={job}
+      aiEnabled={!!ai?.enabled}
+      onGenerate={(detailsOnly) => generate({ id, revision: doc.revision, detailsOnly })}
+      onAccept={() => accept({ id, revision: doc.revision })}
+      onSave={(draft, revision) => save({ id, revision, ...draft })}
+      items={saved
+        ?.filter((item) => !item.rental)
+        .map((item) => ({ id: item._id, title: item.title }))}
+      sources={<UnitSources doc={doc} />}
+    />
   );
 }
