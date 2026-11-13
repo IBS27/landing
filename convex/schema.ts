@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { cityProfileFact } from "./lib/cityProfileFacts";
 import {
   aiJobStatus,
   aiRun,
@@ -717,6 +718,24 @@ export default defineSchema({
     startedAt: v.optional(v.number()),
     finishedAt: v.optional(v.number()),
   }).index("by_kind_key", ["kind", "key", "createdAt"]),
+
+  /* ---------------- Landing ---------------- */
+
+  /** Landing City Profile (#3): one row per person who started the brief. Facts live in `cityProfileFacts`. */
+  cityProfiles: defineTable({
+    userId: v.id("users"),
+    /** When the onboarding brief was last submitted; unset = not onboarded yet. */
+    briefCompletedAt: v.optional(v.number()),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  /**
+   * City Profile facts (#3): one row per fact, each with its source, evidence and
+   * confidence. Read through `getProfile` (convex/lib/cityProfile.ts), never directly.
+   */
+  cityProfileFacts: defineTable(cityProfileFact)
+    .index("by_user", ["userId", "updatedAt"])
+    .index("by_user_key", ["userId", "key"]),
 
   /**
    * Landing network vouching: `voucherId` says they know `subjectId` (usually a
