@@ -244,7 +244,7 @@ export const factEvidence = v.object({
   /**
    * brief: the onboarding form · free_text: the "Tell us about you" box ·
    * activity: inferred from RSVPs, joins, likes, skips and pins (#4) ·
-   * edit: changed on "What Muse knows about you" (#5).
+   * edit: an inferred fact the person kept on "What Muse knows about you" (#5).
    */
   kind: literals("brief", "free_text", "activity", "edit"),
   /** Shown to the person: "You said so in your brief", "RSVP'd to 3 climbing events". */

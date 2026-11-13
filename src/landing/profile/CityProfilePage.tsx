@@ -5,17 +5,22 @@ import { LandingPage } from "@/landing/shell/LandingPage";
 import { Card, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import { PrivacyNote } from "./CityBrief";
+import { KnownFacts } from "./KnownFacts";
 import { LearnFromActivity } from "./LearnFromActivity";
-import { ProfileSummary } from "./ProfileSummary";
+import { OtherData } from "./OtherData";
 
-/** Landing → City Profile (`/landing/profile`): the viewer's profile, or a prompt to set it up. */
+/**
+ * Landing → City Profile (`/landing/profile`): "What Muse knows about you" (#5).
+ * Every fact with where it came from, what's recorded from activity, and the
+ * other data Muse reads, each with a way to change or clear it.
+ */
 export function CityProfilePage() {
-  const profile = useQ(api.cityProfile.get, {});
-  const onboarded = Boolean(profile?.briefCompletedAt);
+  const known = useQ(api.museKnows.facts, {});
+  const onboarded = Boolean(known?.briefCompletedAt);
   return (
     <LandingPage
-      title="City Profile"
-      description="What Landing knows about you, and what it uses it for. Only you can see it."
+      title="What Muse knows about you"
+      description="Everything Landing uses to tune search, neighborhoods and crews, where each piece came from, and how to change it. Only you can see it."
       actions={
         onboarded ? (
           <Link
@@ -30,7 +35,7 @@ export function CityProfilePage() {
       }
     >
       <div className="max-w-[720px]">
-        {profile === undefined ? (
+        {known === undefined ? (
           <div className="flex justify-center py-16">
             <Spinner />
           </div>
@@ -54,10 +59,11 @@ export function CityProfilePage() {
                 </Link>
               </Card>
             )}
-            {(onboarded || profile.facts.length > 0) && (
-              <ProfileSummary profile={profile} showHeader={false} />
+            {(onboarded || known.facts.length > 0 || known.removed.length > 0) && (
+              <KnownFacts known={known} />
             )}
             <LearnFromActivity />
+            <OtherData />
             <PrivacyNote />
           </div>
         )}

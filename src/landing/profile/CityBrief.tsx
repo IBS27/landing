@@ -7,6 +7,7 @@ import { Tooltip } from "@/ui/overlays";
 import { Button, Card, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import {
+  type FactKey,
   factSlot,
   GOALS,
   SF_NEIGHBORHOODS,
@@ -147,6 +148,12 @@ function BriefEditor({
     setForm((f) => (f.moveInMonth ? f : { ...f, moveInMonth: month }));
   }, [onboarded]);
 
+  // Opened at one section from "What Muse knows about you" (`#brief-budget`): start there.
+  useEffect(() => {
+    const id = window.location.hash.slice(1);
+    if (id.startsWith("brief-")) document.getElementById(id)?.scrollIntoView({ block: "start" });
+  }, []);
+
   async function submit() {
     setTried(true);
     if (problems.length > 0) return;
@@ -199,7 +206,11 @@ function BriefEditor({
         <TellUsBox onAdd={(picked) => setForm((f) => applyProposals(f, picked))} />
       </Section>
 
-      <Section title="Budget" help="Monthly rent you're comfortable with.">
+      <Section
+        id={briefAnchor("budget")}
+        title="Budget"
+        help="Monthly rent you're comfortable with."
+      >
         <div className="flex flex-wrap items-center gap-2">
           <MoneyInput
             label="From"
@@ -219,7 +230,11 @@ function BriefEditor({
         </div>
       </Section>
 
-      <Section title="Move-in" help="Crews match people arriving the same month.">
+      <Section
+        id={briefAnchor("moveIn")}
+        title="Move-in"
+        help="Crews match people arriving the same month."
+      >
         <div className="flex flex-wrap items-end gap-3">
           <LabeledInput label="Month">
             {(id) => (
@@ -248,6 +263,7 @@ function BriefEditor({
       </Section>
 
       <Section
+        id={briefAnchor("neighborhood")}
         title="Neighborhoods you're considering"
         help="Pick any that interest you, or none if you're not sure yet."
       >
@@ -269,6 +285,7 @@ function BriefEditor({
       </Section>
 
       <Section
+        id={briefAnchor("transport")}
         title="Getting around"
         help="How you'll get around the city. Leave Car off if you won't have one."
       >
@@ -286,7 +303,11 @@ function BriefEditor({
         </div>
       </Section>
 
-      <Section title="Schedule" help="So plans and suggestions fit when you're actually free.">
+      <Section
+        id={briefAnchor("schedule")}
+        title="Schedule"
+        help="So plans and suggestions fit when you're actually free."
+      >
         <div className="flex flex-col gap-3">
           <Segmented
             label="Work hours"
@@ -314,6 +335,7 @@ function BriefEditor({
       </Section>
 
       <Section
+        id={briefAnchor("employer")}
         title="Work"
         badge="Optional"
         help="Only used to offer a crew of people starting at the same place, if you opt in."
@@ -347,6 +369,7 @@ function BriefEditor({
       </Section>
 
       <Section
+        id={briefAnchor("interest")}
         title="Interests"
         help="Pick a few. These match you with Groups, Events and your crew."
         aside={
@@ -417,7 +440,11 @@ function BriefEditor({
         </div>
       </Section>
 
-      <Section title="What do you want from the move?" help="Pick as many as you like.">
+      <Section
+        id={briefAnchor("goal")}
+        title="What do you want from the move?"
+        help="Pick as many as you like."
+      >
         <div className="flex flex-wrap gap-2">
           {GOALS.map((g) => (
             <Chip
@@ -473,13 +500,20 @@ function BriefEditor({
 const inputCls =
   "h-10 w-full rounded-md border border-divider bg-card px-3 text-[15px] text-primary outline-none placeholder:text-placeholder focus:border-fb focus:shadow-[0_0_0_1px_var(--fb-blue)] [color-scheme:light] dark:[color-scheme:dark]";
 
+/** The brief section for a fact key, so "What Muse knows about you" can link straight to it. */
+export function briefAnchor(key: FactKey): string {
+  return `brief-${key}`;
+}
+
 function Section({
+  id,
   title,
   help,
   badge,
   aside,
   children,
 }: {
+  id?: string;
   title: string;
   help?: string;
   badge?: string;
@@ -487,7 +521,7 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <Card className="px-4 py-4">
+    <Card id={id} className="scroll-mt-[72px] px-4 py-4">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <h2 className="flex items-center gap-2 font-bold text-[17px] text-primary leading-[22px]">

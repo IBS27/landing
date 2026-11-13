@@ -59,3 +59,11 @@ export function toConversation(conversation: Ref<"conversations">) {
     params: { conversationId: idOf(conversation) },
   });
 }
+
+/** A post's permalink, under its author's profile. */
+export function toPost(post: { postId: Id<"posts">; username: string }) {
+  return linkOptions({
+    to: "/$username/posts/$postId",
+    params: { username: post.username, postId: post.postId },
+  });
+}
