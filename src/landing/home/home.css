@@ -209,6 +209,36 @@
   background: var(--fb-blue);
   color: #fff;
 }
+/* Something Muse found, on the map: its kind and its name, at an approximate point. */
+.lh-found {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 190px;
+  height: 28px;
+  padding: 0 10px 0 3px;
+  border-radius: 999px;
+  color: var(--primary-text);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgb(15 20 30 / 0.2);
+  transition: transform 0.15s ease;
+}
+.lh-found:hover {
+  transform: scale(1.05);
+}
+.lh-found-dot {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0866ff, #8b3dff);
+  color: #fff;
+}
 
 /* ── Chat dock ── */
 .lh-dock {
@@ -347,6 +377,47 @@
 .lh-item {
   width: 240px;
   height: 152px;
+}
+.lh-info {
+  width: 248px;
+  height: 152px;
+}
+/* What Muse suggests doing: one row each, the buttons beside the words. */
+.lh-actions {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.lh-action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 12px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  box-shadow: 0 4px 18px rgb(15 20 30 / 0.08);
+}
+.lh-action.lh-glass {
+  background: rgb(255 255 255 / 0.92);
+}
+.dark .lh-action.lh-glass {
+  background: rgb(44 46 48 / 0.94);
+}
+.lh-action > :first-child {
+  flex-basis: 220px;
+}
+/* An action that ran: a check and what happened, where its buttons were. */
+.lh-done {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  min-height: 32px;
+  color: var(--primary-text);
+  font-weight: 600;
 }
 .lh-card-arrow {
   position: absolute;

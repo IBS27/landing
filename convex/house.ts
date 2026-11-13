@@ -171,7 +171,7 @@ export type GroceryView = {
   checked: { by: UserSummary | null; at: number } | null;
 };
 
-async function houseView(ctx: QueryCtx, house: Doc<"houses">, group: Doc<"groups">) {
+export async function houseView(ctx: QueryCtx, house: Doc<"houses">, group: Doc<"groups">) {
   const now = Date.now();
   const memberIds = await houseMemberIds(ctx, house);
   const members = new Set(memberIds);

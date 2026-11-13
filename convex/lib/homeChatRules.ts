@@ -23,7 +23,8 @@ import { ALL_ITEM_KINDS, type PlacementKind } from "./unitScene";
 /**
  * Landing Home's chat dock: the person types, and the reply carries one
  * command the client runs (fly to a neighborhood, show rentals, open a page,
- * show or furnish their 3D apartment, #150, or add named things to it, #153).
+ * show or furnish their 3D apartment, #150, or add named things to it, #153),
+ * the things Muse found as cards, and actions the person can confirm (#154).
  * Muse answers on the server
  * (`api.homeChat.reply`, convex/homeChat.ts); these keyword rules are its
  * fallback there (AI off, a rejected answer, a model error) and in the browser
@@ -96,6 +97,104 @@ export type ChatRentalCard = {
   /** "YYYY-MM-DD"; null or absent means available now. */
   availableFrom?: string | null;
 };
+/**
+ * Something the person can have done from the chat (#154). Muse suggests it or
+ * a card carries it; nothing runs until the person clicks, and then the page
+ * runs it as them, with the mutation the rest of Landing uses.
+ */
+export type ChatAction =
+  | { kind: "rsvp"; eventId: string; status: "going" | "interested" }
+  | { kind: "join_group"; groupId: string }
+  | { kind: "save_listing"; listingId: string }
+  /** Makes a rental their place; `moveIn` is "YYYY-MM-DD". */
+  | { kind: "choose_place"; listingId: string; moveIn: string }
+  /** Muse negotiates a Marketplace item; every offer still waits for their OK. Whole dollars. */
+  | { kind: "negotiate"; listingId: string; maxPrice: number; targetPrice?: number; notes?: string }
+  | { kind: "set_negotiation"; negotiationId: string; status: "active" | "paused" | "stopped" }
+  /** Sends (or drops) a draft that's waiting in their Inbox. */
+  | { kind: "approve_draft"; proposalId: string }
+  | { kind: "discard_draft"; proposalId: string }
+  | { kind: "add_grocery"; houseId: string; text: string }
+  | { kind: "add_chore"; houseId: string; title: string; cadence: "once" | "weekly" | "monthly" }
+  /** `amount` in dollars (cents allowed); `dueDate` is "YYYY-MM-DD". */
+  | {
+      kind: "add_bill";
+      houseId: string;
+      title: string;
+      amount: number;
+      cadence: "once" | "monthly";
+      dueDate?: string;
+    }
+  /** An intro to one of their roommate matches, in the words shown on the card. */
+  | { kind: "ask_roommate"; userId: string; text: string };
+export type ChatActionKind = ChatAction["kind"];
+export const CHAT_ACTION_KINDS = [
+  "rsvp",
+  "join_group",
+  "save_listing",
+  "choose_place",
+  "negotiate",
+  "set_negotiation",
+  "approve_draft",
+  "discard_draft",
+  "add_grocery",
+  "add_chore",
+  "add_bill",
+  "ask_roommate",
+] as const satisfies readonly ChatActionKind[];
+
+/** An action as the chat shows it. Code writes every word of it. */
+export type ChatActionCard = {
+  action: ChatAction;
+  /** What confirming does: "RSVP Going to Sunset Run Club · Sat, Nov 16". */
+  label: string;
+  /** More on it: a draft's text, an item's listed price. */
+  detail?: string;
+  /** The button: "RSVP", "Join", "Start", "Send". */
+  confirm: string;
+};
+
+/** What a card (other than a rental's) is about. */
+export const CHAT_CARD_KINDS = [
+  "item",
+  "event",
+  "group",
+  "place",
+  "neighborhood",
+  "person",
+  "draft",
+  "negotiation",
+] as const;
+export type ChatCardKind = (typeof CHAT_CARD_KINDS)[number];
+
+/**
+ * Something Muse found, as a card under the reply (#154): a Marketplace item,
+ * an Event, a Group, a place or landmark, a neighborhood, a person, a draft
+ * waiting for approval, a negotiation. Code builds every field; Muse only
+ * picks which cards to show.
+ */
+export type ChatCard = {
+  /** `<kind>:<id>`, as Muse cites it ("event:…", "place:…", "listing:…" for an item). */
+  key: string;
+  kind: ChatCardKind;
+  title: string;
+  /** Up to three short lines under the title. */
+  lines: string[];
+  photo?: string | null;
+  /** An item's price, whole dollars. */
+  price?: number;
+  /** A link inside the app to the thing itself. */
+  href?: string;
+  /** An approximate point, for showing it on the map. Never someone's address. */
+  point?: { lat: number; lng: number };
+  /** What the person can do from the card (at most two), each run only on their click. */
+  actions?: ChatActionCard[];
+};
+
+/** Most cards and actions one reply carries. */
+export const CHAT_INFO_CARDS_MAX = 8;
+export const CHAT_ACTIONS_MAX = 3;
+
 export type ChatReply = {
   text: string;
   command: ChatCommand;
@@ -107,6 +206,10 @@ export type ChatReply = {
   rentals: ChatRentalCard[];
   /** What this message added to the City Profile ("Budget up to $2,400/mo"). */
   saved: string[];
+  /** Everything else the reply shows: items, Events, Groups, places, neighborhoods, drafts. */
+  cards: ChatCard[];
+  /** What Muse suggests doing, each waiting for the person's click. */
+  actions: ChatActionCard[];
 };
 /** A ranked rental the rules may name (optional `data.rentals`). Price is monthly, whole dollars. */
 export type ChatRental = { id: string; title: string; price: number; slug?: string };
@@ -114,8 +217,10 @@ export type ChatRental = { id: string; title: string; price: number; slug?: stri
 /** The longest message the chat sends, in characters. */
 export const CHAT_MESSAGE_MAX = 500;
 /** How many earlier turns go with a message, and how much of each. */
-export const CHAT_RECENT_MAX = 6;
-export const CHAT_TURN_MAX = 300;
+export const CHAT_RECENT_MAX = 8;
+export const CHAT_TURN_MAX = 800;
+/** Most keys a turn carries for what it showed (its cards), so a follow-up can mean them. */
+export const CHAT_SHOWN_MAX = 12;
 /** Most rental cards one reply carries. */
 export const CHAT_CARDS_MAX = 4;
 
@@ -662,5 +767,7 @@ export function ruleReply(
     via: "rules",
     rentals: replyCards(r.command, r.listingIds, data.cards ?? []),
     saved: [],
+    cards: [],
+    actions: [],
   };
 }

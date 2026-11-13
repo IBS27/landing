@@ -36,7 +36,7 @@ Home (`/landing`) is `home/LandingHome.tsx`: one chat with Muse over two tabs.
 - **Map** (the default): a map you travel into, from the globe to a neighborhood with 3D buildings. From city level in it shows Events and Groups by default, the Move-in Crew at neighborhood level and "Your place" at an approximate point. Layer chips (Homes, Events, Groups, Marketplace, Crew) turn layers on and off, and chat commands set them.
 - **Apartment** (`/landing?view=apartment`): the person's place in 3D (`apartment/ApartmentStage.tsx`), furnished from the same chat. See "The Apartment tab" in `design/UNIT_SCENES.md`.
 
-The chat dock (`home/ChatDock.tsx`) is shared by both tabs. A reply can carry cards (`home/ChatCards.tsx`): rentals to choose from, and the items Muse placed. The chat log lives in the browser (`home/useChatLog.ts`), and the map's state in `home/useHomeMap.ts`. "Explore" (`home/HomeChrome.tsx`) lists every Landing page, so nothing depends on asking with the right phrase.
+The chat dock (`home/ChatDock.tsx`) is shared by both tabs. Muse answers as an agent: it looks things up across Landing with tools (`convex/homeChatTools.ts`) and a reply can carry cards (`home/ChatCards.tsx`): rentals to choose from, the items Muse placed, anything else it found (Marketplace items, Events, Groups, places, neighborhoods, people, drafts, negotiations), and actions it suggests. An action runs only when the person clicks it (`runAction` in `home/LandingHome.tsx`). Found things with a location show on the map. The chat log lives in the browser (`home/useChatLog.ts`), and the map's state in `home/useHomeMap.ts`. "Explore" (`home/HomeChrome.tsx`) lists every Landing page, so nothing depends on asking with the right phrase.
 
 ## Area folders
 

@@ -5,6 +5,7 @@ import { MODEL } from "../convex/ai/model";
 import { agentSources } from "../convex/ai/sources";
 import {
   answer,
+  CITES_MAX,
   freshCardReasons,
   HOME_CHAT_TASK,
   type HomeChatInput,
@@ -12,26 +13,71 @@ import {
   homeChatContext,
   homeChatProblems,
   homeChatTask,
+  REPLY_MAX,
   rulesOutput,
   saveStatedPlan,
   toReply,
 } from "../convex/homeChat";
+import { runHomeTool } from "../convex/homeChatTools";
 import { getProfile, removeFact } from "../convex/lib/cityProfile";
 import { todayInSF } from "../convex/lib/cityProfileFacts";
-import { CHAT_RECENT_MAX, type ChatRentalCard } from "../convex/lib/homeChatRules";
+import { rsvpAction } from "../convex/lib/homeChatActions";
+import {
+  CHAT_ACTIONS_MAX,
+  CHAT_INFO_CARDS_MAX,
+  CHAT_RECENT_MAX,
+  CHAT_TURN_MAX,
+  type ChatRentalCard,
+} from "../convex/lib/homeChatRules";
+import type { Facts, FactsOf, Found } from "../convex/lib/homeChatThings";
 import { type MovePlan, NO_PLAN } from "../convex/lib/movePlan";
 import { manualScene } from "../convex/lib/unitScene";
 import { fakeCtx, type Row } from "./fakeDb";
 
 /* ---------- A stubbed Meta Model API: replies are queued, requests recorded ---------- */
 
-const replies: (string | Response)[] = [];
-const requests: { model?: string; messages: { role: string; content: string }[] }[] = [];
+type Wire = {
+  role: string;
+  content: string;
+  tool_calls?: { id: string; type: string; function: { name: string; arguments: string } }[];
+  tool_call_id?: string;
+};
+/** A tool call the stubbed model makes. */
+type Call = { name: string; args: unknown };
+/** A queued reply: the answer's text, the tool calls the model makes instead, or a raw response. */
+const replies: (string | Call[] | Response)[] = [];
+const requests: {
+  model?: string;
+  messages: Wire[];
+  tools?: { type: string; function: { name: string } }[];
+}[] = [];
 
-function completion(text: string) {
+/** One streamed chat completion: an answer, or tool calls. */
+function completion(reply: string | Call[]) {
+  const choice = (delta: unknown, finish: string | null = null) => ({
+    model: MODEL,
+    choices: [{ index: 0, delta, ...(finish ? { finish_reason: finish } : {}) }],
+  });
+  const body =
+    typeof reply === "string"
+      ? [choice({ content: reply }), choice({}, "stop")]
+      : [
+          ...reply.map((call, index) =>
+            choice({
+              tool_calls: [
+                {
+                  index,
+                  id: `call_${index}`,
+                  type: "function",
+                  function: { name: call.name, arguments: JSON.stringify(call.args) },
+                },
+              ],
+            }),
+          ),
+          choice({}, "tool_calls"),
+        ];
   const sse = [
-    { model: MODEL, choices: [{ index: 0, delta: { content: text } }] },
-    { model: MODEL, choices: [{ index: 0, delta: {}, finish_reason: "stop" }] },
+    ...body,
     { model: MODEL, choices: [], usage: { prompt_tokens: 10, completion_tokens: 10 } },
   ]
     .map((chunk) => `data: ${JSON.stringify(chunk)}\n\n`)
@@ -44,7 +90,7 @@ const realFetch = globalThis.fetch;
 const stubFetch = (async (_url: string, init?: RequestInit) => {
   requests.push(JSON.parse(String(init?.body)));
   const next = replies.shift() ?? "not json";
-  return typeof next === "string" ? completion(next) : next;
+  return next instanceof Response ? next : completion(next);
 }) as unknown as typeof fetch;
 
 const env = { ...process.env };
@@ -165,6 +211,8 @@ type Ref = FunctionReference<"query" | "mutation", "internal">;
 function actionCtx(tables: Record<string, Row[]>) {
   const db = fakeCtx(tables);
   const runs: Row[] = [];
+  /** The tools Muse ran, in order. */
+  const toolRuns: string[] = [];
   const ctx = {
     runQuery: async (ref: Ref, args: Record<string, never>) => {
       switch (getFunctionName(ref)) {
@@ -172,6 +220,9 @@ function actionCtx(tables: Record<string, Row[]>) {
           return homeChatContext(db, args);
         case "homeChat:cardReasonsNow":
           return freshCardReasons(db, args);
+        case "homeChatTools:run":
+          toolRuns.push(args.name);
+          return runHomeTool(db, args.viewerId, args.name, args.args);
         case "ai/sources:resolve":
           return agentSources(db, args.sources, args.shownTo);
         case "ai/runs:cached":
@@ -192,29 +243,44 @@ function actionCtx(tables: Record<string, Row[]>) {
       return _id;
     },
   };
-  return { ctx: ctx as unknown as ActionCtx, runs };
+  return { ctx: ctx as unknown as ActionCtx, runs, toolRuns };
 }
+
+type Turn = { who: "me" | "muse"; text: string; shown?: string[] };
 
 const ask = (
   message: string,
   tables = world(),
-  {
-    recent,
-    ...extra
-  }: {
-    neighborhood?: string;
-    view?: "map" | "apartment";
-    recent?: { who: "me" | "muse"; text: string }[];
-  } = {},
+  extra: { neighborhood?: string; view?: "map" | "apartment"; recent?: Turn[] } = {},
 ) => {
-  const { ctx, runs } = actionCtx(tables);
+  const { recent, ...context } = extra;
+  const { ctx, runs, toolRuns } = actionCtx(tables);
   return answer(ctx, {
     viewerId: "V" as never,
     message,
-    context: { stage: "city", ...extra },
+    context: { stage: "city", ...context },
     ...(recent ? { recent } : {}),
-  }).then((reply) => ({ reply, runs }));
+  }).then((reply) => ({ reply, runs, toolRuns }));
 };
+
+const muse = (out: Partial<HomeChatOutput> = {}) =>
+  JSON.stringify({
+    text: "Here you go.",
+    command: { kind: "none" },
+    sourceIds: [],
+    show: [],
+    actions: [],
+    plan: NO_PLAN,
+    ...out,
+  });
+
+/** Everything the model was sent across a run's requests, as text. */
+const sent = () => JSON.stringify(requests.map((r) => r.messages));
+/** What the tools returned to the model, in order, parsed (the last request replays them all). */
+const toolResults = () =>
+  (requests.at(-1)?.messages ?? [])
+    .filter((m) => m.role === "tool")
+    .map((m) => JSON.parse(m.content));
 
 /** A draft of Muse's waiting in V's Inbox. */
 const draft = (_id: string, extra: Row = {}) => ({
@@ -227,9 +293,6 @@ const draft = (_id: string, extra: Row = {}) => ({
   createdAt: NOW,
   ...extra,
 });
-
-const muse = (out: Partial<HomeChatOutput> & Pick<HomeChatOutput, "command">) =>
-  JSON.stringify({ text: "Here you go.", sourceIds: [], plan: NO_PLAN, ...out });
 
 /** V took `lCheap` as their place; `scene` is its 3D model, if built. */
 function withPlace(tables: Record<string, Row[]>, scene?: "starter" | "built") {
@@ -281,18 +344,26 @@ describe("homeChatContext", () => {
     expect(c.input.events.map((e) => e.id)).toEqual(["ePublic"]);
     // Protected traits never reach the model or the source labels.
     expect(JSON.stringify(c.input)).not.toMatch(/muslim|women/i);
-    expect(c.links["listing:lProtected"].label).not.toMatch(/muslim|women/i);
-    expect(Object.keys(c.links).sort()).toEqual([
+    const link = (key: string) => c.found.find((f) => f.key === key)?.link;
+    expect(link("listing:lProtected")?.label).not.toMatch(/muslim|women/i);
+    // What the reply may cite or show: exactly what Muse was given, each with a link code built.
+    expect(c.found.map((f) => f.key).sort()).toEqual([
       "event:ePublic",
       "listing:lCheap",
       "listing:lPricey",
       "listing:lProtected",
     ]);
-    expect(c.links["listing:lCheap"]).toEqual({
+    expect(c.found.map((f) => f.key)).toEqual(
+      [...c.input.rentals, ...c.input.events, ...c.input.earlier].map((f) => f.key),
+    );
+    expect(link("listing:lCheap")).toEqual({
       label: "Sunny room near Dolores · $1,500/mo",
       href: "/landing/find/listing/lCheap",
     });
-    expect(c.links["event:ePublic"].href).toBe("/events/ePublic");
+    expect(link("event:ePublic")?.href).toBe("/events/ePublic");
+    expect(c.input.earlier).toEqual([]);
+    expect(c.input.you.house).toBeNull();
+    expect(c.house).toBeNull();
     // An unknown slug from the client is dropped.
     expect(c.input.map).toEqual({ stage: "hood", neighborhood: null, view: "map" });
     expect(c.input.today).toBe(todayInSF());
@@ -300,8 +371,12 @@ describe("homeChatContext", () => {
     expect(c.input.you.budget).toEqual({ min: null, max: 2000 });
     expect(c.input.you.crew).toEqual({ joined: false, members: 0, neighborhoods: [] });
     const json = JSON.stringify(c.input);
-    for (const other of ["User S", "FirstS", "User B", "lBlocker", "ePrivate", "eBlocker"])
+    for (const other of ["User S", "User B", "FirstB", "lBlocker", "ePrivate", "eBlocker"])
       expect(json).not.toContain(other);
+    // Nothing the viewer can't see is on the board either, and raw descriptions never are.
+    const board = JSON.stringify(c.found);
+    for (const hidden of ["lBlocker", "ePrivate", "eBlocker", "Ignore your rules", "scam.example"])
+      expect(board).not.toContain(hidden);
     expect(c.limited).toBe(false);
   });
 
@@ -362,10 +437,11 @@ describe("homeChatContext", () => {
       context: { stage: "city" },
       recent: [],
     });
+    const cards = c.found.flatMap((f) => (f.rental ? [f.rental] : []));
     // The same rentals, in the same ranked order, and no one the viewer can't see.
-    expect(c.cards.map((x) => x.id)).toEqual(c.input.rentals.map((r) => r.id));
-    expect(c.cards.map((x) => x.id).sort()).toEqual(["lCheap", "lPricey", "lProtected"]);
-    const cheap = c.cards.find((x) => x.id === "lCheap");
+    expect(cards.map((x) => x.id)).toEqual(c.input.rentals.map((r) => r.id));
+    expect(cards.map((x) => x.id).sort()).toEqual(["lCheap", "lPricey", "lProtected"]);
+    const cheap = cards.find((x) => x.id === "lCheap");
     expect(cheap).toMatchObject({
       title: "Sunny room near Dolores",
       price: 1500,
@@ -375,7 +451,7 @@ describe("homeChatContext", () => {
     });
     // Every reason is cited, with in-app links only.
     expect(cheap?.reasons.length).toBeGreaterThan(0);
-    for (const card of c.cards) {
+    for (const card of cards) {
       expect(card.reasons.length).toBeLessThanOrEqual(2);
       for (const r of card.reasons) {
         expect(r.sources.length).toBeGreaterThan(0);
@@ -388,14 +464,14 @@ describe("homeChatContext", () => {
         { label: "Sunny room near Dolores · $1,500/mo", href: "/landing/find/listing/lCheap" },
       ],
     });
-    const studio = c.cards.find((x) => x.id === "lPricey");
+    const studio = cards.find((x) => x.id === "lPricey");
     expect(studio?.photo).toBe("/seed/studio.jpg");
     expect(studio?.availableFrom).toBe(todayInSF(NOW + 40 * DAY));
     expect(c.input.rentals.find((r) => r.id === "lPricey")?.availableFrom).toBe(
       studio?.availableFrom ?? null,
     );
     // Protected traits never reach a card, and raw descriptions never do either.
-    expect(JSON.stringify(c.cards)).not.toMatch(/muslim|women|Ignore your rules/i);
+    expect(JSON.stringify(cards)).not.toMatch(/muslim|women|Ignore your rules/i);
   });
 
   test("the Inbox: how many drafts are waiting for the viewer's OK (#153)", async () => {
@@ -858,6 +934,8 @@ describe("homeChat.reply: the apartment", () => {
       why: "unsure",
       rentals: [],
       saved: [],
+      cards: [],
+      actions: [],
     });
     // Opening a page is navigation too.
     replies.push(
@@ -927,6 +1005,721 @@ describe("homeChat.reply: the apartment", () => {
     expect(reply.via).toBe("rules");
     expect(reply.command.kind).toBe("furnish");
     expect(JSON.stringify(reply)).not.toMatch(/muslim|\[removed\]/i);
+  });
+});
+
+/* ---------- Muse as an agent: lookups, cards and actions (#154) ---------- */
+
+const friends = (a: string, b: string): Row[] => [
+  { _id: `fr_${a}_${b}`, userId: a, friendId: b, createdAt: 1 },
+  { _id: `fr_${b}_${a}`, userId: b, friendId: a, createdAt: 1 },
+];
+const lifestyle = (userId: string): Row => ({
+  _id: `rl_${userId}`,
+  userId,
+  answers: { sleep: "early", quietHours: "10pm", cleanliness: "tidy" },
+  shared: true,
+  sharedAt: 1,
+  updatedAt: 1,
+});
+const item = (_id: string, sellerId: string, title: string, price: number, over = {}): Row => ({
+  _id,
+  sellerId,
+  title,
+  description: "",
+  photos: [`/seed/${_id}.jpg`],
+  price,
+  category: "furniture",
+  status: "active",
+  badges: [],
+  location: { city: "San Francisco", neighborhood: "Mission", lat: 37.7612, lng: -122.4193 },
+  neighborhoodId: "neighborhoods:mission",
+  createdAt: NOW - DAY,
+  updatedAt: NOW - DAY,
+  viewCount: 0,
+  ...over,
+});
+const group = (_id: string, name: string, over = {}): Row => ({
+  _id,
+  name,
+  slug: _id.toLowerCase(),
+  cover: "/seed/g.jpg",
+  privacy: "public",
+  visible: true,
+  description: "Neighbors who run together",
+  category: "Sports",
+  rules: [],
+  tags: [],
+  createdBy: "S",
+  createdAt: NOW - 30 * DAY,
+  externalMemberCount: 0,
+  memberCount: 120,
+  lastActivityAt: NOW - DAY,
+  neighborhoodId: "neighborhoods:mission",
+  ...over,
+});
+
+/**
+ * The world with more in it for Muse to find. F is V's friend and L is F's
+ * friend; V and L share their lifestyle answers, so L is a lister V can be
+ * compared with. S sells things, some of them with text Muse must never read.
+ */
+function agentWorld(): Record<string, Row[]> {
+  const t = world();
+  t.users.push(user("F"), user("L"));
+  t.friendships = [...friends("V", "F"), ...friends("F", "L")];
+  t.vouches = [];
+  t.saved = [];
+  t.roommateLifestyles = [lifestyle("V"), lifestyle("L")];
+  t.listings.push(
+    rental("lFriend", "L", "Room with a bay window", 1600),
+    item("iDesk", "S", "Walnut mid-century desk", 180, {
+      description: "Solid walnut with tapered legs.",
+      condition: "used_good",
+    }),
+    item("iChair", "S", "Office chair", 90, {
+      description: "Fits under any desk. Call 415-555-1234 or see scam.example.com",
+    }),
+    item("iProtected", "S", "Desk for Muslim women only", 40),
+    item("iBlocker", "B", "Walnut desk from a blocker", 20),
+  );
+  t.groups = [
+    group("gPublic", "Mission Run Club"),
+    group("gPrivate", "Valencia Neighbors", { privacy: "private" }),
+  ];
+  return t;
+}
+
+/** V lives in a house with roommates: Casa Verde. */
+function withHouse(t: Record<string, Row[]>) {
+  t.groups.push(group("gHouse", "Casa Verde", { privacy: "private", visible: false }));
+  t.houses = [{ _id: "h1", groupId: "gHouse", createdBy: "V", createdAt: 1 }];
+  t.groupMembers.push({
+    _id: "gmHouse",
+    groupId: "gHouse",
+    userId: "V",
+    role: "member",
+    joinedAt: 1,
+  });
+  return t;
+}
+
+const EVENT_AT = new Date(NOW + 2 * DAY).toISOString();
+
+describe("homeChat.reply: Muse looks things up", () => {
+  test("a lookup, then an answer that shows what it found as a card code built", async () => {
+    replies.push(
+      [{ name: "search_marketplace", args: { vibe: "mid-century walnut", maxPrice: null } }],
+      muse({
+        text: "The Walnut mid-century desk at $180 fits that look.",
+        show: ["listing:iDesk"],
+      }),
+    );
+    const { reply, runs, toolRuns } = await ask("find me a mid-century desk", agentWorld());
+    expect(reply.via).toBe("muse");
+    expect(toolRuns).toEqual(["search_marketplace"]);
+    expect(reply.cards).toHaveLength(1);
+    expect(reply.cards[0]).toMatchObject({
+      key: "listing:iDesk",
+      kind: "item",
+      title: "Walnut mid-century desk",
+      price: 180,
+      photo: "/seed/iDesk.jpg",
+      href: "/marketplace/item/iDesk",
+    });
+    // Its point is the approximate area, never where the seller is.
+    expect(reply.cards[0].point).toBeDefined();
+    expect(reply.cards[0].point).not.toEqual({ lat: 37.7612, lng: -122.4193 });
+    expect(reply.sources).toContainEqual({
+      label: "Walnut mid-century desk · $180",
+      href: "/marketplace/item/iDesk",
+    });
+    expect(reply.rentals).toEqual([]);
+    expect(reply.actions).toEqual([]);
+
+    // Both requests carried the tools; the second carried what the tool found.
+    expect(requests).toHaveLength(2);
+    for (const r of requests)
+      expect(r.tools?.map((t) => t.function.name)).toEqual(
+        expect.arrayContaining([
+          "search_rentals",
+          "search_marketplace",
+          "search_events",
+          "search_groups",
+          "search_places",
+          "get_neighborhood",
+          "get_details",
+          "get_weekend_route",
+          "get_my_move",
+        ]),
+      );
+    const [found] = toolResults();
+    expect(found.items.map((i: { key: string }) => i.key)).toContain("listing:iDesk");
+    expect(found.items[0]).toMatchObject({ key: "listing:iDesk", type: "item", price: 180 });
+    // One run, logged once, counting both model calls.
+    expect(runs.map((r) => [r.task, r.outcome, r.attempts])).toEqual([
+      [HOME_CHAT_TASK, "model", 2],
+    ]);
+  });
+
+  test("several lookups at once, and a second round", async () => {
+    replies.push(
+      [
+        { name: "search_events", args: { neighborhood: "mission" } },
+        { name: "search_groups", args: { neighborhood: "mission" } },
+      ],
+      [{ name: "get_details", args: { key: "group:gPublic" } }],
+      muse({
+        text: "Mission Run Club is public and meets near Dolores Park.",
+        show: ["group:gPublic", "event:ePublic"],
+      }),
+    );
+    const { reply, toolRuns } = await ask("what's on in the Mission?", agentWorld());
+    expect(reply.via).toBe("muse");
+    expect(toolRuns.sort()).toEqual(["get_details", "search_events", "search_groups"]);
+    expect(reply.cards.map((c) => [c.key, c.kind])).toEqual([
+      ["group:gPublic", "group"],
+      ["event:ePublic", "event"],
+    ]);
+    // Each card carries what the person can do from it, as code worded it.
+    expect(reply.cards[0].actions?.map((a) => a.action)).toEqual([
+      { kind: "join_group", groupId: "gPublic" },
+    ]);
+    expect(reply.cards[1].actions).toEqual([
+      rsvpAction({ id: "ePublic", title: "Event ePublic", startsAt: EVENT_AT }, "interested"),
+    ]);
+    expect(reply.sources.map((s) => s.href)).toEqual(["/groups/gpublic", "/events/ePublic"]);
+  });
+
+  test("a key it never read is rejected, even for a real thing the viewer could see", async () => {
+    replies.push(
+      muse({ text: "A desk for you.", show: ["listing:iDesk"] }),
+      muse({ text: "A club for you.", sourceIds: ["group:gPublic"] }),
+    );
+    const { reply, runs, toolRuns } = await ask("anything good?", agentWorld());
+    expect(requests).toHaveLength(2);
+    expect(requests[1].messages.at(-1)?.content).toContain(
+      "listing:iDesk is not the key of something in the input or a tool result",
+    );
+    expect(toolRuns).toEqual([]);
+    expect(reply).toMatchObject({ via: "rules", cards: [], actions: [] });
+    expect(JSON.stringify(reply)).not.toMatch(/iDesk|gPublic/);
+    expect(runs.map((r) => r.fallbackReason)).toEqual(["invalid_output"]);
+  });
+
+  test("a thing it names without citing is sent back, and accepted once cited", async () => {
+    const lookup = [{ name: "search_marketplace", args: { query: "walnut desk" } }];
+    replies.push(
+      lookup,
+      muse({ text: "Try the Walnut mid-century desk." }),
+      muse({ text: "Try the Walnut mid-century desk.", sourceIds: ["listing:iDesk"] }),
+    );
+    const { reply } = await ask("a walnut desk?", agentWorld());
+    expect(requests).toHaveLength(3);
+    expect(requests[2].messages.at(-1)?.content).toContain(
+      "sourceIds: cite listing:iDesk, which the reply names",
+    );
+    expect(reply.via).toBe("muse");
+    // Cited, not shown: a source, no card.
+    expect(reply.cards).toEqual([]);
+    expect(reply.sources.map((s) => s.href)).toEqual(["/marketplace/item/iDesk"]);
+  });
+
+  test("a tool error goes back to Muse, and the run still answers", async () => {
+    replies.push(
+      [{ name: "search_events", args: { neighborhood: "atlantis" } }],
+      [{ name: "search_events", args: { neighborhood: "mission" } }],
+      muse({ text: "Here's what's on in the Mission.", show: ["event:ePublic"] }),
+    );
+    const { reply, runs } = await ask("events in Atlantis?", agentWorld());
+    const [failed, found] = toolResults();
+    expect(failed).toEqual({ error: expect.stringMatching(/atlantis/i) });
+    expect(found.items.map((i: { key: string }) => i.key)).toEqual(["event:ePublic"]);
+    expect(reply.via).toBe("muse");
+    expect(reply.cards.map((c) => c.key)).toEqual(["event:ePublic"]);
+    expect(runs[0].outcome).toBe("model");
+    expect(JSON.stringify(runs[0].errors)).toContain("Tool search_events");
+  });
+
+  test("lookups are bounded: past the round cap Muse has to answer, or the rules do", async () => {
+    const lookup = [{ name: "search_events", args: {} }];
+    for (let i = 0; i < 10; i++) replies.push(lookup);
+    const { reply, runs, toolRuns } = await ask("events this week", agentWorld());
+    expect(toolRuns).toHaveLength(homeChatTask.maxToolRounds ?? Number.NaN);
+    expect(reply).toMatchObject({ via: "rules", command: { kind: "show_pins", layer: "events" } });
+    expect(runs.map((r) => r.fallbackReason)).toEqual(["invalid_output"]);
+    // Rounds plus the two answers it was allowed: nothing runs on after that.
+    expect(requests).toHaveLength(
+      (homeChatTask.maxToolRounds ?? 0) + (homeChatTask.maxAttempts ?? 0),
+    );
+  });
+
+  test("AI off or over the rate limit: no lookups, no cards, no actions", async () => {
+    process.env.AI_ENABLED = "false";
+    const off = await ask("find me a mid-century desk", agentWorld());
+    expect(off.reply).toMatchObject({ via: "rules", cards: [], actions: [] });
+    expect(off.toolRuns).toEqual([]);
+
+    delete process.env.AI_ENABLED;
+    const tables = agentWorld();
+    tables.aiRuns = Array.from({ length: 8 }, (_, i) => ({
+      _id: `r${i}`,
+      userId: "V",
+      task: HOME_CHAT_TASK,
+      createdAt: NOW - 1000 * i,
+    }));
+    replies.push([{ name: "search_marketplace", args: { query: "desk" } }]);
+    const limited = await ask("find me a mid-century desk", tables);
+    expect(limited.reply).toMatchObject({ via: "rules", cards: [], actions: [] });
+    expect(limited.toolRuns).toEqual([]);
+    expect(requests).toHaveLength(0);
+  });
+
+  test("what other people wrote reaches Muse without protected traits or contact details", async () => {
+    replies.push(
+      [
+        { name: "search_marketplace", args: { query: "desk" } },
+        { name: "search_rentals", args: {} },
+        { name: "get_details", args: { key: "listing:lCheap" } },
+      ],
+      [
+        { name: "get_details", args: { key: "listing:iChair" } },
+        { name: "get_details", args: { key: "listing:iProtected" } },
+        // Never returned by a search: a blocker's, so there is nothing to detail.
+        { name: "get_details", args: { key: "listing:iBlocker" } },
+        { name: "get_details", args: { key: "listing:lBlocker" } },
+      ],
+      muse({ text: "A few desks to look at.", show: ["listing:iChair", "listing:iProtected"] }),
+    );
+    const { reply } = await ask("desks?", agentWorld());
+    expect(reply.via).toBe("muse");
+    const results = toolResults();
+    expect(results).toHaveLength(7);
+    // The searches really returned the listings whose text carries them.
+    const keys = JSON.stringify(results);
+    for (const k of [
+      "listing:iChair",
+      "listing:iProtected",
+      "listing:lProtected",
+      "listing:lCheap",
+    ])
+      expect(keys).toContain(k);
+    expect(results.slice(5)).toEqual([
+      { error: expect.any(String) },
+      { error: expect.any(String) },
+    ]);
+    const all = sent();
+    // Their text did get there, as data (cut and cleaned), so the cleaning is what's being tested.
+    expect(all).toContain("Fits under any desk");
+    expect(all).toContain("wire a deposit");
+    expect(all).toContain("[removed]");
+    expect(all).not.toMatch(/muslim|women/i);
+    expect(all).not.toMatch(/415-555-1234|scam\.example/);
+    for (const hidden of [
+      "Walnut desk from a blocker",
+      "Room from someone who blocked you",
+      "User B",
+    ])
+      expect(all).not.toContain(hidden);
+    // Nor do they reach the person through a card.
+    expect(reply.cards.map((c) => c.key)).toEqual(["listing:iChair", "listing:iProtected"]);
+    expect(JSON.stringify(reply)).not.toMatch(/muslim|women|415-555-1234|scam\.example/i);
+  });
+});
+
+describe("homeChat.reply: the lister of a rental", () => {
+  const read = async () =>
+    (
+      await homeChatContext(fakeCtx(agentWorld()), {
+        viewerId: "V" as never,
+        message: "which of these listings' lister do I have the best compatibility with and why",
+        context: { stage: "city" },
+        recent: [],
+      })
+    ).input;
+
+  test("Muse reads who lists each rental: compatibility for someone in their network who shares answers", async () => {
+    const { rentals } = await read();
+    const lister = (id: string) =>
+      rentals.find((r) => r.id === id)?.lister as {
+        name: string;
+        connection: string | null;
+        mutualFriends: number;
+        compatibility: { score: number | null; label: string; shared: string[] } | null;
+      };
+    // L is a friend of a friend and shares lifestyle answers, as V does.
+    expect(lister("lFriend")).toMatchObject({
+      name: "FirstL",
+      connection: expect.stringMatching(/friend/i),
+      mutualFriends: 1,
+    });
+    const { compatibility } = lister("lFriend");
+    expect(compatibility?.score).toBeGreaterThan(0);
+    expect(compatibility?.label).toBeTruthy();
+    expect(compatibility?.shared.length).toBeGreaterThan(0);
+    // S is a stranger: a first name, no connection, and nothing to compare.
+    expect(lister("lCheap")).toEqual({
+      name: "FirstS",
+      connection: null,
+      mutualFriends: 0,
+      compatibility: null,
+    });
+  });
+
+  test("first names only, and never the answers themselves", async () => {
+    const json = JSON.stringify(await read());
+    for (const full of ["User L", "User S", "User F"]) expect(json).not.toContain(full);
+    // The comparison is in Landing's words ("You both keep shared spaces tidy"), never the stored answers.
+    for (const raw of [
+      '"answers"',
+      '"sleep"',
+      '"quietHours"',
+      '"cleanliness"',
+      '"early"',
+      '"tidy"',
+    ])
+      expect(json).not.toContain(raw);
+  });
+
+  test("so the question from the chat gets Muse's answer, with the rental cited", async () => {
+    replies.push(
+      muse({
+        text: "FirstL, who lists Room with a bay window, is the closest fit: you're connected through a friend and share the same routines. The other listers haven't shared lifestyle answers with you, so there's nothing to compare yet.",
+        show: ["listing:lFriend"],
+      }),
+    );
+    const { reply, toolRuns } = await ask(
+      "which of these listings' lister do I have the best compatibility with and why",
+      agentWorld(),
+    );
+    expect(reply.via).toBe("muse");
+    // It was all in what Muse was given: no lookup needed.
+    expect(toolRuns).toEqual([]);
+    expect(requests).toHaveLength(1);
+    expect(requests[0].messages.at(-1)?.content).toContain('"compatibility"');
+    expect(reply.rentals.map((c) => c.id)).toEqual(["lFriend"]);
+    expect(reply.sources).toEqual([
+      { label: "Room with a bay window · $1,600/mo", href: "/landing/find/listing/lFriend" },
+    ]);
+  });
+});
+
+describe("homeChat.reply: actions wait for the person", () => {
+  test("an RSVP on an Event it was given becomes a card worded by code", async () => {
+    replies.push(
+      muse({
+        text: "I've lined up your RSVP; confirm below.",
+        sourceIds: ["event:ePublic"],
+        actions: [{ kind: "rsvp", key: "event:ePublic", status: "going" }],
+      }),
+    );
+    const tables = agentWorld();
+    const { reply } = await ask("RSVP me to the run club event", tables);
+    expect(reply.via).toBe("muse");
+    expect(reply.actions).toEqual([
+      rsvpAction({ id: "ePublic", title: "Event ePublic", startsAt: EVENT_AT }, "going"),
+    ]);
+    expect(reply.actions[0].action).toEqual({ kind: "rsvp", eventId: "ePublic", status: "going" });
+    // Muse wrote nothing: the RSVP is the person's click.
+    expect(tables.eventResponses).toEqual([]);
+  });
+
+  test("an action on something it never read is rejected", async () => {
+    const hidden = muse({ actions: [{ kind: "rsvp", key: "event:ePrivate", status: "going" }] });
+    replies.push(hidden, hidden);
+    const { reply } = await ask("RSVP me to the private dinner", agentWorld());
+    expect(requests[1].messages.at(-1)?.content).toContain(
+      "actions[0] (rsvp): key: use the key of something you read whose kind is Event",
+    );
+    expect(reply).toMatchObject({ via: "rules", actions: [] });
+  });
+
+  test("only a public Group can be joined from the chat", async () => {
+    const lookup = [{ name: "search_groups", args: { query: "neighbors" } }];
+    const join = (key: string) => muse({ show: [key], actions: [{ kind: "join_group", key }] });
+    replies.push(lookup, join("group:gPrivate"), join("group:gPrivate"));
+    const closed = await ask("join Valencia Neighbors", agentWorld());
+    expect(requests[2].messages.at(-1)?.content).toContain("only a public Group");
+    expect(closed.reply).toMatchObject({ via: "rules", actions: [] });
+
+    requests.length = 0;
+    replies.push([{ name: "search_groups", args: { query: "run" } }], join("group:gPublic"));
+    const open = await ask("join the run club", agentWorld());
+    expect(open.reply.via).toBe("muse");
+    expect(open.reply.actions).toEqual([
+      {
+        action: { kind: "join_group", groupId: "gPublic" },
+        label: "Join Mission Run Club",
+        confirm: "Join",
+      },
+    ]);
+  });
+
+  test("negotiating: an item, within what the person said they'd pay", async () => {
+    const lookup = [{ name: "search_marketplace", args: { query: "walnut desk" } }];
+    const offer = (maxPrice: number, key = "listing:iDesk") =>
+      muse({
+        text: "I can negotiate that for you; start it below.",
+        show: [key],
+        actions: [{ kind: "negotiate", key, maxPrice }],
+      });
+    const tables = agentWorld();
+    replies.push(lookup, offer(150));
+    const { reply } = await ask("negotiate the walnut desk, I'll pay at most $150", tables);
+    expect(reply.via).toBe("muse");
+    expect(reply.actions).toEqual([
+      {
+        action: { kind: "negotiate", listingId: "iDesk", maxPrice: 150 },
+        label: "Have Muse negotiate Walnut mid-century desk, up to $150",
+        detail: "Listed at $180. Every offer waits for your OK before it's sent.",
+        confirm: "Start",
+      },
+    ]);
+    // Nothing started: no negotiation, no conversation, no draft.
+    for (const table of ["negotiations", "conversations", "proposals", "messages"])
+      expect(tables[table] ?? []).toEqual([]);
+
+    // An amount the person never wrote.
+    requests.length = 0;
+    replies.push(lookup, offer(120), offer(120));
+    const invented = await ask("negotiate the walnut desk, I'll pay at most $150", agentWorld());
+    expect(requests[2].messages.at(-1)?.content).toContain("only an amount the person wrote");
+    expect(invented.reply).toMatchObject({ via: "rules", actions: [] });
+
+    // A rental is never negotiated by Muse.
+    requests.length = 0;
+    replies.push(offer(1500, "listing:lCheap"), offer(1500, "listing:lCheap"));
+    const rent = await ask("negotiate the sunny room down to $1,500", agentWorld());
+    expect(requests[1].messages.at(-1)?.content).toContain("never rentals");
+    expect(rent.reply).toMatchObject({ via: "rules", actions: [] });
+  });
+
+  test("choosing a place: the date has to be real and not past", async () => {
+    const choose = (moveIn: string) =>
+      muse({
+        show: ["listing:lCheap"],
+        actions: [{ kind: "choose_place", key: "listing:lCheap", moveIn }],
+      });
+    replies.push(choose("2020-01-01"), choose("next month"));
+    const bad = await ask("take the sunny room, moving in next month", agentWorld());
+    expect(requests[1].messages.at(-1)?.content).toContain("moveIn");
+    expect(bad.reply).toMatchObject({ via: "rules", actions: [] });
+
+    requests.length = 0;
+    const moveIn = todayInSF(NOW + 30 * DAY);
+    replies.push(choose(moveIn));
+    const tables = agentWorld();
+    const good = await ask("take the sunny room, moving in next month", tables);
+    expect(good.reply.via).toBe("muse");
+    expect(good.reply.actions.map((a) => a.action)).toEqual([
+      { kind: "choose_place", listingId: "lCheap", moveIn },
+    ]);
+    expect(tables.places ?? []).toEqual([]);
+  });
+
+  test("house lists: only with a house, and then to that house", async () => {
+    const add = muse({
+      text: "I'll add it to the list once you confirm.",
+      actions: [{ kind: "add_grocery", text: "oat milk" }],
+    });
+    replies.push(add, add);
+    const none = await ask("add oat milk to the groceries", agentWorld());
+    expect(requests[1].messages.at(-1)?.content).toContain("they aren't in a house");
+    expect(none.reply).toMatchObject({ via: "rules", actions: [] });
+
+    requests.length = 0;
+    replies.push(add);
+    const tables = withHouse(agentWorld());
+    const housed = await ask("add oat milk to the groceries", tables);
+    expect(requests[0].messages.at(-1)?.content).toContain("Casa Verde");
+    expect(housed.reply.via).toBe("muse");
+    expect(housed.reply.actions).toEqual([
+      {
+        action: { kind: "add_grocery", houseId: "h1", text: "oat milk" },
+        label: 'Add "oat milk" to Casa Verde\'s grocery list',
+        confirm: "Add",
+      },
+    ]);
+    expect(tables.groceryItems ?? []).toEqual([]);
+  });
+
+  test("an intro goes only to a roommate match, and contact details never go in an action", async () => {
+    // L is a lister V can be compared with, but not one of V's roommate matches as Muse read them.
+    const intro = (text: string) =>
+      muse({ actions: [{ kind: "ask_roommate", key: "person:L", text }] });
+    replies.push(intro("Hi! Want to talk about rooming together?"), intro("Hi!"));
+    const stranger = await ask("message FirstL for me", agentWorld());
+    expect(requests[1].messages.at(-1)?.content).toContain("actions[0] (ask_roommate)");
+    expect(stranger.reply).toMatchObject({ via: "rules", actions: [] });
+
+    requests.length = 0;
+    const grocery = (text: string) => muse({ actions: [{ kind: "add_grocery", text }] });
+    replies.push(grocery("oat milk, call 415-555-1212"), grocery("oat milk for the Muslim family"));
+    const leaky = await ask("add oat milk to the groceries", withHouse(agentWorld()));
+    expect(requests[1].messages.at(-1)?.content).toContain("no links, email addresses or phone");
+    expect(leaky.reply).toMatchObject({ via: "rules", actions: [] });
+    expect(JSON.stringify(leaky.reply)).not.toMatch(/415-555|muslim/i);
+  });
+
+  test("at most a few actions in one reply", async () => {
+    const many = muse({
+      sourceIds: ["event:ePublic"],
+      actions: Array.from({ length: CHAT_ACTIONS_MAX + 1 }, (_, i) => ({
+        kind: "rsvp" as const,
+        key: "event:ePublic",
+        status: i % 2 ? ("going" as const) : ("interested" as const),
+      })),
+    });
+    replies.push(many, many);
+    const { reply } = await ask("RSVP me", agentWorld());
+    expect(requests[1].messages.at(-1)?.content).toContain(`actions: at most ${CHAT_ACTIONS_MAX}`);
+    expect(reply).toMatchObject({ via: "rules", actions: [] });
+  });
+});
+
+describe("homeChat.reply: follow-ups", () => {
+  /** More upcoming Events than Muse is given up front, so the picnic is only known from an earlier turn. */
+  function busyWorld() {
+    const t = agentWorld();
+    t.events.push(
+      ...Array.from({ length: 6 }, (_, i) => ({
+        ...event(`eSoon${i}`, "S", "public"),
+        startAt: NOW + DAY + i * 1000,
+      })),
+      { ...event("eLate", "S", "public"), title: "Late autumn picnic", startAt: NOW + 20 * DAY },
+    );
+    return t;
+  }
+  const context = (tables: Record<string, Row[]>, recent: Turn[]) =>
+    homeChatContext(fakeCtx(tables), {
+      viewerId: "V" as never,
+      message: "RSVP me to the picnic",
+      context: { stage: "city" },
+      recent,
+    });
+
+  test("what earlier turns showed is read again for the viewer, and nothing else is", async () => {
+    const c = await context(busyWorld(), [
+      { who: "me", text: "what's on later this month?" },
+      {
+        who: "muse",
+        text: "Here's what's on.",
+        shown: [
+          "event:eLate",
+          "listing:iDesk",
+          // Already given up front: not repeated.
+          "event:eSoon0",
+          // Things the viewer can't see, things that don't exist, and things that aren't keys.
+          "event:ePrivate",
+          "event:eBlocker",
+          "listing:lBlocker",
+          "listing:iBlocker",
+          "event:missing",
+          "person:S",
+          "draft:nope",
+          "not a key",
+          "",
+          "__proto__",
+        ],
+      },
+    ]);
+    expect(c.input.events.map((e) => e.id)).not.toContain("eLate");
+    expect(c.input.earlier.map((f) => f.key)).toEqual(["event:eLate", "listing:iDesk"]);
+    expect(c.input.earlier[0]).toMatchObject({
+      kind: "event",
+      id: "eLate",
+      title: "Late autumn picnic",
+      yourResponse: null,
+    });
+    // On the board too, with the link and card code built for them now.
+    const late = c.found.find((f) => f.key === "event:eLate");
+    expect(late?.link?.href).toBe("/events/eLate");
+    expect(late?.card?.kind).toBe("event");
+    const json = JSON.stringify(c);
+    for (const hidden of ["ePrivate", "eBlocker", "lBlocker", "iBlocker"])
+      expect(json).not.toContain(hidden);
+  });
+
+  test("it is read fresh: what changed since, or went away, shows as it is now", async () => {
+    const tables = busyWorld();
+    tables.eventResponses.push({
+      _id: "er1",
+      eventId: "eLate",
+      userId: "V",
+      status: "going",
+      createdAt: NOW,
+    });
+    const shown: Turn[] = [{ who: "muse", text: "Here's what's on.", shown: ["event:eLate"] }];
+    const c = await context(tables, shown);
+    expect(c.input.earlier[0]).toMatchObject({ id: "eLate", yourResponse: "going" });
+    // The host blocks them: the Event is gone from what Muse may act on.
+    tables.blocks.push({ _id: "bl2", userId: "S", blockedId: "V", createdAt: 0 });
+    expect((await context(tables, shown)).input.earlier).toEqual([]);
+  });
+
+  test('each earlier reply keeps the cards it showed, in order, so "the second one" has a meaning', async () => {
+    const tables = busyWorld();
+    const c0 = await context(tables, []);
+    const [first, second] = c0.input.events.map((e) => e.key);
+    const turns = (shown: string[]): Turn[] => [{ who: "muse", text: "Here's what's on.", shown }];
+    // Events Muse is given anyway keep their place in the turn that showed them.
+    expect((await context(tables, turns([second, first]))).input.recent[0].shown).toEqual([
+      second,
+      first,
+    ]);
+    expect((await context(tables, turns([first, second]))).input.recent[0].shown).toEqual([
+      first,
+      second,
+    ]);
+    // A key they can't read, or that isn't one, is dropped from the turn.
+    expect(
+      (await context(tables, turns(["event:eBlocker", "nonsense", first]))).input.recent[0].shown,
+    ).toEqual([first]);
+  });
+
+  test("only the last few turns count, and a turn carries a bounded number of keys", async () => {
+    const tables = busyWorld();
+    const old: Turn = { who: "muse", text: "Earlier.", shown: ["event:eLate"] };
+    const filler = Array.from({ length: CHAT_RECENT_MAX }, (_, i) => ({
+      who: "me" as const,
+      text: `turn ${i}`,
+    }));
+    expect((await context(tables, [old, ...filler])).input.earlier).toEqual([]);
+    expect((await context(tables, [...filler.slice(1), old])).input.earlier).toHaveLength(1);
+    // Keys past the first dozen of a turn are ignored.
+    const padded = [...Array.from({ length: 12 }, (_, i) => `event:pad${i}`), "event:eLate"];
+    expect(
+      (await context(tables, [{ who: "muse", text: "Lots.", shown: padded }])).input.earlier,
+    ).toEqual([]);
+    // Long turns are cut before Muse reads them.
+    const long = await context(tables, [{ who: "me", text: "x".repeat(CHAT_TURN_MAX + 50) }]);
+    expect(long.input.recent[0].text).toHaveLength(CHAT_TURN_MAX);
+  });
+
+  test("so the next reply can act on it", async () => {
+    const rsvp = muse({
+      text: "Confirm below and you're going.",
+      sourceIds: ["event:eLate"],
+      actions: [{ kind: "rsvp", key: "event:eLate", status: "going" }],
+    });
+    replies.push(rsvp);
+    const { reply } = await ask("RSVP me to the picnic", busyWorld(), {
+      recent: [{ who: "muse", text: "Here's what's on.", shown: ["event:eLate"] }],
+    });
+    expect(reply.via).toBe("muse");
+    expect(reply.actions).toMatchObject([
+      {
+        action: { kind: "rsvp", eventId: "eLate", status: "going" },
+        label: expect.stringContaining("Late autumn picnic"),
+      },
+    ]);
+    expect(requests[0].messages.at(-1)?.content).toContain("Late autumn picnic");
+
+    // Without the earlier turn it was never read, so the same answer is rejected.
+    requests.length = 0;
+    replies.push(rsvp, rsvp);
+    const cold = await ask("RSVP me to the picnic", busyWorld());
+    expect(cold.reply).toMatchObject({ via: "rules", actions: [] });
   });
 });
 
@@ -1072,6 +1865,83 @@ describe("saveStatedPlan", () => {
 
 /* ---------- Pure helpers ---------- */
 
+const RENTAL: FactsOf<"listing"> = {
+  kind: "listing",
+  key: "listing:l1",
+  id: "l1",
+  type: "rental",
+  title: "Sunny room near Dolores",
+  price: 1500,
+  neighborhood: "mission",
+  saved: false,
+  availableFrom: null,
+};
+
+const ITEM: FactsOf<"listing"> = {
+  kind: "listing",
+  key: "listing:i1",
+  id: "i1",
+  type: "item",
+  title: "Walnut desk",
+  price: 180,
+  neighborhood: "mission",
+  saved: false,
+};
+const EVENT: FactsOf<"event"> = {
+  kind: "event",
+  key: "event:e1",
+  id: "e1",
+  title: "Sunset Run Club",
+  startsAt: "2026-11-21T02:00:00.000Z",
+  neighborhood: "mission",
+  yourResponse: null,
+};
+const GROUP: FactsOf<"group"> = {
+  kind: "group",
+  key: "group:g1",
+  id: "g1",
+  name: "Mission Run Club",
+  privacy: "public",
+  joined: false,
+  neighborhood: "mission",
+};
+const MATCH: FactsOf<"person"> = {
+  kind: "person",
+  key: "person:u1",
+  id: "u1",
+  name: "Sam",
+  roommateMatch: true,
+};
+const DRAFT: FactsOf<"draft"> = {
+  kind: "draft",
+  key: "draft:d1",
+  id: "d1",
+  type: "offer",
+  summary: "Offer of $120 on Walnut desk",
+  approvable: true,
+};
+const NEGOTIATION: FactsOf<"negotiation"> = {
+  kind: "negotiation",
+  key: "negotiation:n1",
+  id: "n1",
+  title: "Walnut desk",
+  status: "active",
+  maxPrice: 150,
+};
+
+/** A thing on the board with only what `toReply` reads: its facts and a link. */
+const thing = (facts: Facts, more: Partial<Found> = {}): Found => ({
+  key: facts.key,
+  facts,
+  link: null,
+  ...more,
+});
+const board = (...found: Found[]) => new Map(found.map((f) => [f.key, f]));
+/** The tool calls behind an answer, as `runAgent` hands them to the check. */
+const called = (...facts: Facts[]) => [
+  { name: "search", args: {}, result: { count: facts.length, items: facts } },
+];
+
 const input = (over: Partial<HomeChatInput> = {}): HomeChatInput => ({
   message: "hi",
   protectedRemoved: false,
@@ -1089,19 +1959,12 @@ const input = (over: Partial<HomeChatInput> = {}): HomeChatInput => ({
     apartment: null,
     crew: { joined: false, members: 0, neighborhoods: [] },
     inbox: { waiting: 0 },
+    house: null,
   },
   neighborhoods: [{ slug: "mission", name: "Mission", shortName: null }],
-  rentals: [
-    {
-      key: "listing:l1",
-      id: "l1",
-      title: "Sunny room near Dolores",
-      price: 1500,
-      neighborhood: "mission",
-      availableFrom: null,
-    },
-  ],
+  rentals: [RENTAL],
   events: [],
+  earlier: [],
   pages: [],
   ...over,
 });
@@ -1111,6 +1974,8 @@ describe("homeChatProblems", () => {
     text: "Flying to the Mission.",
     command: { kind: "fly_neighborhood", slug: "mission" },
     sourceIds: [],
+    show: [],
+    actions: [],
     plan: NO_PLAN,
   } as HomeChatOutput;
   test("accepts a grounded answer", () => {
@@ -1121,7 +1986,8 @@ describe("homeChatProblems", () => {
     expect(bad({ text: "See www.example.com" })).toBe(1);
     expect(bad({ text: "Visit scam.example.com now" })).toBe(1);
     expect(bad({ text: "Email me at a@b.co" })).toBe(1);
-    expect(bad({ text: "x".repeat(700) })).toBe(1);
+    expect(bad({ text: "x".repeat(REPLY_MAX) })).toBe(0);
+    expect(bad({ text: "x".repeat(REPLY_MAX + 1) })).toBe(1);
     expect(bad({ text: "  " })).toBe(1);
     expect(bad({ command: { kind: "open_listing", listingId: "l1" as never } })).toBe(1);
     expect(
@@ -1130,12 +1996,24 @@ describe("homeChatProblems", () => {
         sourceIds: ["listing:l1"],
       }),
     ).toBe(0);
-    expect(bad({ sourceIds: Array.from({ length: 7 }, () => "listing:l1") })).toBe(1);
+    expect(bad({ sourceIds: Array.from({ length: CITES_MAX }, () => "listing:l1") })).toBe(0);
+    expect(bad({ sourceIds: Array.from({ length: CITES_MAX + 1 }, () => "listing:l1") })).toBe(1);
+    // Too many cards, and too many of them rentals.
+    expect(bad({ show: Array.from({ length: CHAT_INFO_CARDS_MAX + 1 }, () => "listing:l1") })).toBe(
+      2,
+    );
+    // What the reply shows counts as cited.
+    expect(
+      bad({ command: { kind: "open_listing", listingId: "l1" as never }, show: ["listing:l1"] }),
+    ).toBe(0);
   });
   test("rejects sources it wasn't given and rentals it names without citing", () => {
     const bad = (o: Partial<HomeChatOutput>) => homeChatProblems({ ...ok, ...o }, input());
     expect(bad({ sourceIds: ["event:eSecret"] })).toEqual([
-      "sourceIds: event:eSecret is not the key of a rental or Event in the input",
+      "sourceIds and show: event:eSecret is not the key of something in the input or a tool result",
+    ]);
+    expect(bad({ show: ["listing:made-up"] })).toEqual([
+      "sourceIds and show: listing:made-up is not the key of something in the input or a tool result",
     ]);
     expect(bad({ text: "Try the sunny room near Dolores!" })).toEqual([
       "sourceIds: cite listing:l1, which the reply names",
@@ -1180,12 +2058,22 @@ describe("homeChatProblems", () => {
     expect(furnish({ budget: 900 })).toEqual([
       "command.budget: only an amount the person wrote in this message, or leave it out",
     ]);
+    // The look is the person's words only: nothing Muse read elsewhere may steer the furnishing.
+    expect(furnish({ vibe: "warm and cozy, mid-century walnut" })).toEqual([
+      "command.vibe: only words the person used",
+    ]);
+    expect(
+      furnish(
+        { vibe: "warm and cozy" },
+        { message: "furnish it", recent: [{ who: "you", text: "I like it warm, cozy" }] },
+      ),
+    ).toEqual([]);
     expect(furnish({ budget: 0 })[0]).toContain("whole dollars");
     expect(furnish({ budget: 800.5 })[0]).toContain("whole dollars");
     // A budget from an earlier turn is not this message's (#153).
     expect(
       furnish(
-        { budget: 1500 },
+        { vibe: "boho", budget: 1500 },
         {
           message: "make it boho please",
           recent: [{ who: "you", text: "I have 1.5k for furniture" }],
@@ -1197,7 +2085,11 @@ describe("homeChatProblems", () => {
     ]);
     // Even when the message doesn't read as a furnish request.
     expect(
-      furnish({ budget: 800 }, { message: "$800 for the lot" }, { ...NO_PLAN, budgetMax: 800 }),
+      furnish(
+        { budget: 800 },
+        { message: "warm, cozy, $800 for the lot" },
+        { ...NO_PLAN, budgetMax: 800 },
+      ),
     ).toEqual(["plan.budgetMax: a furniture budget is not the rent budget; use null"]);
   });
   test("add_items needs a model, real kinds, a clean want and an amount from this message (#153)", () => {
@@ -1261,6 +2153,7 @@ describe("homeChatProblems", () => {
           map: { stage: "city", neighborhood: null, view: view as "map" | "apartment" },
           // What came before never makes this message a furnishing request.
           recent: [
+            { who: "you", text: "make it cozy and warm" },
             { who: "you", text: "add a reading lamp" },
             { who: "muse", text: "I'm picking a reading lamp." },
           ],
@@ -1318,19 +2211,315 @@ describe("homeChatProblems", () => {
   });
 });
 
+describe("homeChatProblems: what Muse read, and what it may do with it", () => {
+  const ok = {
+    text: "Here you go.",
+    command: { kind: "none" },
+    sourceIds: [],
+    show: [],
+    actions: [],
+    plan: NO_PLAN,
+  } as HomeChatOutput;
+  const housed = (over: Partial<HomeChatInput> = {}) =>
+    input({ you: { ...input().you, house: { name: "Casa Verde" } }, ...over });
+  /** The problems with one answer's actions, given what Muse read. */
+  const problems = (
+    actions: HomeChatOutput["actions"],
+    read: Facts[] = [],
+    given: HomeChatInput = input(),
+  ) => homeChatProblems({ ...ok, actions }, given, called(...read));
+
+  test("tool results, the input and earlier turns are all something it read", () => {
+    const answer = { ...ok, sourceIds: [ITEM.key], show: [EVENT.key, GROUP.key] };
+    expect(homeChatProblems(answer, input())).toHaveLength(1);
+    expect(homeChatProblems(answer, input(), called(ITEM, EVENT, GROUP))).toEqual([]);
+    expect(homeChatProblems(answer, input({ events: [EVENT], earlier: [ITEM, GROUP] }))).toEqual(
+      [],
+    );
+    // Facts nested in a result count too (a neighborhood's Groups, a route's stops).
+    const nested = [{ name: "get_neighborhood", args: {}, result: { top: { groups: [GROUP] } } }];
+    expect(homeChatProblems({ ...ok, show: [GROUP.key] }, input(), nested)).toEqual([]);
+    // A key whose kind doesn't match the thing is not one.
+    const forged = [{ name: "x", args: {}, result: { ...GROUP, key: "event:g1" } }];
+    expect(homeChatProblems({ ...ok, show: ["event:g1"] }, input(), forged)).toHaveLength(1);
+  });
+
+  test("whatever it names, it cites: items, Events, Groups and places", () => {
+    const place: Facts = {
+      kind: "place",
+      key: "place:dolores-park",
+      name: "Dolores Park",
+      type: "park",
+      neighborhood: "mission",
+    };
+    const read = called(ITEM, EVENT, GROUP, place);
+    const named = (text: string, cites: Partial<HomeChatOutput> = {}) =>
+      homeChatProblems({ ...ok, text, ...cites }, input(), read);
+    expect(named("Try the Sunset Run Club at Dolores Park.")).toEqual([
+      "sourceIds: cite event:e1, which the reply names",
+      "sourceIds: cite place:dolores-park, which the reply names",
+    ]);
+    expect(named("Mission Run Club meets weekly.")).toEqual([
+      "sourceIds: cite group:g1, which the reply names",
+    ]);
+    expect(named("The walnut desk is $180.")).toEqual([
+      "sourceIds: cite listing:i1, which the reply names",
+    ]);
+    // Showing a thing cites it.
+    expect(
+      named("Try the Sunset Run Club at Dolores Park.", {
+        sourceIds: [EVENT.key],
+        show: [place.key],
+      }),
+    ).toEqual([]);
+  });
+
+  test("a valid action of every kind passes", () => {
+    const wrote = housed({
+      message: "offer at most $150, hoping for $120; internet is $60.50 a month",
+    });
+    expect(
+      problems(
+        [
+          { kind: "rsvp", key: EVENT.key, status: "going" },
+          { kind: "join_group", key: GROUP.key },
+          { kind: "save_listing", key: ITEM.key },
+        ],
+        [EVENT, GROUP, ITEM],
+      ),
+    ).toEqual([]);
+    expect(
+      problems(
+        [
+          { kind: "choose_place", key: RENTAL.key, moveIn: "2026-12-01" },
+          {
+            kind: "negotiate",
+            key: ITEM.key,
+            maxPrice: 150,
+            targetPrice: 120,
+            notes: "pickup only",
+          },
+          { kind: "set_negotiation", key: NEGOTIATION.key, status: "paused" },
+        ],
+        [ITEM, NEGOTIATION],
+        wrote,
+      ),
+    ).toEqual([]);
+    expect(
+      problems(
+        [
+          { kind: "approve_draft", key: DRAFT.key },
+          { kind: "discard_draft", key: DRAFT.key },
+          { kind: "ask_roommate", key: MATCH.key, text: "Hi Sam, we both keep early hours." },
+        ],
+        [DRAFT, MATCH],
+      ),
+    ).toEqual([]);
+    expect(
+      problems(
+        [
+          { kind: "add_grocery", text: "oat milk" },
+          { kind: "add_chore", title: "Take the bins out", cadence: "weekly" },
+          {
+            kind: "add_bill",
+            title: "Internet",
+            amount: 60.5,
+            cadence: "monthly",
+            dueDate: "2026-12-01",
+          },
+        ],
+        [],
+        wrote,
+      ),
+    ).toEqual([]);
+  });
+
+  test("an action may only target a thing it read, of the right kind", () => {
+    expect(problems([{ kind: "rsvp", key: "event:ePrivate", status: "going" }])).toEqual([
+      "actions[0] (rsvp): key: use the key of something you read whose kind is Event",
+    ]);
+    expect(problems([{ kind: "rsvp", key: ITEM.key, status: "going" }], [ITEM])).toHaveLength(1);
+    expect(problems([{ kind: "join_group", key: EVENT.key }], [EVENT])).toHaveLength(1);
+    expect(problems([{ kind: "approve_draft", key: NEGOTIATION.key }], [NEGOTIATION])).toHaveLength(
+      1,
+    );
+    expect(problems([{ kind: "discard_draft", key: "draft:someone-elses" }])).toHaveLength(1);
+    // A draft the chat can't show whole is approved in the Inbox, never from here.
+    expect(
+      problems([{ kind: "approve_draft", key: DRAFT.key }], [{ ...DRAFT, approvable: false }])[0],
+    ).toContain("approved in the Inbox");
+    expect(
+      problems([{ kind: "set_negotiation", key: DRAFT.key, status: "stopped" }], [DRAFT]),
+    ).toHaveLength(1);
+  });
+
+  test("an action has to fit the state of its target", () => {
+    const one = (action: HomeChatOutput["actions"][number], read: Facts, given = input()) =>
+      problems([action], [read], given)[0];
+    expect(
+      one({ kind: "rsvp", key: EVENT.key, status: "going" }, { ...EVENT, yourResponse: "going" }),
+    ).toContain("already responded");
+    // Interested to Going is a change.
+    expect(
+      problems(
+        [{ kind: "rsvp", key: EVENT.key, status: "going" }],
+        [{ ...EVENT, yourResponse: "interested" }],
+      ),
+    ).toEqual([]);
+    expect(one({ kind: "join_group", key: GROUP.key }, { ...GROUP, privacy: "private" })).toContain(
+      "only a public Group",
+    );
+    expect(one({ kind: "join_group", key: GROUP.key }, { ...GROUP, joined: true })).toContain(
+      "already a member",
+    );
+    expect(one({ kind: "save_listing", key: ITEM.key }, { ...ITEM, saved: true })).toContain(
+      "already saved",
+    );
+    expect(one({ kind: "save_listing", key: ITEM.key }, { ...ITEM, yours: true })).toContain(
+      "their own listing",
+    );
+    expect(
+      one(
+        { kind: "set_negotiation", key: NEGOTIATION.key, status: "active" },
+        { ...NEGOTIATION, status: "active" },
+      ),
+    ).toContain("already active");
+    expect(
+      one(
+        { kind: "ask_roommate", key: MATCH.key, text: "Hi!" },
+        { ...MATCH, roommateMatch: false },
+      ),
+    ).toContain("roommate matches");
+  });
+
+  test("choosing a place needs a rental and a real date that isn't past", () => {
+    const choose = (moveIn: string, key = RENTAL.key, read: Facts[] = []) =>
+      problems([{ kind: "choose_place", key, moveIn }], read);
+    expect(choose("2026-12-01")).toEqual([]);
+    expect(choose("2026-11-13")).toEqual([]);
+    expect(choose("2026-11-12")[0]).toContain("moveIn");
+    expect(choose("2020-01-01")[0]).toContain("moveIn");
+    expect(choose("December 1")[0]).toContain("moveIn");
+    expect(choose("2026-13-40")[0]).toContain("moveIn");
+    expect(choose("2030-01-01")[0]).toContain("moveIn");
+    expect(choose("2026-12-01", ITEM.key, [ITEM])[0]).toContain("only a rental");
+    expect(choose("2026-12-01", "listing:nope")).toHaveLength(1);
+  });
+
+  test("Muse negotiates items only, within amounts the person wrote", () => {
+    const wrote = input({
+      message: "negotiate it",
+      recent: [
+        { who: "you", text: "I'd pay at most $150 for that desk, ideally 120" },
+        { who: "muse", text: "It's listed at $180. I could offer $140 or $130." },
+      ],
+    });
+    const negotiate = (
+      terms: { maxPrice: number; targetPrice?: number; notes?: string },
+      read: Facts = ITEM,
+      given = wrote,
+    ) => problems([{ kind: "negotiate", key: read.key, ...terms }], [read], given);
+    expect(negotiate({ maxPrice: 150 })).toEqual([]);
+    expect(negotiate({ maxPrice: 150, targetPrice: 120 })).toEqual([]);
+    // Never a rental, never their own listing.
+    expect(negotiate({ maxPrice: 150 }, RENTAL)[0]).toContain("never rentals");
+    expect(negotiate({ maxPrice: 150 }, { ...ITEM, yours: true })[0]).toContain(
+      "their own listing",
+    );
+    // An amount Muse said, or made up, is not the person's.
+    expect(negotiate({ maxPrice: 140 })[0]).toContain("only an amount the person wrote");
+    expect(negotiate({ maxPrice: 180 })[0]).toContain("only an amount the person wrote");
+    expect(
+      negotiate({ maxPrice: 150 }, ITEM, input({ message: "negotiate the desk" }))[0],
+    ).toContain("ask them when they gave none");
+    expect(negotiate({ maxPrice: 150, targetPrice: 100 })[0]).toContain("targetPrice");
+    expect(negotiate({ maxPrice: 120, targetPrice: 150 })[0]).toContain("at most maxPrice");
+    expect(negotiate({ maxPrice: 150.5 })[0]).toContain("whole dollars");
+    expect(negotiate({ maxPrice: 0 })[0]).toContain("whole dollars");
+    expect(negotiate({ maxPrice: -150 })[0]).toContain("whole dollars");
+    // Notes go on to the negotiation: no contact details, no protected traits, kept short.
+    expect(negotiate({ maxPrice: 150, notes: "text me at 415-555-1212" })[0]).toContain("notes");
+    expect(negotiate({ maxPrice: 150, notes: "I'm a Christian student" })[0]).toContain(
+      "protected traits",
+    );
+    expect(negotiate({ maxPrice: 150, notes: "x".repeat(201) })[0]).toContain("notes");
+  });
+
+  test("house actions need a house, clean words and an amount the person wrote", () => {
+    expect(problems([{ kind: "add_grocery", text: "oat milk" }])[0]).toContain(
+      "they aren't in a house",
+    );
+    expect(problems([{ kind: "add_chore", title: "Bins", cadence: "weekly" }])[0]).toContain(
+      "they aren't in a house",
+    );
+    expect(problems([{ kind: "add_grocery", text: "oat milk" }], [], housed())).toEqual([]);
+    expect(problems([{ kind: "add_grocery", text: "  " }], [], housed())[0]).toContain("empty");
+    expect(
+      problems([{ kind: "add_grocery", text: "see www.example.com" }], [], housed())[0],
+    ).toContain("no links");
+    expect(
+      problems([{ kind: "add_chore", title: "x".repeat(81), cadence: "once" }], [], housed())[0],
+    ).toContain("title");
+    const bill = (amount: number, message: string, dueDate?: string) =>
+      problems(
+        [
+          {
+            kind: "add_bill",
+            title: "Internet",
+            amount,
+            cadence: "monthly",
+            ...(dueDate ? { dueDate } : {}),
+          },
+        ],
+        [],
+        housed({ message }),
+      );
+    expect(bill(60, "add the internet bill, $60 a month")).toEqual([]);
+    expect(bill(75, "add the internet bill, $60 a month")[0]).toContain("amount");
+    expect(bill(0, "add the internet bill")[0]).toContain("amount");
+    expect(bill(60, "internet is $60, due on the first", "the first")[0]).toContain("dueDate");
+  });
+
+  test("words that would be sent carry no contact details or protected traits", () => {
+    const intro = (text: string) =>
+      problems([{ kind: "ask_roommate", key: MATCH.key, text }], [MATCH]);
+    expect(intro("Hi Sam, we both keep early hours. Want to chat?")).toEqual([]);
+    expect(intro("Hi Sam, call me on 415-555-1212")[0]).toContain("no links");
+    expect(intro("Hi Sam, email a@b.co")[0]).toContain("no links");
+    expect(intro("Hi Sam, as a fellow Muslim I think we'd get along")[0]).toContain(
+      "protected traits",
+    );
+    expect(intro("x".repeat(501))[0]).toContain("text");
+    expect(intro(" ")[0]).toContain("empty");
+  });
+
+  test("at most a few actions", () => {
+    const many = Array.from({ length: CHAT_ACTIONS_MAX + 1 }, () => ({
+      kind: "save_listing" as const,
+      key: ITEM.key,
+    }));
+    expect(problems(many, [ITEM])).toEqual([`actions: at most ${CHAT_ACTIONS_MAX}`]);
+    expect(problems(many.slice(1), [ITEM])).toEqual([]);
+  });
+});
+
 describe("toReply", () => {
+  const base = { show: [], actions: [], plan: NO_PLAN } satisfies Partial<HomeChatOutput>;
+
   test("links only cited sources it has, dedupes, and redacts the text again", () => {
-    const links = { "listing:l1": { label: "Room · $1,500/mo", href: "/landing/find/listing/l1" } };
+    const things = board(
+      thing(RENTAL, { link: { label: "Room · $1,500/mo", href: "/landing/find/listing/l1" } }),
+    );
     const r = toReply(
       {
+        ...base,
         text: "Room near a mosque.",
         command: { kind: "open_listing", listingId: "l1" as never },
         sourceIds: ["listing:l1", "listing:l1", "event:nope", "__proto__"],
-        plan: NO_PLAN,
       },
       "muse",
       input(),
-      links,
+      things,
     );
     expect(r.sources).toEqual([
       { label: "Sunny room near Dolores · $1,500/mo", href: "/landing/find/listing/l1" },
@@ -1338,6 +2527,8 @@ describe("toReply", () => {
     expect(r.text).not.toMatch(/mosque/i);
     expect(r.rentals).toEqual([]);
     expect(r.saved).toEqual([]);
+    expect(r.cards).toEqual([]);
+    expect(r.actions).toEqual([]);
   });
 
   const card = (id: string, price: number): ChatRentalCard => ({
@@ -1349,58 +2540,73 @@ describe("toReply", () => {
     reasons: [],
   });
   const cards = [card("l2", 2600), card("l1", 1500), card("l3", 1900), card("l4", 2000)];
+  /** A rental on the board, with its card. */
+  const rented = (c: ChatRentalCard): Found =>
+    thing(
+      { ...RENTAL, key: `listing:${c.id}`, id: c.id, title: c.title, price: c.price },
+      { rental: c },
+    );
 
   test("cards come only from the rentals it was given: cited first, then ranked within the price", () => {
     const out: HomeChatOutput = {
+      ...base,
       text: "Here are rentals under $2,000.",
       command: { kind: "show_rentals", maxPrice: 2000 },
       sourceIds: ["listing:l4", "listing:made-up", "event:e1"],
-      plan: NO_PLAN,
     };
-    const r = toReply(out, "muse", input(), {}, { cards });
+    const things = board(...cards.map(rented));
+    const r = toReply(out, "muse", input(), things, { cards });
     expect(r.rentals.map((c) => c.id)).toEqual(["l4", "l1", "l3"]);
     expect(r.rentals[0]).toBe(cards[3]);
     // Without cards (or a cited id that isn't one of them) there is nothing to show.
-    expect(toReply(out, "muse", input(), {}).rentals).toEqual([]);
+    expect(toReply(out, "muse", input(), board()).rentals).toEqual([]);
     const cited = toReply(
       { ...out, command: { kind: "none" }, sourceIds: ["listing:nope"] },
       "muse",
       input(),
-      {},
+      things,
       { cards },
     );
     expect(cited.rentals).toEqual([]);
+    // A rental a lookup found, outside the ranked ones, shows when the reply cites or shows it.
+    const extra = card("l9", 3100);
+    const found = toReply(
+      { ...out, command: { kind: "none" }, sourceIds: [], show: ["listing:l9"] },
+      "muse",
+      input(),
+      board(...cards.map(rented), rented(extra)),
+      { cards },
+    );
+    expect(found.rentals).toEqual([extra]);
+    // A rental is never an info card.
+    expect(found.cards).toEqual([]);
   });
 
   test("what was saved comes with a link to the City Profile", () => {
     const out: HomeChatOutput = {
+      ...base,
       text: "Rentals within $2,400.",
       command: { kind: "show_rentals", maxPrice: 2400 },
       sourceIds: [],
       plan: { budgetMax: 2400, moveIn: null, neighborhoods: [] },
     };
-    const r = toReply(out, "rules", input(), {}, { saved: ["Budget up to $2,400/mo"] });
+    const r = toReply(out, "rules", input(), board(), { saved: ["Budget up to $2,400/mo"] });
     expect(r.saved).toEqual(["Budget up to $2,400/mo"]);
     expect(r.sources).toEqual([
       { label: "Find a place", href: "/landing/find" },
       { label: "City Profile", href: "/landing/profile" },
     ]);
     // The plan alone saves nothing: only what the mutation reports is shown.
-    expect(toReply(out, "rules", input(), {}).sources).toHaveLength(1);
+    expect(toReply(out, "rules", input(), board()).sources).toHaveLength(1);
   });
 
   test("a furnish vibe is cleaned again on the way out", () => {
     const furnish = (vibe: string) =>
       toReply(
-        {
-          text: "Picking items.",
-          command: { kind: "furnish", vibe },
-          sourceIds: [],
-          plan: NO_PLAN,
-        },
+        { ...base, text: "Picking items.", command: { kind: "furnish", vibe }, sourceIds: [] },
         "muse",
         input(),
-        {},
+        board(),
       ).command;
     expect(furnish("  warm   and cozy ")).toEqual({ kind: "furnish", vibe: "warm and cozy" });
     expect(furnish("decor for Muslim women, warm")).toEqual({
@@ -1417,11 +2623,13 @@ describe("toReply", () => {
           text: "Looking for a lamp.",
           command: { kind: "add_items", items: ["lamp"], ...(want === undefined ? {} : { want }) },
           sourceIds: [],
+          show: [],
+          actions: [],
           plan: NO_PLAN,
         },
         "rules",
         input(),
-        {},
+        new Map(),
         { why: "busy" },
       );
     expect(add("  reading   nook ").command).toEqual({
@@ -1434,6 +2642,211 @@ describe("toReply", () => {
     expect(add("see www.example.com").command).toEqual({ kind: "add_items", items: ["lamp"] });
     expect(add().why).toBe("busy");
     expect(add().sources).toEqual([]);
+  });
+
+  test("info cards come from the board, in the order shown, each with its link and what stands behind it", () => {
+    const desk = thing(ITEM, {
+      link: { label: "Walnut desk · $180", href: "/marketplace/item/i1" },
+      card: {
+        key: ITEM.key,
+        kind: "item",
+        title: "Walnut desk",
+        lines: ["Good · Mission"],
+        price: 180,
+        href: "/marketplace/item/i1",
+      },
+    });
+    const hood = thing(
+      { kind: "neighborhood", key: "neighborhood:mission", slug: "mission", name: "Mission" },
+      {
+        link: { label: "Mission neighborhood page", href: "/landing/find/neighborhoods/mission" },
+        sources: [
+          { label: "Muni feed · SFMTA" },
+          { label: "Thread in Mission Locals", href: "/groups/mission-locals" },
+          { label: "A third source", href: "/groups/third" },
+        ],
+        card: { key: "neighborhood:mission", kind: "neighborhood", title: "Mission", lines: [] },
+      },
+    );
+    const r = toReply(
+      {
+        ...base,
+        text: "A desk, and where to put it.",
+        command: { kind: "none" },
+        sourceIds: ["neighborhood:mission"],
+        show: ["neighborhood:mission", ITEM.key, ITEM.key, "listing:nope", RENTAL.key],
+      },
+      "muse",
+      input(),
+      board(desk, hood, thing(RENTAL)),
+    );
+    expect(r.cards).toEqual([hood.card, desk.card] as typeof r.cards);
+    expect(r.sources).toEqual([
+      { label: "Mission neighborhood page", href: "/landing/find/neighborhoods/mission" },
+      { label: "Walnut desk · $180", href: "/marketplace/item/i1" },
+      // At most two of the sources behind one thing.
+      { label: "Muni feed · SFMTA" },
+      { label: "Thread in Mission Locals", href: "/groups/mission-locals" },
+    ]);
+    // Something cited but not shown is a source, never a card.
+    const citedOnly = toReply(
+      { ...base, text: "A desk.", command: { kind: "none" }, sourceIds: [ITEM.key] },
+      "muse",
+      input(),
+      board(desk),
+    );
+    expect(citedOnly.cards).toEqual([]);
+    expect(citedOnly.sources).toEqual([
+      { label: "Walnut desk · $180", href: "/marketplace/item/i1" },
+    ]);
+  });
+
+  test("actions become cards worded by code, for things on the board only", () => {
+    const house = { id: "h1", name: "Casa Verde" };
+    const things = board(
+      thing(EVENT),
+      thing(ITEM),
+      thing(RENTAL),
+      thing(GROUP),
+      thing(MATCH),
+      thing(DRAFT, {
+        card: {
+          key: DRAFT.key,
+          kind: "draft",
+          title: "Offer of $120 on Walnut desk",
+          lines: [],
+          actions: [
+            {
+              action: { kind: "approve_draft", proposalId: "d1" },
+              label: "Approve: Offer of $120 on Walnut desk",
+              detail: "Would you take $120?",
+              confirm: "Approve",
+            },
+          ],
+        },
+      }),
+      thing(NEGOTIATION),
+    );
+    const act = (actions: HomeChatOutput["actions"], h: typeof house | null = house) =>
+      toReply(
+        { ...base, text: "Lined up.", command: { kind: "none" }, sourceIds: [], actions },
+        "muse",
+        input(),
+        things,
+        { house: h },
+      ).actions;
+
+    expect(act([{ kind: "rsvp", key: EVENT.key, status: "going" }])).toEqual([
+      rsvpAction({ id: "e1", title: "Sunset Run Club", startsAt: EVENT.startsAt }, "going"),
+    ]);
+    expect(
+      act([
+        { kind: "negotiate", key: ITEM.key, maxPrice: 150, targetPrice: 120, notes: "  " },
+        { kind: "join_group", key: GROUP.key },
+        { kind: "ask_roommate", key: MATCH.key, text: " Hi Sam, want to compare notes? " },
+      ]),
+    ).toMatchObject([
+      {
+        action: { kind: "negotiate", listingId: "i1", maxPrice: 150, targetPrice: 120 },
+        label: "Have Muse negotiate Walnut desk, up to $150",
+        confirm: "Start",
+      },
+      { action: { kind: "join_group", groupId: "g1" }, label: "Join Mission Run Club" },
+      {
+        action: { kind: "ask_roommate", userId: "u1", text: "Hi Sam, want to compare notes?" },
+        detail: "Hi Sam, want to compare notes?",
+        confirm: "Send",
+      },
+    ]);
+    // Empty notes never go on the action.
+    expect(
+      act([{ kind: "negotiate", key: ITEM.key, maxPrice: 150, notes: "  " }])[0].action,
+    ).toEqual({ kind: "negotiate", listingId: "i1", maxPrice: 150 });
+    expect(
+      act([
+        { kind: "choose_place", key: RENTAL.key, moveIn: "2026-12-01" },
+        { kind: "save_listing", key: ITEM.key },
+        { kind: "set_negotiation", key: NEGOTIATION.key, status: "paused" },
+      ]).map((a) => a.action),
+    ).toEqual([
+      { kind: "choose_place", listingId: "l1", moveIn: "2026-12-01" },
+      { kind: "save_listing", listingId: "i1" },
+      { kind: "set_negotiation", negotiationId: "n1", status: "paused" },
+    ]);
+    // A draft's own card says what would be sent: that approval, and no other.
+    expect(act([{ kind: "approve_draft", key: DRAFT.key }])).toEqual([
+      {
+        action: { kind: "approve_draft", proposalId: "d1" },
+        label: "Approve: Offer of $120 on Walnut desk",
+        detail: "Would you take $120?",
+        confirm: "Approve",
+      },
+    ]);
+    // A draft whose card offers no approval (the chat can't show all of it) gets none here either.
+    const inboxOnly = new Map([
+      [
+        DRAFT.key,
+        thing(
+          { ...DRAFT, approvable: false },
+          { card: { key: DRAFT.key, kind: "draft", title: DRAFT.summary, lines: [] } },
+        ),
+      ],
+    ]);
+    expect(
+      toReply(
+        {
+          ...base,
+          text: "Lined up.",
+          command: { kind: "none" },
+          sourceIds: [],
+          actions: [{ kind: "approve_draft", key: DRAFT.key }],
+        },
+        "muse",
+        input(),
+        inboxOnly,
+      ).actions,
+    ).toEqual([]);
+    expect(act([{ kind: "discard_draft", key: DRAFT.key }])).toEqual([
+      {
+        action: { kind: "discard_draft", proposalId: "d1" },
+        label: "Discard: Offer of $120 on Walnut desk",
+        confirm: "Discard",
+      },
+    ]);
+    // House actions go to the viewer's own house, whose id code supplies.
+    expect(
+      act([
+        { kind: "add_grocery", text: " oat milk " },
+        { kind: "add_chore", title: "Take the bins out", cadence: "weekly" },
+        { kind: "add_bill", title: "Internet", amount: 60, cadence: "monthly" },
+      ]).map((a) => a.action),
+    ).toEqual([
+      { kind: "add_grocery", houseId: "h1", text: "oat milk" },
+      { kind: "add_chore", houseId: "h1", title: "Take the bins out", cadence: "weekly" },
+      { kind: "add_bill", houseId: "h1", title: "Internet", amount: 60, cadence: "monthly" },
+    ]);
+    expect(act([{ kind: "add_grocery", text: "oat milk" }], null)).toEqual([]);
+    // A target that isn't on the board, or is the wrong kind of thing, gives no action.
+    expect(
+      act([
+        { kind: "rsvp", key: "event:gone", status: "going" },
+        { kind: "rsvp", key: ITEM.key, status: "going" },
+        { kind: "join_group", key: EVENT.key },
+      ]),
+    ).toEqual([]);
+    // The same action suggested twice is one button.
+    expect(
+      act(Array.from({ length: 3 }, () => ({ kind: "save_listing", key: ITEM.key }))),
+    ).toHaveLength(1);
+    // Never more than the chat shows.
+    expect(
+      act(
+        Array.from({ length: CHAT_ACTIONS_MAX + 2 }, (_, i) => ({
+          kind: "add_grocery",
+          text: `item ${i}`,
+        })),
+      ),
+    ).toHaveLength(CHAT_ACTIONS_MAX);
   });
 
   test("the rules read the plan with the rest of the answer", () => {

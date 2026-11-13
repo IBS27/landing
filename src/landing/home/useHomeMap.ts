@@ -250,6 +250,15 @@ export function useHomeMap() {
     (p: LatLng) => go({ center: p, zoom: CLOSE_ZOOM + 0.4, ...TILT }),
     [go],
   );
+  /** Frames a few approximate points at once (what Muse found): flat, so every marker reads. */
+  const frame = useCallback(
+    (points: readonly LatLng[]) => {
+      if (points.length === 1) return flyTo(points[0]);
+      const b = pointsBounds(points, 0.004);
+      if (b) go({ bounds: b });
+    },
+    [flyTo, go],
+  );
 
   /** Runs a chat command that changes the map. */
   const apply = useCallback(
@@ -345,6 +354,7 @@ export function useHomeMap() {
     apply,
     fitHood,
     flyTo,
+    frame,
     showCity,
     showWorld,
     /** Events and Groups, for "what's on near my place". */

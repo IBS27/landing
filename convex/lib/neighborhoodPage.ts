@@ -334,7 +334,7 @@ function header(n: Doc<"neighborhoods">): NeighborhoodHeader {
 }
 
 /** Visible Groups in the neighborhood, most active first, plus hidden ones the viewer is in. */
-async function visibleGroups(ctx: QueryCtx, nid: Id<"neighborhoods">, a: Audience) {
+export async function visibleGroups(ctx: QueryCtx, nid: Id<"neighborhoods">, a: Audience) {
   const rows = await ctx.db
     .query("groups")
     .withIndex("by_neighborhood", (q) => q.eq("neighborhoodId", nid))
@@ -425,7 +425,7 @@ async function attendance(
  * Posts and comments in the neighborhood's Groups that name each place, as
  * sources the viewer can see. Places nobody mentions are left out.
  */
-async function placeSources(
+export async function placeSources(
   ctx: QueryCtx,
   groups: Doc<"groups">[],
   places: Place[],

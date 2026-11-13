@@ -15,6 +15,7 @@ import {
   CHAT_CARDS_MAX,
   CHAT_MESSAGE_MAX,
   CHAT_RECENT_MAX,
+  type ChatAction,
   type ChatCommand,
   type ChatContext,
   type ChatNeighborhood,
@@ -23,8 +24,8 @@ import {
   type ChatReply,
   ruleReply,
 } from "../../../convex/lib/homeChatRules";
-import type { RentalActions } from "./ChatCards";
-import { ChatDock, type Pending } from "./ChatDock";
+import { CardIcon, type RentalActions } from "./ChatCards";
+import { ChatDock, type FoundActions, type Pending } from "./ChatDock";
 import {
   Breadcrumb,
   ChatHistory,
@@ -36,7 +37,7 @@ import {
   PANEL_ID,
 } from "./HomeChrome";
 import { suggestions } from "./suggestions";
-import { type ChatSession, useChatLog } from "./useChatLog";
+import { actionKey, type ChatSession, shownKeys, useChatLog } from "./useChatLog";
 import { isMapCommand, useHomeMap } from "./useHomeMap";
 import "./home.css";
 
@@ -58,11 +59,18 @@ export type { HomeView };
  *   model Muse furnishes from Marketplace for a vibe and a budget, or adds
  *   the things they name to (#153).
  *
- * Questions about other parts of Landing open their pages; "Explore" lists
- * them all. Muse answers on the server (`api.homeChat.reply`); it only routes
- * and explains. The person chooses a place and reviews what's placed; nothing
- * is sent or bought. When Muse can't answer, Landing's rules do, and say why;
- * here in the browser if the server can't be reached.
+ * Muse answers on the server (`api.homeChat.reply`). It looks things up
+ * across Landing with tools (#154): rentals, Marketplace items, Events,
+ * Groups, places, neighborhoods and the person's own move. What it finds
+ * comes back as cards under the reply, pinned on the map when they have a
+ * place there. It can also suggest doing something (RSVP, join a Group,
+ * negotiate an item, approve a draft): each suggestion is a card, and nothing
+ * changes until the person clicks it, when this page runs it as them
+ * (`runAction`) with the mutation the rest of Landing uses. Opening a past
+ * chat never runs anything. The person chooses a place and reviews what's
+ * placed; nothing is sent or bought. "Explore" lists Landing's other pages.
+ * When Muse can't answer, Landing's rules do, and say why; here in the browser
+ * if the server can't be reached.
  */
 export function LandingHome({ view = "map" }: { view?: HomeView }) {
   const viewer = useViewer();
@@ -71,6 +79,7 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
   const convex = useConvex();
   const profile = useQ(api.cityProfile.get, {});
   const apartment = useQ(api.apartment.get, {});
+  const waiting = useQ(api.proposals.pendingCount, {});
   const chat = useChatLog(viewer._id, GREETING);
   const ask = useAction(api.homeChat.reply);
   const furnish = useAction(api.apartment.furnish);
@@ -216,9 +225,11 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
       const message = text.trim().slice(0, CHAT_MESSAGE_MAX);
       if (!message || pending) return;
       const sessionId = chat.current.id;
-      const recent = chat.current.messages
-        .slice(-CHAT_RECENT_MAX)
-        .map((t) => ({ who: t.who, text: t.text }));
+      // Each turn goes with the keys of what it showed, so "the second one" means something.
+      const recent = chat.current.messages.slice(-CHAT_RECENT_MAX).map((t) => {
+        const shown = shownKeys(t);
+        return { who: t.who, text: t.text, ...(shown.length && { shown }) };
+      });
       chat.add({ who: "me", text: message });
       const context: ChatContext = {
         stage: m.stage,
@@ -256,13 +267,20 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
           command,
           saved: reply.saved,
           rentals: reply.rentals,
+          cards: reply.cards,
+          actions: reply.actions,
         },
         sessionId,
       );
       // The person opened another chat meanwhile: file the answer there, but leave the stage alone.
-      if (chat.isCurrent(sessionId)) run(command, { sessionId });
+      if (!chat.isCurrent(sessionId)) return;
+      run(command, { sessionId });
+      // An answer that leaves the map where it is, with places to show: frame them.
+      // (A server from before #154 sends no cards.)
+      const points = (reply.cards ?? []).flatMap((c) => c.point ?? []);
+      if (command.kind === "none" && viewNow.current === "map" && points.length) m.frame(points);
     },
-    [ask, chat, localReply, pending, profile, run, m.selected, m.stage, view, viewer._id],
+    [ask, chat, localReply, pending, profile, run, m.frame, m.selected, m.stage, view, viewer._id],
   );
 
   /** Where a chat left off on the stage: its last command that shows something here. */
@@ -294,8 +312,10 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
 
   /* ── Choosing a place from a rental card ── */
   const choosePlace = useCallback(
-    async (card: ChatRentalCard, moveIn: string) => {
-      await takeListing({ listingId: card.id as Id<"listings">, moveIn });
+    async (listingId: string, moveIn: string) => {
+      // The chat it was chosen in: the person may open another while this runs.
+      const sessionId = chat.current.id;
+      await takeListing({ listingId: listingId as Id<"listings">, moveIn });
       let building = false;
       try {
         await buildApartment({});
@@ -305,18 +325,30 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
         // The place is theirs either way; the Apartment tab sets up its model.
       }
       // Written here, not by Muse: it says so.
-      chat.add({
-        who: "muse",
-        via: "landing",
-        text: building
-          ? "That's your place. I'm building its 3D model on the Apartment tab."
-          : "That's your place. It's on the Apartment tab as a starter room, ready to furnish.",
-        command: { kind: "show_apartment" },
-        sources: [{ label: "Your place", href: "/landing/place" }],
-      });
-      setView("apartment");
+      chat.add(
+        {
+          who: "muse",
+          via: "landing",
+          text: building
+            ? "That's your place. I'm building its 3D model on the Apartment tab."
+            : "That's your place. It's on the Apartment tab as a starter room, ready to furnish.",
+          command: { kind: "show_apartment" },
+          sources: [{ label: "Your place", href: "/landing/place" }],
+        },
+        sessionId,
+      );
+      if (chat.isCurrent(sessionId)) setView("apartment");
     },
-    [buildApartment, chat.add, convex, setView, takeListing, viewer._id],
+    [
+      buildApartment,
+      chat.add,
+      chat.current.id,
+      chat.isCurrent,
+      convex,
+      setView,
+      takeListing,
+      viewer._id,
+    ],
   );
 
   const rentalActions = useMemo<RentalActions>(
@@ -324,7 +356,7 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
       currentListingId: place?.listingId ?? null,
       replaces: place?.title ?? null,
       statedMoveIn: profile?.moveIn?.value ?? null,
-      onChoose: choosePlace,
+      onChoose: (card, moveIn) => choosePlace(card.id, moveIn),
       onHover: m.setHighlight,
       locate: (id) => {
         const pin = m.rentalPins.get(id);
@@ -340,6 +372,145 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
     [place, profile, choosePlace, m.setHighlight, m.rentalPins, m.flyTo, setView],
   );
 
+  /* ── Doing what a card or a suggestion offers: only ever from the person's click ── */
+  const runAction = useCallback(
+    async (a: ChatAction): Promise<void> => {
+      const viewerId = viewer._id;
+      switch (a.kind) {
+        case "rsvp":
+          await convex.mutation(api.events.respond, {
+            viewerId,
+            eventId: a.eventId as Id<"events">,
+            status: a.status,
+          });
+          return;
+        case "join_group":
+          await convex.mutation(api.groups.join, { viewerId, groupId: a.groupId as Id<"groups"> });
+          return;
+        case "save_listing": {
+          // `saved.toggle` flips: only save what isn't saved yet.
+          const ref = { viewerId, kind: "listing" as const, refId: a.listingId };
+          if (!(await convex.query(api.saved.isSaved, ref)))
+            await convex.mutation(api.saved.toggle, ref);
+          return;
+        }
+        case "choose_place":
+          return choosePlace(a.listingId, a.moveIn);
+        case "negotiate":
+          await convex.mutation(api.negotiations.start, {
+            viewerId,
+            listingId: a.listingId as Id<"listings">,
+            maxPrice: a.maxPrice,
+            ...(a.targetPrice !== undefined && { targetPrice: a.targetPrice }),
+            ...(a.notes && { notes: a.notes }),
+          });
+          return;
+        case "set_negotiation":
+          await convex.mutation(api.negotiations.setStatus, {
+            viewerId,
+            negotiationId: a.negotiationId as Id<"negotiations">,
+            status: a.status,
+          });
+          return;
+        case "approve_draft":
+          await convex.mutation(api.proposals.approve, {
+            viewerId,
+            proposalId: a.proposalId as Id<"proposals">,
+          });
+          return;
+        case "discard_draft":
+          await convex.mutation(api.proposals.discard, {
+            viewerId,
+            proposalId: a.proposalId as Id<"proposals">,
+          });
+          return;
+        case "add_grocery":
+          await convex.mutation(api.house.addGrocery, {
+            viewerId,
+            houseId: a.houseId as Id<"houses">,
+            text: a.text,
+          });
+          return;
+        case "add_chore":
+          await convex.mutation(api.house.addChore, {
+            viewerId,
+            houseId: a.houseId as Id<"houses">,
+            title: a.title,
+            cadence: a.cadence,
+          });
+          return;
+        case "add_bill":
+          await convex.mutation(api.house.addBill, {
+            viewerId,
+            houseId: a.houseId as Id<"houses">,
+            title: a.title,
+            amountCents: Math.round(a.amount * 100),
+            cadence: a.cadence,
+            ...(a.dueDate && { dueDate: a.dueDate }),
+          });
+          return;
+        case "ask_roommate": {
+          // The intro is a draft like any other (#6); the card shows these exact words in full,
+          // and clicking Send is its approval.
+          const proposalId = await convex.mutation(api.roommates.askToConnect, {
+            viewerId,
+            userId: a.userId as Id<"users">,
+            text: a.text,
+          });
+          await convex.mutation(api.proposals.approve, { viewerId, proposalId });
+          return;
+        }
+      }
+    },
+    [choosePlace, convex, viewer._id],
+  );
+
+  /**
+   * One run per action at a time: the same action can be on a card and on a
+   * suggestion, and a second click joins the first run instead of repeating it.
+   */
+  const running = useRef(new Map<string, Promise<void>>());
+  const runOnce = useCallback(
+    (a: ChatAction) => {
+      const key = actionKey(a);
+      const started = running.current.get(key);
+      if (started) return started;
+      const run = runAction(a).finally(() => running.current.delete(key));
+      running.current.set(key, run);
+      return run;
+    },
+    [runAction],
+  );
+
+  const foundActions = useMemo<FoundActions>(
+    () => ({
+      locate: (point) => {
+        setView("map");
+        m.flyTo(point);
+      },
+      run: runOnce,
+      onOutcome: chat.setOutcome,
+    }),
+    [chat.setOutcome, m.flyTo, runOnce, setView],
+  );
+
+  /**
+   * What Muse found, on the map: the cards with a point from the latest reply
+   * that put something on the stage (cards, rentals or a map command). A reply
+   * that shows something else takes them away.
+   */
+  const pinned = useMemo(
+    () =>
+      chat.current.messages
+        .findLast(
+          (x) =>
+            x.who === "muse" &&
+            (x.cards?.length || x.rentals?.length || (x.command && isMapCommand(x.command))),
+        )
+        ?.cards?.flatMap((c) => (c.point ? [{ ...c, point: c.point }] : [])) ?? [],
+    [chat.current.messages],
+  );
+
   /* ── Suggestions follow the view, the person's place and the last answer ── */
   const point = place?.point;
   const chips = suggestions({
@@ -351,6 +522,7 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
     },
     last: chat.current.messages.findLast((x) => x.who === "muse")?.command,
     needsBrief: !!profile && !profile.briefCompletedAt,
+    waiting: waiting ?? 0,
     name: (slug) => m.hoodBySlug.get(slug)?.label ?? slug,
     go: {
       apartment: () => setView("apartment"),
@@ -386,7 +558,12 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
   const { map } = m;
   // A reply with cards stands taller over the map: keep what it shows above them.
   const lastMessage = chat.current.messages[chat.current.messages.length - 1];
-  const tallDock = !!(lastMessage?.rentals?.length || lastMessage?.items?.length);
+  const tallDock = !!(
+    lastMessage?.rentals?.length ||
+    lastMessage?.items?.length ||
+    lastMessage?.cards?.length ||
+    lastMessage?.actions?.length
+  );
 
   return (
     <div
@@ -438,6 +615,23 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
                     {s.names.length} from your crew
                   </span>
                 </Link>
+              </MapMarker>
+            ))}
+          {map &&
+            m.inCity &&
+            pinned.map((c) => (
+              <MapMarker key={c.key} map={map} lng={c.point.lng} lat={c.point.lat} z={5}>
+                <button
+                  type="button"
+                  onClick={() => m.flyTo(c.point)}
+                  title={`${c.title} (approximate area)`}
+                  className="lh-found lh-glass lh-focus"
+                >
+                  <span className="lh-found-dot">
+                    <CardIcon kind={c.kind} size={12} />
+                  </span>
+                  <span className="truncate">{c.title}</span>
+                </button>
               </MapMarker>
             ))}
           {map && m.inCity && place?.point && (
@@ -494,6 +688,7 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
           if (href.startsWith("/") && !href.startsWith("//")) router.history.push(href);
         }}
         rentals={rentalActions}
+        found={foundActions}
         focusedItem={focusItem}
         onFocusItem={(id) => {
           setFocusItem(id);

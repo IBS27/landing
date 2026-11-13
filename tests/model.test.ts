@@ -32,6 +32,8 @@ function stream(
     usage?: Record<string, unknown> | null;
     done?: boolean;
     extra?: string[];
+    /** Tool calls, streamed as Meta does: the id and name first, then the arguments in pieces. */
+    toolCalls?: { id?: string; name?: string; arguments: string }[];
   } = {},
 ) {
   const model = opts.model ?? MODEL;
@@ -41,7 +43,37 @@ function stream(
     events.push({ model, choices: [{ index: 0, delta: { content: text.slice(i, i + 7) } }] });
   if (opts.refusal)
     events.push({ model, choices: [{ index: 0, delta: { refusal: opts.refusal } }] });
-  events.push({ model, choices: [{ index: 0, delta: {}, finish_reason: opts.finish ?? "stop" }] });
+  const calls = opts.toolCalls ?? [];
+  const piece = (tool_call: unknown) => ({
+    model,
+    choices: [{ index: 0, delta: { tool_calls: [tool_call] } }],
+  });
+  calls.forEach((c, index) => {
+    events.push(
+      piece({
+        index,
+        ...(c.id === undefined ? {} : { id: c.id }),
+        type: "function",
+        function: { ...(c.name === undefined ? {} : { name: c.name }), arguments: "" },
+      }),
+    );
+  });
+  // The calls' arguments arrive interleaved, a few characters at a time.
+  for (let at = 0; calls.some((c) => at < c.arguments.length); at += 5)
+    calls.forEach((c, index) => {
+      if (at < c.arguments.length)
+        events.push(piece({ index, function: { arguments: c.arguments.slice(at, at + 5) } }));
+    });
+  events.push({
+    model,
+    choices: [
+      {
+        index: 0,
+        delta: {},
+        finish_reason: opts.finish ?? (calls.length ? "tool_calls" : "stop"),
+      },
+    ],
+  });
   if (opts.usage !== null)
     events.push({
       model,
@@ -153,6 +185,7 @@ describe("complete", () => {
     expect(reply.model).toBe("muse-spark-1.3");
     expect(reply.finishReason).toBe("stop");
     expect(reply.refusal).toBeUndefined();
+    expect(reply.toolCalls).toEqual([]);
     // 1,000 prompt tokens, 400 of them cached; reasoning is inside completion tokens.
     expect(reply.usage).toEqual({
       inputTokens: 600,
@@ -161,6 +194,98 @@ describe("complete", () => {
       cacheWriteTokens: 0,
     });
     expect(reply.costUsd).toBeCloseTo((600 * 1.25 + 400 * 0.15 + 200 * 4.25) / 1e6, 12);
+  });
+
+  test("offers tools, and replays tool calls with their results", async () => {
+    mockFetch(stream({ text: '{"a":"b"}' }));
+    const parameters = {
+      type: "object",
+      properties: { q: { type: "string" } },
+      required: ["q"],
+      additionalProperties: false,
+    };
+    await complete(
+      request({
+        tools: [{ name: "search_events", description: "Finds Events.", parameters }],
+        messages: [
+          { role: "user", content: "What's on?" },
+          {
+            role: "assistant",
+            content: "",
+            toolCalls: [{ id: "call_1", name: "search_events", arguments: '{"q":"run"}' }],
+          },
+          { role: "tool", toolCallId: "call_1", content: '{"items":[]}' },
+          { role: "assistant", content: "{}" },
+        ],
+      }),
+    );
+
+    const { body } = sent[0];
+    expect(body.tools).toEqual([
+      {
+        type: "function",
+        function: { name: "search_events", description: "Finds Events.", parameters },
+      },
+    ]);
+    // Only "auto" is supported, which is the default: the choice is never sent.
+    expect("tool_choice" in body).toBe(false);
+    // The answer is still decoded against the schema.
+    expect(body.response_format).toMatchObject({ type: "json_schema" });
+    expect((body.messages as unknown[]).slice(2)).toEqual([
+      { role: "user", content: "What's on?" },
+      {
+        role: "assistant",
+        content: "",
+        tool_calls: [
+          {
+            id: "call_1",
+            type: "function",
+            function: { name: "search_events", arguments: '{"q":"run"}' },
+          },
+        ],
+      },
+      { role: "tool", tool_call_id: "call_1", content: '{"items":[]}' },
+      { role: "assistant", content: "{}" },
+    ]);
+  });
+
+  test("sends no tools field without tools", async () => {
+    mockFetch(stream({ text: '{"a":"b"}' }), stream({ text: '{"a":"b"}' }));
+    await complete(request());
+    await complete(request({ tools: [] }));
+    expect(sent.map((s) => "tools" in s.body)).toEqual([false, false]);
+  });
+
+  test("joins streamed tool calls by index", async () => {
+    const calls = [
+      {
+        id: "call_a",
+        name: "search_events",
+        arguments: JSON.stringify({ neighborhood: "mission", query: "run club ✓" }),
+      },
+      { id: "call_b", name: "get_my_move", arguments: "" },
+      { id: "call_c", name: "search_groups", arguments: '{"neighborhood":"noe-valley"}' },
+    ];
+    mockFetch(stream({ toolCalls: calls }));
+    const reply = await complete(request({ tools: [] }));
+
+    expect(reply.toolCalls).toEqual(calls);
+    expect(reply.text).toBe("");
+    expect(reply.finishReason).toBe("tool_calls");
+    expect(reply.costUsd).toBeDefined();
+  });
+
+  test("retries a tool call that arrives without an id or a name", async () => {
+    mockFetch(
+      stream({ toolCalls: [{ name: "search_events", arguments: "{}" }] }),
+      stream({ toolCalls: [{ id: "call_a", arguments: "{}" }] }),
+      stream({ toolCalls: [{ id: "call_a", name: "search_events", arguments: "{}" }] }),
+    );
+    const reply = await complete(request());
+    expect(reply.toolCalls).toEqual([{ id: "call_a", name: "search_events", arguments: "{}" }]);
+    expect(sent).toHaveLength(3);
+    // The garbled attempts were billed too.
+    expect(reply.usage.outputTokens).toBe(600);
   });
 
   test("reports refusals and the finish reason", async () => {

@@ -5,8 +5,9 @@ import type { HomeView } from "./HomeChrome";
 /**
  * The suggestion chips under Landing Home's chat. They follow the tab that's
  * showing, where the person is in their move (no place yet, a place, a 3D
- * model, furniture in it) and the last answer. A chip with no `run` is sent
- * as a message, so each is worded for Landing's keyword rules too (AI off).
+ * model, furniture in it), drafts waiting for their OK and the last answer.
+ * A chip with no `run` is sent as a message, so each is worded for Landing's
+ * keyword rules too (AI off). Never more than three, so the dock stays clear.
  */
 export function suggestions(s: {
   view: HomeView;
@@ -16,6 +17,8 @@ export function suggestions(s: {
   last: ChatCommand | undefined;
   /** They haven't done the City Profile brief. */
   needsBrief: boolean;
+  /** Drafts waiting for their approval. */
+  waiting?: number;
   /** A neighborhood's name, by slug. */
   name: (slug: string) => string;
   /** What chips do themselves. `nearPlace` needs the place's approximate point. */
@@ -30,6 +33,8 @@ export function suggestions(s: {
 }): Chip[] {
   const { last, go } = s;
   const nearPlace: Chip = { label: "Show me events near my place", run: go.nearPlace };
+  // Muse shows the drafts with Approve on each; the rules open the Inbox.
+  const drafts: Chip[] = s.waiting ? [{ label: "What's waiting for my approval?" }] : [];
 
   if (s.view === "apartment") {
     if (!s.apartment) return [];
@@ -73,10 +78,17 @@ export function suggestions(s: {
     default:
       if (s.needsBrief)
         return [{ label: "Set up my City Profile", run: go.brief }, { label: "Show me the move" }];
+      // With a place, the search is over: what's on, and things for it.
+      if (openApartment.length)
+        return [
+          ...(drafts.length ? drafts : [{ label: "What's happening this week?" }]),
+          { label: "Marketplace finds for my place" },
+          ...openApartment,
+        ];
       return [
         { label: "Show me the move" },
         { label: "Rooms in my budget" },
-        ...(openApartment.length ? openApartment : [{ label: "What's waiting for approval?" }]),
+        ...(drafts.length ? drafts : [{ label: "What's happening this week?" }]),
       ];
   }
 }
