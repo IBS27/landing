@@ -1,7 +1,8 @@
 # Seed image attribution
 
 Images in `public/seed/` are used as fictional seed data. Each file below lists its
-source, creator and license. Images come from Flickr (via Openverse) and Wikimedia Commons
+source, creator and license. Images come from Flickr (via Openverse), Wikimedia Commons
+and The Metropolitan Museum of Art
 and are Creative Commons or public-domain licensed (CC0, CC BY, CC BY-SA, Public Domain);
 they were resized and re-encoded (EXIF stripped, and `pages/` center-cropped to square).
 Avatars come from [randomuser.me](https://randomuser.me/), which provides its portraits free
