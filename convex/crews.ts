@@ -1,5 +1,5 @@
 import { ConvexError } from "convex/values";
-import type { Id } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { internalMutation, type QueryCtx } from "./_generated/server";
 import { blockedSet } from "./lib/blocks";
 import { getProfile } from "./lib/cityProfile";
@@ -132,30 +132,42 @@ export type CrewMember = {
 export const myCrew = viewerQuery({
   args: {},
   handler: async (ctx): Promise<{ members: CrewMember[] } | null> => {
-    const mine = await optInRow(ctx, ctx.viewer._id);
-    if (!mine) return null;
-    const [viewerProfile, rows, blocked] = await Promise.all([
-      getProfile(ctx, ctx.viewer),
-      ctx.db.query("crewOptIns").take(OPT_IN_SCAN),
-      blockedSet(ctx, ctx.viewer._id),
-    ]);
-    const others = rows.filter((r) => r.userId !== ctx.viewer._id && !blocked.has(r.userId));
-    const profiles = await Promise.all(
-      others.map(async (r) => crewProfile(await getProfile(ctx, r.userId), r.matchBy)),
-    );
-    const matches = matchCrew(crewProfile(viewerProfile, mine.matchBy), profiles, CREW_MAX);
-    const users = await getSummaries(
-      ctx,
-      matches.map((m) => m.userId as Id<"users">),
-    );
-    const members: CrewMember[] = [];
-    for (const m of matches) {
-      const user = users.get(m.userId as Id<"users">);
-      if (user) members.push({ user, anchors: m.anchors, shared: m.shared, score: m.score });
-    }
-    return { members };
+    const members = await viewerCrew(ctx, ctx.viewer);
+    return members && { members };
   },
 });
+
+/**
+ * `myCrew` for other server code, such as the neighborhood page (#16): the
+ * viewer's crew members, or null when the viewer hasn't opted in.
+ */
+export async function viewerCrew(
+  ctx: QueryCtx,
+  viewer: Doc<"users">,
+): Promise<CrewMember[] | null> {
+  const mine = await optInRow(ctx, viewer._id);
+  if (!mine) return null;
+  const [viewerProfile, rows, blocked] = await Promise.all([
+    getProfile(ctx, viewer),
+    ctx.db.query("crewOptIns").take(OPT_IN_SCAN),
+    blockedSet(ctx, viewer._id),
+  ]);
+  const others = rows.filter((r) => r.userId !== viewer._id && !blocked.has(r.userId));
+  const profiles = await Promise.all(
+    others.map(async (r) => crewProfile(await getProfile(ctx, r.userId), r.matchBy)),
+  );
+  const matches = matchCrew(crewProfile(viewerProfile, mine.matchBy), profiles, CREW_MAX);
+  const users = await getSummaries(
+    ctx,
+    matches.map((m) => m.userId as Id<"users">),
+  );
+  const members: CrewMember[] = [];
+  for (const m of matches) {
+    const user = users.get(m.userId as Id<"users">);
+    if (user) members.push({ user, anchors: m.anchors, shared: m.shared, score: m.score });
+  }
+  return members;
+}
 
 /** Seed (#30): Move-in Crew opt-ins for the people in `seed/world/crews.ts`. */
 export const seedDemo = internalMutation({

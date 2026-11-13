@@ -27,11 +27,13 @@ export type Pin =
 export type OverlayData = {
   pins: Pin[];
   hoods: readonly NeighborhoodShape[];
+  /** Slug of the highlighted neighborhood. */
+  selectedHood: string | null;
   stops: readonly RouteStop[];
 };
 
 export function overlayData(layers: readonly MapLayer[]): OverlayData {
-  const out: OverlayData = { pins: [], hoods: [], stops: [] };
+  const out: OverlayData = { pins: [], hoods: [], selectedHood: null, stops: [] };
   for (const layer of layers) {
     if (layer.kind === "listings")
       for (const pin of layer.items) out.pins.push({ kind: "listing", key: `l:${pin._id}`, pin });
@@ -39,8 +41,10 @@ export function overlayData(layers: readonly MapLayer[]): OverlayData {
       for (const pin of layer.items) out.pins.push({ kind: "event", key: `e:${pin._id}`, pin });
     else if (layer.kind === "groups")
       for (const pin of layer.items) out.pins.push({ kind: "group", key: `g:${pin._id}`, pin });
-    else if (layer.kind === "neighborhoods") out.hoods = layer.items;
-    else out.stops = layer.stops;
+    else if (layer.kind === "neighborhoods") {
+      out.hoods = layer.items;
+      out.selectedHood = layer.selected ?? null;
+    } else out.stops = layer.stops;
   }
   return out;
 }
@@ -58,14 +62,14 @@ function pinsGeo(pins: Pin[]): FeatureCollection {
   };
 }
 
-function hoodsGeo(hoods: readonly NeighborhoodShape[]): FeatureCollection {
+function hoodsGeo(hoods: readonly NeighborhoodShape[], selected: string | null): FeatureCollection {
   return {
     type: "FeatureCollection",
     features: hoods.map((n, i) => ({
       type: "Feature",
       id: i,
       geometry: { type: "MultiPolygon", coordinates: n.polygon },
-      properties: { slug: n.slug, label: n.label, park: n.park },
+      properties: { slug: n.slug, label: n.label, park: n.park, selected: n.slug === selected },
     })),
   };
 }
@@ -130,9 +134,12 @@ export function addOverlays(map: MlMap, data: OverlayData, dark: boolean) {
   if (!map.getSource(SRC.hoods)) {
     map.addSource(SRC.hoods, { type: "geojson", data: empty });
     map.addSource(`${SRC.hoods}-labels`, { type: "geojson", data: empty });
+    // The selected neighborhood stays as highlighted as a hovered one.
     const hover = (on: number, off: number) => [
       "case",
       ["boolean", ["feature-state", "hover"], false],
+      on,
+      ["boolean", ["get", "selected"], false],
       on,
       off,
     ];
@@ -259,7 +266,7 @@ export function setOverlayData(map: MlMap, data: OverlayData) {
   const set = (id: string, geo: FeatureCollection) =>
     (map.getSource(id) as GeoJSONSource | undefined)?.setData(geo);
   set(SRC.pins, pinsGeo(data.pins));
-  set(SRC.hoods, hoodsGeo(data.hoods));
+  set(SRC.hoods, hoodsGeo(data.hoods, data.selectedHood));
   set(`${SRC.hoods}-labels`, hoodLabelsGeo(data.hoods));
   set(SRC.route, routeGeo(data.stops));
   // Our neighborhood labels replace the basemap's while that layer has shapes.
