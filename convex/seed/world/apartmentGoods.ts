@@ -6,12 +6,12 @@ export const apartmentGoods: readonly ListingSeed[] = [
   {
     key: "apartment-compact-desk",
     seller: "lily.anderson",
-    title: "Compact white writing desk, 40 in",
+    title: "Compact glass-top writing desk, 40 in",
     price: 25,
     category: "furniture",
     condition: "used_good",
     description:
-      "40 x 24 in white desk. A few scuffs on the top, sturdy legs. Desk only, chair and computer not included. Legs come off for a car. Pickup near 20th and Valencia.",
+      "40 x 24 in glass-top desk with a metal pedestal base. A few scuffs on the base. Desk only, chair and computer not included. Glass top lifts off for transport. Pickup near 20th and Valencia.",
     photos: ["listings/desk-01.jpg"],
     hood: "Mission",
     meetup: ["door_pickup"],
