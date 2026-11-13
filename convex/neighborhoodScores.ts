@@ -339,11 +339,20 @@ export const get = viewerQuery({
       lights?.kind === "streetlight_requests"
         ? await resolveCitations(ctx, lights.citations, audience)
         : null;
-    const quotes = await resolveSources(
+    // Locals' words: the matching sentence, with the post or comment it's from (visible to this viewer).
+    const picked = pickNightQuotes(texts, 8);
+    const cited = await resolveSources(
       ctx,
-      pickNightQuotes(texts, 8).map((t) => t.source),
+      picked.map((t) => t.source),
       audience,
     );
+    const byKey = new Map(cited.map((c) => [c.key, c]));
+    const quotes = picked
+      .flatMap((t) => {
+        const source = byKey.get(sourceKey(t.source));
+        return source ? [{ quote: t.quote, source }] : [];
+      })
+      .slice(0, 4);
 
     return {
       neighborhood: { _id: n._id, slug: n.slug, name: n.name, label: n.shortName ?? n.name },
@@ -368,7 +377,7 @@ export const get = viewerQuery({
           lights?.kind === "streetlight_requests" && lightSources
             ? { count: lights.count, since: lights.since, sources: lightSources }
             : null,
-        quotes: quotes.slice(0, 4),
+        quotes,
       },
       howCalculated: HOW_CALCULATED,
       computedAt: rows.reduce((t, r) => Math.max(t, r.computedAt), 0) || null,

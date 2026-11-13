@@ -344,24 +344,64 @@ export function interestFit(
 
 /* ---------- Getting around at night (no score) ---------- */
 
-/** Words that make a local's post or comment about getting around after dark. */
-const NIGHT_WORDS =
-  /\b(?:well[- ]lit|lit up|lighting|street ?lights?|dark|at night|late at night|after dark|after midnight|walk(?:ing)? home|owl|last (?:bart|train|bus)|late[- ]night|night shift|midnight)\b/i;
+/**
+ * Phrases that make a local's words about getting around after dark: lighting,
+ * walking or biking home, late transit. Bare words that also mean other things
+ * ("owl" in a bar's name, "dark roast", "open til midnight") don't count.
+ */
+const NIGHT =
+  /\b(?:well[- ]lit|poorly lit|badly lit|brightly lit|lit up|street ?lights?|(?:gets?|getting|pretty|too|really|very|super|kinda) dark|dark (?:blocks?|streets?|stretch(?:es)?|alleys?|at night|after)|pitch[- ]dark|at night|after dark|after midnight|late at night|(?:walk|walks|walked|walking|bike|biked|biking) home|owl (?:bus|buses|line|lines|service)|(?:n|l|90|91) owl|owl (?:judah|taraval)|last (?:bart|train|bus)|late[- ]night (?:muni|bus|buses|bart|trains?|transit|service))\b/i;
 /** Labels about an area, or who's in it, never quoted (the brief: cited facts only, no labels). */
 const LABEL_WORDS =
   /\b(?:sketchy|unsafe|dangerous|bad (?:area|part|neighborhood|block)|shady|ghetto|crime|criminals?|scary|homeless|addicts?)\b/i;
+/** Quotes are at most this long: the sentence that says it, cut around the words if needed. */
+const QUOTE_MAX = 200;
 
-export function isNightQuote(text: string): boolean {
-  return NIGHT_WORDS.test(text) && !LABEL_WORDS.test(text);
+/**
+ * The part of a local's post or comment about getting around after dark: the
+ * sentence with the matching phrase, verbatim (… marks a cut). Null when the
+ * text isn't about that, or labels an area or its people anywhere.
+ */
+export function nightExcerpt(text: string): string | null {
+  if (LABEL_WORDS.test(text)) return null;
+  const m = NIGHT.exec(text);
+  if (!m) return null;
+  const at = m.index;
+  const ends = /[.!?\n]/g;
+  let start = 0;
+  for (let i = at - 1; i >= 0; i--) {
+    if (/[.!?\n]/.test(text[i])) {
+      start = i + 1;
+      break;
+    }
+  }
+  ends.lastIndex = at + m[0].length;
+  const stop = ends.exec(text);
+  let end = stop ? stop.index + 1 : text.length;
+  let from = start;
+  if (end - from > QUOTE_MAX) {
+    from = Math.max(start, at - Math.floor(QUOTE_MAX / 3));
+    end = Math.min(end, from + QUOTE_MAX);
+  }
+  const body = text.slice(from, end).replace(/\s+/g, " ").trim();
+  if (!body) return null;
+  return `${from > start ? "…" : ""}${body}${end < (stop ? stop.index + 1 : text.length) ? "…" : ""}`;
 }
 
-/** Up to `n` night quotes, most reacted first, then newest. */
+export function isNightQuote(text: string): boolean {
+  return nightExcerpt(text) !== null;
+}
+
+/** Up to `n` night quotes with their excerpts, most reacted first, then newest. */
 export function pickNightQuotes<T extends { text: string; reactions: number; createdAt: number }>(
   candidates: readonly T[],
   n = 4,
-): T[] {
+): (T & { quote: string })[] {
   return candidates
-    .filter((c) => isNightQuote(c.text))
+    .flatMap((c) => {
+      const quote = nightExcerpt(c.text);
+      return quote ? [{ ...c, quote }] : [];
+    })
     .sort((a, b) => b.reactions - a.reactions || b.createdAt - a.createdAt)
     .slice(0, n);
 }

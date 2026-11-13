@@ -275,7 +275,7 @@ export function NightFacts({ data }: { data: ScoresData }) {
             </h3>
             <ul className="mt-1.5 space-y-2">
               {quotes.map((q) => (
-                <Quote key={q.key} source={q} />
+                <Quote key={q.source.key} quote={q.quote} source={q.source} />
               ))}
             </ul>
           </div>
@@ -325,13 +325,13 @@ function lastTimes(t: { weekday: string | null; saturday: string | null; sunday:
     .join(", ");
 }
 
-/** A local's post or comment, quoted, with who said it and when, and its source. */
-function Quote({ source }: { source: CitedSource }) {
+/** What a local said, with who said it and when, and the post or comment it's from. */
+function Quote({ quote, source }: { quote: string; source: CitedSource }) {
   const who = source.kind === "post" || source.kind === "comment" ? source.author.firstName : null;
   const when = "createdAt" in source ? shortAge(source.createdAt) : null;
   return (
     <li className="rounded-lg bg-wash px-3 py-2">
-      <p className="text-primary text-sm leading-[18px]">“{source.snippet}”</p>
+      <p className="text-primary text-sm leading-[18px]">“{quote}”</p>
       <div className="mt-1 flex items-center gap-2 text-secondary text-xs">
         {who && <span>{who}</span>}
         {when && <span>· {when}</span>}

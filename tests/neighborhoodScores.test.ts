@@ -10,6 +10,7 @@ import {
   isFoodPlace,
   isNightQuote,
   isThingToDo,
+  nightExcerpt,
   percentiles,
   pickNightQuotes,
   type ScoreInputs,
@@ -217,16 +218,44 @@ describe("interest fit", () => {
 });
 
 describe("getting around at night", () => {
-  test("quotes about walking home, lighting and late transit, never labels", () => {
-    expect(isNightQuote("Folsom and Howard are bright and there are people out til midnight")).toBe(
-      true,
-    );
-    expect(isNightQuote("the 14 is my owl bus home")).toBe(true);
-    expect(isNightQuote("Valencia is well-lit after dark")).toBe(true);
-    expect(isNightQuote("great tacos, go early")).toBe(false);
-    expect(isNightQuote("it gets sketchy at night")).toBe(false);
+  test("phrases about lighting, getting home and late transit count", () => {
+    for (const t of [
+      "the little alleys (Natoma, Minna, Tehama) get dark after 6 this time of year",
+      "I take the owl bus home, the N Owl runs every 30",
+      "Valencia is well-lit after dark",
+      "which blocks are actually quiet at night?",
+      "I bike home from the hospital at 7am",
+    ]) {
+      expect([t, isNightQuote(t)]).toEqual([t, true]);
+    }
   });
-  test("most reacted first, then newest", () => {
+  test("words that mean other things don't", () => {
+    for (const t of [
+      "Low Tide Radio at the Velvet Owl friday, doors 8",
+      "their dark roast is the move",
+      "the taqueria is open til midnight",
+      "great tacos, go early",
+    ]) {
+      expect([t, isNightQuote(t)]).toEqual([t, false]);
+    }
+  });
+  test("never quotes labels about an area or its people", () => {
+    expect(isNightQuote("it gets sketchy at night")).toBe(false);
+    expect(isNightQuote("well-lit, but the crime stats are scary")).toBe(false);
+  });
+  test("quotes the sentence that says it, cut around the words when long", () => {
+    expect(
+      nightExcerpt(
+        "Folsom and Howard are bright. the little alleys get dark after 6, I don't cut through them. BART stops around midnight.",
+      ),
+    ).toBe("the little alleys get dark after 6, I don't cut through them.");
+    const long = `${"a".repeat(120)} we walk home on Valencia, it's busy ${"b ".repeat(150)}`;
+    const q = nightExcerpt(long) ?? "";
+    expect(q.length).toBeLessThanOrEqual(202);
+    expect(q).toContain("walk home on Valencia");
+    expect(q.startsWith("…") && q.endsWith("…")).toBe(true);
+  });
+  test("most reacted first, then newest, with excerpts", () => {
     const q = (text: string, reactions: number, createdAt: number) => ({
       text,
       reactions,
@@ -234,17 +263,17 @@ describe("getting around at night", () => {
     });
     const picked = pickNightQuotes(
       [
-        q("walk home on Valencia, it's lit", 2, 1),
-        q("owl bus is fine", 9, 1),
+        q("we walk home on Valencia, it's well-lit", 2, 1),
+        q("the owl bus is fine", 9, 1),
         q("lunch spot", 50, 1),
-        q("dark on Capp", 2, 5),
+        q("Capp gets dark early", 2, 5),
       ],
       3,
     );
-    expect(picked.map((p) => p.text)).toEqual([
-      "owl bus is fine",
-      "dark on Capp",
-      "walk home on Valencia, it's lit",
+    expect(picked.map((p) => p.quote)).toEqual([
+      "the owl bus is fine",
+      "Capp gets dark early",
+      "we walk home on Valencia, it's well-lit",
     ]);
   });
   test("last trains read as clock times, past midnight included", () => {
