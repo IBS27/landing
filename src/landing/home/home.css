@@ -125,7 +125,8 @@
 /* "Your move" panel (#142): beside the chat when the map is wide, over it when it isn't. */
 .lh-move {
   position: absolute;
-  inset: 8px;
+  inset: 8px 8px auto;
+  max-height: calc(100% - 16px);
   z-index: 9;
   display: flex;
   flex-direction: column;
@@ -145,6 +146,10 @@
 .lh-move-pill > * {
   pointer-events: auto;
 }
+/* Over the map, the panel stands in for the chat until it's collapsed. */
+.lh-move-open .lh-dock {
+  visibility: hidden;
+}
 @container (min-width: 900px) {
   .lh-move {
     inset: 60px auto auto 16px;
@@ -157,6 +162,7 @@
     max-width: 340px;
   }
   .lh-move-open .lh-dock {
+    visibility: visible;
     left: calc(50% + 178px);
     width: min(560px, calc(100% - 420px));
   }
