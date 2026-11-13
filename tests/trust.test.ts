@@ -79,6 +79,8 @@ const rental = (
 describe("isBayArea", () => {
   test("matches the city exactly, in California", () => {
     expect(isBayArea("San Rafael, CA")).toBe(true);
+    expect(isBayArea("Vacaville, CA")).toBe(true);
+    expect(isBayArea("Rohnert Park, California")).toBe(true);
     expect(isBayArea("San Francisco, California")).toBe(true);
     expect(isBayArea("Oakland")).toBe(true);
     expect(isBayArea("Richmond, Virginia")).toBe(false);
@@ -110,6 +112,11 @@ describe("lowPriceSignal", () => {
       location: { ...c.location, neighborhood: "SoMa" },
     }));
     expect(lowPriceSignal(me, cityOnly)).toMatchObject({ area: "San Francisco", comps: 3 });
+  });
+  test("a city with the same name in another state doesn't count", () => {
+    const rich = rental("me", "L", 1500, { city: "Richmond, CA" });
+    const va = ["a", "b", "c"].map((x) => rental(x, "x", 4000, { city: "Richmond, Virginia" }));
+    expect(lowPriceSignal(rich, va)).toBeNull();
   });
   test("a neighborhood with the same name in another city doesn't count", () => {
     const comps = ["a", "b", "c"].map((x) =>
@@ -170,6 +177,7 @@ describe("phraseFlags", () => {
   });
   test("harmless messages stay unflagged", () => {
     expect(cats("What time works before the viewing?")).toEqual([]);
+    expect(cats("Please send your availability before the viewing.")).toEqual([]);
     expect(cats("Please do not pay by wire or gift card.")).toEqual([]);
     expect(cats("Never send a deposit before you see it. Come by Saturday!")).toEqual([]);
     expect(cats("The place is great, see you at the showing.")).toEqual([]);
@@ -271,6 +279,13 @@ describe("listingTrust", () => {
     );
     const photos = t?.signals.find((s) => s.kind === "reused_photos");
     expect(photos?.sources?.[0]).toMatchObject({ kind: "listing", listingId: "orig" });
+  });
+
+  test("evidence from blocked sellers doesn't count", async () => {
+    const w = world();
+    (w.blocks as Row[]).push({ _id: "bl2", userId: "O", blockedId: "V", createdAt: 0 });
+    const t = await listingTrust(fakeCtx(w), id("V"), id("lst"));
+    expect(t?.signals.map((s) => s.kind).sort()).toEqual(["lister_far_away", "new_account"]);
   });
 
   test("toured badge: shown for the viewer's network, hidden when blocked or unconnected", async () => {

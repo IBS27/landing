@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useM } from "@/app/viewer";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -19,22 +19,23 @@ export function useChatCheck(
   chat: ChatState | null | undefined,
 ) {
   const request = useM(api.trust.requestChatCheck);
-  const [attempt, setAttempt] = useState(0);
   const asked = useRef<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
+  // Asked to wait (cooldown): ask again then, for automatic and manual retries alike.
   const ask = useCallback(() => {
     if (!listingId) return;
     clearTimeout(timer.current);
-    request({ listingId })
-      .then((r) => {
-        if (r.status === "wait")
-          timer.current = setTimeout(() => setAttempt((n) => n + 1), r.retryInMs + 250);
-      })
-      .catch(() => {});
+    const go = () =>
+      request({ listingId })
+        .then((r) => {
+          if (r.status === "wait") timer.current = setTimeout(go, r.retryInMs + 250);
+        })
+        .catch(() => {});
+    go();
   }, [listingId, request]);
 
-  const key = chat ? `${chat.conversationId}:${chat.lastMessageAt}:${attempt}` : null;
+  const key = chat ? `${chat.conversationId}:${chat.lastMessageAt}` : null;
   const needed = chat?.status === "needed";
   useEffect(() => {
     if (!needed || !key || asked.current === key) return;

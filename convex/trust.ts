@@ -12,7 +12,7 @@ import { defineTask, runAgent } from "./ai/agent";
 import { runJob, startJob } from "./ai/jobs";
 import { type CitedSource, type NonEmpty, resolveSources } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
-import { type Audience, loadAudience } from "./lib/posts";
+import type { Audience } from "./lib/posts";
 import {
   BADGE,
   farAwaySignal,
@@ -26,7 +26,7 @@ import {
   reusedPhotosSignal,
 } from "./lib/trust";
 import { getSummary, type UserSummary, userSummary } from "./lib/users";
-import { listerNetwork } from "./lib/vouches";
+import { BLOCK_READ_MAX, listerNetwork } from "./lib/vouches";
 import { chatFlag, chatFlagCategory } from "./validators";
 
 /**
@@ -184,11 +184,41 @@ export async function chatCheckState(
   };
 }
 
-export type SignalView = Awaited<ReturnType<typeof signalView>>;
+/**
+ * People blocked either way with the viewer, read by index up to
+ * BLOCK_READ_MAX each way, and the audience for citing listings with it:
+ * `resolveSources` checks only the seller's blocks for a listing source.
+ */
+async function listingAudience(ctx: QueryCtx, viewerId: Id<"users">): Promise<Audience> {
+  const [mine, theirs] = await Promise.all([
+    ctx.db
+      .query("blocks")
+      .withIndex("by_user", (q) => q.eq("userId", viewerId))
+      .take(BLOCK_READ_MAX),
+    ctx.db
+      .query("blocks")
+      .withIndex("by_blocked", (q) => q.eq("blockedId", viewerId))
+      .take(BLOCK_READ_MAX),
+  ]);
+  return {
+    viewerId,
+    friends: new Set(),
+    groups: new Set(),
+    adminGroups: new Set(),
+    blocked: new Set([...mine.map((r) => r.blockedId), ...theirs.map((r) => r.userId)]),
+    hideReactionCounts: { others: false, own: false },
+    wallAccess: new Map(),
+  };
+}
+
+export type SignalView = NonNullable<Awaited<ReturnType<typeof signalView>>>;
 
 const nonEmpty = <T>(xs: T[]): NonEmpty<T> | null => (xs.length > 0 ? (xs as never) : null);
 
-/** A signal as the client sees it: listing ids swapped for cited sources. */
+/**
+ * A signal as the client sees it: listing ids swapped for cited sources. Null
+ * when none of a listing-based signal's evidence can be shown to the viewer.
+ */
 async function signalView(ctx: QueryCtx, s: ListingSignal, audience: Audience) {
   const cited = async (ids: Id<"listings">[]): Promise<NonEmpty<CitedSource> | null> =>
     nonEmpty(
@@ -201,11 +231,13 @@ async function signalView(ctx: QueryCtx, s: ListingSignal, audience: Audience) {
   switch (s.kind) {
     case "low_price": {
       const { compIds, ...rest } = s;
-      return { ...rest, sources: await cited(compIds) };
+      const sources = await cited(compIds);
+      return sources && { ...rest, sources };
     }
     case "reused_photos": {
       const { listingIds, ...rest } = s;
-      return { ...rest, sources: await cited(listingIds) };
+      const sources = await cited(listingIds);
+      return sources && { ...rest, sources };
     }
     default:
       return { ...s, sources: null };
@@ -235,18 +267,22 @@ export async function listingTrust(
         q.eq("userId", viewerId).eq("targetType", "listing").eq("targetId", listingId),
       )
       .first(),
-    loadAudience(ctx, viewerId),
+    listingAudience(ctx, viewerId),
   ]);
+  // Evidence the viewer can't see (blocked sellers) doesn't count.
+  const visible = (ls: Doc<"listings">[]) => ls.filter((l) => !audience.blocked.has(l.sellerId));
 
   const raw: ListingSignal[] = isOwn
     ? []
     : [
-        lowPriceSignal(listing, recent),
+        lowPriceSignal(listing, visible(recent)),
         newAccountSignal(lister, networkEvidence(network)),
-        reusedPhotosSignal(listing, older),
+        reusedPhotosSignal(listing, visible(older)),
         farAwaySignal(listing, lister),
       ].filter((s): s is ListingSignal => s !== null);
-  const signals = await Promise.all(raw.map((s) => signalView(ctx, s, audience)));
+  const signals = (await Promise.all(raw.map((s) => signalView(ctx, s, audience)))).filter(
+    (s): s is SignalView => s !== null,
+  );
 
   const summary = await getSummary(ctx, lister._id);
   return {
@@ -318,15 +354,18 @@ export const rentalsToReview = viewerQuery({
     for (const l of live.slice(0, 24)) {
       const lister = await ctx.db.get(l.sellerId);
       if (!lister || lister._id === viewerId) continue;
+      // Past the lookup cap, a new lister's network is unknown: no new-account signal.
+      let known = true;
       let network: NetworkEvidence | null = null;
       if (isNewAccount(lister)) {
         if (!networks.has(lister._id) && networks.size < NETWORK_LOOKUPS_MAX)
           networks.set(lister._id, networkEvidence(await listerNetwork(ctx, viewerId, lister._id)));
+        known = networks.has(lister._id);
         network = networks.get(lister._id) ?? null;
       }
       const signals = [
         lowPriceSignal(l, recent),
-        newAccountSignal(lister, network),
+        known ? newAccountSignal(lister, network) : null,
         reusedPhotosSignal(l, recent),
         farAwaySignal(l, lister),
       ].filter(Boolean).length;

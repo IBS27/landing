@@ -52,105 +52,48 @@ export const REUSED_CITED = 5;
 const DAY = 24 * 60 * 60 * 1000;
 
 /**
- * Cities counted as "local" to a Bay Area listing: the nine Bay Area counties'
- * cities and towns. Matched exactly against the city part of `users.city` /
- * `location.city` ("San Rafael, CA"), with a California region or none.
+ * Cities counted as "local" to a Bay Area listing: the 101 cities of the nine
+ * Bay Area counties (census.bayareametro.gov/cities-counties), plus a few
+ * large unincorporated towns. Matched exactly against the city part of
+ * `users.city` / `location.city` ("San Rafael, CA"), with a California region or none.
  */
-const BAY_AREA = new Set([
-  // San Francisco and San Mateo
-  "san francisco",
-  "daly city",
-  "south san francisco",
-  "brisbane",
-  "colma",
-  "pacifica",
-  "san bruno",
-  "millbrae",
-  "burlingame",
-  "hillsborough",
-  "san mateo",
-  "foster city",
-  "belmont",
-  "san carlos",
-  "redwood city",
-  "menlo park",
-  "atherton",
-  "east palo alto",
-  "half moon bay",
-  // Santa Clara
-  "palo alto",
-  "los altos",
-  "mountain view",
-  "sunnyvale",
-  "santa clara",
-  "cupertino",
-  "san jose",
-  "campbell",
-  "saratoga",
-  "los gatos",
-  "milpitas",
-  "morgan hill",
-  "gilroy",
-  // Alameda and Contra Costa
-  "oakland",
-  "berkeley",
-  "emeryville",
-  "alameda",
-  "albany",
-  "piedmont",
-  "san leandro",
-  "hayward",
-  "union city",
-  "fremont",
-  "newark",
-  "castro valley",
-  "pleasanton",
-  "dublin",
-  "livermore",
-  "richmond",
-  "el cerrito",
-  "san pablo",
-  "pinole",
-  "hercules",
-  "walnut creek",
-  "concord",
-  "pleasant hill",
-  "lafayette",
-  "orinda",
-  "moraga",
-  "danville",
-  "san ramon",
-  "martinez",
-  "antioch",
-  "pittsburg",
-  // Marin, Sonoma, Napa and Solano
-  "sausalito",
-  "mill valley",
-  "tiburon",
-  "corte madera",
-  "larkspur",
-  "san anselmo",
-  "fairfax",
-  "san rafael",
-  "novato",
-  "petaluma",
-  "santa rosa",
-  "sonoma",
-  "napa",
-  "vallejo",
-  "benicia",
-  "fairfield",
-]);
+const BAY_AREA = new Set(
+  [
+    // Alameda
+    "Alameda|Albany|Berkeley|Dublin|Emeryville|Fremont|Hayward|Livermore|Newark|Oakland|Piedmont|Pleasanton|San Leandro|Union City|Castro Valley|San Lorenzo",
+    // Contra Costa
+    "Antioch|Brentwood|Clayton|Concord|Danville|El Cerrito|Hercules|Lafayette|Martinez|Moraga|Oakley|Orinda|Pinole|Pittsburg|Pleasant Hill|Richmond|San Pablo|San Ramon|Walnut Creek|Alamo|El Sobrante",
+    // Marin
+    "Belvedere|Corte Madera|Fairfax|Larkspur|Mill Valley|Novato|Ross|San Anselmo|San Rafael|Sausalito|Tiburon|Kentfield",
+    // Napa
+    "American Canyon|Calistoga|Napa|St. Helena|St Helena|Saint Helena|Yountville",
+    // San Francisco
+    "San Francisco",
+    // San Mateo
+    "Atherton|Belmont|Brisbane|Burlingame|Colma|Daly City|East Palo Alto|Foster City|Half Moon Bay|Hillsborough|Menlo Park|Millbrae|Pacifica|Portola Valley|Redwood City|San Bruno|San Carlos|San Mateo|South San Francisco|Woodside",
+    // Santa Clara
+    "Campbell|Cupertino|Gilroy|Los Altos|Los Altos Hills|Los Gatos|Milpitas|Monte Sereno|Morgan Hill|Mountain View|Palo Alto|San Jose|Santa Clara|Saratoga|Sunnyvale|Stanford",
+    // Solano
+    "Benicia|Dixon|Fairfield|Rio Vista|Suisun City|Vacaville|Vallejo",
+    // Sonoma
+    "Cloverdale|Cotati|Healdsburg|Petaluma|Rohnert Park|Santa Rosa|Sebastopol|Sonoma|Windsor",
+  ].flatMap((county) => county.toLowerCase().split("|")),
+);
 const CALIFORNIA = new Set(["ca", "calif", "calif.", "california", "usa", "us"]);
 
 /** "Richmond, CA" is; "Richmond, Virginia" and "Sacramento, CA" aren't. */
-export function isBayArea(place: string) {
+function parsePlace(place: string) {
   const [city = "", ...region] = place
     .toLowerCase()
     .split(",")
     .map((s) => s.trim().replace(/\s+/g, " "));
-  if (!BAY_AREA.has(city)) return false;
-  return region.every((r) => CALIFORNIA.has(r));
+  const inCalifornia = region.every((r) => CALIFORNIA.has(r));
+  return { city, inCalifornia, key: `${city}|${inCalifornia ? "ca" : region.join(",")}` };
+}
+
+export function isBayArea(place: string) {
+  const p = parsePlace(place);
+  return BAY_AREA.has(p.city) && p.inCalifornia;
 }
 
 /** Rooms are compared with rooms; whole units with units of the same bedroom count. */
@@ -165,8 +108,8 @@ export function median(values: number[]) {
   return s.length % 2 ? s[mid] : Math.round((s[mid - 1] + s[mid]) / 2);
 }
 
-const sameCity = (a: string, b: string) =>
-  a.split(",")[0].trim().toLowerCase() === b.split(",")[0].trim().toLowerCase();
+/** "San Francisco, CA" and "San Francisco, California" match; "Richmond, VA" and "Richmond, CA" don't. */
+const sameCity = (a: string, b: string) => parsePlace(a).key === parsePlace(b).key;
 
 /**
  * Price far below comparable rentals: same unit class, active, for rent or
@@ -304,7 +247,7 @@ export const SCAM_PHRASES: {
   {
     category: "deposit_before_viewing",
     pattern: new RegExp(
-      `\\b(${MONEY})\\b[^.?!]*\\b(before (you |we )?(see|the viewing|a viewing|the showing|a showing|the tour|a tour|viewing|touring|signing)|to (hold|reserve|secure)|hold it|reserve it|secure it)\\b|\\b(${PAY})\\b[^.?!]*\\bbefore (you |we )?(see|the viewing|a viewing|viewing|the showing|the tour|touring)\\b`,
+      `\\b(${MONEY})\\b[^.?!]*\\b(before (you |we )?(see|the viewing|a viewing|the showing|a showing|the tour|a tour|viewing|touring|signing)|to (hold|reserve|secure)|hold it|reserve it|secure it)\\b`,
       "i",
     ),
     reason: "Mentions paying before you've seen the place in person.",
