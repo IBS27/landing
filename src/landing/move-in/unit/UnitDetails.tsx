@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { type ReactNode, useEffect, useMemo } from "react";
 import { BoxGeometry, CylinderGeometry, type Material, SphereGeometry } from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
-import type { ObservedObject } from "../../../../convex/lib/unitAppearance";
+import type { ObservedObject, Part } from "../../../../convex/lib/unitAppearance";
 import { along, distance, type Wall } from "../../../../convex/lib/unitScene";
 import { physicalUvs } from "./UnitMaterials";
 
@@ -12,6 +12,7 @@ export function Solid({
   color = "#f0ede6",
   material,
   rounded = 0.004,
+  children,
 }: {
   size: [number, number, number];
   position: [number, number, number];
@@ -19,6 +20,8 @@ export function Solid({
   color?: string;
   material?: Material;
   rounded?: number;
+  /** Drawn inside the mesh (an outline hull, say). */
+  children?: ReactNode;
 }) {
   const [x, y, z] = size;
   const geometry = useMemo(
@@ -30,6 +33,7 @@ export function Solid({
       ),
     [x, y, z, rounded],
   );
+  useEffect(() => () => geometry.dispose(), [geometry]);
   return (
     <mesh
       position={position}
@@ -40,6 +44,7 @@ export function Solid({
       receiveShadow
     >
       {!material && <meshStandardMaterial color={color} roughness={0.65} />}
+      {children}
     </mesh>
   );
 }
@@ -54,12 +59,21 @@ export function ObservedFixture({
   return (
     <group position={[p.x, p.y, p.z]} rotation={[0, object.rotation, 0]}>
       {object.parts.map((part, i) => (
-        <Part key={i} part={part} material={materials.get(part.materialId)} />
+        <PartMesh key={i} part={part} material={materials.get(part.materialId)} />
       ))}
     </group>
   );
 }
-function Part({ part, material }: { part: ObservedObject["parts"][number]; material?: Material }) {
+/** One primitive of a fixture or an item model (#150): a box, cylinder or ellipsoid. */
+export function PartMesh({
+  part,
+  material,
+  children,
+}: {
+  part: Part;
+  material?: Material;
+  children?: ReactNode;
+}) {
   const { size: s, position: p, rotation: r } = part;
   const roundGeometry = useMemo(() => {
     if (part.shape === "box") return undefined;
@@ -70,13 +84,16 @@ function Part({ part, material }: { part: ObservedObject["parts"][number]; mater
     g.scale(s.x, s.y, s.z);
     return g;
   }, [part.shape, s.x, s.y, s.z]);
+  useEffect(() => () => roundGeometry?.dispose(), [roundGeometry]);
   return part.shape === "box" ? (
     <Solid
       size={[s.x, s.y, s.z]}
       position={[p.x, p.y, p.z]}
       rotation={[r.x, r.y, r.z]}
       material={material}
-    />
+    >
+      {children}
+    </Solid>
   ) : (
     <mesh
       geometry={roundGeometry}
@@ -85,7 +102,10 @@ function Part({ part, material }: { part: ObservedObject["parts"][number]; mater
       rotation={[r.x, r.y, r.z]}
       castShadow
       receiveShadow
-    />
+    >
+      {!material && <meshStandardMaterial color="#f0ede6" roughness={0.65} />}
+      {children}
+    </mesh>
   );
 }
 /** Standard trim profile is inferred; openings retain the evidence-backed geometry. */
@@ -102,42 +122,48 @@ export function WallTrim({ wall: w, cutaway }: { wall: Wall; cutaway: boolean })
   }
   if (start < length) strips.push([start, length]);
   return (
-    <group position={[center.x, 0, center.z]} rotation={[0, theta, 0]}>
-      {strips.map(([a, b], i) => (
-        <Solid
-          key={i}
-          size={[b - a, 0.12, w.thickness + 0.035]}
-          position={[(a + b - length) / 2, 0.06, 0]}
-          rounded={0.003}
-        />
-      ))}
-      {!cutaway &&
-        w.openings.map((o, i) => (
-          <group key={i} position={[o.offset + o.width / 2 - length / 2, o.bottom, 0]}>
-            {[-1, 1].map((side) => (
-              <Solid
-                key={side}
-                size={[0.055, o.height + 0.05, w.thickness + 0.045]}
-                position={[side * (o.width / 2 - 0.02), o.height / 2, 0]}
-              />
-            ))}
-            <Solid
-              size={[o.width, 0.055, w.thickness + 0.045]}
-              position={[0, o.height - 0.02, 0]}
-            />
-            {o.kind === "window" && (
-              <>
-                <Solid
-                  size={[o.width + 0.08, 0.045, w.thickness + 0.14]}
-                  position={[0, 0, -0.025]}
-                />
-                {o.width > 1.1 && (
-                  <Solid size={[0.045, o.height, 0.06]} position={[0, o.height / 2, 0]} />
-                )}
-              </>
-            )}
-          </group>
+    <>
+      <group position={[center.x, 0, center.z]} rotation={[0, theta, 0]}>
+        {strips.map(([a, b], i) => (
+          <Solid
+            key={i}
+            size={[b - a, 0.12, w.thickness + 0.035]}
+            position={[(a + b - length) / 2, 0.06, 0]}
+            rounded={0.003}
+          />
         ))}
+      </group>
+      {!cutaway && <OpeningTrim wall={w} />}
+    </>
+  );
+}
+/** Door and window frames, sills and mullions of one wall. */
+export function OpeningTrim({ wall: w }: { wall: Wall }) {
+  const length = distance(w.a, w.b),
+    theta = -Math.atan2(w.b.z - w.a.z, w.b.x - w.a.x);
+  const center = along(w, length / 2);
+  return (
+    <group position={[center.x, 0, center.z]} rotation={[0, theta, 0]}>
+      {w.openings.map((o, i) => (
+        <group key={i} position={[o.offset + o.width / 2 - length / 2, o.bottom, 0]}>
+          {[-1, 1].map((side) => (
+            <Solid
+              key={side}
+              size={[0.055, o.height + 0.05, w.thickness + 0.045]}
+              position={[side * (o.width / 2 - 0.02), o.height / 2, 0]}
+            />
+          ))}
+          <Solid size={[o.width, 0.055, w.thickness + 0.045]} position={[0, o.height - 0.02, 0]} />
+          {o.kind === "window" && (
+            <>
+              <Solid size={[o.width + 0.08, 0.045, w.thickness + 0.14]} position={[0, 0, -0.025]} />
+              {o.width > 1.1 && (
+                <Solid size={[0.045, o.height, 0.06]} position={[0, o.height / 2, 0]} />
+              )}
+            </>
+          )}
+        </group>
+      ))}
     </group>
   );
 }

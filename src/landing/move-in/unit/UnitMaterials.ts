@@ -14,7 +14,7 @@ import {
 import type { Finish, UnitAppearance } from "../../../../convex/lib/unitAppearance";
 
 /** Procedural detail is a rendering approximation, not recovered photographic texture. */
-function texture(pattern: string, repeat: number, bump: boolean) {
+function pixels(pattern: string, bump: boolean) {
   const n = 256,
     data = new Uint8Array(n * n * 4);
   const noise = (x: number, y: number) => {
@@ -49,8 +49,25 @@ function texture(pattern: string, repeat: number, bump: boolean) {
   map.minFilter = LinearMipmapLinearFilter;
   map.generateMipmaps = true;
   map.anisotropy = 4;
-  map.repeat.set(1 / repeat, 1 / repeat);
   if (!bump) map.colorSpace = SRGBColorSpace;
+  return map;
+}
+/**
+ * One set of pixels per pattern, shared by every material that uses it: each
+ * material's texture is a clone with its own repeat, so a room of furniture
+ * (#150) costs one upload per pattern, not one per item.
+ */
+const PATTERNS = new Set(["wood", "tile", "fabric", "stone"]);
+const shared = new Map<string, DataTexture>();
+function texture(pattern: string, repeat: number, bump: boolean) {
+  const key = `${PATTERNS.has(pattern) ? pattern : "grain"}:${bump}`;
+  let base = shared.get(key);
+  if (!base) {
+    base = pixels(pattern, bump);
+    shared.set(key, base);
+  }
+  const map = base.clone();
+  map.repeat.set(1 / repeat, 1 / repeat);
   map.needsUpdate = true;
   return map;
 }
@@ -80,10 +97,11 @@ function material(finish: Finish) {
   });
   return m;
 }
-export function useUnitMaterials(appearance?: UnitAppearance) {
+/** Three materials for a list of finishes, by id; disposed when the list changes or the caller unmounts. */
+export function useFinishMaterials(finishes?: readonly Finish[]) {
   const materials = useMemo(
-    () => new Map((appearance?.materials ?? []).map((f) => [f.id, material(f)])),
-    [appearance],
+    () => new Map((finishes ?? []).map((f) => [f.id, material(f)])),
+    [finishes],
   );
   useEffect(
     () => () => {
@@ -96,6 +114,9 @@ export function useUnitMaterials(appearance?: UnitAppearance) {
     [materials],
   );
   return materials;
+}
+export function useUnitMaterials(appearance?: UnitAppearance) {
+  return useFinishMaterials(appearance?.materials);
 }
 /** Box/shape UVs in meters keep floor tile and grain sizes consistent across surfaces. */
 export function physicalUvs<T extends BufferGeometry>(geometry: T): T {
