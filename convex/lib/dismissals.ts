@@ -47,3 +47,42 @@ export async function undismiss(ctx: MutationCtx, userId: Id<"users">, targetId:
   const row = await find(ctx, userId, targetId);
   if (row) await ctx.db.delete(row._id);
 }
+
+/** Rows read per list; the count says "500+" past this. */
+export const DISMISSALS_SCAN = 500;
+
+/**
+ * The owner's dismissals, newest first, and whether there are more than
+ * `DISMISSALS_SCAN` (then only that many are read, in index order).
+ */
+export async function listDismissals(ctx: QueryCtx, userId: Id<"users">) {
+  const rows = await ctx.db
+    .query("dismissals")
+    .withIndex("by_user_target", (q) => q.eq("userId", userId))
+    .take(DISMISSALS_SCAN + 1);
+  const more = rows.length > DISMISSALS_SCAN;
+  const shown = rows.slice(0, DISMISSALS_SCAN).sort((a, b) => b.at - a.at);
+  return { rows: shown, more };
+}
+
+/**
+ * One batch of "Show all again": deletes up to `batch` of the owner's
+ * dismissals made at or before `before`, so a card hidden after the person
+ * asked stays hidden. Returns whether rows remain.
+ */
+export async function undismissAll(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  before: number,
+  batch: number,
+) {
+  const ids: Id<"dismissals">[] = [];
+  for await (const row of ctx.db
+    .query("dismissals")
+    .withIndex("by_user_target", (q) => q.eq("userId", userId))) {
+    if (row.at <= before) ids.push(row._id);
+    if (ids.length === batch) break;
+  }
+  for (const id of ids) await ctx.db.delete(id);
+  return ids.length === batch;
+}
