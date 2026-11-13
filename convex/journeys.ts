@@ -10,6 +10,7 @@ import {
 } from "./_generated/server";
 import { runAgent } from "./ai/agent";
 import { runJob, startJob } from "./ai/jobs";
+import { viewActivity, writeCheckIns } from "./checkIns";
 import { viewerCrew } from "./crews";
 import { blockedSet } from "./lib/blocks";
 import {
@@ -27,6 +28,7 @@ import { viewerMutation, viewerQuery } from "./lib/functions";
 import { getInterest } from "./lib/interests";
 import {
   eventFit,
+  isOver,
   JOIN_TASK,
   type JoinInput,
   type JourneyWeek,
@@ -67,7 +69,7 @@ import { citations, type Source, type WeekendStop } from "./validators";
  */
 
 const MINUTE = 60_000;
-const HOUR = 60 * MINUTE;
+const WEEK = 7 * 24 * 60 * MINUTE;
 /** City Profile neighborhoods whose Events are read. */
 const MAX_NEIGHBORHOODS = 3;
 /** Groups (most recently joined) whose plans are read. */
@@ -83,8 +85,6 @@ const STAGGER_MS = 500;
 /** When a neighborhood has no Weekend Route yet, the Journey is built again this much later. */
 const ROUTE_WAIT_MS = 10 * MINUTE;
 const PAST_WEEKS = 12;
-/** Events without an end time count as over this long after they start. */
-const EVENT_LENGTH_MS = 3 * HOUR;
 /** The viewer's recent pending proposals scanned for join drafts. */
 const DRAFT_SCAN = 50;
 /** The owner's most recent threads searched for an existing chat with the same people. */
@@ -97,9 +97,6 @@ function rowFor(ctx: QueryCtx, userId: Id<"users">, weekOf: string) {
     .withIndex("by_user_week", (q) => q.eq("userId", userId).eq("weekOf", weekOf))
     .unique();
 }
-
-const isOver = (e: { startAt: number; endAt?: number }, now: number) =>
-  (e.endAt ?? e.startAt + EVENT_LENGTH_MS) < now;
 
 /* ---------- Gather ---------- */
 
@@ -295,11 +292,12 @@ export async function buildJourney(
     crewIds,
     generatedAt: now,
   };
-  if (existing) {
-    await ctx.db.patch(existing._id, doc);
-    return existing._id;
-  }
-  return ctx.db.insert("journeys", doc);
+  let id = existing?._id;
+  if (id) await ctx.db.patch(id, doc);
+  else id = await ctx.db.insert("journeys", doc);
+  // #33: this week's check-in, and last week's finished now that it's over.
+  await writeCheckIns(ctx, userId, now);
+  return id;
 }
 
 export const build = internalMutation({
@@ -327,6 +325,11 @@ export const refreshAll = internalMutation({
       if (row.briefCompletedAt === undefined) continue;
       const profile = await getProfile(ctx, row.userId);
       const w = profile.moveIn && journeyWeek(profile.moveIn.value, now);
+      // #33: the week after the first 90 days, finish the last week's check-in.
+      if (!w && profile.moveIn && journeyPhase(profile.moveIn.value, now - WEEK) === "during")
+        await ctx.scheduler.runAfter(i++ * STAGGER_MS, internal.checkIns.refresh, {
+          userId: row.userId,
+        });
       if (!w || (!force && (await rowFor(ctx, row.userId, w.weekOf)))) continue;
       await ctx.scheduler.runAfter(i++ * STAGGER_MS, internal.journeys.build, {
         userId: row.userId,
@@ -566,7 +569,15 @@ export const pastWeeks = viewerQuery({
           eventId: s.eventId ?? null,
         });
       }
-      out.push({ _id: r._id, week: r.week, weekOf: r.weekOf, startsAt: r.startsAt, stops });
+      out.push({
+        _id: r._id,
+        week: r.week,
+        weekOf: r.weekOf,
+        startsAt: r.startsAt,
+        stops,
+        // #33: what they did that week, as they may see it now.
+        checkIn: r.checkIn ? await viewActivity(ctx, a, r.checkIn.week) : null,
+      });
     }
     return out.slice(0, PAST_WEEKS);
   },
@@ -744,7 +755,13 @@ export const proposeJoin = internalMutation({
 
 /* ---------- Seed ---------- */
 
-/** Seed (#32): Maya's Journey for this weekend, built by the same code as the job. */
+/**
+ * Seed (#32, #33): Maya's Journeys, built by the same code as the job. She
+ * moved in 16 days ago, so she's in week 3: weeks 1 and 2 are built as they
+ * were, then this one, which writes every week's check-in. A little activity
+ * since move-in (on top of the seeded Halloween party and two new friends) makes
+ * it read "2 weeks in: 2 events, 1 Group, 2 new friends".
+ */
 export const seedDemo = internalMutation({
   args: {},
   handler: async (ctx) => {
@@ -752,6 +769,50 @@ export const seedDemo = internalMutation({
       .query("users")
       .withIndex("by_username", (q) => q.eq("username", "maya.chen"))
       .unique();
-    if (maya) await buildJourney(ctx, maya._id, Date.now(), { force: true });
+    if (!maya) return;
+    const now = Date.now();
+    const DAY = 24 * 60 * MINUTE;
+    // Last Thursday's board game night at Moonrise, which she went to.
+    const recent = await ctx.db
+      .query("events")
+      .withIndex("by_start", (q) => q.gte("startAt", now - 8 * DAY).lt("startAt", now - 6 * DAY))
+      .collect();
+    const games = recent.find((e) => e.title.startsWith("Thursday Board Game Night"));
+    if (games) {
+      const rsvp = await ctx.db
+        .query("eventResponses")
+        .withIndex("by_event_user", (q) => q.eq("eventId", games._id).eq("userId", maya._id))
+        .unique();
+      if (!rsvp)
+        await ctx.db.insert("eventResponses", {
+          eventId: games._id,
+          userId: maya._id,
+          status: "going",
+          createdAt: games.startAt - 2 * DAY,
+        });
+    }
+    // She joined SF Coffee Lovers this week.
+    const coffee = await ctx.db
+      .query("groups")
+      .withIndex("by_slug", (q) => q.eq("slug", "sf-coffee-lovers"))
+      .unique();
+    const member =
+      coffee &&
+      (await ctx.db
+        .query("groupMembers")
+        .withIndex("by_group_user", (q) => q.eq("groupId", coffee._id).eq("userId", maya._id))
+        .unique());
+    if (coffee && !member) {
+      await ctx.db.insert("groupMembers", {
+        groupId: coffee._id,
+        userId: maya._id,
+        role: "member",
+        joinedAt: now - 2 * DAY,
+      });
+      await ctx.db.patch(coffee._id, { memberCount: coffee.memberCount + 1 });
+    }
+    for (const daysAgo of [14, 7])
+      await buildJourney(ctx, maya._id, now - daysAgo * DAY, { force: true });
+    await buildJourney(ctx, maya._id, now, { force: true });
   },
 });

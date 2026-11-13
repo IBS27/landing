@@ -14,6 +14,7 @@ import {
   citations,
   friendRequestAudience,
   friendsListAudience,
+  journeyCheckIn,
   latLng,
   listingCategory,
   listingCondition,
@@ -1055,5 +1056,7 @@ export default defineSchema({
     /** The person's Move-in Crew when it was built; overlap is re-checked when read. */
     crewIds: v.array(v.id("users")),
     generatedAt: v.number(),
+    /** The week's check-in (#33), written by the same job. */
+    checkIn: v.optional(journeyCheckIn),
   }).index("by_user_week", ["userId", "weekOf"]),
 });

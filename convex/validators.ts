@@ -588,3 +588,62 @@ export const negotiationMove = v.union(
   v.literal("message"),
   v.literal("walk_away"),
 );
+
+/* ── Weekly check-ins (#33) ────────────────────────────────────────────── */
+
+/**
+ * What someone did in a check-in window, as the records behind each count.
+ * Re-checked when read (`convex/checkIns.ts`), so an undo or a block shows at once.
+ */
+export const checkInActivity = v.object({
+  /** Events they RSVP'd Going to that started in the window and have ended. In person only. */
+  events: v.array(v.id("events")),
+  /** Groups they joined in the window. */
+  groups: v.array(v.id("groups")),
+  /** Friendships accepted in the window. */
+  friends: v.array(v.id("users")),
+  /** Of `events`, the ones on a Journey (#32). */
+  journeyStops: v.array(v.id("events")),
+});
+export type CheckInActivity = Infer<typeof checkInActivity>;
+
+/** Why the check-in suggests what it does (see `pickSuggestion` in convex/lib/checkIns.ts). */
+export const checkInSuggestionKind = v.union(
+  v.literal("crewMeetup"),
+  v.literal("crewGroup"),
+  v.literal("light"),
+  v.literal("moreLike"),
+  v.literal("groupPlan"),
+  v.literal("journey"),
+);
+
+/** The check-in's next step: a plan on this weekend's Journey, or the crew's Group. */
+export const checkInSuggestion = v.object({
+  kind: checkInSuggestionKind,
+  eventId: v.optional(v.id("events")),
+  groupId: v.optional(v.id("groups")),
+  /** The plain-code text. A change here is what asks Muse to phrase it again. */
+  template: v.string(),
+  /** What's shown: Muse's phrasing when it passed its checks, else `template`. */
+  text: v.string(),
+  via: v.union(v.literal("template"), v.literal("model")),
+  runId: v.optional(v.id("aiRuns")),
+  citations,
+});
+export type CheckInSuggestion = Infer<typeof checkInSuggestion>;
+
+/**
+ * A Journey week's check-in (#33): what they did that week and since move-in,
+ * and (on the current week) what to try next. Written only by the Journeys job.
+ */
+export const journeyCheckIn = v.object({
+  /** Monday before the Journey weekend (or move-in day) to the Monday after. */
+  from: v.number(),
+  to: v.number(),
+  week: checkInActivity,
+  /** Since move-in, as of `computedAt`. */
+  total: checkInActivity,
+  suggestion: v.optional(checkInSuggestion),
+  computedAt: v.number(),
+});
+export type JourneyCheckIn = Infer<typeof journeyCheckIn>;
