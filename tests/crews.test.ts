@@ -87,6 +87,11 @@ describe("matchCrew", () => {
     expect(crew[0]).toMatchObject({ shared: ["climbing", "hiking"], score: 1 + 0.5 + 0.75 * 2 });
   });
 
+  test("stated holds only interests both people stated, so a crew intro never voices an inference", () => {
+    const crew = matchCrew(viewer, [person("climber", { interests: { climbing: 1, hiking: 1 } })]);
+    expect(crew[0]?.stated).toEqual(["climbing"]);
+  });
+
   test("is symmetric", () => {
     const a = person("a", { interests: { climbing: 1 } });
     const b = person("b", {

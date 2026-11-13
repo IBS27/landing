@@ -52,6 +52,8 @@ export type CrewMatch = {
   anchors: Anchor[];
   /** Shared interests, strongest first. */
   shared: InterestId[];
+  /** The shared interests both people stated themselves (not inferred), strongest first. */
+  stated: InterestId[];
 };
 
 /** "Google LLC", "google" and "Google, Inc." are one employer. */
@@ -140,6 +142,8 @@ export function matchCrew(viewer: CrewProfile, others: CrewProfile[], max = CREW
       score: Math.round(score * 100) / 100,
       anchors,
       shared: shared.map((x) => x.id),
+      // Stated interests weigh 1; anything less was inferred for one of them.
+      stated: shared.filter((x) => x.weight >= 1).map((x) => x.id),
     });
   }
   return matches

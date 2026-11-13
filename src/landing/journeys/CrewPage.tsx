@@ -13,6 +13,7 @@ import { api } from "../../../convex/_generated/api";
 import { moveInLabel, neighborhoodLabel } from "../../../convex/lib/cityProfileFacts";
 import type { Anchor, MatchBy } from "../../../convex/lib/crews";
 import { getInterest, type InterestId } from "../../../convex/lib/interests";
+import { CrewGroupCard } from "./CrewGroupCard";
 
 type Status = NonNullable<FunctionReturnType<typeof api.crews.status>>;
 type Crew = NonNullable<FunctionReturnType<typeof api.crews.myCrew>>;
@@ -65,13 +66,12 @@ export function CrewPage() {
         ) : (
           <>
             <CrewList crew={crew} status={status} />
+            <CrewGroupCard crewSize={crew?.members.length ?? 0} />
             <CrewSettings status={status} />
           </>
         )}
         <ComingSoon
           items={[
-            "A new Weekend Route every week, built from real Events and Group plans",
-            "See which crew members are going, and join them",
             "Weekly check-ins and levels: Explore, Regular, Local",
             "Turn crew chat into real plans",
           ]}
@@ -156,8 +156,9 @@ function PrivacyNote() {
       <Lock size={14} className="mt-0.5 shrink-0" />
       Others in your crew see your name and photo and only what you have in common: the month,
       neighborhoods and workplace you both turned on, and shared interests (including ones Landing
-      learned from your activity, which you can remove in your City Profile). Matching never uses
-      age, gender, ethnicity, religion, health or family status.
+      learned from your activity, which you can remove in your City Profile). A crew Group intro may
+      mention interests you both stated, never your workplace. Matching never uses age, gender,
+      ethnicity, religion, health or family status.
     </p>
   );
 }

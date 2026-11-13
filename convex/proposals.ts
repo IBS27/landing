@@ -59,7 +59,7 @@ export const saveEdit = viewerMutation({
   handler: async (ctx, { proposalId, payload }) => {
     const p = await ownPending(ctx, ctx.viewer._id, proposalId);
     assertSameTarget(p.payload, payload);
-    await assertPayload(ctx, p.ownerId, payload);
+    await assertPayload(ctx, p.ownerId, payload, p.origin);
     const now = Date.now();
     await ctx.db.patch(p._id, { payload, original: p.original ?? p.payload, updatedAt: now });
     await syncDraft(ctx, { ...p, payload });
@@ -477,27 +477,7 @@ export const seedDemo = internalMutation({
         }),
       );
 
-    // 5. Start the Move-in Crew Group.
-    const crew = [...friends].slice(4, 8);
-    const mission = await groupPosts("mission-neighbors", 1);
-    if (crew.length)
-      await safe(() =>
-        proposeImpl(ctx, {
-          ownerId: maya._id,
-          payload: {
-            kind: "group",
-            name: "Mission Move-in Crew · June",
-            description:
-              "People who just moved to the Mission this month. Climbing, coffee and figuring out the city together.",
-            privacy: "private",
-            inviteIds: crew,
-          },
-          rationale:
-            "These friends are new to the Mission this month and share your interests in climbing and coffee.",
-          citations: tryCite(mission),
-          origin: { agent: "muse", task: "muse.crewGroup", via: "model" },
-        }),
-      );
+    // 5. The Move-in Crew Group is proposed from Maya's real crew by `crews.seedDemo` (#31).
 
     // History: one Maya approved earlier and one she discarded.
     const hannahDm = await dmWith("hannah.lee");

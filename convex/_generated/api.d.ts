@@ -38,6 +38,8 @@ import type * as lib_citations from "../lib/citations.js";
 import type * as lib_cityProfile from "../lib/cityProfile.js";
 import type * as lib_cityProfileFacts from "../lib/cityProfileFacts.js";
 import type * as lib_compatibility from "../lib/compatibility.js";
+import type * as lib_crewMembers from "../lib/crewMembers.js";
+import type * as lib_crewTasks from "../lib/crewTasks.js";
 import type * as lib_crews from "../lib/crews.js";
 import type * as lib_dismissals from "../lib/dismissals.js";
 import type * as lib_functions from "../lib/functions.js";
@@ -184,6 +186,8 @@ declare const fullApi: ApiFromModules<{
   "lib/cityProfile": typeof lib_cityProfile;
   "lib/cityProfileFacts": typeof lib_cityProfileFacts;
   "lib/compatibility": typeof lib_compatibility;
+  "lib/crewMembers": typeof lib_crewMembers;
+  "lib/crewTasks": typeof lib_crewTasks;
   "lib/crews": typeof lib_crews;
   "lib/dismissals": typeof lib_dismissals;
   "lib/functions": typeof lib_functions;
