@@ -460,6 +460,31 @@ async function placeSources(
 const KIND_ORDER = { event: 0, group: 1, place: 2 } as const;
 
 /**
+ * The best `n` by score, spread across interests: each interest's best item
+ * gets a place before any interest gets a second, so four cafes don't crowd
+ * out the one music venue. Returned best first.
+ */
+export function diverse<T>(
+  xs: readonly T[],
+  n: number,
+  score: (t: T) => number,
+  interest: (t: T) => string,
+): T[] {
+  const sorted = [...xs].sort((a, b) => score(b) - score(a));
+  const seen = new Set<string>();
+  const firsts: T[] = [];
+  const rest: T[] = [];
+  for (const x of sorted) {
+    if (seen.has(interest(x))) rest.push(x);
+    else {
+      seen.add(interest(x));
+      firsts.push(x);
+    }
+  }
+  return [...firsts, ...rest].slice(0, n).sort((a, b) => score(b) - score(a));
+}
+
+/**
  * The "For you" picks: Groups, Events and places sharing the viewer's
  * interests, best first. Groups the viewer is in and Events they're going to
  * are left out (they're not news). Skipped ones stay, flagged, so a card the
@@ -478,8 +503,13 @@ async function forYou(
   const weights = interestWeights(profile);
   if (weights.size === 0) return { state: "no_profile" };
   const facts = factsByInterest(profile);
-  const pick = <T extends { score: number }>(xs: T[], n: number) =>
-    xs.sort((x, y) => y.score - x.score).slice(0, n);
+  const pick = (xs: ForYouItem[], n: number) =>
+    diverse(
+      xs,
+      n,
+      (x) => x.score,
+      (x) => x.reason.interest,
+    );
 
   const eventItems: ForYouItem[] = [];
   eventDocs.forEach((doc, i) => {
@@ -502,8 +532,13 @@ async function forYou(
     return m ? [{ p, m }] : [];
   });
   // Cite only the strongest few: enough to fill the slots when some have no visible mention.
-  candidates.sort((x, y) => y.m.score - x.m.score || x.p.name.localeCompare(y.p.name));
-  const shortlist = candidates.slice(0, FOR_YOU_MAX.place * 3);
+  candidates.sort((x, y) => x.p.name.localeCompare(y.p.name));
+  const shortlist = diverse(
+    candidates,
+    FOR_YOU_MAX.place * 3,
+    (c) => c.m.score,
+    (c) => c.m.reason.interest,
+  );
   const sources = await placeSources(
     ctx,
     groupDocs,
