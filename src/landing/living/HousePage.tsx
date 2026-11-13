@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
-import { Home, Search, UserPlus, UsersRound } from "lucide-react";
+import { Home, Search, UserPlus, UsersRound, X } from "lucide-react";
 import { useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { useToast } from "@/features/marketplace/toast";
@@ -73,11 +73,7 @@ function HouseView({ data }: { data: MemberData }) {
             </li>
           ))}
         </ul>
-        {invited.length > 0 && (
-          <p className="mt-2 text-[13px] text-secondary">
-            Invited: {invited.map((u) => u.name).join(", ")}
-          </p>
-        )}
+        {invited.length > 0 && <InvitedList houseId={house._id} invited={invited} />}
         {others.length > 0 && (
           <p className="mt-2 text-[13px] text-secondary">
             Your other {others.length === 1 ? "house" : "houses"}:{" "}
@@ -155,7 +151,7 @@ function InviteRow({
         <p className="text-[13px] text-secondary">
           Join to share chores, bills and the grocery list. Only people who live there can see them.
         </p>
-        {error && <p className="mt-1 text-[13px] text-[#E41E3F]">{error}</p>}
+        {error && <p className="mt-1 text-[13px] text-negative">{error}</p>}
       </div>
       <div className="flex shrink-0 gap-2">
         <Button
@@ -252,7 +248,7 @@ function CreateHouse() {
         </span>
         <FriendPicker picked={picked} onChange={setPicked} className="mt-1" />
       </div>
-      {error && <p className="mt-2 text-[13px] text-[#E41E3F]">{error}</p>}
+      {error && <p className="mt-2 text-[13px] text-negative">{error}</p>}
       <div className="mt-3 flex justify-end">
         <Button variant="primary" onClick={submit} disabled={busy || !name.trim()}>
           {busy ? "Creating…" : picked.size > 0 ? `Create and invite ${picked.size}` : "Create"}
@@ -330,6 +326,49 @@ function FriendPicker({
   );
 }
 
+/** Pending invites, each of which anyone in the house can withdraw. */
+function InvitedList({ houseId, invited }: { houseId: Id<"houses">; invited: UserSummary[] }) {
+  const cancel = useM(api.house.cancelInvite);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const withdraw = async (userId: Id<"users">) => {
+    setBusy(true);
+    setError(null);
+    try {
+      await cancel({ houseId, userId });
+    } catch (e) {
+      setError(errorText(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="mt-3">
+      <h3 className="font-semibold text-[13px] text-secondary">Invited</h3>
+      <ul className="mt-1 flex flex-wrap gap-2">
+        {invited.map((u) => (
+          <li
+            key={u._id}
+            className="flex items-center gap-1.5 rounded-full bg-btn py-0.5 pr-1 pl-2.5 text-[13px] text-primary"
+          >
+            {u.name}
+            <button
+              type="button"
+              aria-label={`Withdraw ${u.name}'s invite`}
+              disabled={busy}
+              onClick={() => withdraw(u._id)}
+              className="flex h-5 w-5 items-center justify-center rounded-full text-secondary hover:bg-hover disabled:opacity-50"
+            >
+              <X size={12} aria-hidden />
+            </button>
+          </li>
+        ))}
+      </ul>
+      {error && <p className="mt-1 text-[13px] text-negative">{error}</p>}
+    </div>
+  );
+}
+
 function InviteDialog({
   open,
   onOpenChange,
@@ -346,13 +385,20 @@ function InviteDialog({
   const [picked, setPicked] = useState<ReadonlySet<Id<"users">>>(new Set());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Closing (Cancel, the X, Escape) starts the next invite fresh.
+  const close = (o: boolean) => {
+    if (!o) {
+      setPicked(new Set());
+      setError(null);
+    }
+    onOpenChange(o);
+  };
   const send = async () => {
     setBusy(true);
     setError(null);
     try {
       const n = await invite({ houseId, userIds: [...picked] });
-      setPicked(new Set());
-      onOpenChange(false);
+      close(false);
       toast.show(n === 1 ? "Invite sent" : `${n} invites sent`);
     } catch (e) {
       setError(errorText(e));
@@ -362,7 +408,7 @@ function InviteDialog({
   };
   return (
     <>
-      <Modal open={open} onOpenChange={onOpenChange} title={`Invite to ${houseName}`}>
+      <Modal open={open} onOpenChange={close} title={`Invite to ${houseName}`}>
         <div className="p-4">
           <p className="text-[15px] text-secondary">
             Invite the friends you live with. They'll see the house once they join.
@@ -370,9 +416,9 @@ function InviteDialog({
           {open && (
             <FriendPicker houseId={houseId} picked={picked} onChange={setPicked} className="mt-3" />
           )}
-          {error && <p className="mt-2 text-[13px] text-[#E41E3F]">{error}</p>}
+          {error && <p className="mt-2 text-[13px] text-negative">{error}</p>}
           <div className="mt-3 flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={busy}>
+            <Button variant="ghost" onClick={() => close(false)} disabled={busy}>
               Cancel
             </Button>
             <Button variant="primary" onClick={send} disabled={busy || picked.size === 0}>

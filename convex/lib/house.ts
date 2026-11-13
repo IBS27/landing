@@ -42,8 +42,8 @@ export const MAX_HOUSES_PER_PERSON = 5;
 /** Open invites per house at a time. */
 export const MAX_PENDING_INVITES = 20;
 export const MAX_CHORES = 50;
-/** Bills kept per house, paid ones included. */
-export const MAX_BILLS = 500;
+/** Unpaid bills per house. Paid ones are history and aren't capped. */
+export const MAX_OPEN_BILLS = 100;
 /** Unchecked grocery items per house. */
 export const MAX_GROCERIES = 100;
 /** $100,000. */
@@ -115,9 +115,14 @@ export function addDays(date: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** The same day next month, or its last day when it has fewer: Jan 31 → Feb 28. */
-export function addMonth(date: string): string {
-  const [y, m, d] = date.split("-").map(Number);
+/**
+ * The same day next month, or its last day when it has fewer: Jan 31 → Feb 28.
+ * `day` keeps a monthly bill on its own day after a short month: with day 31,
+ * Feb 28 → Mar 31.
+ */
+export function addMonth(date: string, day?: number): string {
+  const [y, m, dd] = date.split("-").map(Number);
+  const d = day ?? dd;
   const year = m === 12 ? y + 1 : y;
   const month = m === 12 ? 1 : m + 1;
   const last = new Date(Date.UTC(year, month, 0)).getUTCDate();

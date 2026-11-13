@@ -12,7 +12,8 @@ import {
   parseDollars,
   periodOf,
 } from "../convex/lib/house";
-import { canSeeGroupAsHouse, houseMateIds } from "../convex/lib/houseAccess";
+import { canSeeGroupAsHouse, houseMateIds, listableGroupIds } from "../convex/lib/houseAccess";
+import * as listings from "../convex/listings";
 import { fakeCtx, type Row } from "./fakeDb";
 
 /* ───────────── Pure helpers ───────────── */
@@ -55,6 +56,9 @@ describe("San Francisco periods", () => {
     expect(periodOf("once", sundayNight)).toBe("once");
   });
   test("next month keeps the day, or the month's last day", () => {
+    // A bill due on the 31st stays on its day after a short month.
+    expect(addMonth("2027-02-28", 31)).toBe("2027-03-31");
+    expect(addMonth("2027-03-31", 31)).toBe("2027-04-30");
     expect(addMonth("2026-11-01")).toBe("2026-12-01");
     expect(addMonth("2026-12-15")).toBe("2027-01-15");
     expect(addMonth("2027-01-31")).toBe("2027-02-28");
@@ -80,7 +84,8 @@ type Handler = (ctx: MutationCtx, args: Record<string, unknown>) => Promise<unkn
 const call = (fn: unknown, ctx: MutationCtx, viewer: string, args: Record<string, unknown> = {}) =>
   (fn as { _handler: Handler })._handler(ctx, { viewerId: `users:${viewer}`, ...args });
 
-const PEOPLE = ["maya", "ana", "hannah", "zed", "blocky"];
+const CROWD = Array.from({ length: 22 }, (_, i) => `f${i}`);
+const PEOPLE = ["maya", "ana", "hannah", "zed", "blocky", ...CROWD];
 
 /** Maya is friends with Ana, Hannah and Blocky; Zed is a stranger; Blocky blocked Maya. */
 function world(extraGroups: Row[] = []) {
@@ -103,6 +108,7 @@ function world(extraGroups: Row[] = []) {
       ...friend("maya", "hannah"),
       ...friend("ana", "hannah"),
       ...friend("maya", "blocky"),
+      ...CROWD.flatMap((f) => friend("maya", f)),
     ],
     blocks: [{ _id: "blocks:1", userId: "users:blocky", blockedId: "users:maya", createdAt: 1 }],
     groups: [...extraGroups],
@@ -117,6 +123,8 @@ function world(extraGroups: Row[] = []) {
     userSettings: [],
     cityProfiles: [],
     profileSignals: [],
+    listings: [],
+    events: [],
   };
   const ctx = fakeCtx(tables);
   // `groups.join` records a learn-from-activity signal and schedules a recompute.
@@ -430,5 +438,175 @@ describe("chores, bills and groceries", () => {
     expect(page?.groceries.map((g) => g.text)).toEqual(["Oat milk", "Eggs"]);
     await call(house.clearChecked, ctx, "maya", { houseId });
     expect(tables.groceryItems.map((g) => g.text)).toEqual(["Oat milk"]);
+  });
+});
+
+/* ───────────── Review fixes ───────────── */
+
+describe("invites stand only while they should", () => {
+  test("a block voids the invite: no Group page, no joining", async () => {
+    const { ctx, tables, groupId, slug } = await startHouse(["ana"]);
+    tables.blocks.push({
+      _id: "blocks:2",
+      userId: "users:maya",
+      blockedId: "users:ana",
+      createdAt: 1,
+    });
+    expect(await call(groups.get, ctx, "ana", { idOrSlug: slug })).toBeNull();
+    expect(await call(house.page, ctx, "ana", { slug })).toBeNull();
+    await expect(call(groups.join, ctx, "ana", { groupId })).rejects.toThrow("invite-only");
+  });
+
+  test("an invite from someone who moved out doesn't stand; a housemate can invite again", async () => {
+    const { ctx, tables, groupId } = await startHouse(["hannah", "ana"]);
+    await call(groups.join, ctx, "hannah", { groupId });
+    await call(groups.leave, ctx, "maya", { groupId });
+    await expect(call(groups.join, ctx, "ana", { groupId })).rejects.toThrow("invite-only");
+    const houseId = tables.houses[0]._id;
+    expect(await call(house.invite, ctx, "hannah", { houseId, userIds: ["users:ana"] })).toBe(1);
+    expect(tables.houseInvites.map((i) => [i.userId, i.invitedBy])).toEqual([
+      ["users:ana", "users:hannah"],
+    ]);
+    await call(groups.join, ctx, "ana", { groupId });
+    expect(tables.groupMembers.map((m) => m.userId)).toEqual(["users:hannah", "users:ana"]);
+  });
+
+  test("anyone in the house can withdraw an invite", async () => {
+    const { ctx, tables, houseId, groupId } = await startHouse(["ana"]);
+    await expect(
+      call(house.cancelInvite, ctx, "zed", { houseId, userId: "users:ana" }),
+    ).rejects.toThrow("House not found");
+    await call(house.cancelInvite, ctx, "maya", { houseId, userId: "users:ana" });
+    expect(tables.houseInvites).toHaveLength(0);
+    expect(tables.notifications).toHaveLength(0);
+    await expect(call(groups.join, ctx, "ana", { groupId })).rejects.toThrow("invite-only");
+  });
+
+  test("declining on the Group page withdraws the house invite", async () => {
+    const { ctx, tables, groupId } = await startHouse(["ana"]);
+    await call(groups.declineInvite, ctx, "ana", { groupId });
+    expect(tables.houseInvites).toHaveLength(0);
+    await expect(call(groups.join, ctx, "ana", { groupId })).rejects.toThrow("invite-only");
+  });
+
+  test("the Group page's invite follows the house's rules: friends only, at most 20 open", async () => {
+    const { ctx, tables, groupId } = await startHouse([]);
+    await call(groups.invite, ctx, "maya", { groupId, userIds: ["users:zed", "users:blocky"] });
+    expect(tables.houseInvites).toHaveLength(0);
+    expect(tables.notifications).toHaveLength(0);
+    await call(groups.invite, ctx, "maya", { groupId, userIds: CROWD.map((f) => `users:${f}`) });
+    expect(tables.houseInvites).toHaveLength(20);
+    expect(tables.notifications).toHaveLength(20);
+    const houseId = tables.houses[0]._id;
+    await expect(
+      call(house.invite, ctx, "maya", { houseId, userIds: ["users:ana"] }),
+    ).rejects.toThrow("up to 20 open invites");
+  });
+
+  test("joining by invite respects the five-house limit", async () => {
+    const { ctx, tables } = await startHouse([]);
+    for (let i = 0; i < 4; i++)
+      await call(house.create, ctx, "ana", { name: `Ana ${i}`, invite: [] });
+    await call(house.create, ctx, "ana", { name: "Ana 4", invite: [] });
+    const maya = tables.houses[0];
+    await call(house.invite, ctx, "maya", { houseId: maya._id, userIds: ["users:ana"] });
+    await expect(call(groups.join, ctx, "ana", { groupId: maya.groupId })).rejects.toThrow(
+      "up to 5 houses",
+    );
+  });
+});
+
+describe("a house stays out of sight elsewhere in the clone", () => {
+  test("outsiders get nothing from members, events or invite candidates", async () => {
+    const { ctx, groupId } = await startHouse(["ana"]);
+    await expect(call(groups.members, ctx, "zed", { groupId })).rejects.toThrow("Group not found");
+    expect(await call(groups.events, ctx, "zed", { groupId })).toEqual({ upcoming: [], past: [] });
+    expect(await call(groups.inviteCandidates, ctx, "zed", { groupId })).toEqual([]);
+    // An invitee isn't a housemate either.
+    expect(await call(groups.inviteCandidates, ctx, "ana", { groupId })).toEqual([]);
+  });
+
+  test("Marketplace never offers or shows a House Group", async () => {
+    const { ctx, tables, groupId } = await startHouse([]);
+    const targets = (await call(listings.listingTargets, ctx, "maya")) as { _id: string }[];
+    expect(targets.map((t) => t._id)).not.toContain(groupId);
+    expect(await listableGroupIds(ctx, [groupId as never])).toBeUndefined();
+    // Even a listing already in a hidden Group isn't shown to outsiders.
+    tables.listings.push({ _id: "listings:1", groupIds: [groupId], createdAt: 1 } as never);
+    expect(await call(listings.buySellGroups, ctx, "zed")).toEqual([]);
+  });
+
+  test("a house's slug never shadows a /groups/ page", async () => {
+    const w = world();
+    const r = (await call(house.create, w.ctx, "maya", { name: "Feed", invite: [] })) as {
+      slug: string;
+    };
+    expect(r.slug).toBe("feed-house");
+  });
+});
+
+describe("bills and removals hold up", () => {
+  afterEach(() => setSystemTime());
+
+  test("a monthly bill due on the 31st stays on the 31st after February", async () => {
+    setSystemTime(new Date("2027-01-10T20:00:00Z"));
+    const { ctx, tables, houseId } = await startHouse([]);
+    let billId = await call(house.addBill, ctx, "maya", {
+      houseId,
+      title: "Rent",
+      amountCents: 100,
+      dueDate: "2027-01-31",
+      cadence: "monthly",
+    });
+    const dues: unknown[] = [];
+    for (let i = 0; i < 3; i++) {
+      await call(house.setBillPaid, ctx, "maya", { billId, paid: true });
+      const next = tables.houseBills.find((b) => b.fromBillId === billId);
+      dues.push(next?.dueDate);
+      billId = next?._id;
+    }
+    expect(dues).toEqual(["2027-02-28", "2027-03-31", "2027-04-30"]);
+  });
+
+  test("only unpaid bills count toward the cap", async () => {
+    const { ctx, tables, houseId } = await startHouse([]);
+    for (let i = 0; i < 100; i++)
+      tables.houseBills.push({
+        _id: `houseBills:old${i}`,
+        houseId,
+        title: "Old",
+        amountCents: 100,
+        cadence: "once",
+        paidBy: "users:maya",
+        paidAt: 1 + i,
+        createdBy: "users:maya",
+        createdAt: 1,
+      });
+    await call(house.addBill, ctx, "maya", {
+      houseId,
+      title: "Water",
+      amountCents: 100,
+      cadence: "once",
+    });
+    const page = (await call(house.page, ctx, "maya")) as {
+      bills: { open: unknown[]; paid: unknown[]; morePaid: boolean };
+    };
+    expect(page.bills.open).toHaveLength(1);
+    expect(page.bills.paid).toHaveLength(12);
+    expect(page.bills.morePaid).toBe(true);
+  });
+
+  test("removing something twice (a double tap) is quiet", async () => {
+    const { ctx, houseId } = await startHouse([]);
+    const itemId = await call(house.addGrocery, ctx, "maya", { houseId, text: "Eggs" });
+    await call(house.removeGrocery, ctx, "maya", { itemId });
+    await expect(call(house.removeGrocery, ctx, "maya", { itemId })).resolves.toBeUndefined();
+    const choreId = await call(house.addChore, ctx, "maya", {
+      houseId,
+      title: "Bins",
+      cadence: "weekly",
+    });
+    await call(house.removeChore, ctx, "maya", { choreId });
+    await expect(call(house.removeChore, ctx, "maya", { choreId })).resolves.toBeUndefined();
   });
 });

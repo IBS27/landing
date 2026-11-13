@@ -8,6 +8,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { BillView, ChoreView, GroceryView } from "../../../convex/house";
 import {
+  addDays,
   BILL_CADENCES,
   type BillCadence,
   CHORE_CADENCES,
@@ -80,7 +81,7 @@ function Section({
           {action}
         </header>
         {error && (
-          <p role="alert" className="px-4 pb-2 text-[13px] text-[#E41E3F]">
+          <p role="alert" className="px-4 pb-2 text-[13px] text-negative">
             {error}
           </p>
         )}
@@ -110,7 +111,7 @@ export function ChoresCard({
   members: UserSummary[];
 }) {
   const [adding, setAdding] = useState(false);
-  const { run, error } = useAction();
+  const { run, busy, error } = useAction();
   const setDone = useM(api.house.setChoreDone);
   const assign = useM(api.house.assignChore);
   const remove = useM(api.house.removeChore);
@@ -188,6 +189,7 @@ export function ChoresCard({
                   ))}
                 </select>
                 <IconButton
+                  disabled={busy}
                   label={`Remove ${c.title}`}
                   variant="ghost"
                   size={32}
@@ -269,7 +271,7 @@ function AddChore({
           </select>
         </label>
       </div>
-      {error && <p className="mt-2 text-[13px] text-[#E41E3F]">{error}</p>}
+      {error && <p className="mt-2 text-[13px] text-negative">{error}</p>}
       <div className="mt-3 flex justify-end gap-2">
         <Button variant="ghost" size="sm" onClick={onDone} disabled={busy}>
           Cancel
@@ -310,12 +312,12 @@ export function BillsCard({
   today,
 }: {
   houseId: Id<"houses">;
-  bills: { open: BillView[]; paid: BillView[]; paidCount: number };
+  bills: { open: BillView[]; paid: BillView[]; morePaid: boolean };
   today: string;
 }) {
   const [adding, setAdding] = useState(false);
   const [showPaid, setShowPaid] = useState(false);
-  const { run, error } = useAction();
+  const { run, busy, error } = useAction();
   const setPaid = useM(api.house.setBillPaid);
   const remove = useM(api.house.removeBill);
   const openTotal = bills.open.reduce((sum, b) => sum + b.amountCents, 0);
@@ -356,7 +358,7 @@ export function BillsCard({
                   </span>
                 </p>
                 <p className="text-[13px] leading-4">
-                  <span className={b.overdue ? "font-semibold text-[#E41E3F]" : "text-secondary"}>
+                  <span className={b.overdue ? "font-semibold text-negative" : "text-secondary"}>
                     {dueLabel(b, today)}
                   </span>
                   <span className="text-secondary">
@@ -368,11 +370,13 @@ export function BillsCard({
               <Button
                 size="sm"
                 variant="secondary"
+                disabled={busy}
                 onClick={() => run(() => setPaid({ billId: b._id, paid: true }))}
               >
                 I paid it
               </Button>
               <IconButton
+                disabled={busy}
                 label={`Remove ${b.title}`}
                 variant="ghost"
                 size={32}
@@ -392,7 +396,7 @@ export function BillsCard({
             onClick={() => setShowPaid((s) => !s)}
             className="flex w-full items-center gap-1.5 px-4 py-2.5 font-semibold text-[13px] text-secondary hover:bg-hover"
           >
-            Paid ({bills.paidCount})
+            Recently paid
             <ChevronDown
               size={16}
               className={cn("transition-transform", showPaid && "rotate-180")}
@@ -418,12 +422,18 @@ export function BillsCard({
                   <Button
                     size="sm"
                     variant="ghost"
+                    disabled={busy}
                     onClick={() => run(() => setPaid({ billId: b._id, paid: false }))}
                   >
                     Undo
                   </Button>
                 </li>
               ))}
+              {bills.morePaid && (
+                <li className="px-4 py-2 text-[13px] text-secondary">
+                  Showing the latest {bills.paid.length}.
+                </li>
+              )}
             </ul>
           )}
         </div>
@@ -486,7 +496,7 @@ function AddBill({
           <span className="font-semibold text-[13px] text-secondary">Due</span>
           <input
             type="date"
-            min={today}
+            min={addDays(today, -365)}
             className={field}
             value={due}
             onChange={(e) => setDue(e.target.value)}
@@ -507,7 +517,7 @@ function AddBill({
           </select>
         </label>
       </div>
-      {(problem ?? error) && <p className="mt-2 text-[13px] text-[#E41E3F]">{problem ?? error}</p>}
+      {(problem ?? error) && <p className="mt-2 text-[13px] text-negative">{problem ?? error}</p>}
       <div className="mt-3 flex justify-end gap-2">
         <Button variant="ghost" size="sm" onClick={onDone} disabled={busy}>
           Cancel
@@ -604,6 +614,7 @@ export function GroceriesCard({
                 </p>
               </div>
               <IconButton
+                disabled={busy}
                 label={`Remove ${g.text}`}
                 variant="ghost"
                 size={32}

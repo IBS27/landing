@@ -4,6 +4,7 @@ import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { isBlockedEitherWay } from "./lib/blocks";
 import { type CitedSource, type NonEmpty, resolveCitations } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
+import { houseOfGroup, listableGroupIds } from "./lib/houseAccess";
 import {
   type CategoryMeta,
   categoryBySlug,
@@ -653,7 +654,8 @@ export const buySellGroups = viewerQuery({
     const out = [];
     for (const [gid, count] of counts) {
       const g = await ctx.db.get(gid);
-      if (!g) continue;
+      // Hidden Groups (House Groups, #38, among them) only show to their members.
+      if (!g || (!g.visible && !joined.has(g._id))) continue;
       out.push({
         _id: g._id,
         name: g.name,
@@ -680,7 +682,8 @@ export const listingTargets = viewerQuery({
     const out = [];
     for (const m of memberships) {
       const g = await ctx.db.get(m.groupId);
-      if (g)
+      // A House Group (#38) is never a place to sell to strangers.
+      if (g && !(await houseOfGroup(ctx, g._id)))
         out.push({
           _id: g._id,
           name: g.name,
@@ -760,7 +763,7 @@ export const create = viewerMutation({
       vehicle: args.vehicle,
       meetup: args.meetup,
       badges: [],
-      groupIds: args.groupIds?.length ? args.groupIds : undefined,
+      groupIds: await listableGroupIds(ctx, args.groupIds),
       createdAt: now,
       updatedAt: now,
       viewCount: 0,
@@ -797,7 +800,7 @@ export const update = viewerMutation({
       rental: args.rental && { ...args.rental, views: args.rental.views ?? l.rental?.views },
       vehicle: args.vehicle,
       meetup: args.meetup,
-      groupIds: args.groupIds?.length ? args.groupIds : undefined,
+      groupIds: await listableGroupIds(ctx, args.groupIds),
       // A different unit loses the badges about the old one (#11).
       badges: badgesAfterEdit(l, {
         location,

@@ -4,7 +4,13 @@ import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { recordSignal, undoSignal } from "./lib/activity";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { activityLabel, externalPostsPerDay } from "./lib/groupActivity";
-import { admitToHouse, canSeeGroupAsHouse, recordHouseInvite } from "./lib/houseAccess";
+import {
+  admitToHouse,
+  assertCanSeeGroupAsHouse,
+  canSeeGroupAsHouse,
+  declineHouseInvite,
+  inviteThroughHouse,
+} from "./lib/houseAccess";
 import { checkPoint, neighborhoodIdAt } from "./lib/neighborhoods";
 import { notify } from "./lib/notify";
 import { canView, enrichPosts, eventVisible, loadAudience } from "./lib/posts";
@@ -437,6 +443,8 @@ export const members = viewerQuery({
   handler: async (ctx, { groupId, q }) => {
     const g = await requireGroup(ctx, groupId);
     const viewerId = ctx.viewer._id;
+    // Who lives in a House Group (#38) is for its members and invitees.
+    await assertCanSeeGroupAsHouse(ctx, groupId, viewerId);
     const rows = await groupMembers(ctx, groupId);
     const isMember = rows.some((m) => m.userId === viewerId);
     const friends = new Set(await friendIds(ctx, viewerId));
@@ -530,6 +538,9 @@ export const events = viewerQuery({
   args: { groupId: v.id("groups") },
   handler: async (ctx, { groupId }) => {
     await requireGroup(ctx, groupId);
+    // A House Group's (#38) Events are for the people who live there.
+    if (!(await canSeeGroupAsHouse(ctx, groupId, ctx.viewer._id, true)))
+      return { upcoming: [], past: [] };
     const rows = await ctx.db
       .query("events")
       .withIndex("by_group", (q) => q.eq("groupId", groupId))
@@ -574,6 +585,8 @@ export const events = viewerQuery({
 export const inviteCandidates = viewerQuery({
   args: { groupId: v.id("groups") },
   handler: async (ctx, { groupId }) => {
+    // Who's in or invited to a House Group (#38) is for the people who live there.
+    if (!(await canSeeGroupAsHouse(ctx, groupId, ctx.viewer._id, true))) return [];
     const ids = await friendIds(ctx, ctx.viewer._id);
     const summaries = await getSummaries(ctx, ids);
     const rows = await Promise.all(
@@ -699,7 +712,11 @@ export const leave = viewerMutation({
 /** Decline an invitation (removes the invite notifications). */
 export const declineInvite = viewerMutation({
   args: { groupId: v.id("groups") },
-  handler: async (ctx, { groupId }) => clearInvites(ctx, ctx.viewer._id, groupId),
+  handler: async (ctx, { groupId }) => {
+    await clearInvites(ctx, ctx.viewer._id, groupId);
+    // Declining a House Group (#38) withdraws the house invite too.
+    await declineHouseInvite(ctx, groupId, ctx.viewer._id);
+  },
 });
 
 /** Stamp the viewer's last visit ("You last visited …"). Throttled to once a minute. */
@@ -720,10 +737,10 @@ export const invite = viewerMutation({
     const viewerId = ctx.viewer._id;
     if (!(await membership(ctx, groupId, viewerId)))
       throw new ConvexError("Join the group to invite friends");
+    // A House Group's (#38) invites follow the house's rules and are sent there.
+    if (await inviteThroughHouse(ctx, g, viewerId, userIds)) return;
     for (const userId of new Set(userIds)) {
       if (await membership(ctx, groupId, userId)) continue;
-      // Inviting to a House Group (#38) records the invite `join` checks.
-      await recordHouseInvite(ctx, groupId, userId, viewerId);
       if (await alreadyInvited(ctx, groupId, userId)) continue;
       await notify(ctx, {
         userId,

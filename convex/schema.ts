@@ -1185,6 +1185,8 @@ export default defineSchema({
     amountCents: v.number(),
     /** "YYYY-MM-DD", San Francisco. */
     dueDate: v.optional(v.string()),
+    /** A monthly bill's day of the month (1–31), kept across short months. */
+    dueDay: v.optional(v.number()),
     cadence: billCadence,
     paidBy: v.optional(v.id("users")),
     paidAt: v.optional(v.number()),
@@ -1193,6 +1195,7 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_house", ["houseId", "createdAt"])
+    .index("by_house_paid", ["houseId", "paidAt"])
     .index("by_from", ["fromBillId"]),
 
   /** The house's shared grocery list. Checking an item off records who and when. */

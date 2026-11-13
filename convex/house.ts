@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
-import { internalMutation, type MutationCtx, type QueryCtx } from "./_generated/server";
+import { internalMutation, type QueryCtx } from "./_generated/server";
 import { isBlockedEitherWay } from "./lib/blocks";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import {
@@ -13,24 +13,27 @@ import {
   cleanTitle,
   isCalendarDate,
   isOverdue,
-  MAX_BILLS,
   MAX_CHORES,
   MAX_GROCERIES,
   MAX_HOUSES_PER_PERSON,
-  MAX_PENDING_INVITES,
+  MAX_OPEN_BILLS,
   NAME_MAX,
   PAID_SHOWN,
   periodOf,
   todayInSF,
 } from "./lib/house";
 import {
+  assertCanInvite,
+  houseCount,
   houseMemberIds,
   houseOfGroup,
-  inviteFor,
+  invitedIds,
+  inviteToHouse,
   isHouseMember,
   requireHouseMember,
+  standingInvite,
+  withdrawInvites,
 } from "./lib/houseAccess";
-import { notify } from "./lib/notify";
 import { friendIds, getSummaries, type UserSummary } from "./lib/users";
 
 /**
@@ -75,6 +78,7 @@ export const mine = viewerQuery({
   },
 });
 
+/** Invites that still stand (see `standingInvite`), newest first, one per house. */
 async function pendingInvites(ctx: QueryCtx, viewerId: Id<"users">) {
   const rows = await ctx.db
     .query("houseInvites")
@@ -83,20 +87,16 @@ async function pendingInvites(ctx: QueryCtx, viewerId: Id<"users">) {
     .collect();
   const out: (HouseRef & { invitedBy: UserSummary; createdAt: number })[] = [];
   const seen = new Set<string>();
-  const people = await getSummaries(
-    ctx,
-    rows.map((r) => r.invitedBy),
-  );
   for (const r of rows) {
     if (seen.has(r.houseId)) continue;
     seen.add(r.houseId);
     const house = await ctx.db.get(r.houseId);
     const group = house && (await ctx.db.get(house.groupId));
-    const by = people.get(r.invitedBy);
-    if (!house || !group || !by) continue;
-    if (await isHouseMember(ctx, house, viewerId)) continue;
-    if (await isBlockedEitherWay(ctx, viewerId, r.invitedBy)) continue;
-    out.push({ ...ref(house, group), invitedBy: by, createdAt: r.createdAt });
+    if (!house || !group || (await isHouseMember(ctx, house, viewerId))) continue;
+    const invite = await standingInvite(ctx, house, viewerId);
+    const by = invite && (await getSummaries(ctx, [invite.invitedBy])).get(invite.invitedBy);
+    if (invite && by)
+      out.push({ ...ref(house, group), invitedBy: by, createdAt: invite.createdAt });
   }
   return out;
 }
@@ -134,8 +134,8 @@ export const page = viewerQuery({
     }
     if (!house || !group) return null;
     if (!(await isHouseMember(ctx, house, viewerId))) {
-      const invite = await inviteFor(ctx, house._id, viewerId);
-      if (!invite || (await isBlockedEitherWay(ctx, viewerId, invite.invitedBy))) return null;
+      const invite = await standingInvite(ctx, house, viewerId);
+      if (!invite) return null;
       const by = (await getSummaries(ctx, [invite.invitedBy])).get(invite.invitedBy);
       return by ? { state: "invited" as const, house: ref(house, group), invitedBy: by } : null;
     }
@@ -175,19 +175,22 @@ async function houseView(ctx: QueryCtx, house: Doc<"houses">, group: Doc<"groups
   const now = Date.now();
   const memberIds = await houseMemberIds(ctx, house);
   const members = new Set(memberIds);
-  const [inviteRows, choreRows, billRows, groceryRows] = await Promise.all([
-    ctx.db
-      .query("houseInvites")
-      .withIndex("by_house_user", (q) => q.eq("houseId", house._id))
-      .collect(),
+  const [invited, choreRows, openRows, paidRows, groceryRows] = await Promise.all([
+    invitedIds(ctx, house),
     ctx.db
       .query("houseChores")
       .withIndex("by_house", (q) => q.eq("houseId", house._id))
       .collect(),
+    // Open bills, and only the latest paid ones: paid history only grows.
     ctx.db
       .query("houseBills")
-      .withIndex("by_house", (q) => q.eq("houseId", house._id))
+      .withIndex("by_house_paid", (q) => q.eq("houseId", house._id).eq("paidAt", undefined))
       .collect(),
+    ctx.db
+      .query("houseBills")
+      .withIndex("by_house_paid", (q) => q.eq("houseId", house._id).gt("paidAt", 0))
+      .order("desc")
+      .take(PAID_SHOWN + 1),
     ctx.db
       .query("groceryItems")
       .withIndex("by_house", (q) => q.eq("houseId", house._id))
@@ -201,7 +204,7 @@ async function houseView(ctx: QueryCtx, house: Doc<"houses">, group: Doc<"groups
         .first(),
     ),
   );
-  const invited = inviteRows.map((i) => i.userId).filter((id) => !members.has(id));
+  const billRows = [...openRows, ...paidRows.slice(0, PAID_SHOWN)];
   const people = await getSummaries(ctx, [
     ...memberIds,
     ...invited,
@@ -234,16 +237,10 @@ async function houseView(ctx: QueryCtx, house: Doc<"houses">, group: Doc<"groups
     addedBy: person(b.createdBy),
   });
   // Open bills by due date (undated last), then the most recently paid.
-  const open = billRows
-    .filter((b) => !b.paidAt)
-    .sort(
-      (a, b) =>
-        (a.dueDate ?? "9999").localeCompare(b.dueDate ?? "9999") || a.createdAt - b.createdAt,
-    );
-  const paid = billRows
-    .filter((b) => b.paidAt)
-    .sort((a, b) => (b.paidAt ?? 0) - (a.paidAt ?? 0))
-    .slice(0, PAID_SHOWN);
+  const open = [...openRows].sort(
+    (a, b) => (a.dueDate ?? "9999").localeCompare(b.dueDate ?? "9999") || a.createdAt - b.createdAt,
+  );
+  const paid = paidRows.slice(0, PAID_SHOWN);
 
   const groceries: GroceryView[] = [
     ...groceryRows.filter((g) => !g.checkedAt),
@@ -265,7 +262,8 @@ async function houseView(ctx: QueryCtx, house: Doc<"houses">, group: Doc<"groups
     bills: {
       open: open.map(billView),
       paid: paid.map(billView),
-      paidCount: billRows.length - open.length,
+      /** Older paid bills exist beyond those shown. */
+      morePaid: paidRows.length > PAID_SHOWN,
     },
     groceries,
     today: todayInSF(now),
@@ -291,11 +289,7 @@ export const inviteOptions = viewerQuery({
     let skip = new Set<Id<"users">>();
     if (houseId) {
       const { house } = await requireHouseMember(ctx, houseId, viewerId);
-      const invites = await ctx.db
-        .query("houseInvites")
-        .withIndex("by_house_user", (q) => q.eq("houseId", house._id))
-        .collect();
-      skip = new Set([...(await houseMemberIds(ctx, house)), ...invites.map((i) => i.userId)]);
+      skip = new Set([...(await houseMemberIds(ctx, house)), ...(await invitedIds(ctx, house))]);
     }
     const ids: Id<"users">[] = [];
     for (const id of await friendIds(ctx, viewerId)) {
@@ -309,6 +303,9 @@ export const inviteOptions = viewerQuery({
 
 /* ───────────── The house ───────────── */
 
+/** Static routes under /groups/ a Group's slug must not shadow. */
+const RESERVED_SLUGS = new Set(["create", "discover", "feed", "joins"]);
+
 async function slugFor(ctx: QueryCtx, name: string) {
   const base =
     name
@@ -319,7 +316,8 @@ async function slugFor(ctx: QueryCtx, name: string) {
       .replace(/[\s_-]+/g, "-")
       .replace(/^-+|-+$/g, "")
       .slice(0, 60) || "house";
-  let slug = base;
+  let slug = RESERVED_SLUGS.has(base) ? `${base}-house` : base;
+  const start = slug;
   for (
     let i = 2;
     await ctx.db
@@ -328,54 +326,8 @@ async function slugFor(ctx: QueryCtx, name: string) {
       .first();
     i++
   )
-    slug = `${base}-${i}`;
+    slug = `${start}-${i}`;
   return slug;
-}
-
-/** Friends only, not blocked either way: people you'd plausibly live with. */
-async function assertInvitable(ctx: QueryCtx, viewerId: Id<"users">, ids: readonly Id<"users">[]) {
-  if (ids.length === 0) return;
-  const friends = new Set(await friendIds(ctx, viewerId));
-  for (const id of ids) {
-    if (id === viewerId) throw new ConvexError("You're already in the house");
-    if (!friends.has(id) || (await isBlockedEitherWay(ctx, viewerId, id)))
-      throw new ConvexError("You can invite your friends");
-  }
-}
-
-async function sendInvites(
-  ctx: MutationCtx,
-  house: Doc<"houses">,
-  group: Doc<"groups">,
-  viewerId: Id<"users">,
-  ids: readonly Id<"users">[],
-) {
-  const members = new Set(await houseMemberIds(ctx, house));
-  const pending = await ctx.db
-    .query("houseInvites")
-    .withIndex("by_house_user", (q) => q.eq("houseId", house._id))
-    .collect();
-  const invited = new Set(pending.map((p) => p.userId));
-  const fresh = [...new Set(ids)].filter((id) => !members.has(id) && !invited.has(id));
-  if (invited.size + fresh.length > MAX_PENDING_INVITES)
-    throw new ConvexError(`A house can have up to ${MAX_PENDING_INVITES} open invites`);
-  const now = Date.now();
-  for (const userId of fresh) {
-    await ctx.db.insert("houseInvites", {
-      houseId: house._id,
-      userId,
-      invitedBy: viewerId,
-      createdAt: now,
-    });
-    await notify(ctx, {
-      userId,
-      actorId: viewerId,
-      kind: "group_invite",
-      text: `invited you to join ${group.name}.`,
-      groupId: group._id,
-    });
-  }
-  return fresh.length;
 }
 
 /**
@@ -387,15 +339,9 @@ export const create = viewerMutation({
   handler: async (ctx, args) => {
     const viewerId = ctx.viewer._id;
     const name = fail(cleanTitle(args.name, NAME_MAX, "a name for your house"));
-    const mine = await ctx.db
-      .query("groupMembers")
-      .withIndex("by_user", (q) => q.eq("userId", viewerId))
-      .collect();
-    let count = 0;
-    for (const m of mine) if (await houseOfGroup(ctx, m.groupId)) count++;
-    if (count >= MAX_HOUSES_PER_PERSON)
+    if ((await houseCount(ctx, viewerId)) >= MAX_HOUSES_PER_PERSON)
       throw new ConvexError(`You can be in up to ${MAX_HOUSES_PER_PERSON} houses`);
-    await assertInvitable(ctx, viewerId, args.invite);
+    await assertCanInvite(ctx, viewerId, args.invite);
 
     const now = Date.now();
     const slug = await slugFor(ctx, name);
@@ -426,7 +372,8 @@ export const create = viewerMutation({
     const houseId = await ctx.db.insert("houses", { groupId, createdBy: viewerId, createdAt: now });
     const house = await ctx.db.get(houseId);
     const group = await ctx.db.get(groupId);
-    if (house && group) await sendInvites(ctx, house, group, viewerId, args.invite);
+    // Friends only, no blocks; a bad invitee undoes the whole create.
+    if (house && group) await inviteToHouse(ctx, house, group, viewerId, args.invite, true);
     return { houseId, slug };
   },
 });
@@ -437,8 +384,16 @@ export const invite = viewerMutation({
   handler: async (ctx, { houseId, userIds }) => {
     const viewerId = ctx.viewer._id;
     const { house, group } = await requireHouseMember(ctx, houseId, viewerId);
-    await assertInvitable(ctx, viewerId, userIds);
-    return sendInvites(ctx, house, group, viewerId, userIds);
+    return (await inviteToHouse(ctx, house, group, viewerId, userIds, true)).length;
+  },
+});
+
+/** Withdraw someone's invite to a house you live in. */
+export const cancelInvite = viewerMutation({
+  args: { houseId: v.id("houses"), userId: v.id("users") },
+  handler: async (ctx, { houseId, userId }) => {
+    const { house } = await requireHouseMember(ctx, houseId, ctx.viewer._id);
+    await withdrawInvites(ctx, house, userId);
   },
 });
 
@@ -446,21 +401,8 @@ export const invite = viewerMutation({
 export const declineInvite = viewerMutation({
   args: { houseId: v.id("houses") },
   handler: async (ctx, { houseId }) => {
-    const viewerId = ctx.viewer._id;
     const house = await ctx.db.get(houseId);
-    if (!house) return;
-    const invites = await ctx.db
-      .query("houseInvites")
-      .withIndex("by_house_user", (q) => q.eq("houseId", houseId).eq("userId", viewerId))
-      .collect();
-    for (const i of invites) await ctx.db.delete(i._id);
-    const notes = await ctx.db
-      .query("notifications")
-      .withIndex("by_user", (q) => q.eq("userId", viewerId))
-      .order("desc")
-      .take(300);
-    for (const n of notes)
-      if (n.kind === "group_invite" && n.groupId === house.groupId) await ctx.db.delete(n._id);
+    if (house) await withdrawInvites(ctx, house, ctx.viewer._id);
   },
 });
 
@@ -540,9 +482,11 @@ export const setChoreDone = viewerMutation({
   },
 });
 
+/** Remove a chore and its history. Removing one that's already gone does nothing. */
 export const removeChore = viewerMutation({
   args: { choreId: v.id("houseChores") },
   handler: async (ctx, { choreId }) => {
+    if (!(await ctx.db.get(choreId))) return;
     const { chore } = await choreForMember(ctx, choreId, ctx.viewer._id);
     const rows = await ctx.db
       .query("choreCompletions")
@@ -580,16 +524,21 @@ export const addBill = viewerMutation({
       throw new ConvexError("Pick a real due date");
     if (args.cadence === "monthly" && args.dueDate === undefined)
       throw new ConvexError("Monthly bills need a due date");
-    const bills = await ctx.db
+    const open = await ctx.db
       .query("houseBills")
-      .withIndex("by_house", (q) => q.eq("houseId", house._id))
+      .withIndex("by_house_paid", (q) => q.eq("houseId", house._id).eq("paidAt", undefined))
       .collect();
-    if (bills.length >= MAX_BILLS) throw new ConvexError("This house has too many bills saved");
+    if (open.length >= MAX_OPEN_BILLS)
+      throw new ConvexError(`A house can have up to ${MAX_OPEN_BILLS} unpaid bills`);
     return ctx.db.insert("houseBills", {
       houseId: house._id,
       title,
       amountCents: args.amountCents,
       dueDate: args.dueDate,
+      // A monthly bill keeps its day: due on the 31st, it's due on the 30th in
+      // April and the 31st again in May.
+      dueDay:
+        args.cadence === "monthly" && args.dueDate ? Number(args.dueDate.slice(8)) : undefined,
       cadence: args.cadence,
       createdBy: viewerId,
       createdAt: Date.now(),
@@ -618,7 +567,8 @@ export const setBillPaid = viewerMutation({
           houseId: bill.houseId,
           title: bill.title,
           amountCents: bill.amountCents,
-          dueDate: addMonth(bill.dueDate),
+          dueDate: addMonth(bill.dueDate, bill.dueDay),
+          dueDay: bill.dueDay,
           cadence: "monthly",
           fromBillId: bill._id,
           createdBy: bill.createdBy,
@@ -632,9 +582,11 @@ export const setBillPaid = viewerMutation({
   },
 });
 
+/** Remove a bill. Removing one that's already gone (a double tap) does nothing. */
 export const removeBill = viewerMutation({
   args: { billId: v.id("houseBills") },
   handler: async (ctx, { billId }) => {
+    if (!(await ctx.db.get(billId))) return;
     const bill = await billForMember(ctx, billId, ctx.viewer._id);
     await ctx.db.delete(bill._id);
   },
@@ -685,9 +637,11 @@ export const setGroceryChecked = viewerMutation({
   },
 });
 
+/** Remove an item. Removing one that's already gone does nothing. */
 export const removeGrocery = viewerMutation({
   args: { itemId: v.id("groceryItems") },
   handler: async (ctx, { itemId }) => {
+    if (!(await ctx.db.get(itemId))) return;
     const item = await groceryForMember(ctx, itemId, ctx.viewer._id);
     await ctx.db.delete(item._id);
   },
@@ -797,6 +751,7 @@ export const seedDemo = internalMutation({
       title: "Rent",
       amountCents: 375_000,
       dueDate: thisFirst,
+      dueDay: 1,
       cadence: "monthly",
       paidBy: ana._id,
       paidAt: now - 10 * DAY,
@@ -808,6 +763,7 @@ export const seedDemo = internalMutation({
       title: "Rent",
       amountCents: 375_000,
       dueDate: nextFirst,
+      dueDay: 1,
       cadence: "monthly",
       fromBillId: rentPaid,
       createdBy: ana._id,
