@@ -11,6 +11,7 @@ import {
 import { type ReactNode, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { useToast } from "@/features/marketplace/toast";
+import { CheckInCard, WeekActivity } from "@/landing/journeys/CheckInCard";
 import { toEvent, toGroup, toProfile } from "@/landing/links";
 import { LandingMap, type RouteStop } from "@/landing/map/LandingMap";
 import { LandingPage } from "@/landing/shell/LandingPage";
@@ -82,6 +83,7 @@ export function JourneysPage() {
       description="A plan for each weekend of your first 90 days, from real Events and Group plans near you."
     >
       <div className="flex max-w-[760px] flex-col gap-4">
+        <CheckInCard />
         {data === undefined ? <Loading /> : <ThisWeekView data={data} />}
         <PastWeeks currentWeekOf={data?.week?.weekOf ?? null} />
       </div>
@@ -541,6 +543,7 @@ function PastWeeks({ currentWeekOf }: { currentWeekOf: string | null }) {
                       </span>
                     ))}
               </p>
+              {w.checkIn && <WeekActivity activity={w.checkIn} />}
             </div>
           </li>
         ))}
