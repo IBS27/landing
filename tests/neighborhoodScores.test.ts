@@ -309,6 +309,9 @@ describe("getting around at night", () => {
         "2. walking home from BART after 10pm, which streets are well lit / have people around",
       ),
     ).toBe(false);
+    expect(
+      isNightQuote("walking home from BART after 10pm — which streets are well lit at night"),
+    ).toBe(false);
     expect(nightExcerpt("1. we walk home along Irving at night, it stays busy til 10")).toBe(
       "we walk home along Irving at night, it stays busy til 10",
     );

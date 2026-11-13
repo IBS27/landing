@@ -437,7 +437,7 @@ const LABEL_WORDS =
 const QUESTION =
   /^(?:how|what|which|where|when|why|who|is|are|does|do|did|can|could|should|would|will|anyone|any)\b/i;
 /** A question after a comma ("walking home after 10pm, which streets are well lit"). */
-const QUESTION_CLAUSE = /[,;:]\s*(?:how|what|which|where|who|anyone)\b/i;
+const QUESTION_CLAUSE = /[,;:—–]\s*(?:how|what|which|where|who|anyone)\b/i;
 /** Quotes are at most this long, cut around the words if needed. */
 const QUOTE_MAX = 200;
 /** Shorter sentences are fragments (a list item, a heading), not something a local said. */
