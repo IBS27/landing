@@ -17,7 +17,6 @@ import type { Audience } from "./lib/posts";
 import {
   BADGE,
   farAwaySignal,
-  isNewAccount,
   type ListingSignal,
   lowPriceSignal,
   type NetworkEvidence,
@@ -55,8 +54,6 @@ export const CHAT_CHECK_WINDOW = 40;
 const CHAT_FLAGS_MAX = 100;
 /** A chat is checked at most once per this long, even when asked again. */
 export const CHAT_CHECK_COOLDOWN_MS = 30_000;
-/** New listers whose network the Find list looks up, per query. */
-const NETWORK_LOOKUPS_MAX = 6;
 const CHECK_KIND = "rentalChatCheck";
 
 type VerifiedBadge =
@@ -342,54 +339,6 @@ export async function chatNotes(
 export const forConversation = viewerQuery({
   args: { conversationId: v.id("conversations") },
   handler: (ctx, { conversationId }) => chatNotes(ctx, ctx.viewer._id, conversationId),
-});
-
-/** Rentals for the Find page stub, with how many things to check each has. */
-export const rentalsToReview = viewerQuery({
-  args: {},
-  handler: async (ctx) => {
-    const viewerId = ctx.viewer._id;
-    const recent = await recentRentals(ctx);
-    const live = recent.filter(
-      (l) => l.status === "active" && l.rental && l.rental.listingType !== "sale",
-    );
-    // Network lookups for new listers, shared across their listings and capped per query.
-    const networks = new Map<Id<"users">, NetworkEvidence | null>();
-    const out = [];
-    for (const l of live.slice(0, 24)) {
-      const lister = await ctx.db.get(l.sellerId);
-      if (!lister || lister._id === viewerId) continue;
-      // Past the lookup cap, a new lister's network is unknown: no new-account signal.
-      let known = true;
-      let network: NetworkEvidence | null = null;
-      if (isNewAccount(lister)) {
-        if (!networks.has(lister._id) && networks.size < NETWORK_LOOKUPS_MAX)
-          networks.set(lister._id, networkEvidence(await listerNetwork(ctx, viewerId, lister._id)));
-        known = networks.has(lister._id);
-        network = networks.get(lister._id) ?? null;
-      }
-      const signals = [
-        lowPriceSignal(l, recent),
-        known ? newAccountSignal(lister, network) : null,
-        reusedPhotosSignal(l, recent),
-        farAwaySignal(l, lister),
-      ].filter(Boolean).length;
-      const verified = l.badges.some((b) => b.kind === BADGE.identity || b.kind === BADGE.property);
-      out.push({
-        _id: l._id,
-        title: l.title,
-        price: l.price,
-        photo: l.photos[0] ?? null,
-        neighborhood: l.location.neighborhood ?? null,
-        signals,
-        verified,
-      });
-    }
-    // Ones with something to check or a verified badge first: the demo set.
-    return out
-      .sort((a, b) => Number(b.signals > 0 || b.verified) - Number(a.signals > 0 || a.verified))
-      .slice(0, 12);
-  },
 });
 
 /* ── Chat check (Ember) ─────────────────────────────────────────────────── */
