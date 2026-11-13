@@ -923,7 +923,8 @@ export const place = internalMutation({
       ctx,
       doc,
       accepted,
-      only ? undefined : { vibe, budget: total },
+      // A refused room request (its budget is below what is placed) stores nothing.
+      only || (budget !== undefined && budget < before.spent) ? undefined : { vibe, budget: total },
     );
     // Only what found a spot: a pick that fits nowhere isn't placed or counted.
     const idOf = new Map(placed.map((p) => [p.listingId, p.id]));

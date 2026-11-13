@@ -162,6 +162,11 @@ const KIND_RULES: readonly { words: string[]; kind: PlacementKind; size?: Size }
   { words: ["vase", "clock", "candle", "sculpture", "basket", "planter"], kind: "decor" },
 ];
 
+/** Every word that names a kind of thing, longest first, for matching a thing's own phrase. */
+export const ITEM_WORDS: readonly string[] = KIND_RULES.flatMap((r) => r.words).sort(
+  (a, b) => b.length - a.length,
+);
+
 /** Categories whose listings are never home furnishings, whatever the title says. */
 const NOT_HOME = new Set([
   "vehicles",

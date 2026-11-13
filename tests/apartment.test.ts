@@ -1574,7 +1574,9 @@ describe("apartment.furnish: one furniture budget (#153)", () => {
       budget: 10,
       picks: [],
     });
-    expect(w.unit().furnishing).toMatchObject({ vibe: "japandi", budget: 2000 });
+    // A refused request stores nothing: neither its budget nor its vibe.
+    expect(w.unit().furnishing?.budget).toBe(2000);
+    expect(w.unit().furnishing?.vibe).not.toBe("japandi");
     const view = await w.me.get();
     expect(view.spent).toBeLessThanOrEqual(view.unit?.furnishing?.budget ?? 0);
   });

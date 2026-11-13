@@ -611,3 +611,20 @@ describe("vibeWords (#150)", () => {
     expect(vibeWords("add a reading lamp")).toBe("add a reading lamp");
   });
 });
+
+describe("furnishRequest: a mood inside a thing's own phrase (#153)", () => {
+  test("describes the thing, not the place", () => {
+    expect(furnishRequest("a cozy armchair")).toEqual({
+      type: "items",
+      kinds: ["chair"],
+      want: "cozy",
+    });
+    expect(furnishRequest("a cozy rug").type).toBe("items");
+    expect(furnishRequest("cozy reading lamp")).toMatchObject({ type: "items", kinds: ["lamp"] });
+  });
+  test("a comma or a joining word keeps it a look for the place", () => {
+    expect(furnishRequest("cozy, lots of plants").type).toBe("room");
+    expect(furnishRequest("cozy with plants").type).toBe("room");
+    expect(furnishRequest("make it cozy with a big rug").type).toBe("room");
+  });
+});

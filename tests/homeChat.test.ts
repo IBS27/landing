@@ -1284,6 +1284,22 @@ describe("homeChatProblems", () => {
     expect(problems("make it cozy and warm", cozy)).toEqual([]);
     // And navigation itself is always fine.
     expect(problems("show my apartment", { kind: "show_apartment" })).toEqual([]);
+    // A message that names things is never answered by furnishing the room, or with other things.
+    expect(problems("add a reading lamp", cozy)[0]).toContain("use add_items");
+    expect(problems("a cozy armchair", cozy)[0]).toContain("use add_items");
+    expect(
+      problems("add a reading lamp", { kind: "add_items", items: ["lamp", "rug"] })[0],
+    ).toContain("asks only for lamp");
+    // An explicit ask for a named thing is one on the Map tab too, whatever the rules' keywords open.
+    expect(problems("find me a reading lamp", lamp, "map")).toEqual([]);
+    expect(problems("add a lamp from Marketplace", lamp, "map")).toEqual([]);
+    // With things in the apartment, no reply may say nothing is placed.
+    expect(
+      homeChatProblems(
+        { ...ok, text: "Nothing has been placed yet.", command: { kind: "show_apartment" } },
+        input({ message: "show my apartment", you }),
+      )[0],
+    ).toContain("never that nothing is placed");
   });
   test("show_apartment needs a place", () => {
     const show = { ...ok, command: { kind: "show_apartment" } } as HomeChatOutput;

@@ -176,11 +176,22 @@ describe("progressive generation", () => {
       note: NO_DETAILS_NOTE,
     });
     expect(h.scene().explanation).toBe("Layout from evidence No details");
+    // A details retry that adds nothing leaves the build partial, with its note.
     await h.request(true);
-    expect(h.scene().generation).toEqual({ status: "details", revision: 2, autoApply: true });
+    expect(h.scene().generation).toEqual({
+      status: "details",
+      revision: 2,
+      autoApply: true,
+      note: NO_DETAILS_NOTE,
+    });
+    await h.generate();
+    expect(h.scene().generation).toMatchObject({ status: "partial", note: NO_DETAILS_NOTE });
+    // One that adds the finishes ends ready, and the note is gone.
+    await h.request(true);
     fetchModel = async () => detailReply();
     await h.generate();
-    expect(h.scene().generation).toEqual({ status: "ready", revision: 3, autoApply: true });
+    expect(h.scene().generation).toMatchObject({ status: "ready" });
+    expect(h.scene().generation).not.toHaveProperty("note");
   });
   test("a build that loses most of its fixtures is partial (#153)", async () => {
     const h = generationHarness();

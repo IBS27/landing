@@ -1,5 +1,5 @@
 import type { AiFallbackReason } from "../validators";
-import { FURNISH_LIMITS, kindsNamed } from "./furnish";
+import { FURNISH_LIMITS, ITEM_WORDS, kindsNamed } from "./furnish";
 import { hasProtected, REDACTED, redactProtected } from "./protectedText";
 import type { PlacementKind } from "./unitScene";
 
@@ -270,6 +270,23 @@ export function furnishAsk(
 /** Words about the whole place, beyond `FURNISH_VERBS` and `FURNISH_MOODS`. */
 const ROOM_CUES = / (make it|make (my|our|the|this) \w+|feel|feels|look) /;
 
+/**
+ * A mood word inside a named thing's own phrase ("a cozy armchair", "cozy
+ * reading lamp") describes the thing, not the place. A comma or a joining word
+ * breaks the phrase: "cozy, lots of plants" and "cozy with plants" are a look.
+ */
+const ITEM_MOOD = new RegExp(
+  `\\b(?:vibes?|cozy|cosy|style|styled|styling)\\s+(?:(?!(?:with|and|or|plus|lots|of|some|a|an|the)\\b)[a-z-]+\\s+){0,2}(?:${ITEM_WORDS.map(
+    (w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+  ).join("|")})s?\\b`,
+  "gi",
+);
+
+/** Whether a message asks, with an add cue, for things it names ("find me a reading lamp"). */
+export function asksForItems(text: string): boolean {
+  return ADD_CUES.test(words(text)) && kindsNamed(text).kinds.length > 0;
+}
+
 export type FurnishRequest =
   /** Style or furnish the whole apartment: `vibe` is the look, without the ask and the price. */
   | { type: "room"; vibe: string }
@@ -288,7 +305,10 @@ export function furnishRequest(text: string): FurnishRequest {
   const t = words(text);
   const room =
     !kinds.length ||
-    (!ADD_CUES.test(t) && (FURNISH_VERBS.test(t) || FURNISH_MOODS.test(t) || ROOM_CUES.test(t)));
+    (!ADD_CUES.test(t) &&
+      (FURNISH_VERBS.test(t) ||
+        ROOM_CUES.test(t) ||
+        FURNISH_MOODS.test(words(text.replace(ITEM_MOOD, " ")))));
   return room
     ? { type: "room", vibe: vibeWords(text) }
     : { type: "items", kinds: kinds.slice(0, FURNISH_LIMITS.onlyMax), want };

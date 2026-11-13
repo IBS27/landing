@@ -390,6 +390,8 @@ export async function startGeneration(
     explanation: undefined,
     generation: {
       status: retryDetails ? "details" : "layout",
+      // A details retry that adds nothing leaves the build as it was, with its note (#153).
+      ...(retryDetails && doc.generation?.note ? { note: doc.generation.note } : {}),
       revision: nextRevision,
       autoApply:
         doc.manuallyEdited === false ||
@@ -608,7 +610,11 @@ export const generate = internalAction({
         if (details.output.appearance) candidate.appearance = details.output.appearance;
         // A few details dropped in validation is a finished build (#153). The full text stays
         // in `explanation` for the editor; the Apartment tab shows only the short note.
-        const outcome = buildOutcome(candidate.appearance, details.output.omitted);
+        // A details retry that adds nothing leaves the build partial, as it was.
+        const outcome =
+          args.detailsOnly && !details.output.appearance
+            ? { status: "partial" as const, note: doc.generation?.note ?? NO_DETAILS_NOTE }
+            : buildOutcome(candidate.appearance, details.output.omitted);
         if (
           !(await publish(
             candidate,

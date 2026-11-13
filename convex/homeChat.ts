@@ -15,8 +15,10 @@ import { agentSources } from "./ai/sources";
 import { aiEnabled } from "./ai/status";
 import { viewerCrew } from "./crews";
 import {
+  asksForItems,
   deniesPlacing,
   FURNISH_BUDGET_MAX,
+  furnishRequest,
   hasContact,
   numbersIn,
   type RulesWhy,
@@ -311,11 +313,27 @@ export function homeChatProblems(out: HomeChatOutput, input: HomeChatInput): str
     // Navigation never furnishes: what Landing's rules read as another request ("show my
     // apartment", "open my roommates page") is that request, whatever came before. What
     // they can't read at all (`none`) stays Muse's call.
+    // An explicit ask for named things ("find me a reading lamp" on the Map tab) is one too,
+    // even where the rules' broader keywords would open a page.
     const ruled = rulesOutput(input).command.kind;
-    if (ruled !== "furnish" && ruled !== "add_items" && ruled !== "none")
+    const explicit = command.kind === "add_items" && asksForItems(input.message);
+    if (ruled !== "furnish" && ruled !== "add_items" && ruled !== "none" && !explicit)
       problems.push(
         `command: this message asks for ${ruled}, not for furnishing. Earlier turns are context, never a request to repeat: answer this message, with ${ruled}`,
       );
+    // A message that names things asks for those things, never for the whole room.
+    const request = furnishRequest(input.message);
+    if (request.type === "items") {
+      const named = request.kinds;
+      if (command.kind === "furnish")
+        problems.push(
+          `command: the message names things to add (${named.join(", ")}): use add_items with those, never furnish`,
+        );
+      else if (command.items.some((k) => !named.includes(k)))
+        problems.push(
+          `command.items: the message asks only for ${named.join(", ")}; add nothing else`,
+        );
+    }
     if (command.kind === "furnish") {
       const vibe = vibeProblem(command.vibe);
       if (vibe) problems.push(`command.vibe: ${vibe}`);
@@ -328,15 +346,21 @@ export function homeChatProblems(out: HomeChatOutput, input: HomeChatInput): str
           "command.budget: only an amount the person wrote in this message, or leave it out",
         );
     }
-    if (deniesPlacing(text))
-      problems.push(
-        "text: the picks are placed in the person's private 3D model for them to review; say nothing is bought or sent, never that nothing is placed",
-      );
     if (out.plan.budgetMax !== null)
       problems.push("plan.budgetMax: a furniture budget is not the rent budget; use null");
   } else if (!validCommand(command, { neighborhoods: chatHoods(input), listingIds }))
     problems.push(
       "command: use only neighborhood slugs from input.neighborhoods, listing ids from input.rentals, and two different neighborhoods to compare",
+    );
+  // True while furnishing, and whenever things are already in the apartment.
+  if (
+    (command.kind === "furnish" ||
+      command.kind === "add_items" ||
+      (input.you.apartment?.items ?? 0) > 0) &&
+    deniesPlacing(text)
+  )
+    problems.push(
+      "text: picks are placed in the person's private 3D model for them to review; say nothing is bought or sent, never that nothing is placed",
     );
   if (command.kind === "show_apartment" && !input.you.apartment)
     problems.push(
