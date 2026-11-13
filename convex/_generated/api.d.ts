@@ -154,6 +154,7 @@ import type * as stories from "../stories.js";
 import type * as subleases from "../subleases.js";
 import type * as trust from "../trust.js";
 import type * as users from "../users.js";
+import type * as unitScenes from "../unitScenes.js";
 import type * as validators from "../validators.js";
 import type * as vouches from "../vouches.js";
 import type * as weekendRoutes from "../weekendRoutes.js";
@@ -311,6 +312,7 @@ declare const fullApi: ApiFromModules<{
   subleases: typeof subleases;
   trust: typeof trust;
   users: typeof users;
+  unitScenes: typeof unitScenes;
   validators: typeof validators;
   vouches: typeof vouches;
   weekendRoutes: typeof weekendRoutes;

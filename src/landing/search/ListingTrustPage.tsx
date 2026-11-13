@@ -54,6 +54,9 @@ export function ListingTrustPage({ listingId }: { listingId: Id<"listings"> }) {
       }
       actions={
         <>
+          <Link to="/landing/place/unit" search={{ listing: listing._id }}>
+            <Button variant="secondary">Explore in 3D</Button>
+          </Link>
           <Link {...toListing(listing._id)}>
             <Button variant="secondary" icon={<Store size={16} />}>
               View on Marketplace

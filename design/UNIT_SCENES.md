@@ -1,10 +1,39 @@
-> [!NOTE]
-> 🤖 **GPT-6 Astra responding on behalf of IBS27**
+# Unit reconstruction and placement (#37)
 
-Implementing #37 with the requested whole-unit scope: listing/room photos, floor plans and video feed Muse Wonder; validated scene data drives a reusable Three.js viewer with dollhouse, floor-plan and collision-aware walkthrough modes. Keep per-user Marketplace placements separate from generated geometry. Estimated measurements remain labeled, sources inspectable, and manual room creation works without AI.
+A private unit model can start from a room scan, a rental listing, or uploaded media. Muse Wonder interprets the evidence into bounded JSON geometry, followed by a second pass for visible surface finishes and fixture assemblies. The application renders that geometry with Three.js and React Three Fiber; it never executes generated JavaScript.
 
-Files: new convex/unitScenes.ts, convex/lib/unitScene*.ts, src/landing/move-in/unit/*, a thin /landing/place/unit route, tests and a reproducible public-listing experiment. Minimal entry links in RoomPage and ListingTrustPage. Extend convex/ai/model.ts and agent.ts for task-selected Muse Wonder and authorized media content; retain the existing runAgent/jobs/validation path.
+## Behavior
 
-Schema: new unitScenes table (ownerId, optional roomId/listingId, source media references, scene, placements, revision, jobId, generation status/provenance, timestamps), indexed by owner and owner+room/listing. Scene geometry is versioned and bounded; placements retain Marketplace listing IDs. No changes to existing room or listing fields. New API: unitScenes.get, forRoom/forListing, create, save, requestGeneration, upload media and internal generation/saving functions. Owner checks on every read/write; no public scene cache containing private uploads.
+Enter from the rental details page or Your room. Add floor-plan images, photos, or MP4/WebM walkthroughs using file uploads or direct HTTPS media URLs. Listing-page and YouTube-page scraping is deliberately outside the app; those pages are not media files. A source can be opened from its evidence card. Source uploads are limited to 25 MB and 20 items per unit.
 
-Coordinate shared schema/generated API additions with #33/#34 and the RoomPage entry point with #26. Existing rooms/listing APIs retain their contracts. Verify with typecheck/lint, geometry and ownership/concurrency tests, browser interactions, and an actual Muse run on public source material if credentials are available. No shared Convex deployment changes from this worktree. PR remains draft for human review.
+Generation runs through `startJob`, `runJob`, and `runAgent` using `muse-wonder-1.0`. Both passes share an eight-minute deadline. Their output is a candidate, separate from the saved scene. A failed detail pass retains the valid layout. Applying it preserves furniture placements. Layout and source revisions protect against late results and stale saves. Item overlap warnings identify placements needing attention after regeneration.
+
+The viewer supports an orbiting dollhouse, a cutaway option, a walkthrough with wall/door/fixture collision and room jumps, and an SVG floor plan with draggable furniture and shared corner handles. Numeric controls provide an alternative to dragging. The canvas loads lazily. Floor-plan editing remains usable when WebGL is unavailable.
+
+Furniture uses dimensioned proxy shapes for sofa, bed, table and storage. Users can attach saved Marketplace listings, enter dimensions, rotate and move items. The proxy is not a reconstructed product mesh. All scene distances use meters; existing measured room sizes in feet are converted at import. Every model inference stores evidence keys and a measured/estimated/unknown basis. The interface does not claim furniture will fit from estimated dimensions.
+
+Without AI, users can enter measured rectangular-room dimensions and place/save furniture. Failed reconstruction leaves the current model intact.
+
+## Visual reconstruction
+
+The reference is [Rumi](https://github.com/IBS27/rumi), particularly its separation of measured captured surfaces from a simulated editable room. This implementation follows the editable reconstruction approach with Muse rather than importing Rumi's LiDAR pipeline or other model providers.
+
+The optional scene `appearance` stores shared materials, assignments to room floors/walls, and observed fixture assemblies with source keys and uncertainty notes. The renderer supports bounded boxes, cylinders and ellipsoids, physical texture repeat sizes, beveled edges, window framing, baseboards, a reflection environment and ambient occlusion. Material grain, tile grids and trim profiles are procedural approximations. There is no captured-surface mesh or photographic texture projection.
+
+Validation checks IDs, evidence, physical bounds, total geometry/storage budgets, and doorway approaches. Walking and placement warnings use conservative fixture footprints. The viewer can hide the details and inspect the structural layout. Changing room corners clears the appearance layer to avoid stale placement; scale calibration transforms the unit and inferred fixtures together while keeping user-placed furniture dimensions unchanged. Saved geometry and calibration notes accompany regeneration as reference.
+
+The real listing trial, generated outputs, costs, reproduction instructions and fidelity assessment are in [the experiment README](../scripts/unit-scenes/README.md). This is an estimated reconstruction, not a measured digital twin. Rumi's captured-surface fidelity would require calibrated overlapping imagery and recovered camera poses/geometry, or a scan package; a text model's scene descriptions cannot establish that accuracy.
+
+## Data and APIs
+
+New table `unitScenes` stores ownerId, optional roomId/listingId, bounded scene data, source media references, placements, revision, optional job/candidate/run references, and timestamps. Indexes: `by_owner`, `by_owner_room`, `by_owner_listing`. Existing room/listing records are unchanged.
+
+Public functions: `get`, `mine`, `create`, `save`, `uploadUrl`, `addSource`, `requestGeneration`, `acceptCandidate`. Internal functions: `load`, `generate`, `saveCandidate`. Viewer wrappers retain the project's demo-persona identity contract. Every unit read/write checks ownership; linked room ownership and listing visibility are rechecked. Uploaded media uses storage IDs and resolves URLs on read.
+
+The shared model adapter now supports typed image/video content and task-level model choice. Existing text tasks retain their default. Media tasks require a private audience, and their cache key includes that audience and media. Model accounting follows the selected model, including failed requests.
+
+## Verification and deployment
+
+`bun run typecheck`, `bun run lint`, and `bun run test`. Tests cover geometry, door traversal, rotated furniture, source references, ownership, measured-room import, stale writes/results, preserved placements, real Muse fixtures and multimodal requests. The public experiment uses the production task, model adapter and editor without writing to a Convex deployment.
+
+The new Convex module must be deployed by the deployment owner through the normal main-branch workflow. Agent worktrees do not run Convex CLI deployment/codegen commands. Production-backend browser verification remains pending that deployment; local registered-handler tests and the standalone editor are verified separately.

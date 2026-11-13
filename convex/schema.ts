@@ -6,6 +6,7 @@ import { dismissal } from "./lib/dismissals";
 import { interestId } from "./lib/interests";
 import { lifestyleAnswers } from "./lib/lifestyle";
 import { profileSignal } from "./lib/profileSignals";
+import { unitSceneFields } from "./lib/unitSceneRecord";
 import { roomKind, roomVibe } from "./lib/vibe";
 import {
   aiJobStatus,
@@ -47,6 +48,10 @@ import {
 } from "./validators";
 
 export default defineSchema({
+  unitScenes: defineTable(unitSceneFields)
+    .index("by_owner", ["ownerId", "updatedAt"])
+    .index("by_owner_room", ["ownerId", "roomId"])
+    .index("by_owner_listing", ["ownerId", "listingId"]),
   users: defineTable({
     name: v.string(),
     firstName: v.string(),

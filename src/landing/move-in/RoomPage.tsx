@@ -72,6 +72,13 @@ export function RoomPage({ roomId }: { roomId?: string }) {
               <div className="flex flex-col gap-4">
                 <RoomScan room={room} />
                 <RoomDetails key={room._id} room={room} />
+                <Link
+                  to="/landing/place/unit"
+                  search={{ room: room._id }}
+                  className="block rounded-lg border border-divider bg-card p-4 font-semibold text-link"
+                >
+                  Explore in 3D and place furniture
+                </Link>
               </div>
               <div className="flex flex-col gap-4">
                 <VibeCard key={room._id} room={room} />
