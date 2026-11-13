@@ -9,14 +9,9 @@ import {
   todayInSF,
 } from "./lib/cityProfileFacts";
 import { viewerMutation, viewerQuery } from "./lib/functions";
-import {
-  canSeeListing,
-  currentPlace,
-  type PlaceStatus,
-  placeProblem,
-  placeStatus,
-} from "./lib/myPlace";
+import { canSeeListing, currentPlace } from "./lib/myPlace";
 import { isNeighborhoodSlug } from "./lib/neighborhoods";
+import { type PlaceStatus, placeProblem, placeStatus } from "./lib/placeRules";
 
 /**
  * My place (#132): the apartment the person chose, set from a rental on

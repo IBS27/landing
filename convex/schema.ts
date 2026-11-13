@@ -6,7 +6,7 @@ import { dismissal } from "./lib/dismissals";
 import { billCadence, choreCadence } from "./lib/house";
 import { interestId } from "./lib/interests";
 import { lifestyleAnswers } from "./lib/lifestyle";
-import { placeStatus } from "./lib/myPlace";
+import { placeStatus } from "./lib/placeRules";
 import { profileSignal } from "./lib/profileSignals";
 import { rentalMedia } from "./lib/rentalMedia";
 import { unitSceneFields } from "./lib/unitSceneRecord";

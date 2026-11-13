@@ -4,10 +4,10 @@ import { Box, Home, Lock, MapPin, Plus, Search, Sofa, Store } from "lucide-react
 import { useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { toNeighborhood, toRentalCheck, toRoom, toUnit } from "@/landing/links";
-import { price } from "@/lib/format";
+import { plural, price } from "@/lib/format";
 import { Button, Card, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
-import { placeStatusLabel } from "../../../convex/lib/myPlace";
+import { placeStatusLabel } from "../../../convex/lib/placeRules";
 import { PlaceForm } from "./PlaceForm";
 import { dateLabel, errorText } from "./placeParts";
 
@@ -88,14 +88,16 @@ function CurrentPlace({ place }: { place: Current }) {
   const title = listing?.title ?? `Your place in ${neighborhood?.name ?? "San Francisco"}`;
   const when =
     place.status === "moving_in"
-      ? `Moving in ${dateLabel(place.moveIn)}`
+      ? `Move-in ${dateLabel(place.moveIn)}`
       : place.status === "moving_out" && place.moveOut
-        ? `Moving out ${dateLabel(place.moveOut)}`
+        ? `Move-out ${dateLabel(place.moveOut)}`
         : `Moved in ${dateLabel(place.moveIn)}`;
   const facts = [
     listing && `${price(listing.price)}/mo`,
     listing?.bedrooms != null &&
-      (listing.bedrooms === 0 ? "Studio" : `${listing.bedrooms} bd · ${listing.bathrooms} ba`),
+      (listing.bedrooms === 0
+        ? "Studio"
+        : `${plural(listing.bedrooms, "bed")}, ${plural(listing.bathrooms ?? 0, "bath")}`),
   ].filter(Boolean);
 
   return (

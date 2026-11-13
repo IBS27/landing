@@ -67,6 +67,7 @@ import type * as lib_neighborhoodPage from "../lib/neighborhoodPage.js";
 import type * as lib_neighborhoodScores from "../lib/neighborhoodScores.js";
 import type * as lib_neighborhoods from "../lib/neighborhoods.js";
 import type * as lib_notify from "../lib/notify.js";
+import type * as lib_placeRules from "../lib/placeRules.js";
 import type * as lib_places from "../lib/places.js";
 import type * as lib_polls from "../lib/polls.js";
 import type * as lib_posts from "../lib/posts.js";
@@ -231,6 +232,7 @@ declare const fullApi: ApiFromModules<{
   "lib/neighborhoodScores": typeof lib_neighborhoodScores;
   "lib/neighborhoods": typeof lib_neighborhoods;
   "lib/notify": typeof lib_notify;
+  "lib/placeRules": typeof lib_placeRules;
   "lib/places": typeof lib_places;
   "lib/polls": typeof lib_polls;
   "lib/posts": typeof lib_posts;

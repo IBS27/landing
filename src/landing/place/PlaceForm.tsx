@@ -5,7 +5,7 @@ import { Button } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { type NeighborhoodSlug, SF_NEIGHBORHOODS } from "../../../convex/lib/cityProfileFacts";
-import { PLACE_STATUSES, type PlaceStatus, placeProblem } from "../../../convex/lib/myPlace";
+import { PLACE_STATUSES, type PlaceStatus, placeProblem } from "../../../convex/lib/placeRules";
 import { errorText, Field, fieldCls, todayInSF } from "./placeParts";
 
 const HOODS = SF_NEIGHBORHOODS.filter((n) => !("park" in n && n.park)).sort((a, b) =>
@@ -69,6 +69,8 @@ function FormBody({ place, done }: { place?: EditablePlace; done: () => void }) 
   // Moved out with no date means today; the server fills it in.
   const leftToday = status === "moved_out" && !moveOut && problem === "Add the day you moved out";
   const blocking = leftToday ? null : problem;
+  // Nothing chosen yet isn't a mistake: Save just waits for a neighborhood.
+  const shown = !place && !neighborhood ? null : blocking;
 
   async function run(action: () => Promise<unknown>) {
     setBusy(true);
@@ -175,9 +177,9 @@ function FormBody({ place, done }: { place?: EditablePlace; done: () => void }) 
           </Field>
         )}
       </div>
-      {(blocking || error) && (
+      {(shown || error) && (
         <p role="alert" className="text-[13px] text-negative">
-          {error ?? blocking}
+          {error ?? shown}
         </p>
       )}
       <div className="flex flex-wrap items-center gap-2 border-divider border-t pt-4">

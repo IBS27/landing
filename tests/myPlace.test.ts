@@ -2,7 +2,8 @@ import { afterEach, beforeEach, describe, expect, setSystemTime, test } from "bu
 import type { Id } from "../convex/_generated/dataModel";
 import type { MutationCtx } from "../convex/_generated/server";
 import { getProfile, saveStatedFacts } from "../convex/lib/cityProfile";
-import { currentPlace, placeProblem } from "../convex/lib/myPlace";
+import { currentPlace } from "../convex/lib/myPlace";
+import { placeProblem } from "../convex/lib/placeRules";
 import * as museKnows from "../convex/museKnows";
 import * as myPlace from "../convex/myPlace";
 import * as rooms from "../convex/rooms";

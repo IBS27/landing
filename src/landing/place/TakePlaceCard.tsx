@@ -4,17 +4,17 @@ import { useId, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { toMyPlace } from "@/landing/links";
 import { Modal } from "@/ui/overlays";
-import { Button } from "@/ui/primitives";
+import { Button, Card } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-import { placeProblem } from "../../../convex/lib/myPlace";
+import { placeProblem } from "../../../convex/lib/placeRules";
 import { dateLabel, errorText, Field, fieldCls, todayInSF } from "./placeParts";
 
 /**
  * "I'm taking this place" on a rental (#132): makes it the viewer's place on
  * My Place. Private: the lister isn't told.
  */
-export function TakePlaceButton({
+export function TakePlaceCard({
   listingId,
   availableFrom,
 }: {
@@ -25,19 +25,37 @@ export function TakePlaceButton({
   const isMine = useQ(api.myPlace.isMine, { listingId });
   const [open, setOpen] = useState(false);
   if (isMine === undefined) return null;
-  if (isMine)
-    return (
-      <Link {...toMyPlace()}>
-        <Button variant="secondary" icon={<Check size={16} />}>
-          Your place
-        </Button>
-      </Link>
-    );
   return (
-    <>
-      <Button variant="secondary" icon={<Home size={16} />} onClick={() => setOpen(true)}>
-        I'm taking this place
-      </Button>
+    <Card className="p-4">
+      {isMine ? (
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-highlight text-accent">
+            <Check size={18} aria-hidden />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="font-bold text-[17px] text-primary leading-5">This is your place</h2>
+            <Link {...toMyPlace()} className="text-[13px] text-link hover:underline">
+              Go to My Place
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <>
+          <h2 className="font-bold text-[17px] text-primary leading-5">Taking this place?</h2>
+          <p className="mt-1 text-[13px] text-secondary leading-4">
+            Add it to My Place. Only you can see it.
+          </p>
+          <Button
+            variant="soft"
+            block
+            className="mt-3"
+            icon={<Home size={16} />}
+            onClick={() => setOpen(true)}
+          >
+            I'm taking this place
+          </Button>
+        </>
+      )}
       <Modal open={open} onOpenChange={setOpen} title="Make this your place">
         {open && (
           <TakeForm
@@ -47,7 +65,7 @@ export function TakePlaceButton({
           />
         )}
       </Modal>
-    </>
+    </Card>
   );
 }
 
