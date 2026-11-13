@@ -3,9 +3,13 @@ import { useM, useQ, useViewer } from "@/app/viewer";
 import { LandingPage } from "@/landing/shell/LandingPage";
 import { Card, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
+import { RoommateCandidates } from "./Candidates";
 import { type LifestyleActions, LifestyleView } from "./LifestyleView";
 
-/** `/landing/place/roommates`: the viewer's opt-in lifestyle answers for roommate matching. */
+/**
+ * `/landing/place/roommates`: roommate candidates from the viewer's network,
+ * and the opt-in lifestyle answers they're matched on.
+ */
 export function LifestylePage() {
   const viewer = useViewer();
   const data = useQ(api.roommates.myLifestyle, {});
@@ -30,8 +34,8 @@ export function LifestylePage() {
 
   return (
     <LandingPage
-      title="Roommate lifestyle"
-      description="How you like to live at home, for matching with roommates from your network."
+      title="Roommates"
+      description="Find a roommate through people you know, matched on how you like to live at home."
       className="max-w-[720px]"
     >
       {data === undefined ? (
@@ -41,7 +45,12 @@ export function LifestylePage() {
         </Card>
       ) : (
         // Keyed by viewer, so switching persona never carries one person's draft to another.
-        <LifestyleView key={viewer._id} state={data} actions={actions} />
+        <LifestyleView
+          key={viewer._id}
+          state={data}
+          actions={actions}
+          candidates={<RoommateCandidates />}
+        />
       )}
     </LandingPage>
   );

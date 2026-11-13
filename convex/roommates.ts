@@ -6,13 +6,14 @@ import {
   deleteLifestyle as deleteRow,
   getOwnLifestyle,
   matchProfileInputs,
+  roommateCandidates,
   saveLifestyleAnswers,
   setLifestyleSharing as setSharing,
 } from "./lib/roommates";
 
 /**
- * Roommate matching (#21–#23). This file: the viewer's own lifestyle answers.
- * Each function reads or writes only the viewer's row.
+ * Roommate matching (#21–#23): the viewer's own lifestyle answers (each
+ * function reads or writes only the viewer's row) and their candidates.
  */
 
 /**
@@ -55,4 +56,13 @@ export const setLifestyleSharing = viewerMutation({
 export const deleteLifestyle = viewerMutation({
   args: {},
   handler: (ctx) => deleteRow(ctx, ctx.viewer._id),
+});
+
+/**
+ * Roommate candidates from the viewer's network who share their answers,
+ * best first, each with why they appear. Null while the viewer doesn't share.
+ */
+export const candidates = viewerQuery({
+  args: {},
+  handler: (ctx) => roommateCandidates(ctx, ctx.viewer._id),
 });

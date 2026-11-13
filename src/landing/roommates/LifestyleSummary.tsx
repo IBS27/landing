@@ -5,17 +5,16 @@ import { Switch } from "@/features/misc/settings/controls";
 import { cn } from "@/lib/format";
 import { Modal } from "@/ui/overlays";
 import { Button, Card } from "@/ui/primitives";
-import { budgetLabel } from "../../../convex/lib/cityProfileFacts";
+import { budgetLabel, moveInLabel, neighborhoodLabel } from "../../../convex/lib/cityProfileFacts";
 import {
   answeredCount,
   answerLabel,
-  type BudgetRange,
   type LifestyleAnswers,
   QUESTION_COUNT,
   STEPS,
   WORKDAY_COPY,
-  type Workday,
 } from "../../../convex/lib/lifestyle";
+import type { ProfileInputs } from "../../../convex/lib/roommates";
 import { questionTitle } from "./questions";
 
 /** The sharing switch, with exactly what is shared, with whom, and how to stop. */
@@ -29,7 +28,7 @@ export function SharingCard({
   shared: boolean;
   sharedAt: number | null;
   canShare: boolean;
-  fromProfile: { budget: BudgetRange | null; workday: Workday | null };
+  fromProfile: ProfileInputs;
   onShare: (shared: boolean) => Promise<void>;
 }) {
   const [busy, setBusy] = useState(false);
@@ -65,7 +64,7 @@ export function SharingCard({
           <p className="text-[13px] text-secondary leading-4" aria-live="polite">
             {shared
               ? `On${sharedAt ? ` since ${new Date(sharedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}` : ""}. People who match with you can see your answers.`
-              : "Off. Only you can see your answers."}
+              : "Off. Only you can see your answers. Share them to see roommate candidates from your network."}
           </p>
         </div>
         <Switch
@@ -90,17 +89,7 @@ export function SharingCard({
           <Link to="/landing/profile" className="font-semibold text-link hover:underline">
             City Profile
           </Link>
-          :{" "}
-          {fromProfile.budget || fromProfile.workday
-            ? [
-                fromProfile.budget &&
-                  `your budget (${budgetLabel(fromProfile.budget)}; matches only see whether budgets overlap, never the amounts)`,
-                fromProfile.workday && `your workday (${WORKDAY_COPY[fromProfile.workday].label})`,
-              ]
-                .filter(Boolean)
-                .join(" and ")
-            : "nothing yet. Add your budget and workday there to compare them too"}
-          .
+          : {profileList(fromProfile)}.
         </li>
         <li>
           <span className="font-semibold text-primary">Never used:</span> age, gender, religion,
@@ -110,6 +99,27 @@ export function SharingCard({
       </ul>
     </Card>
   );
+}
+
+/** What matching compares from the City Profile, in a sentence. */
+function profileList(p: ProfileInputs) {
+  const items = [
+    p.budget &&
+      `your budget (${budgetLabel(p.budget)}; matches only see whether budgets overlap, never the amounts)`,
+    p.workday && `your workday (${WORKDAY_COPY[p.workday].label})`,
+    p.moveInMonth && `your move-in month (${moveInLabel({ month: p.moveInMonth })})`,
+    p.neighborhoods.length > 0 &&
+      `your neighborhoods (${p.neighborhoods.map(neighborhoodLabel).join(", ")})`,
+  ].filter((x): x is string => typeof x === "string");
+  if (items.length === 0)
+    return "nothing yet. Add your budget, workday, move-in month and neighborhoods there to compare them too";
+  const joined =
+    items.length === 1 ? items[0] : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
+  const plans =
+    p.moveInMonth || p.neighborhoods.length > 0
+      ? ". Candidates see your move-in month and neighborhoods only when theirs are the same"
+      : "";
+  return `${joined}${plans}`;
 }
 
 /** Every answer by step, with Edit per step and Delete all. */

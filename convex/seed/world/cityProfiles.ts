@@ -72,6 +72,20 @@ export const cityProfileSeeds: CityProfileSeed[] = [
     briefDaysAgo: 3,
   },
   {
+    // Not a persona: an engineer whose lease ends the month Maya moves, looking
+    // for a roommate in the Mission, so her roommate candidates (#22) show a
+    // friend of friends with the same plans.
+    username: "luis.hernandez",
+    budget: { min: 2000, max: 2600 },
+    moveInMonthsFromNow: 3,
+    neighborhoods: ["mission", "noe-valley"],
+    transport: ["bike", "bart"],
+    schedule: { workHours: "day", workplace: "office", weekendsFree: true },
+    interests: ["cycling", "cooking", "board_games", "hiking", "coffee"],
+    goals: ["find_roommates", "find_place"],
+    briefDaysAgo: 4,
+  },
+  {
     // Night-shift nurse at SF General who climbs and keeps a car for the commute home.
     username: "sofia.alvarez",
     budget: { min: 2200, max: 2900 },
