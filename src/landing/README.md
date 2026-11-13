@@ -10,9 +10,9 @@ Landing is part of the Facebook clone: a section at `/landing`, like Marketplace
   - `LandingLayout.tsx`: Landing's 360px sidebar (the clone's `AppRail`) with the page beside it. Facebook's TopNav and ChatDock come from the root layout, as on every other page.
   - `sections.ts`: the nav. Add a section here.
   - `LandingPage.tsx`: `LandingPage` (title, description, actions, centered column) and the `ComingSoon` stub card.
-  - `HomePage.tsx`: Landing Home (`/landing`).
+  - `HomePage.tsx`: an earlier Home stub, no longer used. Landing Home is `home/LandingHome.tsx`.
   - `icons.tsx`: `BmLanding`, the app's mark.
-- **Links to Facebook objects:** always use `src/landing/links.ts`: `<Link {...toGroup(group)}>`, `toEvent`, `toProfile`, `toListing`, `toConversation`.
+- **Links to Facebook objects:** always use `src/landing/links.ts`: `<Link {...toGroup(group)}>`, `toEvent`, `toProfile`, `toListing`, `toConversation`. It also has links between Landing's own pages: `toHome({ view: "apartment" })`, `toLandingPage("inbox")`, `toRentalCheck`, `toNeighborhood`, `toUnit`.
 - **Viewer:** `useViewer()`, `useQ` and `useM` from `src/app/viewer.tsx`, the same as the rest of the app. Persona switching and dark mode come from the account menu in Facebook's TopNav.
 
 ## Sections
@@ -29,12 +29,23 @@ Landing is part of the Facebook clone: a section at `/landing`, like Marketplace
 
 `/landing/welcome` is the City Profile onboarding brief (#3).
 
+## Home
+
+Home (`/landing`) is `home/LandingHome.tsx`: one chat with Muse over two tabs.
+
+- **Map** (the default): a map you travel into, from the globe to a neighborhood with 3D buildings. From city level in it shows Events and Groups by default, the Move-in Crew at neighborhood level and "Your place" at an approximate point. Layer chips (Homes, Events, Groups, Marketplace, Crew) turn layers on and off, and chat commands set them.
+- **Apartment** (`/landing?view=apartment`): the person's place in 3D (`apartment/ApartmentStage.tsx`), furnished from the same chat. See "The Apartment tab" in `design/UNIT_SCENES.md`.
+
+The chat dock (`home/ChatDock.tsx`) is shared by both tabs. A reply can carry cards (`home/ChatCards.tsx`): rentals to choose from, and the items Muse placed. The chat log lives in the browser (`home/useChatLog.ts`), and the map's state in `home/useHomeMap.ts`. "Explore" (`home/HomeChrome.tsx`) lists every Landing page, so nothing depends on asking with the right phrase.
+
 ## Area folders
 
 Create a folder when you first add code to it.
 
 | Folder           | What                                                               | Section         |
 | ---------------- | ------------------------------------------------------------------ | --------------- |
+| `home/`          | Landing Home: the Muse chat over the Map and Apartment tabs        | Home            |
+| `apartment/`     | Home's Apartment tab: the place in 3D, furnished from the chat     | Home            |
 | `profile/`       | City Profile, onboarding brief, what Muse knows                    | City Profile    |
 | `inbox/`         | Muse approval queue for outgoing drafts                            | Inbox           |
 | `search/`        | Apartment search, verified listings, vouching                      | Find            |

@@ -5,6 +5,7 @@ import { MODEL } from "../convex/ai/model";
 import { agentSources } from "../convex/ai/sources";
 import {
   answer,
+  freshCardReasons,
   HOME_CHAT_TASK,
   type HomeChatInput,
   type HomeChatOutput,
@@ -167,6 +168,8 @@ function actionCtx(tables: Record<string, Row[]>) {
       switch (getFunctionName(ref)) {
         case "homeChat:context":
           return homeChatContext(db, args);
+        case "homeChat:cardReasonsNow":
+          return freshCardReasons(db, args);
         case "ai/sources:resolve":
           return agentSources(db, args.sources, args.shownTo);
         case "ai/runs:cached":
@@ -550,6 +553,32 @@ describe("homeChat.reply: the stated plan", () => {
       { value: { month: expect.stringMatching(/^20\d\d-01$/) }, evidence: { kind: "chat" } },
     ]);
     expect(requests).toHaveLength(0);
+  });
+
+  test("a first budget: the cards carry the reasons it gives them, each cited", async () => {
+    process.env.AI_ENABLED = "false";
+    const tables = world();
+    // Someone new: no brief and no facts, so the rentals rank with no reasons.
+    tables.cityProfiles = [];
+    tables.cityProfileFacts = [];
+    const before = await ask("rooms", tables);
+    expect(before.reply.rentals.length).toBeGreaterThan(0);
+    expect(before.reply.rentals.flatMap((c) => c.reasons)).toEqual([]);
+
+    const { reply } = await ask("I'm moving to SF in January with a $2,400 budget", tables);
+    expect(reply.saved[0]).toBe("Budget up to $2,400/mo");
+    // The same rentals the text was written about, now with reasons.
+    expect(reply.rentals.map((c) => c.id)).toEqual(before.reply.rentals.map((c) => c.id));
+    const cheap = reply.rentals.find((c) => c.id === "lCheap");
+    expect(cheap?.reasons).toContainEqual({
+      text: "$1,500, inside your budget",
+      sources: [
+        { label: "Sunny room near Dolores · $1,500/mo", href: "/landing/find/listing/lCheap" },
+      ],
+    });
+    for (const card of reply.rentals)
+      for (const r of card.reasons) expect(r.sources.length).toBeGreaterThan(0);
+    expect(JSON.stringify(reply.rentals)).not.toMatch(/muslim|women/i);
   });
 
   test("Muse's plan is saved once it matches the message", async () => {

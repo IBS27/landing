@@ -24,6 +24,18 @@ Validation checks IDs, evidence, physical bounds, total geometry/storage budgets
 
 The real listing trial, generated outputs, costs, reproduction instructions and fidelity assessment are in [the experiment README](../scripts/unit-scenes/README.md). This is an estimated reconstruction, not a measured digital twin. Rumi's captured-surface fidelity would require calibrated overlapping imagery and recovered camera poses/geometry, or a scan package; a text model's scene descriptions cannot establish that accuracy.
 
+## The Apartment tab (#150)
+
+Landing Home (`/landing`) has two tabs over one chat with Muse: the map, and **Apartment** (`/landing?view=apartment`), the person's place as a full-bleed 3D model. The 3D editor above stays the place for changing the layout by hand.
+
+**Choosing a place.** A reply in the chat can carry rental cards. "Choose this place" on a card asks for the move-in date, then calls `myPlace.takeListing` and `apartment.build`. `build` makes the place's unit if it has none and starts the 3D generation above when nothing has been built or tried, AI is on and Muse can read some of the listing's media. It is safe to call again and never fails for want of media: the tab then shows the starter room. `apartment.get` returns the place (with an approximate point for the map, never an address), the unit with its state (`starter`, `building`, `ready`, `partial`, `failed`), the placed items and what they cost.
+
+**Furnishing.** "Make it cozy and warm under $1,500" becomes the chat command `furnish { vibe, budget? }`, and the client calls the `apartment.furnish` action. Muse (task `muse.furnish`) picks from Marketplace listings the viewer can see: the best vibe matches first, then furniture and household basics. Each pick is checked again before it is placed: still a visible, active listing that isn't the viewer's own or already placed, a valid size, and inside the budget that is left. The picks are laid out in the unit where there is room, and the vibe and budget are remembered on the unit, so "add a lamp" keeps the look. `apartment.addItem` places one listing the same way; `moveItem` and `removeItem` change what is there. A unit holds at most 80 items. The reply lists each pick with its price and reason, and the running total against the budget. Nothing is bought, messaged or sent: the items sit in a private model for the person to review. Over the rate limit (4 runs a minute, 20 an hour), with AI off, or when Muse's answer is rejected, Landing's rules pick instead.
+
+**Item models.** Each placed listing gets its own 3D model: a bounded list of the same primitives unit fixtures use (`convex/lib/itemModel.ts`), never code, assets or URLs. One job per change builds them with Muse (task `muse.itemModel`), a few at a time under a shared deadline, reading up to three of the listing's photos for that owner only. Models are stored per owner and listing in `itemModels` and are private. Flat things (rugs, posters) show the listing's first photo on one face. Until a model is ready, when it fails, and whenever AI is off, the tab shows a stand-in shape of the right kind and size.
+
+**Without AI** the whole flow still works: the starter room, Landing's rules for the picks, and stand-in shapes.
+
 ## Data and APIs
 
 New table `unitScenes` stores ownerId, optional roomId/listingId, bounded scene data, source media references, placements, revision, optional job/candidate/run references, and timestamps. Indexes: `by_owner`, `by_owner_room`, `by_owner_listing`. Existing room/listing records are unchanged.

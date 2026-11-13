@@ -18,6 +18,10 @@ import type {
 
 export const SRC = { pins: "lm-pins", hoods: "lm-hoods", route: "lm-route" } as const;
 export const HOOD_FILL = "lm-hood-fill";
+export const BUILDINGS = "lm-buildings";
+/** Buildings rise between these zooms, so a tilted neighborhood reads in 3D and the city view stays flat. */
+const BUILDINGS_FROM = 13.8;
+const BUILDINGS_FULL = 14.5;
 
 export type Pin =
   | { kind: "listing"; key: string; pin: ListingPin }
@@ -124,6 +128,8 @@ function palette(dark: boolean) {
         label: "#b0b3b8",
         halo: "rgba(28,28,29,0.85)",
         casing: "#252728",
+        roofLow: "#3b3d40",
+        roofHigh: "#55585d",
       }
     : {
         blue: "#0866ff",
@@ -131,11 +137,79 @@ function palette(dark: boolean) {
         label: "#65686c",
         halo: "rgba(255,255,255,0.9)",
         casing: "#ffffff",
+        roofLow: "#f3f2ee",
+        roofHigh: "#d9d8d2",
       };
 }
 
-/** Add (or re-add after a style swap) every source and layer, then fill them. */
-export function addOverlays(map: MlMap, data: OverlayData, dark: boolean) {
+/**
+ * The basemap's buildings as extruded blocks (Landing Home): they fade and
+ * rise in as the camera gets close. Heights come from the tiles
+ * (`render_height`, `render_min_height`, in meters). Does nothing when the
+ * style has no `building` layer.
+ */
+function addBuildings(map: MlMap, c: ReturnType<typeof palette>, before: string | undefined) {
+  if (map.getLayer(BUILDINGS)) return;
+  const flat = map
+    .getStyle()
+    .layers.find((l) => "source-layer" in l && l["source-layer"] === "building");
+  if (!flat || !("source" in flat) || typeof flat.source !== "string") return;
+  const rise = (height: string) => [
+    "interpolate",
+    ["linear"],
+    ["zoom"],
+    BUILDINGS_FROM,
+    0,
+    BUILDINGS_FULL,
+    ["coalesce", ["get", height], 0],
+  ];
+  map.addLayer(
+    {
+      id: BUILDINGS,
+      type: "fill-extrusion",
+      source: flat.source,
+      "source-layer": "building",
+      minzoom: BUILDINGS_FROM,
+      // Parts drawn inside a larger building's outline would double up.
+      filter: ["!=", ["get", "hide_3d"], true],
+      paint: {
+        // Taller buildings a shade deeper, so the skyline separates from the blocks around it.
+        "fill-extrusion-color": [
+          "interpolate",
+          ["linear"],
+          ["coalesce", ["get", "render_height"], 0],
+          0,
+          c.roofLow,
+          60,
+          c.roofHigh,
+        ],
+        "fill-extrusion-height": rise("render_height") as never,
+        "fill-extrusion-base": rise("render_min_height") as never,
+        "fill-extrusion-opacity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          BUILDINGS_FROM,
+          0,
+          BUILDINGS_FULL,
+          0.9,
+        ],
+      },
+    },
+    before,
+  );
+}
+
+/**
+ * Add (or re-add after a style swap) every source and layer, then fill them.
+ * `buildings` also extrudes the basemap's buildings (Landing Home).
+ */
+export function addOverlays(
+  map: MlMap,
+  data: OverlayData,
+  dark: boolean,
+  { buildings = false }: { buildings?: boolean } = {},
+) {
   const c = palette(dark);
   // Draw under the basemap's labels: before the first symbol layer above every road and area.
   const styleLayers = map.getStyle().layers;
@@ -217,6 +291,9 @@ export function addOverlays(map: MlMap, data: OverlayData, dark: boolean) {
       },
     });
   }
+
+  // Above the neighborhood shapes, under the route line, labels and pins.
+  if (buildings) addBuildings(map, c, firstLabel);
 
   if (!map.getSource(SRC.route)) {
     map.addSource(SRC.route, { type: "geojson", data: empty });

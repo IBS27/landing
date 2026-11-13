@@ -410,33 +410,42 @@ Never choose or describe places by who lives there or by the person's own traits
  * A cited record as a chat source the client can open. Code builds every link,
  * and only in-app ones: an outside page is named, never linked.
  */
-function sourceLink(s: CitedSource): ChatSource | null {
+function sourceLink(s: CitedSource, label: typeof cap = cap): ChatSource | null {
   switch (s.kind) {
     case "listing":
-      return rentalSource({ id: s.listingId, title: cap(s.title, 120), price: s.price });
+      return rentalSource({ id: s.listingId, title: label(s.title, 120), price: s.price });
     case "event":
       return {
-        label: `${cap(s.title, 120)} · ${new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/Los_Angeles" }).format(s.startAt)}`,
+        label: `${label(s.title, 120)} · ${new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/Los_Angeles" }).format(s.startAt)}`,
         href: `/events/${s.eventId}`,
       };
     case "group":
-      return { label: cap(s.name, 120), href: `/groups/${s.slug}` };
+      return { label: label(s.name, 120), href: `/groups/${s.slug}` };
     case "external":
-      return { label: `${cap(s.title, 120)} · ${cap(s.publisher, 60)}` };
+      return { label: `${label(s.title, 120)} · ${label(s.publisher, 60)}` };
     default:
       return null;
   }
 }
 
 const cap = (text: string, max: number) => redactProtected(text.trim().slice(0, max));
+/** For text Landing's own ranking wrote, which Muse never reads. */
+const uncut = (text: string, max: number) => text.trim().slice(0, max);
 
-/** A ranked rental's reasons for its card: the strongest, each with the sources it cites. */
+/**
+ * A ranked rental's reasons for its card: the strongest, each with the sources
+ * it cites. Code wrote the lines (convex/lib/rentalFit.ts) and Find shows the
+ * same ones, so a station named "Church St" stays whole.
+ */
 function cardReasons(
   reasons: readonly { text: string; sources: readonly CitedSource[] }[],
 ): ChatRentalCard["reasons"] {
   return reasons.slice(0, CARD_REASONS_MAX).map((r) => ({
-    text: cap(r.text, CARD_REASON_TEXT_MAX),
-    sources: r.sources.flatMap((s) => sourceLink(s) ?? []).slice(0, CARD_REASON_SOURCES_MAX),
+    text: uncut(r.text, CARD_REASON_TEXT_MAX),
+    // Titles other people wrote stay redacted; a transit feed's "J Church" doesn't.
+    sources: r.sources
+      .flatMap((x) => (x.kind === "external" ? sourceLink(x, uncut) : sourceLink(x)) ?? [])
+      .slice(0, CARD_REASON_SOURCES_MAX),
   }));
 }
 
@@ -599,6 +608,31 @@ export async function homeChatContext(ctx: QueryCtx, a: ObjectType<typeof contex
   return { input, links, cards, limited };
 }
 
+/**
+ * The reasons on a reply's rental cards, read again once the reply has saved
+ * the plan the message stated. The first time someone says their budget, the
+ * rentals were ranked before their City Profile had it, with no reasons to
+ * show. Same rentals in the same order (the reply's text names them): only
+ * their reasons change.
+ */
+const reasonsArgs = { viewerId: v.id("users"), ids: v.array(v.string()) };
+export const cardReasonsNow = internalQuery({
+  args: reasonsArgs,
+  handler: (ctx, a) => freshCardReasons(ctx, a),
+});
+
+/** `cardReasonsNow`'s handler. */
+export async function freshCardReasons(
+  ctx: QueryCtx,
+  { viewerId, ids }: ObjectType<typeof reasonsArgs>,
+): Promise<{ id: string; reasons: ChatRentalCard["reasons"] }[]> {
+  const wanted = new Set(ids.slice(0, RENTALS_MAX));
+  const ranked = await rankedRentals(ctx, viewerId);
+  return ranked.results
+    .filter((r) => wanted.has(r._id))
+    .map((r) => ({ id: r._id, reasons: cardReasons(r.reasons) }));
+}
+
 /* ── The stated plan ── */
 
 const planArgs = { viewerId: v.id("users"), plan: movePlan };
@@ -753,7 +787,17 @@ export async function answer(ctx: ActionCtx, a: ObjectType<typeof replyArgs>): P
     const saved: string[] = statesPlan(out.plan)
       ? await ctx.runMutation(internal.homeChat.savePlan, { viewerId: a.viewerId, plan: out.plan })
       : [];
-    return toReply(out, via, c.input, c.links, { cards: c.cards, saved });
+    let cards: ChatRentalCard[] = c.cards;
+    if (saved.length && cards.length) {
+      // The cards were ranked before the plan was saved: show the reasons it gives them now.
+      const fresh: Awaited<ReturnType<typeof freshCardReasons>> = await ctx.runQuery(
+        internal.homeChat.cardReasonsNow,
+        { viewerId: a.viewerId, ids: cards.map((x) => x.id) },
+      );
+      const reasons = new Map(fresh.map((f) => [f.id, f.reasons]));
+      cards = cards.map((x) => ({ ...x, reasons: reasons.get(x.id) ?? x.reasons }));
+    }
+    return toReply(out, via, c.input, c.links, { cards, saved });
   };
   const rules = () => finish(rulesOutput(c.input), "rules");
   if (c.limited || !c.input.message.trim()) return rules();

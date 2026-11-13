@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { LandingHome } from "@/landing/home/LandingHome";
+import { type HomeSearch, LandingHome } from "@/landing/home/LandingHome";
 
 export const Route = createFileRoute("/landing/")({
-  component: LandingHome,
+  validateSearch: (s: Record<string, unknown>): HomeSearch =>
+    s.view === "apartment" ? { view: "apartment" } : {},
+  component: () => {
+    const { view } = Route.useSearch();
+    return <LandingHome view={view ?? "map"} />;
+  },
 });
