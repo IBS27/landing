@@ -13,7 +13,8 @@ export const MOVE_SIZES: readonly { id: MoveSize; label: string; hours: number }
   { id: "3br", label: "3 bedrooms", hours: 8 },
 ];
 
-export type DiscountWhen = "weekday" | "student" | "always";
+/** "other": the deal has a condition code can't check (booking ahead, a code), so it is never taken off. */
+export type DiscountWhen = "weekday" | "student" | "always" | "other";
 
 export type RateCard = {
   /** Dollars per hour for the whole crew. */
@@ -39,7 +40,7 @@ export type Estimate = {
   truckFee: number;
   /** Discounts that apply to this move (weekday date, always-on), best one only. */
   applied: { label: string; percent: number; amount: number } | null;
-  /** Discounts that might apply (student), shown but not taken off. */
+  /** Discounts that might apply (student, other conditions), shown but not taken off. */
   ifEligible: { label: string; percent: number }[];
   total: number;
 };
@@ -69,7 +70,7 @@ export function estimate(card: RateCard, move: Move): Estimate {
     truckFee: card.truckFee,
     applied,
     ifEligible: card.discounts
-      .filter((d) => d.when === "student")
+      .filter((d) => d.when === "student" || d.when === "other")
       .map(({ label, percent }) => ({ label, percent })),
     total: subtotal - (applied?.amount ?? 0),
   };
@@ -108,12 +109,26 @@ export function rateFromText(texts: readonly string[]): RateCard | null {
     const rest = m[2].toLowerCase();
     const when: DiscountWhen = /student/.test(rest)
       ? "student"
-      : /week ?day|mid-?week|mon|tue|wed|thu/.test(rest)
-        ? "weekday"
-        : "always";
+      : /book|ahead|advance|code|first|refer|minimum|veteran|senior|military/.test(rest)
+        ? "other"
+        : /week ?day|mid-?week|mon|tue|wed|thu/.test(rest)
+          ? "weekday"
+          : "always";
     discounts.push({ label: `${percent}% off ${m[2].trim()}`.trim(), percent, when });
   }
   return { hourly, crew, minHours, truckFee, discounts };
+}
+
+/**
+ * The total a mover quoted in a chat reply: the first dollar amount that isn't
+ * an hourly rate ("$155/hr", "$155 an hour"). Null when there is none.
+ */
+export function quotedPrice(text: string | undefined): number | null {
+  for (const m of (text ?? "").matchAll(
+    /\$\s?(\d{1,2},\d{3}|\d{3,5})(?![\d,])(\s*(?:\/|per|an|a)\s*(?:hr|hour)\b|\s*hourly\b)?/gi,
+  ))
+    if (!m[2]) return Number(m[1].replace(/,/g, ""));
+  return null;
 }
 
 /* ── Negotiating a quote ───────────────────────────────────────────────── */

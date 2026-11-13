@@ -702,7 +702,12 @@ export const rateCard = v.object({
     v.object({
       label: v.string(),
       percent: v.number(),
-      when: v.union(v.literal("weekday"), v.literal("student"), v.literal("always")),
+      when: v.union(
+        v.literal("weekday"),
+        v.literal("student"),
+        v.literal("always"),
+        v.literal("other"),
+      ),
     }),
   ),
 });

@@ -1,10 +1,15 @@
 import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
-import type { Doc, Id } from "./_generated/dataModel";
-import { internalAction, internalMutation, internalQuery } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
+import {
+  internalAction,
+  internalMutation,
+  internalQuery,
+  type MutationCtx,
+} from "./_generated/server";
 import { defineTask, runAgent } from "./ai/agent";
 import { runJob, startJob } from "./ai/jobs";
-import { type CitedSource, type NonEmpty, resolveCitations } from "./lib/citations";
+import { assertCitable, type CitedSource, type NonEmpty, resolveCitations } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { NEIGHBORHOODS } from "./lib/listings";
 import {
@@ -16,6 +21,7 @@ import {
   isWeekdayMove,
   MOVE_SIZES,
   type Move,
+  quotedPrice,
   type RateCard,
   rateFromText,
   rateProblems,
@@ -23,7 +29,7 @@ import {
 import { loadAudience } from "./lib/posts";
 import { dropDraft, logEvent, propose } from "./lib/proposals";
 import { getSummary } from "./lib/users";
-import { moveSize, rateCard } from "./validators";
+import { citations, moveSize, rateCard } from "./validators";
 
 /**
  * Mover quotes (#28). Moving companies are Facebook Pages (category "Movers").
@@ -96,6 +102,7 @@ const moverRates = defineTask<{ mover: string }, typeof ratesOutput>({
   instructions: `You read a moving company's Facebook Page posts and extract its published rates.
 hourly: dollars per hour for the whole crew. crew: number of movers in that crew. minHours: the hour minimum. truckFee: any flat truck, trip or travel fee (0 if none).
 discounts: each deal the posts state, with its percent and when it applies: "weekday" (midweek or Monday to Thursday), "student" (needs a student ID), or "always".
+A deal with any other condition (booking ahead, a promo code, a minimum size) is "other".
 Use only what the posts say; never guess a number. sourceKeys: the keys of the posts you used.`,
   output: ratesOutput,
   cites: (o) => o.sourceKeys,
@@ -194,12 +201,12 @@ export const gather = internalAction({
           sources: m.postIds.map((postId) => ({ kind: "post" as const, postId })),
           shownTo: "everyone",
         }).catch(() => null);
-        if (!rates) continue;
+        if (!rates?.cited) continue;
         const { sourceKeys: _keys, ...card } = rates.output;
         await ctx.runMutation(internal.moverQuotes.saveRates, {
           pageId: m.pageId,
           card,
-          citations: rates.cited ?? undefined,
+          citations: rates.cited,
           via: rates.via,
         });
         done++;
@@ -240,19 +247,16 @@ export const saveRates = internalMutation({
   args: {
     pageId: v.id("users"),
     card: rateCard,
-    citations: v.optional(v.object({ first: v.any(), rest: v.array(v.any()) })),
+    citations,
     via: v.union(v.literal("model"), v.literal("cache"), v.literal("fallback")),
   },
   handler: async (ctx, a) => {
+    await assertCitable(ctx, a.citations, "everyone");
     const row = await ctx.db
       .query("moverRates")
       .withIndex("by_page", (q) => q.eq("pageId", a.pageId))
       .unique();
-    const doc = {
-      ...a,
-      citations: a.citations as Doc<"moverRates">["citations"],
-      extractedAt: Date.now(),
-    };
+    const doc = { ...a, extractedAt: Date.now() };
     if (row) await ctx.db.replace(row._id, doc);
     else await ctx.db.insert("moverRates", doc);
   },
@@ -319,14 +323,25 @@ export const saveOutreach = internalMutation({
       proposalId,
       requestedAt: a.requestedAt,
     };
-    if (old) await ctx.db.replace(old._id, row);
-    else await ctx.db.insert("moverOutreach", row);
+    if (old) {
+      await expireIfPending(ctx, old.proposalId);
+      if (old.counterProposalId) await expireIfPending(ctx, old.counterProposalId);
+      await ctx.db.replace(old._id, row);
+    } else await ctx.db.insert("moverOutreach", row);
   },
 });
 
-/* ── Side by side ─────────────────────────────────────────────────────── */
+/** Expires a draft that a newer one replaces, if the user hasn't acted on it yet. */
+async function expireIfPending(ctx: MutationCtx, proposalId: Id<"proposals">) {
+  const p = await ctx.db.get(proposalId);
+  if (p?.status !== "pending") return;
+  const now = Date.now();
+  await dropDraft(ctx, p);
+  await ctx.db.patch(p._id, { status: "expired", decidedAt: now, updatedAt: now });
+  await logEvent(ctx, p._id, p.ownerId, "expired", "system", now);
+}
 
-const PRICE = /\$\s?(\d{1,2},\d{3}|\d{3,5})(?![\d,])/;
+/* ── Side by side ─────────────────────────────────────────────────────── */
 
 /** The viewer's move, and one column per mover: rates, estimate, deals, request status, quote. */
 export const mine = viewerQuery({
@@ -368,22 +383,19 @@ export const mine = viewerQuery({
           );
           if (reply) {
             status = "replied";
-            const m = reply.text?.match(PRICE);
-            if (m)
-              quoted = {
-                price: Number(m[1].replace(/,/g, "")),
-                text: reply.text ?? "",
-                at: reply.createdAt,
-              };
+            const price = quotedPrice(reply.text);
+            if (price !== null) quoted = { price, text: reply.text ?? "", at: reply.createdAt };
           }
         }
       }
       // Muse's counter or acceptance still waiting for the user's OK.
       const counter = out?.counterProposalId ? await ctx.db.get(out.counterProposalId) : null;
       const counterWaiting = counter?.status === "pending";
+      // Rates whose posts the viewer can't see (or that cite nothing) aren't shown.
       const sources: NonEmpty<CitedSource> | null = r.citations
         ? await resolveCitations(ctx, r.citations, audience)
         : null;
+      if (!sources) continue;
       movers.push({
         counterWaiting,
         page,
@@ -453,9 +465,8 @@ export const counterContext = internalQuery({
       .order("desc")
       .take(20);
     const reply = msgs.find((m) => m.senderId === out.pageId && m.status === "sent" && !m.unsent);
-    const priced = reply?.text?.match(PRICE);
-    if (!reply || !priced) return null;
-    const theirQuote = Number(priced[1].replace(/,/g, ""));
+    const theirQuote = quotedPrice(reply?.text);
+    if (!reply || theirQuote === null) return null;
     const move: Move = { size: req.size, date: req.date, stairs: req.stairs };
 
     // The lowest other price: another mover's quoted reply, else their estimate.
@@ -476,20 +487,17 @@ export const counterContext = internalQuery({
         .withIndex("by_conversation", (q) => q.eq("conversationId", o.conversationId))
         .order("desc")
         .take(20);
-      const oq = om.find((m) => m.senderId === o.pageId && m.status === "sent")?.text?.match(PRICE);
-      const cand = oq
-        ? {
-            mover: other?.name ?? "Another mover",
-            price: Number(oq[1].replace(/,/g, "")),
-            kind: "quote" as const,
-          }
-        : rates
-          ? {
-              mover: other?.name ?? "Another mover",
-              price: estimate(rates.card as RateCard, move).total,
-              kind: "estimate" as const,
-            }
-          : null;
+      const oq = quotedPrice(om.find((m) => m.senderId === o.pageId && m.status === "sent")?.text);
+      const cand =
+        oq !== null
+          ? { mover: other?.name ?? "Another mover", price: oq, kind: "quote" as const }
+          : rates
+            ? {
+                mover: other?.name ?? "Another mover",
+                price: estimate(rates.card as RateCard, move).total,
+                kind: "estimate" as const,
+              }
+            : null;
       if (cand && (!bestOther || cand.price < bestOther.price)) bestOther = cand;
     }
     const own = await ctx.db
@@ -567,15 +575,7 @@ export const saveCounter = internalMutation({
       .first();
     // An older run finishing late never replaces a newer draft.
     if (!out || (out.handledThrough ?? 0) >= a.replyAt) return;
-    if (out.counterProposalId) {
-      const old = await ctx.db.get(out.counterProposalId);
-      if (old?.status === "pending") {
-        const now = Date.now();
-        await dropDraft(ctx, old);
-        await ctx.db.patch(old._id, { status: "expired", decidedAt: now, updatedAt: now });
-        await logEvent(ctx, old._id, old.ownerId, "expired", "system", now);
-      }
-    }
+    if (out.counterProposalId) await expireIfPending(ctx, out.counterProposalId);
     const counterProposalId = await propose(ctx, {
       ownerId: out.userId,
       payload: { kind: "message", conversationId: a.conversationId, text: a.text },

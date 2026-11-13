@@ -5,6 +5,7 @@ import {
   counterProblems,
   estimate,
   isWeekdayMove,
+  quotedPrice,
   type RateCard,
   rateFromText,
   rateProblems,
@@ -42,6 +43,26 @@ describe("estimate", () => {
     const e = estimate(card, { size: "1br", date: "2026-12-02", stairs: false });
     expect(e.applied).toBeNull();
     expect(e.ifEligible).toEqual([{ label: "10% off for students", percent: 10 }]);
+  });
+  test("deals with conditions code can't check are never taken off", () => {
+    const card = rateFromText([
+      "2 movers: $155/hr, 2-hour minimum.",
+      "10% off weekday moves (Mon to Thu) booked at least a week ahead.",
+    ]);
+    expect(card?.discounts.map((d) => d.when)).toEqual(["other"]);
+    const e = card && estimate(card, { size: "1br", date: "2026-12-02", stairs: false });
+    expect(e?.applied).toBeNull();
+    expect(e?.ifEligible).toHaveLength(1);
+  });
+});
+
+describe("quotedPrice", () => {
+  test("skips hourly rates and reads the total", () => {
+    expect(quotedPrice("$155/hr; the total quote is $679")).toBe(679);
+    expect(quotedPrice("$155 an hour, so about $1,240 all in")).toBe(1240);
+    expect(quotedPrice("We can do it for $640.")).toBe(640);
+    expect(quotedPrice("$155 per hour")).toBeNull();
+    expect(quotedPrice(undefined)).toBeNull();
   });
 });
 
