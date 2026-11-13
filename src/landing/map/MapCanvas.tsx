@@ -98,7 +98,7 @@ export default function MapCanvas({
   useEffect(() => {
     let cancelled = false;
     let created: MlMap | null = null;
-    const { dark: startDark, insets: pad } = latest.current;
+    const { dark: startDark, insets: pad, focus: start } = latest.current;
     loadBasemap(startDark ? "dark" : "light")
       .then((style) => {
         const el = container.current;
@@ -106,8 +106,12 @@ export default function MapCanvas({
         const m = new MlMap({
           container: el,
           style,
-          bounds: focusBounds(latest.current.focus, latest.current.data) ?? toLngLat(SF_BOUNDS),
-          fitBoundsOptions: { padding: fitPadding(pad, el) },
+          ...(typeof start === "object" && "center" in start
+            ? { center: [start.center.lng, start.center.lat] as [number, number], zoom: start.zoom }
+            : {
+                bounds: focusBounds(start, latest.current.data) ?? toLngLat(SF_BOUNDS),
+                fitBoundsOptions: { padding: fitPadding(pad, el) },
+              }),
           minZoom: MIN_ZOOM,
           maxZoom: MAX_ZOOM,
           maxBounds: MAX_BOUNDS,
@@ -159,7 +163,7 @@ export default function MapCanvas({
 
   /* ── Data ── */
   useEffect(() => {
-    if (map?.isStyleLoaded() && map.getSource(SRC.pins)) setOverlayData(map, data);
+    if (map?.getSource(SRC.pins)) setOverlayData(map, data);
   }, [map, data]);
 
   /* ── Which pins and clusters are on screen ── */
@@ -296,11 +300,18 @@ export default function MapCanvas({
     if (restoreFocus && trigger.current?.isConnected)
       trigger.current.focus({ preventScroll: true });
   };
-  const openPin = (p: Pin) => {
-    if (p.kind === "listing") open({ kind: "listing", pin: p.pin });
-    else if (p.kind === "event") open({ kind: "event", pin: p.pin });
-    else open({ kind: "group", pin: p.pin });
-  };
+  const openPin = (p: Pin) => open(toSelected(p));
+  // The card shows the latest data for its pin or stop, so a price change shows at once.
+  const shown = useMemo<Selected | null>(() => {
+    if (!selected) return null;
+    if (selected.kind === "stop") {
+      const n = data.stops.findIndex((s) => s.key === selected.stop.key);
+      const stop = data.stops[n];
+      return stop ? { kind: "stop", stop, n: n + 1 } : null;
+    }
+    const p = pinsByKey.get(`${selected.kind[0]}:${selected.pin._id}`);
+    return p ? toSelected(p) : null;
+  }, [selected, data.stops, pinsByKey]);
   const selectedKey =
     selected === null
       ? null
@@ -308,7 +319,7 @@ export default function MapCanvas({
         ? `s:${selected.stop.key}`
         : `${selected.kind[0]}:${selected.pin._id}`;
   const selectedPoint: LatLng | null =
-    selected === null ? null : selected.kind === "stop" ? selected.stop.point : selected.pin.point;
+    shown === null ? null : shown.kind === "stop" ? shown.stop.point : shown.pin.point;
 
   const expand = async (v: Extract<Visible, { kind: "cluster" }>) => {
     if (!map) return;
@@ -455,35 +466,30 @@ export default function MapCanvas({
             );
           })}
 
-        {map && selected && selectedPoint && !compact && (
+        {map && shown && selectedPoint && !compact && (
           <MapMarker
             key={selectedKey}
             map={map}
             lng={selectedPoint.lng}
             lat={selectedPoint.lat}
             anchor="bottom"
-            offset={[0, selected.kind === "listing" ? -19 : -24]}
+            offset={[0, shown.kind === "listing" ? -19 : -24]}
             z={Z.card}
             isolate
           >
             <div ref={card} className="lm-card-in pb-1">
-              <PreviewCard selected={selected} compact={false} onClose={() => close(true)} />
+              <PreviewCard selected={shown} compact={false} onClose={() => close(true)} />
             </div>
           </MapMarker>
         )}
 
-        {selected && compact && (
+        {shown && compact && (
           <div
             ref={card}
             className="lm-sheet-in absolute inset-x-3 z-20"
             style={{ bottom: insets.bottom + 12 }}
           >
-            <PreviewCard
-              key={selectedKey}
-              selected={selected}
-              compact
-              onClose={() => close(true)}
-            />
+            <PreviewCard key={selectedKey} selected={shown} compact onClose={() => close(true)} />
           </div>
         )}
 
@@ -621,6 +627,12 @@ function polygonBounds(polygon: number[][][][]): LngLatBoundsLike {
     [west, south],
     [east, north],
   ];
+}
+
+function toSelected(p: Pin): Selected {
+  if (p.kind === "listing") return { kind: "listing", pin: p.pin };
+  if (p.kind === "event") return { kind: "event", pin: p.pin };
+  return { kind: "group", pin: p.pin };
 }
 
 function inMarker(target: EventTarget | null) {
