@@ -190,7 +190,14 @@ describe("pinsInBounds: Groups", () => {
     const secret = group({ visible: false });
     const secretMember = group({ visible: false });
     const out = await run({
-      groups: [open, closed, secret, secretMember, group({ point: BERKELEY }), group({ point: undefined })],
+      groups: [
+        open,
+        closed,
+        secret,
+        secretMember,
+        group({ point: BERKELEY }),
+        group({ point: undefined }),
+      ],
       groupMembers: [
         { _id: "m1", groupId: secretMember._id, userId: "viewer", role: "member", joinedAt: 0 },
       ],
