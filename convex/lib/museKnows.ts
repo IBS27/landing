@@ -11,7 +11,8 @@ import {
   restoreFact,
 } from "./cityProfile";
 import { type Audience, loadAudience } from "./posts";
-import type { SignalKind } from "./profileSignals";
+import { activitySummary as reasonFor, type SignalKind } from "./profileSignals";
+import { hasProtected } from "./protectedText";
 
 /**
  * "What Muse knows about you" (#5): everything Landing holds about one person,
@@ -31,6 +32,13 @@ export type EvidenceLink = { signal: SignalKind } & (
 
 /** The links behind an inferred fact, plus how many of its targets can't be shown. */
 export type Evidence = { links: EvidenceLink[]; unavailable: number };
+
+type Resolved = Evidence & {
+  /** The owner's live signals behind the fact, for rebuilding its reason. */
+  signals: Doc<"profileSignals">[];
+  /** Event titles and Group names that may still appear in the reason. */
+  names: Map<string, string>;
+};
 
 export type KnownFact = Fact & { evidenceLinks: Evidence | null };
 
@@ -55,22 +63,28 @@ function sourceOf(ctx: QueryCtx, s: Doc<"profileSignals">): Source | null {
   }
 }
 
+/** A name that names a protected trait ("Women Who Climb") is never shown; a generic label is. */
+const safe = (name: string, generic: string) => (hasProtected(name) ? generic : name);
+
 function toLink(c: CitedSource, signal: SignalKind): EvidenceLink | null {
   switch (c.kind) {
     case "event":
-      return { signal, kind: "event", eventId: c.eventId, title: c.title };
+      return { signal, kind: "event", eventId: c.eventId, title: safe(c.title, "An Event") };
     case "group":
-      return { signal, kind: "group", slug: c.slug, name: c.name };
+      return { signal, kind: "group", slug: c.slug, name: safe(c.name, "A Group") };
     case "post":
       return {
         signal,
         kind: "post",
         postId: c.postId,
         username: c.author.username,
-        label: c.group ? `A post in ${c.group.name}` : `${c.author.name}'s post`,
+        label:
+          c.group && !hasProtected(c.group.name)
+            ? `A post in ${c.group.name}`
+            : `${c.author.name}'s post`,
       };
     case "listing":
-      return { signal, kind: "listing", listingId: c.listingId, title: c.title };
+      return { signal, kind: "listing", listingId: c.listingId, title: safe(c.title, "A listing") };
     default:
       return null;
   }
@@ -88,21 +102,31 @@ export async function evidenceLinks(
   userId: Id<"users">,
   signalIds: readonly Id<"profileSignals">[],
   a: Audience,
-): Promise<Evidence> {
+): Promise<Resolved> {
   const links: EvidenceLink[] = [];
+  const signals: Doc<"profileSignals">[] = [];
+  const names = new Map<string, string>();
   const seen = new Set<string>();
   let unavailable = 0;
   for (const id of signalIds) {
     const s = await ctx.db.get(id);
-    if (!s || s.userId !== userId || s.undoneAt !== undefined || seen.has(s.targetId)) continue;
+    if (!s || s.userId !== userId || s.undoneAt !== undefined) continue;
+    signals.push(s);
+    if (seen.has(s.targetId)) continue;
     seen.add(s.targetId);
     const source = sourceOf(ctx, s);
     const [cited] = source ? await resolveSources(ctx, [source], a) : [];
     const link = cited && toLink(cited, s.kind);
-    if (link) links.push(link);
-    else unavailable++;
+    if (!link) {
+      unavailable++;
+      continue;
+    }
+    links.push(link);
+    // Same rule as #4's reasons: Event titles and Group names, never a protected one.
+    const name = cited.kind === "event" ? cited.title : cited.kind === "group" ? cited.name : null;
+    if (name && !hasProtected(name)) names.set(s.targetId, name);
   }
-  return { links, unavailable };
+  return { links, unavailable, signals, names };
 }
 
 /** Every fact with where it came from, and the facts the person removed. */
@@ -115,7 +139,16 @@ export async function knownFacts(ctx: QueryCtx, userId: Id<"users">) {
   const facts: KnownFact[] = [];
   for (const f of profile.facts) {
     const ids = f.source === "inferred" ? f.evidence.signalIds : undefined;
-    facts.push({ ...f, evidenceLinks: ids ? await evidenceLinks(ctx, userId, ids, a) : null });
+    if (!ids || (f.key !== "interest" && f.key !== "neighborhood")) {
+      facts.push({ ...f, evidenceLinks: null });
+      continue;
+    }
+    const { links, unavailable, signals, names } = await evidenceLinks(ctx, userId, ids, a);
+    // The stored reason may name an Event or Group the owner can no longer see:
+    // rebuild it from what's still visible, so a hidden one is only counted.
+    const evidence =
+      unavailable > 0 ? { ...f.evidence, summary: reasonFor(f, signals, names) } : f.evidence;
+    facts.push({ ...f, evidence, evidenceLinks: { links, unavailable } });
   }
   return { briefCompletedAt: profile.briefCompletedAt, facts, removed };
 }

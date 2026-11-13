@@ -106,6 +106,40 @@ describe("where each fact came from", () => {
     expect(f?.evidenceLinks?.unavailable).toBe(1);
   });
 
+  test("a reason never names an Event the viewer can no longer see", async () => {
+    const { ctx, tables } = world();
+    await climber(ctx);
+    expect((await climbing(ctx))?.evidence.summary).toContain("Climb & Coffee");
+    const coffee = tables.events.find((e) => e._id === "events:2") as Row;
+    coffee.privacy = "friends";
+    const f = (await knownFacts(ctx, USER)).facts.find((x) => x.key === "interest");
+    expect(f?.evidence.summary).toBe("RSVP'd to 2 climbing Events");
+    expect(f?.evidenceLinks).toMatchObject({ unavailable: 1 });
+  });
+
+  test("a protected-sounding name is never shown as a link", async () => {
+    const group = {
+      _id: "groups:w",
+      name: "Women Who Climb",
+      slug: "women-who-climb",
+      category: "Sports",
+      tags: ["Climbing"],
+      visible: true,
+      privacy: "public",
+      description: "",
+      cover: "/seed/g.jpg",
+      memberCount: 10,
+      lastActivityAt: 1,
+    };
+    const { ctx } = world({ groups: [group] });
+    await recordSignal(ctx, USER, "join", "group", "groups:w");
+    await climber(ctx);
+    const f = (await knownFacts(ctx, USER)).facts.find((x) => x.key === "interest");
+    const names = f?.evidenceLinks?.links.map((l) => (l.kind === "group" ? l.name : null));
+    expect(names).toContain("A Group");
+    expect(JSON.stringify(f)).not.toContain("Women");
+  });
+
   test("stated facts carry their own evidence and no links", async () => {
     const { ctx } = world();
     await saveStatedFacts(
