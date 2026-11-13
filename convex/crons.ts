@@ -46,4 +46,11 @@ crons.daily("rebuild journeys", { hourUTC: 14, minuteUTC: 0 }, internal.journeys
  */
 crons.hourly("chat plans", { minuteUTC: 5 }, internal.chatPlans.tick, {});
 
+/**
+ * Day-of Event reminders (#134): every hour, notify people going to Events
+ * whose reminder time has come (8am in San Francisco, or 2 hours before an
+ * earlier start). Each person hears once per Event. Plain code, no model calls.
+ */
+crons.hourly("event day-of reminders", { minuteUTC: 0 }, internal.reminders.tick, {});
+
 export default crons;

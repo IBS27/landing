@@ -7,6 +7,7 @@ import {
   Clapperboard,
   Flag,
   HandHeart,
+  House,
   type LucideIcon,
   Mail,
   MessageCircle,
@@ -41,6 +42,7 @@ const ICONS: Record<NotificationCategory, LucideIcon> = {
   pages: Flag,
   marketplace: Store,
   fundraisers: HandHeart,
+  landing: House,
 };
 
 const CHANNELS = [

@@ -469,27 +469,29 @@ export async function createConversation(
   return conversationId;
 }
 
+/** `viewerId`'s 1:1 thread with `userId`, created empty (and out of every inbox) if new. */
+export async function dmThread(ctx: MutationCtx, viewerId: Id<"users">, userId: Id<"users">) {
+  const mine = await ctx.db
+    .query("conversationMembers")
+    .withIndex("by_user", (q) => q.eq("userId", viewerId))
+    .collect();
+  for (const m of mine) {
+    const c = await ctx.db.get(m.conversationId);
+    const self = userId === viewerId;
+    if (
+      c?.kind === "dm" &&
+      c.memberIds.includes(userId) &&
+      (self ? c.memberIds.every((id) => id === viewerId) : c.memberIds.length === 2)
+    )
+      return c._id;
+  }
+  return createConversation(ctx, "dm", userId === viewerId ? [viewerId] : [viewerId, userId]);
+}
+
 /** The viewer's 1:1 thread with a person, created empty on first open. */
 export const getOrCreateDm = viewerMutation({
   args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
-    const viewerId = ctx.viewer._id;
-    const mine = await ctx.db
-      .query("conversationMembers")
-      .withIndex("by_user", (q) => q.eq("userId", viewerId))
-      .collect();
-    for (const m of mine) {
-      const c = await ctx.db.get(m.conversationId);
-      const self = userId === viewerId;
-      if (
-        c?.kind === "dm" &&
-        c.memberIds.includes(userId) &&
-        (self ? c.memberIds.every((id) => id === viewerId) : c.memberIds.length === 2)
-      )
-        return c._id;
-    }
-    return createConversation(ctx, "dm", userId === viewerId ? [viewerId] : [viewerId, userId]);
-  },
+  handler: (ctx, { userId }) => dmThread(ctx, ctx.viewer._id, userId),
 });
 
 /** A new group chat with the viewer and the chosen people. */

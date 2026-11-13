@@ -70,6 +70,8 @@ export function useOpenTarget() {
         });
       case "conversation":
         return openChat(t.conversationId);
+      case "landing":
+        return void navigate({ to: t.to });
     }
   };
 }

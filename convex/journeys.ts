@@ -749,6 +749,8 @@ export const proposeJoin = internalMutation({
         runId: args.runId,
         via: same ? args.via : "fallback",
       },
+      // The owner pressed "Join?" for this draft.
+      byOwner: true,
     });
   },
 });

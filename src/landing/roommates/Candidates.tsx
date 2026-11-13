@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { BadgeCheck, CalendarDays, MessageCircle, Users } from "lucide-react";
+import { BadgeCheck, CalendarDays, Inbox, MessageCircle, Users } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
-import { toConversation, toProfile } from "@/landing/links";
+import { toProfile } from "@/landing/links";
 import { cn, plural } from "@/lib/format";
 import { Modal } from "@/ui/overlays";
 import { Avatar, Button, Card, Skeleton } from "@/ui/primitives";
@@ -12,19 +12,14 @@ import type { CandidateList, RoommateCandidate } from "../../../convex/lib/roomm
 import { CardTraits, CompareDialog, type EditAnswer, ScoreBadge } from "./Compatibility";
 import { askMessage, namesShown, overlapLine } from "./candidateCopy";
 
-/** Sends the viewer's approved first message and returns the chat it went to. */
-export type AskToConnect = (userId: Id<"users">, text: string) => Promise<Id<"conversations">>;
+/** Saves the viewer's first message as a draft in Landing Inbox; nothing is sent until they approve it. */
+export type AskToConnect = (userId: Id<"users">, text: string) => Promise<Id<"proposals">>;
 
 /** Roommate candidates from the viewer's network. Shown while the viewer shares their answers. */
 export function RoommateCandidates({ onEditAnswer }: { onEditAnswer?: EditAnswer }) {
   const data = useQ(api.roommates.candidates, {});
-  const getDm = useM(api.messenger.getOrCreateDm);
-  const send = useM(api.messenger.send);
-  const ask: AskToConnect = async (userId, text) => {
-    const conversationId = await getDm({ userId });
-    await send({ conversationId, text });
-    return conversationId;
-  };
+  const askToConnect = useM(api.roommates.askToConnect);
+  const ask: AskToConnect = (userId, text) => askToConnect({ userId, text });
   return <CandidatesView data={data} onAsk={ask} onEditAnswer={onEditAnswer} />;
 }
 
@@ -229,7 +224,10 @@ function PersonLink({
   );
 }
 
-/** The person approves (and can edit) the first message before anything is sent. */
+/**
+ * The person edits the first message (the template by default) and saves it
+ * to Landing Inbox, where they approve it like every outgoing Landing message.
+ */
 function AskDialog({
   candidate,
   onAsk,
@@ -243,13 +241,14 @@ function AskDialog({
   const [text, setText] = useState(() => askMessage(first, candidate.overlap));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
-  const [sent, setSent] = useState<Id<"conversations"> | null>(null);
+  const [saved, setSaved] = useState(false);
 
   const submit = async () => {
     setBusy(true);
     setError(false);
     try {
-      setSent(await onAsk(candidate.user._id, text.trim()));
+      await onAsk(candidate.user._id, text.trim());
+      setSaved(true);
     } catch {
       setError(true);
     } finally {
@@ -261,22 +260,23 @@ function AskDialog({
     <Modal
       open
       onOpenChange={(o) => !o && !busy && onClose()}
-      title={sent ? "Message sent" : `Ask ${first} to connect`}
+      title={saved ? "Draft saved to your Inbox" : `Ask ${first} to connect`}
       width={500}
     >
       <div className="px-4 pt-3 pb-4">
-        {sent ? (
+        {saved ? (
           <>
             <p className="px-2 text-[15px] text-primary leading-5">
-              Your message is in your chat with {first}.
+              Your message to {first} is waiting in Landing Inbox. It's sent once you approve it
+              there.
             </p>
             <div className="flex justify-end gap-2 px-2 pt-4">
               <Button variant="ghost" onClick={onClose}>
                 Close
               </Button>
-              <Link {...toConversation(sent)}>
-                <Button variant="primary" icon={<MessageCircle size={16} aria-hidden />}>
-                  Open chat
+              <Link to="/landing/inbox">
+                <Button variant="primary" icon={<Inbox size={16} aria-hidden />}>
+                  Open Inbox
                 </Button>
               </Link>
             </div>
@@ -284,8 +284,8 @@ function AskDialog({
         ) : (
           <>
             <p className="px-2 pb-2 text-[13px] text-secondary leading-4">
-              This starts a Messenger chat with {first}. Edit the message as you like. Nothing is
-              sent until you press Send.
+              Edit the message as you like. It's saved to your Landing Inbox, and nothing is sent to{" "}
+              {first} until you approve it there.
             </p>
             <label className="block px-2">
               <span className="sr-only">Message to {first}</span>
@@ -298,7 +298,7 @@ function AskDialog({
             </label>
             {error && (
               <p role="alert" className="px-2 pt-1 text-[13px] text-negative">
-                Couldn't send your message. Try again.
+                Couldn't save your draft. Try again.
               </p>
             )}
             <div className="flex justify-end gap-2 px-2 pt-3">
@@ -306,7 +306,7 @@ function AskDialog({
                 Cancel
               </Button>
               <Button variant="primary" disabled={busy || !text.trim()} onClick={submit}>
-                Send
+                Save draft
               </Button>
             </div>
           </>

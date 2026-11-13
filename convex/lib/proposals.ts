@@ -25,6 +25,10 @@ import { friendIds } from "./users";
 export const OFFER_TTL_MS = 24 * 60 * 60 * 1000;
 export const POLL_MAX_OPTIONS = 6;
 export const DEFAULT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+/** A Muse draft waits this long for more before the Inbox notification goes out… */
+export const DRAFTS_DEBOUNCE_MS = 10 * 60 * 1000;
+/** …but never longer than this after the oldest one it counts. */
+export const DRAFTS_MAX_WAIT_MS = 60 * 60 * 1000;
 
 export type ProposeArgs = {
   ownerId: Id<"users">;
@@ -36,6 +40,11 @@ export type ProposeArgs = {
   origin: Doc<"proposals">["origin"];
   /** Defaults to OFFER_TTL_MS for offers and DEFAULT_TTL_MS for the rest. */
   ttlMs?: number;
+  /**
+   * The owner asked for this draft just now ("Plan it", "Ask to connect"), so
+   * it isn't announced. Muse's own drafts get a batched Inbox notification.
+   */
+  byOwner?: boolean;
 };
 
 export async function propose(ctx: MutationCtx, a: ProposeArgs): Promise<Id<"proposals">> {
@@ -60,10 +69,39 @@ export async function propose(ctx: MutationCtx, a: ProposeArgs): Promise<Id<"pro
     draftMessageId,
     createdAt: now,
     updatedAt: now,
+    ...(a.byOwner && { byOwner: true }),
   });
   await logEvent(ctx, proposalId, a.ownerId, "created", "agent", now);
   await ctx.scheduler.runAt(now + ttl, internal.proposals.expire, { proposalId });
+  // Debounced: each draft pushes the check back, so a burst becomes one notification.
+  if (!a.byOwner)
+    await ctx.scheduler.runAfter(DRAFTS_DEBOUNCE_MS, internal.reminders.draftsReady, {
+      ownerId: a.ownerId,
+    });
   return proposalId;
+}
+
+/**
+ * The owner's pending proposals that are still live and actionable: not
+ * expired, every cited source still visible to them, and its chat or Group
+ * still theirs. The inbox, its badge, the chat drafts and the Inbox
+ * notification all use this set.
+ */
+export async function waitingProposals(ctx: QueryCtx, ownerId: Id<"users">, now: number) {
+  const rows = await ctx.db
+    .query("proposals")
+    .withIndex("by_owner_status", (q) => q.eq("ownerId", ownerId).eq("status", "pending"))
+    .collect();
+  const a = await loadAudience(ctx, ownerId);
+  const ok = await Promise.all(
+    rows.map(
+      async (p) =>
+        !isExpired(p, now) &&
+        (await citationsVisible(ctx, p, a)) &&
+        (await targetReachable(ctx, p)),
+    ),
+  );
+  return { rows: rows.filter((_, i) => ok[i]), audience: a };
 }
 
 /** Checks the owner may do what the payload says, before it's stored or sent. */
