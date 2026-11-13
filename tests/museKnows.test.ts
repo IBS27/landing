@@ -117,6 +117,19 @@ describe("where each fact came from", () => {
     expect(f?.evidenceLinks).toMatchObject({ unavailable: 1 });
   });
 
+  test("the reason only names what the stored evidence still shows", async () => {
+    const { ctx, tables } = world();
+    await climber(ctx);
+    // A named Group that isn't among the stored evidence ids (past the first 20).
+    const fact = tables.cityProfileFacts.find((f) => f.key === "interest") as Row & {
+      evidence: { summary: string };
+    };
+    fact.evidence.summary = "RSVP'd to 2 climbing Events and joined Bay Climbers";
+    const f = (await knownFacts(ctx, USER)).facts.find((x) => x.key === "interest");
+    expect(f?.evidence.summary).not.toContain("Bay Climbers");
+    expect(f?.evidence.summary).toMatch(/^RSVP'd to (Bouldering Night|Climb & Coffee) and/);
+  });
+
   test("a protected-sounding name is never shown as a link", async () => {
     const group = {
       _id: "groups:w",

@@ -144,10 +144,10 @@ export async function knownFacts(ctx: QueryCtx, userId: Id<"users">) {
       continue;
     }
     const { links, unavailable, signals, names } = await evidenceLinks(ctx, userId, ids, a);
-    // The stored reason may name an Event or Group the owner can no longer see:
-    // rebuild it from what's still visible, so a hidden one is only counted.
-    const evidence =
-      unavailable > 0 ? { ...f.evidence, summary: reasonFor(f, signals, names) } : f.evidence;
+    // The stored reason may name an Event or Group the owner can no longer see,
+    // even one past the stored evidence ids. Rebuild it from the evidence as it
+    // resolves now, so it describes the links shown and a hidden target is only counted.
+    const evidence = { ...f.evidence, summary: reasonFor(f, signals, names) };
     facts.push({ ...f, evidence, evidenceLinks: { links, unavailable } });
   }
   return { briefCompletedAt: profile.briefCompletedAt, facts, removed };
