@@ -2,6 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { cityProfileFact } from "./lib/cityProfileFacts";
 import { lifestyleAnswers } from "./lib/lifestyle";
+import { roomKind, roomVibe } from "./lib/vibe";
 import {
   aiJobStatus,
   aiRun,
@@ -251,7 +252,9 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_target", ["targetType", "targetId"])
-    .index("by_target_user", ["targetType", "targetId", "userId"]),
+    .index("by_target_user", ["targetType", "targetId", "userId"])
+    /** What someone reacted to, newest last ("likes" for Landing's vibe, #25). */
+    .index("by_user", ["userId", "createdAt"]),
 
   stories: defineTable({
     authorId: v.id("users"),
@@ -837,4 +840,24 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_shared", ["shared", "userId"]),
+
+  /**
+   * Landing rooms (#25): a person's room scan (photos and optional floor size)
+   * and its style vibe. Marketplace matching (#26) and the 3D room (#37) read
+   * these; see convex/rooms.ts.
+   */
+  rooms: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    kind: roomKind,
+    /** The scan, oldest first; at most MAX_PHOTOS. Uploaded via `posts:generateUploadUrl`. */
+    photos: v.array(
+      v.object({ url: v.string(), storageId: v.optional(v.id("_storage")), addedAt: v.number() }),
+    ),
+    /** Floor size in feet, when the person measured it. */
+    size: v.optional(v.object({ widthFt: v.number(), lengthFt: v.number() })),
+    vibe: v.optional(roomVibe),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId", "createdAt"]),
 });

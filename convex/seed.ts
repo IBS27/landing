@@ -24,6 +24,7 @@ import { seedCityProfiles } from "./seed/cityProfiles";
 import { DAY } from "./seed/lib/time";
 import { buildPlan } from "./seed/plan";
 import { roommateLifestyles } from "./seed/world/roommateLifestyles";
+import { roomSeeds } from "./seed/world/rooms";
 import { type Citations, reactionType } from "./validators";
 
 const T = schema.tables;
@@ -61,6 +62,33 @@ export const clearTable = internalMutation({
 export const insertUsers = internalMutation({
   args: { rows: v.array(T.users.validator) },
   handler: (ctx, { rows }) => insertAll(ctx, "users", rows),
+});
+/** Landing rooms (#25) for the personas in `seed/world/rooms.ts`. */
+export const insertRooms = internalMutation({
+  args: { now: v.number() },
+  handler: async (ctx, { now }) => {
+    let n = 0;
+    for (const r of roomSeeds) {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_username", (q) => q.eq("username", r.username))
+        .unique();
+      if (!user) continue; // Persona renamed or removed: skip rather than fail the seed.
+      const at = now - r.daysAgo * DAY;
+      await ctx.db.insert("rooms", {
+        userId: user._id,
+        name: r.name,
+        kind: r.kind,
+        photos: r.photos.map((url) => ({ url, addedAt: at })),
+        size: r.size,
+        vibe: r.vibe ? { ...r.vibe, origin: "typed", updatedAt: at } : undefined,
+        createdAt: at,
+        updatedAt: at,
+      });
+      n++;
+    }
+    return n;
+  },
 });
 export const insertFriendships = internalMutation({
   args: { rows: v.array(T.friendships.validator) },
@@ -346,6 +374,7 @@ export const reset = internalAction({
     U.set(first.handle, firstIds[0]);
     for (const [i, u] of rest.entries()) U.set(u.handle, restIds[i]);
     const uid = (h: string) => lookup(U, h, "user");
+    const rooms: number = await ctx.runMutation(internal.seed.insertRooms, { now: Date.now() });
 
     // 3b. Neighborhoods, their cited facts and the external sources they cite (#15).
     const NB = new Map<string, Id<"neighborhoods">>();
@@ -668,6 +697,7 @@ export const reset = internalAction({
         listings: plan.listings.length,
         events: plan.events.length,
         cityProfileFacts,
+        rooms,
         eventResponses: plan.eventResponses.length,
         posts: plan.posts.length,
         comments: plan.posts.reduce((s, p) => s + p.comments.length, 0),
