@@ -5,7 +5,7 @@ import schema from "../convex/schema";
  * A tiny in-memory stand-in for `ctx.db`: get, indexed equality queries, and
  * insert / patch / delete. Rows come back in index order (the index's fields
  * from `convex/schema.ts`, then insertion order), reversed by `order("desc")`.
- * Ranges support `eq`, `lt`, `lte`, `gt` and `gte`. Queries are also async iterable. Writes go to `tables`, so tests can
+ * Ranges support `eq`, `lt`, `lte`, `gt` and `gte`. Queries are also async iterable and paginate. Writes go to `tables`, so tests can
  * inspect them.
  */
 
@@ -80,6 +80,17 @@ export function fakeCtx(tables: Record<string, Row[]>, stats?: ReadStats): Mutat
           return read(rows.slice(0, 1))[0] ?? null;
         },
         take: async (n: number) => read(sorted().slice(0, n)),
+        /** The cursor is an offset into the range. */
+        paginate: async ({ cursor, numItems }: { cursor: string | null; numItems: number }) => {
+          const all = sorted();
+          const start = cursor ? Number(cursor) : 0;
+          const end = start + numItems;
+          return {
+            page: read(all.slice(start, end)),
+            isDone: end >= all.length,
+            continueCursor: String(end),
+          };
+        },
         [Symbol.asyncIterator]: async function* () {
           for (const row of sorted()) {
             if (stats) stats.docs++;

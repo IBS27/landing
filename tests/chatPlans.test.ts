@@ -587,6 +587,47 @@ describe("chat plans, end to end", () => {
     expect(tables.chatPlans?.[0]?.open).toBe(false);
   });
 
+  test("the hourly job pages through every open plan", async () => {
+    const { ctx, tables } = world();
+    const pollId = await planIt(ctx);
+    const sent = (await call(approve, ctx, { ...as("maya"), proposalId: pollId })) as {
+      messageId: string;
+    };
+    const poll = pollIn(tables, sent.messageId);
+    await call(vote, ctx, {
+      ...as("zoe"),
+      messageId: sent.messageId,
+      optionIds: [poll.options[1]?.id],
+    });
+    const plan = tables.chatPlans?.[0];
+    const eventId = await call(chatPlans.proposeEvent, ctx, { ...as("maya"), planId: plan?._id });
+    await call(approve, ctx, { ...as("maya"), proposalId: eventId });
+    // 250 older plans still waiting on their poll draft come first in the index.
+    const waiting = await ctx.db.insert("proposals", { status: "pending" } as never);
+    for (let i = 0; i < 250; i++)
+      await ctx.db.insert("chatPlans", {
+        ...plan,
+        _id: undefined,
+        pollProposalId: waiting,
+        eventProposalId: undefined,
+        updatedAt: 0,
+      } as never);
+    const pages: Record<string, unknown>[] = [];
+    Object.assign(ctx, {
+      scheduler: {
+        runAt: async () => null,
+        runAfter: async (_: number, __: unknown, a: Record<string, unknown>) => pages.push(a),
+      },
+    });
+    let proposed = (await call(chatPlans.tick, ctx, {
+      now: (poll.options[1]?.startAt ?? 0) - 1.5 * HOUR,
+    })) as number;
+    for (let a = pages.shift(); a; a = pages.shift())
+      proposed += (await call(chatPlans.tick, ctx, a)) as number;
+    expect(proposed).toBe(1);
+    expect(tables.proposals?.some((p) => p.origin?.task === "muse.chatPlanReminder")).toBe(true);
+  });
+
   test("when the poll closes, the hourly job drafts the Event once", async () => {
     const { ctx, tables } = world();
     const pollId = await planIt(ctx);

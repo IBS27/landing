@@ -493,21 +493,25 @@ async function advance(ctx: MutationCtx, plan: Doc<"chatPlans">, now: number): P
   }
 }
 
+/** Open plans read per run of the hourly job; the rest go to the next page. */
+const TICK_PAGE = 100;
+
 /**
  * Hourly (convex/crons.ts): draft the Event for polls that closed and the
  * day-of reminder for today's Events, and close plans that are over. Plain
- * code, no model calls. `now` is for tests.
+ * code, no model calls. Pages through open plans, one mutation per page.
+ * `now` is for tests.
  */
 export const tick = internalMutation({
-  args: { now: v.optional(v.number()) },
+  args: { now: v.optional(v.number()), cursor: v.optional(v.union(v.string(), v.null())) },
   handler: async (ctx, args) => {
     const now = args.now ?? Date.now();
-    const open = await ctx.db
+    const page = await ctx.db
       .query("chatPlans")
       .withIndex("by_open", (q) => q.eq("open", true))
-      .take(200);
+      .paginate({ cursor: args.cursor ?? null, numItems: TICK_PAGE });
     let proposed = 0;
-    for (const plan of open) {
+    for (const plan of page.page) {
       try {
         if (await advance(ctx, plan, now)) proposed++;
       } catch (e) {
@@ -515,6 +519,11 @@ export const tick = internalMutation({
         console.warn(`chatPlans.tick: ${plan._id}:`, e instanceof Error ? e.message : e);
       }
     }
+    if (!page.isDone)
+      await ctx.scheduler.runAfter(0, internal.chatPlans.tick, {
+        now,
+        cursor: page.continueCursor,
+      });
     return proposed;
   },
 });
