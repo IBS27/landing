@@ -38,6 +38,11 @@ describe("matchListing", () => {
     const m = matchListing(vibe, l("a", "Reading chair", "Upholstered in mustard velvet"));
     expect(m.reasons).toEqual(['Your keyword: "reading chair"', "Matches your palette: mustard"]);
   });
+  test("a word inside a longer phrase that already matched counts once", () => {
+    const m = matchListing(vibe, l("a", "Vintage lamp", "Brass base"));
+    expect(m.reasons).toEqual(['Vintage: "vintage lamp", "brass"']);
+    expect(m.score).toBe(4);
+  });
   test("no matching words, no score", () => {
     expect(matchListing(vibe, l("a", "Glass top desk", "Chrome legs")).score).toBe(0);
   });

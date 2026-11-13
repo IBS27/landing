@@ -44,19 +44,22 @@ const quoted = (words: string[]) =>
 export function matchListing(vibe: MatchVibe, l: MatchListing): VibeMatch {
   const text = `${l.title} ${l.description}`.toLowerCase();
   const parts: { weight: number; reason: string }[] = [];
-  // Each word counts once: style first, then keywords, then colors.
-  const used = new Set<string>();
+  // Each word counts once: style first, then keywords, then colors. A term
+  // inside a longer one already counted ("vintage" in "vintage lamp") is the same word.
+  const used: string[] = [];
   const fresh = (w: string) => {
     const k = w.toLowerCase();
-    if (used.has(k)) return false;
-    used.add(k);
+    if (used.some((u) => hasTerm(u, k) || hasTerm(k, u))) return false;
+    used.push(k);
     return true;
   };
+  const longestFirst = (words: readonly string[]) =>
+    [...new Set(words)].sort((a, b) => b.length - a.length);
 
   for (const id of vibe.styles) {
     const style = STYLES.find((s) => s.id === id);
     if (!style) continue;
-    const hits = [...new Set([...style.words, ...style.decor])].filter(
+    const hits = longestFirst([...style.words, ...style.decor]).filter(
       (w) => hasTerm(text, w) && fresh(w),
     );
     if (hits.length > 0)
@@ -66,7 +69,7 @@ export function matchListing(vibe: MatchVibe, l: MatchListing): VibeMatch {
       });
   }
 
-  const keywords = [...new Set(vibe.keywords.map((k) => k.trim().toLowerCase()).filter(Boolean))];
+  const keywords = longestFirst(vibe.keywords.map((k) => k.trim().toLowerCase()).filter(Boolean));
   const keyHits = keywords.filter((k) => hasTerm(text, k) && fresh(k));
   if (keyHits.length > 0)
     parts.push({
