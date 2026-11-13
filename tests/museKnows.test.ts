@@ -10,11 +10,14 @@ import {
   removeFact,
   saveStatedFacts,
 } from "../convex/lib/cityProfile";
+import { DISMISSALS_SCAN, dismiss, undismiss, undismissAll } from "../convex/lib/dismissals";
 import {
   activitySummary,
   clearActivityBatch,
   DELETE_BATCH,
   deleteRunsBatch,
+  HIDDEN_SHOWN,
+  hiddenCards,
   knownFacts,
   runsSummary,
   undoRemoval,
@@ -349,5 +352,128 @@ describe("Muse runs", () => {
     ]);
     expect(await deleteRunsBatch(ctx, USER)).toBe(false);
     expect(tables.aiRuns.map((r) => r._id)).toEqual(["aiRuns:4", "aiRuns:5"]);
+  });
+});
+
+describe("hidden cards", () => {
+  const listing = {
+    _id: "listings:1",
+    sellerId: HOST,
+    title: "Climbing shoes",
+    description: "Size 42",
+    photos: [],
+    price: 40,
+    status: "active",
+    location: { neighborhood: "Mission" },
+    createdAt: 1,
+  };
+  const womenGroup = {
+    _id: "groups:w",
+    name: "Women Who Climb",
+    slug: "women-who-climb",
+    category: "Sports",
+    tags: ["Climbing"],
+    visible: true,
+    privacy: "public",
+    description: "",
+    cover: "/seed/g.jpg",
+    memberCount: 10,
+    lastActivityAt: 1,
+  };
+  const row = (id: string, userId: string, targetKind: string, targetId: string, at: number) => ({
+    _id: `dismissals:${id}`,
+    userId,
+    targetKind,
+    targetId,
+    at,
+  });
+
+  test("lists the owner's cards newest first, counting ones they can't see now", async () => {
+    const { ctx } = world({
+      listings: [listing],
+      groups: [womenGroup],
+      dismissals: [
+        row("1", USER, "event", "events:1", 10),
+        row("2", USER, "listing", "listings:1", 30),
+        // Friends-only now: counted, never named.
+        row("3", USER, "event", "events:3", 20),
+        // Deleted.
+        row("4", USER, "event", "events:404", 5),
+        // A protected-sounding name gets a generic label.
+        row("5", USER, "group", "groups:w", 25),
+        // Someone else's.
+        row("6", OTHER, "event", "events:2", 40),
+      ],
+    });
+    const h = await hiddenCards(ctx, USER);
+    expect(h).toMatchObject({ total: 5, more: false, unavailable: 2, older: 0 });
+    expect(h.cards).toEqual([
+      {
+        kind: "listing",
+        listingId: "listings:1",
+        title: "Climbing shoes",
+        targetId: "listings:1",
+        at: 30,
+      },
+      { kind: "group", slug: "women-who-climb", name: "A Group", targetId: "groups:w", at: 25 },
+      {
+        kind: "event",
+        eventId: "events:1",
+        title: "Bouldering Night",
+        targetId: "events:1",
+        at: 10,
+      },
+    ]);
+    expect(JSON.stringify(h)).not.toMatch(/Women|Crag Trip|Climb & Coffee/);
+  });
+
+  test("lists the newest few and counts the rest", async () => {
+    const many = Array.from({ length: DISMISSALS_SCAN + 1 }, (_, i) =>
+      row(`m${i}`, USER, "event", i % 2 ? "events:1" : "events:2", i),
+    );
+    const { ctx } = world({ dismissals: many });
+    const h = await hiddenCards(ctx, USER);
+    expect(h.more).toBe(true);
+    expect(h.total).toBe(DISMISSALS_SCAN);
+    expect(h.cards).toHaveLength(HIDDEN_SHOWN);
+    expect(h.cards.map((c) => c.at)).toEqual([...h.cards.map((c) => c.at)].sort((a, b) => b - a));
+    expect(h.older).toBe(DISMISSALS_SCAN - HIDDEN_SHOWN);
+  });
+
+  test("Show again removes only the owner's dismissal and keeps the skip signal", async () => {
+    const { ctx, tables } = world();
+    await dismiss(ctx, USER, "event", "events:1");
+    await dismiss(ctx, OTHER, "event", "events:1");
+    await recordSignal(ctx, USER, "skip", "event", "events:1");
+    await undismiss(ctx, USER, "events:1");
+    expect(tables.dismissals.map((d) => d.userId)).toEqual([OTHER]);
+    expect(tables.profileSignals).toMatchObject([{ userId: USER, kind: "skip" }]);
+    expect((await hiddenCards(ctx, USER)).total).toBe(0);
+    // Showing a card the owner didn't hide changes nothing.
+    await undismiss(ctx, USER, "events:2");
+    expect(tables.dismissals).toHaveLength(1);
+  });
+
+  test("Show all again deletes the owner's dismissals in batches, not later ones or others'", async () => {
+    const mine = Array.from({ length: 5 }, (_, i) =>
+      row(`a${i}`, USER, "event", `events:x${i}`, 10),
+    );
+    const { ctx, tables } = world({
+      dismissals: [
+        ...mine,
+        // Hidden after "Show all again" was asked: stays.
+        row("late", USER, "event", "events:late", 100),
+        row("other", OTHER, "event", "events:x1", 10),
+      ],
+    });
+    await recordSignal(ctx, USER, "skip", "event", "events:1");
+    expect(await undismissAll(ctx, USER, 50, 3)).toBe(true);
+    expect(tables.dismissals).toHaveLength(4);
+    expect(await undismissAll(ctx, USER, 50, 3)).toBe(false);
+    expect(tables.dismissals.map((d) => d._id).sort()).toEqual([
+      "dismissals:late",
+      "dismissals:other",
+    ]);
+    expect(tables.profileSignals).toHaveLength(1);
   });
 });

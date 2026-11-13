@@ -10,6 +10,7 @@ import {
   getRemovedFacts,
   restoreFact,
 } from "./cityProfile";
+import { listDismissals } from "./dismissals";
 import { type Audience, loadAudience } from "./posts";
 import { activitySummary as reasonFor, type SignalKind } from "./profileSignals";
 import { hasProtected } from "./protectedText";
@@ -22,13 +23,15 @@ import { hasProtected } from "./protectedText";
  * deleted here.
  */
 
-/** One Event, Group, post or listing behind an inferred fact, as the owner may see it now. */
-export type EvidenceLink = { signal: SignalKind } & (
+/** An Event, Group, post or listing as the owner may see it now, named safely. */
+type TargetLink =
   | { kind: "event"; eventId: Id<"events">; title: string }
   | { kind: "group"; slug: string; name: string }
   | { kind: "post"; postId: Id<"posts">; username: string; label: string }
-  | { kind: "listing"; listingId: Id<"listings">; title: string }
-);
+  | { kind: "listing"; listingId: Id<"listings">; title: string };
+
+/** One Event, Group, post or listing behind an inferred fact, as the owner may see it now. */
+export type EvidenceLink = { signal: SignalKind } & TargetLink;
 
 /** The links behind an inferred fact, plus how many of its targets can't be shown. */
 export type Evidence = { links: EvidenceLink[]; unavailable: number };
@@ -42,7 +45,10 @@ type Resolved = Evidence & {
 
 export type KnownFact = Fact & { evidenceLinks: Evidence | null };
 
-function sourceOf(ctx: QueryCtx, s: Doc<"profileSignals">): Source | null {
+function sourceOf(
+  ctx: QueryCtx,
+  s: Pick<Doc<"profileSignals">, "targetKind" | "targetId">,
+): Source | null {
   switch (s.targetKind) {
     case "event": {
       const eventId = ctx.db.normalizeId("events", s.targetId);
@@ -66,15 +72,14 @@ function sourceOf(ctx: QueryCtx, s: Doc<"profileSignals">): Source | null {
 /** A name that names a protected trait ("Women Who Climb") is never shown; a generic label is. */
 const safe = (name: string, generic: string) => (hasProtected(name) ? generic : name);
 
-function toLink(c: CitedSource, signal: SignalKind): EvidenceLink | null {
+function toTarget(c: CitedSource): TargetLink | null {
   switch (c.kind) {
     case "event":
-      return { signal, kind: "event", eventId: c.eventId, title: safe(c.title, "An Event") };
+      return { kind: "event", eventId: c.eventId, title: safe(c.title, "An Event") };
     case "group":
-      return { signal, kind: "group", slug: c.slug, name: safe(c.name, "A Group") };
+      return { kind: "group", slug: c.slug, name: safe(c.name, "A Group") };
     case "post":
       return {
-        signal,
         kind: "post",
         postId: c.postId,
         username: c.author.username,
@@ -84,10 +89,15 @@ function toLink(c: CitedSource, signal: SignalKind): EvidenceLink | null {
             : `${c.author.name}'s post`,
       };
     case "listing":
-      return { signal, kind: "listing", listingId: c.listingId, title: safe(c.title, "A listing") };
+      return { kind: "listing", listingId: c.listingId, title: safe(c.title, "A listing") };
     default:
       return null;
   }
+}
+
+function toLink(c: CitedSource, signal: SignalKind): EvidenceLink | null {
+  const t = toTarget(c);
+  return t && { ...t, signal };
 }
 
 /**
@@ -162,6 +172,46 @@ export async function undoRemoval(
   const source = await restoreFact(ctx, userId, factId);
   if (source === "inferred") await recomputeInferred(ctx, userId);
   return source !== null;
+}
+
+/* ---------------- Hidden cards (#100, #108) ---------------- */
+
+/** A card the owner marked "Not for me", as they may see it now. */
+export type HiddenCard = Exclude<TargetLink, { kind: "post" }> & { targetId: string; at: number };
+
+/** Hidden cards listed at most; the rest are counted. */
+export const HIDDEN_SHOWN = 50;
+
+/**
+ * The Event, Group and listing cards the owner hid, newest first. Each goes
+ * through `resolveSources` with the owner's audience, like an inferred fact's
+ * evidence: one that's since been deleted, made private or blocked is counted,
+ * never shown.
+ */
+export async function hiddenCards(ctx: QueryCtx, userId: Id<"users">) {
+  const [{ rows, more }, a] = await Promise.all([
+    listDismissals(ctx, userId),
+    loadAudience(ctx, userId),
+  ]);
+  const cards: HiddenCard[] = [];
+  let unavailable = 0;
+  for (const d of rows) {
+    if (cards.length === HIDDEN_SHOWN) break;
+    const source = sourceOf(ctx, d);
+    const [cited] = source ? await resolveSources(ctx, [source], a) : [];
+    const t = cited && toTarget(cited);
+    if (!t || t.kind === "post") unavailable++;
+    else cards.push({ ...t, targetId: d.targetId, at: d.at });
+  }
+  return {
+    total: rows.length,
+    /** More than `total` are hidden. */
+    more,
+    cards,
+    unavailable,
+    /** Older ones past `HIDDEN_SHOWN`, not listed. */
+    older: rows.length - cards.length - unavailable,
+  };
 }
 
 /* ---------------- Activity (#4) ---------------- */

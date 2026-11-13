@@ -2,11 +2,14 @@ import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
 import { internalMutation } from "./_generated/server";
 import { confirmFact as confirm, removeFact as remove } from "./lib/cityProfile";
+import { undismiss, undismissAll } from "./lib/dismissals";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import {
   activitySummary,
   clearActivityBatch as clearBatch,
+  DELETE_BATCH,
   deleteRunsBatch as deleteBatch,
+  hiddenCards,
   knownFacts,
   runsSummary,
   undoRemoval,
@@ -37,6 +40,35 @@ export const activity = viewerQuery({
 export const runs = viewerQuery({
   args: {},
   handler: (ctx) => runsSummary(ctx, ctx.viewer._id),
+});
+
+/** Cards the viewer marked "Not for me", newest first, as they may see them now. */
+export const hidden = viewerQuery({
+  args: {},
+  handler: (ctx) => hiddenCards(ctx, ctx.viewer._id),
+});
+
+/**
+ * "Show again": the card can come back in the viewer's recommendations. Only
+ * the dismissal goes; the skip signal and anything learned from it stay
+ * (that's "Clear my activity" or removing the interest).
+ */
+export const showCard = viewerMutation({
+  args: { targetId: v.string() },
+  handler: (ctx, { targetId }) => undismiss(ctx, ctx.viewer._id, targetId),
+});
+
+/** "Show all again": every card the viewer hid until now. */
+export const showAllCards = viewerMutation({
+  args: {},
+  handler: async (ctx) => {
+    const before = Date.now();
+    if (await undismissAll(ctx, ctx.viewer._id, before, DELETE_BATCH))
+      await ctx.scheduler.runAfter(0, internal.museKnows.showAllCardsBatch, {
+        userId: ctx.viewer._id,
+        before,
+      });
+  },
 });
 
 /** "Keep": an inferred fact becomes a stated one. */
@@ -100,5 +132,14 @@ export const deleteRunsBatch = internalMutation({
   handler: async (ctx, { userId }) => {
     if (await deleteBatch(ctx, userId))
       await ctx.scheduler.runAfter(0, internal.museKnows.deleteRunsBatch, { userId });
+  },
+});
+
+/** Continues `showAllCards` past one batch. */
+export const showAllCardsBatch = internalMutation({
+  args: { userId: v.id("users"), before: v.number() },
+  handler: async (ctx, { userId, before }) => {
+    if (await undismissAll(ctx, userId, before, DELETE_BATCH))
+      await ctx.scheduler.runAfter(0, internal.museKnows.showAllCardsBatch, { userId, before });
   },
 });

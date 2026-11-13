@@ -5,6 +5,7 @@ import { LandingPage } from "@/landing/shell/LandingPage";
 import { Card, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import { PrivacyNote } from "./CityBrief";
+import { HiddenCards } from "./HiddenCards";
 import { KnownFacts } from "./KnownFacts";
 import { LearnFromActivity } from "./LearnFromActivity";
 import { OtherData } from "./OtherData";
@@ -63,6 +64,7 @@ export function CityProfilePage() {
               <KnownFacts known={known} />
             )}
             <LearnFromActivity />
+            <HiddenCards />
             <OtherData />
             <PrivacyNote />
           </div>
