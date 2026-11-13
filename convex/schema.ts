@@ -815,6 +815,10 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
     decidedAt: v.optional(v.number()),
+    /** The owner asked for this draft ("Plan it", "Ask to connect"), so no Inbox notification. */
+    byOwner: v.optional(v.boolean()),
+    /** When an Inbox notification ("Muse has 2 drafts…") counted it. */
+    notifiedAt: v.optional(v.number()),
   })
     .index("by_owner_status", ["ownerId", "status", "createdAt"])
     .index("by_owner", ["ownerId", "createdAt"])
@@ -849,6 +853,18 @@ export default defineSchema({
     .index("by_owner", ["ownerId", "updatedAt"])
     .index("by_conversation", ["conversationId", "createdAt"])
     .index("by_open", ["open", "updatedAt"]),
+
+  /**
+   * Reminders Landing sent (#134): one row per person per thing ("event:<id>"
+   * for an Event's day-of reminder, "checkin:<weekOf>" for a check-in), so a
+   * retry or an overlapping run never notifies twice.
+   */
+  reminders: defineTable({
+    userId: v.id("users"),
+    key: v.string(),
+    eventId: v.optional(v.id("events")),
+    sentAt: v.number(),
+  }).index("by_user_key", ["userId", "key"]),
 
   /** One row per person per poll (#34): the options they picked. */
   pollVotes: defineTable({
