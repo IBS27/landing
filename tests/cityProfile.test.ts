@@ -1176,6 +1176,10 @@ describe("#77 budget: each exclusion belongs to its own amount", () => {
       key: "budget",
       value: { max: 2500 },
     });
+    expect(entries("My budget is $2,500 including $200 for utilities.")).toContainEqual({
+      key: "budget",
+      value: { max: 2500 },
+    });
     expect(entries("Rent up to $2,200, not counting $150 for parking.")).toContainEqual({
       key: "budget",
       value: { max: 2200 },
@@ -1225,6 +1229,7 @@ describe("#77 wider aliases", () => {
 
   test("everyday phrasings map to interests", () => {
     expect(interests("I train jiu jitsu and do muay thai.")).toContain("martial_arts");
+    expect(interests("I do muay thai.")).toContain("martial_arts");
     expect(interests("Total foodie.")).toContain("restaurants");
     expect(interests("I'm in two book clubs.")).toContain("books");
     expect(interests("I love flea markets.")).toContain("thrifting");

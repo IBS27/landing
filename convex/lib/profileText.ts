@@ -525,17 +525,23 @@ function rentScore(phrase: string, amount: Amount): number {
   return BUDGET_WORDS.test(phrase) ? 1 : 0;
 }
 
+/** Any dollar amount, even one too small or large to be rent ("$200 for utilities"). */
+const MONEY = new RegExp(NUM, "gi");
+
 /**
- * An amount's own words: its phrase, cut where the amounts before and after it
- * end and start. In "budget is $2,500 including $300 for utilities" the $300
- * is for utilities, the $2,500 isn't.
+ * An amount's own words: its phrase, cut where the dollar amounts before and
+ * after it end and start. In "budget is $2,500 including $200 for utilities"
+ * the $200 is for utilities, the $2,500 isn't.
  */
 function ownPhrase(amount: Amount): string {
   const { part, start, end } = amount.hit;
   let { from, to } = phraseSpan(amount.hit);
-  for (const other of amountsIn(part)) {
-    if (other.hit.end <= start) from = Math.max(from, other.hit.end);
-    else if (other.hit.start >= end) to = Math.min(to, other.hit.start);
+  for (const m of part.text.matchAll(MONEY)) {
+    if (!m[1] && !m[3]) continue;
+    const s = m.index;
+    const e = s + m[0].length;
+    if (e <= start) from = Math.max(from, e);
+    else if (s >= end) to = Math.min(to, s);
   }
   return part.text.slice(from, to).trim();
 }

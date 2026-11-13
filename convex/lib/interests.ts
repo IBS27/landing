@@ -183,7 +183,8 @@ export const INTERESTS = [
       "karate",
       "boxing",
       "kickboxing",
-      "muay thai",
+      // "Thai" is redacted as a nationality before matching, so "muay" alone.
+      "muay",
       "taekwondo",
     ],
   },
