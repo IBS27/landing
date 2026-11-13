@@ -81,6 +81,11 @@ function eventSlot(hour: number): number {
   return 5;
 }
 
+/** The part of the day an Event starting at `t` falls in. */
+export function routeTimeAt(t: number): RouteTime {
+  return (SLOTS[eventSlot(pacificHour(t))] as Slot).time;
+}
+
 /* ---------- Time ---------- */
 
 const TZ = "America/Los_Angeles";
@@ -118,13 +123,35 @@ function pacificMidnight(year: number, month: number, day: number): number {
   return t;
 }
 
-/** This weekend from now if it's Saturday or Sunday in San Francisco, else the coming one. */
-export function weekendWindow(now: number): { start: number; end: number } {
+/**
+ * This weekend if it's Saturday or Sunday in San Francisco, else the coming
+ * one: from Saturday midnight to Monday midnight, and Saturday's date
+ * ("2026-11-14") as a stable key for the weekend.
+ */
+export function weekendOf(now: number): { saturday: string; start: number; end: number } {
   const p = pacific(now);
   const toSaturday = p.weekday === 0 ? -1 : 6 - p.weekday;
-  const saturday = pacificMidnight(p.year, p.month, p.day + toSaturday);
+  const start = pacificMidnight(p.year, p.month, p.day + toSaturday);
   const end = pacificMidnight(p.year, p.month, p.day + toSaturday + 2);
-  return { start: Math.max(now, saturday), end };
+  return { saturday: pacificDate(start), start, end };
+}
+
+/** This weekend from now if it's Saturday or Sunday in San Francisco, else the coming one. */
+export function weekendWindow(now: number): { start: number; end: number } {
+  const { start, end } = weekendOf(now);
+  return { start: Math.max(now, start), end };
+}
+
+/** Midnight in San Francisco at the start of a "YYYY-MM-DD" date. */
+export function pacificDateStart(date: string): number {
+  const [y, m, d] = date.split("-").map(Number);
+  return pacificMidnight(y ?? 1970, m ?? 1, d ?? 1);
+}
+
+/** The San Francisco calendar date of `t`, as "2026-11-14". */
+export function pacificDate(t: number): string {
+  const p = pacific(t);
+  return `${p.year}-${String(p.month).padStart(2, "0")}-${String(p.day).padStart(2, "0")}`;
 }
 
 export function pacificHour(t: number): number {
@@ -402,6 +429,8 @@ export type RouteEvent = {
   endAt?: number;
   point?: LatLng;
   going: number;
+  /** Ranks Events for the route, highest first. Defaults to `going`. */
+  score?: number;
   sourceKey: string;
 };
 
@@ -419,6 +448,21 @@ export type BuiltStop = {
   disagreement?: { note: string; sources: string[] };
   sources: string[];
 };
+
+/** An Event as a route stop, in the part of the day it starts, citing the Event. */
+export function eventStop(e: RouteEvent): BuiltStop {
+  return {
+    name: e.title,
+    ...(e.point && { point: e.point }),
+    timeOfDay: routeTimeAt(e.startAt),
+    kind: "event",
+    why: snippet(e.description, TEXT_MAX),
+    eventId: e.eventId,
+    startAt: e.startAt,
+    ...(e.endAt !== undefined && { endAt: e.endAt }),
+    sources: [e.sourceKey],
+  };
+}
 
 /** Walking cost of a stop away from the last pinned one: one point per km; unknown spots cost a little. */
 const KM_COST = 1;
@@ -441,8 +485,10 @@ export function buildRoute(
   const filled: (BuiltStop | undefined)[] = SLOTS.map(() => undefined);
   const used = new Set<Candidate>();
 
-  // One day's Events only (the day of the best-attended one), so the route stays in order.
-  const eventsByPick = [...events].sort((a, b) => b.going - a.going || a.startAt - b.startAt);
+  // One day's Events only (the day of the best-ranked one), so the route stays in order.
+  const eventsByPick = [...events].sort(
+    (a, b) => (b.score ?? b.going) - (a.score ?? a.going) || a.startAt - b.startAt,
+  );
   const day = eventsByPick[0] && pacificDay(eventsByPick[0].startAt);
   let eventCount = 0;
   for (const e of eventsByPick) {
@@ -450,18 +496,7 @@ export function buildRoute(
     if (eventCount >= MAX_EVENTS) break;
     const i = eventSlot(pacificHour(e.startAt));
     if (filled[i]) continue;
-    const slot = SLOTS[i] as Slot;
-    filled[i] = {
-      name: e.title,
-      ...(e.point && { point: e.point }),
-      timeOfDay: slot.time,
-      kind: "event",
-      why: snippet(e.description, TEXT_MAX),
-      eventId: e.eventId,
-      startAt: e.startAt,
-      ...(e.endAt !== undefined && { endAt: e.endAt }),
-      sources: [e.sourceKey],
-    };
+    filled[i] = eventStop(e);
     eventCount++;
   }
 

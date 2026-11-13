@@ -1028,4 +1028,30 @@ export default defineSchema({
     /** Group posts the route was built from, for the "lots of new threads" rebuild. */
     postCount: v.number(),
   }).index("by_neighborhood", ["neighborhoodId"]),
+
+  /**
+   * Landing Journeys (#32): one row per person per weekend of their first 90
+   * days, a route built from real Events and Group plans plus #18's Weekend
+   * Route places. Written only by the scheduled job (`internal.journeys.build`);
+   * read through `api.journeys.thisWeek`, which checks crew overlap live.
+   */
+  journeys: defineTable({
+    userId: v.id("users"),
+    /** The weekend's Saturday in San Francisco, "2026-11-14". */
+    weekOf: v.string(),
+    /** Week 1 to 13 of the first 90 days, counted from the move-in date. */
+    week: v.number(),
+    /** Saturday midnight to Monday midnight, San Francisco time. */
+    startsAt: v.number(),
+    endsAt: v.number(),
+    /** The person's neighborhoods the plans came from. */
+    neighborhoodIds: v.array(v.id("neighborhoods")),
+    /** The day's route, in order. Every stop is cited. */
+    stops: v.array(weekendStop),
+    /** "Also this weekend": Event stops that didn't fit the day. */
+    more: v.array(weekendStop),
+    /** The person's Move-in Crew when it was built; overlap is re-checked when read. */
+    crewIds: v.array(v.id("users")),
+    generatedAt: v.number(),
+  }).index("by_user_week", ["userId", "weekOf"]),
 });

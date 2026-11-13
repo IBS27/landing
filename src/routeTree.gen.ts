@@ -59,6 +59,7 @@ import { Route as GroupsFeedRouteImport } from './routes/groups/feed'
 import { Route as GroupsJoinsRouteImport } from './routes/groups/joins'
 import { Route as LandingIndexRouteImport } from './routes/landing/index'
 import { Route as LandingSplatRouteImport } from './routes/landing/$'
+import { Route as LandingCrewRouteRouteImport } from './routes/landing/crew/route'
 import { Route as LandingWelcomeRouteImport } from './routes/landing/welcome'
 import { Route as LiveProducerRouteImport } from './routes/live.producer'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace/index'
@@ -88,6 +89,7 @@ import { Route as GroupsGroupIdFilesRouteImport } from './routes/groups/$groupId
 import { Route as GroupsGroupIdMediaRouteImport } from './routes/groups/$groupId/media'
 import { Route as GroupsGroupIdMembersRouteImport } from './routes/groups/$groupId/members'
 import { Route as LandingCrewIndexRouteImport } from './routes/landing/crew/index'
+import { Route as LandingCrewJourneysRouteImport } from './routes/landing/crew/journeys'
 import { Route as LandingFindIndexRouteImport } from './routes/landing/find/index'
 import { Route as LandingInboxIndexRouteImport } from './routes/landing/inbox/index'
 import { Route as LandingMoveOutIndexRouteImport } from './routes/landing/move-out/index'
@@ -360,6 +362,11 @@ const LandingSplatRoute = LandingSplatRouteImport.update({
   path: '/$',
   getParentRoute: () => LandingRouteRoute,
 } as any)
+const LandingCrewRouteRoute = LandingCrewRouteRouteImport.update({
+  id: '/crew',
+  path: '/crew',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
 const LandingWelcomeRoute = LandingWelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
@@ -502,9 +509,14 @@ const GroupsGroupIdMembersRoute = GroupsGroupIdMembersRouteImport.update({
   getParentRoute: () => GroupsGroupIdRoute,
 } as any)
 const LandingCrewIndexRoute = LandingCrewIndexRouteImport.update({
-  id: '/crew/',
-  path: '/crew/',
-  getParentRoute: () => LandingRouteRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => LandingCrewRouteRoute,
+} as any)
+const LandingCrewJourneysRoute = LandingCrewJourneysRouteImport.update({
+  id: '/journeys',
+  path: '/journeys',
+  getParentRoute: () => LandingCrewRouteRoute,
 } as any)
 const LandingFindIndexRoute = LandingFindIndexRouteImport.update({
   id: '/find/',
@@ -639,6 +651,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/video': typeof VideoRoute
   '/watch': typeof WatchRoute
+  '/landing/crew': typeof LandingCrewRouteRouteWithChildren
   '/$username/$section': typeof UsernameSectionRoute
   '/$username/about': typeof UsernameAboutRoute
   '/$username/friends': typeof UsernameFriendsRoute
@@ -697,6 +710,7 @@ export interface FileRoutesByFullPath {
   '/groups/$groupId/files': typeof GroupsGroupIdFilesRoute
   '/groups/$groupId/media': typeof GroupsGroupIdMediaRoute
   '/groups/$groupId/members': typeof GroupsGroupIdMembersRoute
+  '/landing/crew/journeys': typeof LandingCrewJourneysRoute
   '/landing/place/room': typeof LandingPlaceRoomRoute
   '/landing/place/roommates': typeof LandingPlaceRoommatesRoute
   '/marketplace/category/$category': typeof MarketplaceCategoryCategoryRoute
@@ -796,6 +810,7 @@ export interface FileRoutesByTo {
   '/groups/$groupId/files': typeof GroupsGroupIdFilesRoute
   '/groups/$groupId/media': typeof GroupsGroupIdMediaRoute
   '/groups/$groupId/members': typeof GroupsGroupIdMembersRoute
+  '/landing/crew/journeys': typeof LandingCrewJourneysRoute
   '/landing/place/room': typeof LandingPlaceRoomRoute
   '/landing/place/roommates': typeof LandingPlaceRoommatesRoute
   '/marketplace/category/$category': typeof MarketplaceCategoryCategoryRoute
@@ -841,6 +856,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/video': typeof VideoRoute
   '/watch': typeof WatchRoute
+  '/landing/crew': typeof LandingCrewRouteRouteWithChildren
   '/$username/$section': typeof UsernameSectionRoute
   '/$username/about': typeof UsernameAboutRoute
   '/$username/friends': typeof UsernameFriendsRoute
@@ -899,6 +915,7 @@ export interface FileRoutesById {
   '/groups/$groupId/files': typeof GroupsGroupIdFilesRoute
   '/groups/$groupId/media': typeof GroupsGroupIdMediaRoute
   '/groups/$groupId/members': typeof GroupsGroupIdMembersRoute
+  '/landing/crew/journeys': typeof LandingCrewJourneysRoute
   '/landing/place/room': typeof LandingPlaceRoomRoute
   '/landing/place/roommates': typeof LandingPlaceRoommatesRoute
   '/marketplace/category/$category': typeof MarketplaceCategoryCategoryRoute
@@ -945,6 +962,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/video'
     | '/watch'
+    | '/landing/crew'
     | '/$username/$section'
     | '/$username/about'
     | '/$username/friends'
@@ -1003,6 +1021,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId/files'
     | '/groups/$groupId/media'
     | '/groups/$groupId/members'
+    | '/landing/crew/journeys'
     | '/landing/place/room'
     | '/landing/place/roommates'
     | '/marketplace/category/$category'
@@ -1102,6 +1121,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId/files'
     | '/groups/$groupId/media'
     | '/groups/$groupId/members'
+    | '/landing/crew/journeys'
     | '/landing/place/room'
     | '/landing/place/roommates'
     | '/marketplace/category/$category'
@@ -1146,6 +1166,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/video'
     | '/watch'
+    | '/landing/crew'
     | '/$username/$section'
     | '/$username/about'
     | '/$username/friends'
@@ -1204,6 +1225,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId/files'
     | '/groups/$groupId/media'
     | '/groups/$groupId/members'
+    | '/landing/crew/journeys'
     | '/landing/place/room'
     | '/landing/place/roommates'
     | '/marketplace/category/$category'
@@ -1655,6 +1677,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LandingSplatRouteImport
       parentRoute: typeof LandingRouteRoute
     }
+    '/landing/crew': {
+      id: '/landing/crew'
+      path: '/crew'
+      fullPath: '/landing/crew'
+      preLoaderRoute: typeof LandingCrewRouteRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
     '/landing/welcome': {
       id: '/landing/welcome'
       path: '/welcome'
@@ -1853,10 +1882,17 @@ declare module '@tanstack/react-router' {
     }
     '/landing/crew/': {
       id: '/landing/crew/'
-      path: '/crew'
+      path: '/'
       fullPath: '/landing/crew/'
       preLoaderRoute: typeof LandingCrewIndexRouteImport
-      parentRoute: typeof LandingRouteRoute
+      parentRoute: typeof LandingCrewRouteRoute
+    }
+    '/landing/crew/journeys': {
+      id: '/landing/crew/journeys'
+      path: '/journeys'
+      fullPath: '/landing/crew/journeys'
+      preLoaderRoute: typeof LandingCrewJourneysRouteImport
+      parentRoute: typeof LandingCrewRouteRoute
     }
     '/landing/find/': {
       id: '/landing/find/'
@@ -2034,13 +2070,26 @@ const UsernameRouteRouteWithChildren = UsernameRouteRoute._addFileChildren(
   UsernameRouteRouteChildren,
 )
 
+interface LandingCrewRouteRouteChildren {
+  LandingCrewJourneysRoute: typeof LandingCrewJourneysRoute
+  LandingCrewIndexRoute: typeof LandingCrewIndexRoute
+}
+
+const LandingCrewRouteRouteChildren: LandingCrewRouteRouteChildren = {
+  LandingCrewJourneysRoute: LandingCrewJourneysRoute,
+  LandingCrewIndexRoute: LandingCrewIndexRoute,
+}
+
+const LandingCrewRouteRouteWithChildren =
+  LandingCrewRouteRoute._addFileChildren(LandingCrewRouteRouteChildren)
+
 interface LandingRouteRouteChildren {
+  LandingCrewRouteRoute: typeof LandingCrewRouteRouteWithChildren
   LandingSplatRoute: typeof LandingSplatRoute
   LandingWelcomeRoute: typeof LandingWelcomeRoute
   LandingIndexRoute: typeof LandingIndexRoute
   LandingPlaceRoomRoute: typeof LandingPlaceRoomRoute
   LandingPlaceRoommatesRoute: typeof LandingPlaceRoommatesRoute
-  LandingCrewIndexRoute: typeof LandingCrewIndexRoute
   LandingFindIndexRoute: typeof LandingFindIndexRoute
   LandingInboxIndexRoute: typeof LandingInboxIndexRoute
   LandingMoveOutIndexRoute: typeof LandingMoveOutIndexRoute
@@ -2052,12 +2101,12 @@ interface LandingRouteRouteChildren {
 }
 
 const LandingRouteRouteChildren: LandingRouteRouteChildren = {
+  LandingCrewRouteRoute: LandingCrewRouteRouteWithChildren,
   LandingSplatRoute: LandingSplatRoute,
   LandingWelcomeRoute: LandingWelcomeRoute,
   LandingIndexRoute: LandingIndexRoute,
   LandingPlaceRoomRoute: LandingPlaceRoomRoute,
   LandingPlaceRoommatesRoute: LandingPlaceRoommatesRoute,
-  LandingCrewIndexRoute: LandingCrewIndexRoute,
   LandingFindIndexRoute: LandingFindIndexRoute,
   LandingInboxIndexRoute: LandingInboxIndexRoute,
   LandingMoveOutIndexRoute: LandingMoveOutIndexRoute,

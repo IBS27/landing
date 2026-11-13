@@ -17,6 +17,8 @@ export type TimeSpec =
       readonly future?: boolean;
       /** Whole calendar years back (same month and day), for "On this day" memories. */
       readonly years?: number;
+      /** Counted from this weekend's Saturday (0) instead of today, as `weekendDay` does. */
+      readonly weekend?: boolean;
     };
 
 export const minutesAgo = (m: number): TimeSpec => ({ kind: "offset", ms: -m * MINUTE });
@@ -33,6 +35,19 @@ export const yearsAgo = (n: number, hm: string): TimeSpec => ({
   days: 0,
   hm,
   years: n,
+});
+
+/**
+ * Saturday (0) or Sunday (1) of this weekend in San Francisco, or the coming
+ * one on a weekday, at `hm`: for plans that must land on the weekend whatever
+ * day the seed runs (Journeys, #32).
+ */
+export const weekendDay = (d: 0 | 1, hm: string): TimeSpec => ({
+  kind: "clock",
+  days: d,
+  hm,
+  future: true,
+  weekend: true,
 });
 
 export const daysFromNow = (d: number, hm?: string): TimeSpec =>
@@ -77,11 +92,13 @@ export class Clock {
     if (spec.kind === "offset") return this.now + spec.ms;
     const [h, m] = spec.hm.split(":").map(Number);
     const local = new Date(this.now + this.offset);
+    const weekday = local.getUTCDay();
+    const toSaturday = !spec.weekend ? 0 : weekday === 0 ? -1 : 6 - weekday;
     const t =
       Date.UTC(
         local.getUTCFullYear() - (spec.years ?? 0),
         local.getUTCMonth(),
-        local.getUTCDate() + spec.days,
+        local.getUTCDate() + toSaturday + spec.days,
         h,
         m,
       ) - this.offset;

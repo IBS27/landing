@@ -20,6 +20,12 @@ export type CityProfileSeed = {
   budget: FactValue<"budget">;
   /** Move-in month, counted from seed time. */
   moveInMonthsFromNow: number;
+  /**
+   * Already moved in this many days ago (the move-in date is set, and the month
+   * comes from it instead of `moveInMonthsFromNow`). Journeys (#32) run for the
+   * first 90 days after it.
+   */
+  moveInDaysAgo?: number;
   neighborhoods: NeighborhoodSlug[];
   transport: TransportMode[];
   schedule: FactValue<"schedule">;
@@ -36,7 +42,8 @@ export const cityProfileSeeds: CityProfileSeed[] = [
     // Mission climber without a car.
     username: "maya.chen",
     budget: { min: 1800, max: 2400 },
-    moveInMonthsFromNow: 3,
+    moveInMonthsFromNow: 0,
+    moveInDaysAgo: 16,
     neighborhoods: ["mission", "bernal-heights"],
     transport: ["walk", "bike", "muni", "bart"],
     schedule: { workHours: "day", workplace: "hybrid", weekendsFree: true },
@@ -77,7 +84,8 @@ export const cityProfileSeeds: CityProfileSeed[] = [
     // friend of friends with the same plans.
     username: "luis.hernandez",
     budget: { min: 2000, max: 2600 },
-    moveInMonthsFromNow: 3,
+    moveInMonthsFromNow: 0,
+    moveInDaysAgo: 16,
     neighborhoods: ["mission", "noe-valley"],
     transport: ["bike", "bart"],
     schedule: { workHours: "day", workplace: "office", weekendsFree: true },
@@ -116,7 +124,8 @@ export const cityProfileSeeds: CityProfileSeed[] = [
     // Design student and film photographer.
     username: "zoe.nguyen",
     budget: { min: 1500, max: 2100 },
-    moveInMonthsFromNow: 3,
+    moveInMonthsFromNow: 0,
+    moveInDaysAgo: 16,
     neighborhoods: ["mission", "inner-sunset"],
     transport: ["walk", "muni", "bart"],
     schedule: { workHours: "day", workplace: "hybrid", weekendsFree: true },
@@ -128,7 +137,8 @@ export const cityProfileSeeds: CityProfileSeed[] = [
     // Mechanical engineer who runs the fire trails at 6am.
     username: "daniel.reyes",
     budget: { min: 1700, max: 2300 },
-    moveInMonthsFromNow: 3,
+    moveInMonthsFromNow: 0,
+    moveInDaysAgo: 16,
     neighborhoods: ["bernal-heights", "noe-valley"],
     transport: ["bike", "bart"],
     schedule: { workHours: "day", workplace: "office", weekendsFree: true },
@@ -140,7 +150,8 @@ export const cityProfileSeeds: CityProfileSeed[] = [
     // CS new grad starting at Salesforce.
     username: "ethan.park",
     budget: { min: 1800, max: 2600 },
-    moveInMonthsFromNow: 3,
+    moveInMonthsFromNow: 0,
+    moveInDaysAgo: 16,
     neighborhoods: ["south-of-market", "mission"],
     transport: ["walk", "muni", "bart"],
     schedule: { workHours: "day", workplace: "office", weekendsFree: true },

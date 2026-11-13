@@ -22,7 +22,7 @@ export async function seedCityProfiles(ctx: MutationCtx, now: number) {
     const briefAt = now - seed.briefDaysAgo * DAY;
     const stated: FactEntry[] = [
       { key: "budget", value: seed.budget },
-      { key: "moveIn", value: { month: monthFromNow(now, seed.moveInMonthsFromNow) } },
+      { key: "moveIn", value: moveIn(now, seed) },
       { key: "transport", value: { modes: seed.transport } },
       { key: "schedule", value: seed.schedule },
       ...employerFact(seed.employerFromWork ? user : null),
@@ -51,6 +51,22 @@ export async function seedCityProfiles(ctx: MutationCtx, now: number) {
   }
   return facts;
 }
+
+/** The move-in fact: a date for people who already moved in, else a month. */
+function moveIn(now: number, seed: (typeof cityProfileSeeds)[number]) {
+  if (seed.moveInDaysAgo === undefined)
+    return { month: monthFromNow(now, seed.moveInMonthsFromNow) };
+  const date = SF_DATE.format(now - seed.moveInDaysAgo * DAY);
+  return { month: date.slice(0, 7), date };
+}
+
+/** "2026-10-27": en-CA formats dates as YYYY-MM-DD. */
+const SF_DATE = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Los_Angeles",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
 
 /** "YYYY-MM" for the month `n` months after `now` (Pacific time is close enough for a month). */
 function monthFromNow(now: number, n: number): string {
