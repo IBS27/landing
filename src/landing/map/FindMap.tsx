@@ -6,6 +6,7 @@ import { api } from "../../../convex/_generated/api";
 import type { PinsInBounds } from "../../../convex/lib/mapPins";
 import { LandingMap } from "./LandingMap";
 import type { Bounds, MapLayer, PinKind } from "./types";
+import { useMediaQuery } from "./useEnv";
 
 const KINDS: readonly { kind: PinKind; label: string; icon: ReactNode }[] = [
   { kind: "homes", label: "Homes", icon: <House size={16} strokeWidth={2.25} /> },
@@ -98,6 +99,9 @@ export function FindMapView({
 }) {
   // Wide screens: the list in a 400px column beside a full-height map.
   // Narrow screens: title, then the map, then the list, in one scrolling page.
+  const wide = useMediaQuery("(min-width: 1200px)");
+  // The map reaches the bottom of the window (and the app's floating New message button) unless the list sits below it.
+  const atBottom = !aside || wide;
   return (
     <div
       className={cn(
@@ -130,7 +134,7 @@ export function FindMapView({
           layers={layers}
           focus="city"
           // Top: the layer chips. Bottom: the app's floating New message button.
-          padding={{ top: 64, bottom: 64 }}
+          padding={{ top: 64, bottom: atBottom ? 64 : 0 }}
           label="Map of homes, Events and Groups in San Francisco"
           onBoundsChange={onBoundsChange}
           className="absolute inset-0"

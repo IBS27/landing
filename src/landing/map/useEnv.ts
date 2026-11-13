@@ -13,17 +13,20 @@ export function useIsDark() {
   return dark;
 }
 
-export function useReducedMotion() {
-  const query = "(prefers-reduced-motion: reduce)";
-  const [reduced, setReduced] = useState(() => window.matchMedia(query).matches);
+/** Whether a media query matches, kept current. */
+export function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
   useEffect(() => {
     const m = window.matchMedia(query);
-    const on = () => setReduced(m.matches);
+    const on = () => setMatches(m.matches);
+    on();
     m.addEventListener("change", on);
     return () => m.removeEventListener("change", on);
-  }, []);
-  return reduced;
+  }, [query]);
+  return matches;
 }
+
+export const useReducedMotion = () => useMediaQuery("(prefers-reduced-motion: reduce)");
 
 /** An element's width, kept current as it resizes. */
 export function useWidth(ref: RefObject<HTMLElement | null>) {
