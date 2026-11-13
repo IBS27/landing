@@ -442,7 +442,7 @@ export function manualScene(
     notes: measured
       ? ["Room dimensions entered by you. Ceiling height is estimated."]
       : ["Example dimensions. Enter your measurements before judging furniture fit."],
-    rooms: [{ id: "room", name: title, polygon, floorColor: "#c7b69e", evidence }],
+    rooms: [{ id: "room", name: title.slice(0, 80), polygon, floorColor: "#c7b69e", evidence }],
     walls: polygon.map((a, i) => ({
       id: `wall-${i}`,
       a,

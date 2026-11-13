@@ -88,6 +88,9 @@ describe("unit geometry", () => {
     unknown.rooms[0].evidence.sources = ["made-up"];
     expect(sceneProblems(unknown, []).join()).toContain("unknown evidence");
   });
+  test("starts valid with a long listing title", () => {
+    expect(sceneProblems(manualScene(4, 5, "x".repeat(100)))).toEqual([]);
+  });
   test("walks through doors but not walls, windows, or outside the unit", () => {
     const scene = manualScene(4, 5);
     scene.walls.push({

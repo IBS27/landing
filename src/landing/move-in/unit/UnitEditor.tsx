@@ -32,6 +32,8 @@ export function UnitEditor({
   items?: { id: Id<"listings">; title: string }[];
 }) {
   const [draft, setDraft] = useState(initial);
+  const latest = useRef(draft);
+  latest.current = draft;
   const [base, setBase] = useState(revision);
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -171,9 +173,10 @@ export function UnitEditor({
   const save = async () => {
     if (!onSave) return;
     setBusy(true);
+    const submitted = draft;
     try {
-      setBase(await onSave(draft, base));
-      setDirty(false);
+      setBase(await onSave(submitted, base));
+      if (latest.current === submitted) setDirty(false);
       setMessage("Layout saved");
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Could not save");
