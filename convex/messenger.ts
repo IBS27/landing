@@ -440,7 +440,8 @@ export const searchPeople = viewerQuery({
 
 /* ---------------- Mutations ---------------- */
 
-async function createConversation(
+/** A new, empty thread; it stays out of every inbox until a message is sent. */
+export async function createConversation(
   ctx: MutationCtx,
   kind: "dm" | "group",
   memberIds: Id<"users">[],

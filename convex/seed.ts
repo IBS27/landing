@@ -682,6 +682,9 @@ export const reset = internalAction({
     // Move-in Crew opt-ins (#30), after City Profiles.
     await ctx.runMutation(internal.crews.seedDemo, {});
 
+    // Maya's Journey for this weekend (#32), after the crew exists.
+    await ctx.runMutation(internal.journeys.seedDemo, {});
+
     // Neighborhood scores (#17), from everything above. The daily cron keeps them fresh.
     const scores = await ctx.runAction(internal.neighborhoodScores.recompute, {});
 

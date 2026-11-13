@@ -30,4 +30,13 @@ crons.daily(
   { force: false },
 );
 
+/**
+ * Journeys (#32): every morning in San Francisco, an hour after the Weekend
+ * Route check, rebuild each person's Journey for the coming weekend so new
+ * Events, RSVPs and routes show up. Builds are plain code, no model calls.
+ */
+crons.daily("rebuild journeys", { hourUTC: 14, minuteUTC: 0 }, internal.journeys.refreshAll, {
+  force: true,
+});
+
 export default crons;
