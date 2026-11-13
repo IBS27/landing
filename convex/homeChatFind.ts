@@ -728,18 +728,13 @@ async function hostGroup(s: Scope, e: Doc<"events">): Promise<Doc<"groups"> | nu
 
 /**
  * An Event as Muse reads it and the chat shows it, with the Group hosting it
- * ("Hosted by …", linked, and cited with the Event). `host: false` leaves the
- * Group out, for an Event listed under that Group's own details.
+ * ("Hosted by …", linked, and cited with the Event).
  */
-async function eventFound(
-  s: Scope,
-  e: Doc<"events">,
-  { host: withHost = true }: { host?: boolean } = {},
-): Promise<Found> {
+async function eventFound(s: Scope, e: Doc<"events">): Promise<Found> {
   const [responses, going, host] = await Promise.all([
     s.responses(),
     goingCount(s, e),
-    withHost ? hostGroup(s, e) : null,
+    hostGroup(s, e),
   ]);
   const hostFound = host && groupFound(s, host);
   const status = responses.get(e._id);
@@ -927,6 +922,19 @@ const plural = (n: number, one: string) =>
   `${n.toLocaleString("en-US")} ${one}${n === 1 ? "" : "s"}`;
 
 /**
+ * Where someone is or lives, as a post may say it ("I'm at 18th and Dolores
+ * right now", "currently near the park", "I live on Valencia"): no live
+ * location or home reaches Muse or the chat. A plan's meeting place stays.
+ */
+const WHEREABOUTS = [
+  /\b(?:i['’]?m|i am|we['’]?re|we are)\s+(?:currently\s+|now\s+)?(?:at|on|near|by|outside|around|in front of)\b[^.!?\n]*?\b(?:right now|currently|now|rn|atm|at the moment)\b[^.!?\n]*/gi,
+  /\b(?:currently|right now)\s+(?:at|on|near|by|outside|around)\b[^.!?\n]*/gi,
+  /\b(?:i|we)\s+live\s+(?:at|on|near|by|off|around)\b[^.!?\n]*/gi,
+];
+const withoutWhereabouts = (text: string) =>
+  WHEREABOUTS.reduce((t, re) => t.replace(re, "…"), text);
+
+/**
  * Whether a Group post shows to the viewer, as the Groups feed decides: a Group
  * whose posts they may read, Facebook's audience rules (blocks either way,
  * "only me"), an author still there, and some text to read.
@@ -947,7 +955,7 @@ function postFound(s: Scope, p: Doc<"posts">, g: Doc<"groups">, author: Doc<"use
   const group = groupFound(s, g);
   const by = firstName(author);
   const where = cap(g.name, 80);
-  const excerpt = cap(p.text ?? "", EXCERPT_MAX);
+  const excerpt = cap(withoutWhereabouts(p.text ?? ""), EXCERPT_MAX);
   const key = foundKey("post", p._id);
   const href = `/${encodeURIComponent(author.username)}/posts/${p._id}`;
   const label = `${by}'s post in ${where}`;
@@ -1112,8 +1120,7 @@ async function groupActivity(
   const events: Found[] = [];
   for (const e of eventRows) {
     if (events.length >= GROUP_THINGS) break;
-    if (notOver(e, s.now) && (await eventOpen(s, e)))
-      events.push(await eventFound(s, e, { host: false }));
+    if (notOver(e, s.now) && (await eventOpen(s, e))) events.push(await eventFound(s, e));
   }
   const posts: Found[] = [];
   for (const p of postRows) {

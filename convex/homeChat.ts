@@ -749,10 +749,18 @@ export function homeChatProblems(
     )
       problems.push(`sourceIds: cite ${f.key}, which the reply names`);
   }
-  // A Group post has no title to spot: a reply that talks about posts cites the ones it means.
+  // A Group post has no title to spot: a reply that talks about posts cites the ones it means,
+  // and one by each author it names.
   const posts = [...known.values()].filter((f) => f.kind === "post");
-  if (posts.length && MENTIONS_POSTS.test(text) && !posts.some((p) => cited.has(p.key)))
-    problems.push("sourceIds: cite the key of every Group post you mention");
+  if (posts.length && MENTIONS_POSTS.test(text)) {
+    const named = posts.filter((p) => saidText.includes(` ${plain(p.author).trim()} `));
+    const authors = new Set(named.map((p) => p.author));
+    if (
+      !posts.some((p) => cited.has(p.key)) ||
+      [...authors].some((a) => !named.some((p) => p.author === a && cited.has(p.key)))
+    )
+      problems.push("sourceIds: cite the key of every Group post you mention");
+  }
   problems.push(...actionProblems(out, input, known));
   problems.push(...planProblems(out.plan, input.message, planContext(input)));
   return [...new Set(problems)];

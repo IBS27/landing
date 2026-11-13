@@ -241,6 +241,32 @@ describe("search_group_posts", () => {
     expect(prot?.facts).toMatchObject({ excerpt: expect.stringContaining("[removed]") });
   });
 
+  test("where someone is right now, or lives, never reaches Muse or the card", async () => {
+    const tables = world();
+    tables.posts.push(
+      post(
+        "pHere",
+        "gClimb",
+        "S",
+        "Climbing later! I'm at the southwest corner of 18th and Dolores right now.",
+      ),
+      post(
+        "pNear",
+        "gClimb",
+        "S",
+        "Currently near Dolores Park with snacks. Join the hike Saturday.",
+      ),
+      post("pHome", "gClimb", "S", "We live on Valencia near 20th, come by for board games."),
+    );
+    const out = await run("search_group_posts", { group: "gClimb" }, tables);
+    const text = JSON.stringify(out);
+    for (const where of ["18th and Dolores", "Dolores Park", "Valencia near 20th"])
+      expect(text).not.toContain(where);
+    // The plan itself stays.
+    expect(text).toContain("Join the hike Saturday");
+    expect(text).toContain("Climbing later!");
+  });
+
   test("arguments are checked", async () => {
     await expect(run("search_group_posts", { withinDays: "soon" })).rejects.toThrow(
       /Wrong arguments/,
@@ -313,8 +339,11 @@ describe("get_details on a Group", () => {
     const upcoming = facts.upcomingEvents as { key: string; hostedBy?: unknown }[];
     const recent = facts.recentPosts as { key: string }[];
     expect(upcoming.map((e) => e.key)).toEqual(["event:eClimb", "event:eClimb2"]);
-    // Listed under its own Group, an Event doesn't repeat it.
-    expect(upcoming[0]?.hostedBy).toBeUndefined();
+    // Shown as its own card, an Event still says who hosts it.
+    expect(upcoming[0]?.hostedBy).toMatchObject({ key: "group:gClimb" });
+    expect(out.found.find((f) => f.key === "event:eClimb")?.card?.host?.label).toBe(
+      "SF Climbing Crew",
+    );
     // The newest three, however old.
     expect(recent.map((p) => p.key)).toEqual(["post:pProtected", "post:pHike", "post:pOld"]);
     expect(facts.postsNote).toBeUndefined();
@@ -444,6 +473,18 @@ describe("what's happening in a Group", () => {
       "sourceIds: cite the key of every Group post you mention",
     );
     expect(homeChatProblems(answer({ show: ["post:pHike"] }), c.input)).toEqual([]);
+    // Each author it names cites their post: one cited isn't enough for two described.
+    const tables = world();
+    tables.users.push(user("A"));
+    tables.posts.push(post("pGames", "gClimb", "A", "Board games at the gym after climbing"));
+    const two = await contextFor("What's happening in the climbing Group?", tables);
+    const both = "Sname posted about a hike, and Aname posted about board games.";
+    expect(homeChatProblems(answer({ text: both, show: ["post:pHike"] }), two.input)).toContain(
+      "sourceIds: cite the key of every Group post you mention",
+    );
+    expect(
+      homeChatProblems(answer({ text: both, show: ["post:pHike", "post:pGames"] }), two.input),
+    ).toEqual([]);
     // Naming the Group cites it too.
     expect(
       homeChatProblems(
