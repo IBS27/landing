@@ -12,368 +12,368 @@ export const TRANSIT_SOURCES: Record<string, SourceSnapshot> = {
     title: "Embarcadero | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "298 Market Street, San Francisco, CA 94111",
-    fetchedAt: 1794524329465,
+    fetchedAt: 1794530058224,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"EMBR","901169","Embarcadero","","37.792762","-122.397037","EMBR","https://www.bart.gov/stations/embr","1","",""':
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt)",
+      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
       publisher: "BART",
       snippet:
         '"EMBR","901169","Embarcadero","","37.792762","-122.397037","EMBR","https://www.bart.gov/stations/embr","1","",""',
-      fetchedAt: 1794524329095,
+      fetchedAt: 1794530057983,
     },
   "https://www.bart.gov/stations/mont": {
     url: "https://www.bart.gov/stations/mont",
     title: "Montgomery St. | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "598 Market Street, San Francisco, CA 94104",
-    fetchedAt: 1794524329563,
+    fetchedAt: 1794530058301,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"MONT","901209","Montgomery Street","","37.789173","-122.401587","MONT","https://www.bart.gov/stations/mont","1","",""':
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt)",
+      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
       publisher: "BART",
       snippet:
         '"MONT","901209","Montgomery Street","","37.789173","-122.401587","MONT","https://www.bart.gov/stations/mont","1","",""',
-      fetchedAt: 1794524329095,
+      fetchedAt: 1794530057983,
     },
   "https://www.bart.gov/stations/powl": {
     url: "https://www.bart.gov/stations/powl",
     title: "Powell St. | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "899 Market Street, San Francisco, CA 94102",
-    fetchedAt: 1794524329690,
+    fetchedAt: 1794530058377,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"POWL","901309","Powell Street","","37.784606","-122.407331","POWL","https://www.bart.gov/stations/powl","1","",""':
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt)",
+      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
       publisher: "BART",
       snippet:
         '"POWL","901309","Powell Street","","37.784606","-122.407331","POWL","https://www.bart.gov/stations/powl","1","",""',
-      fetchedAt: 1794524329095,
+      fetchedAt: 1794530057983,
     },
   "https://www.bart.gov/stations/civc": {
     url: "https://www.bart.gov/stations/civc",
     title: "Civic Center/UN Plaza | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "1150 Market Street, San Francisco, CA 94102",
-    fetchedAt: 1794524329755,
+    fetchedAt: 1794530058429,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"CIVC","901409","Civic Center / UN Plaza","","37.779408","-122.413826","CIVC","https://www.bart.gov/stations/civc","1","",""':
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt)",
+      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
       publisher: "BART",
       snippet:
         '"CIVC","901409","Civic Center / UN Plaza","","37.779408","-122.413826","CIVC","https://www.bart.gov/stations/civc","1","",""',
-      fetchedAt: 1794524329095,
+      fetchedAt: 1794530057983,
     },
   "https://www.bart.gov/stations/16th": {
     url: "https://www.bart.gov/stations/16th",
     title: "16th St./Mission | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "2000 Mission Street, San Francisco, CA 94110",
-    fetchedAt: 1794524329831,
+    fetchedAt: 1794530058502,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"16TH","901509","16th Street / Mission","","37.765173","-122.419704","16TH","https://www.bart.gov/stations/16th","1","",""':
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt)",
+      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
       publisher: "BART",
       snippet:
         '"16TH","901509","16th Street / Mission","","37.765173","-122.419704","16TH","https://www.bart.gov/stations/16th","1","",""',
-      fetchedAt: 1794524329095,
+      fetchedAt: 1794530057983,
     },
   "https://www.bart.gov/stations/24th": {
     url: "https://www.bart.gov/stations/24th",
     title: "24th St./Mission | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "2800 Mission Street, San Francisco, CA 94110",
-    fetchedAt: 1794524329887,
+    fetchedAt: 1794530058556,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"24TH","901609","24th Street / Mission","","37.752419","-122.418468","24TH","https://www.bart.gov/stations/24th","1","",""':
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt)",
+      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
       publisher: "BART",
       snippet:
         '"24TH","901609","24th Street / Mission","","37.752419","-122.418468","24TH","https://www.bart.gov/stations/24th","1","",""',
-      fetchedAt: 1794524329095,
+      fetchedAt: 1794530057983,
     },
   "https://www.bart.gov/stations/glen": {
     url: "https://www.bart.gov/stations/glen",
     title: "Glen Park | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "2901 Diamond Street, San Francisco, CA 94131",
-    fetchedAt: 1794524329942,
+    fetchedAt: 1794530058608,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"GLEN","901709","Glen Park","","37.733235","-122.433515","GLEN","https://www.bart.gov/stations/glen","1","",""':
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt)",
+      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
       publisher: "BART",
       snippet:
         '"GLEN","901709","Glen Park","","37.733235","-122.433515","GLEN","https://www.bart.gov/stations/glen","1","",""',
-      fetchedAt: 1794524329095,
+      fetchedAt: 1794530057983,
     },
   "https://www.bart.gov/stations/balb": {
     url: "https://www.bart.gov/stations/balb",
     title: "Balboa Park | Bay Area Rapid Transit",
     publisher: "BART",
     snippet: "401 Geneva Avenue, San Francisco, CA 94112",
-    fetchedAt: 1794524330087,
+    fetchedAt: 1794530058659,
   },
   'https://www.bart.gov/dev/schedules/google_transit.zip#"BALB","901809","Balboa Park","","37.721747","-122.447457","BALB","https://www.bart.gov/stations/balb","1","",""':
     {
       url: "https://www.bart.gov/dev/schedules/google_transit.zip",
-      title: "BART GTFS schedule feed (stops.txt)",
+      title: "BART GTFS schedule feed (stops.txt), schedule through 2027-01-10",
       publisher: "BART",
       snippet:
         '"BALB","901809","Balboa Park","","37.721747","-122.447457","BALB","https://www.bart.gov/stations/balb","1","",""',
-      fetchedAt: 1794524329095,
+      fetchedAt: 1794530057983,
     },
   "https://www.sfmta.com/routes/j-church": {
     url: "https://www.sfmta.com/routes/j-church",
     title: "J Church",
     publisher: "SFMTA",
     snippet:
-      "Inbound to Embarcadero Station From San Jose & Geneva, north on San Jose, left on 30th St, right on Church, right onto Muni separated trackway from 22nd to 18th sts, to Church, right on Duboce to the Market Street Subway. Last stop: Embarcadero Station.",
-    fetchedAt: 1794524332053,
+      "Inbound to Embarcadero Station From San Jose & Geneva, north on San Jose, left on 30th St, right on Church, right onto Muni separated trackway from 22nd to…",
+    fetchedAt: 1794530059876,
   },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#J,SFMTA,J,CHURCH,http://www.sfmta.com/J,5am-12 midnight daily,0,A96614 ,FFFFFF,":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt)",
+      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "J,SFMTA,J,CHURCH,http://www.sfmta.com/J,5am-12 midnight daily,0,A96614 ,FFFFFF,",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://www.sfmta.com/routes/k-ingleside": {
     url: "https://www.sfmta.com/routes/k-ingleside",
     title: "K Ingleside",
     publisher: "SFMTA",
     snippet:
-      "Northbound to Downtown From San Jose Avenue & Geneva, north on San Jose Avenue, left on Ocean, right on Junipero Serra, continue to West Portal Ave to West Portal Station, continue in subway to Embarcadero Station. Southbound to Balboa Park From Embarcadero Station, west in…",
-    fetchedAt: 1794524334444,
+      "Northbound to Downtown From San Jose Avenue & Geneva, north on San Jose Avenue, left on Ocean, right on Junipero Serra, continue to West Portal Ave to West…",
+    fetchedAt: 1794530060437,
   },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#K,SFMTA,K,INGLESIDE,http://www.sfmta.com/K,Weekdays 6am-12 midnight; weekends 8am-12 midnight,0,437C93 ,FFFFFF,":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt)",
+      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "K,SFMTA,K,INGLESIDE,http://www.sfmta.com/K,Weekdays 6am-12 midnight; weekends 8am-12 midnight,0,437C93 ,FFFFFF,",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://www.sfmta.com/routes/l-taraval": {
     url: "https://www.sfmta.com/routes/l-taraval",
     title: "L Taraval",
     publisher: "SFMTA",
     snippet:
-      "This route serves Ocean Beach along 46th Ave. Inbound Wawona and 46th Avenue (San Francisco Zoo) via Wawona. 46th Avenue, Taraval, 15th Avenue, Ulloa to West Portal station, then via Twin Peaks tunnel, Market Street Subway to Embarcadero station. Outbound Via Market Street…",
-    fetchedAt: 1794524337754,
+      "This route serves Ocean Beach along 46th Ave. Inbound Wawona and 46th Avenue (San Francisco Zoo) via Wawona. 46th Avenue, Taraval, 15th Avenue, Ulloa to West…",
+    fetchedAt: 1794530063191,
   },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#L,SFMTA,L,TARAVAL,http://www.sfmta.com/L,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,942D83 ,FFFFFF,":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt)",
+      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "L,SFMTA,L,TARAVAL,http://www.sfmta.com/L,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,942D83 ,FFFFFF,",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://www.sfmta.com/routes/m-ocean-view": {
     url: "https://www.sfmta.com/routes/m-ocean-view",
     title: "M Ocean View",
     publisher: "SFMTA",
     snippet:
-      "Inbound San Jose Avenue and Geneva (Balboa Park Muni Metro/BART) via San Jose Avenue, Broad, Orizaba, Randolph, 19th Avenue (San Francisco State University), right-of-way, West Portal Avenue to West Portal station, then via Twin Peaks tunnel, Market Street subway to Embarcadero…",
-    fetchedAt: 1794524339390,
+      "Inbound San Jose Avenue and Geneva (Balboa Park Muni Metro/BART) via San Jose Avenue, Broad, Orizaba, Randolph, 19th Avenue (San Francisco State University),…",
+    fetchedAt: 1794530067588,
   },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#M,SFMTA,M,OCEAN VIEW,http://www.sfmta.com/M,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,008547 ,FFFFFF,":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt)",
+      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "M,SFMTA,M,OCEAN VIEW,http://www.sfmta.com/M,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,008547 ,FFFFFF,",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://www.sfmta.com/routes/n-judah": {
     url: "https://www.sfmta.com/routes/n-judah",
     title: "N Judah",
     publisher: "SFMTA",
     snippet:
-      "This route serves Ocean Beach at La Playa St. Inbound Judah and La Playa via Judah, 9th Avenue, Irving, Arguello (UCSF), Carl, Sunset tunnel, Duboce, Market Street subway, The Embarcadero, King Street to 4th (Caltrain). Outbound From King and 4th (Caltrain) via King, The…",
-    fetchedAt: 1794524341564,
+      "This route serves Ocean Beach at La Playa St. Inbound Judah and La Playa via Judah, 9th Avenue, Irving, Arguello (UCSF), Carl, Sunset tunnel, Duboce, Market…",
+    fetchedAt: 1794530068076,
   },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#N,SFMTA,N,JUDAH,http://www.sfmta.com/N,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,005B95 ,FFFFFF,":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt)",
+      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "N,SFMTA,N,JUDAH,http://www.sfmta.com/N,Weekdays 6am-12 midnight Weekends 8am-12 midnight,0,005B95 ,FFFFFF,",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://www.sfmta.com/routes/t-third-street": {
     url: "https://www.sfmta.com/routes/t-third-street",
     title: "T Third Street",
     publisher: "SFMTA",
     snippet:
-      "Southbound to Sunnydale From Chinatown Station, exit Central Subway, continue on 4th St, left on Channel, right on 3rd St to Bayshore Blvd to the terminal at Bayshore & Sunnydale. Northbound to Chinatown From Bayshore & Sunnydale, north on Bayshore Blvd, continue on 3rd St,…",
-    fetchedAt: 1794524342166,
+      "Southbound to Sunnydale From Chinatown Station, exit Central Subway, continue on 4th St, left on Channel, right on 3rd St to Bayshore Blvd to the terminal at…",
+    fetchedAt: 1794530068500,
   },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#T,SFMTA,T,THIRD,http://www.sfmta.com/T,Weekends 8 am-11:30 pm,0,BF2B45 ,FFFFFF,":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (routes.txt)",
+      title: "SFMTA Muni GTFS schedule feed (routes.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet: "T,SFMTA,T,THIRD,http://www.sfmta.com/T,Weekends 8 am-11:30 pm,0,BF2B45 ,FFFFFF,",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5728,15728,Metro Castro Station/Downtown,37.76262,-122.435231,0, ,https://www.sfmta.com/15728":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt)",
+      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "5728,15728,Metro Castro Station/Downtown,37.76262,-122.435231,0, ,https://www.sfmta.com/15728",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7876,17876,Chinatown - Rose Pak Station,37.794807,-122.408078,0, ,https://www.sfmta.com/17876":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt)",
+      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "7876,17876,Chinatown - Rose Pak Station,37.794807,-122.408078,0, ,https://www.sfmta.com/17876",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5726,15726,Metro Church Station/Downtown,37.767194,-122.429168,0, ,https://www.sfmta.com/15726":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt)",
+      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "5726,15726,Metro Church Station/Downtown,37.767194,-122.429168,0, ,https://www.sfmta.com/15726",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5727,15727,Metro Civic Center Station/Downtn,37.779712,-122.413347,0, ,https://www.sfmta.com/15727":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt)",
+      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "5727,15727,Metro Civic Center Station/Downtn,37.779712,-122.413347,0, ,https://www.sfmta.com/15727",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#6992,16992,Metro Embarcadero Station,37.793134,-122.396431,0, ,https://www.sfmta.com/16992":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt)",
+      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "6992,16992,Metro Embarcadero Station,37.793134,-122.396431,0, ,https://www.sfmta.com/16992",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5730,15730,Metro Forest Hill Station/Downtown,37.748351,-122.458623,0, ,https://www.sfmta.com/15730":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt)",
+      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "5730,15730,Metro Forest Hill Station/Downtown,37.748351,-122.458623,0, ,https://www.sfmta.com/15730",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5731,15731,Metro Montgomery Station/Downtown,37.789219,-122.401351,0, ,https://www.sfmta.com/15731":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt)",
+      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "5731,15731,Metro Montgomery Station/Downtown,37.789219,-122.401351,0, ,https://www.sfmta.com/15731",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5417,15417,Metro Powell Station/Downtown,37.784653,-122.407086,0, ,https://www.sfmta.com/15417":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt)",
+      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "5417,15417,Metro Powell Station/Downtown,37.784653,-122.407086,0, ,https://www.sfmta.com/15417",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7874,17874,Union Square/Market St Station Southbound,37.787133,-122.406523,0, ,https://www.sfmta.com/17874":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt)",
+      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "7874,17874,Union Square/Market St Station Southbound,37.787133,-122.406523,0, ,https://www.sfmta.com/17874",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#5419,15419,Metro Van Ness Station,37.775127,-122.419252,0, ,https://www.sfmta.com/15419":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt)",
+      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "5419,15419,Metro Van Ness Station,37.775127,-122.419252,0, ,https://www.sfmta.com/15419",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#6739,16739,West Portal Station,37.741391,-122.46553,0, ,https://www.sfmta.com/16739":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt)",
+      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "6739,16739,West Portal Station,37.741391,-122.46553,0, ,https://www.sfmta.com/16739",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip#7873,17873,Yerba Buena/Moscone Station Southbound,37.78238,-122.40173,0, ,https://www.sfmta.com/17873":
     {
       url: "https://muni-gtfs.apps.sfmta.com/data/muni_gtfs-current.zip",
-      title: "SFMTA Muni GTFS schedule feed (stops.txt)",
+      title: "SFMTA Muni GTFS schedule feed (stops.txt), schedule through 2026-08-28",
       publisher: "SFMTA",
       snippet:
         "7873,17873,Yerba Buena/Moscone Station Southbound,37.78238,-122.40173,0, ,https://www.sfmta.com/17873",
-      fetchedAt: 1794524330227,
+      fetchedAt: 1794530058742,
     },
   "https://www.caltrain.com/station/22ndstreet": {
     url: "https://www.caltrain.com/station/22ndstreet",
     title: "22nd Street | Caltrain",
     publisher: "Caltrain",
     snippet: "1149 22nd St., San Francisco 94107",
-    fetchedAt: 1794524345052,
+    fetchedAt: 1794530069054,
   },
   "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#22nd_street,22nd_street,,22nd Street Station,,37.756972,-122.392492,,,1,,America/Los_Angeles,,,0,twenty second street":
     {
       url: "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip",
-      title: "Caltrain GTFS schedule feed (stops.txt)",
+      title: "Caltrain GTFS schedule feed (stops.txt), schedule through 2027-01-31",
       publisher: "Caltrain",
       snippet:
         "22nd_street,22nd_street,,22nd Street Station,,37.756972,-122.392492,,,1,,America/Los_Angeles,,,0,twenty second street",
-      fetchedAt: 1794524344910,
+      fetchedAt: 1794530068908,
     },
   "https://www.caltrain.com/station/sanfrancisco": {
     url: "https://www.caltrain.com/station/sanfrancisco",
     title: "San Francisco | Caltrain",
     publisher: "Caltrain",
     snippet: "700 4th St., San Francisco 94107",
-    fetchedAt: 1794524345766,
+    fetchedAt: 1794530069740,
   },
   "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip#san_francisco,san_francisco,,San Francisco Caltrain Station,,37.776404,-122.394911,,,1,,America/Los_Angeles,,,0,san francisco":
     {
       url: "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip",
-      title: "Caltrain GTFS schedule feed (stops.txt)",
+      title: "Caltrain GTFS schedule feed (stops.txt), schedule through 2027-01-31",
       publisher: "Caltrain",
       snippet:
         "san_francisco,san_francisco,,San Francisco Caltrain Station,,37.776404,-122.394911,,,1,,America/Los_Angeles,,,0,san francisco",
-      fetchedAt: 1794524344910,
+      fetchedAt: 1794530068908,
     },
 };
 
@@ -707,36 +707,43 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
       {
         name: "Embarcadero Station",
         point: {
-          lat: 37.79271,
-          lng: -122.39715,
+          lat: 37.792922,
+          lng: -122.396791,
         },
       },
       {
         name: "Montgomery Station",
         point: {
-          lat: 37.788791,
-          lng: -122.402127,
+          lat: 37.789005,
+          lng: -122.401739,
         },
       },
       {
         name: "Powell Station",
         point: {
-          lat: 37.7843,
-          lng: -122.407822,
+          lat: 37.784477,
+          lng: -122.407454,
         },
       },
       {
         name: "Civic Center Station",
         point: {
-          lat: 37.77924,
-          lng: -122.414223,
+          lat: 37.779476,
+          lng: -122.413785,
         },
       },
       {
         name: "Van Ness Station",
         point: {
-          lat: 37.775234,
-          lng: -122.41934,
+          lat: 37.775181,
+          lng: -122.419296,
+        },
+      },
+      {
+        name: "Church St & Duboce Ave",
+        point: {
+          lat: 37.769302,
+          lng: -122.429087,
         },
       },
       {
@@ -810,10 +817,24 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         },
       },
       {
+        name: "Church St & 29th St",
+        point: {
+          lat: 37.743587,
+          lng: -122.426585,
+        },
+      },
+      {
         name: "Church St & Day St",
         point: {
           lat: 37.742811,
           lng: -122.426654,
+        },
+      },
+      {
+        name: "Church St & 30th St",
+        point: {
+          lat: 37.742222,
+          lng: -122.426459,
         },
       },
       {
@@ -859,13 +880,6 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         },
       },
       {
-        name: "Balboa Park BART/Mezzanine Level",
-        point: {
-          lat: 37.721809,
-          lng: -122.447425,
-        },
-      },
-      {
         name: "San Jose Ave & Geneva Ave",
         point: {
           lat: 37.721238,
@@ -873,31 +887,10 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         },
       },
       {
-        name: "Church St & 30th St",
+        name: "Balboa Park BART/Mezzanine Level",
         point: {
-          lat: 37.742222,
-          lng: -122.426459,
-        },
-      },
-      {
-        name: "Church St & 29th St",
-        point: {
-          lat: 37.743587,
-          lng: -122.426585,
-        },
-      },
-      {
-        name: "Right Of Way/18th St",
-        point: {
-          lat: 37.761192,
-          lng: -122.428184,
-        },
-      },
-      {
-        name: "Church St & Duboce Ave",
-        point: {
-          lat: 37.769302,
-          lng: -122.429087,
+          lat: 37.721809,
+          lng: -122.447425,
         },
       },
     ],
@@ -922,64 +915,64 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
       {
         name: "Embarcadero Station",
         point: {
-          lat: 37.79271,
-          lng: -122.39715,
+          lat: 37.792922,
+          lng: -122.396791,
         },
       },
       {
         name: "Montgomery Station",
         point: {
-          lat: 37.788791,
-          lng: -122.402127,
+          lat: 37.789005,
+          lng: -122.401739,
         },
       },
       {
         name: "Powell Station",
         point: {
-          lat: 37.7843,
-          lng: -122.407822,
+          lat: 37.784477,
+          lng: -122.407454,
         },
       },
       {
         name: "Civic Center Station",
         point: {
-          lat: 37.77924,
-          lng: -122.414223,
+          lat: 37.779476,
+          lng: -122.413785,
         },
       },
       {
         name: "Van Ness Station",
         point: {
-          lat: 37.775234,
-          lng: -122.41934,
+          lat: 37.775181,
+          lng: -122.419296,
         },
       },
       {
         name: "Church Station",
         point: {
-          lat: 37.767327,
-          lng: -122.429321,
+          lat: 37.767261,
+          lng: -122.429245,
         },
       },
       {
         name: "Castro Station",
         point: {
-          lat: 37.762683,
-          lng: -122.435289,
+          lat: 37.762652,
+          lng: -122.43526,
         },
       },
       {
         name: "Forest Hill Station",
         point: {
-          lat: 37.74817,
-          lng: -122.459192,
+          lat: 37.748261,
+          lng: -122.458908,
         },
       },
       {
         name: "West Portal Station",
         point: {
-          lat: 37.741391,
-          lng: -122.46553,
+          lat: 37.741455,
+          lng: -122.465373,
         },
       },
       {
@@ -1053,13 +1046,6 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         },
       },
       {
-        name: "Balboa Park BART/Mezzanine Level",
-        point: {
-          lat: 37.721809,
-          lng: -122.447425,
-        },
-      },
-      {
         name: "San Jose Ave & Geneva Ave",
         point: {
           lat: 37.721238,
@@ -1067,17 +1053,10 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         },
       },
       {
-        name: "Ocean Ave & Dorado Ter",
+        name: "Balboa Park BART/Mezzanine Level",
         point: {
-          lat: 37.724957,
-          lng: -122.461059,
-        },
-      },
-      {
-        name: "Ocean Ave & Fairfield Way",
-        point: {
-          lat: 37.726008,
-          lng: -122.464072,
+          lat: 37.721809,
+          lng: -122.447425,
         },
       },
     ],
@@ -1102,64 +1081,64 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
       {
         name: "Embarcadero Station",
         point: {
-          lat: 37.79271,
-          lng: -122.39715,
+          lat: 37.792922,
+          lng: -122.396791,
         },
       },
       {
         name: "Montgomery Station",
         point: {
-          lat: 37.788791,
-          lng: -122.402127,
+          lat: 37.789005,
+          lng: -122.401739,
         },
       },
       {
         name: "Powell Station",
         point: {
-          lat: 37.7843,
-          lng: -122.407822,
+          lat: 37.784477,
+          lng: -122.407454,
         },
       },
       {
         name: "Civic Center Station",
         point: {
-          lat: 37.77924,
-          lng: -122.414223,
+          lat: 37.779476,
+          lng: -122.413785,
         },
       },
       {
         name: "Van Ness Station",
         point: {
-          lat: 37.775234,
-          lng: -122.41934,
+          lat: 37.775181,
+          lng: -122.419296,
         },
       },
       {
         name: "Church Station",
         point: {
-          lat: 37.767327,
-          lng: -122.429321,
+          lat: 37.767261,
+          lng: -122.429245,
         },
       },
       {
         name: "Castro Station",
         point: {
-          lat: 37.762683,
-          lng: -122.435289,
+          lat: 37.762652,
+          lng: -122.43526,
         },
       },
       {
         name: "Forest Hill Station",
         point: {
-          lat: 37.74817,
-          lng: -122.459192,
+          lat: 37.748261,
+          lng: -122.458908,
         },
       },
       {
         name: "West Portal Station",
         point: {
-          lat: 37.741391,
-          lng: -122.46553,
+          lat: 37.741455,
+          lng: -122.465373,
         },
       },
       {
@@ -1177,10 +1156,24 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         },
       },
       {
+        name: "Taraval St & 17th Ave",
+        point: {
+          lat: 37.743131,
+          lng: -122.473306,
+        },
+      },
+      {
         name: "Taraval St & 19th Ave",
         point: {
           lat: 37.74311,
           lng: -122.475444,
+        },
+      },
+      {
+        name: "Taraval St & 22nd Ave",
+        point: {
+          lat: 37.74289,
+          lng: -122.478426,
         },
       },
       {
@@ -1261,13 +1254,6 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         },
       },
       {
-        name: "47th Ave & Cutler Ave",
-        point: {
-          lat: 37.736991,
-          lng: -122.505413,
-        },
-      },
-      {
         name: "Wawona/46th Ave /SF Zoo",
         point: {
           lat: 37.736125,
@@ -1275,24 +1261,10 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         },
       },
       {
-        name: "46th Ave & Taraval St",
+        name: "47th Ave & Cutler Ave",
         point: {
-          lat: 37.741685,
-          lng: -122.504534,
-        },
-      },
-      {
-        name: "Taraval St & 22nd Ave",
-        point: {
-          lat: 37.74289,
-          lng: -122.478426,
-        },
-      },
-      {
-        name: "Taraval St & 17th Ave",
-        point: {
-          lat: 37.743131,
-          lng: -122.473306,
+          lat: 37.736991,
+          lng: -122.505413,
         },
       },
     ],
@@ -1317,64 +1289,64 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
       {
         name: "Embarcadero Station",
         point: {
-          lat: 37.79271,
-          lng: -122.39715,
+          lat: 37.792922,
+          lng: -122.396791,
         },
       },
       {
         name: "Montgomery Station",
         point: {
-          lat: 37.788791,
-          lng: -122.402127,
+          lat: 37.789005,
+          lng: -122.401739,
         },
       },
       {
         name: "Powell Station",
         point: {
-          lat: 37.7843,
-          lng: -122.407822,
+          lat: 37.784477,
+          lng: -122.407454,
         },
       },
       {
         name: "Civic Center Station",
         point: {
-          lat: 37.77924,
-          lng: -122.414223,
+          lat: 37.779476,
+          lng: -122.413785,
         },
       },
       {
         name: "Van Ness Station",
         point: {
-          lat: 37.775234,
-          lng: -122.41934,
+          lat: 37.775181,
+          lng: -122.419296,
         },
       },
       {
         name: "Church Station",
         point: {
-          lat: 37.767327,
-          lng: -122.429321,
+          lat: 37.767261,
+          lng: -122.429245,
         },
       },
       {
         name: "Castro Station",
         point: {
-          lat: 37.762683,
-          lng: -122.435289,
+          lat: 37.762652,
+          lng: -122.43526,
         },
       },
       {
         name: "Forest Hill Station",
         point: {
-          lat: 37.74817,
-          lng: -122.459192,
+          lat: 37.748261,
+          lng: -122.458908,
         },
       },
       {
         name: "West Portal Station",
         point: {
-          lat: 37.741391,
-          lng: -122.46553,
+          lat: 37.741455,
+          lng: -122.465373,
         },
       },
       {
@@ -1417,6 +1389,13 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         point: {
           lat: 37.721342,
           lng: -122.475245,
+        },
+      },
+      {
+        name: "19th Ave & Junipero Serra Blvd",
+        point: {
+          lat: 37.716889,
+          lng: -122.472275,
         },
       },
       {
@@ -1476,13 +1455,6 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         },
       },
       {
-        name: "San Jose Ave & Niagra Ave",
-        point: {
-          lat: 37.719421,
-          lng: -122.447654,
-        },
-      },
-      {
         name: "San Jose Ave & Geneva Ave",
         point: {
           lat: 37.720631,
@@ -1490,17 +1462,10 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         },
       },
       {
-        name: "Broad St & Orizaba Ave",
+        name: "San Jose Ave & Niagra Ave",
         point: {
-          lat: 37.713178,
-          lng: -122.462331,
-        },
-      },
-      {
-        name: "19th Ave & Junipero Serra Blvd",
-        point: {
-          lat: 37.716889,
-          lng: -122.472275,
+          lat: 37.719421,
+          lng: -122.447654,
         },
       },
     ],
@@ -1546,36 +1511,36 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
       {
         name: "Embarcadero Station",
         point: {
-          lat: 37.79271,
-          lng: -122.39715,
+          lat: 37.792922,
+          lng: -122.396791,
         },
       },
       {
         name: "Montgomery Station",
         point: {
-          lat: 37.788791,
-          lng: -122.402127,
+          lat: 37.789005,
+          lng: -122.401739,
         },
       },
       {
         name: "Powell Station",
         point: {
-          lat: 37.7843,
-          lng: -122.407822,
+          lat: 37.784477,
+          lng: -122.407454,
         },
       },
       {
         name: "Civic Center Station",
         point: {
-          lat: 37.77924,
-          lng: -122.414223,
+          lat: 37.779476,
+          lng: -122.413785,
         },
       },
       {
         name: "Van Ness Station",
         point: {
-          lat: 37.775234,
-          lng: -122.41934,
+          lat: 37.775181,
+          lng: -122.419296,
         },
       },
       {
@@ -1621,10 +1586,24 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         },
       },
       {
+        name: "Irving St & 5th Ave",
+        point: {
+          lat: 37.764182,
+          lng: -122.462139,
+        },
+      },
+      {
         name: "Irving St & 6th Ave",
         point: {
           lat: 37.764244,
           lng: -122.462987,
+        },
+      },
+      {
+        name: "Irving St & 8th Ave",
+        point: {
+          lat: 37.764038,
+          lng: -122.465428,
         },
       },
       {
@@ -1656,6 +1635,13 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         },
       },
       {
+        name: "Judah St & 15th Ave",
+        point: {
+          lat: 37.761848,
+          lng: -122.472777,
+        },
+      },
+      {
         name: "Judah St & 16th Ave",
         point: {
           lat: 37.76194,
@@ -1667,6 +1653,13 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         point: {
           lat: 37.761743,
           lng: -122.476921,
+        },
+      },
+      {
+        name: "Judah St & 22nd Ave",
+        point: {
+          lat: 37.761534,
+          lng: -122.479855,
         },
       },
       {
@@ -1737,48 +1730,6 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         point: {
           lat: 37.760349,
           lng: -122.508685,
-        },
-      },
-      {
-        name: "Judah St & 22nd Ave",
-        point: {
-          lat: 37.761534,
-          lng: -122.479855,
-        },
-      },
-      {
-        name: "Judah St & 15th Ave",
-        point: {
-          lat: 37.761848,
-          lng: -122.472777,
-        },
-      },
-      {
-        name: "Irving St & 8th Ave",
-        point: {
-          lat: 37.764038,
-          lng: -122.465428,
-        },
-      },
-      {
-        name: "Irving St & 5th Ave",
-        point: {
-          lat: 37.764182,
-          lng: -122.462139,
-        },
-      },
-      {
-        name: "Irving St & Arguello Blvd",
-        point: {
-          lat: 37.764366,
-          lng: -122.458024,
-        },
-      },
-      {
-        name: "Sunset Tunnel East Portal",
-        point: {
-          lat: 37.769285,
-          lng: -122.433511,
         },
       },
     ],
@@ -1929,15 +1880,15 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
       {
         name: "Yerba Buena/Moscone Station",
         point: {
-          lat: 37.782358,
-          lng: -122.401551,
+          lat: 37.782369,
+          lng: -122.40164,
         },
       },
       {
         name: "Union Square/Market Street Station",
         point: {
-          lat: 37.787151,
-          lng: -122.406477,
+          lat: 37.787142,
+          lng: -122.4065,
         },
       },
       {
@@ -1945,27 +1896,6 @@ export const TRANSIT_LINES: readonly TransitLineSeed[] = [
         point: {
           lat: 37.794807,
           lng: -122.408078,
-        },
-      },
-      {
-        name: "4th & Brannan Southbound",
-        point: {
-          lat: 37.778341,
-          lng: -122.396613,
-        },
-      },
-      {
-        name: "UCSF / Chase Center (16th Street)",
-        point: {
-          lat: 37.768237,
-          lng: -122.389366,
-        },
-      },
-      {
-        name: "Bayshore Blvd & Blanken Ave",
-        point: {
-          lat: 37.712253,
-          lng: -122.402316,
         },
       },
     ],

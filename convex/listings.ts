@@ -16,7 +16,7 @@ import {
   toCard,
   withinRadius,
 } from "./lib/listings";
-import { neighborhoodIdAt } from "./lib/neighborhoods";
+import { locationPoint, neighborhoodIdAt } from "./lib/neighborhoods";
 import { notify } from "./lib/notify";
 import { isSaved } from "./lib/posts";
 import { badgesAfterEdit } from "./lib/trust";
@@ -748,7 +748,7 @@ export const create = viewerMutation({
       photos,
       video: listingVideo(args.video),
       location,
-      neighborhoodId: await neighborhoodIdAt(ctx, location),
+      neighborhoodId: await neighborhoodIdAt(ctx, locationPoint(location)),
       status: "active",
       rental: args.rental,
       vehicle: args.vehicle,
@@ -772,7 +772,9 @@ export const update = viewerMutation({
     // Facebook shows a price drop struck through: remember the highest earlier price.
     const before = l.originalPrice ?? l.price;
     const originalPrice = price < before ? before : undefined;
-    const location = placeFor(args.neighborhood);
+    // Same place: keep the listing's own point (a rental's cross streets) instead of the center.
+    const location =
+      l.location.neighborhood === args.neighborhood ? l.location : placeFor(args.neighborhood);
     await ctx.db.patch(listingId, {
       title: args.title.trim(),
       price,
@@ -784,7 +786,7 @@ export const update = viewerMutation({
       photos,
       video: listingVideo(args.video),
       location,
-      neighborhoodId: await neighborhoodIdAt(ctx, location),
+      neighborhoodId: await neighborhoodIdAt(ctx, locationPoint(location)),
       rental: args.rental,
       vehicle: args.vehicle,
       meetup: args.meetup,
