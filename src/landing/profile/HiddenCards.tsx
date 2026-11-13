@@ -63,7 +63,7 @@ export function HiddenCards() {
             label="Show all again"
             icon={<Eye size={16} aria-hidden />}
             disabled={!hidden || hidden.total === 0}
-            title="Show all your hidden cards again?"
+            title="Show all cards again?"
             body={
               <>
                 {one ? "The card you hid" : `All ${n} cards you hid`} can show up in your
@@ -137,7 +137,7 @@ function HiddenRow({
       <div className="min-w-0 flex-1">
         <Link
           {...link}
-          className="block truncate font-semibold text-[15px] text-primary leading-5 hover:underline"
+          className="block w-fit max-w-full truncate font-semibold text-[15px] text-primary leading-5 hover:underline"
         >
           {name}
         </Link>
