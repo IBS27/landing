@@ -26,9 +26,8 @@ import type { CitedSource } from "../../../convex/lib/citations";
  * viewer's own), "How this is calculated", and "Getting around at night":
  * cited facts and locals' words, never a safety score.
  *
- * `NeighborhoodScores` loads one neighborhood. For a side-by-side comparison
- * (#19), load `api.neighborhoodScores.get` per neighborhood and render
- * `ScoreTiles` and `NightFacts` in two columns.
+ * `NeighborhoodScores` loads one neighborhood. "Try the neighborhood" (#19)
+ * loads two and lays the same pieces side by side (`ComparePage`).
  */
 export function NeighborhoodScores({ neighborhoodId }: { neighborhoodId: Id<"neighborhoods"> }) {
   const data = useQ(api.neighborhoodScores.get, { neighborhoodId });
@@ -54,7 +53,8 @@ export function NeighborhoodScores({ neighborhoodId }: { neighborhoodId: Id<"nei
 
 export type ScoresData = NonNullable<FunctionReturnType<typeof api.neighborhoodScores.get>>;
 
-const TILE: Record<
+/** Each score's title and icon. */
+export const TILE: Record<
   ScoresData["scores"][number]["kind"] | "fit",
   { title: string; icon: ReactNode }
 > = {
@@ -165,7 +165,7 @@ function Tile({
   );
 }
 
-function fitLabel(score: number) {
+export function fitLabel(score: number) {
   return score >= 8
     ? "A great fit"
     : score >= 6
@@ -175,7 +175,7 @@ function fitLabel(score: number) {
         : "Not much for you";
 }
 
-function fitDetail(matched: string[], missing: string[]) {
+export function fitDetail(matched: string[], missing: string[]) {
   const list = (xs: string[]) =>
     xs.length <= 2 ? xs.join(" and ") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`;
   if (matched.length === 0) return `Nothing here yet for ${list(missing.slice(0, 3))}.`;
@@ -183,7 +183,13 @@ function fitDetail(matched: string[], missing: string[]) {
   return missing.length ? `${have} Not yet: ${list(missing.slice(0, 3))}.` : have;
 }
 
-function HowCalculated({ lines, computedAt }: { lines: string[]; computedAt: number | null }) {
+export function HowCalculated({
+  lines,
+  computedAt,
+}: {
+  lines: string[];
+  computedAt: number | null;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <div className="mt-3">
