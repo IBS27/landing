@@ -732,6 +732,8 @@ export default defineSchema({
     lastOffer: v.optional(v.number()),
     /** Time of the last seller message Muse has answered. */
     handledThrough: v.number(),
+    /** When the buyer last set limits; drafts begun under older limits are dropped. */
+    limitsSetAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
