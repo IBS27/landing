@@ -8,6 +8,7 @@ import {
   undoSignal,
 } from "../convex/lib/activity";
 import { getProfile, setLearnFromActivity } from "../convex/lib/cityProfile";
+import { isDismissed } from "../convex/lib/dismissals";
 import { interestsForEvent } from "../convex/lib/interests";
 import {
   activitySummary,
@@ -22,6 +23,7 @@ import {
   type SignalLike,
   signalWeight,
 } from "../convex/lib/profileSignals";
+import { skip, unskip } from "../convex/profileSignals";
 import { fakeCtx, type Row } from "./fakeDb";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -453,5 +455,71 @@ describe("hooks and recompute", () => {
     expect(tables.cityProfiles[0].learnFromActivity).toBeUndefined();
     await recomputeInferred(ctx, USER);
     expect(interestFacts(tables)).toHaveLength(1);
+  });
+});
+
+describe("Not for me (#100)", () => {
+  type Handler = (ctx: MutationCtx, args: Record<string, unknown>) => Promise<unknown>;
+  const call = (fn: unknown, ctx: MutationCtx, args: Record<string, unknown>) =>
+    (fn as { _handler: Handler })._handler(ctx, { viewerId: USER, ...args });
+  const skipWorld = () =>
+    world({
+      users: [{ _id: USER }],
+      groups: [
+        {
+          _id: "groups:1",
+          name: "Climbers",
+          category: "Sports",
+          tags: ["Climbing"],
+          visible: true,
+        },
+        { _id: "groups:2", name: "Neighbors", category: "Neighborhood", tags: [], visible: true },
+      ],
+      dismissals: [],
+    });
+  const group = (targetId: string) => ({ targetKind: "group", targetId });
+
+  test("is kept with learning off, without a signal", async () => {
+    const { ctx, tables, scheduled } = skipWorld();
+    await setLearnFromActivity(ctx, USER, false);
+    expect(await call(skip, ctx, group("groups:1"))).toEqual({ learned: false });
+    expect(tables.dismissals).toMatchObject([
+      { userId: USER, targetKind: "group", targetId: "groups:1" },
+    ]);
+    expect(tables.profileSignals).toEqual([]);
+    expect(scheduled).toEqual([]);
+    expect(await isDismissed(ctx, USER, "groups:1")).toBe(true);
+  });
+
+  test("is kept on a card with no interest, without a signal", async () => {
+    const { ctx, tables } = skipWorld();
+    expect(await call(skip, ctx, group("groups:2"))).toEqual({ learned: false });
+    expect(tables.dismissals).toHaveLength(1);
+    expect(tables.profileSignals).toEqual([]);
+  });
+
+  test("counts against the interest when learning is on; once per card", async () => {
+    const { ctx, tables } = skipWorld();
+    expect(await call(skip, ctx, group("groups:1"))).toEqual({ learned: true });
+    expect(await call(skip, ctx, group("groups:1"))).toEqual({ learned: true });
+    expect(tables.dismissals).toHaveLength(1);
+    expect(tables.profileSignals).toMatchObject([{ kind: "skip", interestIds: ["climbing"] }]);
+  });
+
+  test("undo removes the dismissal and undoes the signal", async () => {
+    const { ctx, tables } = skipWorld();
+    await call(skip, ctx, group("groups:1"));
+    await call(skip, ctx, group("groups:2"));
+    await call(unskip, ctx, group("groups:1"));
+    expect(await isDismissed(ctx, USER, "groups:1")).toBe(false);
+    expect(tables.dismissals.map((d) => d.targetId)).toEqual(["groups:2"]);
+    expect(tables.profileSignals[0].undoneAt).toBeNumber();
+  });
+
+  test("can't dismiss what the viewer can't see", async () => {
+    const { ctx, tables } = skipWorld();
+    tables.groups[0].visible = false;
+    await expect(call(skip, ctx, group("groups:1"))).rejects.toThrow();
+    expect(tables.dismissals).toEqual([]);
   });
 });

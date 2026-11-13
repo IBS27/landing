@@ -319,7 +319,7 @@ function ForYouCard({ item }: { item: ForYouItem }) {
       </Link>
     );
     meta = `${cardDate(e.startAt, e.endAt)} · ${e.place}`;
-    footer = e.skippable && (
+    footer = (
       <NotForMe targetKind="event" targetId={e._id} onChange={(on) => skips.set(item.key, on)} />
     );
   } else if (item.kind === "group") {
@@ -331,7 +331,7 @@ function ForYouCard({ item }: { item: ForYouItem }) {
       </Link>
     );
     meta = groupLine(g);
-    footer = g.skippable && (
+    footer = (
       <NotForMe targetKind="group" targetId={g._id} onChange={(on) => skips.set(item.key, on)} />
     );
   } else {
@@ -445,8 +445,8 @@ function EventTile({ event: e }: { event: HoodEvent }) {
           )}
         </div>
       </Link>
-      {/* Nothing to skip on an Event you're going to, or when the skip wouldn't be saved. */}
-      {e.viewerStatus === "going" || !e.skippable ? (
+      {/* Nothing to skip on an Event you're going to. */}
+      {e.viewerStatus === "going" ? (
         <div className="pb-3" />
       ) : (
         <div className="mt-auto flex items-center px-1 pt-1 pb-1.5">
@@ -518,7 +518,7 @@ function GroupRow({ group: g }: { group: HoodGroup }) {
           )}
         </div>
       </Link>
-      {!g.joined && g.skippable && (
+      {!g.joined && (
         <div className="-mr-1 shrink-0 self-center">
           <NotForMe targetKind="group" targetId={g._id} onChange={(on) => skips.set(key, on)} />
         </div>

@@ -140,7 +140,8 @@ async function scheduleRecompute(
 
 /**
  * Records that `userId` did `kind` to a target, then schedules a recompute.
- * Does nothing when they turned learning off or the target maps to no interest.
+ * Does nothing (and returns false) when they turned learning off or the target
+ * maps to no interest.
  */
 export async function recordSignal(
   ctx: MutationCtx,
@@ -148,12 +149,13 @@ export async function recordSignal(
   kind: SignalKind,
   targetKind: SignalTargetKind,
   targetId: string,
-) {
-  if (!(await learnsFromActivity(ctx, userId))) return;
+): Promise<boolean> {
+  if (!(await learnsFromActivity(ctx, userId))) return false;
   const info = await describeTarget(ctx, targetKind, targetId);
-  if (!info) return;
+  if (!info) return false;
   await upsertSignal(ctx, userId, kind, targetKind, targetId, info, Date.now());
   await scheduleRecompute(ctx, userId);
+  return true;
 }
 
 /** Marks `userId`'s live signals of `kinds` on a target undone (un-RSVP, leave, unreact, unsave). */

@@ -37,6 +37,7 @@ import type * as lib_cityProfile from "../lib/cityProfile.js";
 import type * as lib_cityProfileFacts from "../lib/cityProfileFacts.js";
 import type * as lib_compatibility from "../lib/compatibility.js";
 import type * as lib_crews from "../lib/crews.js";
+import type * as lib_dismissals from "../lib/dismissals.js";
 import type * as lib_functions from "../lib/functions.js";
 import type * as lib_geo from "../lib/geo.js";
 import type * as lib_groupActivity from "../lib/groupActivity.js";
@@ -173,6 +174,7 @@ declare const fullApi: ApiFromModules<{
   "lib/cityProfileFacts": typeof lib_cityProfileFacts;
   "lib/compatibility": typeof lib_compatibility;
   "lib/crews": typeof lib_crews;
+  "lib/dismissals": typeof lib_dismissals;
   "lib/functions": typeof lib_functions;
   "lib/geo": typeof lib_geo;
   "lib/groupActivity": typeof lib_groupActivity;

@@ -10,6 +10,7 @@ import {
   upsertSignal,
 } from "./lib/activity";
 import { learnsFromActivity, setLearnFromActivity } from "./lib/cityProfile";
+import { dismiss, undismiss } from "./lib/dismissals";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { canSeeEvent, loadAudience } from "./lib/posts";
 import {
@@ -21,9 +22,10 @@ import {
 
 /**
  * Learn from activity (#4). The RSVP, join, reaction and save mutations record
- * signals through `./lib/activity`; this module adds the "Not for me" skip, the
- * on/off switch, the debounced recompute and the seed backfill. Signals are
- * private: no query here returns another person's.
+ * signals through `./lib/activity`; this module adds the "Not for me" skip and
+ * its dismissal (#100), the on/off switch, the debounced recompute and the seed
+ * backfill. Signals and dismissals are private: no query here returns another
+ * person's.
  */
 
 /** Whether the viewer's City Profile learns from their activity. */
@@ -70,19 +72,27 @@ async function requireVisible(
   if (!ok) throw new ConvexError("This isn't available.");
 }
 
-/** "Not for me" on a Landing Event, Group or listing card. */
+/**
+ * "Not for me" on a Landing Event, Group or listing card. The dismissal is always
+ * kept; it counts against the card's interests only when the viewer learns from
+ * activity and the card maps to one (`learned`).
+ */
 export const skip = viewerMutation({
   args: { targetKind: skipTargetKind, targetId: v.string() },
   handler: async (ctx, { targetKind, targetId }) => {
     await requireVisible(ctx, ctx.viewer._id, targetKind, targetId);
-    await recordSignal(ctx, ctx.viewer._id, "skip", targetKind, targetId);
+    await dismiss(ctx, ctx.viewer._id, targetKind, targetId);
+    return { learned: await recordSignal(ctx, ctx.viewer._id, "skip", targetKind, targetId) };
   },
 });
 
-/** Undo "Not for me". */
+/** Undo "Not for me": removes the dismissal and the signal. */
 export const unskip = viewerMutation({
   args: { targetKind: skipTargetKind, targetId: v.string() },
-  handler: (ctx, { targetId }) => undoSignal(ctx, ctx.viewer._id, ["skip"], targetId),
+  handler: async (ctx, { targetId }) => {
+    await undismiss(ctx, ctx.viewer._id, targetId);
+    await undoSignal(ctx, ctx.viewer._id, ["skip"], targetId);
+  },
 });
 
 /**
