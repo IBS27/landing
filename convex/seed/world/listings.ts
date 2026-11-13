@@ -1,5 +1,6 @@
 import { daysAgo, hoursAgo } from "../lib/time";
 import type { ListingSeed } from "../types";
+import { apartmentGoods } from "./apartmentGoods";
 
 /**
  * Marketplace listings (everything except property rentals, which live in
@@ -1619,4 +1620,5 @@ export const listings: readonly ListingSeed[] = [
     listed: daysAgo(6, "08:45"),
     views: 141,
   },
+  ...apartmentGoods,
 ];
