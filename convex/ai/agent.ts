@@ -212,6 +212,7 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
       usage: attempts ? usage : undefined,
       costUsd: attempts ? cost : undefined,
       jobId,
+      userId: args.shownTo === "everyone" ? undefined : args.shownTo,
       createdAt: Date.now(),
     });
 

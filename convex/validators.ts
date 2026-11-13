@@ -275,6 +275,8 @@ export const aiRun = v.object({
   ),
   costUsd: v.optional(v.number()),
   jobId: v.optional(v.id("aiJobs")),
+  /** Who the result was for (`shownTo`), so they can see and delete it (#5). Unset for shared results. */
+  userId: v.optional(v.id("users")),
   createdAt: v.number(),
 });
 
