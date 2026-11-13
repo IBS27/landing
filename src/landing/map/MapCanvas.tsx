@@ -91,6 +91,8 @@ export default function MapCanvas({
   latest.current = { data, pinsByKey, dark, onBoundsChange, insets, focus };
 
   const [visible, setVisible] = useState<Visible[]>([]);
+  // The area on screen, so pins in loaded-but-offscreen tiles stay out of the tab order.
+  const [view, setView] = useState<Bounds | null>(null);
   const [selected, setSelected] = useState<Selected | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
 
@@ -183,6 +185,9 @@ export default function MapCanvas({
       next.push(v);
     }
     setVisible((prev) => (sameVisible(prev, next) ? prev : next));
+    const b = map.getBounds();
+    const now = { west: b.getWest(), south: b.getSouth(), east: b.getEast(), north: b.getNorth() };
+    setView((prev) => (prev && JSON.stringify(prev) === JSON.stringify(now) ? prev : now));
   }, [map]);
 
   useEffect(() => {
@@ -370,6 +375,9 @@ export default function MapCanvas({
     return () => cancelAnimationFrame(frame);
   }, [map, selectedKey, compact]);
 
+  const offscreen = (lng: number, lat: number) =>
+    view !== null && (lng < view.west || lng > view.east || lat < view.south || lat > view.north);
+
   const zoomBy = (d: number) => map?.easeTo({ zoom: map.getZoom() + d, ...motion(reduced) });
 
   return (
@@ -403,6 +411,7 @@ export default function MapCanvas({
                   z={hovered === v.id ? Z.hover : Z.cluster}
                 >
                   <ClusterBubble
+                    {...unreachable(offscreen(v.lng, v.lat))}
                     counts={v.counts}
                     aria-label={`${parts.join(", ")}. Zoom in`}
                     onClick={() => expand(v)}
@@ -415,6 +424,7 @@ export default function MapCanvas({
             const p = v.pin;
             const isSel = selectedKey === p.key;
             const common = {
+              ...unreachable(!isSel && offscreen(p.pin.point.lng, p.pin.point.lat)),
               selected: isSel,
               onClick: () => (isSel ? close(false) : openPin(p)),
               onMouseEnter: () => setHovered(p.key),
@@ -456,6 +466,7 @@ export default function MapCanvas({
                 z={isSel ? Z.card - 1 : hovered === key ? Z.hover : Z.stop}
               >
                 <StopMarker
+                  {...unreachable(!isSel && offscreen(s.point.lng, s.point.lat))}
                   n={i + 1}
                   selected={isSel}
                   aria-label={`Stop ${i + 1}: ${s.name}`}
@@ -628,6 +639,11 @@ function polygonBounds(polygon: number[][][][]): LngLatBoundsLike {
     [west, south],
     [east, north],
   ];
+}
+
+/** Props that take an offscreen pin out of the tab order and the accessibility tree. */
+function unreachable(off: boolean) {
+  return off ? { tabIndex: -1, "aria-hidden": true } : {};
 }
 
 function toSelected(p: Pin): Selected {
