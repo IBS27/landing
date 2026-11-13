@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronRight, MapPinOff } from "lucide-react";
+import { ArrowLeftRight, ChevronRight, MapPinOff } from "lucide-react";
 import { useMemo } from "react";
 import { useQ } from "@/app/viewer";
 import { LandingMap, type MapLayer } from "@/landing/map/LandingMap";
@@ -7,6 +7,7 @@ import { plural } from "@/lib/format";
 import { Card, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { NeighborhoodPageData } from "../../../convex/lib/neighborhoodPage";
+import { compareSearch } from "./compare";
 import {
   EventsSection,
   ForYouSection,
@@ -56,7 +57,7 @@ function Crumbs({ here }: { here?: string }) {
 
 export { Crumbs as NeighborhoodCrumbs };
 
-/** The page itself, given its data (also used by "Try the neighborhood", #19, per column). */
+/** The page itself, given its data. */
 export function NeighborhoodPageView({ data }: { data: NeighborhoodPageData }) {
   const { neighborhood: n, groups, events, forYou, people } = data;
   const layers = useMemo<MapLayer[]>(
@@ -123,11 +124,21 @@ export function NeighborhoodPageView({ data }: { data: NeighborhoodPageData }) {
     <SkipsProvider>
       <Shell>
         <Crumbs here={n.label} />
-        <header className="mb-4">
-          <h1 className="font-bold text-[28px] text-primary leading-8 tracking-[-0.01em]">
-            {n.label}
-          </h1>
-          <p className="mt-1 text-[15px] text-secondary leading-5">{facts.join(" · ")}</p>
+        <header className="mb-4 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="font-bold text-[28px] text-primary leading-8 tracking-[-0.01em]">
+              {n.label}
+            </h1>
+            <p className="mt-1 text-[15px] text-secondary leading-5">{facts.join(" · ")}</p>
+          </div>
+          <Link
+            to="/landing/find/neighborhoods/compare"
+            search={compareSearch({ a: n.slug })}
+            className="flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-btn px-3 font-semibold text-[15px] text-btn-text transition-[filter] hover:brightness-95 active:scale-[0.98] dark:hover:brightness-125"
+          >
+            <ArrowLeftRight size={16} aria-hidden />
+            Compare
+          </Link>
         </header>
         <Card className="relative mb-4 overflow-hidden">
           <LandingMap

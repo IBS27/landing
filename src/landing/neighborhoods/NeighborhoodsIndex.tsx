@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronRight, Search } from "lucide-react";
+import { ArrowLeftRight, ChevronRight, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQ } from "@/app/viewer";
 import { LandingMap, type MapLayer } from "@/landing/map/LandingMap";
@@ -8,6 +8,7 @@ import { plural } from "@/lib/format";
 import { Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { DirectoryEntry } from "../../../convex/lib/neighborhoodPage";
+import { compareSearch } from "./compare";
 import { NeighborhoodCrumbs } from "./NeighborhoodPage";
 
 /**
@@ -41,6 +42,8 @@ export function NeighborhoodsIndexView({ data }: { data: Directory | undefined }
   const match = (n: DirectoryEntry) =>
     !needle || n.label.toLowerCase().includes(needle) || n.name.toLowerCase().includes(needle);
   const yours = all.filter((n) => n.yours && match(n));
+  // "Try the neighborhood" starts from the viewer's first two, when they have them.
+  const mine = all.filter((n) => n.yours);
   const rest = all.filter((n) => !n.yours && match(n));
 
   return (
@@ -51,6 +54,14 @@ export function NeighborhoodsIndexView({ data }: { data: Directory | undefined }
         <p className="mt-1 text-[15px] text-secondary leading-5">
           Groups, events and people in each part of San Francisco, and what fits you.
         </p>
+        <Link
+          to="/landing/find/neighborhoods/compare"
+          search={compareSearch({ a: mine[0]?.slug, b: mine[1]?.slug })}
+          className="mt-3 flex h-9 items-center justify-center gap-1.5 rounded-md bg-btn-soft px-3 font-semibold text-[15px] text-btn-soft-text transition-[filter] hover:brightness-95 active:scale-[0.98] dark:hover:brightness-125"
+        >
+          <ArrowLeftRight size={16} aria-hidden />
+          Compare two neighborhoods
+        </Link>
         <label className="mt-3 flex h-10 items-center gap-2 rounded-full bg-input px-3 text-secondary focus-within:ring-2 focus-within:ring-accent">
           <Search size={16} aria-hidden />
           <span className="sr-only">Search neighborhoods</span>
