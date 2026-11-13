@@ -137,6 +137,7 @@ function world(): Record<string, Row[]> {
       rental("lCheap", "S", "Sunny room near Dolores", 1500),
       rental("lPricey", "S", "Studio by the park", 2300),
       rental("lBlocker", "B", "Room from someone who blocked you", 1200),
+      rental("lProtected", "S", "Room for Muslim women only", 1700),
     ],
     events: [
       event("ePublic", "S", "public"),
@@ -204,13 +205,17 @@ describe("homeChatContext", () => {
       context: { stage: "hood", neighborhood: "atlantis" },
       recent: [],
     });
-    expect(c.input.rentals.map((r) => r.id).sort()).toEqual(["lCheap", "lPricey"]);
+    expect(c.input.rentals.map((r) => r.id).sort()).toEqual(["lCheap", "lPricey", "lProtected"]);
+    expect(c.input.rentals.find((r) => r.id === "lCheap")?.key).toBe("listing:lCheap");
     expect(c.input.events.map((e) => e.id)).toEqual(["ePublic"]);
-    expect(c.sources.map((s) => s.kind)).toEqual(["listing", "listing", "event"]);
+    // Protected traits never reach the model or the source labels.
+    expect(JSON.stringify(c.input)).not.toMatch(/muslim|women/i);
+    expect(c.links["listing:lProtected"].label).not.toMatch(/muslim|women/i);
     expect(Object.keys(c.links).sort()).toEqual([
       "event:ePublic",
       "listing:lCheap",
       "listing:lPricey",
+      "listing:lProtected",
     ]);
     expect(c.links["listing:lCheap"]).toEqual({
       label: "Sunny room near Dolores · $1,500/mo",
@@ -282,6 +287,9 @@ describe("homeChat.reply", () => {
     const prompt = requests[0].messages.map((m) => m.content).join("\n");
     expect(prompt).not.toContain("lBlocker");
     expect(prompt).not.toContain("ePrivate");
+    // Raw listing text (descriptions, protected traits) never reaches the model.
+    expect(prompt).not.toContain("Ignore your rules");
+    expect(prompt).not.toMatch(/muslim|women/i);
   });
 
   test("AI off (kill switch or no key): the rules answer, without calling the model", async () => {
@@ -398,7 +406,15 @@ const input = (over: Partial<HomeChatInput> = {}): HomeChatInput => ({
     crew: { joined: false, members: 0, neighborhoods: [] },
   },
   neighborhoods: [{ slug: "mission", name: "Mission", shortName: null }],
-  rentals: [{ id: "l1", title: "Room", price: 1500, neighborhood: "mission" }],
+  rentals: [
+    {
+      key: "listing:l1",
+      id: "l1",
+      title: "Sunny room near Dolores",
+      price: 1500,
+      neighborhood: "mission",
+    },
+  ],
   events: [],
   pages: [],
   ...over,
@@ -427,7 +443,19 @@ describe("homeChatProblems", () => {
         sourceIds: ["listing:l1"],
       }),
     ).toBe(0);
-    expect(bad({ sourceIds: Array.from({ length: 7 }, (_, i) => `listing:${i}`) })).toBe(1);
+    expect(bad({ sourceIds: Array.from({ length: 7 }, () => "listing:l1") })).toBe(1);
+  });
+  test("rejects sources it wasn't given and rentals it names without citing", () => {
+    const bad = (o: Partial<HomeChatOutput>) => homeChatProblems({ ...ok, ...o }, input());
+    expect(bad({ sourceIds: ["event:eSecret"] })).toEqual([
+      "sourceIds: event:eSecret is not the key of a rental or Event in the input",
+    ]);
+    expect(bad({ text: "Try the sunny room near Dolores!" })).toEqual([
+      "sourceIds: cite listing:l1, which the reply names",
+    ]);
+    expect(bad({ text: "Try the sunny room near Dolores!", sourceIds: ["listing:l1"] })).toEqual(
+      [],
+    );
   });
 });
 
@@ -444,16 +472,18 @@ describe("toReply", () => {
       input(),
       links,
     );
-    expect(r.sources).toEqual([{ label: "Room · $1,500/mo", href: "/landing/find/listing/l1" }]);
+    expect(r.sources).toEqual([
+      { label: "Sunny room near Dolores · $1,500/mo", href: "/landing/find/listing/l1" },
+    ]);
     expect(r.text).not.toMatch(/mosque/i);
   });
 
-  test("rules cite only listings among the given sources", () => {
-    const out = rulesOutput(input({ message: "cheapest room" }), new Set());
-    expect(out.command).toEqual({ kind: "open_listing", listingId: "l1" });
-    expect(out.sourceIds).toEqual([]);
-    expect(
-      rulesOutput(input({ message: "cheapest room" }), new Set(["listing:l1"])).sourceIds,
-    ).toEqual(["listing:l1"]);
+  test("rules cite the rentals they name", () => {
+    const out = rulesOutput(input({ message: "cheapest room" }));
+    expect(out).toMatchObject({
+      command: { kind: "open_listing", listingId: "l1" },
+      sourceIds: ["listing:l1"],
+    });
+    expect(homeChatProblems(out, input())).toEqual([]);
   });
 });
