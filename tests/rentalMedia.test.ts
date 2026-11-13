@@ -26,7 +26,8 @@ describe("same-unit rental evidence", () => {
       expect(row.photos).toEqual(unit.media.photos.map((p) => p.url));
       expect(row.location.lat).toBe(unit.point.lat);
       expect(row.location.lng).toBe(unit.point.lng);
-      expect(row.rental?.bedrooms).toBe(unit.bedrooms);
+      expect(row.rental?.bedrooms).toBe(row.rental?.propertyType === "room" ? 1 : unit.bedrooms);
+      expect(row.rental?.sqft).toBe(row.rental?.propertyType === "room" ? undefined : unit.sqft);
       expect(row.rental?.bathrooms).toBe(unit.bathrooms);
       const labeled = unit.media.photos.filter((p) => !p.label.includes("view"));
       expect(

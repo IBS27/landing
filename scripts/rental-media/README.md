@@ -2,7 +2,7 @@
 
 The 30 normal seed listings now use real, single-level SF units. Each reference has a dimensioned published floor-plan image and labeled photos of every bedroom, full bathroom and powder room, plus kitchen, living spaces and connecting rooms. The catalog records the source listing, original image URLs and retrieval date. Display copies are local under `public/seed/rentals/`.
 
-Sellers, prices and availability are fictional demo terms. Private-room offers show the whole apartment's evidence and explicitly ask the renter to confirm which bedroom is offered. Natural seed keys remain stable for conversations, saves and vouches. The four intentionally suspicious trust-demo listings remain separate warning examples and do not claim complete reconstruction evidence.
+Sellers, prices and availability are fictional demo terms. Private-room offers show the whole apartment's evidence and explicitly ask the renter to confirm which bedroom is offered. Private-room search fields offer one bedroom and leave its unknown floor area unset; the description and evidence give the whole apartment's layout. Natural seed keys remain stable for conversations, saves and vouches. The four intentionally suspicious trust-demo listings remain separate warning examples and do not claim complete reconstruction evidence.
 
 `convex/seed/rentalMedia.json` is the reviewed catalog. `python3 scripts/rental-media/fetch.py` refreshes only those pinned units and local images. It rejects multi-level or incomplete galleries, excludes common areas and shared laundry, and keeps distinct rooms before alternate views. No Convex writes occur. The listing seed uses the source point and room counts instead of combining unrelated stock photos and guessed plans.
 
