@@ -276,7 +276,11 @@ export async function listingTrust(
   const raw: ListingSignal[] = isOwn
     ? []
     : [
-        lowPriceSignal(listing, visible(recent)),
+        lowPriceSignal(
+          listing,
+          visible(recent),
+          listing.neighborhoodId ? await ctx.db.get(listing.neighborhoodId) : null,
+        ),
         newAccountSignal(lister, networkEvidence(network)),
         reusedPhotosSignal(listing, visible(older)),
         farAwaySignal(listing, lister),
