@@ -375,7 +375,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "maya.chen",
     at: daysAgo(6, "15:40"),
     text: "the fog burned off and mount tam is OUT!!! nearly walked into a cyclist on hearst staring at it",
-    photos: ["mount tam"],
+    photos: ["posts/mount-tam-04.jpg"],
     feeling: "feeling happy",
     reactions: 29,
     comments: [
@@ -644,7 +644,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "sofia.alvarez",
     at: daysAgo(4, "21:30"),
     text: "bishop weekend 🍂 two days of buttermilks granite, one schat's sweet roll, zero wind (somehow). kai flashed the problem i've been projecting since august and i'm choosing to be happy for him",
-    photos: ["bouldering outdoors", "bouldering outdoors", "fall leaves", "camper van"],
+    photos: ["bouldering outdoors", "bouldering outdoors", "camper van"],
     place: "Bishop, California",
     tagged: ["maya.chen", "kai.nakamura"],
     reactions: 39,
@@ -1077,7 +1077,6 @@ export const friendPosts: readonly PostSeed[] = [
     by: "leo.novak",
     at: daysAgo(8, "16:10"),
     text: "it's not cold here. it's just never warm. day 9 of fog. i have not seen the sun since october",
-    photos: ["foggy hills"],
     reactions: 18,
     comments: [
       { by: "owen.murphy", after: 15, text: "get a real jacket, expense it, I'll approve it" },
@@ -1509,8 +1508,7 @@ export const friendPosts: readonly PostSeed[] = [
   {
     by: "arjun.mehta",
     at: daysAgo(4, "13:30"),
-    text: "summit selfie at the mission peak pole with zero view. classic november",
-    photos: ["foggy hills", "posts/forest-trail-05.jpg"],
+    text: "made it to the mission peak pole and the view was 100% cloud. not even posting the summit selfie. classic november",
     place: "Mission Peak",
     reactions: 25,
     mood: "haha",
@@ -1556,7 +1554,7 @@ export const friendPosts: readonly PostSeed[] = [
     by: "ben.carter",
     at: daysAgo(3, "18:00"),
     text: "first real snow in tahoe and the ski tune line is out the door. bring us coffee and we'll move you up",
-    photos: ["ski shop"],
+    photos: ["posts/donner-pass-01.jpg", "posts/ski-equipment-01.jpg"],
     reactions: 19,
     comments: [
       {
@@ -1589,7 +1587,7 @@ export const friendPosts: readonly PostSeed[] = [
     at: daysAgo(9, "17:30"),
     privacy: "friends",
     text: "mt tam in the fog with the bay area hikers crew. 20 people, 0 views, 100% good vibes. leave no trace or i will find you",
-    photos: ["forest trail", "foggy hills", "forest trail"],
+    photos: ["posts/mount-tam-05.jpg", "posts/mount-tam-06.jpg"],
     place: "Mount Tamalpais",
     reactions: 28,
     comments: [

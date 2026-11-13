@@ -18,7 +18,7 @@ export const stories: readonly StorySeed[] = [
     text: "the 51B was 20 min late again",
     at: hoursAgo(4),
   },
-  { by: "grace.liu", photo: "mount tam", text: "zero fog. tam is OUT", at: hoursAgo(5.5) },
+  { by: "grace.liu", photo: "posts/mount-tam-02.jpg", text: "zero fog. tam is OUT", at: hoursAgo(5.5) },
   { by: "diego.morales", photo: "ramen", text: "staff meal hits different", at: hoursAgo(6) },
   { by: "jasmine.ortiz", photo: "coffee shop", at: hoursAgo(7.5) },
   {
