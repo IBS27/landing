@@ -1,5 +1,6 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, setSystemTime, test } from "bun:test";
 import { afterProposalApproved } from "../convex/lib/inventory";
+import { dayStart, today } from "../src/landing/move-in/OwnedItems";
 import { fakeCtx, type Row } from "./fakeDb";
 
 const NOW = Date.UTC(2026, 10, 12);
@@ -83,5 +84,16 @@ describe("afterProposalApproved", () => {
     const b = world(negotiation());
     await afterProposalApproved(b.ctx, proposal({ owner: "users:kai" }), NOW);
     expect(b.tables.ownedItems).toHaveLength(0);
+  });
+});
+
+describe("manual item date", () => {
+  test("today's default isn't in the future before noon", () => {
+    setSystemTime(new Date(2026, 10, 12, 9, 0));
+    try {
+      expect(dayStart(today())).toBeLessThanOrEqual(Date.now());
+    } finally {
+      setSystemTime();
+    }
   });
 });

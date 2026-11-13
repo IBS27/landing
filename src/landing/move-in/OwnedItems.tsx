@@ -13,11 +13,13 @@ const field =
   "w-full rounded-lg border border-divider bg-input px-3 py-2 text-[15px] text-primary outline-none placeholder:text-placeholder focus:border-fb";
 
 /** Today as "YYYY-MM-DD" in the viewer's own time zone. */
-const today = () => {
+export const today = () => {
   const d = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 };
+/** Start of a "YYYY-MM-DD" day in local time: never in the future for today. */
+export const dayStart = (date: string) => new Date(`${date}T00:00:00`).getTime();
 const day = (ts: number) =>
   new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
@@ -137,7 +139,7 @@ function AddItemForm({ onDone }: { onDone: () => void }) {
       await add({
         title,
         price: paid.trim() ? Number(paid) : Number.NaN,
-        acquiredAt: new Date(`${date}T12:00:00`).getTime(),
+        acquiredAt: dayStart(date),
         photos: photos.map((p) => ({ storageId: p.storageId })),
       });
       onDone();
