@@ -33,6 +33,8 @@ export const mine = viewerQuery({
       photos: r.photos,
       source: r.source,
       saleListingId: r.saleListingId && live.has(r.saleListingId) ? r.saleListingId : null,
+      saleMinPrice: r.saleMinPrice ?? null,
+      saleMuse: r.saleMuse ?? null,
     }));
   },
 });
@@ -116,6 +118,8 @@ export const listForSale = viewerMutation({
         title: v.string(),
         price: v.number(),
         category: listingCategory,
+        /** Lowest price Muse may accept from buyers (#44); unset = Muse doesn't reply. */
+        minPrice: v.optional(v.number()),
       }),
     ),
     neighborhood: v.string(),
@@ -156,7 +160,17 @@ export const listForSale = viewerMutation({
         updatedAt: now,
         viewCount: 0,
       });
-      await ctx.db.patch(item._id, { saleListingId: listingId });
+      const min = it.minPrice === undefined ? undefined : Math.round(it.minPrice);
+      if (min !== undefined && (min < 1 || min > Math.round(it.price)))
+        throw new ConvexError(
+          `Lowest price for ${it.title} must be at least $1 and no more than the price`,
+        );
+      await ctx.db.patch(item._id, {
+        saleListingId: listingId,
+        ...(min !== undefined
+          ? { saleMinPrice: min, saleMuse: "active" as const, saleTermsAt: now }
+          : {}),
+      });
       created.push(listingId);
     }
     return created;

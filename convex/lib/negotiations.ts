@@ -203,4 +203,12 @@ export async function afterChatMessage(
     .unique();
   if (sublet?.museReplies === "active" && sublet.ownerId !== senderId)
     await ctx.scheduler.runAfter(0, internal.subleases.draftReply, { conversationId });
+
+  // A buyer writing about a move-out listing prompts Muse's reply for the seller (#44).
+  const item = await ctx.db
+    .query("ownedItems")
+    .withIndex("by_sale_listing", (q) => q.eq("saleListingId", listingId))
+    .first();
+  if (item?.saleMuse === "active" && item.userId !== senderId)
+    await ctx.scheduler.runAfter(0, internal.moveOutSales.draftReply, { conversationId });
 }
