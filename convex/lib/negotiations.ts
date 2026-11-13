@@ -129,7 +129,9 @@ export function ladderMove(input: NegotiationInput): MoveOutput {
 
 /**
  * Called after any chat message is stored. When the seller replies in a chat
- * with an active negotiation, Muse drafts the buyer's next move.
+ * with an active negotiation, Muse drafts the buyer's next move (#36). When a
+ * renter writes about a sublet with Muse replies on, Muse drafts the lister's
+ * reply (#45).
  */
 export async function afterChatMessage(
   ctx: MutationCtx,
@@ -140,6 +142,16 @@ export async function afterChatMessage(
     .query("negotiations")
     .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
     .first();
-  if (n?.status !== "active" || n.buyerId === senderId) return;
-  await ctx.scheduler.runAfter(0, internal.negotiations.draftNext, { negotiationId: n._id });
+  if (n?.status === "active" && n.buyerId !== senderId)
+    await ctx.scheduler.runAfter(0, internal.negotiations.draftNext, { negotiationId: n._id });
+
+  const conv = await ctx.db.get(conversationId);
+  if (!conv?.listingId) return;
+  const listingId = conv.listingId;
+  const sublet = await ctx.db
+    .query("sublets")
+    .withIndex("by_listing", (q) => q.eq("listingId", listingId))
+    .unique();
+  if (sublet?.museReplies === "active" && sublet.ownerId !== senderId)
+    await ctx.scheduler.runAfter(0, internal.subleases.draftReply, { conversationId });
 }

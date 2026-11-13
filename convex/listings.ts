@@ -16,6 +16,7 @@ import {
   toCard,
   withinRadius,
 } from "./lib/listings";
+import { afterChatMessage } from "./lib/negotiations";
 import { notify } from "./lib/notify";
 import { isSaved } from "./lib/posts";
 import { badgesAfterEdit } from "./lib/trust";
@@ -80,7 +81,7 @@ export const browseFilters = v.object({
 });
 export type BrowseFilters = Infer<typeof browseFilters>;
 
-const photoInput = v.union(
+export const photoInput = v.union(
   v.object({ url: v.string() }),
   v.object({ storageId: v.id("_storage") }),
 );
@@ -690,7 +691,7 @@ export const listingTargets = viewerQuery({
 
 /* ───────────────────────── Mutations ───────────────────────── */
 
-async function resolvePhotos(ctx: MutationCtx, photos: Infer<typeof photoInput>[]) {
+export async function resolvePhotos(ctx: MutationCtx, photos: Infer<typeof photoInput>[]) {
   const out: string[] = [];
   for (const p of photos) {
     if ("url" in p) out.push(p.url);
@@ -709,13 +710,16 @@ function listingVideo(video: Infer<typeof media> | undefined) {
   return video;
 }
 
-function placeFor(name: string) {
+export function placeFor(name: string) {
   const n = NEIGHBORHOODS.find((x) => x.name === name);
   if (!n) throw new ConvexError("Choose a location");
   return { city: n.city, neighborhood: n.name, lat: n.lat, lng: n.lng };
 }
 
-function validate(f: { title: string; price: number; description: string }, photoCount: number) {
+export function validate(
+  f: { title: string; price: number; description: string },
+  photoCount: number,
+) {
   if (!f.title.trim()) throw new ConvexError("Add a title");
   if (!Number.isFinite(f.price) || f.price < 0) throw new ConvexError("Enter a valid price");
   if (photoCount === 0) throw new ConvexError("Add at least one photo");
@@ -902,6 +906,8 @@ export const messageSeller = viewerMutation({
         listingId,
         conversationId,
       });
+    // A renter writing about a sublet prompts Muse's reply for the lister (#45).
+    await afterChatMessage(ctx, conversationId, buyerId);
     return conversationId;
   },
 });
