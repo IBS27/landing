@@ -137,6 +137,14 @@ export function ladderMove(input: NegotiationInput): MoveOutput {
       rationale: `The seller came down to $${theirs}, which is within your $${maxPrice} max.`,
     };
   }
+  // Only a counter-price moves the ladder; "Yes, that works" or "No" doesn't.
+  const followUp: MoveOutput = {
+    move: "message",
+    amount: 0,
+    text: `Just to confirm, would $${last} work for the ${item}?`,
+    rationale: "The seller didn't name a new price, so Muse checks on your last offer.",
+  };
+  if (theirs === null) return followUp;
   if (last >= maxPrice) {
     return {
       move: "walk_away",
@@ -145,25 +153,13 @@ export function ladderMove(input: NegotiationInput): MoveOutput {
       rationale: `You're already at your $${maxPrice} max, so Muse won't go higher.`,
     };
   }
-  const counter = Math.min(
-    maxPrice,
-    round5(theirs !== null ? (last + theirs) / 2 : last + (maxPrice - last) / 2),
-  );
-  if (counter <= last)
-    return {
-      move: "message",
-      amount: 0,
-      text: `Just checking in: would $${last} work for the ${item}?`,
-      rationale: "No new price from the seller, so Muse follows up on your last offer.",
-    };
+  const counter = Math.min(maxPrice, round5((last + theirs) / 2));
+  if (counter <= last) return followUp;
   return {
     move: "offer",
     amount: counter,
     text: `Could you meet me at $${counter}? I can pick up whenever works for you.`,
-    rationale:
-      theirs !== null
-        ? `Meeting the seller's $${theirs} about halfway, still under your $${maxPrice} max.`
-        : `Raising a little from $${last}, still under your $${maxPrice} max.`,
+    rationale: `Meeting the seller's $${theirs} about halfway, still under your $${maxPrice} max.`,
   };
 }
 

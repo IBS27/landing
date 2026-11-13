@@ -94,6 +94,8 @@ export const start = viewerMutation({
     const limits = { maxPrice, targetPrice, notes: notes?.trim() || undefined };
     let negotiationId: Id<"negotiations">;
     if (existing) {
+      // A waiting draft was written for the old limits; don't leave it approvable.
+      await retirePending(ctx, existing, "expired", "system");
       await ctx.db.patch(existing._id, { ...limits, status: "active", updatedAt: now });
       negotiationId = existing._id;
     } else {
@@ -303,6 +305,9 @@ export const context = internalQuery({
       listingOpen: listing.status === "active",
       lastSellerAt,
       draftWaiting: pending?.status === "pending",
+      /** The buyer sent Muse's acceptance: the price is settled. */
+      agreed:
+        n.lastMove === "accept" && (pending?.status === "approved" || pending?.status === "edited"),
     };
   },
 });
@@ -317,6 +322,8 @@ export const draftNext = internalAction({
   handler: async (ctx, { negotiationId, force }) => {
     const c = await ctx.runQuery(internal.negotiations.context, { negotiationId });
     if (c?.negotiation.status !== "active" || !c.listingOpen) return;
+    // After an accepted price, pickup chat is the buyer's own; new limits restart it.
+    if (c.agreed && !force) return;
     const somethingNew = c.lastSellerAt > c.negotiation.handledThrough;
     if (!force && !somethingNew && c.draftWaiting) return;
     if (!force && !somethingNew && c.negotiation.lastMove) return;
@@ -367,6 +374,8 @@ export const saveMove = internalMutation({
   handler: async (ctx, a) => {
     const n = await ctx.db.get(a.negotiationId);
     if (n?.status !== "active") return;
+    // A run that started before a newer one already answered later seller messages.
+    if (a.handledThrough < n.handledThrough) return;
     const priced = a.move === "offer" || a.move === "accept";
     if (priced && a.amount > n.maxPrice) throw new ConvexError("Offer over the buyer's max");
     await retirePending(ctx, n, "expired", "system");

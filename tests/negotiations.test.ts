@@ -97,6 +97,14 @@ describe("ladderMove", () => {
     expect(walk.move).toBe("walk_away");
   });
 
+  test("a reply without a price never raises the offer or walks away", () => {
+    for (const last of [170, 200]) {
+      const m = ladderMove(input({ yourLastOffer: last, chat: [seller("Yes, that works")] }));
+      expect(m).toMatchObject({ move: "message", amount: 0 });
+      expect(m.text).toContain(`$${last}`);
+    }
+  });
+
   test("every ladder move passes the code checks", () => {
     for (const i of [
       input(),
