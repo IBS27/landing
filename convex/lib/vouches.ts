@@ -418,3 +418,96 @@ export async function removeVouch(ctx: MutationCtx, voucherId: UserId, subjectId
   const existing = await vouchBy(ctx, voucherId, subjectId);
   if (existing) await ctx.db.delete(existing._id);
 }
+
+/* ---------- The viewer's network, as a list ---------- */
+
+/** Friends whose friend lists and vouches `networkReach` reads. */
+export const REACH_FRIENDS_MAX = 200;
+/** Each of those friends' newest vouches read. */
+export const REACH_VOUCHES_MAX = 20;
+/** Friends read in parallel at a time (two index ranges each). */
+const REACH_BATCH = 50;
+
+export type Reach = {
+  userId: UserId;
+  isFriend: boolean;
+  /** The viewer's friends who are friends with them: mutual friends. */
+  mutualIds: UserId[];
+  /** The viewer's friends who vouch for them. */
+  voucherIds: UserId[];
+};
+
+const reachTier = (r: Reach) => (r.isFriend ? 0 : r.voucherIds.length > 0 ? 1 : 2);
+const reachLinks = (r: Reach) => new Set([...r.mutualIds, ...r.voucherIds]).size;
+
+/** Friends, then people a friend vouches for, then friends of friends; more connecting friends first. */
+export function byReach(a: Reach, b: Reach) {
+  return reachTier(a) - reachTier(b) || reachLinks(b) - reachLinks(a);
+}
+
+/**
+ * Everyone in the viewer's network, closest first: their friends, people a
+ * friend vouches for and friends of friends. `listerNetwork` answers how one
+ * person is connected to the viewer; this lists who is, under the same rules:
+ * the only friendships it reveals are mutual friends, and only vouches by the
+ * viewer's friends count. Friends blocked either way with the viewer are left
+ * out. Everyone else's blocks are the caller's to check: a block removes the
+ * friendship, so it never links people, but vouches survive it.
+ *
+ * Every read is bounded, and `partial` says when something wasn't read:
+ * - The viewer's friends, up to FRIENDS_READ_MAX, through `BlockCheck`.
+ * - The friend lists of the first REACH_FRIENDS_MAX of them, sharing
+ *   FRIEND_READ_BUDGET rows evenly.
+ * - Each of those friends' newest REACH_VOUCHES_MAX vouches.
+ */
+export async function networkReach(
+  ctx: QueryCtx,
+  viewerId: UserId,
+): Promise<{ people: Reach[]; partial: boolean }> {
+  const [friendRead, blocks] = await Promise.all([
+    friendsOf(ctx, viewerId, FRIENDS_READ_MAX),
+    BlockCheck.load(ctx, viewerId, { left: PAIR_CHECK_MAX }),
+  ]);
+  // A friend blocked either way (or not checked) links nobody and isn't listed.
+  await blocks.check(friendRead.ids);
+  const friendIds = friendRead.ids.filter((id) => !blocks.hides(id));
+  const friendSet = new Set(friendIds);
+  const read = friendIds.slice(0, REACH_FRIENDS_MAX);
+  let partial = !friendRead.complete || read.length < friendIds.length || blocks.missed;
+  const perFriend = Math.floor(FRIEND_READ_BUDGET / Math.max(read.length, 1));
+
+  const people = new Map<UserId, Reach>();
+  const person = (id: UserId) => {
+    let r = people.get(id);
+    if (!r) {
+      r = { userId: id, isFriend: friendSet.has(id), mutualIds: [], voucherIds: [] };
+      people.set(id, r);
+    }
+    return r;
+  };
+  for (const id of friendIds) person(id);
+
+  for (let i = 0; i < read.length; i += REACH_BATCH) {
+    const batch = read.slice(i, i + REACH_BATCH);
+    const results = await Promise.all(
+      batch.map((friendId) =>
+        Promise.all([
+          friendsOf(ctx, friendId, perFriend),
+          ctx.db
+            .query("vouches")
+            .withIndex("by_voucher", (q) => q.eq("voucherId", friendId))
+            .order("desc")
+            .take(REACH_VOUCHES_MAX + 1),
+        ]),
+      ),
+    );
+    for (const [j, [theirFriends, vouched]] of results.entries()) {
+      const friendId = batch[j] as UserId;
+      if (!theirFriends.complete || vouched.length > REACH_VOUCHES_MAX) partial = true;
+      for (const id of theirFriends.ids) if (id !== viewerId) person(id).mutualIds.push(friendId);
+      for (const row of vouched.slice(0, REACH_VOUCHES_MAX))
+        if (row.subjectId !== viewerId) person(row.subjectId).voucherIds.push(friendId);
+    }
+  }
+  return { people: [...people.values()].sort(byReach), partial };
+}
