@@ -1,4 +1,5 @@
 import type { GroupSeed } from "../types";
+import type { neighborhoodGroups } from "./neighborhoods/groups";
 
 /**
  * Groups. `members` lists seeded members besides admins/moderators (who are
@@ -13,6 +14,7 @@ export const groups = [
       "For Cal students, staff and alumni looking for housing near campus: rooms, sublets, roommates, and leases. Southside, Northside, Elmwood, Rockridge, Downtown Berkeley, Albany and beyond. Please include price, dates, and location in every post. Scams get you banned instantly.",
     category: "Housing",
     location: "Berkeley, CA",
+    point: { lat: 37.8719, lng: -122.2585 }, // UC Berkeley campus
     cover: "posts/berkeley campus",
     rules: [
       {
@@ -106,6 +108,7 @@ export const groups = [
       "A place for people who live, work, and hang out in the Mission. Lost cats, construction noise, taqueria openings, Valencia street closures, and the occasional neighborly rant.",
     category: "Neighborhood",
     location: "Mission District, San Francisco",
+    neighborhood: "mission",
     cover: "covers/castro-01.jpg",
     rules: [
       { title: "Neighbors only", body: "Answer the membership questions honestly. We check." },
@@ -252,6 +255,7 @@ export const groups = [
       "The unofficial group for Golden Bears graduating in 2027. Housing, classes, internships, memes, and countdowns to graduation. Go Bears.",
     category: "School and Education",
     location: "Berkeley, CA",
+    point: { lat: 37.8719, lng: -122.2585 }, // UC Berkeley campus
     cover: "posts/berkeley campus",
     rules: [
       { title: "2027 grads only", body: "Or close to it. Transfer students welcome." },
@@ -320,6 +324,7 @@ export const groups = [
       "Weekly board game nights at Moonrise Coffee in the Mission (Thursdays, 7pm) plus pop-ups around town. Newcomers very welcome: we'll teach you anything.",
     category: "Games",
     location: "Mission District, San Francisco",
+    neighborhood: "mission",
     cover: "posts/wingspan-01.jpg",
     rules: [
       { title: "Newbies welcome", body: "Ask for a teach. Nobody's judging." },
@@ -406,6 +411,7 @@ export const groups = [
       "Buy, sell and swap with your Inner Richmond neighbors. Furniture, tools, bikes, baby gear. Local pickup only.",
     category: "Buy and Sell",
     location: "Inner Richmond, San Francisco",
+    neighborhood: "inner-richmond",
     cover: "covers/mission-01.jpg",
     rules: [
       { title: "Price in the post", body: "No 'DM for price'." },
@@ -563,6 +569,7 @@ export const groups = [
       "For people who love the Ferry Building: vendor news, seasonal produce at the Saturday farmers market, the best oyster line strategy, and events up and down the Embarcadero.",
     category: "Local",
     location: "Ferry Building, San Francisco",
+    point: { lat: 37.79554, lng: -122.39363 }, // Ferry Building
     cover: "posts/ferry building",
     rules: [{ title: "Support local", body: "Vendors may post once a week about their stall." }],
     tags: ["Ferry Building", "Local", "Food"],
@@ -573,4 +580,6 @@ export const groups = [
   },
 ] as const satisfies readonly GroupSeed[];
 
-export type GroupSlug = (typeof groups)[number]["slug"];
+export type GroupSlug =
+  | (typeof groups)[number]["slug"]
+  | (typeof neighborhoodGroups)[number]["slug"];

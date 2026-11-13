@@ -463,7 +463,7 @@ export const events: readonly EventSeed[] = [
     host: "tara.singh",
     in: "bay-area-hikers",
     title: "Tennessee Valley Sunday Morning Hike (beginner friendly)",
-    cover: "posts/forest-trail-08.jpg",
+    cover: "covers/sf-03.jpg",
     description:
       "Easy-ish 4 miles round trip out to Tennessee Beach, mostly flat with one short climb, great views of the cove if the fog cooperates (it won't, but the moody fog version is cool too).\n\nCarpool meets at Chestnut & Fillmore in the Marina at 7:30, we start hiking around 8:15 to beat the crowds (the lot fills fast on weekends). Trail can be muddy near the beach after rain, wear real shoes. Bring water, a snack, a windbreaker and a warm layer for the beach. Do NOT climb out on the bluffs for photos. Back in the city by 1.\n\nDrivers: comment how many seats you have. Parking at the trailhead is free.",
     category: "Outdoors",

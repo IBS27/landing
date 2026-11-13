@@ -8,6 +8,7 @@ The goal is a faithful, working clone of desktop facebook.com (1440×900, light 
 - Dev servers are already running. **Do not start or stop them.**
   - Vite: http://127.0.0.1:5173
   - `bunx convex dev` (`bun run dev:convex`) auto-pushes every change in `convex/`. Watch its output after Convex edits: a type error there blocks pushes for everyone sharing the deployment, so fix it immediately.
+- **Agent worktrees never touch a shared Convex deployment.** From a PR branch or worktree, don't run `convex dev`, `convex deploy`, `convex codegen`, `convex run` with writes, or `bun run seed`. `convex codegen` uploads your branch's functions to typecheck them, which changes the live code and indexes for everyone using that deployment. When a branch adds or removes a Convex module, edit `convex/_generated/api.d.ts` by hand in the format codegen writes (one import and one `fullApi` entry per module). The next `convex dev` on `main` regenerates it. Test backend code with `bun run test` and the in-memory `tests/fakeDb.ts`.
 - Checks: `bun run typecheck` and `bun run lint` (Biome; `bun run format` auto-fixes). Leave both clean for your files. Never use `any`.
 
 ## Conventions
@@ -16,6 +17,11 @@ The goal is a faithful, working clone of desktop facebook.com (1440×900, light 
 - **Notifications.** Call `notify(ctx, {...})` from `convex/lib/notify.ts` whenever a real Facebook action would notify someone (reaction, comment, friend request, group post, event invite, Marketplace message).
 - **Reactions.** Shared module `convex/reactions.ts`: `react` mutation and `reactionSummary(ctx, type, id, viewerId)` helper, for posts, comments and messages.
 - **Schema.** `convex/schema.ts` and `convex/validators.ts` are shared. The `attachments` unions on posts and messages, `author`/`status` on messages, and `badges` on listings are extension points; keep them. If you need a schema change, make a minimal, additive Edit (re-read the file first, never rewrite it). Prefer optional fields.
+- **Neighborhoods.**
+  - **Data:** the `neighborhoods` table holds San Francisco's 41 DataSF Analysis Neighborhoods. Its slugs match City Profile facts. Listings, Events and Groups carry an optional `neighborhoodId`, and each of those tables has a `by_neighborhood` index.
+  - **Assigning one:** set `neighborhoodId` from coordinates with `neighborhoodIdAt(ctx, point)` from `convex/lib/neighborhoods.ts`. Never derive it from a typed name such as a listing's `location.neighborhood`, which is a display string only.
+  - **Facts:** cited transit, nightlife and campus facts are in `neighborhoodFacts`, read through `api.neighborhoods.get`.
+  - **Refreshing:** `bun scripts/neighborhoods/build.ts` rebuilds the boundaries, transit data and geocoded seed addresses from the live sources.
 - **Data is real.** Every Tier-1 surface reads from and writes to Convex, and updates in real time. Nothing on a page should be hardcoded except static chrome (labels, menus). Images are paths under `/seed/...` (public folder) or Convex storage URLs.
 - **UI kit** (reuse it; don't fork it):
   - `src/ui/primitives.tsx`: Card, CardHeader, Divider, Button (primary, secondary, soft, ghost, floating, link), IconButton, Avatar (online dot, ring, square), VerifiedBadge, CountBadge, Spinner, Skeleton, NavRow, SectionTitle, EmptyState.
