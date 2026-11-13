@@ -156,7 +156,8 @@ export type StepLink =
   | { to: "unit" }
   | { to: "crew" }
   | { to: "journeys" }
-  | { to: "moveOut" };
+  | { to: "moveOut" }
+  | { to: "subletPlace" };
 
 export type StepId =
   | "setUpProfile"
@@ -204,7 +205,7 @@ export type StepInput = StageInput & {
   /** This week's check-in, once written. */
   checkIn?: { text: string; week: number } | null;
   items?: { total: number; unlisted: number };
-  /** Whether they have a live sublet listing. */
+  /** Whether they listed a sublet from their place (still up, or subleased). */
   sublet?: boolean;
 };
 
@@ -424,7 +425,7 @@ const sublet: Rule = (i) => {
     title: "Sublet your place",
     reason: `You're moving out${when} and haven't listed a sublet.`,
     action: "List a sublet",
-    link: { to: "moveOut" },
+    link: { to: "subletPlace" },
   };
 };
 

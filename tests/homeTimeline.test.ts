@@ -331,7 +331,7 @@ describe("pickSteps", () => {
       expect(nextStep).toMatchObject({
         id: "sublet",
         reason: "You're moving out in 18 days and haven't listed a sublet.",
-        link: { to: "moveOut" },
+        link: { to: "subletPlace" },
       });
       expect(alsoSteps[0]).toMatchObject({
         id: "sellItems",
@@ -675,5 +675,30 @@ describe("home.timeline", () => {
     expect(t.alsoSteps[0]).toMatchObject({ id: "sellItems" });
     // Saved listings aren't read while moving out; items and sublets are capped.
     expect(stats.docs).toBeLessThan(120);
+  });
+
+  test("moving out: a sublet listed from this place ends the sublet step, another person's doesn't", async () => {
+    const tables = world();
+    tables.places = [
+      placeRow("maya", { status: "moving_out", moveIn: day(-400), moveOut: day(20) }),
+    ];
+    tables.sublets = [
+      {
+        _id: "sublets:z",
+        ownerId: "users:zed",
+        placeId: "places:maya",
+        listingId: "listings:b",
+        createdAt: 1,
+      },
+    ];
+    expect((await timeline(fakeCtx(tables), "maya")).nextStep?.id).toBe("sublet");
+    tables.sublets.push({
+      _id: "sublets:m",
+      ownerId: "users:maya",
+      placeId: "places:maya",
+      listingId: "listings:a",
+      createdAt: 2,
+    });
+    expect((await timeline(fakeCtx(tables), "maya")).nextStep?.id).toBe("trackItems");
   });
 });

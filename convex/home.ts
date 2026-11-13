@@ -42,7 +42,7 @@ const SAVED_SCAN = 50;
 const SAVED_CHECK = 10;
 /** Owned items counted; the steps only need "none" and how many are unlisted. */
 const ITEMS_SCAN = 51;
-/** Newest sublets checked for a live one. */
+/** Sublets read for the place (one per listing it was sublet from). */
 const SUBLETS_SCAN = 5;
 /** Unit scenes without a listing read for a place found elsewhere (rooms' plus its own). */
 const UNITS_SCAN = MAX_ROOMS + 10;
@@ -150,17 +150,16 @@ async function moverFacts(ctx: QueryCtx, userId: Id<"users">): Promise<StepInput
   return { requested: req?.requestedAt !== undefined };
 }
 
-/** Whether the viewer has a sublet listing that's still up. */
-async function hasSublet(ctx: QueryCtx, userId: Id<"users">) {
+/**
+ * Whether the viewer listed a sublet from this place (#141), and it's still
+ * up or already subleased.
+ */
+async function hasSublet(ctx: QueryCtx, userId: Id<"users">, place: Doc<"places">) {
   const rows = await ctx.db
     .query("sublets")
-    .withIndex("by_owner", (q) => q.eq("ownerId", userId))
-    .order("desc")
+    .withIndex("by_place", (q) => q.eq("placeId", place._id))
     .take(SUBLETS_SCAN);
-  for (const s of rows) {
-    const l = await ctx.db.get(s.listingId);
-    if (l && l.status !== "sold") return true;
-  }
+  for (const s of rows) if (s.ownerId === userId && (await ctx.db.get(s.listingId))) return true;
   return false;
 }
 
@@ -219,7 +218,7 @@ export const timeline = viewerQuery({
       when("unit", async () => (place ? hasUnit(ctx, userId, place) : undefined)),
       when("movers", () => moverFacts(ctx, userId)),
       when("items", () => itemFacts(ctx, userId)),
-      when("sublet", () => hasSublet(ctx, userId)),
+      when("sublet", async () => (place ? hasSublet(ctx, userId, place) : undefined)),
       checkInFacts(ctx, profile, now),
       upcomingReminders(ctx, userId, now, EVENTS_SHOWN),
     ]);

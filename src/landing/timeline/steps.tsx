@@ -32,6 +32,7 @@ import {
   toWelcome,
 } from "@/landing/links";
 import type { StepId, StepLink } from "../../../convex/lib/homeTimeline";
+import { toSubletMyPlace } from "../move-out/placeSublet";
 
 /** A step's destination, through the `links.ts` helpers. */
 export function stepLink(link: StepLink): LinkOptions {
@@ -58,6 +59,8 @@ export function stepLink(link: StepLink): LinkOptions {
       return toJourneys();
     case "moveOut":
       return toMoveOut();
+    case "subletPlace":
+      return toSubletMyPlace();
   }
 }
 
