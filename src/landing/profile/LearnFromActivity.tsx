@@ -74,7 +74,8 @@ export function LearnFromActivity() {
               <>
                 Landing deletes everything it recorded from your activity and the interests and
                 neighborhoods Muse inferred from it. Your RSVPs, Groups, likes and saves themselves
-                don't change, and facts you removed stay removed.
+                don't change, cards you marked "Not for me" stay hidden, and facts you removed stay
+                removed.
               </>
             }
             confirmLabel="Clear activity"
