@@ -35,6 +35,11 @@ export type CityProfile = {
   /** When the onboarding brief was last submitted; null = not onboarded yet. */
   briefCompletedAt: number | null;
   budget: Fact<"budget"> | null;
+  /**
+   * The move-in features match and plan on (Crew, roommates, Journeys). One
+   * kept in step with the person's place is their private record: it's in
+   * `facts`, never here.
+   */
   moveIn: Fact<"moveIn"> | null;
   transport: Fact<"transport"> | null;
   schedule: Fact<"schedule"> | null;
@@ -113,7 +118,7 @@ export async function getProfile(
     userId,
     briefCompletedAt: row?.briefCompletedAt ?? null,
     budget: only(facts, "budget")[0] ?? null,
-    moveIn: only(facts, "moveIn")[0] ?? null,
+    moveIn: only(facts, "moveIn").find((f) => f.evidence.kind !== "place") ?? null,
     transport: only(facts, "transport")[0] ?? null,
     schedule: only(facts, "schedule")[0] ?? null,
     employer: only(facts, "employer")[0] ?? null,

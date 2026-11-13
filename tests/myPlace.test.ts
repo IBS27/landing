@@ -293,9 +293,15 @@ describe("City Profile", () => {
       source: "stated",
       evidence: { kind: "place", summary: "Your place" },
     });
-    expect(p.moveIn?.value).toEqual({ month: "2026-12", date: "2026-12-01" });
-    // Where they live never becomes a neighborhood they're looking in.
+    const moveIn = p.facts.find((f) => f.key === "moveIn");
+    expect(moveIn).toMatchObject({
+      value: { month: "2026-12", date: "2026-12-01" },
+      evidence: { kind: "place" },
+    });
+    // Neither feeds matching: where they live isn't a neighborhood they're looking
+    // in, and the place's move-in isn't the one Crew, roommates and Journeys use.
     expect(p.neighborhoods).toEqual([]);
+    expect(p.moveIn).toBeNull();
     // "What Muse knows about you" shows it.
     const known = await call<Promise<{ facts: { key: string }[] }>>(museKnows.facts, ctx, "maya");
     expect(known.facts.map((f) => f.key).sort()).toEqual(["home", "moveIn"]);
@@ -307,13 +313,13 @@ describe("City Profile", () => {
     await take(ctx, "b", "2026-12-20");
     let p = await getProfile(ctx, maya);
     expect(p.home?.value.slug).toBe("noe-valley");
-    expect(p.moveIn?.value.date).toBe("2026-12-20");
+    expect(p.facts.find((f) => f.key === "moveIn")?.value.date).toBe("2026-12-20");
     expect(tables.cityProfileFacts).toHaveLength(2);
     await call(myPlace.remove, ctx, "maya", {
       placeId: (await currentPlace(ctx, maya))?._id ?? id,
     });
     p = await getProfile(ctx, maya);
-    expect([p.home, p.moveIn]).toEqual([null, null]);
+    expect(p.facts).toEqual([]);
     expect(tables.cityProfileFacts).toEqual([]);
   });
 
@@ -383,10 +389,20 @@ describe("rooms and the 3D unit", () => {
     expect(tables.unitScenes[2].listingId).toBeUndefined();
   });
 
-  test("a found place has no listing to start from", async () => {
+  test("a found place has no listing to start from, and still links its unit", async () => {
     const { ctx, tables } = world();
     await call(myPlace.addFound, ctx, "maya", { neighborhood: "mission", moveIn: TODAY });
     await call(rooms.create, ctx, "maya", { name: "Bedroom", kind: "bedroom" });
     expect(tables.rooms[0].listingId).toBeUndefined();
+    const unit = await call(unitScenes.create, ctx, "maya", {});
+    // Newer scenes of rentals and rooms don't hide it.
+    for (let i = 0; i < 35; i++)
+      tables.unitScenes.push({
+        _id: `unitScenes:other${i}`,
+        ownerId: "users:maya",
+        listingId: "listings:b",
+        updatedAt: Date.now() + i + 1,
+      });
+    expect((await mine(fakeCtx(tables))).current?.unit?._id).toBe(unit);
   });
 });

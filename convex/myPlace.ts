@@ -106,7 +106,21 @@ export const mine = viewerQuery({
               q.eq("ownerId", userId).eq("listingId", listingId),
             )
             .first()
-        : null,
+        : current.listingId
+          ? null
+          : // A place found elsewhere: its unit started from neither a room nor a listing.
+            // Scenes without a listing are the person's rooms' (at most MAX_ROOMS) and these.
+            ctx.db
+              .query("unitScenes")
+              .withIndex("by_owner_listing", (q) =>
+                q.eq("ownerId", userId).eq("listingId", undefined),
+              )
+              .collect()
+              .then(
+                (units) =>
+                  units.filter((u) => !u.roomId).sort((a, b) => b.updatedAt - a.updatedAt)[0] ??
+                  null,
+              ),
     ]);
     return {
       current: {
