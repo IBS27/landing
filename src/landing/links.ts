@@ -88,11 +88,6 @@ export function toPost(post: { postId: Id<"posts">; username: string }) {
   });
 }
 
-/** A neighborhood's Landing page (#16), by its slug ("mission"). */
-export function toNeighborhood(slug: string) {
-  return linkOptions({ to: "/landing/find/neighborhoods/$slug", params: { slug } });
-}
-
 /** My Place: the person's place, rooms and house. */
 export function toMyPlace() {
   return linkOptions({ to: "/landing/place" });
