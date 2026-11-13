@@ -36,6 +36,7 @@ import {
   LayerChips,
   PANEL_ID,
 } from "./HomeChrome";
+import { StatusSpine } from "./StatusSpine";
 import { suggestions } from "./suggestions";
 import { actionKey, type ChatSession, shownKeys, useChatLog } from "./useChatLog";
 import { isMapCommand, useHomeMap } from "./useHomeMap";
@@ -677,6 +678,7 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
         </div>
       </div>
       {onMap && m.inCity && <LayerChips kinds={m.kinds} onToggle={m.toggleKind} crew={m.crew} />}
+      {onMap && <StatusSpine />}
 
       <ChatDock
         messages={chat.current.messages}
