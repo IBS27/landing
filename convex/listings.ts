@@ -1033,6 +1033,9 @@ export const hideAd = viewerMutation({
 
 /* ───────────────────────── Unit details (#13) ───────────────────────── */
 
+/** Per kind; SF has a few dozen campus and corridor facts (corridors repeat per neighborhood). */
+const NOISE_FACTS_MAX = 500;
+
 /**
  * A rental's view (as the lister states it) and its noise risk, computed from
  * the campuses and nightlife corridors near it in #15's cited neighborhood
@@ -1050,10 +1053,17 @@ export const unitDetails = viewerQuery({
         ? null
         : { lat, lng, neighborhood: l.location.neighborhood ?? null };
     if (!l.neighborhoodId || !point) return { views, point, noise: null };
-    const facts = await ctx.db.query("neighborhoodFacts").collect();
+    const [campuses, corridors] = await Promise.all(
+      (["campus", "nightlife_corridor"] as const).map((kind) =>
+        ctx.db
+          .query("neighborhoodFacts")
+          .withIndex("by_kind", (q) => q.eq("kind", kind))
+          .take(NOISE_FACTS_MAX),
+      ),
+    );
     const places: NoisePlace[] = [];
     const byKey = new Map<string, Doc<"neighborhoodFacts">>();
-    for (const f of facts) {
+    for (const f of [...campuses, ...corridors]) {
       if (f.kind === "campus")
         places.push({ key: f._id, kind: "campus", name: f.name, point: f.point });
       else if (f.kind === "nightlife_corridor")

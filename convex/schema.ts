@@ -609,7 +609,8 @@ export default defineSchema({
   /** Cited transit, nightlife and campus facts per neighborhood (#15). */
   neighborhoodFacts: defineTable(neighborhoodFact)
     .index("by_neighborhood", ["neighborhoodId", "kind"])
-    .index("by_key", ["key"]),
+    .index("by_key", ["key"])
+    .index("by_kind", ["kind"]),
 
   /**
    * Shared neighborhood scores (#17), computed by code from public data and rewritten by
