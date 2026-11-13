@@ -1,9 +1,11 @@
 import { v } from "convex/values";
+import { getProfile } from "./lib/cityProfile";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { lifestyleAnswers } from "./lib/lifestyle";
 import {
   deleteLifestyle as deleteRow,
   getOwnLifestyle,
+  matchProfileInputs,
   saveLifestyleAnswers,
   setLifestyleSharing as setSharing,
 } from "./lib/roommates";
@@ -13,17 +15,24 @@ import {
  * Each function reads or writes only the viewer's row.
  */
 
-/** The viewer's own answers and sharing choice, or null if they haven't started. */
+/**
+ * The viewer's own answers and sharing choice, or null if they haven't started.
+ * `fromProfile` is what matching would also compare from their City Profile.
+ */
 export const myLifestyle = viewerQuery({
   args: {},
   handler: async (ctx) => {
-    const row = await getOwnLifestyle(ctx, ctx.viewer._id);
+    const [row, profile] = await Promise.all([
+      getOwnLifestyle(ctx, ctx.viewer._id),
+      getProfile(ctx, ctx.viewer._id),
+    ]);
     if (!row) return null;
     return {
       answers: row.answers,
       shared: row.shared,
       sharedAt: row.sharedAt ?? null,
       updatedAt: row.updatedAt,
+      fromProfile: matchProfileInputs(profile),
     };
   },
 });

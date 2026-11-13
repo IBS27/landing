@@ -1,9 +1,11 @@
 import { describe, expect, test } from "bun:test";
+import { getProfile } from "../convex/lib/cityProfile";
 import {
   COMPARE_MAX,
   comparableLifestyles,
   deleteLifestyle,
   getOwnLifestyle,
+  matchProfileInputs,
   saveLifestyleAnswers,
   setLifestyleSharing,
 } from "../convex/lib/roommates";
@@ -123,9 +125,10 @@ describe("comparableLifestyles", () => {
       id("Nobody"),
       id("A"),
     ]);
-    expect(r?.mine).toEqual({ sleep: "early" });
+    const none = { budget: null, workplace: null };
+    expect(r?.mine).toEqual({ answers: { sleep: "early" }, ...none });
     expect([...(r?.others.entries() ?? [])]).toEqual([
-      ["A", { quietHours: "10pm", pets: ["cat", "dog"] }],
+      ["A", { answers: { quietHours: "10pm", pets: ["cat", "dog"] }, ...none }],
     ]);
   });
 
@@ -138,5 +141,74 @@ describe("comparableLifestyles", () => {
       many.map((m) => id(m.userId as string)),
     );
     expect(r?.others.size).toBe(COMPARE_MAX);
+  });
+});
+
+describe("City Profile inputs", () => {
+  const fact = (
+    userId: string,
+    key: string,
+    value: unknown,
+    source: "stated" | "inferred",
+  ): Row => ({
+    _id: `f_${userId}_${key}_${source}`,
+    userId,
+    key,
+    value,
+    source,
+    evidence: { kind: source === "stated" ? "brief" : "activity", summary: "x" },
+    confidence: source === "stated" ? 1 : 0.6,
+    updatedAt: 1,
+  });
+
+  test("only stated budget and workday count; 'not working' is never compared", async () => {
+    const tables: Record<string, Row[]> = {
+      cityProfiles: [],
+      cityProfileFacts: [
+        fact("S", "budget", { min: 1800, max: 2400 }, "stated"),
+        fact(
+          "S",
+          "schedule",
+          { workHours: "day", workplace: "hybrid", weekendsFree: true },
+          "stated",
+        ),
+        fact("I", "budget", { max: 2000 }, "inferred"),
+        fact(
+          "I",
+          "schedule",
+          { workHours: "day", workplace: "remote", weekendsFree: true },
+          "inferred",
+        ),
+        fact(
+          "N",
+          "schedule",
+          { workHours: "day", workplace: "none", weekendsFree: true },
+          "stated",
+        ),
+      ],
+    };
+    const ctx = fakeCtx(tables);
+    expect(matchProfileInputs(await getProfile(ctx, id("S")))).toEqual({
+      budget: { min: 1800, max: 2400 },
+      workday: "hybrid",
+    });
+    const nothing = { budget: null, workday: null };
+    expect(matchProfileInputs(await getProfile(ctx, id("I")))).toEqual(nothing);
+    expect(matchProfileInputs(await getProfile(ctx, id("N")))).toEqual(nothing);
+  });
+
+  test("comparableLifestyles carries each side's stated profile values", async () => {
+    const tables: Record<string, Row[]> = {
+      roommateLifestyles: [row("V", true), row("A", true)],
+      blocks: [],
+      cityProfiles: [],
+      cityProfileFacts: [fact("A", "budget", { max: 2000 }, "stated")],
+    };
+    const r = await comparableLifestyles(fakeCtx(tables), id("V"), [id("A")]);
+    expect(r?.others.get(id("A"))).toEqual({
+      answers: { sleep: "early" },
+      budget: { max: 2000 },
+      workplace: null,
+    });
   });
 });

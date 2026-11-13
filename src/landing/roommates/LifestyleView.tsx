@@ -3,8 +3,10 @@ import { useRef, useState } from "react";
 import { Button, Card } from "@/ui/primitives";
 import {
   answeredCount,
+  type BudgetRange,
   type LifestyleAnswers,
   QUESTION_COUNT,
+  type Workday,
 } from "../../../convex/lib/lifestyle";
 import { LifestyleSummary, SharingCard } from "./LifestyleSummary";
 import { Questionnaire } from "./Questionnaire";
@@ -14,6 +16,8 @@ export type LifestyleState = {
   answers: LifestyleAnswers;
   shared: boolean;
   sharedAt: number | null;
+  /** The viewer's stated City Profile values that matching also compares. */
+  fromProfile: { budget: BudgetRange | null; workday: Workday | null };
 } | null;
 
 export type LifestyleActions = {
@@ -79,6 +83,7 @@ export function LifestyleView({
         shared={state.shared}
         sharedAt={state.sharedAt}
         canShare={answeredCount(state.answers) > 0}
+        fromProfile={state.fromProfile}
         onShare={actions.share}
       />
       <LifestyleSummary answers={state.answers} onEdit={edit} onDelete={actions.remove} />

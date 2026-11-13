@@ -5,12 +5,16 @@ import { Switch } from "@/features/misc/settings/controls";
 import { cn } from "@/lib/format";
 import { Modal } from "@/ui/overlays";
 import { Button, Card } from "@/ui/primitives";
+import { budgetLabel } from "../../../convex/lib/cityProfileFacts";
 import {
   answeredCount,
   answerLabel,
+  type BudgetRange,
   type LifestyleAnswers,
   QUESTION_COUNT,
   STEPS,
+  WORKDAY_COPY,
+  type Workday,
 } from "../../../convex/lib/lifestyle";
 import { questionTitle } from "./questions";
 
@@ -19,11 +23,13 @@ export function SharingCard({
   shared,
   sharedAt,
   canShare,
+  fromProfile,
   onShare,
 }: {
   shared: boolean;
   sharedAt: number | null;
   canShare: boolean;
+  fromProfile: { budget: BudgetRange | null; workday: Workday | null };
   onShare: (shared: boolean) => Promise<void>;
 }) {
   const [busy, setBusy] = useState(false);
@@ -80,11 +86,21 @@ export function SharingCard({
         </li>
         <li>
           <span className="font-semibold text-primary">What's compared:</span> your answers below,
-          plus your budget and workday from your{" "}
+          plus from your{" "}
           <Link to="/landing/profile" className="font-semibold text-link hover:underline">
             City Profile
           </Link>
-          . Matches only see whether your budgets overlap, never the amounts.
+          :{" "}
+          {fromProfile.budget || fromProfile.workday
+            ? [
+                fromProfile.budget &&
+                  `your budget (${budgetLabel(fromProfile.budget)}; matches only see whether budgets overlap, never the amounts)`,
+                fromProfile.workday && `your workday (${WORKDAY_COPY[fromProfile.workday].label})`,
+              ]
+                .filter(Boolean)
+                .join(" and ")
+            : "nothing yet. Add your budget and workday there to compare them too"}
+          .
         </li>
         <li>
           <span className="font-semibold text-primary">Never used:</span> age, gender, religion,
