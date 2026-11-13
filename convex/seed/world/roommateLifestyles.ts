@@ -12,14 +12,17 @@ export type RoommateLifestyleSeed = {
 /**
  * Roommate lifestyle answers (#21), keyed by username. Chosen so
  * candidates (#22) and the compatibility score (#23) show every outcome, seen
- * as Maya:
+ * as Maya (her compatibility scores, #23: Luis 85, Tasha 73, Sofia 67, Camila
+ * 60, Leo capped at 40):
  * - Tasha (her friend): same sleep and quiet hours, close on tidiness, and a cat.
  * - Leo (a friend of friends): his dog hits Maya's "Dogs" dealbreaker, and his
  *   smoking outside hits Tasha's "Any smoking or vaping".
- * - Sofia (her friend): sleeps during the day after night shifts, skipped the
- *   overnight guests question, so one of Maya's checks is "unknown".
+ * - Sofia (her friend): sleeps during the day after night shifts and skipped
+ *   the overnight guests and pets questions, so Maya's "Dogs" dealbreaker
+ *   can't be checked against her.
  * - Camila (a friend of friends): Tasha vouches she lived with her, so she's
- *   "vouched for" and ranks above other friends of friends.
+ *   "vouched for" and ranks above other friends of friends. A night owl with
+ *   no set quiet hours, so she and Maya differ the most without a dealbreaker.
  * - Luis (a friend of friends): moves the same month as Maya, also wants the
  *   Mission, and their budgets overlap.
  * - Marcus has answers but keeps them private, so he never appears.
@@ -84,12 +87,11 @@ export const roommateLifestyles: readonly RoommateLifestyleSeed[] = [
     answers: {
       sleep: "days",
       quietHours: "11pm",
-      cleanliness: "tidy",
+      cleanliness: "very_tidy",
       noise: "quiet",
       groceries: "separate",
       guests: "rarely",
       smoking: "no",
-      pets: [],
       dealbreakers: ["frequent_guests", "no_quiet_hours"],
     },
   },
@@ -115,11 +117,11 @@ export const roommateLifestyles: readonly RoommateLifestyleSeed[] = [
     answeredDaysAgo: 5,
     answers: {
       sleep: "late",
-      quietHours: "midnight",
+      quietHours: "none",
       cleanliness: "tidy",
-      noise: "some",
+      noise: "lively",
       groceries: "separate",
-      guests: "monthly",
+      guests: "weekly",
       overnightGuests: "sometimes",
       smoking: "no",
       pets: ["cat"],
