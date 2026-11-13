@@ -8,7 +8,7 @@ import {
   priceIn,
   ruleReply,
   validCommand,
-} from "../src/landing/home/chatRules";
+} from "../convex/lib/homeChatRules";
 
 const neighborhoods: ChatNeighborhood[] = SF_NEIGHBORHOODS.map((n) => ({
   slug: n.slug,

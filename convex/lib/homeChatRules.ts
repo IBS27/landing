@@ -1,11 +1,12 @@
-import { hasProtected, redactProtected } from "../../../convex/lib/protectedText";
+import { hasProtected, redactProtected } from "./protectedText";
 
 /**
  * Landing Home's chat dock: the person types, and the reply carries one map
  * command the client runs (fly to a neighborhood, show rentals, open a page).
- * These rules answer in the browser from the viewer's own data (no server
- * function yet). A Muse-backed answer can replace `ruleReply` later and reuse
- * the same types and command check, so the UI won't change.
+ * Muse answers on the server (`api.homeChat.reply`, convex/homeChat.ts); these
+ * keyword rules are its fallback there (AI off, a rejected answer, a model
+ * error) and in the browser when the action can't be reached. Pure, so the
+ * client and the server share it.
  */
 
 export type ChatStage = "globe" | "city" | "hood" | "house";
@@ -34,6 +35,12 @@ export type ChatNeighborhood = { slug: string; name: string; aliases?: string[] 
 /** A ranked rental the rules may name (optional `data.rentals`). Price is monthly, whole dollars. */
 export type ChatRental = { id: string; title: string; price: number; slug?: string };
 
+/** The longest message the chat sends, in characters. */
+export const CHAT_MESSAGE_MAX = 500;
+/** How many earlier turns go with a message, and how much of each. */
+export const CHAT_RECENT_MAX = 6;
+export const CHAT_TURN_MAX = 300;
+
 export const CHAT_PAGES = [
   "find",
   "place",
@@ -58,6 +65,11 @@ const PAGE_INFO: Record<ChatPage, { label: string; href: string }> = {
 /** The Landing route for a chat page. */
 export function pageHref(page: ChatPage): string {
   return PAGE_INFO[page].href;
+}
+
+/** A rental as a chat source: its title and rent, linking to Landing's view of it. */
+export function rentalSource(r: { id: string; title: string; price: number }): ChatSource {
+  return { label: `${r.title} · ${money(r.price)}/mo`, href: `/landing/find/listing/${r.id}` };
 }
 
 /** Everyday names people use that aren't the DataSF name or its short name. */
@@ -211,10 +223,7 @@ export function commandSources(
     case "open_listing": {
       const r = data.rentals?.find((x) => x.id === cmd.listingId);
       return [
-        {
-          label: r ? `${r.title} · ${money(r.price)}/mo` : "Rental",
-          href: `/landing/find/listing/${cmd.listingId}`,
-        },
+        r ? rentalSource(r) : { label: "Rental", href: `/landing/find/listing/${cmd.listingId}` },
       ];
     }
     case "show_crew":
@@ -245,16 +254,16 @@ const PAGE_LINES: Record<ChatPage, string> = {
 
 const has = (re: RegExp, s: string) => re.test(s);
 
-/**
- * The rules' answer, plus the listings it names (so the server can cite them).
- * `ruleReply` is the public form.
- */
 /** "Title at $X", unless the title already carries its price. */
 function withPrice(r: ChatRental): string {
   const price = money(r.price);
   return r.title.includes(price) ? r.title : `${r.title} at ${price}`;
 }
 
+/**
+ * The rules' answer, plus the listings it names (so the server can cite them).
+ * `ruleReply` is the browser's form.
+ */
 export function ruleRoute(
   message: string,
   ctx: ChatContext,
@@ -264,9 +273,16 @@ export function ruleRoute(
     rentals?: ChatRental[];
     /** The City Profile's budget top, for "in my budget". */
     budgetMax?: number | null;
+    /** The message had protected traits removed before it got here. */
+    hadProtected?: boolean;
   },
 ): { text: string; command: ChatCommand; listingIds: string[] } {
-  const none = (text = CHAT_HELP) => ({ text, command: { kind: "none" } as const, listingIds: [] });
+  const fallbackLine = hasProtected(message) || data.hadProtected ? PROTECTED_LINE : CHAT_HELP;
+  const none = (text = fallbackLine) => ({
+    text,
+    command: { kind: "none" } as const,
+    listingIds: [],
+  });
   // Route on the words with protected traits removed, so they can't steer anything.
   const clean = redactProtected(message);
   const t = words(clean);
@@ -406,7 +422,7 @@ export function ruleRoute(
     };
   }
 
-  return none(hasProtected(message) ? PROTECTED_LINE : CHAT_HELP);
+  return none();
 }
 
 /** The keyword rules: a useful answer with AI off, or when the model's answer is rejected. */
@@ -424,9 +440,7 @@ export function ruleReply(
   const rentals = data.rentals ?? [];
   const named = r.listingIds.flatMap((id) => {
     const x = rentals.find((y) => y.id === id);
-    return x && r.command.kind !== "open_listing"
-      ? [{ label: `${x.title} · ${money(x.price)}/mo`, href: `/landing/find/listing/${x.id}` }]
-      : [];
+    return x && r.command.kind !== "open_listing" ? [rentalSource(x)] : [];
   });
   return {
     text: r.text,

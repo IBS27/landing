@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
-import type { ChatCommand, ChatSource } from "./chatRules";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { ChatCommand, ChatSource } from "../../../convex/lib/homeChatRules";
 
 export type ChatMessage = {
   id: string;
   who: "me" | "muse";
   text: string;
   sources?: ChatSource[];
-  /** How Muse's reply was made: the model, or Landing's rules when AI is off. */
+  /** How Muse's reply was made: the model, or Landing's rules (AI off, or the model's answer rejected). */
   via?: "muse" | "rules";
   command?: ChatCommand;
 };
@@ -46,6 +46,8 @@ export function useChatLog(viewerId: string | undefined, greeting: string) {
   const key = `landing:chats:${viewerId ?? "anon"}`;
   const [sessions, setSessions] = useState<ChatSession[]>(() => read(key));
   const [current, setCurrent] = useState<ChatSession>(() => fresh(greeting));
+  const currentId = useRef(current.id);
+  currentId.current = current.id;
 
   useEffect(() => setSessions(read(key)), [key]);
 
@@ -61,32 +63,48 @@ export function useChatLog(viewerId: string | undefined, greeting: string) {
     [key],
   );
 
+  /**
+   * Adds a message to the open chat, or to `sessionId` when given: a reply
+   * that arrives after the person switched chats still lands in its own.
+   */
   const add = useCallback(
-    (m: Omit<ChatMessage, "id">) => {
-      setCurrent((s) => {
+    (m: Omit<ChatMessage, "id">, sessionId?: string) => {
+      const msg = { ...m, id: newId() };
+      const append = (s: ChatSession): ChatSession => {
+        // Updaters can run twice (StrictMode); add each message once.
+        if (s.messages.some((x) => x.id === msg.id)) return s;
         const title =
           s.title === "New chat" && m.who === "me"
             ? m.text.length > 44
               ? `${m.text.slice(0, 42)}…`
               : m.text
             : s.title;
-        const next = {
-          ...s,
-          title,
-          updatedAt: Date.now(),
-          messages: [...s.messages, { ...m, id: newId() }],
-        };
+        return { ...s, title, updatedAt: Date.now(), messages: [...s.messages, msg] };
+      };
+      if (sessionId && sessionId !== currentId.current) {
+        setSessions((prev) => {
+          const target = prev.find((p) => p.id === sessionId);
+          if (!target) return prev;
+          const next = [append(target), ...prev.filter((p) => p.id !== sessionId)];
+          write(key, next);
+          return next;
+        });
+        return;
+      }
+      setCurrent((s) => {
+        const next = append(s);
         save(next);
         return next;
       });
     },
-    [save],
+    [key, save],
   );
 
+  const isCurrent = useCallback((sessionId: string) => currentId.current === sessionId, []);
   const open = useCallback((s: ChatSession) => setCurrent(s), []);
   const reset = useCallback(() => setCurrent(fresh("New chat. Where to?")), []);
 
-  return { current, sessions, add, open, reset };
+  return { current, sessions, add, isCurrent, open, reset };
 }
 
 function fresh(greeting: string): ChatSession {
