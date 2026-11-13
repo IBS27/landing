@@ -3,6 +3,7 @@ import { ConvexError, v } from "convex/values";
 import { mergedStream, stream } from "convex-helpers/server/stream";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
+import { deletePostCascade } from "./lib/cascade";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { notify } from "./lib/notify";
 import { canView, enrichPost, enrichPosts, loadAudience } from "./lib/posts";
@@ -281,43 +282,9 @@ export const remove = viewerMutation({
       (post.groupId !== undefined && a.adminGroups.has(post.groupId));
     if (!allowed) throw new ConvexError("You can't delete this post");
 
-    const comments = await ctx.db
-      .query("comments")
-      .withIndex("by_post", (q) => q.eq("postId", postId))
-      .collect();
-    for (const c of comments) {
-      await deleteReactions(ctx, "comment", c._id);
-      await ctx.db.delete(c._id);
-    }
-    await deleteReactions(ctx, "post", postId);
-    const subs = await ctx.db
-      .query("postSubscriptions")
-      .withIndex("by_post", (q) => q.eq("postId", postId))
-      .collect();
-    for (const s of subs) await ctx.db.delete(s._id);
-    // Notifications about the post would otherwise link to a deleted page.
-    const notes = await ctx.db
-      .query("notifications")
-      .withIndex("by_post", (q) => q.eq("postId", postId))
-      .collect();
-    for (const n of notes) await ctx.db.delete(n._id);
-    // Saved rows pointing here are skipped by `saved:list` once the post is gone.
-    if (post.sharedPostId) {
-      const original = await ctx.db.get(post.sharedPostId);
-      if (original)
-        await ctx.db.patch(original._id, { shareCount: Math.max(0, original.shareCount - 1) });
-    }
-    await ctx.db.delete(postId);
+    await deletePostCascade(ctx, post);
   },
 });
-
-async function deleteReactions(ctx: MutationCtx, targetType: "post" | "comment", id: string) {
-  const rows = await ctx.db
-    .query("reactions")
-    .withIndex("by_target", (q) => q.eq("targetType", targetType).eq("targetId", id))
-    .collect();
-  for (const r of rows) await ctx.db.delete(r._id);
-}
 
 /** Groups the viewer can post or share into, most recently visited first. */
 export const postTargets = viewerQuery({

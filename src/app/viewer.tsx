@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { api } from "../../convex/_generated/api";
@@ -18,6 +19,8 @@ type ViewerContextValue = {
   viewerId: Id<"users"> | null;
   viewer: Doc<"users"> | null | undefined;
   switchTo: (id: Id<"users">) => void;
+  /** Makes a new private demo user for this browser and switches to it. */
+  startFresh: () => Promise<void>;
 };
 
 const ViewerContext = createContext<ViewerContextValue | null>(null);
@@ -38,11 +41,10 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
   const personas = useQuery(api.users.personas);
   const [stored, setStored] = useState<Id<"users"> | null>(readStored);
 
-  const viewerId = useMemo(() => {
-    if (!personas || personas.length === 0) return null;
-    if (stored && personas.some((p) => p._id === stored)) return stored;
-    return personas[0]._id;
-  }, [personas, stored]);
+  // The stored id is a seeded persona or this browser's demo user; `check` is
+  // null when it's missing or was deleted, and a new demo user starts then.
+  const check = useQuery(api.demo.check, { viewerId: stored ?? "" });
+  const viewerId = check ?? null;
 
   const viewer = useQuery(api.users.me, viewerId ? { viewerId } : "skip");
 
@@ -54,6 +56,23 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
     }
     setStored(id);
   }, []);
+
+  const start = useMutation(api.demo.start);
+  const starting = useRef(false);
+  const startFresh = useCallback(async () => {
+    if (starting.current) return;
+    starting.current = true;
+    try {
+      switchTo(await start({}));
+    } finally {
+      starting.current = false;
+    }
+  }, [start, switchTo]);
+
+  // First visit (or a deleted demo user): start this browser's own demo user.
+  useEffect(() => {
+    if (check === null) void startFresh().catch(() => {});
+  }, [check, startFresh]);
 
   const heartbeat = useMutation(api.users.heartbeat);
   useEffect(() => {
@@ -67,10 +86,11 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       viewerId,
-      viewer: viewerId ? viewer : personas === undefined ? undefined : null,
+      viewer: viewerId ? viewer : personas === undefined || personas.length > 0 ? undefined : null,
       switchTo,
+      startFresh,
     }),
-    [viewerId, viewer, personas, switchTo],
+    [viewerId, viewer, personas, switchTo, startFresh],
   );
   return <ViewerContext.Provider value={value}>{children}</ViewerContext.Provider>;
 }

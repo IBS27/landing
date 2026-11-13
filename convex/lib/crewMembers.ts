@@ -33,7 +33,11 @@ export async function crewFor(
   if (!mine) return null;
   const [profile, rows, blocked] = await Promise.all([
     getProfile(ctx, userId),
-    ctx.db.query("crewOptIns").take(OPT_IN_SCAN),
+    // Demo users (one per browser) see a crew of the seeded world, never each other.
+    ctx.db
+      .query("crewOptIns")
+      .withIndex("by_demo", (q) => q.eq("demo", undefined))
+      .take(OPT_IN_SCAN),
     blockedSet(ctx, userId),
   ]);
   const others = rows.filter((r) => r.userId !== userId && !blocked.has(r.userId));

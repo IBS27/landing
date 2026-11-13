@@ -1,7 +1,10 @@
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 
-export const ONLINE_WINDOW_MS = 5 * 60 * 1000;
+/** `users.heartbeat` writes `lastActiveAt` at most this often. */
+export const ACTIVE_WRITE_MS = 10 * 60 * 1000;
+/** Online: active within this window, longer than the heartbeat's write interval. */
+export const ONLINE_WINDOW_MS = 15 * 60 * 1000;
 
 /** The public shape of a user that every surface renders (avatar + name chips). */
 export function userSummary(u: Doc<"users">) {

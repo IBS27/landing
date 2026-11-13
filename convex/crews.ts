@@ -99,6 +99,7 @@ export const optIn = viewerMutation({
         matchBy: m,
         createdAt: now,
         updatedAt: now,
+        ...(ctx.viewer.isDemo && { demo: true }),
       });
   },
 });

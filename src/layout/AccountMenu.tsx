@@ -192,7 +192,7 @@ function Footer({ onNavigate }: { onNavigate: () => void }) {
 /* ---------- Menu ---------- */
 
 export function AccountMenu() {
-  const { viewer, switchTo } = useViewerContext();
+  const { viewer, switchTo, startFresh } = useViewerContext();
   const personas = useQuery(api.users.personas);
   const { setting, setSetting } = useTheme();
   const [open, setOpen] = useState(false);
@@ -384,6 +384,21 @@ export function AccountMenu() {
           {view === "profiles" && (
             <>
               <SubHeader title="Switch profile" onBack={() => setView("main")} />
+              <button
+                type="button"
+                onClick={() => {
+                  close();
+                  void startFresh()
+                    .then(() => navigate({ to: "/" }))
+                    .catch(() => {});
+                }}
+                className="mb-2 flex h-9 w-full items-center justify-center rounded-lg bg-btn-primary font-semibold text-[15px] text-white hover:brightness-95"
+              >
+                Start fresh
+              </button>
+              <p className="mb-1 px-2 text-[13px] text-secondary">
+                Shared: changes are visible to everyone
+              </p>
               <div className="flex flex-col">
                 {personas?.map((p) => (
                   <button

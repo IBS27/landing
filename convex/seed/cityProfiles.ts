@@ -2,7 +2,7 @@ import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import type { FactEntry, FactEvidence } from "../lib/cityProfileFacts";
 import { DAY } from "./lib/time";
-import { cityProfileSeeds } from "./world/cityProfiles";
+import { type CityProfileSeed, cityProfileSeeds } from "./world/cityProfiles";
 
 /**
  * Seeds Landing City Profiles (#3) after users, Groups and Events exist.
@@ -19,41 +19,54 @@ export async function seedCityProfiles(ctx: MutationCtx, now: number) {
       .withIndex("by_username", (q) => q.eq("username", seed.username))
       .unique();
     if (!user) continue; // The persona was renamed or removed; skip rather than fail the seed.
-    const briefAt = now - seed.briefDaysAgo * DAY;
-    const stated: FactEntry[] = [
-      { key: "budget", value: seed.budget },
-      { key: "moveIn", value: moveIn(now, seed) },
-      { key: "transport", value: { modes: seed.transport } },
-      { key: "schedule", value: seed.schedule },
-      ...employerFact(seed.employerFromWork ? user : null),
-      ...seed.neighborhoods.map((slug) => ({ key: "neighborhood" as const, value: { slug } })),
-      ...seed.interests.map((id) => ({ key: "interest" as const, value: { id } })),
-      ...seed.goals.map((id) => ({ key: "goal" as const, value: { id } })),
-    ];
-    const brief: FactEvidence = { kind: "brief", summary: "You said so in your brief" };
-    for (const entry of stated) {
-      await ctx.db.insert("cityProfileFacts", {
-        userId: user._id,
-        ...entry,
-        source: "stated",
-        evidence: brief,
-        confidence: 1,
-        updatedAt: briefAt,
-      });
-      facts++;
-    }
-
-    await ctx.db.insert("cityProfiles", {
-      userId: user._id,
-      briefCompletedAt: briefAt,
-      updatedAt: briefAt,
-    });
+    facts += await insertCityProfile(ctx, user, seed, now);
   }
   return facts;
 }
 
+/**
+ * One person's City Profile from a seed: the brief and its stated facts, as of
+ * `now`. Also builds a demo user's starting profile (`convex/lib/demoClone.ts`).
+ * Returns how many facts it wrote.
+ */
+export async function insertCityProfile(
+  ctx: MutationCtx,
+  user: Doc<"users">,
+  seed: CityProfileSeed,
+  now: number,
+) {
+  const briefAt = now - seed.briefDaysAgo * DAY;
+  const stated: FactEntry[] = [
+    { key: "budget", value: seed.budget },
+    { key: "moveIn", value: moveIn(now, seed) },
+    { key: "transport", value: { modes: seed.transport } },
+    { key: "schedule", value: seed.schedule },
+    ...employerFact(seed.employerFromWork ? user : null),
+    ...seed.neighborhoods.map((slug) => ({ key: "neighborhood" as const, value: { slug } })),
+    ...seed.interests.map((id) => ({ key: "interest" as const, value: { id } })),
+    ...seed.goals.map((id) => ({ key: "goal" as const, value: { id } })),
+  ];
+  const brief: FactEvidence = { kind: "brief", summary: "You said so in your brief" };
+  for (const entry of stated) {
+    await ctx.db.insert("cityProfileFacts", {
+      userId: user._id,
+      ...entry,
+      source: "stated",
+      evidence: brief,
+      confidence: 1,
+      updatedAt: briefAt,
+    });
+  }
+  await ctx.db.insert("cityProfiles", {
+    userId: user._id,
+    briefCompletedAt: briefAt,
+    updatedAt: briefAt,
+  });
+  return stated.length;
+}
+
 /** The move-in fact: a date for people who already moved in, else a month. */
-function moveIn(now: number, seed: (typeof cityProfileSeeds)[number]) {
+function moveIn(now: number, seed: CityProfileSeed) {
   if (seed.moveInDaysAgo === undefined)
     return { month: monthFromNow(now, seed.moveInMonthsFromNow) };
   const date = SF_DATE.format(now - seed.moveInDaysAgo * DAY);
