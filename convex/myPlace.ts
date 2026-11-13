@@ -9,7 +9,7 @@ import {
   todayInSF,
 } from "./lib/cityProfileFacts";
 import { viewerMutation, viewerQuery } from "./lib/functions";
-import { canSeeListing, currentPlace } from "./lib/myPlace";
+import { canSeeListing, currentPlace, placeSublet } from "./lib/myPlace";
 import { isNeighborhoodSlug } from "./lib/neighborhoods";
 import { type PlaceStatus, placeProblem, placeStatus } from "./lib/placeRules";
 
@@ -52,9 +52,10 @@ async function listingView(ctx: QueryCtx, userId: Id<"users">, id: Id<"listings"
 }
 
 async function placeView(ctx: QueryCtx, userId: Id<"users">, p: Doc<"places">) {
-  const [neighborhood, listing] = await Promise.all([
+  const [neighborhood, listing, sublet] = await Promise.all([
     neighborhoodView(ctx, p.neighborhoodId),
     listingView(ctx, userId, p.listingId),
+    placeSublet(ctx, userId, p._id),
   ]);
   return {
     _id: p._id,
@@ -65,6 +66,8 @@ async function placeView(ctx: QueryCtx, userId: Id<"users">, p: Doc<"places">) {
     listing,
     /** Taken from a listing the owner can no longer see. */
     listingGone: p.listingId !== undefined && listing === null,
+    /** The newest sublet listed from this place (#141). */
+    sublet,
     createdAt: p.createdAt,
   };
 }
@@ -148,7 +151,7 @@ export const isMine = viewerQuery({
 /* ---------------- Writing ---------------- */
 
 /** Keeps the City Profile's "Lives in" and move-in facts in step with the current place. */
-async function syncProfile(ctx: MutationCtx, userId: Id<"users">) {
+export async function syncProfile(ctx: MutationCtx, userId: Id<"users">) {
   const place = await currentPlace(ctx, userId);
   const n = place ? await ctx.db.get(place.neighborhoodId) : null;
   await syncStatedFact(

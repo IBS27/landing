@@ -24,6 +24,8 @@ export type SubletInput = {
   limits: { minRent: number; notes: string | null };
   yourLastPrice: number | null;
   chat: { from: "you" | "renter"; text: string }[];
+  /** Trust facts about the renter from the lister's network (#141), with no names. */
+  renter: { fact: string; source: string }[];
 };
 
 export type SubletMove = { move: Move; amount: number; text: string; rationale: string };
@@ -75,6 +77,11 @@ export function subletMoveProblems(out: SubletMove, input: SubletInput): string[
     p.push("text must not ask for money or payment details before a viewing and lease");
   if (/\b\d{2,5}\s+\w+\s+(st|street|ave|avenue|blvd|rd|road)\b/i.test(out.text))
     p.push("text must not share the street address");
+  // Trust facts about the renter are for the lister only (#141): the reply
+  // never talks about Facebook, vouches, verification, or what you share. A
+  // rejected draft is retried or falls back to the ladder, so err broad.
+  if (/\b(facebook|vouch\w*|mutual\w*|verif\w*|in common|groups?)\b/i.test(out.text))
+    p.push("text must not mention the renter's trust facts; put them in rationale");
   return p;
 }
 

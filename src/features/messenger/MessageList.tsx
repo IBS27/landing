@@ -5,6 +5,7 @@ import { useM, useQ, useViewer } from "@/app/viewer";
 import { StoryReplyAttachment } from "@/features/feed/StoryReplyAttachment";
 import { useViewerPaginated } from "@/features/posts";
 import { ChatDraft } from "@/landing/inbox/ProposalCard";
+import { RenterTrust } from "@/landing/move-out/RenterTrust";
 import { ChatPoll } from "@/landing/plans/ChatPoll";
 import { ChatCheckNote, useChatNotes } from "@/landing/search/ChatCheckNote";
 import { cn, price } from "@/lib/format";
@@ -158,6 +159,11 @@ export function MessageList({
   const chronological = [...results].reverse();
   const items = buildItems(chronological, detail.members, viewer._id);
   const lastMine = [...chronological].reverse().find((m) => m.senderId === viewer._id);
+  // Landing sublets: what the lister's network says about the renter, under their latest message (#141).
+  const lastTheirs =
+    detail.kind === "marketplace"
+      ? [...chronological].reverse().find((m) => m.senderId !== viewer._id)?._id
+      : undefined;
   const isGroup = detail.kind === "group";
   const avatarSize = 28;
 
@@ -206,6 +212,17 @@ export function MessageList({
                   listingId={chatNotes.listingId}
                   compact={variant === "dock"}
                   indent={avatarSize + 8}
+                />
+              )}
+              {it.m._id === lastTheirs && (
+                <RenterTrust
+                  conversationId={conversationId}
+                  compact={variant === "dock"}
+                  className={cn(
+                    "mt-1 mb-1.5",
+                    variant === "dock" ? "max-w-[240px]" : "max-w-[420px]",
+                  )}
+                  style={{ marginLeft: avatarSize + 8 }}
                 />
               )}
               {it.readers.length > 0 ? (

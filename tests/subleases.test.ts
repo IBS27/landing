@@ -22,6 +22,7 @@ const input = (chat: SubletInput["chat"], yourLastPrice: number | null = null): 
   limits: { minRent: 1450, notes: null },
   yourLastPrice,
   chat,
+  renter: [],
 });
 const renter = (text: string) => ({ from: "renter" as const, text });
 const you = (text: string) => ({ from: "you" as const, text });

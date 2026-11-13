@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import type { FunctionReturnType } from "convex/server";
-import { Box, Home, Lock, MapPin, Plus, Search, Sofa, Store } from "lucide-react";
+import { Box, Home, KeyRound, Lock, MapPin, Plus, Search, Sofa, Store } from "lucide-react";
 import { useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { toNeighborhood, toRentalCheck, toRoom, toUnit } from "@/landing/links";
+import { subletStateLabel, toSubletMyPlace } from "@/landing/move-out/placeSublet";
 import { plural, price } from "@/lib/format";
 import { Button, Card, Skeleton } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
@@ -92,6 +93,8 @@ function CurrentPlace({ place }: { place: Current }) {
       : place.status === "moving_out" && place.moveOut
         ? `Move-out ${dateLabel(place.moveOut)}`
         : `Moved in ${dateLabel(place.moveIn)}`;
+  // A sublet listed from this place and not yet taken (#141).
+  const sublet = place.sublet && place.sublet.status !== "sold" ? place.sublet : null;
   const facts = [
     listing && `${price(listing.price)}/mo`,
     listing?.bedrooms != null &&
@@ -165,7 +168,31 @@ function CurrentPlace({ place }: { place: Current }) {
                 {r.name}
               </Link>
             ))}
+            {sublet ? (
+              <Link to="/landing/move-out" className={chip}>
+                <KeyRound size={16} aria-hidden />
+                {subletStateLabel(sublet)}
+              </Link>
+            ) : (
+              <Link {...toSubletMyPlace()} className={chip}>
+                <KeyRound size={16} aria-hidden />
+                Sublet my place
+              </Link>
+            )}
           </nav>
+          {place.status === "moving_out" && !sublet && (
+            <div className="mt-3 flex flex-col gap-2 rounded-lg bg-highlight p-3 sm:flex-row sm:items-center">
+              <p className="min-w-0 flex-1 text-[13px] text-primary leading-[18px]">
+                <span className="font-semibold">Moving out?</span> List your place as a sublet. The
+                form fills in from your place, and you check everything before it's listed.
+              </p>
+              <Link {...toSubletMyPlace()} className="shrink-0">
+                <Button variant="primary" size="sm" icon={<KeyRound size={15} />}>
+                  Sublet my place
+                </Button>
+              </Link>
+            </div>
+          )}
           <div className="mt-3">
             <PrivateNote />
           </div>
@@ -211,6 +238,14 @@ function PastPlaces({ past }: { past: Past[] }) {
               <span className="block text-[13px] text-secondary">
                 {dateLabel(p.moveIn)}
                 {p.moveOut ? ` to ${dateLabel(p.moveOut)}` : ""}
+                {p.sublet && (
+                  <>
+                    {" · "}
+                    <Link {...toRentalCheck(p.sublet.listingId)} className="hover:underline">
+                      {subletStateLabel(p.sublet)}
+                    </Link>
+                  </>
+                )}
               </span>
             </span>
             <Button

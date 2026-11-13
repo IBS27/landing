@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ImagePlus, Sparkles, X } from "lucide-react";
+import type { FunctionReturnType } from "convex/server";
+import { Home, ImagePlus, Sparkles, X } from "lucide-react";
 import { useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { uploadFile } from "@/features/posts/util";
@@ -16,10 +17,31 @@ const toDay = (s: string) => (s ? new Date(`${s}T12:00:00`).getTime() : Number.N
 const shortDate = (ts: number | null) =>
   ts ? new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "";
 
-/** "Sublease your place": the form, then the viewer's sublets. */
-export function Sublets() {
+type Prefill = NonNullable<FunctionReturnType<typeof api.subleases.fromPlace>>;
+
+/**
+ * "Sublease your place": the form, then the viewer's sublets. With
+ * `fromPlace`, the form opens filled in from their current place (#141), unless
+ * that place already has a sublet listed.
+ */
+export function Sublets({
+  fromPlace = false,
+  onClose,
+}: {
+  fromPlace?: boolean;
+  /** Called when a form opened `fromPlace` is listed or cancelled. */
+  onClose?: () => void;
+}) {
   const rows = useQ(api.subleases.mine, {});
+  const prefill = useQ(api.subleases.fromPlace, fromPlace ? {} : "skip");
   const [creating, setCreating] = useState(false);
+  // Waits for the place before opening, so the form starts filled in.
+  const placeForm = fromPlace && prefill !== undefined && !prefill?.open;
+  const open = creating || placeForm;
+  const close = () => {
+    setCreating(false);
+    onClose?.();
+  };
 
   return (
     <Card className="mb-4 overflow-hidden">
@@ -31,13 +53,19 @@ export function Sublets() {
             lowest rent, and you approve each one in your Inbox.
           </p>
         </div>
-        {!creating && (
+        {!open && (
           <Button variant="primary" size="sm" onClick={() => setCreating(true)}>
             List a sublet
           </Button>
         )}
       </div>
-      {creating && <SubletForm onDone={() => setCreating(false)} />}
+      {open && (
+        <SubletForm
+          key={placeForm && prefill ? prefill.placeId : "blank"}
+          prefill={placeForm ? (prefill ?? undefined) : undefined}
+          onDone={close}
+        />
+      )}
       {rows === undefined ? (
         <div className="p-4">
           <Skeleton className="h-14 w-full" />
@@ -153,24 +181,34 @@ function SubletRow({ r }: { r: Row }) {
   );
 }
 
-function SubletForm({ onDone }: { onDone: () => void }) {
+type Photo = {
+  key: string;
+  input: { url: string } | { storageId: Id<"_storage"> };
+  preview: string;
+};
+
+function SubletForm({ prefill, onDone }: { prefill?: Prefill; onDone: () => void }) {
   const create = useM(api.subleases.create);
   const getUploadUrl = useM(api.posts.generateUploadUrl);
-  const [f, setF] = useState({
-    title: "",
-    rent: "",
+  const [f, setF] = useState(() => ({
+    title: prefill?.title ?? "",
+    rent: prefill?.rent ? String(prefill.rent) : "",
     minRent: "",
-    neighborhood: "Mission",
-    propertyType: "room" as "apartment" | "room" | "studio",
-    bedrooms: "1",
-    bathrooms: "1",
-    from: "",
+    // A place whose neighborhood isn't in the list waits for the user to pick one.
+    neighborhood: prefill ? (prefill.neighborhood ?? "") : "Mission",
+    propertyType: prefill?.propertyType ?? ("room" as "apartment" | "room" | "studio"),
+    bedrooms: String(prefill?.bedrooms || 1),
+    bathrooms: String(prefill?.bathrooms ?? 1),
+    from: prefill?.availableFrom ?? "",
     to: "",
-    furnished: true,
+    furnished: prefill?.furnished ?? true,
     description: "",
     notes: "",
-  });
-  const [photos, setPhotos] = useState<{ storageId: Id<"_storage">; preview: string }[]>([]);
+  }));
+  const [photos, setPhotos] = useState<Photo[]>(
+    () =>
+      prefill?.photos.slice(0, 10).map((url) => ({ key: url, input: { url }, preview: url })) ?? [],
+  );
   const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -180,10 +218,10 @@ function SubletForm({ onDone }: { onDone: () => void }) {
     if (!files?.length) return;
     setUploading(true);
     try {
-      const added: { storageId: Id<"_storage">; preview: string }[] = [];
+      const added: Photo[] = [];
       for (const file of [...files].slice(0, 10 - photos.length)) {
         const storageId = (await uploadFile(await getUploadUrl({}), file)) as Id<"_storage">;
-        added.push({ storageId, preview: URL.createObjectURL(file) });
+        added.push({ key: storageId, input: { storageId }, preview: URL.createObjectURL(file) });
       }
       setPhotos((p) => [...p, ...added]);
     } catch {
@@ -202,7 +240,7 @@ function SubletForm({ onDone }: { onDone: () => void }) {
         rent: Number(f.rent),
         minRent: Number(f.minRent),
         description: f.description,
-        photos: photos.map((p) => ({ storageId: p.storageId })),
+        photos: photos.map((p) => p.input),
         neighborhood: f.neighborhood,
         propertyType: f.propertyType,
         bedrooms: Number(f.bedrooms),
@@ -211,6 +249,7 @@ function SubletForm({ onDone }: { onDone: () => void }) {
         availableTo: toDay(f.to),
         furnished: f.furnished,
         notes: f.notes.trim() || undefined,
+        placeId: prefill?.placeId,
       });
       onDone();
     } catch (e) {
@@ -227,6 +266,15 @@ function SubletForm({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="mx-4 mb-4 rounded-lg bg-wash p-3 dark:bg-hover">
+      {prefill && (
+        <p className="mb-3 flex items-start gap-2 text-[13px] text-primary leading-[18px]">
+          <Home size={14} className="mt-0.5 shrink-0 text-secondary" aria-hidden />
+          <span>
+            Filled in from your place. Check every detail and add your lowest rent. Nothing is
+            listed until you tap List sublet.
+          </span>
+        </p>
+      )}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1 sm:col-span-2">
           {label("Title")}
@@ -282,6 +330,11 @@ function SubletForm({ onDone }: { onDone: () => void }) {
             value={f.neighborhood}
             onChange={(e) => set({ neighborhood: e.target.value })}
           >
+            {!f.neighborhood && (
+              <option value="" disabled>
+                Choose a neighborhood
+              </option>
+            )}
             {NEIGHBORHOODS.map((n) => (
               <option key={n.name} value={n.name}>
                 {n.name}
@@ -355,7 +408,7 @@ function SubletForm({ onDone }: { onDone: () => void }) {
           {label("Photos")}
           <div className="mt-1 flex flex-wrap gap-2">
             {photos.map((p, i) => (
-              <span key={p.storageId} className="relative">
+              <span key={p.key} className="relative">
                 <img src={p.preview} alt="" className="h-16 w-16 rounded-md object-cover" />
                 <button
                   type="button"
