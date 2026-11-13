@@ -50,7 +50,7 @@ export type MapLayer =
       /** Called after the map zooms to a clicked neighborhood (#16 routes to its page). */
       onSelect?: (n: NeighborhoodShape) => void;
       /** Slug of a neighborhood to keep highlighted (a neighborhood page's own shape). */
-      selected?: string;
+      selected?: string | readonly string[];
     }
   | { kind: "listings"; items: readonly ListingPin[] }
   | { kind: "events"; items: readonly EventPin[] }
@@ -61,7 +61,11 @@ export type MapLayer =
  * Where the camera starts: all of San Francisco, everything in the layers, a
  * box, or a point. The map moves again only when `focus` changes.
  */
-export type MapFocus = "city" | "layers" | { bounds: Bounds } | { center: LatLng; zoom: number };
+export type MapFocus =
+  | "city"
+  | "layers"
+  | { bounds: Bounds }
+  | { center: LatLng; zoom: number; pitch?: number; bearing?: number };
 
 export type LandingMapProps = {
   layers: readonly MapLayer[];
@@ -76,4 +80,8 @@ export type LandingMapProps = {
   className?: string;
   /** Map controls and floating UI the feature adds (e.g. Find's layer chips). */
   children?: React.ReactNode;
+  /** Landing Home: start on a globe, allow the whole world, tilt and fly between views. */
+  world?: boolean;
+  /** The MapLibre map once loaded, for a feature's own extra drawing (Landing Home's move line). */
+  onMapReady?: (map: import("maplibre-gl").Map) => void;
 };

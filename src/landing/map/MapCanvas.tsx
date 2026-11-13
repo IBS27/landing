@@ -71,6 +71,8 @@ export default function MapCanvas({
   className,
   children,
   padding,
+  world = false,
+  onMapReady,
 }: LandingMapProps) {
   const container = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<MlMap | null>(null);
@@ -87,8 +89,8 @@ export default function MapCanvas({
 
   const data = useMemo(() => overlayData(layers), [layers]);
   const pinsByKey = useMemo(() => new Map(data.pins.map((p) => [p.key, p])), [data.pins]);
-  const latest = useRef({ data, pinsByKey, dark, onBoundsChange, insets, focus });
-  latest.current = { data, pinsByKey, dark, onBoundsChange, insets, focus };
+  const latest = useRef({ data, pinsByKey, dark, onBoundsChange, insets, focus, onMapReady });
+  latest.current = { data, pinsByKey, dark, onBoundsChange, insets, focus, onMapReady };
 
   const [visible, setVisible] = useState<Visible[]>([]);
   // The area on screen, so pins in loaded-but-offscreen tiles stay out of the tab order.
@@ -100,6 +102,7 @@ export default function MapCanvas({
   const appliedFocus = useRef<string | null>(null);
 
   /* ── Create the map once ── */
+  // biome-ignore lint/correctness/useExhaustiveDependencies: created once; `world` is fixed for a map's life.
   useEffect(() => {
     let cancelled = false;
     let created: MlMap | null = null;
@@ -114,17 +117,23 @@ export default function MapCanvas({
           container: el,
           style,
           ...(typeof start === "object" && "center" in start
-            ? { center: [start.center.lng, start.center.lat] as [number, number], zoom: start.zoom }
+            ? {
+                center: [start.center.lng, start.center.lat] as [number, number],
+                zoom: start.zoom,
+                pitch: start.pitch ?? 0,
+                bearing: start.bearing ?? 0,
+              }
             : {
                 bounds: focusBounds(start, latest.current.data) ?? toLngLat(SF_BOUNDS),
                 fitBoundsOptions: { padding: fitPadding(pad, el) },
               }),
-          minZoom: MIN_ZOOM,
+          // World mode (Landing Home) starts on a globe and flies in to San Francisco.
+          minZoom: world ? 0.6 : MIN_ZOOM,
           maxZoom: MAX_ZOOM,
-          maxBounds: MAX_BOUNDS,
-          dragRotate: false,
-          pitchWithRotate: false,
-          touchPitch: false,
+          ...(world ? { maxPitch: 70 } : { maxBounds: MAX_BOUNDS }),
+          dragRotate: world,
+          pitchWithRotate: world,
+          touchPitch: world,
           renderWorldCopies: false,
           attributionControl: false,
           fadeDuration: 150,
@@ -134,7 +143,12 @@ export default function MapCanvas({
         m.addControl(new AttributionControl({ compact: true }), "bottom-left");
         created = m;
         m.on("load", () => {
+          if (world) {
+            m.setProjection({ type: "globe" });
+            m.setSky({ "atmosphere-blend": 0 });
+          }
           addOverlays(m, latest.current.data, latest.current.dark);
+          latest.current.onMapReady?.(m);
           // Narrow maps start with the credits folded behind the "i", clear of the app's floating buttons.
           if (el.clientWidth < COMPACT)
             el.querySelector(".maplibregl-ctrl-attrib")?.classList.remove(
@@ -239,11 +253,15 @@ export default function MapCanvas({
     appliedFocus.current = focusKey;
     const el = container.current;
     if (typeof focus === "object" && "center" in focus) {
-      map.easeTo({
-        center: [focus.center.lng, focus.center.lat],
+      const to = {
+        center: [focus.center.lng, focus.center.lat] as [number, number],
         zoom: focus.zoom,
-        ...motion(reduced),
-      });
+        ...(focus.pitch !== undefined ? { pitch: focus.pitch } : {}),
+        ...(focus.bearing !== undefined ? { bearing: focus.bearing } : {}),
+        ...(el ? { padding: fitPadding(insets, el) } : {}),
+      };
+      if (world && !reduced) map.flyTo({ ...to, duration: 2600, curve: 1.5, essential: true });
+      else map.easeTo({ ...to, ...motion(reduced) });
     } else {
       const b = focusBounds(focus, latest.current.data) ?? toLngLat(SF_BOUNDS);
       if (el) map.fitBounds(b, { padding: fitPadding(insets, el), ...motion(reduced) });
