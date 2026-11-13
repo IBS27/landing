@@ -20,7 +20,7 @@ import {
   inferFromSignals,
   MAX_AGE_MS,
   MAX_EVIDENCE,
-  msUntilBelowThreshold,
+  msUntilRecheck,
   neighborhoodIn,
   type SignalKind,
   type SignalTargetKind,
@@ -223,13 +223,13 @@ export async function recomputeInferred(ctx: MutationCtx, userId: Id<"users">) {
       },
     });
   }
-  // Come back when the weakest one decays under the threshold, so inferred
+  // Come back when the first one may stop holding, so inferred
   // facts fade without new activity. A newer signal's recompute supersedes this.
   if (inferred.length > 0)
     await scheduleRecompute(
       ctx,
       userId,
-      Math.min(...inferred.map(([, inf]) => msUntilBelowThreshold(inf.score))) + 60_000,
+      Math.max(0, Math.min(...inferred.map(([, inf]) => msUntilRecheck(inf, now)))) + 60_000,
     );
   const keep = new Set(inferred.map(([subject]) => factSlot(subject)));
   const profile = await getProfile(ctx, userId);

@@ -9,7 +9,9 @@ import {
   HALF_LIFE_MS,
   inferFromSignals,
   isPositiveReaction,
+  MAX_AGE_MS,
   msUntilBelowThreshold,
+  msUntilRecheck,
   neighborhoodIn,
   type SignalLike,
   signalWeight,
@@ -94,6 +96,23 @@ describe("rules", () => {
   test("a score decays under the threshold on the half-life clock", () => {
     expect(msUntilBelowThreshold(8)).toBe(HALF_LIFE_MS);
     expect(msUntilBelowThreshold(4)).toBe(0);
+  });
+
+  test("the recheck also comes when a signal passes the one-year cutoff", () => {
+    // 3 + 1 on one Event, and an old join that is the second target.
+    const inf = inferFromSignals(
+      [
+        sig({ targetId: "e" }),
+        sig({ targetId: "e", kind: "save" }),
+        sig({ kind: "join", at: NOW - MAX_AGE_MS + 2 * 60 * 60 * 1000 }),
+      ],
+      NOW,
+    ).interests.get("climbing");
+    expect(inf).toBeDefined();
+    expect(msUntilRecheck(inf!, NOW)).toBe(2 * 60 * 60 * 1000);
+    expect(
+      msUntilRecheck(inferFromSignals([sig({}), sig({})], NOW).interests.get("climbing")!, NOW),
+    ).toBe(msUntilBelowThreshold(6));
   });
 
   test("confidence maps from the score and never reaches stated", () => {

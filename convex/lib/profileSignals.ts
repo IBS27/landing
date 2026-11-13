@@ -99,6 +99,18 @@ export function msUntilBelowThreshold(score: number): number {
   return HALF_LIFE_MS * Math.log2(score / THRESHOLD);
 }
 
+/**
+ * When an inference may next stop holding with no new activity: its score
+ * decays under the threshold, or one of its signals passes the one-year cutoff
+ * (which can take away a distinct target).
+ */
+export function msUntilRecheck(inf: Inference, now: number): number {
+  return Math.min(
+    msUntilBelowThreshold(inf.score),
+    ...inf.signals.map((s) => s.at + MAX_AGE_MS - now),
+  );
+}
+
 export type Inference<S extends SignalLike = SignalLike> = {
   score: number;
   confidence: number;
