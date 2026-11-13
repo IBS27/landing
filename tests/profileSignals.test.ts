@@ -1,8 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import type { Id } from "../convex/_generated/dataModel";
 import type { MutationCtx } from "../convex/_generated/server";
-import { recomputeInferred, recordSignal, undoSignal } from "../convex/lib/activity";
+import {
+  describeTarget,
+  recomputeInferred,
+  recordSignal,
+  undoSignal,
+} from "../convex/lib/activity";
 import { getProfile, setLearnFromActivity } from "../convex/lib/cityProfile";
+import { interestsForEvent } from "../convex/lib/interests";
 import {
   activitySummary,
   confidenceFor,
@@ -127,7 +133,7 @@ describe("rules", () => {
     expect(r.neighborhoods.get("mission")?.score).toBe(6);
   });
 
-  test("place strings map to neighborhoods by name; parks and other cities don't", () => {
+  test("without a neighborhoodId, place strings map to neighborhoods by name; parks and other cities don't", () => {
     expect(neighborhoodIn("Valencia St & 18th St, Mission")).toBe("mission");
     expect(neighborhoodIn("Mission District, San Francisco")).toBe("mission");
     expect(neighborhoodIn("4th St & Brannan St, SoMa")).toBe("south-of-market");
@@ -199,6 +205,11 @@ function world(extra: Record<string, Row[]> = {}) {
         location: "San Francisco Bay Area",
       },
       { _id: "groups:2", name: "Parents who climb", category: "Parenting", tags: ["Climbing"] },
+    ],
+    neighborhoods: [
+      { _id: "neighborhoods:1", slug: "mission", name: "Mission" },
+      { _id: "neighborhoods:2", slug: "golden-gate-park", name: "Golden Gate Park", park: true },
+      { _id: "neighborhoods:3", slug: "south-of-market", name: "South of Market" },
     ],
     profileSignals: [],
     cityProfiles: [],
@@ -329,6 +340,73 @@ describe("hooks and recompute", () => {
     await recordSignal(ctx, USER, "join", "group", "groups:2");
     expect(tables.profileSignals).toEqual([]);
     expect(scheduled).toEqual([]);
+  });
+
+  test("neighborhoods come from neighborhoodId, and from place names only when it's unset", async () => {
+    const at = (neighborhoodId: string | undefined, place: string) => ({ neighborhoodId, place });
+    const cases = [
+      // The id wins over a place string that names somewhere else.
+      [at("neighborhoods:3", "Valencia St & 16th St, Mission"), "south-of-market"],
+      [at(undefined, "Valencia St & 16th St, Mission"), "mission"],
+      // Parks never count, by id or by name.
+      [at("neighborhoods:2", "Stow Lake, Golden Gate Park"), undefined],
+      [at(undefined, "Stow Lake, Golden Gate Park"), undefined],
+      // An id whose row is gone gives none rather than guessing from the text.
+      [at("neighborhoods:9", "Mission"), undefined],
+    ] as const;
+    for (const [{ neighborhoodId, place }, want] of cases) {
+      const { ctx } = world({
+        events: [
+          { _id: "events:1", title: "Climb", category: "Fitness", address: place, neighborhoodId },
+        ],
+        groups: [
+          {
+            _id: "groups:1",
+            name: "Climbers",
+            category: "Fitness",
+            tags: [],
+            location: place,
+            neighborhoodId,
+          },
+        ],
+        listings: [
+          {
+            _id: "listings:1",
+            category: "Home & Garden",
+            location: { neighborhood: place },
+            neighborhoodId,
+          },
+        ],
+        posts: [{ _id: "posts:1", groupId: "groups:1" }],
+      });
+      for (const [kind, id] of [
+        ["event", "events:1"],
+        ["group", "groups:1"],
+        ["listing", "listings:1"],
+        ["post", "posts:1"],
+      ] as const) {
+        expect((await describeTarget(ctx, kind, id))?.neighborhoodSlug).toBe(want);
+      }
+    }
+  });
+
+  test("online Events have no neighborhood, even with a neighborhoodId", async () => {
+    const { ctx } = world({
+      events: [
+        {
+          _id: "events:1",
+          title: "Climb",
+          category: "Fitness",
+          address: "Mission",
+          online: true,
+          neighborhoodId: "neighborhoods:1",
+        },
+      ],
+    });
+    expect(await describeTarget(ctx, "event", "events:1")).toEqual({
+      interestIds: interestsForEvent({ category: "Fitness", title: "Climb" }),
+      neighborhoodSlug: undefined,
+    });
   });
 
   test("unknown targets aren't recorded", async () => {
