@@ -78,7 +78,11 @@ export function subletMoveProblems(out: SubletMove, input: SubletInput): string[
   if (/\b\d{2,5}\s+\w+\s+(st|street|ave|avenue|blvd|rd|road)\b/i.test(out.text))
     p.push("text must not share the street address");
   // Trust facts about the renter are for the lister only (#141).
-  if (/\b(vouch\w*|mutual|verified)\b/i.test(out.text))
+  if (
+    /\b(vouch\w*|mutual|verified|friends? (?:list|on facebook)|(?:joined|been on|on) facebook|groups? (?:together|with you|in common)|(?:same|both in|in your|in my) groups?)\b/i.test(
+      out.text,
+    )
+  )
     p.push("text must not mention the renter's trust facts; put them in rationale");
   return p;
 }

@@ -403,6 +403,18 @@ describe("renter trust", () => {
       "text must not mention the renter's trust facts; put them in rationale",
     );
     expect(subletMoveProblems(reply("Hi! We have 2 mutual friends."), input).length).toBe(1);
+    for (const leak of [
+      "Hi! I see you joined Facebook 3 days ago.",
+      "Hi! You've been on Facebook since 2019.",
+      "Hi! Looks like we're friends on Facebook.",
+      "Hi! We're in the same Group, SF Climbers.",
+      "Hi! Nice, we have 2 Groups in common.",
+      "Hi! Your identity is verified.",
+    ])
+      expect(subletMoveProblems(reply(leak), input)).toHaveLength(1);
     expect(subletMoveProblems(reply("Hi! Want to see it this week?"), input)).toEqual([]);
+    expect(
+      subletMoveProblems(reply("Hi! My friends and I can show you around Saturday."), input),
+    ).toEqual([]);
   });
 });
