@@ -18,6 +18,7 @@ import {
 } from "./lib/listings";
 import { notify } from "./lib/notify";
 import { isSaved } from "./lib/posts";
+import { badgesAfterEdit } from "./lib/trust";
 import { getSummaries, getSummary, type UserSummary } from "./lib/users";
 import {
   listingCategory,
@@ -783,6 +784,12 @@ export const update = viewerMutation({
       vehicle: args.vehicle,
       meetup: args.meetup,
       groupIds: args.groupIds?.length ? args.groupIds : undefined,
+      // A different unit loses the badges about the old one (#11).
+      badges: badgesAfterEdit(l, {
+        location: placeFor(args.neighborhood),
+        photos,
+        rental: args.rental,
+      }),
       updatedAt: Date.now(),
     });
     return listingId;

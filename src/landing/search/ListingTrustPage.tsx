@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Bath, BedDouble, CalendarDays, Flag, MapPin, MessageCircle, Store } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { toConversation, toListing, toProfile } from "@/landing/links";
 import { LandingPage } from "@/landing/shell/LandingPage";
@@ -12,24 +12,17 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { LISTING_REPORT_REASONS } from "../../../convex/lib/reports";
 import { ListerNetwork } from "./ListerNetwork";
 import { ChatCheck, ThingsToCheck, VerifiedBadges } from "./ThingsToCheck";
+import { useChatCheck } from "./useChatCheck";
 
 /** `/landing/find/listing/:id`: a rental with its verified levels and things to check. */
 export function ListingTrustPage({ listingId }: { listingId: Id<"listings"> }) {
   const data = useQ(api.trust.forListing, { listingId });
-  const requestCheck = useM(api.trust.requestChatCheck);
   const report = useM(api.reports.create);
   const [photo, setPhoto] = useState(0);
   const [reporting, setReporting] = useState(false);
 
   // Check the viewer's chat with the lister when it's new or has new messages.
-  const asked = useRef<string | null>(null);
-  const chatStatus = data?.chat?.status;
-  useEffect(() => {
-    if (!chatStatus || chatStatus === "checked") return;
-    if (asked.current === `${listingId}:${chatStatus}`) return;
-    asked.current = `${listingId}:${chatStatus}`;
-    requestCheck({ listingId }).catch(() => {});
-  }, [chatStatus, listingId, requestCheck]);
+  const retryCheck = useChatCheck(listingId, data?.chat);
 
   if (data === undefined)
     return (
@@ -151,11 +144,13 @@ export function ListingTrustPage({ listingId }: { listingId: Id<"listings"> }) {
               </p>
             </div>
           </Card>
-          {data.chat && lister && <ChatCheck chat={data.chat} listerFirstName={lister.firstName} />}
+          {data.chat && lister && (
+            <ChatCheck chat={data.chat} listerFirstName={lister.firstName} onRetry={retryCheck} />
+          )}
         </div>
 
         <div className="flex flex-col gap-4">
-          {!data.isOwn && <ThingsToCheck signals={data.signals} />}
+          {!data.isOwn && <ThingsToCheck signals={data.signals} lister={lister} />}
           {lister && (
             <Card className="p-4">
               <h2 className="font-bold text-[17px] text-primary leading-5">Listed by</h2>

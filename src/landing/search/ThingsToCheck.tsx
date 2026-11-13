@@ -13,11 +13,12 @@ import {
   UserRound,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { toConversation } from "@/landing/links";
+import { toConversation, toProfile } from "@/landing/links";
 import { cn, price, shortAge } from "@/lib/format";
-import { Card, Spinner } from "@/ui/primitives";
+import { SourcesChip } from "@/ui/Citations";
+import { Button, Card, Spinner } from "@/ui/primitives";
 import type { api } from "../../../convex/_generated/api";
-import type { ListingSignal } from "../../../convex/lib/trust";
+import type { SignalView } from "../../../convex/trust";
 
 export type ListingTrust = NonNullable<FunctionReturnType<typeof api.trust.forListing>>;
 
@@ -68,13 +69,13 @@ function Pill({ icon, children }: { icon: ReactNode; children: ReactNode }) {
 
 /* ── Listing signals ──────────────────────────────────────────────────── */
 
-function signalCopy(s: ListingSignal): { icon: ReactNode; title: string; body: string } {
+function signalCopy(s: SignalView): { icon: ReactNode; title: string; body: string } {
   switch (s.kind) {
     case "low_price":
       return {
         icon: <Tag size={18} />,
         title: `Price is ${s.percentBelow}% below similar listings`,
-        body: `Similar ${s.unit === "room" ? "rooms" : `${s.unit}s`} in ${s.area} go for about ${price(s.median)}/mo (${s.comps} listings). A price that seems too good is a common way to rush renters.`,
+        body: `Similar ${s.unit === "room" ? "rooms" : `${s.unit}s`} in ${s.area} go for about ${price(s.median)}/mo (${s.comps} listings). Ask why it's priced lower before you pay anything.`,
       };
     case "new_account":
       return {
@@ -82,12 +83,15 @@ function signalCopy(s: ListingSignal): { icon: ReactNode; title: string; body: s
         title: "New account with no one you know",
         body: `Joined ${s.daysOld === 0 ? "today" : `${s.daysOld} ${s.daysOld === 1 ? "day" : "days"} ago`}, with no mutual friends or vouches from your network.`,
       };
-    case "reused_photos":
+    case "reused_photos": {
+      const first = s.sources?.[0];
+      const where = first?.kind === "listing" ? `“${first.title}”` : "another listing";
       return {
         icon: <Images size={18} />,
         title: "Photos also appear on another listing",
-        body: `${s.count === 1 ? "A photo" : `${s.count} photos`} also ${s.count === 1 ? "appears" : "appear"} on “${s.otherListingTitle}”, posted earlier by someone else.`,
+        body: `${s.count === 1 ? "A photo" : `${s.count} photos`} also ${s.count === 1 ? "appears" : "appear"} on ${where}, posted earlier by someone else.`,
       };
+    }
     case "lister_far_away":
       return {
         icon: <MapPin size={18} />,
@@ -97,8 +101,14 @@ function signalCopy(s: ListingSignal): { icon: ReactNode; title: string; body: s
   }
 }
 
-/** "Things to check" on a listing: each signal with its reason. */
-export function ThingsToCheck({ signals }: { signals: ListingSignal[] }) {
+/** "Things to check" on a listing: each signal with its reason and sources. */
+export function ThingsToCheck({
+  signals,
+  lister,
+}: {
+  signals: SignalView[];
+  lister: { name: string; username: string } | null;
+}) {
   return (
     <Card className="p-4">
       <h2 className="font-bold text-[17px] text-primary leading-5">Things to check</h2>
@@ -123,6 +133,19 @@ export function ThingsToCheck({ signals }: { signals: ListingSignal[] }) {
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-[15px] text-primary leading-5">{c.title}</div>
                   <p className="mt-0.5 text-[13px] text-secondary leading-[18px]">{c.body}</p>
+                  {s.sources ? (
+                    <SourcesChip sources={s.sources} className="mt-1.5" />
+                  ) : (
+                    lister &&
+                    (s.kind === "new_account" || s.kind === "lister_far_away") && (
+                      <Link
+                        {...toProfile(lister)}
+                        className="mt-1 inline-block font-semibold text-[13px] text-link hover:underline"
+                      >
+                        Source: {lister.name}'s profile
+                      </Link>
+                    )
+                  )}
                 </div>
               </li>
             );
@@ -138,7 +161,7 @@ export function ThingsToCheck({ signals }: { signals: ListingSignal[] }) {
 
 /* ── Chat check ───────────────────────────────────────────────────────── */
 
-const CATEGORY_LABEL: Record<string, string> = {
+export const CATEGORY_LABEL: Record<string, string> = {
   deposit_before_viewing: "Money before a viewing",
   away_lister: "Can't show it in person",
   untraceable_payment: "Hard-to-reverse payment",
@@ -150,11 +173,13 @@ const CATEGORY_LABEL: Record<string, string> = {
 export function ChatCheck({
   chat,
   listerFirstName,
+  onRetry,
 }: {
   chat: NonNullable<ListingTrust["chat"]>;
   listerFirstName: string;
+  onRetry: () => void;
 }) {
-  const checking = chat.status !== "checked";
+  const checking = chat.status === "checking" || chat.status === "needed";
   const byMessage = new Map<
     string,
     { text: string; createdAt: number; items: typeof chat.flags }
@@ -183,8 +208,15 @@ export function ChatCheck({
           <>
             <Spinner size={12} /> Reading your chat…
           </>
+        ) : chat.status === "failed" ? (
+          <>
+            Couldn't check your newest messages.
+            <Button variant="link" onClick={onRetry} className="text-[12px]">
+              Try again
+            </Button>
+          </>
         ) : chat.via === "fallback" ? (
-          "Checked with Landing's scam phrase list"
+          "Checked for common rental warning signs"
         ) : (
           <>
             <Sparkles size={12} className="text-[#8A3FFC]" aria-hidden /> Checked by Muse
@@ -192,7 +224,7 @@ export function ChatCheck({
         )}
       </div>
 
-      {!checking && byMessage.size === 0 && (
+      {chat.status === "checked" && byMessage.size === 0 && (
         <p className="mt-3 text-[15px] text-primary leading-5">
           Nothing stood out in your messages so far.
         </p>
