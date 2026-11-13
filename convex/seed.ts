@@ -19,6 +19,7 @@ import {
 } from "./_generated/server";
 import schema from "./schema";
 import { DAY } from "./seed/lib/time";
+import { seedCityProfiles } from "./seed/cityProfiles";
 import { buildPlan } from "./seed/plan";
 import { roomSeeds } from "./seed/world/rooms";
 import { reactionType } from "./validators";
@@ -38,6 +39,12 @@ async function insertAll<N extends TableNames>(
 }
 
 // ── Mutations ────────────────────────────────────────────────────────────────
+
+/** Landing City Profiles (#3), after users, Groups and Events exist. */
+export const insertCityProfiles = internalMutation({
+  args: { now: v.number() },
+  handler: (ctx, { now }) => seedCityProfiles(ctx, now),
+});
 
 /** Deletes up to one batch of a table; returns how many were deleted. */
 export const clearTable = internalMutation({
@@ -586,6 +593,14 @@ export const reset = internalAction({
       }),
     ]);
 
+    // 9. Landing City Profiles for the personas.
+    const cityProfileFacts: number = await ctx.runMutation(internal.seed.insertCityProfiles, {
+      now: Date.now(),
+    });
+
+    // Demo rentals for "Things to check" (#11).
+    await ctx.runMutation(internal.trust.seedDemo, {});
+
     // Muse proposals for the demo inbox (#6).
     await ctx.runMutation(internal.proposals.seedDemo, {});
 
@@ -607,6 +622,7 @@ export const reset = internalAction({
         listings: plan.listings.length,
         events: plan.events.length,
         rooms,
+        cityProfileFacts,
         eventResponses: plan.eventResponses.length,
         posts: plan.posts.length,
         comments: plan.posts.reduce((s, p) => s + p.comments.length, 0),
