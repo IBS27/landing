@@ -28,6 +28,7 @@ import {
 import { Avatar, Button, Card, IconButton, VerifiedBadge } from "@/ui/primitives";
 import { POST_REPORT_REASONS, ReportDialog } from "@/ui/ReportDialog";
 import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { ActionBar } from "./ActionBar";
 import { AdStrip, AttachmentCard, adCallToAction } from "./Attachments";
 import { AudienceIcon, audienceLabel } from "./Audience";
@@ -56,9 +57,12 @@ export function PostCard({
   nameSuffix,
   className,
   inlineComments = false,
+  focusCommentId,
 }: {
   post: PostView;
   expanded?: boolean;
+  /** Permalink only: a linked comment to open, scroll to and highlight. */
+  focusCommentId?: Id<"comments">;
   /** Profile timelines: the top comment and a "Write a comment…" row under the post. */
   inlineComments?: boolean;
   /** Feeds show the X "Hide post" button; search results don't. */
@@ -116,7 +120,7 @@ export function PostCard({
       />
       {expanded && (
         <div className="border-divider border-t">
-          <CommentsSection postId={post._id} focusKey={focusKey} />
+          <CommentsSection postId={post._id} focusKey={focusKey} focusCommentId={focusCommentId} />
         </div>
       )}
       {!expanded && (inGroups || inlineComments) && (

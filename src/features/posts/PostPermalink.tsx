@@ -4,8 +4,11 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { PostCard } from "./PostCard";
 import { PostSkeleton } from "./PostFeed";
 
-/** `/<username>/posts/<id>`: the post expanded with its comments, centered. */
-export function PostPermalink({ postId }: { postId: string }) {
+/**
+ * `/<username>/posts/<id>`: the post expanded with its comments, centered.
+ * `commentId` (`?comment_id=`) opens the comments at that comment, highlighted.
+ */
+export function PostPermalink({ postId, commentId }: { postId: string; commentId?: string }) {
   const post = useQ(api.posts.get, { postId: postId as Id<"posts"> });
   return (
     <div className="mx-auto w-full max-w-[680px] px-4 py-4">
@@ -14,7 +17,7 @@ export function PostPermalink({ postId }: { postId: string }) {
       ) : post === null ? (
         <Unavailable />
       ) : (
-        <PostCard post={post} expanded />
+        <PostCard post={post} expanded focusCommentId={commentId as Id<"comments"> | undefined} />
       )}
     </div>
   );
