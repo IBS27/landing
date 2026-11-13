@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { type Infer, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { type CitedSource, cite, type NonEmpty, resolveCitations } from "./lib/citations";
@@ -143,104 +143,110 @@ const filtersArg = v.object({
  */
 export const search = viewerQuery({
   args: { filters: v.optional(filtersArg) },
-  handler: async (ctx, { filters = {} }) => {
-    const viewerId = ctx.viewer._id;
-    const now = Date.now();
-    const [profile, audience, rows] = await Promise.all([
-      getProfile(ctx, viewerId),
-      loadAudience(ctx, viewerId),
-      ctx.db
-        .query("listings")
-        .withIndex("by_category", (q) => q.eq("category", "propertyrentals"))
-        .order("desc")
-        .take(500),
-    ]);
-    const areaOf = areaLookup(ctx);
-    const listings = rows.filter(
-      (l) =>
-        l.status === "active" &&
-        l.rental &&
-        l.rental.listingType !== "sale" &&
-        l.sellerId !== viewerId &&
-        !audience.blocked.has(l.sellerId) &&
-        meetsFilters({ ...l.rental, price: l.price }, filters),
-    );
-
-    const hasProfile =
-      !!profile.budget ||
-      profile.interests.length > 0 ||
-      !!profile.transport ||
-      profile.neighborhoods.length > 0 ||
-      !!profile.moveIn;
-    if (!hasProfile)
-      return {
-        needsBrief: true,
-        results: await Promise.all(
-          listings
-            .slice(0, RESULTS_MAX)
-            .map(async (l) => ({ ...(await card(l, areaOf)), reasons: [] })),
-        ),
-      };
-
-    const weights = interestWeights(profile);
-    const hoods = new Map<string, string>();
-    for (const f of profile.neighborhoods) {
-      const row = await ctx.db
-        .query("neighborhoods")
-        .withIndex("by_slug", (q) => q.eq("slug", f.value.slug))
-        .unique();
-      if (row) hoods.set(row._id, neighborhoodLabel(f.value.slug));
-    }
-    const moveIn = profile.moveIn
-      ? Date.parse(`${profile.moveIn.value.date ?? `${profile.moveIn.value.month}-01`}T00:00:00Z`)
-      : Number.NaN;
-    const fitProfile: FitProfile = {
-      budget: profile.budget?.value ?? null,
-      modes: profile.transport?.value.modes ?? null,
-      interests: weights,
-      interestLabels: new Map([...weights.keys()].map((id) => [id, getInterest(id).label])),
-      neighborhoods: hoods,
-      moveIn: Number.isNaN(moveIn) ? null : moveIn,
-    };
-    const { stops, citations } = await transitStops(ctx);
-    const placesByHood = new Map<string, FitPlace[]>();
-    for (const l of listings)
-      if (l.neighborhoodId && !placesByHood.has(l.neighborhoodId))
-        placesByHood.set(l.neighborhoodId, await placesIn(ctx, l.neighborhoodId, now));
-    const byId = new Map(listings.map((l) => [l._id as string, l]));
-
-    const ranked = rankRentals(
-      fitProfile,
-      listings.map((l) => ({
-        id: l._id,
-        price: l.price,
-        lat: l.location.lat ?? null,
-        lng: l.location.lng ?? null,
-        neighborhoodId: l.neighborhoodId ?? null,
-        availableFrom: l.rental?.availableFrom ?? null,
-      })),
-      {
-        now,
-        stops,
-        placesFor: (id) => {
-          const hood = byId.get(id)?.neighborhoodId;
-          return hood ? (placesByHood.get(hood) ?? []) : [];
-        },
-      },
-    ).slice(0, RESULTS_MAX);
-
-    const results = [];
-    for (const f of ranked) {
-      const l = byId.get(f.id);
-      if (!l) continue;
-      // Every reason shown is cited (#7): one whose sources the viewer can't see is left out.
-      const reasons = [];
-      for (const r of f.reasons) {
-        const sources = await reasonSources(ctx, r, citations, audience);
-        if (sources) reasons.push({ kind: r.kind, text: r.text, tone: r.tone, sources });
-      }
-      results.push({ ...(await card(l, areaOf)), reasons });
-    }
-    return { needsBrief: false, results };
-  },
+  handler: (ctx, { filters = {} }) => rankedRentals(ctx, ctx.viewer._id, filters),
 });
+
+/** `search` for other server code, such as Home's chat (convex/homeChat.ts). Call it with the viewer's own id. */
+export async function rankedRentals(
+  ctx: QueryCtx,
+  viewerId: Id<"users">,
+  filters: Infer<typeof filtersArg> = {},
+) {
+  const now = Date.now();
+  const [profile, audience, rows] = await Promise.all([
+    getProfile(ctx, viewerId),
+    loadAudience(ctx, viewerId),
+    ctx.db
+      .query("listings")
+      .withIndex("by_category", (q) => q.eq("category", "propertyrentals"))
+      .order("desc")
+      .take(500),
+  ]);
+  const areaOf = areaLookup(ctx);
+  const listings = rows.filter(
+    (l) =>
+      l.status === "active" &&
+      l.rental &&
+      l.rental.listingType !== "sale" &&
+      l.sellerId !== viewerId &&
+      !audience.blocked.has(l.sellerId) &&
+      meetsFilters({ ...l.rental, price: l.price }, filters),
+  );
+
+  const hasProfile =
+    !!profile.budget ||
+    profile.interests.length > 0 ||
+    !!profile.transport ||
+    profile.neighborhoods.length > 0 ||
+    !!profile.moveIn;
+  if (!hasProfile)
+    return {
+      needsBrief: true,
+      results: await Promise.all(
+        listings
+          .slice(0, RESULTS_MAX)
+          .map(async (l) => ({ ...(await card(l, areaOf)), reasons: [] })),
+      ),
+    };
+
+  const weights = interestWeights(profile);
+  const hoods = new Map<string, string>();
+  for (const f of profile.neighborhoods) {
+    const row = await ctx.db
+      .query("neighborhoods")
+      .withIndex("by_slug", (q) => q.eq("slug", f.value.slug))
+      .unique();
+    if (row) hoods.set(row._id, neighborhoodLabel(f.value.slug));
+  }
+  const moveIn = profile.moveIn
+    ? Date.parse(`${profile.moveIn.value.date ?? `${profile.moveIn.value.month}-01`}T00:00:00Z`)
+    : Number.NaN;
+  const fitProfile: FitProfile = {
+    budget: profile.budget?.value ?? null,
+    modes: profile.transport?.value.modes ?? null,
+    interests: weights,
+    interestLabels: new Map([...weights.keys()].map((id) => [id, getInterest(id).label])),
+    neighborhoods: hoods,
+    moveIn: Number.isNaN(moveIn) ? null : moveIn,
+  };
+  const { stops, citations } = await transitStops(ctx);
+  const placesByHood = new Map<string, FitPlace[]>();
+  for (const l of listings)
+    if (l.neighborhoodId && !placesByHood.has(l.neighborhoodId))
+      placesByHood.set(l.neighborhoodId, await placesIn(ctx, l.neighborhoodId, now));
+  const byId = new Map(listings.map((l) => [l._id as string, l]));
+
+  const ranked = rankRentals(
+    fitProfile,
+    listings.map((l) => ({
+      id: l._id,
+      price: l.price,
+      lat: l.location.lat ?? null,
+      lng: l.location.lng ?? null,
+      neighborhoodId: l.neighborhoodId ?? null,
+      availableFrom: l.rental?.availableFrom ?? null,
+    })),
+    {
+      now,
+      stops,
+      placesFor: (id) => {
+        const hood = byId.get(id)?.neighborhoodId;
+        return hood ? (placesByHood.get(hood) ?? []) : [];
+      },
+    },
+  ).slice(0, RESULTS_MAX);
+
+  const results = [];
+  for (const f of ranked) {
+    const l = byId.get(f.id);
+    if (!l) continue;
+    // Every reason shown is cited (#7): one whose sources the viewer can't see is left out.
+    const reasons = [];
+    for (const r of f.reasons) {
+      const sources = await reasonSources(ctx, r, citations, audience);
+      if (sources) reasons.push({ kind: r.kind, text: r.text, tone: r.tone, sources });
+    }
+    results.push({ ...(await card(l, areaOf)), reasons });
+  }
+  return { needsBrief: false, results };
+}

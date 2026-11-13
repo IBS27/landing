@@ -1,4 +1,5 @@
 import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useAction, useConvex } from "convex/react";
 import { ArrowUp, History, X } from "lucide-react";
 import type { Map as MlMap } from "maplibre-gl";
 import {
@@ -19,12 +20,15 @@ import { cn } from "@/lib/format";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import {
+  CHAT_MESSAGE_MAX,
+  CHAT_RECENT_MAX,
   type ChatCommand,
   type ChatContext,
   type ChatNeighborhood,
+  type ChatRental,
   type ChatReply,
   ruleReply,
-} from "./chatRules";
+} from "../../../convex/lib/homeChatRules";
 import { pointsBounds, shapeBounds, unionBounds } from "./places";
 import { type ChatSession, useChatLog } from "./useChatLog";
 import "./home.css";
@@ -42,8 +46,9 @@ type Chip = { label: string; run?: () => void };
  * shows real data: rentals ranked for the viewer (#10), neighborhood shapes
  * (#15), Events and Groups (#56), Weekend Routes (#18), comparisons (#19),
  * the Move-in Crew at neighborhood level (#30). Questions about other parts
- * of Landing open their pages. Muse only routes and explains; it creates and
- * sends nothing. With AI off, Landing's rules answer instead.
+ * of Landing open their pages. Muse answers on the server (`api.homeChat.reply`);
+ * it only routes and explains, and creates and sends nothing. With AI off,
+ * Landing's rules answer instead, here in the browser if the server can't.
  */
 export function LandingHome() {
   const viewer = useViewer();
@@ -53,6 +58,9 @@ export function LandingHome() {
   const hoods = useQ(api.neighborhoods.boundaries, {});
   const crew = useQ(api.crews.myCrew, {});
   const chat = useChatLog(viewer._id, GREETING);
+  const ask = useAction(api.homeChat.reply);
+  const convex = useConvex();
+  const [pending, setPending] = useState(false);
 
   const [map, setMap] = useState<MlMap | null>(null);
   const [focus, setFocus] = useState<MapFocus>(GLOBE);
@@ -77,8 +85,6 @@ export function LandingHome() {
     api.rentals.search,
     rentalMax === undefined ? "skip" : { filters: rentalMax ? { maxPrice: rentalMax } : {} },
   );
-  // The full ranked list (same as Find), so the chat's rules can answer about rentals.
-  const ranked = useQ(api.rentals.search, { filters: {} });
   const pins = useQ(
     api.map.inBounds,
     area && pinKinds.length ? { bounds: snap(area), kinds: pinKinds } : "skip",
@@ -244,30 +250,60 @@ export function LandingHome() {
 
   const stage: ChatContext["stage"] = zoom < 5 ? "globe" : zoom < 12.5 ? "city" : "hood";
 
-  const send = useCallback(
-    (text: string) => {
-      const message = text.trim();
-      if (!message) return;
-      chat.add({ who: "me", text: message });
-      const context: ChatContext = { stage, ...(selected ? { neighborhood: selected } : {}) };
-      // UI-only for now: Landing's rules answer in the browser, from the viewer's own data.
-      // (A Muse-backed server answer can replace this later without changing the UI.)
-      const reply: ChatReply = ruleReply(message, context, {
+  /** Landing's rules in the browser, for when the server can't answer. */
+  const localReply = useCallback(
+    async (message: string, context: ChatContext): Promise<ChatReply> => {
+      let rentals: ChatRental[] | undefined;
+      try {
+        const ranked = await convex.query(api.rentals.search, {
+          viewerId: viewer._id,
+          filters: {},
+        });
+        rentals = ranked.results.map((r) => ({ id: r._id, title: r.title, price: r.price }));
+      } catch {
+        // Offline too: the rules still answer, without naming rentals.
+      }
+      return ruleReply(message, context, {
         neighborhoods: chatHoods,
         budgetMax: profile?.budget?.value.max ?? null,
-        rentals: (ranked?.results ?? []).map((r) => ({
-          id: r._id,
-          title: r.title,
-          price: r.price,
-        })),
+        rentals,
       });
-      chat.add({
-        who: "muse",
-        text: reply.text,
-        sources: reply.sources,
-        via: reply.via,
-        command: reply.command,
-      });
+    },
+    [convex, viewer._id, chatHoods, profile],
+  );
+
+  const send = useCallback(
+    async (text: string) => {
+      const message = text.trim().slice(0, CHAT_MESSAGE_MAX);
+      if (!message || pending) return;
+      const sessionId = chat.current.id;
+      const recent = chat.current.messages
+        .slice(-CHAT_RECENT_MAX)
+        .map((m) => ({ who: m.who, text: m.text }));
+      chat.add({ who: "me", text: message });
+      const context: ChatContext = { stage, ...(selected ? { neighborhood: selected } : {}) };
+      setPending(true);
+      let reply: ChatReply;
+      try {
+        reply = await ask({ viewerId: viewer._id, message, context, recent });
+      } catch {
+        // The chat never dead-ends: answer with the rules here.
+        reply = await localReply(message, context);
+      } finally {
+        setPending(false);
+      }
+      chat.add(
+        {
+          who: "muse",
+          text: reply.text,
+          sources: reply.sources,
+          via: reply.via,
+          command: reply.command,
+        },
+        sessionId,
+      );
+      // The person opened another chat meanwhile: file the answer there, but leave the map alone.
+      if (!chat.isCurrent(sessionId)) return;
       // "In my budget" means the City Profile's budget when no price was given.
       const budgetMax = profile?.budget?.value.max;
       if (
@@ -279,7 +315,7 @@ export function LandingHome() {
         run({ ...reply.command, maxPrice: budgetMax });
       else run(reply.command);
     },
-    [chat, chatHoods, profile, ranked, run, selected, stage],
+    [ask, chat, localReply, pending, profile, run, selected, stage, viewer._id],
   );
 
   const openSession = (s: ChatSession) => {
@@ -430,8 +466,12 @@ export function LandingHome() {
       <ChatDock
         messages={chat.current.messages}
         chips={chips}
-        onSend={send}
-        onSource={(href) => router.history.push(href)}
+        pending={pending}
+        onSend={(t) => void send(t)}
+        onSource={(href) => {
+          // Code builds every source link; still, only ever follow one inside the app.
+          if (href.startsWith("/") && !href.startsWith("//")) router.history.push(href);
+        }}
       />
 
       <aside className="lh-history lh-glass flex flex-col gap-2.5 p-3.5" aria-hidden={!historyOpen}>
@@ -523,6 +563,7 @@ function snap(b: Bounds): Bounds {
 function ChatDock({
   messages,
   chips,
+  pending,
   onSend,
   onSource,
 }: {
@@ -534,6 +575,7 @@ function ChatDock({
     via?: "muse" | "rules";
   }[];
   chips: Chip[];
+  pending: boolean;
   onSend: (text: string) => void;
   onSource: (href: string) => void;
 }) {
@@ -542,7 +584,7 @@ function ChatDock({
   const [more, setMore] = useState(false);
 
   // The log is exactly as tall as its last two items, scrolled to the newest.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: re-measure when messages change.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-measure when messages or the pending bubble change.
   useLayoutEffect(() => {
     const el = log.current;
     if (!el) return;
@@ -551,10 +593,11 @@ function ChatDock({
     el.style.maxHeight = `${h}px`;
     el.scrollTop = el.scrollHeight;
     setMore(el.scrollTop > 2);
-  }, [messages]);
+  }, [messages, pending]);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
+    if (pending || !text.trim()) return;
     onSend(text);
     setText("");
   };
@@ -573,7 +616,7 @@ function ChatDock({
             className={cn("lh-msg", m.who === "me" ? "lh-me" : "lh-muse lh-glass text-primary")}
           >
             {m.text}
-            {m.who === "muse" && (m.sources?.length || m.via === "rules") ? (
+            {m.who === "muse" && (m.sources?.length || m.via) ? (
               <div className="mt-1.5 flex flex-wrap gap-x-1.5 text-[11px] text-secondary">
                 {m.sources?.map((s) =>
                   s.href ? (
@@ -589,19 +632,31 @@ function ChatDock({
                     <span key={s.label}>{s.label}</span>
                   ),
                 )}
+                {m.via === "muse" && <span>· Answered by Muse</span>}
                 {m.via === "rules" && <span>· Answered by Landing's rules (AI off)</span>}
               </div>
             ) : null}
           </div>
         ))}
+        {pending && (
+          <div className="lh-msg lh-muse lh-glass text-secondary" role="status" aria-live="polite">
+            <span className="lh-typing" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
+            <span className="sr-only">Muse is answering</span>
+          </div>
+        )}
       </div>
       <div className="flex flex-wrap justify-center gap-1.5">
         {chips.map((c) => (
           <button
             key={c.label}
             type="button"
+            disabled={pending && !c.run}
             onClick={() => (c.run ? c.run() : onSend(c.label))}
-            className="lh-glass rounded-full px-3 py-1.5 text-[13px] text-primary shadow-base hover:brightness-95"
+            className="lh-glass rounded-full px-3 py-1.5 text-[13px] text-primary shadow-base hover:brightness-95 disabled:opacity-50"
           >
             {c.label}
           </button>
@@ -614,6 +669,7 @@ function ChatDock({
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
+          maxLength={CHAT_MESSAGE_MAX}
           placeholder="Ask Muse"
           aria-label="Ask Muse"
           className="min-w-0 flex-1 bg-transparent px-1.5 text-[16px] text-primary outline-none placeholder:text-secondary"
@@ -621,7 +677,7 @@ function ChatDock({
         <button
           type="submit"
           aria-label="Send"
-          disabled={!text.trim()}
+          disabled={!text.trim() || pending}
           className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-[#0b0c0f] text-white disabled:opacity-40 dark:bg-white dark:text-black"
         >
           <ArrowUp size={16} strokeWidth={2.4} />
