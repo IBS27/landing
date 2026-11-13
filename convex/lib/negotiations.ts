@@ -1,6 +1,8 @@
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
+import { statesAmount } from "./proposals";
+import { MIN_COMPS, median, phraseFlags } from "./trust";
 
 /**
  * Marketplace negotiation (#36): shared rules for Muse's moves.
@@ -19,29 +21,57 @@ export type NegotiationInput = {
     daysListed: number;
     description: string;
   };
+  /** Similar listings (same category, matching title), also passed as cited sources. */
+  comparables: { title: string; price: number; status: string }[];
   limits: { maxPrice: number; targetPrice: number | null; notes: string | null };
   yourLastOffer: number | null;
   chat: { from: "you" | "seller"; text: string }[];
+  /** Warning signs in the seller's messages, from #73's chat rules. */
+  thingsToCheck: string[];
 };
 
 export type MoveOutput = { move: Move; amount: number; text: string; rationale: string };
 
 const round5 = (n: number) => Math.max(5, Math.round(n / 5) * 5);
 
-/** The last dollar amount the seller named, if any ("I could do 120", "$95 firm"). */
-export function sellerPrice(chat: NegotiationInput["chat"]): number | null {
+const AMOUNT =
+  /(?<![\d,.])(\d{1,3}(?:,\d{3})+|\d+)(?![\d,]|\s?(?:am|pm|min|mins|minutes|hours|days|%|ft|in)\b)/gi;
+
+/**
+ * The last dollar amount the seller named since the buyer's last message ("I
+ * could do 120", "$95 firm"). Only amounts from a fifth of asking up to asking
+ * count, so "I have 2 of these" or "I paid 400" isn't read as a price.
+ */
+export function sellerPrice(chat: NegotiationInput["chat"], askingPrice: number): number | null {
   for (let i = chat.length - 1; i >= 0; i--) {
     const m = chat[i];
     if (m.from === "you") return null; // only a reply after our last message counts
-    const match = m.text.match(
-      /\$?\s?(\d{1,3}(?:,\d{3})*|\d+)(?!\s?(?:am|pm|min|mins|minutes|hours|days|%|ft|in))/i,
-    );
-    if (match) {
-      const n = Number(match[1].replace(/,/g, ""));
-      if (n > 0) return n;
-    }
+    const amounts = [...m.text.matchAll(AMOUNT)]
+      .map((a) => Number(a[1].replace(/,/g, "")))
+      .filter((n) => n >= askingPrice / 5 && n <= askingPrice);
+    if (amounts.length) return amounts[amounts.length - 1];
   }
   return null;
+}
+
+/** The median price of the comparable listings, or null with fewer than MIN_COMPS. */
+export function comparableMedian(input: NegotiationInput): number | null {
+  return input.comparables.length >= MIN_COMPS
+    ? median(input.comparables.map((c) => c.price))
+    : null;
+}
+
+/** #73's chat rules that apply to buying goods (the others are about viewing a rental). */
+const GOODS_FLAGS = new Set(["untraceable_payment", "pressure", "off_platform"]);
+
+/** Why the seller's messages are worth a second look, deduplicated. */
+export function sellerFlags(chat: NegotiationInput["chat"]): string[] {
+  const reasons = chat
+    .filter((m) => m.from === "seller")
+    .flatMap((m) => phraseFlags(m.text))
+    .filter((f) => GOODS_FLAGS.has(f.category))
+    .map((f) => f.reason);
+  return [...new Set(reasons)];
 }
 
 /** Problems with a move, checked in code whether the model or the fallback made it. */
@@ -56,6 +86,8 @@ export function moveProblems(out: MoveOutput, input: NegotiationInput): string[]
       p.push("amount must be a whole number of dollars above 0");
     if (out.amount > maxPrice)
       p.push(`amount ${out.amount} is over the buyer's max of ${maxPrice}`);
+    // The sent message carries the amount only in its text (see `assertPayload`).
+    if (!statesAmount(out.text, out.amount)) p.push(`text must say the amount as $${out.amount}`);
   }
   if (out.move === "offer") {
     if (out.amount >= input.listing.askingPrice)
@@ -77,16 +109,24 @@ export function ladderMove(input: NegotiationInput): MoveOutput {
   const { maxPrice, targetPrice } = input.limits;
   const ask = input.listing.askingPrice;
   const last = input.yourLastOffer;
-  const theirs = sellerPrice(input.chat);
+  const theirs = sellerPrice(input.chat, ask);
   const item = input.listing.title.split(",")[0];
+  const med = comparableMedian(input);
 
   if (last === null) {
-    const open = Math.min(maxPrice, ask - 5, targetPrice ?? round5(ask * 0.75));
+    // Anchor on similar listings when they go for less than this one asks.
+    const anchor = med !== null ? Math.min(ask, med) : ask;
+    const open = Math.min(maxPrice, ask - 5, targetPrice ?? round5(anchor * 0.75));
+    const basis = targetPrice
+      ? "your ideal price"
+      : med !== null && med < ask
+        ? `about 75% of the $${med} median for ${input.comparables.length} similar listings`
+        : "about 75% of asking";
     return {
       move: "offer",
       amount: open,
       text: `Hi! I'm interested in the ${item}. Would you take $${open}? I can pick up soon.`,
-      rationale: `Opening at ${targetPrice ? "your target" : "about 75% of asking"} ($${open} vs $${ask} asking), well under your $${maxPrice} max.`,
+      rationale: `Opening at ${basis} ($${open} vs $${ask} asking), under your $${maxPrice} max.`,
     };
   }
   if (theirs !== null && theirs <= maxPrice) {
