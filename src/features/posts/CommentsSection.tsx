@@ -447,6 +447,20 @@ function ReplyBranch({
   );
 }
 
+/** Re-center a linked comment for this long while the page above it settles. */
+const RECENTER_MS = 2000;
+const USER_SCROLL = ["wheel", "touchstart", "keydown", "mousedown"] as const;
+
+/**
+ * A comment photo's box (within 260×200), reserved from its stored size so the
+ * thread doesn't shift as photos load. Without a size, a fixed box.
+ */
+function commentPhotoBox(m: { width?: number; height?: number }) {
+  if (!m.width || !m.height) return { width: 200, height: 200 };
+  const s = Math.min(1, 260 / m.width, 200 / m.height);
+  return { width: Math.round(m.width * s), height: Math.round(m.height * s) };
+}
+
 function CommentRow({
   comment,
   depth,
@@ -463,9 +477,23 @@ function CommentRow({
   const rowRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!highlighted) return;
+    const center = () => rowRef.current?.scrollIntoView({ block: "center" });
     // After the router's scroll restoration, which runs when the page settles.
-    const frame = requestAnimationFrame(() => rowRef.current?.scrollIntoView({ block: "center" }));
-    return () => cancelAnimationFrame(frame);
+    const frame = requestAnimationFrame(center);
+    // Keep it centered while photos above it finish loading, until the reader scrolls.
+    const resize = new ResizeObserver(center);
+    resize.observe(document.body);
+    const stop = () => {
+      resize.disconnect();
+      window.clearTimeout(timer);
+      for (const e of USER_SCROLL) window.removeEventListener(e, stop);
+    };
+    const timer = window.setTimeout(stop, RECENTER_MS);
+    for (const e of USER_SCROLL) window.addEventListener(e, stop, { passive: true, once: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      stop();
+    };
   }, [highlighted]);
   const rx = useOptimisticReaction("comment", comment._id, comment.reactions);
   const hover = useReactionHover();
@@ -559,6 +587,7 @@ function CommentRow({
               <img
                 src={comment.media.url}
                 alt=""
+                {...commentPhotoBox(comment.media)}
                 className="mt-1.5 max-h-[200px] max-w-[260px] rounded-2xl border border-divider object-cover"
               />
             )}
