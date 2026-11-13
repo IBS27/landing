@@ -94,15 +94,20 @@ export default function MapCanvas({
   const [selected, setSelected] = useState<Selected | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
 
+  /** The focus the camera last moved to (JSON), so each new focus is applied once. */
+  const appliedFocus = useRef<string | null>(null);
+
   /* ── Create the map once ── */
   useEffect(() => {
     let cancelled = false;
     let created: MlMap | null = null;
-    const { dark: startDark, insets: pad, focus: start } = latest.current;
-    loadBasemap(startDark ? "dark" : "light")
+    loadBasemap(latest.current.dark ? "dark" : "light")
       .then((style) => {
         const el = container.current;
         if (cancelled || !el) return;
+        // Read the camera props now, not before the fetch: they may have changed meanwhile.
+        const { insets: pad, focus: start } = latest.current;
+        appliedFocus.current = JSON.stringify(start);
         const m = new MlMap({
           container: el,
           style,
@@ -223,14 +228,10 @@ export default function MapCanvas({
 
   /* ── Focus in: move when the feature asks for a new view ── */
   const focusKey = JSON.stringify(focus);
-  const firstFocus = useRef(true);
   // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the focus value, not its identity.
   useEffect(() => {
-    if (!map) return;
-    if (firstFocus.current) {
-      firstFocus.current = false;
-      return;
-    }
+    if (!map || appliedFocus.current === focusKey) return;
+    appliedFocus.current = focusKey;
     const el = container.current;
     if (typeof focus === "object" && "center" in focus) {
       map.easeTo({
