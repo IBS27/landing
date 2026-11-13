@@ -127,7 +127,12 @@ function Ask({ a, b }: { a?: Hood; b?: Hood }) {
       void go(x, y);
     } else if (x) {
       const other = a && a.slug !== x ? a.slug : b && b.slug !== x ? b.slug : undefined;
-      setNote(other ? null : `Pick a second neighborhood to compare with ${label(x)}.`);
+      // Only one neighborhood found (an unknown or repeated name): say what's compared.
+      setNote(
+        other
+          ? `We found only ${label(x)} in that, so it's compared with ${label(other)}. Name two to change both.`
+          : `Pick a second neighborhood to compare with ${label(x)}.`,
+      );
       void go(x, other);
     } else {
       setNote(
