@@ -1,5 +1,13 @@
 /** San Francisco and East Bay / Peninsula neighborhoods used for Marketplace locations, with approximate centers. */
 export const neighborhoods = {
+  Lakeshore: { city: "San Francisco, CA", lat: 37.7134009, lng: -122.483405 },
+  "Lone Mountain/USF": { city: "San Francisco, CA", lat: 37.7722096, lng: -122.4536019 },
+  "Bayview Hunters Point": { city: "San Francisco, CA", lat: 37.7347105, lng: -122.3933441 },
+  "Presidio Heights": { city: "San Francisco, CA", lat: 37.7824459, lng: -122.451115 },
+  "Outer Richmond": { city: "San Francisco, CA", lat: 37.7729559, lng: -122.4897783 },
+  Tenderloin: { city: "San Francisco, CA", lat: 37.7837, lng: -122.4145 },
+  "Western Addition": { city: "San Francisco, CA", lat: 37.7812, lng: -122.4333 },
+  "Financial District/South Beach": { city: "San Francisco, CA", lat: 37.785, lng: -122.394 },
   Mission: { city: "San Francisco, CA", lat: 37.7599, lng: -122.4148 },
   Berkeley: { city: "Berkeley, CA", lat: 37.867, lng: -122.2584 },
   "Inner Richmond": { city: "San Francisco, CA", lat: 37.7786, lng: -122.4642 },

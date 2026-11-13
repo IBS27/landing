@@ -13,6 +13,7 @@ import type { MediaInput } from "./ai/model";
 import { resolveSources } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { loadAudience } from "./lib/posts";
+import { rentalSources } from "./lib/rentalMedia";
 import { unitAppearanceTask } from "./lib/unitAppearanceTask";
 import {
   MAX_SOURCES,
@@ -106,13 +107,15 @@ export const create = viewerMutation({
     const title = (room?.name ?? listing?.title ?? "Your unit").slice(0, 120);
     const photos: { url: string; storageId?: Id<"_storage"> }[] =
       room?.photos ?? listing?.photos.map((url) => ({ url })) ?? [];
-    const sources: Doc<"unitScenes">["sources"] = photos.slice(0, 18).map((p, i) => ({
-      key: `photo-${i + 1}`,
-      label: `Photo ${i + 1}`,
-      kind: "photo",
-      url: p.url,
-      ...(p.storageId ? { storageId: p.storageId } : {}),
-    }));
+    const sources: Doc<"unitScenes">["sources"] = listing?.rentalMedia
+      ? rentalSources(listing.rentalMedia)
+      : photos.slice(0, 18).map((p, i) => ({
+          key: `photo-${i + 1}`,
+          label: `Photo ${i + 1}`,
+          kind: "photo",
+          url: p.url,
+          ...(p.storageId ? { storageId: p.storageId } : {}),
+        }));
     if (listing?.video)
       sources.push({
         key: "listing-video",

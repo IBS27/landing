@@ -399,6 +399,7 @@ export function buildPlan(now: number) {
    * neighborhood or the bay. `jitter` is the listing's first two draws, as before.
    */
   const listingPoint = (l: ListingSeed, jitter: { u: number; w: number }): LatLng => {
+    if (l.point) return l.point;
     const place = neighborhoods[l.hood];
     const address = l.rental?.address
       ? ADDRESS_POINTS[`${l.rental.address}, ${place.city}`]
@@ -430,7 +431,9 @@ export function buildPlan(now: number) {
     const folder = l.rental ? "rooms" : "listings";
     const hint = `${l.title} ${CATEGORY_HINTS[l.category] ?? ""}`;
     const photos: Picked[] = [];
-    if (typeof l.photos === "string") {
+    if (l.rentalMedia) {
+      photos.push(...l.rentalMedia.photos.map((p) => ({ url: p.url, strong: true })));
+    } else if (typeof l.photos === "string") {
       const exact = pics.exactCount(l.photos, folder);
       const n = exact > 0 ? Math.min(l.photoCount ?? exact, exact) : 1;
       photos.push(...pics.pickMany(l.photos, folder, `listing:${l.key}`, n, hint));
@@ -468,6 +471,7 @@ export function buildPlan(now: number) {
         meetup: l.meetup ? [...l.meetup] : undefined,
         description: l.description,
         photos: photos.map((p) => p.url),
+        rentalMedia: l.rentalMedia,
         location: { city: hood.city, neighborhood: l.hood, lat: point.lat, lng: point.lng },
         status,
         rental: l.rental

@@ -1,0 +1,820 @@
+{
+  "listingUrl": "https://real.vision/2775-market-street-306",
+  "generatedAt": "2026-11-13T06:53:00.974Z",
+  "output": {
+    "scene": {
+      "notes": [
+        "Bathroom and closets estimated; no dimensions printed for them."
+      ],
+      "rooms": [
+        {
+          "evidence": {
+            "basis": "measured",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#D8D2C8",
+          "id": "bedroom",
+          "name": "Bedroom",
+          "polygon": [
+            {
+              "x": 0,
+              "z": 0
+            },
+            {
+              "x": 3.07,
+              "z": 0
+            },
+            {
+              "x": 3.07,
+              "z": 4.34
+            },
+            {
+              "x": 0,
+              "z": 4.34
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "measured",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#E3DED4",
+          "id": "living",
+          "name": "Living/Dining",
+          "polygon": [
+            {
+              "x": 3.07,
+              "z": 0
+            },
+            {
+              "x": 7.08,
+              "z": 0
+            },
+            {
+              "x": 7.08,
+              "z": 5.03
+            },
+            {
+              "x": 4.82,
+              "z": 5.03
+            },
+            {
+              "x": 4.82,
+              "z": 6.06
+            },
+            {
+              "x": 3.93,
+              "z": 6.06
+            },
+            {
+              "x": 3.93,
+              "z": 5.18
+            },
+            {
+              "x": 3.07,
+              "z": 5.18
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "measured",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#DDD8CF",
+          "id": "kitchen",
+          "name": "Kitchen",
+          "polygon": [
+            {
+              "x": 4.82,
+              "z": 5.03
+            },
+            {
+              "x": 7.08,
+              "z": 5.03
+            },
+            {
+              "x": 7.08,
+              "z": 7.34
+            },
+            {
+              "x": 4.82,
+              "z": 7.34
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#D5DEE2",
+          "id": "bathroom",
+          "name": "Bathroom",
+          "polygon": [
+            {
+              "x": 0,
+              "z": 5.05
+            },
+            {
+              "x": 1.95,
+              "z": 5.05
+            },
+            {
+              "x": 1.95,
+              "z": 7.34
+            },
+            {
+              "x": 0,
+              "z": 7.34
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "measured",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#E0DAD2",
+          "id": "foyer",
+          "name": "Foyer",
+          "polygon": [
+            {
+              "x": 2.45,
+              "z": 4.34
+            },
+            {
+              "x": 3.07,
+              "z": 4.34
+            },
+            {
+              "x": 3.07,
+              "z": 6.06
+            },
+            {
+              "x": 4.82,
+              "z": 6.06
+            },
+            {
+              "x": 4.82,
+              "z": 7.34
+            },
+            {
+              "x": 1.95,
+              "z": 7.34
+            },
+            {
+              "x": 1.95,
+              "z": 6.16
+            },
+            {
+              "x": 2.45,
+              "z": 6.16
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#CFC8BC",
+          "id": "bed-closet",
+          "name": "Bedroom Closet",
+          "polygon": [
+            {
+              "x": 0,
+              "z": 4.34
+            },
+            {
+              "x": 2.45,
+              "z": 4.34
+            },
+            {
+              "x": 2.45,
+              "z": 5.05
+            },
+            {
+              "x": 0,
+              "z": 5.05
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#CFC8BC",
+          "id": "hall-closet",
+          "name": "Hall Closet",
+          "polygon": [
+            {
+              "x": 1.95,
+              "z": 5.05
+            },
+            {
+              "x": 2.45,
+              "z": 5.05
+            },
+            {
+              "x": 2.45,
+              "z": 6.16
+            },
+            {
+              "x": 1.95,
+              "z": 6.16
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#CFC8BC",
+          "id": "foyer-closet",
+          "name": "Foyer Closet",
+          "polygon": [
+            {
+              "x": 3.07,
+              "z": 5.18
+            },
+            {
+              "x": 3.93,
+              "z": 5.18
+            },
+            {
+              "x": 3.93,
+              "z": 6.06
+            },
+            {
+              "x": 3.07,
+              "z": 6.06
+            }
+          ]
+        }
+      ],
+      "title": "2775 Market Street #306",
+      "version": 1,
+      "walls": [
+        {
+          "a": {
+            "x": 0,
+            "z": 0
+          },
+          "b": {
+            "x": 3.07,
+            "z": 0
+          },
+          "color": "#2B2B2B",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-top-bed",
+          "openings": [
+            {
+              "bottom": 0.9,
+              "height": 1.4,
+              "kind": "window",
+              "offset": 0.75,
+              "width": 1.6
+            }
+          ],
+          "thickness": 0.2
+        },
+        {
+          "a": {
+            "x": 3.07,
+            "z": 0
+          },
+          "b": {
+            "x": 7.08,
+            "z": 0
+          },
+          "color": "#2B2B2B",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-top-liv",
+          "openings": [
+            {
+              "bottom": 0.9,
+              "height": 1.4,
+              "kind": "window",
+              "offset": 0.35,
+              "width": 1.7
+            },
+            {
+              "bottom": 0.9,
+              "height": 1.4,
+              "kind": "window",
+              "offset": 2.25,
+              "width": 1.5
+            }
+          ],
+          "thickness": 0.2
+        },
+        {
+          "a": {
+            "x": 7.08,
+            "z": 0
+          },
+          "b": {
+            "x": 7.08,
+            "z": 7.34
+          },
+          "color": "#2B2B2B",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-right",
+          "openings": [],
+          "thickness": 0.2
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 7.34
+          },
+          "b": {
+            "x": 4.82,
+            "z": 7.34
+          },
+          "color": "#2B2B2B",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-bottom-west",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 3.9,
+              "width": 0.85
+            }
+          ],
+          "thickness": 0.2
+        },
+        {
+          "a": {
+            "x": 4.82,
+            "z": 7.34
+          },
+          "b": {
+            "x": 7.08,
+            "z": 7.34
+          },
+          "color": "#2B2B2B",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-bottom-east",
+          "openings": [],
+          "thickness": 0.2
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 0
+          },
+          "b": {
+            "x": 0,
+            "z": 4.34
+          },
+          "color": "#2B2B2B",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-left-bed",
+          "openings": [],
+          "thickness": 0.2
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 4.34
+          },
+          "b": {
+            "x": 0,
+            "z": 5.05
+          },
+          "color": "#2B2B2B",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-left-closet",
+          "openings": [],
+          "thickness": 0.2
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 5.05
+          },
+          "b": {
+            "x": 0,
+            "z": 7.34
+          },
+          "color": "#2B2B2B",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-left-bath",
+          "openings": [],
+          "thickness": 0.2
+        },
+        {
+          "a": {
+            "x": 3.07,
+            "z": 0
+          },
+          "b": {
+            "x": 3.07,
+            "z": 4.34
+          },
+          "color": "#4A4A4A",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-divider-top",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 3.07,
+            "z": 4.34
+          },
+          "b": {
+            "x": 3.07,
+            "z": 5.18
+          },
+          "color": "#4A4A4A",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-divider-hall",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 3.07,
+            "z": 5.18
+          },
+          "b": {
+            "x": 3.07,
+            "z": 6.06
+          },
+          "color": "#4A4A4A",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-fcloset-west",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 4.34
+          },
+          "b": {
+            "x": 2.45,
+            "z": 4.34
+          },
+          "color": "#4A4A4A",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-bed-south-closet",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 0.5,
+              "width": 1.5
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 2.45,
+            "z": 4.34
+          },
+          "b": {
+            "x": 3.07,
+            "z": 4.34
+          },
+          "color": "#4A4A4A",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-bed-door",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 0.04,
+              "width": 0.55
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 5.05
+          },
+          "b": {
+            "x": 2.45,
+            "z": 5.05
+          },
+          "color": "#4A4A4A",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-closet-south",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 2.45,
+            "z": 4.34
+          },
+          "b": {
+            "x": 2.45,
+            "z": 6.16
+          },
+          "color": "#4A4A4A",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-hall-east",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 1.05,
+              "width": 0.65
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 1.95,
+            "z": 5.05
+          },
+          "b": {
+            "x": 1.95,
+            "z": 6.16
+          },
+          "color": "#4A4A4A",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-bath-east-n",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 1.95,
+            "z": 6.16
+          },
+          "b": {
+            "x": 2.45,
+            "z": 6.16
+          },
+          "color": "#4A4A4A",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-hcloset-south",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 1.95,
+            "z": 6.16
+          },
+          "b": {
+            "x": 1.95,
+            "z": 7.34
+          },
+          "color": "#4A4A4A",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-bath-east-s",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 0.3,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 3.07,
+            "z": 5.18
+          },
+          "b": {
+            "x": 3.93,
+            "z": 5.18
+          },
+          "color": "#4A4A4A",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-fcloset-north",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 3.93,
+            "z": 5.18
+          },
+          "b": {
+            "x": 3.93,
+            "z": 6.06
+          },
+          "color": "#4A4A4A",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-fcloset-east",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 3.07,
+            "z": 6.06
+          },
+          "b": {
+            "x": 3.93,
+            "z": 6.06
+          },
+          "color": "#4A4A4A",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w-fcloset-south",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 0.1,
+              "width": 0.65
+            }
+          ],
+          "thickness": 0.1
+        }
+      ]
+    },
+    "explanation": "Detailed finishes could not be reconstructed. The editable layout is still available."
+  },
+  "via": "fallback",
+  "validation": [],
+  "log": {
+    "agent": "muse",
+    "task": "muse.unitAppearance",
+    "inputHash": "d3f83bcedd7f25e41483bdf0607475718626d50b9b264e583c7110091537812f",
+    "outcome": "fallback",
+    "fallbackReason": "invalid_output",
+    "cited": [],
+    "model": "muse-wonder-1.0",
+    "attempts": 3,
+    "errors": [
+      "Attempt 1: kitchen-east-cabinets: part outside object bounds; kitchen-range-wall-cabinets: part outside object bounds; range-oven: part outside object bounds; toilet: part outside object bounds; bedroom-wall-heater: part outside object bounds",
+      "Attempt 2: toilet: part outside object bounds",
+      "Attempt 3: Observed fixtures obstruct doorway w-bed-south-closet near (1.25, 4.34). Keep the opening and approach clear"
+    ],
+    "latencyMs": 214171,
+    "usage": {
+      "inputTokens": 59089,
+      "outputTokens": 45541,
+      "cacheReadTokens": 81640,
+      "cacheWriteTokens": 0
+    },
+    "costUsd": 1.163504,
+    "createdAt": 1794552780974
+  }
+}

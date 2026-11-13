@@ -6,8 +6,6 @@ import {
   CalendarDays,
   Car,
   Check,
-  ChevronLeft,
-  ChevronRight,
   EyeOff,
   Flag,
   Fuel,
@@ -29,7 +27,7 @@ import {
 import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { useChatDock } from "@/app/chat-dock";
 import { useM, useQ } from "@/app/viewer";
-import { PlayGlyph, VideoPlayer } from "@/features/posts/VideoPlayer";
+import { PlayGlyph } from "@/features/posts/VideoPlayer";
 import { FacebookLogo } from "@/icons";
 import { cn, price } from "@/lib/format";
 import {
@@ -56,6 +54,7 @@ import { LISTING_REPORT_REASONS } from "../../../convex/lib/reports";
 import { areaMap } from "../maps/lookup";
 import { ListingGrid } from "./grid";
 import { BookmarkFill, BookmarkOutline, MessengerGradient, ShareArrow } from "./icons";
+import { ListingGallery } from "./ListingGallery";
 import { useNear } from "./location";
 import { MapTile } from "./MapTile";
 import { LocationChip, MainRail, MpShell } from "./rails";
@@ -133,7 +132,13 @@ function ItemContainer({ l }: { l: Detail }) {
   const toast = useToast();
   return (
     <div className="flex h-[calc(100vh-132px)] min-h-[560px] overflow-hidden bg-card">
-      <Gallery photos={l.photos} video={l.video} title={l.title} />
+      <ListingGallery
+        key={l._id}
+        photos={l.photos}
+        video={l.video}
+        title={l.title}
+        rentalMedia={l.rentalMedia}
+      />
       <aside className="flex w-[356px] shrink-0 flex-col">
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-[11px] pb-5">
           <Header l={l} toast={toast.show} />
@@ -147,114 +152,6 @@ function ItemContainer({ l }: { l: Detail }) {
       </aside>
       {toast.node}
     </div>
-  );
-}
-
-/* ───────────── Gallery ───────────── */
-
-function Gallery({
-  photos,
-  video,
-  title,
-}: {
-  photos: string[];
-  video: Detail["video"];
-  title: string;
-}) {
-  const [i, setI] = useState(0);
-  // The listing video (if any) leads the gallery, then the photos.
-  const slides = [
-    ...(video ? [{ video, thumb: video.poster ?? "" }] : []),
-    ...photos.map((p) => ({ video: null, thumb: p })),
-  ];
-  const n = slides.length;
-  const go = (d: number) => setI((x) => (x + d + n) % n);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement)?.closest("input,textarea,[contenteditable]")) return;
-      if (e.key === "ArrowLeft") setI((x) => (x - 1 + n) % n);
-      if (e.key === "ArrowRight") setI((x) => (x + 1) % n);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [n]);
-  const slide = slides[i];
-  const src = slide && !slide.video ? slide.thumb : undefined;
-  return (
-    <div ref={ref} className="relative min-w-0 flex-1 overflow-hidden bg-black">
-      {slide?.video && (
-        <VideoPlayer
-          key={slide.video.url}
-          src={slide.video.url}
-          poster={slide.video.poster}
-          label={`${title} video`}
-          className={n > 1 ? "h-[calc(100%-52px)] w-full" : "h-full w-full"}
-        />
-      )}
-      {src && (
-        <>
-          <img
-            src={src}
-            alt=""
-            aria-hidden
-            className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-2xl"
-          />
-          <img src={src} alt={title} className="relative h-full w-full object-contain" />
-        </>
-      )}
-      {n > 1 && (
-        <>
-          <GalleryArrow side="left" onClick={() => go(-1)} />
-          <GalleryArrow side="right" onClick={() => go(1)} />
-          <div className="absolute inset-x-0 bottom-0 flex h-[52px] items-start justify-center gap-3">
-            {slides.map((p, k) => (
-              <button
-                key={p.thumb + String(k)}
-                type="button"
-                aria-label={p.video ? "View video" : `View photo ${k + 1 - (video ? 1 : 0)}`}
-                aria-current={k === i}
-                onClick={() => setI(k)}
-                className="relative h-9 w-9 overflow-hidden rounded-[6px] bg-[#3a3b3c]"
-              >
-                {p.thumb && <img src={p.thumb} alt="" className="h-full w-full object-cover" />}
-                {p.video && (
-                  <span className="absolute inset-0 flex items-center justify-center text-white">
-                    <PlayGlyph size={14} />
-                  </span>
-                )}
-                <span
-                  className={cn(
-                    "absolute inset-0 rounded-[6px]",
-                    k === i ? "ring-2 ring-white ring-inset" : "bg-black/40 hover:bg-black/20",
-                  )}
-                />
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-function GalleryArrow({ side, onClick }: { side: "left" | "right"; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      aria-label={side === "left" ? "View previous image" : "View next image"}
-      onClick={onClick}
-      className={cn(
-        "absolute top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-[#E2E5E9] text-[#080809] hover:bg-[#d8dadf]",
-        side === "left" ? "left-2.5" : "right-2.5",
-      )}
-    >
-      {side === "left" ? (
-        <ChevronLeft size={26} strokeWidth={2.25} />
-      ) : (
-        <ChevronRight size={26} strokeWidth={2.25} />
-      )}
-    </button>
   );
 }
 

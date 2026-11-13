@@ -861,3 +861,7 @@ Game key art is original artwork rendered by `scripts/game-art`. These covers co
 - `games/solitaire-grove.webp` (+ `-thumb`, `-icon`): ["Valley Forge cabin"](https://commons.wikimedia.org/wiki/File:Valley_Forge_cabin.jpg) by Rdsmith4, [CC BY-SA 2.5](https://creativecommons.org/licenses/by-sa/2.5)
 - `games/tower-legends.webp` (+ `-thumb`, `-icon`): ["Corfe Castle sunset - geograph.org.uk - 4735444"](https://commons.wikimedia.org/wiki/File:Corfe_Castle_sunset_-_geograph.org.uk_-_4735444.jpg) by Ian Andrews, [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0)
 - `games/word-garden.webp` (+ `-thumb`, `-icon`): ["Asteraceae meadow (202558757)"](https://commons.wikimedia.org/wiki/File:Asteraceae_meadow_(202558757).jpg) by Terry Lucas, [CC BY 3.0](https://creativecommons.org/licenses/by/3.0)
+
+## Rental reference units
+
+The same-unit photo sets and published floor plans under `rentals/` are attributed separately in `rentals/ATTRIBUTION.md` and the per-unit source catalog `convex/seed/rentalMedia.json`. These references are distinct from the general stock-photo library above.

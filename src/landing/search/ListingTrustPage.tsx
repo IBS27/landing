@@ -2,9 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { Bath, BedDouble, CalendarDays, Flag, MapPin, MessageCircle, Store } from "lucide-react";
 import { useState } from "react";
 import { useM, useQ } from "@/app/viewer";
+import { ListingGallery } from "@/features/marketplace/ListingGallery";
 import { toConversation, toListing, toProfile } from "@/landing/links";
 import { LandingPage } from "@/landing/shell/LandingPage";
-import { cn, price } from "@/lib/format";
+import { price } from "@/lib/format";
 import { Avatar, Button, Card, EmptyState, Skeleton } from "@/ui/primitives";
 import { ReportDialog } from "@/ui/ReportDialog";
 import { api } from "../../../convex/_generated/api";
@@ -19,7 +20,6 @@ import { useChatCheck } from "./useChatCheck";
 export function ListingTrustPage({ listingId }: { listingId: Id<"listings"> }) {
   const data = useQ(api.trust.forListing, { listingId });
   const report = useM(api.reports.create);
-  const [photo, setPhoto] = useState(0);
   const [reporting, setReporting] = useState(false);
 
   // Check the viewer's chat with the lister when it's new or has new messages.
@@ -83,31 +83,15 @@ export function ListingTrustPage({ listingId }: { listingId: Id<"listings"> }) {
         <div className="flex min-w-0 flex-col gap-4">
           <Card className="overflow-hidden">
             {listing.photos.length > 0 && (
-              <>
-                <img
-                  src={listing.photos[photo]}
-                  alt=""
-                  className="aspect-[16/10] w-full bg-wash object-cover"
+              <div className="flex h-[560px]">
+                <ListingGallery
+                  key={listing._id}
+                  title={listing.title}
+                  photos={listing.photos}
+                  rentalMedia={listing.rentalMedia}
+                  video={null}
                 />
-                {listing.photos.length > 1 && (
-                  <div className="flex gap-2 overflow-x-auto p-2">
-                    {listing.photos.map((p, i) => (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => setPhoto(i)}
-                        aria-label={`Photo ${i + 1}`}
-                        className={cn(
-                          "h-14 w-20 shrink-0 overflow-hidden rounded-md ring-2",
-                          i === photo ? "ring-fb" : "ring-transparent hover:ring-divider",
-                        )}
-                      >
-                        <img src={p} alt="" className="h-full w-full object-cover" />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </>
+              </div>
             )}
             <div className="p-4">
               <div className="flex flex-wrap items-baseline gap-2">

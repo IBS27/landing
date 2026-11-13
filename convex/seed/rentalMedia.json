@@ -1,0 +1,3044 @@
+[
+  {
+    "slug": "1454-south-van-ness-avenue-1-1",
+    "address": "1454 South Van Ness Avenue #1",
+    "point": {
+      "lat": 37.7498884,
+      "lng": -122.416344
+    },
+    "bedrooms": 1,
+    "bathrooms": 1.0,
+    "sqft": 427,
+    "rooms": ["BEDROOM", "KITCHEN/LIVING/DINING"],
+    "media": {
+      "sourceUrl": "https://real.vision/1454-south-van-ness-avenue-1-1",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/1454-south-van-ness-avenue-1-1/01.jpg",
+          "sourceUrl": "https://photos.real.vision/Y2YgePAjoLK.jpg?v=-1780594492&size=1800x1200",
+          "label": "Living/Dining"
+        },
+        {
+          "url": "/seed/rentals/1454-south-van-ness-avenue-1-1/02.jpg",
+          "sourceUrl": "https://photos.real.vision/cw7hvrCJ3WP.jpg?v=-1780594492&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/1454-south-van-ness-avenue-1-1/03.jpg",
+          "sourceUrl": "https://photos.real.vision/NWHjkpuLj6H.jpg?v=-1598008668&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/1454-south-van-ness-avenue-1-1/04.jpg",
+          "sourceUrl": "https://photos.real.vision/2str3eBon4c.jpg?v=-1598008668&size=1800x1200",
+          "label": "Walk-in Closet"
+        },
+        {
+          "url": "/seed/rentals/1454-south-van-ness-avenue-1-1/05.jpg",
+          "sourceUrl": "https://photos.real.vision/B6pibC4jxi3.jpg?v=-1780594492&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/1454-south-van-ness-avenue-1-1/06.jpg",
+          "sourceUrl": "https://photos.real.vision/r4HZQWxZ7sL.jpg?v=-1598008668&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/1454-south-van-ness-avenue-1-1/07.jpg",
+          "sourceUrl": "https://photos.real.vision/1FMNQJ6LJSd.jpg?v=-1780594492&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/1454-south-van-ness-avenue-1-1/08.jpg",
+          "sourceUrl": "https://photos.real.vision/KMRX1xkyWRA.jpg?v=-1780594492&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/1454-south-van-ness-avenue-1-1/09.jpg",
+          "sourceUrl": "https://photos.real.vision/JgZQPUjsAn6.jpg?v=-1772232204&size=1800x1200",
+          "label": "Bathroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/1454-south-van-ness-avenue-1-1/10.jpg",
+          "sourceUrl": "https://photos.real.vision/zdjiHiAUKsW.jpg?v=-987346428&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/1454-south-van-ness-avenue-1-1/11.jpg",
+          "sourceUrl": "https://photos.real.vision/7UQMR5nPy64.jpg?v=-42367580&size=1800x1200",
+          "label": "Bedroom \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/1454-south-van-ness-avenue-1-1/12.jpg",
+          "sourceUrl": "https://photos.real.vision/9Cv7BGVyEg.jpg?v=-1780594492&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 4"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/1454-south-van-ness-avenue-1-1/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/nfduvLHVDMH_imperial.jpg?v=-1901959450&width=3300&download=true&filename=1454-south-van-ness-avenue-1-1_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "525-leavenworth-street-18",
+    "address": "525 Leavenworth Street #18",
+    "point": {
+      "lat": 37.7858937,
+      "lng": -122.4150239
+    },
+    "bedrooms": 0,
+    "bathrooms": 1.0,
+    "sqft": 458,
+    "rooms": ["STORAGE", "FOYER", "LIVING", "KITCHEN/DINING"],
+    "media": {
+      "sourceUrl": "https://real.vision/525-leavenworth-street-18",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/525-leavenworth-street-18/01.jpg",
+          "sourceUrl": "https://photos.real.vision/PSPuDqpwXcQ.jpg?v=-1014136275&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/525-leavenworth-street-18/02.jpg",
+          "sourceUrl": "https://photos.real.vision/1Nro6rAoVtX.jpg?v=-1014136275&size=1800x1200",
+          "label": "Kitchen/Dining"
+        },
+        {
+          "url": "/seed/rentals/525-leavenworth-street-18/03.jpg",
+          "sourceUrl": "https://photos.real.vision/xjgfvwJBKVU.jpg?v=-1014136275&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/525-leavenworth-street-18/04.jpg",
+          "sourceUrl": "https://photos.real.vision/BsTdxUBfk2h.jpg?v=-1014136275&size=1800x1200",
+          "label": "Storage"
+        },
+        {
+          "url": "/seed/rentals/525-leavenworth-street-18/05.jpg",
+          "sourceUrl": "https://photos.real.vision/SLD8ci59VCF.jpg?v=-1014136275&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/525-leavenworth-street-18/06.jpg",
+          "sourceUrl": "https://photos.real.vision/FdqrKfsXBBN.jpg?v=-1014136275&size=1800x1200",
+          "label": "Kitchen/Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/525-leavenworth-street-18/07.jpg",
+          "sourceUrl": "https://photos.real.vision/Eau7BGVyEg.jpg?v=-1014136275&size=1800x1200",
+          "label": "Living \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/525-leavenworth-street-18/08.jpg",
+          "sourceUrl": "https://photos.real.vision/5rreMdkZkpf.jpg?v=-1014136275&size=1800x1200",
+          "label": "Kitchen/Dining \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/525-leavenworth-street-18/09.jpg",
+          "sourceUrl": "https://photos.real.vision/uKJWfctX5KL.jpg?v=-1014136275&size=1800x1200",
+          "label": "Living \u00b7 view 4"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/525-leavenworth-street-18/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/RGiQuJ3x2zP_imperial.jpg?v=2002257105&width=3300&download=true&filename=525-leavenworth-street-18_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "1670-page-street-a",
+    "address": "1670 Page Street #A",
+    "point": {
+      "lat": 37.7709835,
+      "lng": -122.4482908
+    },
+    "bedrooms": 2,
+    "bathrooms": 1.0,
+    "sqft": 780,
+    "rooms": ["LIVING", "KITCHEN", "DINING", "PRIMARY BEDROOM", "BEDROOM"],
+    "media": {
+      "sourceUrl": "https://real.vision/1670-page-street-a",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/1670-page-street-a/01.jpg",
+          "sourceUrl": "https://photos.real.vision/Zu2o85GXMuZ.jpg?v=-1427233530&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/1670-page-street-a/02.jpg",
+          "sourceUrl": "https://photos.real.vision/k8fDVixaYeP.jpg?v=-1427233530&size=1800x1200",
+          "label": "Dining/Kitchen"
+        },
+        {
+          "url": "/seed/rentals/1670-page-street-a/03.jpg",
+          "sourceUrl": "https://photos.real.vision/KejkYMpUm1a.jpg?v=-1427233530&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/1670-page-street-a/04.jpg",
+          "sourceUrl": "https://photos.real.vision/BsT8SLxyjS2.jpg?v=-1427233530&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/1670-page-street-a/05.jpg",
+          "sourceUrl": "https://photos.real.vision/nvvahLdBTMV.jpg?v=-1427233530&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/1670-page-street-a/06.jpg",
+          "sourceUrl": "https://photos.real.vision/amKwSscxQRJ.jpg?v=-1427233530&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/1670-page-street-a/07.jpg",
+          "sourceUrl": "https://photos.real.vision/H9rWNoepH9g.jpg?v=-1427233530&size=1800x1200",
+          "label": "Dining/Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/1670-page-street-a/08.jpg",
+          "sourceUrl": "https://photos.real.vision/kaQX1xkyWRA.jpg?v=-1427233530&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/1670-page-street-a/09.jpg",
+          "sourceUrl": "https://photos.real.vision/Z2HRf6SDu3G.jpg?v=-1427233530&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/1670-page-street-a/10.jpg",
+          "sourceUrl": "https://photos.real.vision/8S2Vhefu36P.jpg?v=-1427233530&size=1800x1200",
+          "label": "Living \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/1670-page-street-a/11.jpg",
+          "sourceUrl": "https://photos.real.vision/LtfEK29oTCe.jpg?v=-1427233530&size=1800x1200",
+          "label": "Dining/Kitchen \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/1670-page-street-a/12.jpg",
+          "sourceUrl": "https://photos.real.vision/Wvar4x4ANwU.jpg?v=-1427233530&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/1670-page-street-a/13.jpg",
+          "sourceUrl": "https://photos.real.vision/c8pxyV7kudB.jpg?v=-1427233530&size=1800x1200",
+          "label": "Bedroom \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/1670-page-street-a/14.jpg",
+          "sourceUrl": "https://photos.real.vision/KEfT6HqFpdD.jpg?v=-1427233530&size=1800x1200",
+          "label": "Bedroom \u00b7 view 4"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/1670-page-street-a/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/MWarDtzwme5_imperial.jpg?v=-908574364&width=3300&download=true&filename=1670-page-street-a_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "666-ofarrell-street-27",
+    "address": "666 O'Farrell Street #27",
+    "point": {
+      "lat": 37.7856821,
+      "lng": -122.4158919
+    },
+    "bedrooms": 2,
+    "bathrooms": 1.0,
+    "sqft": 600,
+    "rooms": ["FOYER", "LIVING/DINING", "KITCHEN", "PRIMARY BEDROOM", "BEDROOM"],
+    "media": {
+      "sourceUrl": "https://real.vision/666-ofarrell-street-27",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/666-ofarrell-street-27/01.jpg",
+          "sourceUrl": "https://photos.real.vision/vQRMR5nPy64.jpg?v=-1916615175&size=1800x1200",
+          "label": "Living/Dining"
+        },
+        {
+          "url": "/seed/rentals/666-ofarrell-street-27/02.jpg",
+          "sourceUrl": "https://photos.real.vision/z1qegRjhFCM.jpg?v=-1916615175&size=1800x1200",
+          "label": "Foyer"
+        },
+        {
+          "url": "/seed/rentals/666-ofarrell-street-27/03.jpg",
+          "sourceUrl": "https://photos.real.vision/oaUHhdJuuZC.jpg?v=-1916615175&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/666-ofarrell-street-27/04.jpg",
+          "sourceUrl": "https://photos.real.vision/MU31L4ECswa.jpg?v=-1916615175&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/666-ofarrell-street-27/05.jpg",
+          "sourceUrl": "https://photos.real.vision/aq3B4FYwksb.jpg?v=-1916615175&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/666-ofarrell-street-27/06.jpg",
+          "sourceUrl": "https://photos.real.vision/pK1Vf1vLFqG.jpg?v=-1916615175&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/666-ofarrell-street-27/07.jpg",
+          "sourceUrl": "https://photos.real.vision/AP1K9MmbtDa.jpg?v=-194473366&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/666-ofarrell-street-27/08.jpg",
+          "sourceUrl": "https://photos.real.vision/LH5goTvtHHi.jpg?v=-1916615175&size=1800x1200",
+          "label": "Foyer \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/666-ofarrell-street-27/09.jpg",
+          "sourceUrl": "https://photos.real.vision/UDgEQMhQE5P.jpg?v=-1916615175&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/666-ofarrell-street-27/10.jpg",
+          "sourceUrl": "https://photos.real.vision/5LenLVAeRSe.jpg?v=-1916615175&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/666-ofarrell-street-27/11.jpg",
+          "sourceUrl": "https://photos.real.vision/7g3ayn5rFLB.jpg?v=-316241710&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/666-ofarrell-street-27/12.jpg",
+          "sourceUrl": "https://photos.real.vision/P42oX1ZJatP.jpg?v=-1916615175&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/666-ofarrell-street-27/13.jpg",
+          "sourceUrl": "https://photos.real.vision/XV1huBpUfr5.jpg?v=-1916615175&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/666-ofarrell-street-27/14.jpg",
+          "sourceUrl": "https://photos.real.vision/NsXM164MMb9.jpg?v=-1916615175&size=1800x1200",
+          "label": "Bedroom \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/666-ofarrell-street-27/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/zyQ5LGCdFu8_imperial.jpg?v=-1251301617&width=3300&download=true&filename=666-ofarrell-street-27_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "2775-market-street-306",
+    "address": "2775 Market Street #306",
+    "point": {
+      "lat": 37.7613342,
+      "lng": -122.4392919
+    },
+    "bedrooms": 1,
+    "bathrooms": 1.0,
+    "sqft": 633,
+    "rooms": ["KITCHEN", "LIVING/DINING", "BEDROOM", "FOYER"],
+    "media": {
+      "sourceUrl": "https://real.vision/2775-market-street-306",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/2775-market-street-306/01.jpg",
+          "sourceUrl": "https://photos.real.vision/SAkhbmXCyUG.jpg?v=379140255&size=1800x1200",
+          "label": "Living/Dining"
+        },
+        {
+          "url": "/seed/rentals/2775-market-street-306/02.jpg",
+          "sourceUrl": "https://photos.real.vision/ajgfvwJBKVU.jpg?v=-1933891228&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/2775-market-street-306/03.jpg",
+          "sourceUrl": "https://photos.real.vision/kCV7P7F67XE.jpg?v=847739821&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/2775-market-street-306/04.jpg",
+          "sourceUrl": "https://photos.real.vision/jdvQRa6HHBU.jpg?v=-2002730108&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/2775-market-street-306/05.jpg",
+          "sourceUrl": "https://photos.real.vision/PQbXYUWWhQB.jpg?v=847739821&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/2775-market-street-306/06.jpg",
+          "sourceUrl": "https://photos.real.vision/eU1Fbei43sY.jpg?v=-2002730108&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/2775-market-street-306/07.jpg",
+          "sourceUrl": "https://photos.real.vision/ohDxdpK9tWQ.jpg?v=847739821&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/2775-market-street-306/08.jpg",
+          "sourceUrl": "https://photos.real.vision/VaC5nNksAK8.jpg?v=847739821&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/2775-market-street-306/09.jpg",
+          "sourceUrl": "https://photos.real.vision/uiXxYr4wuC6.jpg?v=847739821&size=1800x1200",
+          "label": "Bedroom \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/2775-market-street-306/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/CHEmLmSCmMb_imperial.jpg?v=541737584&width=3300&download=true&filename=2775-market-street-306_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "869-30th-avenue",
+    "address": "869 30th Avenue",
+    "point": {
+      "lat": 37.7729559,
+      "lng": -122.4897783
+    },
+    "bedrooms": 3,
+    "bathrooms": 1.5,
+    "sqft": 1493,
+    "rooms": ["LIVING", "BEDROOM", "PRIMARY BEDROOM", "BEDROOM", "DINING", "KITCHEN", "FOYER"],
+    "media": {
+      "sourceUrl": "https://real.vision/869-30th-avenue",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/869-30th-avenue/01.jpg",
+          "sourceUrl": "https://photos.real.vision/gfZkKy9YpiX.jpg?v=-1139690487&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/02.jpg",
+          "sourceUrl": "https://photos.real.vision/kfDy6KzL2wV.jpg?v=-1139690487&size=1800x1200",
+          "label": "Entry"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/03.jpg",
+          "sourceUrl": "https://photos.real.vision/aokhbmXCyUG.jpg?v=-1139690487&size=1800x1200",
+          "label": "Dining"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/04.jpg",
+          "sourceUrl": "https://photos.real.vision/415eiBQDRTH.jpg?v=-1139690487&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/05.jpg",
+          "sourceUrl": "https://photos.real.vision/D52Fbei43sY.jpg?v=-1139690487&size=1800x1200",
+          "label": "Powder"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/06.jpg",
+          "sourceUrl": "https://photos.real.vision/ABBFqXiVKDG.jpg?v=-1139690487&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/07.jpg",
+          "sourceUrl": "https://photos.real.vision/PUS7AKreZyW.jpg?v=-1139690487&size=1800x1200",
+          "label": "Walk-in Closet"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/08.jpg",
+          "sourceUrl": "https://photos.real.vision/SDxnK71rNF5.jpg?v=-1139690487&size=1800x1200",
+          "label": "Semi-Ensuite"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/09.jpg",
+          "sourceUrl": "https://photos.real.vision/XH8kJqF4F3N.jpg?v=-1139690487&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/10.jpg",
+          "sourceUrl": "https://photos.real.vision/DLZgSutR9FT.jpg?v=-1139690487&size=1800x1200",
+          "label": "Bedroom 2"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/11.jpg",
+          "sourceUrl": "https://photos.real.vision/2y1ms7jMBDd.jpg?v=-1341030967&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/12.jpg",
+          "sourceUrl": "https://photos.real.vision/UUdma68hs7g.jpg?v=-1341030967&size=1800x1200",
+          "label": "Entry \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/13.jpg",
+          "sourceUrl": "https://photos.real.vision/yaYnfbZTVB6.jpg?v=-1139690487&size=1800x1200",
+          "label": "Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/14.jpg",
+          "sourceUrl": "https://photos.real.vision/7YBwrc38yxd.jpg?v=-1139690487&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/15.jpg",
+          "sourceUrl": "https://photos.real.vision/1V6EJbJH2nb.jpg?v=-1139690487&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/16.jpg",
+          "sourceUrl": "https://photos.real.vision/QyRAK3uoqbF.jpg?v=-1139690487&size=1800x1200",
+          "label": "Semi-Ensuite \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/17.jpg",
+          "sourceUrl": "https://photos.real.vision/BKTwaK8fozK.jpg?v=-1139690487&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/869-30th-avenue/18.jpg",
+          "sourceUrl": "https://photos.real.vision/tjfwmHgCUER.jpg?v=-1341030967&size=1800x1200",
+          "label": "Bedroom 2 \u00b7 view 2"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/869-30th-avenue/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/WfnXo3R5zwb_imperial.jpg?v=-1959167571&width=3300&download=true&filename=869-30th-avenue_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "66-cleary-court-1104",
+    "address": "66 Cleary Court #1104",
+    "point": {
+      "lat": 37.7841279,
+      "lng": -122.4273921
+    },
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "sqft": 1230,
+    "rooms": [
+      "FOYER",
+      "KITCHEN",
+      "LIVING/DINING",
+      "BEDROOM",
+      "BEDROOM",
+      "PRIMARY BEDROOM",
+      "STORAGE"
+    ],
+    "media": {
+      "sourceUrl": "https://real.vision/66-cleary-court-1104",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/01.jpg",
+          "sourceUrl": "https://photos.real.vision/j7heWu8cYHD.jpg?v=842209421&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/02.jpg",
+          "sourceUrl": "https://photos.real.vision/JzWqaiRjR82.jpg?v=829399805&size=1800x1200",
+          "label": "Foyer"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/03.jpg",
+          "sourceUrl": "https://photos.real.vision/vPtUf1vLFqG.jpg?v=829399805&size=1800x1200",
+          "label": "Dining"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/04.jpg",
+          "sourceUrl": "https://photos.real.vision/wpreMdkZkpf.jpg?v=884891117&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/05.jpg",
+          "sourceUrl": "https://photos.real.vision/Fa42mmie8WD.jpg?v=829399805&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/06.jpg",
+          "sourceUrl": "https://photos.real.vision/nKsWcgxkKh4.jpg?v=829399805&size=1800x1200",
+          "label": "Walk-in Closet"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/07.jpg",
+          "sourceUrl": "https://photos.real.vision/NJVA24EjzHS.jpg?v=829399805&size=1800x1200",
+          "label": "Ensuite"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/08.jpg",
+          "sourceUrl": "https://photos.real.vision/9CHdcLo9YDE.jpg?v=842209421&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/09.jpg",
+          "sourceUrl": "https://photos.real.vision/H1KNaGFCELc.jpg?v=829399805&size=1800x1200",
+          "label": "Bedroom 2"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/10.jpg",
+          "sourceUrl": "https://photos.real.vision/k5fcd4NUyLi.jpg?v=2140322373&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/11.jpg",
+          "sourceUrl": "https://photos.real.vision/Yi2o85GXMuZ.jpg?v=829399805&size=1800x1200",
+          "label": "Storage"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/12.jpg",
+          "sourceUrl": "https://photos.real.vision/Zf8B4FYwksb.jpg?v=842209421&size=1800x1200",
+          "label": "Walkway"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/13.jpg",
+          "sourceUrl": "https://photos.real.vision/KRPuDqpwXcQ.jpg?v=829399805&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/14.jpg",
+          "sourceUrl": "https://photos.real.vision/hxU5VJkt1GZ.jpg?v=842209421&size=1800x1200",
+          "label": "Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/15.jpg",
+          "sourceUrl": "https://photos.real.vision/a8Z1ZevGNfh.jpg?v=875574669&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/16.jpg",
+          "sourceUrl": "https://photos.real.vision/Jm9g5yxJVg5.jpg?v=842209421&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/17.jpg",
+          "sourceUrl": "https://photos.real.vision/NfVtv6Z8riK.jpg?v=829399805&size=1800x1200",
+          "label": "Ensuite \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/66-cleary-court-1104/18.jpg",
+          "sourceUrl": "https://photos.real.vision/oFuCJxBsJ9Y.jpg?v=829399805&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/66-cleary-court-1104/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/X5usB68XFWh_imperial.jpg?v=-1959905701&width=3300&download=true&filename=66-cleary-court-1104_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "80-blake-street-a",
+    "address": "80 Blake Street #A",
+    "point": {
+      "lat": 37.7824459,
+      "lng": -122.451115
+    },
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "sqft": 1675,
+    "rooms": ["LIVING/DINING", "KITCHEN", "FOYER", "PRIMARY BEDROOM", "BEDROOM", "BEDROOM"],
+    "media": {
+      "sourceUrl": "https://real.vision/80-blake-street-a",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/80-blake-street-a/01.jpg",
+          "sourceUrl": "https://photos.real.vision/tPEixt7WkyG.jpg?v=-732705088&size=1800x1200",
+          "label": "Living/Dining"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/02.jpg",
+          "sourceUrl": "https://photos.real.vision/TKZnfbZTVB6.jpg?v=-732705088&size=1800x1200",
+          "label": "Entry"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/03.jpg",
+          "sourceUrl": "https://photos.real.vision/LzvahLdBTMV.jpg?v=-732705088&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/04.jpg",
+          "sourceUrl": "https://photos.real.vision/iSK3uJTKTL4.jpg?v=-732705088&size=1800x1200",
+          "label": "Bar"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/05.jpg",
+          "sourceUrl": "https://photos.real.vision/ZmM4CPsWX3Q.jpg?v=-732705088&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/06.jpg",
+          "sourceUrl": "https://photos.real.vision/qo7kJqF4F3N.jpg?v=-732705088&size=1800x1200",
+          "label": "Walk-in Closet"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/07.jpg",
+          "sourceUrl": "https://photos.real.vision/KhcnLVAeRSe.jpg?v=-732705088&size=1800x1200",
+          "label": "Closet"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/08.jpg",
+          "sourceUrl": "https://photos.real.vision/WPG9mELmUka.jpg?v=-732705088&size=1800x1200",
+          "label": "Ensuite"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/09.jpg",
+          "sourceUrl": "https://photos.real.vision/v9fETzCocZE.jpg?v=-732705088&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/10.jpg",
+          "sourceUrl": "https://photos.real.vision/rs6goTvtHHi.jpg?v=-732705088&size=1800x1200",
+          "label": "Closet 2"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/11.jpg",
+          "sourceUrl": "https://photos.real.vision/uD9cZEYT6X6.jpg?v=-732705088&size=1800x1200",
+          "label": "Bedroom 2"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/12.jpg",
+          "sourceUrl": "https://photos.real.vision/3rYioGHnycf.jpg?v=-732705088&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/13.jpg",
+          "sourceUrl": "https://photos.real.vision/Wd9g5yxJVg5.jpg?v=-732705088&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/14.jpg",
+          "sourceUrl": "https://photos.real.vision/CbARvrgbXmB.jpg?v=-732705088&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/15.jpg",
+          "sourceUrl": "https://photos.real.vision/vK32SnUGcE.jpg?v=-732705088&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/16.jpg",
+          "sourceUrl": "https://photos.real.vision/zC3BLta2YeV.jpg?v=-732705088&size=1800x1200",
+          "label": "Ensuite \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/17.jpg",
+          "sourceUrl": "https://photos.real.vision/EK2nzZPeLx4.jpg?v=-732705088&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/80-blake-street-a/18.jpg",
+          "sourceUrl": "https://photos.real.vision/fGzcYSGqqBS.jpg?v=-732705088&size=1800x1200",
+          "label": "Bedroom 2 \u00b7 view 2"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/80-blake-street-a/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/etUAfKutjpD_imperial.jpg?v=1538570337&width=3300&download=true&filename=80-blake-street-a_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "1540-newhall-street-lower-1",
+    "address": "1540 Newhall Street #Lower",
+    "point": {
+      "lat": 37.7347105,
+      "lng": -122.3933441
+    },
+    "bedrooms": 3,
+    "bathrooms": 1.5,
+    "sqft": 2110,
+    "rooms": [
+      "BEDROOM",
+      "FOYER",
+      "KITCHEN",
+      "DINING",
+      "PRIMARY BEDROOM",
+      "BEDROOM",
+      "LIVING",
+      "PLAYROOM",
+      "LAUNDRY"
+    ],
+    "media": {
+      "sourceUrl": "https://real.vision/1540-newhall-street-lower-1",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/01.jpg",
+          "sourceUrl": "https://photos.real.vision/7g7t8RLh6uC.jpg?v=-172633457&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/02.jpg",
+          "sourceUrl": "https://photos.real.vision/gexnSRRkVeM.jpg?v=-182333393&size=1800x1200",
+          "label": "Foyer"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/03.jpg",
+          "sourceUrl": "https://photos.real.vision/GBCssRMaeWc.jpg?v=138262528&size=1800x1200",
+          "label": "Playroom"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/04.jpg",
+          "sourceUrl": "https://photos.real.vision/pD3anFanN4b.jpg?v=-172633457&size=1800x1200",
+          "label": "Dining"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/05.jpg",
+          "sourceUrl": "https://photos.real.vision/H7D8ci59VCF.jpg?v=138262528&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/06.jpg",
+          "sourceUrl": "https://photos.real.vision/6mqaj4ZDBTW.jpg?v=-172633457&size=1800x1200",
+          "label": "Powder"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/07.jpg",
+          "sourceUrl": "https://photos.real.vision/9RLE4EFRCyX.jpg?v=138262528&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/08.jpg",
+          "sourceUrl": "https://photos.real.vision/dE3Fos489FJ.jpg?v=-172633457&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/09.jpg",
+          "sourceUrl": "https://photos.real.vision/z6BRXQt3RRK.jpg?v=-172633457&size=1800x1200",
+          "label": "Bedroom 2"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/10.jpg",
+          "sourceUrl": "https://photos.real.vision/REZEQMhQE5P.jpg?v=-182333393&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/11.jpg",
+          "sourceUrl": "https://photos.real.vision/AFuBy6irQMY.jpg?v=-172633457&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/12.jpg",
+          "sourceUrl": "https://photos.real.vision/tmZgSutR9FT.jpg?v=-1807044176&size=1800x1200",
+          "label": "Foyer \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/13.jpg",
+          "sourceUrl": "https://photos.real.vision/c83mk1qutAj.jpg?v=138262528&size=1800x1200",
+          "label": "Playroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/14.jpg",
+          "sourceUrl": "https://photos.real.vision/241jvBGNS4A.jpg?v=-172633457&size=1800x1200",
+          "label": "Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/15.jpg",
+          "sourceUrl": "https://photos.real.vision/mHZvANvoiPj.jpg?v=-172633457&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/16.jpg",
+          "sourceUrl": "https://photos.real.vision/dJVDbuotEu6.jpg?v=-172633457&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/17.jpg",
+          "sourceUrl": "https://photos.real.vision/wbXgePAjoLK.jpg?v=-172633457&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/1540-newhall-street-lower-1/18.jpg",
+          "sourceUrl": "https://photos.real.vision/wirZvu1tWpg.jpg?v=-172633457&size=1800x1200",
+          "label": "Bedroom 2 \u00b7 view 2"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/1540-newhall-street-lower-1/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/FFFkDf7fjrQ_imperial.jpg?v=-809827741&width=3300&download=true&filename=1540-newhall-street-lower-1_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "169-fair-oaks-street-01",
+    "address": "169 Fair Oaks Street #01",
+    "point": {
+      "lat": 37.7540389,
+      "lng": -122.4239478
+    },
+    "bedrooms": 2,
+    "bathrooms": 2.0,
+    "sqft": 740,
+    "rooms": ["FOYER", "KITCHEN", "LIVING", "BEDROOM", "PRIMARY BEDROOM"],
+    "media": {
+      "sourceUrl": "https://real.vision/169-fair-oaks-street-01",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/169-fair-oaks-street-01/01.jpg",
+          "sourceUrl": "https://photos.real.vision/GdvL9mH9793.jpg?v=1936874633&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/169-fair-oaks-street-01/02.jpg",
+          "sourceUrl": "https://photos.real.vision/jQsWcgxkKh4.jpg?v=1936874633&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/169-fair-oaks-street-01/03.jpg",
+          "sourceUrl": "https://photos.real.vision/VeC5nNksAK8.jpg?v=1936874633&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/169-fair-oaks-street-01/04.jpg",
+          "sourceUrl": "https://photos.real.vision/eihTvFg88ti.jpg?v=1936874633&size=1800x1200",
+          "label": "Ensuite"
+        },
+        {
+          "url": "/seed/rentals/169-fair-oaks-street-01/05.jpg",
+          "sourceUrl": "https://photos.real.vision/emHZQWxZ7sL.jpg?v=1936874633&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/169-fair-oaks-street-01/06.jpg",
+          "sourceUrl": "https://photos.real.vision/LUXqqVXRSWM.jpg?v=1936874633&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/169-fair-oaks-street-01/07.jpg",
+          "sourceUrl": "https://photos.real.vision/R7CssRMaeWc.jpg?v=1936874633&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/169-fair-oaks-street-01/08.jpg",
+          "sourceUrl": "https://photos.real.vision/YUDBatEewoF.jpg?v=1936874633&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/169-fair-oaks-street-01/09.jpg",
+          "sourceUrl": "https://photos.real.vision/Zj3NmsYLinQ.jpg?v=1936874633&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/169-fair-oaks-street-01/10.jpg",
+          "sourceUrl": "https://photos.real.vision/1p2YNZM1sMf.jpg?v=1936874633&size=1800x1200",
+          "label": "Ensuite \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/169-fair-oaks-street-01/11.jpg",
+          "sourceUrl": "https://photos.real.vision/zrcw96vK4b3.jpg?v=1936874633&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/169-fair-oaks-street-01/12.jpg",
+          "sourceUrl": "https://photos.real.vision/Bk2ms7jMBDd.jpg?v=1936874633&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/169-fair-oaks-street-01/13.jpg",
+          "sourceUrl": "https://photos.real.vision/3z2o85GXMuZ.jpg?v=1936874633&size=1800x1200",
+          "label": "Bedroom \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/169-fair-oaks-street-01/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/NpN2HWZ65NG_imperial.jpg?v=-2110628245&width=3300&download=true&filename=169-fair-oaks-street-01_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "764-natoma-street",
+    "address": "764 Natoma Street",
+    "point": {
+      "lat": 37.775985,
+      "lng": -122.41329
+    },
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "sqft": 1146,
+    "rooms": ["LIVING/DINING", "KITCHEN", "PRIMARY BEDROOM", "BEDROOM", "BEDROOM"],
+    "media": {
+      "sourceUrl": "https://real.vision/764-natoma-street",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/764-natoma-street/01.jpg",
+          "sourceUrl": "https://photos.real.vision/XHrWNoepH9g.jpg?v=1484579074&size=1800x1200",
+          "label": "Living/Dining"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/02.jpg",
+          "sourceUrl": "https://photos.real.vision/XvfAAPVXbv2.jpg?v=944625475&size=1800x1200",
+          "label": "Foyer"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/03.jpg",
+          "sourceUrl": "https://photos.real.vision/5TEasB2P2vU.jpg?v=944625475&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/04.jpg",
+          "sourceUrl": "https://photos.real.vision/djLNQJ6LJSd.jpg?v=944625475&size=1800x1200",
+          "label": "Corridor"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/05.jpg",
+          "sourceUrl": "https://photos.real.vision/MpZtp1pfTph.jpg?v=1176381682&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/06.jpg",
+          "sourceUrl": "https://photos.real.vision/4NsWcgxkKh4.jpg?v=944625475&size=1800x1200",
+          "label": "Ensuite"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/07.jpg",
+          "sourceUrl": "https://photos.real.vision/UWuMD29YgtB.jpg?v=1176381682&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/08.jpg",
+          "sourceUrl": "https://photos.real.vision/WncnLVAeRSe.jpg?v=944625475&size=1800x1200",
+          "label": "Walk-in Closet"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/09.jpg",
+          "sourceUrl": "https://photos.real.vision/tLy6UUyosd6.jpg?v=944625475&size=1800x1200",
+          "label": "Bedroom 2"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/10.jpg",
+          "sourceUrl": "https://photos.real.vision/7jhTvFg88ti.jpg?v=944625475&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/11.jpg",
+          "sourceUrl": "https://photos.real.vision/RNbrBFawYWZ.jpg?v=944625475&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/12.jpg",
+          "sourceUrl": "https://photos.real.vision/tUG3dgY3KpH.jpg?v=944625475&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/13.jpg",
+          "sourceUrl": "https://photos.real.vision/2WQX1xkyWRA.jpg?v=1176381682&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/14.jpg",
+          "sourceUrl": "https://photos.real.vision/ypaWp8vZKfY.jpg?v=944625475&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/15.jpg",
+          "sourceUrl": "https://photos.real.vision/u73Fos489FJ.jpg?v=944625475&size=1800x1200",
+          "label": "Bedroom 2 \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/16.jpg",
+          "sourceUrl": "https://photos.real.vision/fuy1H2uNvz9.jpg?v=944625475&size=1800x1200",
+          "label": "Bathroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/17.jpg",
+          "sourceUrl": "https://photos.real.vision/8TEasB2P2vU.jpg?v=1176381682&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/764-natoma-street/18.jpg",
+          "sourceUrl": "https://photos.real.vision/QCkiHiAUKsW.jpg?v=944625475&size=1800x1200",
+          "label": "Kitchen \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/764-natoma-street/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/fHEmLmSCmMb_imperial.jpg?v=208657045&width=3300&download=true&filename=764-natoma-street_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "350-24th-avenue-3",
+    "address": "350 24th Avenue #3",
+    "point": {
+      "lat": 37.7829772,
+      "lng": -122.4836299
+    },
+    "bedrooms": 2,
+    "bathrooms": 1.5,
+    "sqft": 1026,
+    "rooms": ["FOYER", "LIVING", "PRIMARY BEDROOM", "BEDROOM", "KITCHEN", "DINING"],
+    "media": {
+      "sourceUrl": "https://real.vision/350-24th-avenue-3",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/01.jpg",
+          "sourceUrl": "https://photos.real.vision/BYkhbmXCyUG.jpg?v=-222077589&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/02.jpg",
+          "sourceUrl": "https://photos.real.vision/vkjkYMpUm1a.jpg?v=-222077589&size=1800x1200",
+          "label": "Foyer"
+        },
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/03.jpg",
+          "sourceUrl": "https://photos.real.vision/HwVtv6Z8riK.jpg?v=-222077589&size=1800x1200",
+          "label": "Kitchen/Dining"
+        },
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/04.jpg",
+          "sourceUrl": "https://photos.real.vision/ooEasB2P2vU.jpg?v=-222077589&size=1800x1200",
+          "label": "Powder"
+        },
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/05.jpg",
+          "sourceUrl": "https://photos.real.vision/yw4z3EtuhSC.jpg?v=-222077589&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/06.jpg",
+          "sourceUrl": "https://photos.real.vision/F7fv6YHfGdA.jpg?v=-222077589&size=1800x1200",
+          "label": "Walk-in Closet"
+        },
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/07.jpg",
+          "sourceUrl": "https://photos.real.vision/CYCgEVy5yqT.jpg?v=-222077589&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/08.jpg",
+          "sourceUrl": "https://photos.real.vision/CXgZT6ckhAc.jpg?v=-222077589&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/09.jpg",
+          "sourceUrl": "https://photos.real.vision/77npHUTMALF.jpg?v=-222077589&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/10.jpg",
+          "sourceUrl": "https://photos.real.vision/2j2nzZPeLx4.jpg?v=-222077589&size=1800x1200",
+          "label": "Foyer \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/11.jpg",
+          "sourceUrl": "https://photos.real.vision/W33o85GXMuZ.jpg?v=-222077589&size=1800x1200",
+          "label": "Kitchen/Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/12.jpg",
+          "sourceUrl": "https://photos.real.vision/UhpXds7gQs.jpg?v=-222077589&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/13.jpg",
+          "sourceUrl": "https://photos.real.vision/e8bErKquUTF.jpg?v=-222077589&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/14.jpg",
+          "sourceUrl": "https://photos.real.vision/xTkwUPzdK8j.jpg?v=-222077589&size=1800x1200",
+          "label": "Living \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/15.jpg",
+          "sourceUrl": "https://photos.real.vision/7ZaWp8vZKfY.jpg?v=-222077589&size=1800x1200",
+          "label": "Kitchen/Dining \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/350-24th-avenue-3/16.jpg",
+          "sourceUrl": "https://photos.real.vision/237ExiNyoM.jpg?v=-222077589&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/350-24th-avenue-3/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/D1W12DeEb1j_imperial.jpg?v=-1401817370&width=3300&download=true&filename=350-24th-avenue-3_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "173-fair-oaks-street-173-02",
+    "address": "173 Fair Oaks Street #173-02",
+    "point": {
+      "lat": 37.7540173,
+      "lng": -122.4240483
+    },
+    "bedrooms": 2,
+    "bathrooms": 2.0,
+    "sqft": 749,
+    "rooms": ["FOYER", "PRIMARY BEDROOM", "BEDROOM", "LIVING/DINING/ KITCHEN"],
+    "media": {
+      "sourceUrl": "https://real.vision/173-fair-oaks-street-173-02",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/01.jpg",
+          "sourceUrl": "https://photos.real.vision/oTXx9ovXen8.jpg?v=-1520216839&size=1800x1200",
+          "label": "Living/Dining"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/02.jpg",
+          "sourceUrl": "https://photos.real.vision/rXfwmHgCUER.jpg?v=-1747074167&size=1800x1200",
+          "label": "Foyer"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/03.jpg",
+          "sourceUrl": "https://photos.real.vision/WC4XxvGemGX.jpg?v=-1258794215&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/04.jpg",
+          "sourceUrl": "https://photos.real.vision/TFc1AG6NV7V.jpg?v=-1239605719&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/05.jpg",
+          "sourceUrl": "https://photos.real.vision/EMQieCz6aj7.jpg?v=-862860119&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/06.jpg",
+          "sourceUrl": "https://photos.real.vision/QW2Fbei43sY.jpg?v=-669113623&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/07.jpg",
+          "sourceUrl": "https://photos.real.vision/TMQQBjV8VMb.jpg?v=-318888119&size=1800x1200",
+          "label": "Closet"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/08.jpg",
+          "sourceUrl": "https://photos.real.vision/XVeETzCocZE.jpg?v=-524104439&size=1800x1200",
+          "label": "Bathroom 2"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/09.jpg",
+          "sourceUrl": "https://photos.real.vision/9wjwUPzdK8j.jpg?v=-454815655&size=1800x1200",
+          "label": "Storage"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/10.jpg",
+          "sourceUrl": "https://photos.real.vision/zTk8fnSPghH.jpg?v=-491730613&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/11.jpg",
+          "sourceUrl": "https://photos.real.vision/ZK6ExiNyoM.jpg?v=-1361392903&size=1800x1200",
+          "label": "Foyer \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/12.jpg",
+          "sourceUrl": "https://photos.real.vision/j8a1ZevGNfh.jpg?v=-909119735&size=1800x1200",
+          "label": "Bathroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/13.jpg",
+          "sourceUrl": "https://photos.real.vision/QjS7AKreZyW.jpg?v=-1062649687&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/14.jpg",
+          "sourceUrl": "https://photos.real.vision/cYqo6rAoVtX.jpg?v=-590993847&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/15.jpg",
+          "sourceUrl": "https://photos.real.vision/JdraFDziWdU.jpg?v=-118425095&size=1800x1200",
+          "label": "Storage \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/16.jpg",
+          "sourceUrl": "https://photos.real.vision/Mt7kJqF4F3N.jpg?v=-492498693&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/17.jpg",
+          "sourceUrl": "https://photos.real.vision/KRAoX1ZJatP.jpg?v=-1001189719&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-173-02/18.jpg",
+          "sourceUrl": "https://photos.real.vision/AwpYw6pFecN.jpg?v=-563351207&size=1800x1200",
+          "label": "Bedroom \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/173-fair-oaks-street-173-02/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/n6uQJo34wdL_imperial.jpg?v=-595191622&width=3300&download=true&filename=173-fair-oaks-street-173-02_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "942-divisadero-street-301",
+    "address": "942 Divisadero Street #301",
+    "point": {
+      "lat": 37.7784366,
+      "lng": -122.4382446
+    },
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "sqft": 1728,
+    "rooms": [
+      "FOYER",
+      "LIVING",
+      "DINING",
+      "KITCHEN",
+      "BEDROOM",
+      "LAUNDRY",
+      "PRIMARY BEDROOM",
+      "BEDROOM"
+    ],
+    "media": {
+      "sourceUrl": "https://real.vision/942-divisadero-street-301",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/01.jpg",
+          "sourceUrl": "https://photos.real.vision/tp4z3EtuhSC.jpg?v=-437325705&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/02.jpg",
+          "sourceUrl": "https://photos.real.vision/Y23gmSi8SxR.jpg?v=-437325705&size=1800x1200",
+          "label": "Foyer"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/03.jpg",
+          "sourceUrl": "https://photos.real.vision/AYQieCz6aj7.jpg?v=-437325705&size=1800x1200",
+          "label": "Dining"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/04.jpg",
+          "sourceUrl": "https://photos.real.vision/yPYViQcp9X8.jpg?v=-437325705&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/05.jpg",
+          "sourceUrl": "https://photos.real.vision/iEEf2caLyKG.jpg?v=-437325705&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/06.jpg",
+          "sourceUrl": "https://photos.real.vision/q1a3q6CVXVX.jpg?v=-437325705&size=1800x1200",
+          "label": "Ensuite"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/07.jpg",
+          "sourceUrl": "https://photos.real.vision/8TGYGY6KH5K.jpg?v=-437325705&size=1800x1200",
+          "label": "Closet"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/08.jpg",
+          "sourceUrl": "https://photos.real.vision/1npYw6pFecN.jpg?v=-437325705&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/09.jpg",
+          "sourceUrl": "https://photos.real.vision/pqoQpZiEAnj.jpg?v=-437325705&size=1800x1200",
+          "label": "Closet 2"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/10.jpg",
+          "sourceUrl": "https://photos.real.vision/HFGqUmfRqFR.jpg?v=-437325705&size=1800x1200",
+          "label": "Bedroom 2"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/11.jpg",
+          "sourceUrl": "https://photos.real.vision/xXS7AKreZyW.jpg?v=-437325705&size=1800x1200",
+          "label": "Closet 3"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/12.jpg",
+          "sourceUrl": "https://photos.real.vision/BuAoX1ZJatP.jpg?v=-437325705&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/13.jpg",
+          "sourceUrl": "https://photos.real.vision/ffD8ci59VCF.jpg?v=-437325705&size=1800x1200",
+          "label": "Storage"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/14.jpg",
+          "sourceUrl": "https://photos.real.vision/NywnSRRkVeM.jpg?v=-437325705&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/15.jpg",
+          "sourceUrl": "https://photos.real.vision/nV8Atb7WNi2.jpg?v=-437325705&size=1800x1200",
+          "label": "Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/16.jpg",
+          "sourceUrl": "https://photos.real.vision/EaYvANvoiPj.jpg?v=-437325705&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/17.jpg",
+          "sourceUrl": "https://photos.real.vision/LMT1SZzFzii.jpg?v=-437325705&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/942-divisadero-street-301/18.jpg",
+          "sourceUrl": "https://photos.real.vision/GrLv1ZijExY.jpg?v=-437325705&size=1800x1200",
+          "label": "Ensuite \u00b7 view 2"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/942-divisadero-street-301/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/n1kPxp7aMDR_imperial.jpg?v=-1403842884&width=3300&download=true&filename=942-divisadero-street-301_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "173-fair-oaks-street-167-05",
+    "address": "173 Fair Oaks Street #167-05",
+    "point": {
+      "lat": 37.7540173,
+      "lng": -122.4240483
+    },
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "sqft": 689,
+    "rooms": ["KITCHEN", "LIVING/DINING", "PRIMARY BEDROOM", "BEDROOM", "BEDROOM"],
+    "media": {
+      "sourceUrl": "https://real.vision/173-fair-oaks-street-167-05",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/01.jpg",
+          "sourceUrl": "https://photos.real.vision/96AcZEYT6X6.jpg?v=-184185719&size=1800x1200",
+          "label": "Living/Dining"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/02.jpg",
+          "sourceUrl": "https://photos.real.vision/DGg2ui775EC.jpg?v=3307834&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/03.jpg",
+          "sourceUrl": "https://photos.real.vision/hy5h7uFFAaJ.jpg?v=471167514&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/04.jpg",
+          "sourceUrl": "https://photos.real.vision/NwSwaK8fozK.jpg?v=767890090&size=1800x1200",
+          "label": "Ensuite"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/05.jpg",
+          "sourceUrl": "https://photos.real.vision/ezm66i6QZmf.jpg?v=611125994&size=1800x1200",
+          "label": "Closet"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/06.jpg",
+          "sourceUrl": "https://photos.real.vision/Kc4eiBQDRTH.jpg?v=646141482&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/07.jpg",
+          "sourceUrl": "https://photos.real.vision/kRwGXwhDaje.jpg?v=1031784074&size=1800x1200",
+          "label": "Closet 2"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/08.jpg",
+          "sourceUrl": "https://photos.real.vision/UMaKvg3EUZS.jpg?v=818728490&size=1800x1200",
+          "label": "Bedroom 2"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/09.jpg",
+          "sourceUrl": "https://photos.real.vision/omBRvrgbXmB.jpg?v=1163799530&size=1800x1200",
+          "label": "Closet 3"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/10.jpg",
+          "sourceUrl": "https://photos.real.vision/S3dw96vK4b3.jpg?v=1193494490&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/11.jpg",
+          "sourceUrl": "https://photos.real.vision/DkXJhP8fD25.jpg?v=139243114&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/12.jpg",
+          "sourceUrl": "https://photos.real.vision/UvnDWjACrJH.jpg?v=52529738&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/13.jpg",
+          "sourceUrl": "https://photos.real.vision/C9egSRg9thS.jpg?v=297058746&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/14.jpg",
+          "sourceUrl": "https://photos.real.vision/yjmmQixGYWd.jpg?v=540860074&size=1800x1200",
+          "label": "Ensuite \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/15.jpg",
+          "sourceUrl": "https://photos.real.vision/Qp4NmsYLinQ.jpg?v=948226954&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/16.jpg",
+          "sourceUrl": "https://photos.real.vision/eV9g5yxJVg5.jpg?v=1228641274&size=1800x1200",
+          "label": "Bedroom 2 \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/17.jpg",
+          "sourceUrl": "https://photos.real.vision/vfDBatEewoF.jpg?v=195607370&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/173-fair-oaks-street-167-05/18.jpg",
+          "sourceUrl": "https://photos.real.vision/oi1ms7jMBDd.jpg?v=394902266&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/173-fair-oaks-street-167-05/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/JaXv6nMgaLN_imperial.jpg?v=-40043312&width=3300&download=true&filename=173-fair-oaks-street-167-05_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "2170-fell-street",
+    "address": "2170 Fell Street",
+    "point": {
+      "lat": 37.7722096,
+      "lng": -122.4536019
+    },
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "sqft": 1698,
+    "rooms": ["KITCHEN", "LIVING", "DINING", "PRIMARY BEDROOM", "BEDROOM", "BEDROOM"],
+    "media": {
+      "sourceUrl": "https://real.vision/2170-fell-street",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/2170-fell-street/01.jpg",
+          "sourceUrl": "https://photos.real.vision/huQeDRoXVDL.jpg?v=-609011973&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/02.jpg",
+          "sourceUrl": "https://photos.real.vision/gEgfvwJBKVU.jpg?v=-609011973&size=1800x1200",
+          "label": "Foyer"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/03.jpg",
+          "sourceUrl": "https://photos.real.vision/MRYViQcp9X8.jpg?v=-609011973&size=1800x1200",
+          "label": "Dining"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/04.jpg",
+          "sourceUrl": "https://photos.real.vision/2ANEiuebiz3.jpg?v=-609011973&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/05.jpg",
+          "sourceUrl": "https://photos.real.vision/scaAWskRHD7.jpg?v=-609011973&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/06.jpg",
+          "sourceUrl": "https://photos.real.vision/xhV7P7F67XE.jpg?v=-609011973&size=1800x1200",
+          "label": "Closets"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/07.jpg",
+          "sourceUrl": "https://photos.real.vision/4ttr3eBon4c.jpg?v=-609011973&size=1800x1200",
+          "label": "Ensuite"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/08.jpg",
+          "sourceUrl": "https://photos.real.vision/goBsXBTP3QT.jpg?v=-609011973&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/09.jpg",
+          "sourceUrl": "https://photos.real.vision/F4XxYr4wuC6.jpg?v=1004679484&size=1800x1200",
+          "label": "Bedroom 2"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/10.jpg",
+          "sourceUrl": "https://photos.real.vision/LSHjkpuLj6H.jpg?v=-609011973&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/11.jpg",
+          "sourceUrl": "https://photos.real.vision/iuZQPUjsAn6.jpg?v=-609011973&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/12.jpg",
+          "sourceUrl": "https://photos.real.vision/N8aErKquUTF.jpg?v=-609011973&size=1800x1200",
+          "label": "Foyer \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/13.jpg",
+          "sourceUrl": "https://photos.real.vision/LstjqK46Nc.jpg?v=-609011973&size=1800x1200",
+          "label": "Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/14.jpg",
+          "sourceUrl": "https://photos.real.vision/FaBZaf5PfYN.jpg?v=-609011973&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/15.jpg",
+          "sourceUrl": "https://photos.real.vision/ix2Vhefu36P.jpg?v=-609011973&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/16.jpg",
+          "sourceUrl": "https://photos.real.vision/FZeDVixaYeP.jpg?v=-609011973&size=1800x1200",
+          "label": "Ensuite \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/17.jpg",
+          "sourceUrl": "https://photos.real.vision/ZoaKvg3EUZS.jpg?v=-609011973&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/2170-fell-street/18.jpg",
+          "sourceUrl": "https://photos.real.vision/iFbycQtTBK2.jpg?v=1004679484&size=1800x1200",
+          "label": "Bedroom 2 \u00b7 view 2"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/2170-fell-street/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/WoDudxwrUzZ_imperial.jpg?v=285736613&width=3300&download=true&filename=2170-fell-street_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "747-16th-avenue-a",
+    "address": "747 16th Avenue #A",
+    "point": {
+      "lat": 37.773969,
+      "lng": -122.4748454
+    },
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "sqft": 1622,
+    "rooms": ["BEDROOM", "PRIMARY BEDROOM", "BEDROOM", "KITCHEN", "FAMILY", "LIVING/DINING"],
+    "media": {
+      "sourceUrl": "https://real.vision/747-16th-avenue-a",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/01.jpg",
+          "sourceUrl": "https://photos.real.vision/6iawXnSMcX8.jpg?v=428624534&size=1800x1200",
+          "label": "Living/Dining"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/02.jpg",
+          "sourceUrl": "https://photos.real.vision/cW3beVprAkJ.jpg?v=428624534&size=1800x1200",
+          "label": "Entry"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/03.jpg",
+          "sourceUrl": "https://photos.real.vision/PmBssRMaeWc.jpg?v=428624534&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/04.jpg",
+          "sourceUrl": "https://photos.real.vision/1Mqaj4ZDBTW.jpg?v=482696150&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/05.jpg",
+          "sourceUrl": "https://photos.real.vision/KqV7P7F67XE.jpg?v=437624358&size=1800x1200",
+          "label": "Closets"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/06.jpg",
+          "sourceUrl": "https://photos.real.vision/NUdma68hs7g.jpg?v=437624358&size=1800x1200",
+          "label": "Ensuite"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/07.jpg",
+          "sourceUrl": "https://photos.real.vision/3X8BZFn51Eb.jpg?v=428624534&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/08.jpg",
+          "sourceUrl": "https://photos.real.vision/WKXJhP8fD25.jpg?v=428624534&size=1800x1200",
+          "label": "Bedroom 2"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/09.jpg",
+          "sourceUrl": "https://photos.real.vision/1B3DTUxSH8C.jpg?v=428624534&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/10.jpg",
+          "sourceUrl": "https://photos.real.vision/FAT1SZzFzii.jpg?v=482696150&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/11.jpg",
+          "sourceUrl": "https://photos.real.vision/pFXMaodb58B.jpg?v=482696150&size=1800x1200",
+          "label": "Entry \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/12.jpg",
+          "sourceUrl": "https://photos.real.vision/zfZQPUjsAn6.jpg?v=428624534&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/13.jpg",
+          "sourceUrl": "https://photos.real.vision/WE51L4ECswa.jpg?v=428624534&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/14.jpg",
+          "sourceUrl": "https://photos.real.vision/HsydSADD4mg.jpg?v=437624358&size=1800x1200",
+          "label": "Ensuite \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/15.jpg",
+          "sourceUrl": "https://photos.real.vision/yHiJ43A8wsK.jpg?v=428624534&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/16.jpg",
+          "sourceUrl": "https://photos.real.vision/JnzrhNcGBJA.jpg?v=428624534&size=1800x1200",
+          "label": "Bedroom 2 \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/17.jpg",
+          "sourceUrl": "https://photos.real.vision/ZvsEw6Wkcp9.jpg?v=428624534&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/747-16th-avenue-a/18.jpg",
+          "sourceUrl": "https://photos.real.vision/KMU5VJkt1GZ.jpg?v=437624358&size=1800x1200",
+          "label": "Kitchen \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/747-16th-avenue-a/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/3f1GGzXThy2_imperial.jpg?v=1113480603&width=3300&download=true&filename=747-16th-avenue-a_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "333-main-street-8g",
+    "address": "333 Main Street #8G",
+    "point": {
+      "lat": 37.7891307,
+      "lng": -122.3910195
+    },
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "sqft": 1533,
+    "rooms": ["FOYER", "DINING", "BEDROOM", "BEDROOM", "KITCHEN", "LIVING", "PRIMARY BEDROOM"],
+    "media": {
+      "sourceUrl": "https://real.vision/333-main-street-8g",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/333-main-street-8g/01.jpg",
+          "sourceUrl": "https://photos.real.vision/Aiieu1btVEf.jpg?v=1881644832&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/02.jpg",
+          "sourceUrl": "https://photos.real.vision/uDSDyDKRFnM.jpg?v=1881644832&size=1800x1200",
+          "label": "Dining"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/03.jpg",
+          "sourceUrl": "https://photos.real.vision/DKKAC3eRHy8.jpg?v=1962168368&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/04.jpg",
+          "sourceUrl": "https://photos.real.vision/cF41Ct2Yc8W.jpg?v=1881644832&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/05.jpg",
+          "sourceUrl": "https://photos.real.vision/BiLE4EFRCyX.jpg?v=-1973272688&size=1800x1200",
+          "label": "Ensuite"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/06.jpg",
+          "sourceUrl": "https://photos.real.vision/MvG3dgY3KpH.jpg?v=1931978128&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/07.jpg",
+          "sourceUrl": "https://photos.real.vision/esoibC4jxi3.jpg?v=1881644832&size=1800x1200",
+          "label": "Bedroom 2"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/08.jpg",
+          "sourceUrl": "https://photos.real.vision/Sy5FR8Uog7d.jpg?v=1910143040&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/09.jpg",
+          "sourceUrl": "https://photos.real.vision/82bLeA2Z95R.jpg?v=1881644832&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/10.jpg",
+          "sourceUrl": "https://photos.real.vision/ovG3dgY3KpH.jpg?v=1910143040&size=1800x1200",
+          "label": "Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/11.jpg",
+          "sourceUrl": "https://photos.real.vision/AvpMdQeS1H9.jpg?v=1881644832&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/12.jpg",
+          "sourceUrl": "https://photos.real.vision/GEujqK46Nc.jpg?v=1881644832&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/13.jpg",
+          "sourceUrl": "https://photos.real.vision/h2wJ9MmbtDa.jpg?v=1923323696&size=1800x1200",
+          "label": "Ensuite \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/14.jpg",
+          "sourceUrl": "https://photos.real.vision/UEbr4x4ANwU.jpg?v=1881644832&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/15.jpg",
+          "sourceUrl": "https://photos.real.vision/ehieu1btVEf.jpg?v=1910143040&size=1800x1200",
+          "label": "Bedroom 2 \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/16.jpg",
+          "sourceUrl": "https://photos.real.vision/73N4CPsWX3Q.jpg?v=1881644832&size=1800x1200",
+          "label": "Bathroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/17.jpg",
+          "sourceUrl": "https://photos.real.vision/mSbAWskRHD7.jpg?v=1881644832&size=1800x1200",
+          "label": "Living \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/333-main-street-8g/18.jpg",
+          "sourceUrl": "https://photos.real.vision/5hEixt7WkyG.jpg?v=1881644832&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/333-main-street-8g/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/6GVXR2QhAY3_imperial.jpg?v=1948850286&width=3300&download=true&filename=333-main-street-8g_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "208-north-lake-merced-hills-3a",
+    "address": "208 North Lake Merced Hills #3A",
+    "point": {
+      "lat": 37.7134009,
+      "lng": -122.483405
+    },
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "sqft": 1562,
+    "rooms": ["FOYER", "LIVING", "DINING", "KITCHEN", "BEDROOM", "BEDROOM", "PRIMARY BEDROOM"],
+    "media": {
+      "sourceUrl": "https://real.vision/208-north-lake-merced-hills-3a",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/01.jpg",
+          "sourceUrl": "https://photos.real.vision/hJbr4x4ANwU.jpg?v=1990500218&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/02.jpg",
+          "sourceUrl": "https://photos.real.vision/kRtdu6rkRcj.jpg?v=-536169288&size=1800x1200",
+          "label": "Foyer"
+        },
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/03.jpg",
+          "sourceUrl": "https://photos.real.vision/aPkwUPzdK8j.jpg?v=-2002303062&size=1800x1200",
+          "label": "Dining"
+        },
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/04.jpg",
+          "sourceUrl": "https://photos.real.vision/vsxnSRRkVeM.jpg?v=-1999124134&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/05.jpg",
+          "sourceUrl": "https://photos.real.vision/hRpYw6pFecN.jpg?v=-2002303062&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/06.jpg",
+          "sourceUrl": "https://photos.real.vision/UJvL9mH9793.jpg?v=-101457704&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/07.jpg",
+          "sourceUrl": "https://photos.real.vision/dZcw96vK4b3.jpg?v=-420443640&size=1800x1200",
+          "label": "Walk-in Closet"
+        },
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/08.jpg",
+          "sourceUrl": "https://photos.real.vision/VjK3uJTKTL4.jpg?v=-491561896&size=1800x1200",
+          "label": "Ensuite"
+        },
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/09.jpg",
+          "sourceUrl": "https://photos.real.vision/ZcYJGAwvgyS.jpg?v=-101457704&size=1800x1200",
+          "label": "Bedroom 2"
+        },
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/10.jpg",
+          "sourceUrl": "https://photos.real.vision/J1DP7EXftP9.jpg?v=-536169288&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/13.jpg",
+          "sourceUrl": "https://photos.real.vision/VXzrhNcGBJA.jpg?v=-1999124134&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/14.jpg",
+          "sourceUrl": "https://photos.real.vision/MqBZaf5PfYN.jpg?v=1033892027&size=1800x1200",
+          "label": "Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/15.jpg",
+          "sourceUrl": "https://photos.real.vision/a1Ag5yxJVg5.jpg?v=-1999124134&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/16.jpg",
+          "sourceUrl": "https://photos.real.vision/5DDBatEewoF.jpg?v=-462187160&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/17.jpg",
+          "sourceUrl": "https://photos.real.vision/kum6oRvhzPZ.jpg?v=-536169288&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/208-north-lake-merced-hills-3a/18.jpg",
+          "sourceUrl": "https://photos.real.vision/MSV7P7F67XE.jpg?v=-462187160&size=1800x1200",
+          "label": "Ensuite \u00b7 view 2"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/208-north-lake-merced-hills-3a/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/zUDEUGNagCX_imperial.jpg?v=-1427405409&width=3300&download=true&filename=208-north-lake-merced-hills-3a_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "520-geary-street-509",
+    "address": "520 Geary Street #509",
+    "point": {
+      "lat": 37.7872137,
+      "lng": -122.4120514
+    },
+    "bedrooms": 0,
+    "bathrooms": 1.0,
+    "sqft": 474,
+    "rooms": ["STORAGE", "FOYER", "LIVING", "KITCHEN"],
+    "media": {
+      "sourceUrl": "https://real.vision/520-geary-street-509",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/520-geary-street-509/01.jpg",
+          "sourceUrl": "https://photos.real.vision/3dJ3dgY3KpH.jpg?v=-2058488429&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/520-geary-street-509/02.jpg",
+          "sourceUrl": "https://photos.real.vision/QWFwgdso66W.jpg?v=-2058488429&size=1800x1200",
+          "label": "Foyer"
+        },
+        {
+          "url": "/seed/rentals/520-geary-street-509/03.jpg",
+          "sourceUrl": "https://photos.real.vision/3QdxYr4wuC6.jpg?v=-2119346397&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/520-geary-street-509/04.jpg",
+          "sourceUrl": "https://photos.real.vision/hG2d93Lopb4.jpg?v=-2119346397&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/520-geary-street-509/05.jpg",
+          "sourceUrl": "https://photos.real.vision/KEgEQMhQE5P.jpg?v=1262273022&size=1800x1200",
+          "label": "Storage"
+        },
+        {
+          "url": "/seed/rentals/520-geary-street-509/06.jpg",
+          "sourceUrl": "https://photos.real.vision/KWBhvrCJ3WP.jpg?v=-2119346397&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/520-geary-street-509/07.jpg",
+          "sourceUrl": "https://photos.real.vision/sFQdxUBfk2h.jpg?v=-2063194797&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/520-geary-street-509/08.jpg",
+          "sourceUrl": "https://photos.real.vision/22jwXnSMcX8.jpg?v=1262273022&size=1800x1200",
+          "label": "Living \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/520-geary-street-509/09.jpg",
+          "sourceUrl": "https://photos.real.vision/HF4GFfY9onD.jpg?v=-2058488429&size=1800x1200",
+          "label": "Kitchen \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/520-geary-street-509/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/2pHTAZ8mFoi_imperial.jpg?v=1940638980&width=3300&download=true&filename=520-geary-street-509_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "970-post-street-11-1",
+    "address": "970 Post Street #11",
+    "point": {
+      "lat": 37.7873779,
+      "lng": -122.417858
+    },
+    "bedrooms": 0,
+    "bathrooms": 1.0,
+    "sqft": 351,
+    "rooms": ["KITCHEN", "FOYER", "LIVING"],
+    "media": {
+      "sourceUrl": "https://real.vision/970-post-street-11-1",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/970-post-street-11-1/01.jpg",
+          "sourceUrl": "https://photos.real.vision/PdvQRa6HHBU.jpg?v=-91524283&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/970-post-street-11-1/02.jpg",
+          "sourceUrl": "https://photos.real.vision/p5ckWdnkAbg.jpg?v=-91524283&size=1800x1200",
+          "label": "Foyer"
+        },
+        {
+          "url": "/seed/rentals/970-post-street-11-1/03.jpg",
+          "sourceUrl": "https://photos.real.vision/N4FLS3F1Wsc.jpg?v=-91524283&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/970-post-street-11-1/04.jpg",
+          "sourceUrl": "https://photos.real.vision/QT2nzZPeLx4.jpg?v=-91524283&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/970-post-street-11-1/05.jpg",
+          "sourceUrl": "https://photos.real.vision/vgjeKdMq5Ue.jpg?v=-91524283&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/970-post-street-11-1/06.jpg",
+          "sourceUrl": "https://photos.real.vision/qrgZT6ckhAc.jpg?v=-91524283&size=1800x1200",
+          "label": "Foyer \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/970-post-street-11-1/07.jpg",
+          "sourceUrl": "https://photos.real.vision/Cmev6YHfGdA.jpg?v=-91524283&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/970-post-street-11-1/08.jpg",
+          "sourceUrl": "https://photos.real.vision/PFk8fnSPghH.jpg?v=-91524283&size=1800x1200",
+          "label": "Bathroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/970-post-street-11-1/09.jpg",
+          "sourceUrl": "https://photos.real.vision/EzfEK29oTCe.jpg?v=-82236427&size=1800x1200",
+          "label": "Living \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/970-post-street-11-1/10.jpg",
+          "sourceUrl": "https://photos.real.vision/Xb4MKgMxcJN.jpg?v=-91524283&size=1800x1200",
+          "label": "Kitchen \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/970-post-street-11-1/11.jpg",
+          "sourceUrl": "https://photos.real.vision/zMPQBjV8VMb.jpg?v=-26574027&size=1800x1200",
+          "label": "Living \u00b7 view 4"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/970-post-street-11-1/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/2kcDpgPJQ4X_imperial.jpg?v=-680921045&width=3300&download=true&filename=970-post-street-11-1_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "860-bush-street-603",
+    "address": "860 Bush Street #603",
+    "point": {
+      "lat": 37.790095,
+      "lng": -122.4115045
+    },
+    "bedrooms": 0,
+    "bathrooms": 1.0,
+    "sqft": 369,
+    "rooms": ["LIVING/DINING", "KITCHEN", "STORAGE"],
+    "media": {
+      "sourceUrl": "https://real.vision/860-bush-street-603",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/860-bush-street-603/01.jpg",
+          "sourceUrl": "https://photos.real.vision/G4gEK29oTCe.jpg?v=467604835&size=1800x1200",
+          "label": "Living/Dining"
+        },
+        {
+          "url": "/seed/rentals/860-bush-street-603/02.jpg",
+          "sourceUrl": "https://photos.real.vision/CegfvwJBKVU.jpg?v=467604835&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/860-bush-street-603/03.jpg",
+          "sourceUrl": "https://photos.real.vision/g6nMnMAffZ2.jpg?v=467604835&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/860-bush-street-603/04.jpg",
+          "sourceUrl": "https://photos.real.vision/Frar4x4ANwU.jpg?v=467604835&size=1800x1200",
+          "label": "Storage"
+        },
+        {
+          "url": "/seed/rentals/860-bush-street-603/05.jpg",
+          "sourceUrl": "https://photos.real.vision/dUKnYGiEjMg.jpg?v=467604835&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/860-bush-street-603/06.jpg",
+          "sourceUrl": "https://photos.real.vision/4dtEw6Wkcp9.jpg?v=467604835&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/860-bush-street-603/07.jpg",
+          "sourceUrl": "https://photos.real.vision/bV42mmie8WD.jpg?v=467604835&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/860-bush-street-603/08.jpg",
+          "sourceUrl": "https://photos.real.vision/MkYioGHnycf.jpg?v=467604835&size=1800x1200",
+          "label": "Kitchen \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/860-bush-street-603/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/tQswX5maEHT_imperial.jpg?v=1412413848&width=3300&download=true&filename=860-bush-street-603_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "2345-jackson-street-1",
+    "address": "2345 Jackson Street #1",
+    "point": {
+      "lat": 37.7923928,
+      "lng": -122.433641
+    },
+    "bedrooms": 1,
+    "bathrooms": 1.0,
+    "sqft": 635,
+    "rooms": ["KITCHEN", "LIVING/DINING", "BEDROOM"],
+    "media": {
+      "sourceUrl": "https://real.vision/2345-jackson-street-1",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/2345-jackson-street-1/01.jpg",
+          "sourceUrl": "https://photos.real.vision/QHU7AKreZyW.jpg?v=-417672799&size=1800x1200",
+          "label": "Living/Dining"
+        },
+        {
+          "url": "/seed/rentals/2345-jackson-street-1/02.jpg",
+          "sourceUrl": "https://photos.real.vision/BmxnK71rNF5.jpg?v=-66159695&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/2345-jackson-street-1/03.jpg",
+          "sourceUrl": "https://photos.real.vision/zZx1H2uNvz9.jpg?v=-252813695&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/2345-jackson-street-1/04.jpg",
+          "sourceUrl": "https://photos.real.vision/LLKE4EFRCyX.jpg?v=-206185743&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/2345-jackson-street-1/05.jpg",
+          "sourceUrl": "https://photos.real.vision/BmWxZce85U7.jpg?v=-133007487&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/2345-jackson-street-1/06.jpg",
+          "sourceUrl": "https://photos.real.vision/jSJRf6SDu3G.jpg?v=-48805727&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/2345-jackson-street-1/07.jpg",
+          "sourceUrl": "https://photos.real.vision/gYcKvg3EUZS.jpg?v=1288271817&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/2345-jackson-street-1/08.jpg",
+          "sourceUrl": "https://photos.real.vision/D9fpMCe5rv7.jpg?v=-182665983&size=1800x1200",
+          "label": "Bathroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/2345-jackson-street-1/09.jpg",
+          "sourceUrl": "https://photos.real.vision/DaZErKquUTF.jpg?v=-83746895&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/2345-jackson-street-1/10.jpg",
+          "sourceUrl": "https://photos.real.vision/xm3ms7jMBDd.jpg?v=-2397183&size=1800x1200",
+          "label": "Kitchen \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/2345-jackson-street-1/11.jpg",
+          "sourceUrl": "https://photos.real.vision/oQur3eBon4c.jpg?v=-222771695&size=1800x1200",
+          "label": "Bedroom \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/2345-jackson-street-1/12.jpg",
+          "sourceUrl": "https://photos.real.vision/ip1BLta2YeV.jpg?v=-87067999&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 4"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/2345-jackson-street-1/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/gkY7913n16P_imperial.jpg?v=1634856172&width=3300&download=true&filename=2345-jackson-street-1_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "425-1st-street-3103",
+    "address": "425 1st Street #3103",
+    "point": {
+      "lat": 37.7862945,
+      "lng": -122.3932264
+    },
+    "bedrooms": 2,
+    "bathrooms": 2.0,
+    "sqft": 1350,
+    "rooms": ["KITCHEN", "LIVING/DINING", "PRIMARY BEDROOM", "BEDROOM", "FOYER"],
+    "media": {
+      "sourceUrl": "https://real.vision/425-1st-street-3103",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/425-1st-street-3103/01.jpg",
+          "sourceUrl": "https://photos.real.vision/Mtx6UUyosd6.jpg?v=1986417069&size=1800x1200",
+          "label": "Living/Dining"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/02.jpg",
+          "sourceUrl": "https://photos.real.vision/Vq6EJbJH2nb.jpg?v=1936412317&size=1800x1200",
+          "label": "Bar"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/03.jpg",
+          "sourceUrl": "https://photos.real.vision/W4z1H2uNvz9.jpg?v=-1617719698&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/04.jpg",
+          "sourceUrl": "https://photos.real.vision/YAU1SZzFzii.jpg?v=1986417069&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/05.jpg",
+          "sourceUrl": "https://photos.real.vision/h2ujqK46Nc.jpg?v=1936711709&size=1800x1200",
+          "label": "Ensuite"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/06.jpg",
+          "sourceUrl": "https://photos.real.vision/keuBy6irQMY.jpg?v=1986417069&size=1800x1200",
+          "label": "Walk-in Closet"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/07.jpg",
+          "sourceUrl": "https://photos.real.vision/oJoegRjhFCM.jpg?v=1936596669&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/08.jpg",
+          "sourceUrl": "https://photos.real.vision/WH2YNZM1sMf.jpg?v=1936711709&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/09.jpg",
+          "sourceUrl": "https://photos.real.vision/ob6ayn5rFLB.jpg?v=1986417069&size=1800x1200",
+          "label": "Storage"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/10.jpg",
+          "sourceUrl": "https://photos.real.vision/CdXqqVXRSWM.jpg?v=1936711709&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/11.jpg",
+          "sourceUrl": "https://photos.real.vision/zy6ExiNyoM.jpg?v=1986417069&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/12.jpg",
+          "sourceUrl": "https://photos.real.vision/zQ6KWJucSPQ.jpg?v=1936711709&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/13.jpg",
+          "sourceUrl": "https://photos.real.vision/FYkwUPzdK8j.jpg?v=-2066421555&size=1800x1200",
+          "label": "Ensuite \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/14.jpg",
+          "sourceUrl": "https://photos.real.vision/8Wi8nEB9DNW.jpg?v=1936711709&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/15.jpg",
+          "sourceUrl": "https://photos.real.vision/jEPuDqpwXcQ.jpg?v=1936711709&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/16.jpg",
+          "sourceUrl": "https://photos.real.vision/FFzJsuez8L3.jpg?v=1936596669&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/425-1st-street-3103/17.jpg",
+          "sourceUrl": "https://photos.real.vision/75Yx9ovXen8.jpg?v=-1997333987&size=1800x1200",
+          "label": "Ensuite \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/425-1st-street-3103/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/8ggkHti9cF5_imperial.jpg?v=-843147893&width=3300&download=true&filename=425-1st-street-3103_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "926-esmeralda-avenue",
+    "address": "926 Esmeralda Avenue",
+    "point": {
+      "lat": 37.743392,
+      "lng": -122.409672
+    },
+    "bedrooms": 2,
+    "bathrooms": 1.0,
+    "sqft": 1009,
+    "rooms": ["KITCHEN", "LIVING", "DINING", "PRIMARY BEDROOM", "BEDROOM"],
+    "media": {
+      "sourceUrl": "https://real.vision/926-esmeralda-avenue",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/01.jpg",
+          "sourceUrl": "https://photos.real.vision/jumMnMAffZ2.jpg?v=1117746158&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/02.jpg",
+          "sourceUrl": "https://photos.real.vision/2bPKPMCtWoA.jpg?v=2051935598&size=1800x1200",
+          "label": "Dining"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/03.jpg",
+          "sourceUrl": "https://photos.real.vision/NFfcd4NUyLi.jpg?v=1478244270&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/04.jpg",
+          "sourceUrl": "https://photos.real.vision/9zepMCe5rv7.jpg?v=-1964453362&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/05.jpg",
+          "sourceUrl": "https://photos.real.vision/u9KNaGFCELc.jpg?v=1545079982&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/06.jpg",
+          "sourceUrl": "https://photos.real.vision/H8aQPUjsAn6.jpg?v=1412984398&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/07.jpg",
+          "sourceUrl": "https://photos.real.vision/DnRAK3uoqbF.jpg?v=1152413038&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/08.jpg",
+          "sourceUrl": "https://photos.real.vision/W3UdxUBfk2h.jpg?v=2101304142&size=1800x1200",
+          "label": "Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/09.jpg",
+          "sourceUrl": "https://photos.real.vision/C58BZFn51Eb.jpg?v=1516193006&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/10.jpg",
+          "sourceUrl": "https://photos.real.vision/evZ1ZevGNfh.jpg?v=-1913464786&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/11.jpg",
+          "sourceUrl": "https://photos.real.vision/J3Bwrc38yxd.jpg?v=1351967358&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/12.jpg",
+          "sourceUrl": "https://photos.real.vision/opYtp1pfTph.jpg?v=-2128528498&size=1800x1200",
+          "label": "Bathroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/13.jpg",
+          "sourceUrl": "https://photos.real.vision/3b8t8RLh6uC.jpg?v=1716690094&size=1800x1200",
+          "label": "Living \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/14.jpg",
+          "sourceUrl": "https://photos.real.vision/Dfev6YHfGdA.jpg?v=1182592862&size=1800x1200",
+          "label": "Dining \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/15.jpg",
+          "sourceUrl": "https://photos.real.vision/A7dw96vK4b3.jpg?v=1991308734&size=1800x1200",
+          "label": "Kitchen \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/16.jpg",
+          "sourceUrl": "https://photos.real.vision/SxzLFp7Sd6D.jpg?v=-1889374658&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/926-esmeralda-avenue/17.jpg",
+          "sourceUrl": "https://photos.real.vision/274BLta2YeV.jpg?v=1380984430&size=1800x1200",
+          "label": "Bedroom \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/926-esmeralda-avenue/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/MBZLyWDJi4E_imperial.jpg?v=-203065342&width=3300&download=true&filename=926-esmeralda-avenue_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "554a-natoma-street-a",
+    "address": "554a Natoma Street #A",
+    "point": {
+      "lat": 37.7792416,
+      "lng": -122.4090811
+    },
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "sqft": 1311,
+    "rooms": ["KITCHEN/DINING", "BEDROOM", "BEDROOM", "PRIMARY BEDROOM", "LIVING", "LAUNDRY"],
+    "media": {
+      "sourceUrl": "https://real.vision/554a-natoma-street-a",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/01.jpg",
+          "sourceUrl": "https://photos.real.vision/zCheWu8cYHD.jpg?v=130079321&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/02.jpg",
+          "sourceUrl": "https://photos.real.vision/RwgZT6ckhAc.jpg?v=130079321&size=1800x1200",
+          "label": "Foyer"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/03.jpg",
+          "sourceUrl": "https://photos.real.vision/j5nmQixGYWd.jpg?v=130079321&size=1800x1200",
+          "label": "Dining"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/04.jpg",
+          "sourceUrl": "https://photos.real.vision/ovreMdkZkpf.jpg?v=130079321&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/05.jpg",
+          "sourceUrl": "https://photos.real.vision/zoisV9YvTse.jpg?v=130079321&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/06.jpg",
+          "sourceUrl": "https://photos.real.vision/9QUSQYmpM6Q.jpg?v=130079321&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/07.jpg",
+          "sourceUrl": "https://photos.real.vision/ri1so6oEomR.jpg?v=130079321&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/08.jpg",
+          "sourceUrl": "https://photos.real.vision/ufgfvwJBKVU.jpg?v=130079321&size=1800x1200",
+          "label": "Bedroom 2"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/09.jpg",
+          "sourceUrl": "https://photos.real.vision/XrkwUPzdK8j.jpg?v=2073800472&size=1800x1200",
+          "label": "Closet"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/10.jpg",
+          "sourceUrl": "https://photos.real.vision/dvJAC3eRHy8.jpg?v=130079321&size=1800x1200",
+          "label": "Bathroom 2"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/11.jpg",
+          "sourceUrl": "https://photos.real.vision/DWUFKBsf4xD.jpg?v=130079321&size=1800x1200",
+          "label": "Storage"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/12.jpg",
+          "sourceUrl": "https://photos.real.vision/YYrkx7BwgkR.jpg?v=130079321&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/13.jpg",
+          "sourceUrl": "https://photos.real.vision/TXXgePAjoLK.jpg?v=130079321&size=1800x1200",
+          "label": "Foyer \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/14.jpg",
+          "sourceUrl": "https://photos.real.vision/e532SnUGcE.jpg?v=-237846761&size=1800x1200",
+          "label": "Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/15.jpg",
+          "sourceUrl": "https://photos.real.vision/rvJAC3eRHy8.jpg?v=-237846761&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/16.jpg",
+          "sourceUrl": "https://photos.real.vision/ysev6YHfGdA.jpg?v=-237846761&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/17.jpg",
+          "sourceUrl": "https://photos.real.vision/9saErKquUTF.jpg?v=-237846761&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/554a-natoma-street-a/18.jpg",
+          "sourceUrl": "https://photos.real.vision/rUbrBFawYWZ.jpg?v=-237846761&size=1800x1200",
+          "label": "Bedroom 2 \u00b7 view 2"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/554a-natoma-street-a/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/NXvaA15q1KZ_imperial.jpg?v=190691489&width=3300&download=true&filename=554a-natoma-street-a_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "960-market-street-1109",
+    "address": "960 Market Street #1109",
+    "point": {
+      "lat": 37.7831239,
+      "lng": -122.4095552
+    },
+    "bedrooms": 2,
+    "bathrooms": 2.0,
+    "sqft": 1054,
+    "rooms": ["FOYER", "LIVING/DINING", "KITCHEN", "PRIMARY BEDROOM", "BEDROOM"],
+    "media": {
+      "sourceUrl": "https://real.vision/960-market-street-1109",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/960-market-street-1109/01.jpg",
+          "sourceUrl": "https://photos.real.vision/YJ3Fos489FJ.jpg?v=1462973054&size=1800x1200",
+          "label": "Living/Dining"
+        },
+        {
+          "url": "/seed/rentals/960-market-street-1109/02.jpg",
+          "sourceUrl": "https://photos.real.vision/toT1SZzFzii.jpg?v=1462973054&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/960-market-street-1109/03.jpg",
+          "sourceUrl": "https://photos.real.vision/e7AoX1ZJatP.jpg?v=1462973054&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/960-market-street-1109/04.jpg",
+          "sourceUrl": "https://photos.real.vision/a3zrhNcGBJA.jpg?v=1462973054&size=1800x1200",
+          "label": "Walk-in Closet"
+        },
+        {
+          "url": "/seed/rentals/960-market-street-1109/05.jpg",
+          "sourceUrl": "https://photos.real.vision/wpfAAPVXbv2.jpg?v=1462973054&size=1800x1200",
+          "label": "Ensuite"
+        },
+        {
+          "url": "/seed/rentals/960-market-street-1109/06.jpg",
+          "sourceUrl": "https://photos.real.vision/uMeSB5zk4Nh.jpg?v=1462973054&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/960-market-street-1109/07.jpg",
+          "sourceUrl": "https://photos.real.vision/P9FLS3F1Wsc.jpg?v=1462973054&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/960-market-street-1109/08.jpg",
+          "sourceUrl": "https://photos.real.vision/SshTvFg88ti.jpg?v=1462973054&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/960-market-street-1109/09.jpg",
+          "sourceUrl": "https://photos.real.vision/zLkiHiAUKsW.jpg?v=1462973054&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/960-market-street-1109/10.jpg",
+          "sourceUrl": "https://photos.real.vision/RXK3uJTKTL4.jpg?v=1462973054&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/960-market-street-1109/11.jpg",
+          "sourceUrl": "https://photos.real.vision/JzaWp8vZKfY.jpg?v=1462973054&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/960-market-street-1109/12.jpg",
+          "sourceUrl": "https://photos.real.vision/S4XqaiRjR82.jpg?v=-1489104141&size=1800x1200",
+          "label": "Living/Dining \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/960-market-street-1109/13.jpg",
+          "sourceUrl": "https://photos.real.vision/Yeu7BGVyEg.jpg?v=1462973054&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/960-market-street-1109/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/jzcP6W5oAgg_imperial.jpg?v=655602358&width=3300&download=true&filename=960-market-street-1109_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "565-page-street-6",
+    "address": "565 Page Street #6",
+    "point": {
+      "lat": 37.7729113,
+      "lng": -122.4299745
+    },
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "sqft": 1019,
+    "rooms": ["PRIMARY BEDROOM", "BEDROOM", "LIVING/DINING", "KITCHEN", "BEDROOM"],
+    "media": {
+      "sourceUrl": "https://real.vision/565-page-street-6",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/565-page-street-6/01.jpg",
+          "sourceUrl": "https://photos.real.vision/eyqkx7BwgkR.jpg?v=-443554898&size=1800x1200",
+          "label": "Living/Dining"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/02.jpg",
+          "sourceUrl": "https://photos.real.vision/jeaKvg3EUZS.jpg?v=-443554898&size=1800x1200",
+          "label": "Foyer"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/03.jpg",
+          "sourceUrl": "https://photos.real.vision/pYx6UUyosd6.jpg?v=-536601122&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/04.jpg",
+          "sourceUrl": "https://photos.real.vision/uxraFDziWdU.jpg?v=-486175058&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/05.jpg",
+          "sourceUrl": "https://photos.real.vision/e63Vhefu36P.jpg?v=-524514946&size=1800x1200",
+          "label": "Ensuite"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/06.jpg",
+          "sourceUrl": "https://photos.real.vision/L1kEZRqFa3e.jpg?v=-56688594&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/07.jpg",
+          "sourceUrl": "https://photos.real.vision/5t2gmSi8SxR.jpg?v=-486175058&size=1800x1200",
+          "label": "Bedroom 2"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/08.jpg",
+          "sourceUrl": "https://photos.real.vision/MLXMaodb58B.jpg?v=1650684293&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/09.jpg",
+          "sourceUrl": "https://photos.real.vision/6tZ3q6CVXVX.jpg?v=-56688594&size=1800x1200",
+          "label": "Foyer \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/10.jpg",
+          "sourceUrl": "https://photos.real.vision/TLreMdkZkpf.jpg?v=-528288802&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/11.jpg",
+          "sourceUrl": "https://photos.real.vision/tqKE4EFRCyX.jpg?v=-528288802&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/12.jpg",
+          "sourceUrl": "https://photos.real.vision/HA2Fbei43sY.jpg?v=-486175058&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/13.jpg",
+          "sourceUrl": "https://photos.real.vision/xezcYSGqqBS.jpg?v=-443554898&size=1800x1200",
+          "label": "Bedroom 2 \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/14.jpg",
+          "sourceUrl": "https://photos.real.vision/citCJxBsJ9Y.jpg?v=-524514946&size=1800x1200",
+          "label": "Foyer \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/15.jpg",
+          "sourceUrl": "https://photos.real.vision/8cg2ui775EC.jpg?v=-536601122&size=1800x1200",
+          "label": "Kitchen \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/16.jpg",
+          "sourceUrl": "https://photos.real.vision/BuSHhdJuuZC.jpg?v=-486175058&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/565-page-street-6/17.jpg",
+          "sourceUrl": "https://photos.real.vision/kzjh52LRiHM.jpg?v=-528288802&size=1800x1200",
+          "label": "Bedroom 2 \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/565-page-street-6/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/K9gsCsWS1Ce_imperial.jpg?v=347520286&width=3300&download=true&filename=565-page-street-6_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "484-alvarado-street",
+    "address": "484 Alvarado Street",
+    "point": {
+      "lat": 37.7541,
+      "lng": -122.431577
+    },
+    "bedrooms": 2,
+    "bathrooms": 2.0,
+    "sqft": 1278,
+    "rooms": ["FOYER", "LIVING", "DINING", "KITCHEN", "PRIMARY BEDROOM", "BEDROOM"],
+    "media": {
+      "sourceUrl": "https://real.vision/484-alvarado-street",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/484-alvarado-street/01.jpg",
+          "sourceUrl": "https://photos.real.vision/znBRvrgbXmB.jpg?v=115431990&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/02.jpg",
+          "sourceUrl": "https://photos.real.vision/nTieWu8cYHD.jpg?v=79725494&size=1800x1200",
+          "label": "Foyer"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/03.jpg",
+          "sourceUrl": "https://photos.real.vision/owB8ci59VCF.jpg?v=519327382&size=1800x1200",
+          "label": "Dining"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/04.jpg",
+          "sourceUrl": "https://photos.real.vision/bw52mmie8WD.jpg?v=341525606&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/05.jpg",
+          "sourceUrl": "https://photos.real.vision/B28cZEYT6X6.jpg?v=733377062&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/06.jpg",
+          "sourceUrl": "https://photos.real.vision/t69oX1ZJatP.jpg?v=585002646&size=1800x1200",
+          "label": "Ensuite"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/07.jpg",
+          "sourceUrl": "https://photos.real.vision/T2vdu6rkRcj.jpg?v=588489014&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/08.jpg",
+          "sourceUrl": "https://photos.real.vision/AVNKKhQJQyH.jpg?v=973009910&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/09.jpg",
+          "sourceUrl": "https://photos.real.vision/9gvH987TxUa.jpg?v=486449062&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/10.jpg",
+          "sourceUrl": "https://photos.real.vision/MVJdcLo9YDE.jpg?v=277877846&size=1800x1200",
+          "label": "Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/11.jpg",
+          "sourceUrl": "https://photos.real.vision/JGqYw6pFecN.jpg?v=374481142&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/12.jpg",
+          "sourceUrl": "https://photos.real.vision/sswxPa8C7xJ.jpg?v=787204486&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/13.jpg",
+          "sourceUrl": "https://photos.real.vision/7NF3dgY3KpH.jpg?v=628620758&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/14.jpg",
+          "sourceUrl": "https://photos.real.vision/CCnegRjhFCM.jpg?v=973232694&size=1800x1200",
+          "label": "Bathroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/15.jpg",
+          "sourceUrl": "https://photos.real.vision/2Cgv6YHfGdA.jpg?v=404281942&size=1800x1200",
+          "label": "Living \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/16.jpg",
+          "sourceUrl": "https://photos.real.vision/MGmhbmXCyUG.jpg?v=313601750&size=1800x1200",
+          "label": "Dining \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/17.jpg",
+          "sourceUrl": "https://photos.real.vision/xzdT6HqFpdD.jpg?v=678494022&size=1800x1200",
+          "label": "Kitchen \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/484-alvarado-street/18.jpg",
+          "sourceUrl": "https://photos.real.vision/2VQuDqpwXcQ.jpg?v=552997574&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/484-alvarado-street/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/mHpTyMqY468_imperial.jpg?v=-70928691&width=3300&download=true&filename=484-alvarado-street_Main.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  },
+  {
+    "slug": "4639-18th-street",
+    "address": "4639 18th Street",
+    "point": {
+      "lat": 37.7603628,
+      "lng": -122.4423815
+    },
+    "bedrooms": 3,
+    "bathrooms": 1.5,
+    "sqft": 1375,
+    "rooms": ["FOYER", "BEDROOM", "PRIMARY BEDROOM", "KITCHEN", "DINING", "BEDROOM", "LIVING"],
+    "media": {
+      "sourceUrl": "https://real.vision/4639-18th-street",
+      "sourceName": "Realvision",
+      "retrievedOn": "2026-11-13",
+      "photos": [
+        {
+          "url": "/seed/rentals/4639-18th-street/01.jpg",
+          "sourceUrl": "https://photos.real.vision/EQU5VJkt1GZ.jpg?v=1815571379&size=1800x1200",
+          "label": "Living"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/02.jpg",
+          "sourceUrl": "https://photos.real.vision/qwZV5NjsFvE.jpg?v=1744892595&size=1800x1200",
+          "label": "Foyer"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/03.jpg",
+          "sourceUrl": "https://photos.real.vision/GA5z3EtuhSC.jpg?v=1815571379&size=1800x1200",
+          "label": "Dining"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/04.jpg",
+          "sourceUrl": "https://photos.real.vision/nHU1SZzFzii.jpg?v=2107631683&size=1800x1200",
+          "label": "Kitchen"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/05.jpg",
+          "sourceUrl": "https://photos.real.vision/Rs2d93Lopb4.jpg?v=1815571379&size=1800x1200",
+          "label": "Powder"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/06.jpg",
+          "sourceUrl": "https://photos.real.vision/zGSDyDKRFnM.jpg?v=2014813363&size=1800x1200",
+          "label": "Primary Bedroom"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/07.jpg",
+          "sourceUrl": "https://photos.real.vision/kx9g5yxJVg5.jpg?v=1815571379&size=1800x1200",
+          "label": "Bedroom"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/08.jpg",
+          "sourceUrl": "https://photos.real.vision/waPieCz6aj7.jpg?v=1815571379&size=1800x1200",
+          "label": "Bedroom 2"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/09.jpg",
+          "sourceUrl": "https://photos.real.vision/7NTdxUBfk2h.jpg?v=1815571379&size=1800x1200",
+          "label": "Bathroom"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/10.jpg",
+          "sourceUrl": "https://photos.real.vision/oQ7kJqF4F3N.jpg?v=1744892595&size=1800x1200",
+          "label": "Living \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/11.jpg",
+          "sourceUrl": "https://photos.real.vision/UQzJsuez8L3.jpg?v=1763439395&size=1800x1200",
+          "label": "Foyer \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/12.jpg",
+          "sourceUrl": "https://photos.real.vision/iWSwaK8fozK.jpg?v=1815571379&size=1800x1200",
+          "label": "Dining \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/13.jpg",
+          "sourceUrl": "https://photos.real.vision/oveETzCocZE.jpg?v=1815571379&size=1800x1200",
+          "label": "Kitchen \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/14.jpg",
+          "sourceUrl": "https://photos.real.vision/h8ujqK46Nc.jpg?v=1747897267&size=1800x1200",
+          "label": "Primary Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/15.jpg",
+          "sourceUrl": "https://photos.real.vision/FnaoKsCaNzA.jpg?v=1452366019&size=1800x1200",
+          "label": "Bedroom \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/16.jpg",
+          "sourceUrl": "https://photos.real.vision/oc3anFanN4b.jpg?v=1762494547&size=1800x1200",
+          "label": "Bedroom 2 \u00b7 view 2"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/17.jpg",
+          "sourceUrl": "https://photos.real.vision/3rReDRoXVDL.jpg?v=1747897267&size=1800x1200",
+          "label": "Living \u00b7 view 3"
+        },
+        {
+          "url": "/seed/rentals/4639-18th-street/18.jpg",
+          "sourceUrl": "https://photos.real.vision/w2y6UUyosd6.jpg?v=1348026291&size=1800x1200",
+          "label": "Kitchen \u00b7 view 3"
+        }
+      ],
+      "floorPlan": {
+        "url": "/seed/rentals/4639-18th-street/floor-plan.jpg",
+        "sourceUrl": "https://floor-assets.real.vision/BogZfPcoXnT_imperial.jpg?v=1248078986&width=3300&download=true&filename=4639-18th-street_Suite.jpg",
+        "label": "Published floor plan"
+      }
+    }
+  }
+]

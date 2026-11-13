@@ -7,6 +7,7 @@ import { billCadence, choreCadence } from "./lib/house";
 import { interestId } from "./lib/interests";
 import { lifestyleAnswers } from "./lib/lifestyle";
 import { profileSignal } from "./lib/profileSignals";
+import { rentalMedia } from "./lib/rentalMedia";
 import { unitSceneFields } from "./lib/unitSceneRecord";
 import { roomKind, roomVibe } from "./lib/vibe";
 import {
@@ -345,6 +346,8 @@ export default defineSchema({
     location,
     status: v.union(v.literal("active"), v.literal("pending"), v.literal("sold")),
     rental: v.optional(rentalDetails),
+    /** Attributed same-unit photos and published floor plan for demo reconstruction. */
+    rentalMedia: v.optional(rentalMedia),
     vehicle: v.optional(vehicleDetails),
     /** Set when the seller lowered the price; shown struck through. */
     originalPrice: v.optional(v.number()),

@@ -11,6 +11,7 @@ import {
   categoryFor,
   distanceTo,
   type ListingCard,
+  MAX_PROPERTY_PHOTOS,
   matchesPropertyType,
   NEIGHBORHOODS,
   type Near,
@@ -352,6 +353,7 @@ export const get = viewerQuery({
       brand: l.brand ?? null,
       description: l.description,
       photos: l.photos,
+      rentalMedia: l.rentalMedia ?? null,
       video: l.video ?? null,
       location: l.location,
       status: l.status,
@@ -723,13 +725,15 @@ export function placeFor(name: string) {
 }
 
 export function validate(
-  f: { title: string; price: number; description: string },
+  f: { title: string; price: number; description: string; category?: string },
   photoCount: number,
 ) {
   if (!f.title.trim()) throw new ConvexError("Add a title");
   if (!Number.isFinite(f.price) || f.price < 0) throw new ConvexError("Enter a valid price");
   if (photoCount === 0) throw new ConvexError("Add at least one photo");
-  if (photoCount > 10) throw new ConvexError("You can add up to 10 photos");
+  const limit =
+    f.category === "propertyrentals" || f.category === "homesales" ? MAX_PROPERTY_PHOTOS : 10;
+  if (photoCount > limit) throw new ConvexError(`You can add up to ${limit} photos`);
 }
 
 async function ownListing(ctx: MutationCtx, listingId: Id<"listings">, viewerId: Id<"users">) {
@@ -796,6 +800,17 @@ export const update = viewerMutation({
       video: listingVideo(args.video),
       location,
       neighborhoodId: await neighborhoodIdAt(ctx, locationPoint(location)),
+      // Remove reference evidence when the seller changes the photographed unit or gallery.
+      rentalMedia:
+        args.rental?.address === l.rental?.address &&
+        args.rental?.bedrooms === l.rental?.bedrooms &&
+        args.rental?.bathrooms === l.rental?.bathrooms &&
+        args.rental?.sqft === l.rental?.sqft &&
+        args.neighborhood === l.location.neighborhood &&
+        photos.length === l.photos.length &&
+        photos.every((url, i) => url === l.photos[i])
+          ? l.rentalMedia
+          : undefined,
       // The listing form has no views picker yet (#13), so keep the lister's stated views.
       rental: args.rental && { ...args.rental, views: args.rental.views ?? l.rental?.views },
       vehicle: args.vehicle,

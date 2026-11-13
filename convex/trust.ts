@@ -293,6 +293,7 @@ export async function listingTrust(
       title: listing.title,
       price: listing.price,
       photos: listing.photos,
+      rentalMedia: listing.rentalMedia ?? null,
       description: listing.description,
       status: listing.status,
       neighborhood: listing.location.neighborhood ?? null,

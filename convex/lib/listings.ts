@@ -138,6 +138,14 @@ export const PLACES = [
 
 /** Neighborhoods offered as a listing's location in the composer. */
 export const NEIGHBORHOODS = [
+  { name: "Lakeshore", city: "San Francisco, CA", lat: 37.7134009, lng: -122.483405 },
+  { name: "Lone Mountain/USF", city: "San Francisco, CA", lat: 37.7722096, lng: -122.4536019 },
+  { name: "Bayview Hunters Point", city: "San Francisco, CA", lat: 37.7347105, lng: -122.3933441 },
+  { name: "Presidio Heights", city: "San Francisco, CA", lat: 37.7824459, lng: -122.451115 },
+  { name: "Outer Richmond", city: "San Francisco, CA", lat: 37.7729559, lng: -122.4897783 },
+  { name: "Tenderloin", city: "San Francisco, CA", lat: 37.7837, lng: -122.4145 },
+  { name: "Western Addition", city: "San Francisco, CA", lat: 37.7812, lng: -122.4333 },
+  { name: "Financial District/South Beach", city: "San Francisco, CA", lat: 37.785, lng: -122.394 },
   { name: "Mission", city: "San Francisco, CA", lat: 37.7599, lng: -122.4148 },
   { name: "Berkeley", city: "Berkeley, CA", lat: 37.867, lng: -122.2584 },
   { name: "Inner Richmond", city: "San Francisco, CA", lat: 37.7786, lng: -122.4642 },
@@ -294,3 +302,6 @@ export function sellerRating(sellerId: string): { stars: number; count: number }
   const count = 1 + ((u >>> 7) % 48);
   return { stars, count };
 }
+
+/** Property galleries need room coverage beyond the general item photo limit. */
+export const MAX_PROPERTY_PHOTOS = 18;

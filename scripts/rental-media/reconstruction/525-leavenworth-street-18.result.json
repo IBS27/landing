@@ -1,0 +1,685 @@
+{
+  "listingUrl": "https://real.vision/525-leavenworth-street-18",
+  "generatedAt": "2026-11-13T06:45:25.302Z",
+  "output": {
+    "explanation": "Reconstructed from the published floor plan only. Printed dimensions were interpreted in plan order as north-south length by east-west width, consistent with the storage, living and kitchen proportions on the plan; the bathroom and closet have no printed dimensions and are sized from shared wall alignments. The entry is shown on a chamfered foyer corner as drawn. Foyer-to-living and the west part of living-to-kitchen are open connections with no wall. Wall thickness and ceiling height are estimated; the summed centreline area is less than the published 458 sq ft, which is not reconciled by the printed room dimensions.",
+    "scene": {
+      "notes": [
+        "Only evidence used is the published floor plan (floorplan); no photos were supplied.",
+        "STORAGE 5'8\" x 5'1\", LIVING 15'8\" x 11'2\", FOYER 3' x 3'9\" and KITCHEN/DINING 12'2\" x 8'1\" are the printed dimensions used for those rooms.",
+        "Bathroom and the east closet have no printed dimensions; their sizes are estimated from alignment with the dimensioned rooms and are marked measured:false.",
+        "Ceiling height 2.7 m and wall thickness 0.15 m are plausible estimates, not printed on the plan.",
+        "The bathroom window, living west glazing and kitchen west window are the breaks shown in the west wall on the plan; bath, hob and sink symbols inside rooms were not treated as openings.",
+        "The foyer entry door is placed on the diagonal north-east foyer wall shown on the plan; its exact swing is not modelled."
+      ],
+      "rooms": [
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#D8D3C8",
+          "id": "r_bath",
+          "name": "Bathroom",
+          "polygon": [
+            {
+              "x": 0,
+              "z": 0
+            },
+            {
+              "x": 1.855,
+              "z": 0
+            },
+            {
+              "x": 1.855,
+              "z": 1.727
+            },
+            {
+              "x": 0,
+              "z": 1.727
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "measured",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#CFC8BB",
+          "id": "r_storage",
+          "name": "Storage",
+          "polygon": [
+            {
+              "x": 1.855,
+              "z": 0
+            },
+            {
+              "x": 3.404,
+              "z": 0
+            },
+            {
+              "x": 3.404,
+              "z": 1.727
+            },
+            {
+              "x": 1.855,
+              "z": 1.727
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "measured",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#E3DED2",
+          "id": "r_living",
+          "name": "Living",
+          "polygon": [
+            {
+              "x": 0,
+              "z": 1.727
+            },
+            {
+              "x": 3.404,
+              "z": 1.727
+            },
+            {
+              "x": 3.404,
+              "z": 6.502
+            },
+            {
+              "x": 0,
+              "z": 6.502
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "measured",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#D8D3C8",
+          "id": "r_foyer",
+          "name": "Foyer",
+          "polygon": [
+            {
+              "x": 3.404,
+              "z": 1.727
+            },
+            {
+              "x": 3.7,
+              "z": 1.727
+            },
+            {
+              "x": 4.318,
+              "z": 2.345
+            },
+            {
+              "x": 4.318,
+              "z": 2.87
+            },
+            {
+              "x": 3.404,
+              "z": 2.87
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#CFC8BB",
+          "id": "r_closet",
+          "name": "Closet",
+          "polygon": [
+            {
+              "x": 3.404,
+              "z": 2.87
+            },
+            {
+              "x": 4.318,
+              "z": 2.87
+            },
+            {
+              "x": 4.318,
+              "z": 6.502
+            },
+            {
+              "x": 3.404,
+              "z": 6.502
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "measured",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#DDD6C9",
+          "id": "r_kitchen",
+          "name": "Kitchen/Dining",
+          "polygon": [
+            {
+              "x": 0,
+              "z": 6.502
+            },
+            {
+              "x": 2.464,
+              "z": 6.502
+            },
+            {
+              "x": 2.464,
+              "z": 10.21
+            },
+            {
+              "x": 0,
+              "z": 10.21
+            }
+          ]
+        }
+      ],
+      "title": "525 Leavenworth Street #18",
+      "version": 1,
+      "walls": [
+        {
+          "a": {
+            "x": 0,
+            "z": 0
+          },
+          "b": {
+            "x": 1.855,
+            "z": 0
+          },
+          "color": "#8A8578",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_bath_n",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 1.855,
+            "z": 0
+          },
+          "b": {
+            "x": 3.404,
+            "z": 0
+          },
+          "color": "#8A8578",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_storage_n",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 3.404,
+            "z": 0
+          },
+          "b": {
+            "x": 3.404,
+            "z": 1.727
+          },
+          "color": "#8A8578",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_storage_e",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 0
+          },
+          "b": {
+            "x": 0,
+            "z": 1.727
+          },
+          "color": "#8A8578",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_bath_w",
+          "openings": [
+            {
+              "bottom": 1.2,
+              "height": 0.9,
+              "kind": "window",
+              "offset": 0.25,
+              "width": 0.9
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 1.855,
+            "z": 0
+          },
+          "b": {
+            "x": 1.855,
+            "z": 1.727
+          },
+          "color": "#9A9588",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_bath_storage",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.05,
+              "kind": "door",
+              "offset": 0.95,
+              "width": 0.7
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 1.727
+          },
+          "b": {
+            "x": 1.855,
+            "z": 1.727
+          },
+          "color": "#9A9588",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_bath_s",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 1.855,
+            "z": 1.727
+          },
+          "b": {
+            "x": 3.404,
+            "z": 1.727
+          },
+          "color": "#9A9588",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_storage_s",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.05,
+              "kind": "door",
+              "offset": 0.75,
+              "width": 0.75
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 1.727
+          },
+          "b": {
+            "x": 0,
+            "z": 6.502
+          },
+          "color": "#8A8578",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_living_w",
+          "openings": [
+            {
+              "bottom": 0.8,
+              "height": 1.6,
+              "kind": "window",
+              "offset": 0.4,
+              "width": 3.8
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 3.404,
+            "z": 2.87
+          },
+          "b": {
+            "x": 3.404,
+            "z": 6.502
+          },
+          "color": "#9A9588",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_closet_w",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.05,
+              "kind": "door",
+              "offset": 1.2,
+              "width": 1.4
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 3.404,
+            "z": 1.727
+          },
+          "b": {
+            "x": 3.7,
+            "z": 1.727
+          },
+          "color": "#8A8578",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_foyer_n",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 3.7,
+            "z": 1.727
+          },
+          "b": {
+            "x": 4.318,
+            "z": 2.345
+          },
+          "color": "#8A8578",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_entry_diag",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.05,
+              "kind": "door",
+              "offset": 0.04,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 4.318,
+            "z": 2.345
+          },
+          "b": {
+            "x": 4.318,
+            "z": 2.87
+          },
+          "color": "#8A8578",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_foyer_e",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 3.404,
+            "z": 2.87
+          },
+          "b": {
+            "x": 4.318,
+            "z": 2.87
+          },
+          "color": "#9A9588",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_foyer_closet",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.05,
+              "kind": "door",
+              "offset": 0.15,
+              "width": 0.6
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 4.318,
+            "z": 2.87
+          },
+          "b": {
+            "x": 4.318,
+            "z": 6.502
+          },
+          "color": "#8A8578",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_closet_e",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 2.464,
+            "z": 6.502
+          },
+          "b": {
+            "x": 4.318,
+            "z": 6.502
+          },
+          "color": "#8A8578",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_living_s_ext",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 0.9,
+            "z": 6.502
+          },
+          "b": {
+            "x": 2.464,
+            "z": 6.502
+          },
+          "color": "#9A9588",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_liv_kitchen",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 6.502
+          },
+          "b": {
+            "x": 0,
+            "z": 10.21
+          },
+          "color": "#8A8578",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_kitchen_w",
+          "openings": [
+            {
+              "bottom": 0.9,
+              "height": 1.4,
+              "kind": "window",
+              "offset": 0.8,
+              "width": 1.4
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 2.464,
+            "z": 6.502
+          },
+          "b": {
+            "x": 2.464,
+            "z": 10.21
+          },
+          "color": "#8A8578",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_kitchen_e",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 10.21
+          },
+          "b": {
+            "x": 2.464,
+            "z": 10.21
+          },
+          "color": "#8A8578",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w_kitchen_s",
+          "openings": [],
+          "thickness": 0.15
+        }
+      ]
+    }
+  },
+  "via": "model",
+  "cited": null,
+  "validation": [],
+  "log": {
+    "agent": "muse",
+    "task": "muse.unitScene",
+    "inputHash": "1a125da5a8332a52944a3873a8e967e350bab486d76347bdf7084d2ad2beba54",
+    "outcome": "model",
+    "cited": [],
+    "model": "muse-wonder-1.0",
+    "attempts": 1,
+    "latencyMs": 132959,
+    "usage": {
+      "inputTokens": 4792,
+      "outputTokens": 14209,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "costUsd": 0.303348,
+    "createdAt": 1794552325302
+  }
+}

@@ -63,7 +63,11 @@ export function UnitSources({ doc }: { doc: Doc<"unitScenes"> }) {
             className="overflow-hidden rounded-lg border border-divider text-primary text-xs"
           >
             {s.url && s.kind !== "video" ? (
-              <img src={s.url} alt={s.label} className="aspect-[4/3] w-full bg-wash object-cover" />
+              <img
+                src={s.url}
+                alt={s.label}
+                className={`aspect-[4/3] w-full bg-wash ${s.kind === "floorplan" ? "object-contain" : "object-cover"}`}
+              />
             ) : (
               <div className="flex aspect-[4/3] items-center justify-center bg-wash">
                 {s.kind === "video" ? "Video" : "Unavailable"}

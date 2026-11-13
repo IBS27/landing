@@ -16,6 +16,7 @@ import {
   type Condition,
   conditionLabel,
   ITEM_CATEGORIES,
+  MAX_PROPERTY_PHOTOS,
   MEETUPS,
   type Meetup,
   NEIGHBORHOODS,
@@ -492,7 +493,7 @@ function DetailsStep({
           </p>
         </div>
       </div>
-      <PhotoPicker f={f} set={set} toast={toast} />
+      <PhotoPicker f={f} set={set} toast={toast} kind={kind} />
 
       {kind === "vehicle" ? (
         <VehicleFields f={f} set={set} />
@@ -621,7 +622,13 @@ function ToggleBlock({
   );
 }
 
-function PhotoPicker({ f, set, toast }: StepProps & { toast: (m: string) => void }) {
+function PhotoPicker({
+  f,
+  set,
+  toast,
+  kind,
+}: StepProps & { toast: (m: string) => void; kind: ComposerKind }) {
+  const photoLimit = kind === "property" ? MAX_PROPERTY_PHOTOS : 10;
   const input = useRef<HTMLInputElement>(null);
   const video = useRef<HTMLInputElement>(null);
   const getUploadUrl = useM(api.posts.generateUploadUrl);
@@ -632,8 +639,8 @@ function PhotoPicker({ f, set, toast }: StepProps & { toast: (m: string) => void
 
   const add = async (files: FileList | File[]) => {
     const images = [...files].filter((x) => x.type.startsWith("image/"));
-    const room = 10 - photosRef.current.length - pending;
-    if (images.length > room) toast("You can add up to 10 photos");
+    const room = photoLimit - photosRef.current.length - pending;
+    if (images.length > room) toast(`You can add up to ${photoLimit} photos`);
     const take = images.slice(0, Math.max(0, room));
     setPending((n) => n + take.length);
     for (const file of take) {
@@ -698,7 +705,7 @@ function PhotoPicker({ f, set, toast }: StepProps & { toast: (m: string) => void
   return (
     <>
       <p className="mt-3 font-semibold text-[13px] text-secondary leading-4">
-        Photos · {f.photos.length} / 10 Videos · {f.video ? 1 : 0} / 1
+        Photos · {f.photos.length} / {photoLimit} Videos · {f.video ? 1 : 0} / 1
       </p>
       <input
         ref={input}
@@ -826,7 +833,7 @@ function PhotoPicker({ f, set, toast }: StepProps & { toast: (m: string) => void
               <Spinner size={20} />
             </div>
           ))}
-          {f.photos.length + pending < 10 && (
+          {f.photos.length + pending < photoLimit && (
             <button
               type="button"
               onClick={() => input.current?.click()}
