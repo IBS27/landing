@@ -20,25 +20,26 @@ import {
 } from "./lib/citations";
 import { getProfile, interestWeights } from "./lib/cityProfile";
 import { viewerQuery } from "./lib/functions";
-import { getInterest, interestsForEvent, interestsForGroup } from "./lib/interests";
+import { getInterest, interestsForEvent } from "./lib/interests";
 import {
   breakdown,
   clockTime,
   type FitItem,
   HOW_CALCULATED,
   interestFit,
+  interestsForLocalGroup,
   interestsForPlace,
   MAX_SOURCES,
   type PlaceMention,
   percentiles,
   pickNightQuotes,
-  RAW,
+  rawScore,
   type ScoreInputs,
   scoreLabel,
   scoreSources,
 } from "./lib/neighborhoodScores";
+import { mentions, placesIn } from "./lib/places";
 import { loadAudience } from "./lib/posts";
-import { NEIGHBORHOOD_PLACES } from "./seed/world/neighborhoods/places";
 import {
   type NeighborhoodScoreKind,
   neighborhoodScoreKind,
@@ -116,21 +117,20 @@ async function neighborhoodThreads(
   return { groups, texts };
 }
 
-/** #15 places of this neighborhood that its threads name, with where they're named. */
+/**
+ * #15 places of this neighborhood that its threads name, with where they're named: by name or
+ * alias, as whole words (#18's matching), so "Union St" doesn't match inside "Union stay".
+ */
 function placeMentions(slug: string, texts: readonly ThreadText[]): PlaceMention[] {
-  const lower = texts.map((t) => ({ ...t, lc: t.text.toLowerCase() }));
-  return NEIGHBORHOOD_PLACES.filter((p) => p.neighborhood === slug)
-    .map((p) => {
-      const name = p.name.toLowerCase();
-      return {
-        key: p.key,
-        name: p.name,
-        kind: p.kind,
-        mentions: lower
-          .filter((t) => t.lc.includes(name))
-          .map((t) => ({ source: t.source, reactions: t.reactions })),
-      };
-    })
+  return placesIn(slug)
+    .map((p) => ({
+      key: p.key,
+      name: p.name,
+      kind: p.kind,
+      mentions: texts
+        .filter((t) => mentions(t.text, p))
+        .map((t) => ({ source: t.source, reactions: t.reactions })),
+    }))
     .filter((p) => p.mentions.length > 0);
 }
 
@@ -273,7 +273,8 @@ export const recompute = internalAction({
       if (i) inputs.set(id, i);
     }
     const ranked = KINDS.map((kind) => {
-      const raws = new Map([...inputs].map(([id, i]) => [id, RAW[kind](i)]));
+      // Rounded, and 0 without enough data (so it isn't ranked or stored).
+      const raws = new Map([...inputs].map(([id, i]) => [id, rawScore(kind, i)]));
       return { kind, raws, scores: percentiles(raws) };
     });
     let stored = 0;
@@ -374,7 +375,7 @@ export const get = viewerQuery({
         .take(MAX_EVENTS);
       const candidates: FitItem[] = [
         ...groups.map((g) => ({
-          interests: interestsForGroup({ category: g.category, tags: g.tags, name: g.name }),
+          interests: interestsForLocalGroup({ category: g.category, tags: g.tags, name: g.name }),
           source: { kind: "group", groupId: g._id } as Source,
         })),
         ...events.map((e) => ({
@@ -451,6 +452,7 @@ export const get = viewerQuery({
                 lastTrains: service.lastTrains.map((t) => ({
                   system: t.system,
                   station: t.station,
+                  toward: t.toward ?? null,
                   weekday: t.weekday === undefined ? null : clockTime(t.weekday),
                   saturday: t.saturday === undefined ? null : clockTime(t.saturday),
                   sunday: t.sunday === undefined ? null : clockTime(t.sunday),

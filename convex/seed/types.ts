@@ -435,6 +435,8 @@ export type ServiceRouteSeed = {
 export type LastTrainSeed = {
   readonly system: "bart" | "caltrain";
   readonly station: string;
+  /** Where the last train in this direction goes ("Antioch"): one entry per direction. */
+  readonly toward?: string;
   readonly weekday?: number;
   readonly saturday?: number;
   readonly sunday?: number;

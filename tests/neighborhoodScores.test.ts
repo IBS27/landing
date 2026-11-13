@@ -6,7 +6,9 @@ import {
   breakdown,
   clockTime,
   foodRaw,
+  hasEnoughData,
   interestFit,
+  interestsForLocalGroup,
   interestsForPlace,
   isFoodPlace,
   isNightQuote,
@@ -14,11 +16,13 @@ import {
   nightExcerpt,
   percentiles,
   pickNightQuotes,
+  rawScore,
   type ScoreInputs,
   scoreLabel,
   scoreSources,
   thingsToDoRaw,
   transitRaw,
+  withoutNeighborhoodNames,
 } from "../convex/lib/neighborhoodScores";
 import * as scores from "../convex/neighborhoodScores";
 import type { Source } from "../convex/validators";
@@ -116,8 +120,8 @@ describe("score functions", () => {
   });
 
   test("transit: trips an hour, stations, Metro lines and all-night lines", () => {
-    // 0.1·200 + 6·1 BART + 3·1 subway + 1·1 line + 2·2 all-night.
-    expect(transitRaw(mission)).toBeCloseTo(34);
+    // 0.1·200 + 6·1 BART + 3·1 subway + 0.5·25 Muni lines + 2·2 all-night.
+    expect(transitRaw(mission)).toBeCloseTo(45.5);
     expect(breakdown("transit", mission)).toBe(
       "16th Street / Mission · Muni Metro at Church Station · 25 Muni lines · ~200 trips an hour on weekdays · 2 all-night lines",
     );
@@ -146,6 +150,31 @@ describe("score functions", () => {
     expect(scoreLabel("transit", 9.1)).toBe("Excellent transit");
     expect(scoreLabel("food", 6)).toBe("Great food");
     expect(scoreLabel("things_to_do", 0.5)).toBe("Quieter");
+  });
+});
+
+describe("enough data to score", () => {
+  test("one Event, or a corridor alone, isn't enough", () => {
+    const oneEvent = { ...empty, events: [ev("e1", "Music")] };
+    expect(hasEnoughData("things_to_do", oneEvent)).toBe(false);
+    expect(rawScore("things_to_do", oneEvent)).toBe(0);
+    const corridorOnly = { ...empty, corridors: [{ name: "Polk Street", source: ext("polk") }] };
+    expect(hasEnoughData("food", corridorOnly)).toBe(false);
+    expect(hasEnoughData("food", mission)).toBe(true);
+    expect(hasEnoughData("transit", empty)).toBe(false);
+  });
+  test("raw values are rounded, so equal counts tie", () => {
+    const a = {
+      ...empty,
+      service: { tripsPerHour: 106, routes: 4, allNight: ["x"], sources: [] },
+    };
+    const b = {
+      ...empty,
+      service: { tripsPerHour: 86, routes: 0, allNight: [], sources: [] },
+      stations: [{ name: "s", system: "bart" as const, source: ext("s") }],
+    };
+    // 10.6 + 2 + 2 and 8.6 + 6: both 14.6, though 0.1 · 106 isn't exact in floating point.
+    expect(rawScore("transit", a)).toBe(rawScore("transit", b));
   });
 });
 
@@ -212,6 +241,23 @@ describe("interest fit", () => {
   });
   test("places map to interests by kind and name", () => {
     expect(interestsForPlace({ kind: "cafe", name: "Moonrise Coffee" })).toContain("coffee");
+    // Neighborhood names aren't interests, and a shop or market isn't thrifting or a farmers
+    // market unless its name says so.
+    expect(interestsForPlace({ kind: "library", name: "North Beach Branch Library" })).toEqual([
+      "books",
+    ]);
+    expect(
+      interestsForLocalGroup({
+        category: "Neighborhood",
+        tags: ["North Beach", "Telegraph Hill"],
+        name: "North Beach & Telegraph Hill Neighbors",
+      }),
+    ).not.toContain("beach_days");
+    expect(withoutNeighborhoodNames("Ocean Beach in the Outer Sunset")).toContain("Ocean Beach");
+    expect(interestsForPlace({ kind: "shop", name: "The Rind Line" })).toEqual([]);
+    expect(interestsForPlace({ kind: "market", name: "Rivet Market" })).not.toContain(
+      "farmers_markets",
+    );
     expect(interestsForPlace({ kind: "climbing-gym", name: "Sutro Boulders" })).toContain(
       "climbing",
     );
@@ -224,7 +270,8 @@ describe("getting around at night", () => {
       "the little alleys (Natoma, Minna, Tehama) get dark after 6 this time of year",
       "I take the owl bus home, the N Owl runs every 30",
       "Valencia is well-lit after dark",
-      "I bike home from the hospital at 7am",
+      "some side streets east of folsom have long gaps between streetlights",
+      "I walk home from the Velvet Owl around 2am most weekends.",
     ]) {
       expect([t, isNightQuote(t)]).toEqual([t, true]);
     }
@@ -235,6 +282,14 @@ describe("getting around at night", () => {
       "their dark roast is the move",
       "the taqueria is open til midnight",
       "great tacos, go early",
+      // Seeded strings that matched before: coffee, a scenic view, art, a fragment, a question.
+      "The cortado at Dovecote Coffee is still too dark for me.",
+      "you can see alamo square after dark, when downtown lights up behind them.",
+      "Patricia's Green at night when the big art piece is lit up.",
+      "toast (crispy. sorry ryan), decaf from slow grade on the walk home.",
+      "how bad is the uphill walk home from 24th St BART, honestly",
+      "board game night is two blocks from BART, every thursday",
+      "I bike home from the hospital at 7am",
     ]) {
       expect([t, isNightQuote(t)]).toEqual([t, false]);
     }
@@ -242,8 +297,8 @@ describe("getting around at night", () => {
   test("questions and fragments ask, they don't tell", () => {
     expect(isNightQuote("which blocks are actually quiet at night?")).toBe(false);
     expect(isNightQuote("questions:\n- getting home late at night\n- groceries")).toBe(false);
-    expect(nightExcerpt("1. we walk home along Irving, it stays busy til 10")).toBe(
-      "we walk home along Irving, it stays busy til 10",
+    expect(nightExcerpt("1. we walk home along Irving at night, it stays busy til 10")).toBe(
+      "we walk home along Irving at night, it stays busy til 10",
     );
   });
   test("never quotes labels about an area or its people", () => {
@@ -253,6 +308,10 @@ describe("getting around at night", () => {
     expect(isNightQuote("This neighborhood is safe to walk home in after dark.")).toBe(false);
     expect(isNightQuote("Mostly young families and immigrants walk here at night.")).toBe(false);
     expect(isNightQuote("Lots of gay bars, so the streets stay busy at night.")).toBe(false);
+    // Crime, and who's around: never quoted.
+    expect(isNightQuote("past the encampments on Division it's dark at night.")).toBe(false);
+    expect(isNightQuote("Dolores Park at night is full of transients.")).toBe(false);
+    expect(isNightQuote("my car got broken into twice at night on this block.")).toBe(false);
   });
   test("quotes the sentence that says it, cut around the words when long", () => {
     expect(
@@ -260,10 +319,10 @@ describe("getting around at night", () => {
         "Folsom and Howard are bright. the little alleys get dark after 6, I don't cut through them. BART stops around midnight.",
       ),
     ).toBe("the little alleys get dark after 6, I don't cut through them.");
-    const long = `${"a".repeat(120)} we walk home on Valencia, it's busy ${"b ".repeat(150)}`;
+    const long = `${"a ".repeat(90)}we walk home on Valencia at night, it's busy ${"b ".repeat(150)}`;
     const q = nightExcerpt(long) ?? "";
     expect(q.length).toBeLessThanOrEqual(202);
-    expect(q).toContain("walk home on Valencia");
+    expect(q).toContain("walk home on Valencia at night");
     expect(q.startsWith("…") && q.endsWith("…")).toBe(true);
   });
   test("most reacted first, then newest, with excerpts", () => {
@@ -396,7 +455,26 @@ function world() {
         city: "San Francisco, CA",
       },
     ],
-    groups: [],
+    // An active public Group: "Things to do" needs one (or a place locals name), not just an Event.
+    groups: [
+      {
+        _id: "groups:locals",
+        name: "Mission Locals",
+        slug: "mission-locals",
+        privacy: "public",
+        visible: true,
+        category: "Neighborhood",
+        tags: [],
+        cover: "/seed/covers/mission-01.jpg",
+        description: "Ask-anything Mission group",
+        neighborhoodId: "neighborhoods:mission",
+        memberCount: 10,
+        externalMemberCount: 9,
+        lastActivityAt: NOW - DAY,
+        createdAt: NOW - 400 * DAY,
+      },
+    ],
+    groupMembers: [],
     posts: [],
     comments: [],
     neighborhoodScores: [],
@@ -409,7 +487,7 @@ describe("recompute and get", () => {
     const { tables, ctx } = world();
     await recompute(ctx);
     const stored = tables.neighborhoodScores.map((r) => `${r.neighborhoodId}:${r.kind}`).sort();
-    // Mission: an Event (things to do) and a cited BART station (transit). Inner Sunset's station
+    // Mission: an Event and an active Group (things to do), a cited BART station (transit). Inner Sunset's station
     // counts (raw > 0) but its only source is gone, so no transit score is stored. Food: no data.
     expect(stored).toEqual(["neighborhoods:mission:things_to_do", "neighborhoods:mission:transit"]);
     for (const r of tables.neighborhoodScores) {
@@ -417,7 +495,7 @@ describe("recompute and get", () => {
     }
   });
 
-  test("a score is hidden when its only source turns private", async () => {
+  test("a score is hidden when one of its sources turns private", async () => {
     const { tables, ctx } = world();
     await recompute(ctx);
     const view = async () =>
@@ -432,7 +510,7 @@ describe("recompute and get", () => {
       "food:no_data",
       "transit:ok",
     ]);
-    // The Event behind "Things to do" becomes friends-only.
+    // An Event behind "Things to do" becomes friends-only: the score could repeat what it said.
     const e = tables.events.find((x) => x._id === "events:e1");
     if (e) e.privacy = "friends";
     expect((await view()).scores.map((s) => `${s.kind}:${s.state}`)).toEqual([

@@ -243,9 +243,9 @@ export function NightFacts({ data }: { data: ScoresData }) {
               <p>No all-night Muni lines stop here.</p>
             )}
             {transit.lastTrains.map((t) => (
-              <p key={`${t.system}:${t.station}`}>
-                Last {t.system === "bart" ? "BART" : "Caltrain"} departure from {t.station}:{" "}
-                {lastTimes(t)}
+              <p key={`${t.system}:${t.station}:${t.toward}`}>
+                Last {t.system === "bart" ? "BART" : "Caltrain"} from {t.station}
+                {t.toward ? ` toward ${t.toward}` : ""}: {lastTimes(t)}
               </p>
             ))}
           </NightRow>

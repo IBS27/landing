@@ -1,7 +1,8 @@
 import type { Id } from "../_generated/dataModel";
 import type { NeighborhoodScoreKind, Source } from "../validators";
 import { sourceKey } from "./citations";
-import { type InterestId, interestsInText } from "./interests";
+import { type InterestId, interestsForGroup, interestsInText } from "./interests";
+import { SF_NEIGHBORHOODS } from "./neighborhoods";
 import { hasProtected } from "./protectedText";
 
 /**
@@ -76,7 +77,6 @@ const KIND_INTERESTS: Record<string, InterestId[]> = {
   dessert: ["restaurants"],
   bar: ["bars", "nightlife"],
   brewery: ["bars"],
-  market: ["farmers_markets"],
   grocery: ["cooking"],
   viewpoint: ["photography", "hiking"],
   stairway: ["hiking"],
@@ -87,12 +87,52 @@ const KIND_INTERESTS: Record<string, InterestId[]> = {
   bookstore: ["books"],
   "music-venue": ["live_music", "nightlife"],
   "climbing-gym": ["climbing"],
-  shop: ["thrifting"],
   landmark: ["day_trips"],
 };
 
+/** Every SF neighborhood name and its parts ("Castro/Upper Market" → "Castro", "Upper Market"). */
+const NEIGHBORHOOD_NAMES = [
+  ...new Set(
+    SF_NEIGHBORHOODS.flatMap((n: { name: string; short?: string }) => [
+      n.name,
+      ...n.name.split("/"),
+      ...(n.short ? [n.short] : []),
+    ]).map((x) => x.trim().toLowerCase()),
+  ),
+].sort((a, b) => b.length - a.length);
+const NEIGHBORHOOD_NAME_RE = new RegExp(
+  `\\b(?:${NEIGHBORHOOD_NAMES.map((x) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
+  "gi",
+);
+
+/**
+ * `text` without neighborhood names, so a place or Group named after where it
+ * is doesn't read as an interest ("North Beach Branch Library" isn't a beach).
+ */
+export function withoutNeighborhoodNames(text: string): string {
+  return text.replace(NEIGHBORHOOD_NAME_RE, " ");
+}
+
 export function interestsForPlace(p: { kind: string; name: string }): InterestId[] {
-  return [...new Set([...(KIND_INTERESTS[p.kind] ?? []), ...interestsInText(p.name)])];
+  return [
+    ...new Set([
+      ...(KIND_INTERESTS[p.kind] ?? []),
+      ...interestsInText(withoutNeighborhoodNames(p.name)),
+    ]),
+  ];
+}
+
+/** A Group's interests, ignoring neighborhood names in its name and tags. */
+export function interestsForLocalGroup(g: {
+  category: string;
+  tags: readonly string[];
+  name: string;
+}): InterestId[] {
+  return interestsForGroup({
+    category: g.category,
+    tags: g.tags.map(withoutNeighborhoodNames).filter((t) => t.trim()),
+    name: withoutNeighborhoodNames(g.name),
+  });
 }
 
 /* ---------- Raw scores ---------- */
@@ -100,7 +140,7 @@ export function interestsForPlace(p: { kind: string; name: string }): InterestId
 const WEIGHTS = {
   things_to_do: { event: 2, eventKind: 3, group: 2, place: 1 },
   food: { place: 3, mention: 0.5, corridor: 4 },
-  transit: { tripsPerHour: 0.1, railStation: 6, subwayStation: 3, metroLine: 1, allNight: 2 },
+  transit: { tripsPerHour: 0.1, railStation: 6, subwayStation: 3, line: 0.5, allNight: 2 },
 } as const;
 
 export function thingsToDoRaw(i: ScoreInputs): number {
@@ -130,7 +170,7 @@ export function transitRaw(i: ScoreInputs): number {
     w.tripsPerHour * (i.service?.tripsPerHour ?? 0) +
     w.railStation * rail +
     w.subwayStation * subway +
-    w.metroLine * i.metroLines.length +
+    w.line * (i.service?.routes ?? 0) +
     w.allNight * (i.service?.allNight.length ?? 0)
   );
 }
@@ -140,6 +180,23 @@ export const RAW: Record<NeighborhoodScoreKind, (i: ScoreInputs) => number> = {
   food: foodRaw,
   transit: transitRaw,
 };
+
+/**
+ * Whether there's enough to score: a place locals recommend or an active Group
+ * for Things to do (one Event alone isn't), a food spot locals name for Food (a
+ * corridor alone isn't), a station or any service for Transit.
+ */
+export function hasEnoughData(kind: NeighborhoodScoreKind, i: ScoreInputs): boolean {
+  if (kind === "things_to_do")
+    return i.activeGroups.length > 0 || i.places.some((p) => isThingToDo(p.kind));
+  if (kind === "food") return i.places.some((p) => isFoodPlace(p.kind));
+  return i.stations.length > 0 || i.service !== null;
+}
+
+/** The value a score ranks: its raw count rounded to 0.01 (so equal counts tie), or 0 without enough data. */
+export function rawScore(kind: NeighborhoodScoreKind, i: ScoreInputs): number {
+  return hasEnoughData(kind, i) ? Math.round(RAW[kind](i) * 100) / 100 : 0;
+}
 
 /* ---------- Percentiles ---------- */
 
@@ -238,12 +295,12 @@ export function breakdown(kind: NeighborhoodScoreKind, i: ScoreInputs): string {
 
 /** How the scores are calculated, for the "How this is calculated" note. */
 export const HOW_CALCULATED = [
-  "Things to do, Food and Transit are percentiles, from 0 to 10: a neighborhood's rank among the San Francisco neighborhoods (DataSF's 41) that have public data for that score. A 7 means it ranks above about 70% of them.",
-  "Things to do counts public Events in the next 30 days and how many kinds, Groups based here that posted in the last month, and places (parks, viewpoints, venues, museums…) that locals name in public neighborhood Groups.",
-  "Food counts the food and drink spots locals name in public neighborhood Groups, how often they come up, and nightlife corridors.",
+  "Things to do, Food and Transit are percentiles, from 0 to 10: a neighborhood's rank among the San Francisco neighborhoods (DataSF's 41) with enough public data for that score. A 7 means it ranks above about 70% of them.",
+  "Things to do counts public Events in the next 30 days and how many kinds, Groups based here that posted in the last month, and places (parks, viewpoints, venues, museums…) that locals name in public neighborhood Groups. It needs an active Group or a place locals name.",
+  "Food counts the food and drink spots locals name in public neighborhood Groups, how often they come up, and nightlife corridors. It needs at least one spot locals name.",
   "Transit counts BART, Caltrain and Muni Metro stations, Muni lines, weekday trips an hour and all-night lines, from the agencies' own schedules.",
   "Interest fit is only yours: how many of the interests in your City Profile have a Group, Event or place here. It isn't shared or stored.",
-  "Only public sources count, and every score shows them. There is no safety score.",
+  "Things to do, Food and Transit count only public sources, and each shows them. Interest fit also counts what only you can see. There is no safety score.",
 ];
 
 /* ---------- Sources ---------- */
@@ -346,58 +403,60 @@ export function interestFit(
 /* ---------- Getting around at night (no score) ---------- */
 
 /**
- * Phrases that make a local's words about getting around after dark: lighting,
- * walking or biking home, late transit. Bare words that also mean other things
- * ("owl" in a bar's name, "dark roast", "open til midnight") don't count.
+ * Getting around after dark: a sentence about street lighting, or one that names
+ * the night (at night, after dark, past 9pm, an Owl line…) and getting around
+ * (walking or biking home, buses and trains, streets and blocks). Bare words that
+ * also mean other things ("owl" in a bar's name, "too dark" coffee, "game night",
+ * "downtown lights up") don't count on their own.
  */
-const NIGHT =
-  /\b(?:well[- ]lit|poorly lit|badly lit|brightly lit|lit up|street ?lights?|(?:gets?|getting|pretty|too|really|very|super|kinda) dark|dark (?:blocks?|streets?|stretch(?:es)?|alleys?|at night|after)|pitch[- ]dark|at night|after dark|after midnight|late at night|(?:walk|walks|walked|walking|bike|biked|biking) home|owl (?:bus|buses|line|lines|service)|(?:n|l|90|91) owl|owl (?:judah|taraval)|last (?:bart|train|bus)|late[- ]night (?:muni|bus|buses|bart|trains?|transit|service))\b/i;
+const NIGHT_CUE =
+  /\b(?:at night|after dark|after midnight|late at night|late[- ]night|(?:9|10|11) ?pm|(?:12|1|2|3|4) ?am|owl (?:bus|buses|line|lines|service)|(?:n|l|90|91) owl|owl (?:judah|taraval)|last (?:bart|train|bus))\b/i;
+const MOVE_CUE =
+  /\b(?:walk(?:s|ed|ing)?|bik(?:e|es|ed|ing)|bus(?:es)?|trains?|bart|muni|caltrain|n judah|uber|lyft|(?:get|gets|getting|got|ride|riding) home|streets?|blocks?|sidewalks?|alleys?|corners?|crosswalks?)\b/i;
+/** Street lighting: about the night on its own. */
+const LIGHT_CUE =
+  /\b(?:street ?lights?|(?:well|poorly|badly|brightly)[- ]lit|unlit|lighting|gets? dark|(?:dark|unlit) (?:blocks?|streets?|stretch(?:es)?|alleys?|sidewalks?|corners?))\b/i;
 /**
  * Labels about an area, or who's in it, never quoted (the brief: cited facts only, no labels):
- * safety verdicts either way, and descriptions of the people there. `hasProtected` catches the
- * rest of who someone is (origin, religion, orientation…).
+ * safety verdicts either way, crime, and descriptions of the people there. `hasProtected`
+ * catches the rest of who someone is (origin, religion, orientation…).
  */
 const LABEL_WORDS =
-  /\b(?:sketchy|safe|safer|safest|safely|safety|unsafe|dangerous|bad (?:area|part|neighborhood|block)|shady|ghetto|crime|criminals?|scary|homeless|addicts?|famil(?:y|ies)|kids|children|young|old|older|elderly|seniors?|retirees?)\b/i;
-/** Quotes are at most this long: the sentence that says it, cut around the words if needed. */
+  /\b(?:sketch\w*|safe|safer|safest|safely|safety|unsafe|dangerous|rough|seedy|shady|scary|creepy|bad (?:area|part|neighborhood|block|blocks)|ghetto|hood|the tl|crime|criminals?|mugg\w*|robb\w*|break[- ]?ins?|broken into|stolen|theft|thie(?:f|ves)|police|cops|drugs?|needles?|tents?|encampments?|unhoused|homeless|transients?|tweak\w*|addicts?|projects|famil(?:y|ies)|kids|children|young|old|older|elderly|seniors?|retirees?)\b/i;
+/** Openers that make a sentence a question even without a question mark. */
+const QUESTION =
+  /^(?:how|what|which|where|when|why|who|is|are|does|do|did|can|could|should|would|will|anyone|any)\b/i;
+/** Quotes are at most this long, cut around the words if needed. */
 const QUOTE_MAX = 200;
 /** Shorter sentences are fragments (a list item, a heading), not something a local said. */
 const QUOTE_MIN = 30;
 
+const balanced = (s: string) =>
+  [...s].reduce((d, c) => (d < 0 ? d : c === "(" ? d + 1 : c === ")" ? d - 1 : d), 0) === 0;
+
 /**
- * The part of a local's post or comment about getting around after dark: the
- * sentence with the matching phrase, verbatim (… marks a cut). Null when the
- * text isn't about that, labels an area or its people anywhere, or the
- * sentence is a question or a fragment: those ask, they don't tell.
+ * The sentence of a local's post or comment about getting around after dark,
+ * verbatim (… marks a cut). Null when there's none, or the text labels an area
+ * or its people anywhere. Questions and fragments (including pieces of a
+ * parenthetical) ask or trail off, they don't tell, so they don't count.
  */
 export function nightExcerpt(text: string): string | null {
   if (LABEL_WORDS.test(text) || hasProtected(text)) return null;
-  const m = NIGHT.exec(text);
-  if (!m) return null;
-  const at = m.index;
-  const ends = /[.!?\n]/g;
-  let start = 0;
-  for (let i = at - 1; i >= 0; i--) {
-    if (/[.!?\n]/.test(text[i])) {
-      start = i + 1;
-      break;
-    }
+  for (const m of text.matchAll(/[^.!?\n]+[.!?]?/g)) {
+    const body = m[0]
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/^(?:[-*•]|\d+[.)])\s+/, "");
+    if (body.length < QUOTE_MIN || body.endsWith("?") || QUESTION.test(body)) continue;
+    if (!balanced(body)) continue;
+    const cue = LIGHT_CUE.exec(body) ?? (MOVE_CUE.test(body) ? NIGHT_CUE.exec(body) : null);
+    if (!cue) continue;
+    if (body.length <= QUOTE_MAX) return body;
+    const from = Math.max(0, cue.index - Math.floor(QUOTE_MAX / 3));
+    const cut = body.slice(from, from + QUOTE_MAX).trim();
+    return `${from > 0 ? "…" : ""}${cut}${from + QUOTE_MAX < body.length ? "…" : ""}`;
   }
-  ends.lastIndex = at + m[0].length;
-  const stop = ends.exec(text);
-  let end = stop ? stop.index + 1 : text.length;
-  let from = start;
-  if (end - from > QUOTE_MAX) {
-    from = Math.max(start, at - Math.floor(QUOTE_MAX / 3));
-    end = Math.min(end, from + QUOTE_MAX);
-  }
-  const body = text
-    .slice(from, end)
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/^(?:[-*•]|\d+[.)])\s+/, "");
-  if (body.length < QUOTE_MIN || body.endsWith("?")) return null;
-  return `${from > start ? "…" : ""}${body}${end < (stop ? stop.index + 1 : text.length) ? "…" : ""}`;
+  return null;
 }
 
 export function isNightQuote(text: string): boolean {

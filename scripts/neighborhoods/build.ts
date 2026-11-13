@@ -849,11 +849,18 @@ function referenceDates(feed: Gtfs): Record<DayType, string> {
 
 /** `board`: riders can get on here (not a drop-off-only stop or the end of the trip). */
 type StopEvent = { stop: string; t: number; row: number; seq: number; board: boolean };
+type Trip = { route: string; service: string; direction: string; events: StopEvent[] };
 /** Trips running on any of `services`, with their stop events (row = stop_times line index). */
 function tripsOf(feed: Gtfs, services: Set<string>) {
-  const trips = new Map<string, { route: string; service: string; events: StopEvent[] }>();
+  const trips = new Map<string, Trip>();
   for (const t of table(feed, "trips.txt").rows) {
-    if (services.has(t.service_id)) trips.set(t.trip_id, { route: t.route_id, service: t.service_id, events: [] });
+    if (!services.has(t.service_id)) continue;
+    trips.set(t.trip_id, {
+      route: t.route_id,
+      service: t.service_id,
+      direction: t.direction_id ?? "",
+      events: [],
+    });
   }
   const bytes = feed.files.get("stop_times.txt");
   if (!bytes) throw new Error(`${feed.url} has no stop_times.txt`);
@@ -892,6 +899,8 @@ type RouteOut = {
 type LastTrainOut = {
   system: "bart" | "caltrain";
   station: string;
+  /** Where the last train in this direction goes ("Antioch"): one entry per direction. */
+  toward?: string;
   weekday?: number;
   saturday?: number;
   sunday?: number;
@@ -916,7 +925,7 @@ async function buildService() {
     string,
     {
       weekdayTrips: Set<string>;
-      routes: Map<string, RouteOut & { trips: number; rowKey: string }>;
+      routes: Map<string, RouteOut & { trips: number; rowKey: string; nightKey?: string }>;
       lastTrains: Map<string, LastTrainOut & { rowKey?: string }>;
       stopRow: Map<string, string>;
     }
@@ -950,6 +959,16 @@ async function buildService() {
     const stopById = new Map(stopsTable.rows.map((s, i) => [s.stop_id, { ...s, line: stopsTable.lines[i] }]));
     const routesTable = table(feed, "routes.txt");
     const routeById = new Map(routesTable.rows.map((r, i) => [r.route_id, { ...r, line: routesTable.lines[i] }]));
+    /** Where a trip ends, by station name ("Antioch", "Tamien"): clearer than many headsigns. */
+    const destination = (trip: Trip) => {
+      const end = trip.events.reduce<StopEvent | null>((a, e) => (a && a.seq > e.seq ? a : e), null);
+      const s = end ? stopById.get(end.stop) : undefined;
+      const station = s?.parent_station ? stopById.get(s.parent_station) : s;
+      return station?.stop_name
+        .replace(/ Caltrain Station$| Station$/, "")
+        .replace(/ \(.*\)$/, "")
+        .trim();
+    };
     // Where each stop is (a platform takes its station's point, like the station facts).
     const where = new Map<string, string[]>();
     const hoodsOf = (stopId: string) => {
@@ -990,7 +1009,13 @@ async function buildService() {
                 trips: 0,
                 rowKey: "",
               } satisfies RouteOut & { trips: number; rowKey: string });
-            if (isNight(e.t)) r.allNight = true;
+            if (isNight(e.t)) {
+              r.allNight = true;
+              // Cite the night run itself: a route's description may not say it runs all night here.
+              r.nightKey ??= cite(
+                feedSnapshot(feed, f.publisher, `${f.name} GTFS schedule feed (stop_times.txt)`, lines[e.row]),
+              );
+            }
             if (weekday) r.trips++;
             if (!r.rowKey) {
               r.rowKey = cite(feedSnapshot(feed, f.publisher, `${f.name} GTFS schedule feed (routes.txt)`, route.line));
@@ -1003,21 +1028,24 @@ async function buildService() {
             const stationId = platform?.parent_station || e.stop;
             const station = stopById.get(stationId);
             if (!station) continue;
+            // One last train per direction: the last one toward Millbrae isn't the last one toward Antioch.
+            const id = `${stationId}:${trip.direction}`;
             const last =
-              h.lastTrains.get(stationId) ??
+              h.lastTrains.get(id) ??
               ({ system: f.system, station: station.stop_name } satisfies LastTrainOut & { rowKey?: string });
             for (const d of Object.keys(byDay) as DayType[]) {
               if (!byDay[d].has(trip.service)) continue;
               if ((last[d] ?? -1) < e.t) {
                 last[d] = e.t;
-                if (d === "weekday") {
+                if (d === "weekday" || !last.rowKey) {
+                  last.toward = destination(trip);
                   last.rowKey = cite(
                     feedSnapshot(feed, f.publisher, `${f.name} GTFS schedule feed (stop_times.txt)`, lines[e.row]),
                   );
                 }
               }
             }
-            h.lastTrains.set(stationId, last);
+            h.lastTrains.set(id, last);
           }
         }
       }
@@ -1030,25 +1058,32 @@ async function buildService() {
       const routes = [...h.routes.values()].sort(
         (a, b) => Number(b.allNight) - Number(a.allNight) || b.trips - a.trips || a.line.localeCompare(b.line),
       );
-      const lastTrains = [...h.lastTrains.values()].sort((a, b) => a.station.localeCompare(b.station));
-      // Citations: all-night lines, last trains, then the busiest lines.
+      const lastTrains = [...h.lastTrains.values()].sort(
+        (a, b) => a.station.localeCompare(b.station) || (a.toward ?? "").localeCompare(b.toward ?? ""),
+      );
+      // Citations: every displayed last train and all-night line keeps its own row (the night
+      // run, for all-night lines), then a couple of the busiest lines.
       const keys = [
-        ...routes.filter((r) => r.allNight).map((r) => r.rowKey),
         ...lastTrains.flatMap((l) => (l.rowKey ? [l.rowKey] : [])),
-        ...routes.filter((r) => !r.allNight).slice(0, 3).map((r) => r.rowKey),
+        ...routes.filter((r) => r.allNight).map((r) => r.nightKey ?? r.rowKey),
+        ...routes
+          .filter((r) => !r.allNight)
+          .slice(0, 2)
+          .map((r) => r.rowKey),
       ];
       return {
         neighborhood: slug,
         tripsPerHour: Math.round(h.weekdayTrips.size / ((DAYTIME[1] - DAYTIME[0]) / 3600)),
         routes: routes.map(({ line, name, mode, allNight }) => ({ line, name, mode, allNight })),
-        lastTrains: lastTrains.map(({ system, station, weekday, saturday, sunday }) => ({
+        lastTrains: lastTrains.map(({ system, station, toward, weekday, saturday, sunday }) => ({
           system,
           station,
+          toward,
           weekday: weekday === undefined ? undefined : Math.round(weekday / 60),
           saturday: saturday === undefined ? undefined : Math.round(saturday / 60),
           sunday: sunday === undefined ? undefined : Math.round(sunday / 60),
         })),
-        sources: [...new Set(keys)].slice(0, 8),
+        sources: [...new Set(keys)],
       };
     })
     .filter((s) => s.sources.length > 0);

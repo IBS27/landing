@@ -399,6 +399,8 @@ export const neighborhoodFact = v.union(
       v.object({
         system: v.union(v.literal("bart"), v.literal("caltrain")),
         station: v.string(),
+        /** Where the last train in this direction goes ("Antioch"): one entry per direction. */
+        toward: v.optional(v.string()),
         weekday: v.optional(v.number()),
         saturday: v.optional(v.number()),
         sunday: v.optional(v.number()),
