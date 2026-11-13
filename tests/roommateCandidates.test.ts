@@ -7,6 +7,7 @@ import {
   overlapOf,
   type RoommateCandidate,
   roommateCandidates,
+  VOUCHERS_CHECKED,
 } from "../convex/lib/roommates";
 import { networkReach, REACH_FRIENDS_MAX } from "../convex/lib/vouches";
 import { askMessage, namesShown, overlapLine } from "../src/landing/roommates/candidateCopy";
@@ -221,15 +222,11 @@ describe("ranking", () => {
     name: string,
     closeness: RoommateCandidate["closeness"],
     o: Partial<Overlap> = {},
-    mutualFriendCount = 1,
-  ) =>
-    ({
-      user: { name },
-      closeness,
-      overlap: overlap(o),
-      mutualFriendCount,
-      vouchCount: 0,
-    }) as RoommateCandidate;
+    links = 1,
+  ) => ({
+    links,
+    candidate: { user: { name }, closeness, overlap: overlap(o) } as RoommateCandidate,
+  });
 
   test("closeness, then overlap, then connections, then name", () => {
     const list = [
@@ -239,7 +236,36 @@ describe("ranking", () => {
       c("Cal", "vouched"),
       c("Dee", "friend"),
     ].sort(byCandidateRank);
-    expect(list.map((x) => x.user.name)).toEqual(["Dee", "Cal", "Zed", "Amy", "Bea"]);
+    expect(list.map((x) => x.candidate.user.name)).toEqual(["Dee", "Cal", "Zed", "Amy", "Bea"]);
+  });
+
+  test("a friend who is both a mutual friend and a voucher counts once", async () => {
+    // Ab: F1 is a mutual friend and vouches. Zy: vouched for by F1 and F2.
+    const tables = world({
+      users: ["V", "F1", "F2", "Ab", "Zy"].map(user),
+      friendships: [...friends("V", "F1"), ...friends("V", "F2"), ...friends("Ab", "F1")],
+      vouches: [vouch("F1", "Ab"), vouch("F1", "Zy"), vouch("F2", "Zy")],
+      blocks: [],
+      roommateLifestyles: ["V", "Ab", "Zy"].map((u) => lifestyle(u)),
+      cityProfileFacts: [],
+    });
+    const r = await roommateCandidates(fakeCtx(tables), id("V"));
+    expect(usernames(r?.candidates)).toEqual(["Zy", "Ab"]);
+  });
+
+  test("unchecked vouches mark the list partial", async () => {
+    const vouchers = Array.from({ length: VOUCHERS_CHECKED + 1 }, (_, i) => `F${i}`);
+    const tables = world({
+      users: ["V", "S", ...vouchers].map(user),
+      friendships: vouchers.flatMap((f) => friends("V", f)),
+      vouches: vouchers.map((f) => vouch(f, "S")),
+      blocks: vouchers.slice(0, VOUCHERS_CHECKED).map((f) => block("S", f)),
+      roommateLifestyles: ["V", "S"].map((u) => lifestyle(u)),
+      cityProfileFacts: [],
+    });
+    const r = await roommateCandidates(fakeCtx(tables), id("V"));
+    expect(r?.candidates).toEqual([]);
+    expect(r?.partial).toBe(true);
   });
 
   test("overlapOf needs both sides", () => {

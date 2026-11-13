@@ -264,14 +264,18 @@ export type CandidateList = {
 /**
  * Network closeness first (friend, vouched for by a friend, friend of
  * friends), then how many plans overlap (move-in month, a neighborhood,
- * budget), then how many of the viewer's friends connect them, then name.
+ * budget), then how many of the viewer's friends connect them (`links`:
+ * distinct mutual friends and vouchers), then name.
  */
-export function byCandidateRank(a: RoommateCandidate, b: RoommateCandidate): number {
+export function byCandidateRank(
+  a: { candidate: RoommateCandidate; links: number },
+  b: { candidate: RoommateCandidate; links: number },
+): number {
   return (
-    CLOSENESS.indexOf(a.closeness) - CLOSENESS.indexOf(b.closeness) ||
-    overlapCount(b.overlap) - overlapCount(a.overlap) ||
-    b.mutualFriendCount + b.vouchCount - (a.mutualFriendCount + a.vouchCount) ||
-    a.user.name.localeCompare(b.user.name)
+    CLOSENESS.indexOf(a.candidate.closeness) - CLOSENESS.indexOf(b.candidate.closeness) ||
+    overlapCount(b.candidate.overlap) - overlapCount(a.candidate.overlap) ||
+    b.links - a.links ||
+    a.candidate.user.name.localeCompare(b.candidate.user.name)
   );
 }
 
@@ -312,7 +316,7 @@ export async function roommateCandidates(
   const checked = reach.people.slice(0, SHARING_CHECK_MAX);
   const sharingFlags = await inBatches(checked, (r) => isSharing(ctx, r.userId));
   const sharing = checked.filter((_, i) => sharingFlags[i]);
-  const partial =
+  let partial =
     reach.partial || reach.people.length > checked.length || sharing.length > COMPARE_MAX;
   const comparable = await comparableLifestyles(
     ctx,
@@ -322,6 +326,7 @@ export async function roommateCandidates(
   if (!comparable) return null;
   const found = sharing.filter((r) => comparable.others.has(r.userId));
 
+  if (found.some((r) => r.voucherIds.length > VOUCHERS_CHECKED)) partial = true;
   const pairs = found.flatMap((r) =>
     r.voucherIds
       .slice(0, VOUCHERS_CHECKED)
@@ -356,6 +361,7 @@ export async function roommateCandidates(
     return [
       {
         reach: { ...r, voucherIds },
+        links: new Set([...r.mutualIds, ...voucherIds]).size,
         candidate: {
           user,
           closeness,
@@ -368,7 +374,7 @@ export async function roommateCandidates(
       },
     ];
   });
-  ranked.sort((a, b) => byCandidateRank(a.candidate, b.candidate));
+  ranked.sort(byCandidateRank);
   const shown = ranked.slice(0, CANDIDATES_SHOWN);
 
   const names = await getSummaries(
