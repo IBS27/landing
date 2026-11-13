@@ -5,7 +5,7 @@ import type { MutationCtx, QueryCtx } from "../_generated/server";
 import type { Citations, ProposalPayload } from "../validators";
 import { dmBlockNotice } from "./blocks";
 import { assertCitable, resolveCitations } from "./citations";
-import { crewMateIds } from "./crewMembers";
+import { CREW_TASKS, crewMateIds } from "./crewMembers";
 import { notify } from "./notify";
 import { type Audience, loadAudience } from "./posts";
 import { friendIds } from "./users";
@@ -40,7 +40,7 @@ export type ProposeArgs = {
 export async function propose(ctx: MutationCtx, a: ProposeArgs): Promise<Id<"proposals">> {
   const rationale = a.rationale.trim();
   if (!rationale) throw new ConvexError("A proposal needs a rationale");
-  await assertPayload(ctx, a.ownerId, a.payload);
+  await assertPayload(ctx, a.ownerId, a.payload, a.origin);
   if (a.citations) await assertCitable(ctx, a.citations, await loadAudience(ctx, a.ownerId));
   else if (a.payload.kind !== "message")
     throw new ConvexError("Recommendations need citations; only plain replies may skip them");
@@ -70,7 +70,9 @@ export async function assertPayload(
   ctx: MutationCtx,
   ownerId: Id<"users">,
   p: ProposalPayload,
+  origin: Doc<"proposals">["origin"],
 ): Promise<void> {
+  const crewOnly = origin.task !== undefined && CREW_TASKS.has(origin.task);
   switch (p.kind) {
     case "message":
     case "offer": {
@@ -99,13 +101,13 @@ export async function assertPayload(
       if (p.startAt < Date.now()) throw new ConvexError("The event is in the past");
       if (p.groupId && !(await inGroup(ctx, p.groupId, ownerId)))
         throw new ConvexError("You're not in this group");
-      return assertInvitable(ctx, ownerId, p.inviteIds);
+      return assertInvitable(ctx, ownerId, p.inviteIds, crewOnly);
     }
     case "group": {
       const name = p.name.trim();
       if (!name) throw new ConvexError("Name the group");
       if (name.length > 75) throw new ConvexError("Group names can be up to 75 characters");
-      return assertInvitable(ctx, ownerId, p.inviteIds);
+      return assertInvitable(ctx, ownerId, p.inviteIds, crewOnly);
     }
   }
 }
@@ -163,16 +165,26 @@ export function statesAmount(text: string, amount: number): boolean {
 
 /**
  * Muse invites only the owner's friends, or people in their Move-in Crew (#30,
- * #31): crew members opted in to being matched, but aren't friends yet. Checked
- * again on approval, so someone who left the crew can't be invited.
+ * #31): crew members opted in to being matched, but aren't friends yet. A crew
+ * Group or meetup (`crewOnly`) invites only the current crew, friends or not.
+ * Checked again on approval, so someone who left the crew can't be invited.
  */
-async function assertInvitable(ctx: MutationCtx, ownerId: Id<"users">, ids: Id<"users">[]) {
-  const friends = new Set(await friendIds(ctx, ownerId));
+async function assertInvitable(
+  ctx: MutationCtx,
+  ownerId: Id<"users">,
+  ids: Id<"users">[],
+  crewOnly: boolean,
+) {
+  const friends = crewOnly ? new Set<Id<"users">>() : new Set(await friendIds(ctx, ownerId));
   const others = ids.filter((id) => !friends.has(id));
   if (others.length === 0) return;
   const crew = await crewMateIds(ctx, ownerId);
   if (others.some((id) => !crew.has(id)))
-    throw new ConvexError("Muse can only invite your friends or your Move-in Crew");
+    throw new ConvexError(
+      crewOnly
+        ? "Someone here isn't in your Move-in Crew anymore"
+        : "Muse can only invite your friends or your Move-in Crew",
+    );
 }
 
 /**
@@ -276,7 +288,7 @@ export async function executeProposal(
 ): Promise<NonNullable<Doc<"proposals">["result"]>> {
   const ownerId = proposal.ownerId;
   const p = proposal.payload;
-  await assertPayload(ctx, ownerId, p);
+  await assertPayload(ctx, ownerId, p, proposal.origin);
   if (!(await citationsVisible(ctx, proposal, await loadAudience(ctx, ownerId))))
     throw new ConvexError("Muse's sources for this are no longer available to you");
   const now = Date.now();

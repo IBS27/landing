@@ -11,6 +11,9 @@ import { CREW_MAX, type CrewMatch, crewProfile, type MatchBy, matchCrew } from "
  * check all read it.
  */
 
+/** Muse tasks whose proposals invite only the owner's current crew (#31). */
+export const CREW_TASKS: ReadonlySet<string> = new Set(["muse.crewGroup", "muse.crewMeetup"]);
+
 /** How many opt-ins are read per crew; plenty for a city's month of arrivals. */
 const OPT_IN_SCAN = 500;
 

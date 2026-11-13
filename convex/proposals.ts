@@ -59,7 +59,7 @@ export const saveEdit = viewerMutation({
   handler: async (ctx, { proposalId, payload }) => {
     const p = await ownPending(ctx, ctx.viewer._id, proposalId);
     assertSameTarget(p.payload, payload);
-    await assertPayload(ctx, p.ownerId, payload);
+    await assertPayload(ctx, p.ownerId, payload, p.origin);
     const now = Date.now();
     await ctx.db.patch(p._id, { payload, original: p.original ?? p.payload, updatedAt: now });
     await syncDraft(ctx, { ...p, payload });
