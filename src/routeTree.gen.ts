@@ -107,6 +107,8 @@ import { Route as MarketplaceYouIndexRouteImport } from './routes/marketplace/yo
 import { Route as MarketplaceYouSellingRouteImport } from './routes/marketplace/you/selling'
 import { Route as MessagesTConversationIdRouteImport } from './routes/messages/t/$conversationId'
 import { Route as LandingFindListingListingIdRouteImport } from './routes/landing/find/listing/$listingId'
+import { Route as LandingFindNeighborhoodsIndexRouteImport } from './routes/landing/find/neighborhoods/index'
+import { Route as LandingFindNeighborhoodsSlugRouteImport } from './routes/landing/find/neighborhoods/$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -604,6 +606,18 @@ const LandingFindListingListingIdRoute =
     path: '/find/listing/$listingId',
     getParentRoute: () => LandingRouteRoute,
   } as any)
+const LandingFindNeighborhoodsIndexRoute =
+  LandingFindNeighborhoodsIndexRouteImport.update({
+    id: '/find/neighborhoods/',
+    path: '/find/neighborhoods/',
+    getParentRoute: () => LandingRouteRoute,
+  } as any)
+const LandingFindNeighborhoodsSlugRoute =
+  LandingFindNeighborhoodsSlugRouteImport.update({
+    id: '/find/neighborhoods/$slug',
+    path: '/find/neighborhoods/$slug',
+    getParentRoute: () => LandingRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -704,6 +718,8 @@ export interface FileRoutesByFullPath {
   '/marketplace/item/': typeof MarketplaceItemIndexRoute
   '/marketplace/you/': typeof MarketplaceYouIndexRoute
   '/landing/find/listing/$listingId': typeof LandingFindListingListingIdRoute
+  '/landing/find/neighborhoods/$slug': typeof LandingFindNeighborhoodsSlugRoute
+  '/landing/find/neighborhoods/': typeof LandingFindNeighborhoodsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -801,6 +817,8 @@ export interface FileRoutesByTo {
   '/marketplace/item': typeof MarketplaceItemIndexRoute
   '/marketplace/you': typeof MarketplaceYouIndexRoute
   '/landing/find/listing/$listingId': typeof LandingFindListingListingIdRoute
+  '/landing/find/neighborhoods/$slug': typeof LandingFindNeighborhoodsSlugRoute
+  '/landing/find/neighborhoods': typeof LandingFindNeighborhoodsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -902,6 +920,8 @@ export interface FileRoutesById {
   '/marketplace/item/': typeof MarketplaceItemIndexRoute
   '/marketplace/you/': typeof MarketplaceYouIndexRoute
   '/landing/find/listing/$listingId': typeof LandingFindListingListingIdRoute
+  '/landing/find/neighborhoods/$slug': typeof LandingFindNeighborhoodsSlugRoute
+  '/landing/find/neighborhoods/': typeof LandingFindNeighborhoodsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1004,6 +1024,8 @@ export interface FileRouteTypes {
     | '/marketplace/item/'
     | '/marketplace/you/'
     | '/landing/find/listing/$listingId'
+    | '/landing/find/neighborhoods/$slug'
+    | '/landing/find/neighborhoods/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1101,6 +1123,8 @@ export interface FileRouteTypes {
     | '/marketplace/item'
     | '/marketplace/you'
     | '/landing/find/listing/$listingId'
+    | '/landing/find/neighborhoods/$slug'
+    | '/landing/find/neighborhoods'
   id:
     | '__root__'
     | '/'
@@ -1201,6 +1225,8 @@ export interface FileRouteTypes {
     | '/marketplace/item/'
     | '/marketplace/you/'
     | '/landing/find/listing/$listingId'
+    | '/landing/find/neighborhoods/$slug'
+    | '/landing/find/neighborhoods/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1965,6 +1991,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LandingFindListingListingIdRouteImport
       parentRoute: typeof LandingRouteRoute
     }
+    '/landing/find/neighborhoods/': {
+      id: '/landing/find/neighborhoods/'
+      path: '/find/neighborhoods'
+      fullPath: '/landing/find/neighborhoods/'
+      preLoaderRoute: typeof LandingFindNeighborhoodsIndexRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
+    '/landing/find/neighborhoods/$slug': {
+      id: '/landing/find/neighborhoods/$slug'
+      path: '/find/neighborhoods/$slug'
+      fullPath: '/landing/find/neighborhoods/$slug'
+      preLoaderRoute: typeof LandingFindNeighborhoodsSlugRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
   }
 }
 
@@ -2007,6 +2047,8 @@ interface LandingRouteRouteChildren {
   LandingPlaceIndexRoute: typeof LandingPlaceIndexRoute
   LandingProfileIndexRoute: typeof LandingProfileIndexRoute
   LandingFindListingListingIdRoute: typeof LandingFindListingListingIdRoute
+  LandingFindNeighborhoodsSlugRoute: typeof LandingFindNeighborhoodsSlugRoute
+  LandingFindNeighborhoodsIndexRoute: typeof LandingFindNeighborhoodsIndexRoute
 }
 
 const LandingRouteRouteChildren: LandingRouteRouteChildren = {
@@ -2022,6 +2064,8 @@ const LandingRouteRouteChildren: LandingRouteRouteChildren = {
   LandingPlaceIndexRoute: LandingPlaceIndexRoute,
   LandingProfileIndexRoute: LandingProfileIndexRoute,
   LandingFindListingListingIdRoute: LandingFindListingListingIdRoute,
+  LandingFindNeighborhoodsSlugRoute: LandingFindNeighborhoodsSlugRoute,
+  LandingFindNeighborhoodsIndexRoute: LandingFindNeighborhoodsIndexRoute,
 }
 
 const LandingRouteRouteWithChildren = LandingRouteRoute._addFileChildren(

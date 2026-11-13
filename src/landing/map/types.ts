@@ -49,6 +49,8 @@ export type MapLayer =
       items: readonly NeighborhoodShape[];
       /** Called after the map zooms to a clicked neighborhood (#16 routes to its page). */
       onSelect?: (n: NeighborhoodShape) => void;
+      /** Slug of a neighborhood to keep highlighted (a neighborhood page's own shape). */
+      selected?: string;
     }
   | { kind: "listings"; items: readonly ListingPin[] }
   | { kind: "events"; items: readonly EventPin[] }

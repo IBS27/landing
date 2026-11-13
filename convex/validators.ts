@@ -482,6 +482,40 @@ export const proposalAction = v.union(
   v.literal("expired"),
 );
 
+/** When a Weekend Route stop happens (#18), in day order. */
+export const routeTime = v.union(
+  v.literal("morning"),
+  v.literal("midday"),
+  v.literal("afternoon"),
+  v.literal("evening"),
+  v.literal("night"),
+);
+export type RouteTime = Infer<typeof routeTime>;
+
+/**
+ * One stop of a neighborhood's Weekend Route (#18). Every stop cites the posts,
+ * comments or Event it came from, so a stop without a source can't be stored.
+ */
+export const weekendStop = v.object({
+  name: v.string(),
+  /** The place's key in #15's place list; unset when the place isn't on it (no pin). */
+  placeKey: v.optional(v.string()),
+  /** From #15's place list, or the Event's own point. Never geocoded from thread text. */
+  point: v.optional(latLng),
+  timeOfDay: routeTime,
+  /** The place list's kind ("cafe", "park"), the model's category for unlisted places, or "event". */
+  kind: v.string(),
+  /** One line on why locals send you here. */
+  why: v.string(),
+  eventId: v.optional(v.id("events")),
+  /** Event stops: when it starts and ends. */
+  startAt: v.optional(v.number()),
+  endAt: v.optional(v.number()),
+  /** Where locals disagree about this stop, with its own sources. */
+  disagreement: v.optional(v.object({ note: v.string(), citations })),
+  citations,
+});
+export type WeekendStop = Infer<typeof weekendStop>;
 /* ── Marketplace negotiation (#36) ─────────────────────────────────────── */
 
 /** "paused" and "stopped" are the buyer's; Muse drafts nothing while either is set. */

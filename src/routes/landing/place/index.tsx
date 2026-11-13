@@ -15,7 +15,6 @@ export const Route = createFileRoute("/landing/place/")({
       <RoomCard />
       <ComingSoon
         items={[
-          "Roommate candidates from your network, with the habits you share",
           "Marketplace items that match your room's vibe",
           "Everything you get is tracked for resale later",
           "A house Group for bills, chores and groceries",

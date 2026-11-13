@@ -4,7 +4,9 @@ import { Button, Card } from "@/ui/primitives";
 import {
   answeredCount,
   type LifestyleAnswers,
+  type MatchField,
   QUESTION_COUNT,
+  STEPS,
 } from "../../../convex/lib/lifestyle";
 import type { ProfileInputs } from "../../../convex/lib/roommates";
 import { LifestyleSummary, SharingCard } from "./LifestyleSummary";
@@ -37,7 +39,8 @@ export function LifestyleView({
 }: {
   state: LifestyleState;
   actions: LifestyleActions;
-  candidates?: ReactNode;
+  /** Rendered while sharing. `editAnswer` opens the viewer's answer to one question. */
+  candidates?: (editAnswer: (field: MatchField) => void) => ReactNode;
 }) {
   const [step, setStep] = useState<number | null>(null);
   // While answering, the form shows its own copy so quick taps never wait on the server.
@@ -87,7 +90,11 @@ export function LifestyleView({
 
   return (
     <div className="flex flex-col gap-3">
-      {state.shared && candidates}
+      {state.shared &&
+        candidates?.((field) => {
+          const at = STEPS.findIndex((s) => (s.fields as readonly string[]).includes(field));
+          if (at >= 0) edit(at);
+        })}
       <SharingCard
         shared={state.shared}
         sharedAt={state.sharedAt}
