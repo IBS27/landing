@@ -3,6 +3,7 @@ import { v } from "convex/values";
 import { cityProfileFact } from "./lib/cityProfileFacts";
 import { matchBy } from "./lib/crews";
 import { dismissal } from "./lib/dismissals";
+import { interestId } from "./lib/interests";
 import { lifestyleAnswers } from "./lib/lifestyle";
 import { profileSignal } from "./lib/profileSignals";
 import { roomKind, roomVibe } from "./lib/vibe";
@@ -808,6 +809,47 @@ export default defineSchema({
     .index("by_owner_status", ["ownerId", "status", "createdAt"])
     .index("by_owner", ["ownerId", "createdAt"])
     .index("by_draft", ["draftMessageId"]),
+
+  /**
+   * Plans Muse found in group chats (#34): the talk ("we should hike sometime"),
+   * what Muse suggested, and the proposals that carry it out (poll, Event,
+   * day-of reminder). Each step's state is read from its proposal.
+   */
+  chatPlans: defineTable({
+    ownerId: v.id("users"),
+    conversationId: v.id("conversations"),
+    /** The message that floated the plan. */
+    messageId: v.id("messages"),
+    activity: interestId,
+    title: v.string(),
+    place: v.optional(v.string()),
+    /** Meet → main stop → after, from the cited source. */
+    route: v.array(v.string()),
+    citations: v.optional(citations),
+    pollProposalId: v.optional(v.id("proposals")),
+    eventProposalId: v.optional(v.id("proposals")),
+    reminderProposalId: v.optional(v.id("proposals")),
+    /** "Not now": the talk stays out of the list. */
+    dismissed: v.optional(v.boolean()),
+    /** Still has a step ahead; the hourly job reads only open plans. */
+    open: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_owner", ["ownerId", "updatedAt"])
+    .index("by_conversation", ["conversationId", "createdAt"])
+    .index("by_open", ["open", "updatedAt"]),
+
+  /** One row per person per poll (#34): the options they picked. */
+  pollVotes: defineTable({
+    messageId: v.id("messages"),
+    conversationId: v.id("conversations"),
+    userId: v.id("users"),
+    optionIds: v.array(v.string()),
+    updatedAt: v.number(),
+  })
+    .index("by_message", ["messageId"])
+    .index("by_message_user", ["messageId", "userId"]),
 
   /** Audit log: one row per thing that happened to a proposal. */
   proposalEvents: defineTable({

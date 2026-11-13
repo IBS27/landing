@@ -5,6 +5,7 @@ import { type ReactNode, useState } from "react";
 import { useM, useQ } from "@/app/viewer";
 import { useToast } from "@/features/marketplace/toast";
 import { toProfile } from "@/landing/links";
+import { ChatPlansCard } from "@/landing/plans/ChatPlansCard";
 import { ComingSoon, LandingPage } from "@/landing/shell/LandingPage";
 import { cn } from "@/lib/format";
 import { Modal } from "@/ui/overlays";
@@ -29,7 +30,8 @@ const placesLabel = (slugs: string[]) =>
 /**
  * Landing → Crew & Journeys (`/landing/crew`): the Move-in Crew (#30). Opt in,
  * pick what you're matched on, and see the people arriving with you and what
- * you have in common. Journeys (#32 and later) join this page.
+ * you have in common. Journeys (#32 and later) join this page, and plans from
+ * your group chats (#34).
  */
 export function CrewPage() {
   const status = useQ(api.crews.status, {});
@@ -70,12 +72,8 @@ export function CrewPage() {
             <CrewSettings status={status} />
           </>
         )}
-        <ComingSoon
-          items={[
-            "Weekly check-ins and levels: Explore, Regular, Local",
-            "Turn crew chat into real plans",
-          ]}
-        />
+        {status !== undefined && <ChatPlansCard />}
+        <ComingSoon items={["Weekly check-ins and levels: Explore, Regular, Local"]} />
       </div>
     </LandingPage>
   );

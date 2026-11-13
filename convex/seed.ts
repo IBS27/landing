@@ -685,6 +685,9 @@ export const reset = internalAction({
     // Maya's Journey for this weekend (#32), after the crew exists.
     await ctx.runMutation(internal.journeys.seedDemo, {});
 
+    // Plans from Maya's group chats (#34): a poll that's out and one in Inbox.
+    await ctx.runMutation(internal.chatPlans.seedDemo, {});
+
     // Neighborhood scores (#17), from everything above. The daily cron keeps them fresh.
     const scores = await ctx.runAction(internal.neighborhoodScores.recompute, {});
 

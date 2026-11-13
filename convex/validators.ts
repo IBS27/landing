@@ -48,6 +48,23 @@ export const postAttachment = v.union(
 );
 export type PostAttachment = Infer<typeof postAttachment>;
 
+/**
+ * A poll in a group chat (#34): a question and 2–6 options, any of which people
+ * can pick. Options for a time carry it as `startAt`.
+ */
+export const pollOption = v.object({
+  id: v.string(),
+  label: v.string(),
+  startAt: v.optional(v.number()),
+});
+export const poll = v.object({
+  question: v.string(),
+  options: v.array(pollOption),
+  /** Votes close at this time. */
+  closesAt: v.optional(v.number()),
+});
+export type Poll = Infer<typeof poll>;
+
 export const messageAttachment = v.union(
   v.object({
     kind: v.literal("image"),
@@ -79,6 +96,8 @@ export const messageAttachment = v.union(
     durationMs: v.optional(v.number()),
     callId: v.optional(v.id("calls")),
   }),
+  /** A poll (#34). Votes are rows in `pollVotes`. */
+  v.object({ kind: v.literal("poll"), ...poll.fields }),
 );
 export type MessageAttachment = Infer<typeof messageAttachment>;
 
@@ -473,6 +492,8 @@ export const proposalPayload = v.union(
     kind: v.literal("message"),
     conversationId: v.id("conversations"),
     text: v.string(),
+    /** Sent with the message as a poll (#34). */
+    poll: v.optional(poll),
   }),
   /** A Marketplace offer or counteroffer, sent in the listing's chat. */
   v.object({
@@ -490,6 +511,8 @@ export const proposalPayload = v.union(
     startAt: v.number(),
     venue: v.optional(v.string()),
     groupId: v.optional(v.id("groups")),
+    /** The group chat it was planned in (#34): that chat's members may be invited. */
+    conversationId: v.optional(v.id("conversations")),
     inviteIds: v.array(v.id("users")),
   }),
   /** A new Group created by the owner, with people invited. */

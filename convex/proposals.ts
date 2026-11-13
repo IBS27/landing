@@ -19,7 +19,7 @@ import {
   syncDraft,
   targetReachable,
 } from "./lib/proposals";
-import { friendIds, getSummaries, type UserSummary } from "./lib/users";
+import { getSummaries, type UserSummary } from "./lib/users";
 import { citations, proposalOrigin, proposalPayload, type Source } from "./validators";
 
 /* ── Writing ──────────────────────────────────────────────────────────── */
@@ -340,7 +340,6 @@ export const seedDemo = internalMutation({
         .unique();
     const maya = await byName("maya.chen");
     if (!maya) return 0;
-    const friends = new Set(await friendIds(ctx, maya._id));
     const conversationsOf = async () => {
       const rows = await ctx.db
         .query("conversationMembers")
@@ -451,31 +450,8 @@ export const seedDemo = internalMutation({
         }),
       );
 
-    // 4. Turn "we should hike sometime" into a real Event.
-    const hikers = await groupPosts("bay-area-hikers", 2);
-    const invitees = [...friends].slice(0, 4);
-    const sunday = new Date();
-    sunday.setDate(sunday.getDate() + ((7 - sunday.getDay()) % 7 || 7));
-    sunday.setUTCHours(18, 0, 0, 0); // 10am in San Francisco (PST)
-    if (invitees.length)
-      await safe(() =>
-        proposeImpl(ctx, {
-          ownerId: maya._id,
-          payload: {
-            kind: "event",
-            title: "Sunday hike: Lands End trail",
-            description:
-              "Easy 3.4 mile loop with ocean views, then coffee after. Meet at the Lands End Lookout parking lot.",
-            startAt: sunday.getTime(),
-            venue: "Lands End Lookout",
-            inviteIds: invitees,
-          },
-          rationale:
-            'Your crew chat keeps saying "we should hike sometime". Locals in Bay Area Hikers rate Lands End as the best easy hike in the city.',
-          citations: tryCite(hikers),
-          origin: { agent: "spark", task: "spark.planFromChat", via: "model" },
-        }),
-      );
+    // 4. Chat talk turned into plans ("we should hike sometime") is proposed
+    //    from Maya's real group chats by `chatPlans.seedDemo` (#34).
 
     // 5. The Move-in Crew Group is proposed from Maya's real crew by `crews.seedDemo` (#31).
 

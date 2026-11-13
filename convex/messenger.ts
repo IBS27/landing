@@ -6,6 +6,7 @@ import { dmBlockNotice } from "./lib/blocks";
 import { formatCallDuration } from "./lib/callFormat";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { afterChatMessage } from "./lib/negotiations";
+import { pollView } from "./lib/polls";
 import { friendIds, getSummaries, type UserSummary, userSummary } from "./lib/users";
 import type { ReactionType } from "./validators";
 
@@ -251,6 +252,7 @@ async function enrichAttachments(ctx: QueryCtx, m: Doc<"messages">) {
           author: author ? userSummary(author) : null,
         };
       }
+      if (a.kind === "poll") return pollView(ctx, m._id, a);
       return a;
     }),
   );
@@ -285,7 +287,9 @@ async function messageView(ctx: QueryCtx, m: Doc<"messages">) {
             ? null
             : (reply.attachments.find((a) => a.kind === "image")?.url ?? null),
           sticker: reply.attachments.find((a) => a.kind === "sticker")?.emoji ?? null,
-          attachment: reply.attachments.some((a) => a.kind === "listing" || a.kind === "post"),
+          attachment: reply.attachments.some(
+            (a) => a.kind === "listing" || a.kind === "post" || a.kind === "poll",
+          ),
         }
       : null,
   };

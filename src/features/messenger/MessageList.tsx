@@ -5,6 +5,7 @@ import { useM, useQ, useViewer } from "@/app/viewer";
 import { StoryReplyAttachment } from "@/features/feed/StoryReplyAttachment";
 import { useViewerPaginated } from "@/features/posts";
 import { ChatDraft } from "@/landing/inbox/ProposalCard";
+import { ChatPoll } from "@/landing/plans/ChatPoll";
 import { ChatCheckNote, useChatNotes } from "@/landing/search/ChatCheckNote";
 import { cn, price } from "@/lib/format";
 import { Menu, MenuContent, MenuItem, MenuTrigger, Modal, Tooltip } from "@/ui/overlays";
@@ -352,8 +353,20 @@ function MessageRow({
   }
 
   const body: ReactNode[] = [];
+  // Polls (#34) go under the message's text, like Messenger's.
+  const afterText: ReactNode[] = [];
   for (const [i, a] of m.attachments.entries()) {
-    if (a.kind === "image")
+    if (a.kind === "poll")
+      afterText.push(
+        <ChatPoll
+          key={`a${i}`}
+          poll={a}
+          viewerId={viewerId}
+          person={(id) => members.get(id)}
+          compact={variant === "dock"}
+        />,
+      );
+    else if (a.kind === "image")
       body.push(
         <a key={`a${i}`} href={a.url} target="_blank" rel="noreferrer" className="block">
           <img
@@ -542,6 +555,7 @@ function MessageRow({
           >
             {body}
             {textNode}
+            {afterText}
             {hasReactions && <ReactionBadge m={m} members={members} mine={mine} />}
           </div>
         </StampTooltip>
