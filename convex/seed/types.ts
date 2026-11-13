@@ -261,6 +261,8 @@ export type ListingSeed = {
   /** Groups the listing was also posted to. */
   readonly groups?: readonly GroupSlug[];
   readonly rental?: RentalSeed;
+  readonly rentalMedia?: Doc<"listings">["rentalMedia"];
+  readonly point?: { lat: number; lng: number };
   /** Vehicles: make/model/year/mileage etc. */
   readonly vehicle?: Doc<"listings">["vehicle"];
   /** The price before the seller lowered it (shown struck through). */

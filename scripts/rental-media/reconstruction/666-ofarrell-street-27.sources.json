@@ -1,0 +1,97 @@
+{
+  "title": "666 O'Farrell Street #27",
+  "listingUrl": "https://real.vision/666-ofarrell-street-27",
+  "description": "Single-level SF unit. 2 bedrooms, 1 bathrooms, approximately 600 sqft. Use the published dimensions and room topology; no invented rooms.",
+  "sources": [
+    {
+      "key": "floorplan",
+      "kind": "floorplan",
+      "label": "Published floor plan",
+      "url": "https://floor-assets.real.vision/zyQ5LGCdFu8_imperial.jpg?v=-1251301617&width=3300&download=true&filename=666-ofarrell-street-27_Suite.jpg"
+    },
+    {
+      "key": "photo-1",
+      "kind": "photo",
+      "label": "Living/Dining",
+      "url": "https://photos.real.vision/vQRMR5nPy64.jpg?v=-1916615175&size=1800x1200"
+    },
+    {
+      "key": "photo-2",
+      "kind": "photo",
+      "label": "Foyer",
+      "url": "https://photos.real.vision/z1qegRjhFCM.jpg?v=-1916615175&size=1800x1200"
+    },
+    {
+      "key": "photo-3",
+      "kind": "photo",
+      "label": "Kitchen",
+      "url": "https://photos.real.vision/oaUHhdJuuZC.jpg?v=-1916615175&size=1800x1200"
+    },
+    {
+      "key": "photo-4",
+      "kind": "photo",
+      "label": "Primary Bedroom",
+      "url": "https://photos.real.vision/MU31L4ECswa.jpg?v=-1916615175&size=1800x1200"
+    },
+    {
+      "key": "photo-5",
+      "kind": "photo",
+      "label": "Bedroom",
+      "url": "https://photos.real.vision/aq3B4FYwksb.jpg?v=-1916615175&size=1800x1200"
+    },
+    {
+      "key": "photo-6",
+      "kind": "photo",
+      "label": "Bathroom",
+      "url": "https://photos.real.vision/pK1Vf1vLFqG.jpg?v=-1916615175&size=1800x1200"
+    },
+    {
+      "key": "photo-7",
+      "kind": "photo",
+      "label": "Living/Dining · view 2",
+      "url": "https://photos.real.vision/AP1K9MmbtDa.jpg?v=-194473366&size=1800x1200"
+    },
+    {
+      "key": "photo-8",
+      "kind": "photo",
+      "label": "Foyer · view 2",
+      "url": "https://photos.real.vision/LH5goTvtHHi.jpg?v=-1916615175&size=1800x1200"
+    },
+    {
+      "key": "photo-9",
+      "kind": "photo",
+      "label": "Kitchen · view 2",
+      "url": "https://photos.real.vision/UDgEQMhQE5P.jpg?v=-1916615175&size=1800x1200"
+    },
+    {
+      "key": "photo-10",
+      "kind": "photo",
+      "label": "Primary Bedroom · view 2",
+      "url": "https://photos.real.vision/5LenLVAeRSe.jpg?v=-1916615175&size=1800x1200"
+    },
+    {
+      "key": "photo-11",
+      "kind": "photo",
+      "label": "Bedroom · view 2",
+      "url": "https://photos.real.vision/7g3ayn5rFLB.jpg?v=-316241710&size=1800x1200"
+    },
+    {
+      "key": "photo-12",
+      "kind": "photo",
+      "label": "Living/Dining · view 3",
+      "url": "https://photos.real.vision/P42oX1ZJatP.jpg?v=-1916615175&size=1800x1200"
+    },
+    {
+      "key": "photo-13",
+      "kind": "photo",
+      "label": "Primary Bedroom · view 3",
+      "url": "https://photos.real.vision/XV1huBpUfr5.jpg?v=-1916615175&size=1800x1200"
+    },
+    {
+      "key": "photo-14",
+      "kind": "photo",
+      "label": "Bedroom · view 3",
+      "url": "https://photos.real.vision/NsXM164MMb9.jpg?v=-1916615175&size=1800x1200"
+    }
+  ]
+}

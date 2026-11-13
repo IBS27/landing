@@ -1,0 +1,67 @@
+{
+  "title": "2775 Market Street #306",
+  "listingUrl": "https://real.vision/2775-market-street-306",
+  "description": "Single-level SF unit. 1 bedrooms, 1 bathrooms, approximately 633 sqft. Use the published dimensions and room topology; no invented rooms.",
+  "sources": [
+    {
+      "key": "floorplan",
+      "kind": "floorplan",
+      "label": "Published floor plan",
+      "url": "https://floor-assets.real.vision/CHEmLmSCmMb_imperial.jpg?v=541737584&width=3300&download=true&filename=2775-market-street-306_Suite.jpg"
+    },
+    {
+      "key": "photo-1",
+      "kind": "photo",
+      "label": "Living/Dining",
+      "url": "https://photos.real.vision/SAkhbmXCyUG.jpg?v=379140255&size=1800x1200"
+    },
+    {
+      "key": "photo-2",
+      "kind": "photo",
+      "label": "Kitchen",
+      "url": "https://photos.real.vision/ajgfvwJBKVU.jpg?v=-1933891228&size=1800x1200"
+    },
+    {
+      "key": "photo-3",
+      "kind": "photo",
+      "label": "Bedroom",
+      "url": "https://photos.real.vision/kCV7P7F67XE.jpg?v=847739821&size=1800x1200"
+    },
+    {
+      "key": "photo-4",
+      "kind": "photo",
+      "label": "Bathroom",
+      "url": "https://photos.real.vision/jdvQRa6HHBU.jpg?v=-2002730108&size=1800x1200"
+    },
+    {
+      "key": "photo-5",
+      "kind": "photo",
+      "label": "Living/Dining · view 2",
+      "url": "https://photos.real.vision/PQbXYUWWhQB.jpg?v=847739821&size=1800x1200"
+    },
+    {
+      "key": "photo-6",
+      "kind": "photo",
+      "label": "Kitchen · view 2",
+      "url": "https://photos.real.vision/eU1Fbei43sY.jpg?v=-2002730108&size=1800x1200"
+    },
+    {
+      "key": "photo-7",
+      "kind": "photo",
+      "label": "Bedroom · view 2",
+      "url": "https://photos.real.vision/ohDxdpK9tWQ.jpg?v=847739821&size=1800x1200"
+    },
+    {
+      "key": "photo-8",
+      "kind": "photo",
+      "label": "Living/Dining · view 3",
+      "url": "https://photos.real.vision/VaC5nNksAK8.jpg?v=847739821&size=1800x1200"
+    },
+    {
+      "key": "photo-9",
+      "kind": "photo",
+      "label": "Bedroom · view 3",
+      "url": "https://photos.real.vision/uiXxYr4wuC6.jpg?v=847739821&size=1800x1200"
+    }
+  ]
+}

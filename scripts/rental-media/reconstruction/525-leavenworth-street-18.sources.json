@@ -1,0 +1,67 @@
+{
+  "title": "525 Leavenworth Street #18",
+  "listingUrl": "https://real.vision/525-leavenworth-street-18",
+  "description": "Single-level SF unit. 0 bedrooms, 1 bathrooms, approximately 458 sqft. Use the published dimensions and room topology; no invented rooms.",
+  "sources": [
+    {
+      "key": "floorplan",
+      "kind": "floorplan",
+      "label": "Published floor plan",
+      "url": "https://floor-assets.real.vision/RGiQuJ3x2zP_imperial.jpg?v=2002257105&width=3300&download=true&filename=525-leavenworth-street-18_Suite.jpg"
+    },
+    {
+      "key": "photo-1",
+      "kind": "photo",
+      "label": "Living",
+      "url": "https://photos.real.vision/PSPuDqpwXcQ.jpg?v=-1014136275&size=1800x1200"
+    },
+    {
+      "key": "photo-2",
+      "kind": "photo",
+      "label": "Kitchen/Dining",
+      "url": "https://photos.real.vision/1Nro6rAoVtX.jpg?v=-1014136275&size=1800x1200"
+    },
+    {
+      "key": "photo-3",
+      "kind": "photo",
+      "label": "Bathroom",
+      "url": "https://photos.real.vision/xjgfvwJBKVU.jpg?v=-1014136275&size=1800x1200"
+    },
+    {
+      "key": "photo-4",
+      "kind": "photo",
+      "label": "Storage",
+      "url": "https://photos.real.vision/BsTdxUBfk2h.jpg?v=-1014136275&size=1800x1200"
+    },
+    {
+      "key": "photo-5",
+      "kind": "photo",
+      "label": "Living · view 2",
+      "url": "https://photos.real.vision/SLD8ci59VCF.jpg?v=-1014136275&size=1800x1200"
+    },
+    {
+      "key": "photo-6",
+      "kind": "photo",
+      "label": "Kitchen/Dining · view 2",
+      "url": "https://photos.real.vision/FdqrKfsXBBN.jpg?v=-1014136275&size=1800x1200"
+    },
+    {
+      "key": "photo-7",
+      "kind": "photo",
+      "label": "Living · view 3",
+      "url": "https://photos.real.vision/Eau7BGVyEg.jpg?v=-1014136275&size=1800x1200"
+    },
+    {
+      "key": "photo-8",
+      "kind": "photo",
+      "label": "Kitchen/Dining · view 3",
+      "url": "https://photos.real.vision/5rreMdkZkpf.jpg?v=-1014136275&size=1800x1200"
+    },
+    {
+      "key": "photo-9",
+      "kind": "photo",
+      "label": "Living · view 4",
+      "url": "https://photos.real.vision/uKJWfctX5KL.jpg?v=-1014136275&size=1800x1200"
+    }
+  ]
+}

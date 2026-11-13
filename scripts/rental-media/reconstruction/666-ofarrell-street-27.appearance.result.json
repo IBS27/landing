@@ -1,0 +1,1224 @@
+{
+  "listingUrl": "https://real.vision/666-ofarrell-street-27",
+  "generatedAt": "2026-11-13T06:48:56.440Z",
+  "output": {
+    "scene": {
+      "notes": [],
+      "rooms": [
+        {
+          "evidence": {
+            "basis": "measured",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#FFFFFF",
+          "id": "primary",
+          "name": "Primary Bedroom",
+          "polygon": [
+            {
+              "x": 0.65,
+              "z": 0
+            },
+            {
+              "x": 3.27,
+              "z": 0
+            },
+            {
+              "x": 3.27,
+              "z": 4.06
+            },
+            {
+              "x": 0.65,
+              "z": 4.06
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "measured",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#FFFFFF",
+          "id": "bedroom",
+          "name": "Bedroom",
+          "polygon": [
+            {
+              "x": 3.27,
+              "z": 0
+            },
+            {
+              "x": 6.01,
+              "z": 0
+            },
+            {
+              "x": 6.01,
+              "z": 2.9
+            },
+            {
+              "x": 3.27,
+              "z": 2.9
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#FFFFFF",
+          "id": "bedroom-closet",
+          "name": "Bedroom Closet",
+          "polygon": [
+            {
+              "x": 4.8,
+              "z": 2.9
+            },
+            {
+              "x": 6.01,
+              "z": 2.9
+            },
+            {
+              "x": 6.01,
+              "z": 3.37
+            },
+            {
+              "x": 4.8,
+              "z": 3.37
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#FFFFFF",
+          "id": "hall",
+          "name": "Hall",
+          "polygon": [
+            {
+              "x": 3.27,
+              "z": 2.9
+            },
+            {
+              "x": 4.8,
+              "z": 2.9
+            },
+            {
+              "x": 4.8,
+              "z": 3.37
+            },
+            {
+              "x": 4.55,
+              "z": 3.37
+            },
+            {
+              "x": 4.55,
+              "z": 4.06
+            },
+            {
+              "x": 3.27,
+              "z": 4.06
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#FFFFFF",
+          "id": "bath",
+          "name": "Bath",
+          "polygon": [
+            {
+              "x": 4.55,
+              "z": 3.37
+            },
+            {
+              "x": 6.01,
+              "z": 3.37
+            },
+            {
+              "x": 6.01,
+              "z": 5.14
+            },
+            {
+              "x": 4.55,
+              "z": 5.14
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "measured",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#FFFFFF",
+          "id": "living",
+          "name": "Living/Dining",
+          "polygon": [
+            {
+              "x": 0,
+              "z": 4.56
+            },
+            {
+              "x": 0.65,
+              "z": 4.56
+            },
+            {
+              "x": 0.65,
+              "z": 4.06
+            },
+            {
+              "x": 4.55,
+              "z": 4.06
+            },
+            {
+              "x": 4.55,
+              "z": 5.14
+            },
+            {
+              "x": 3.7,
+              "z": 5.14
+            },
+            {
+              "x": 3.7,
+              "z": 7.03
+            },
+            {
+              "x": 0,
+              "z": 7.03
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#FFFFFF",
+          "id": "laundry",
+          "name": "Laundry",
+          "polygon": [
+            {
+              "x": 3.7,
+              "z": 5.14
+            },
+            {
+              "x": 4.55,
+              "z": 5.14
+            },
+            {
+              "x": 4.55,
+              "z": 5.99
+            },
+            {
+              "x": 3.7,
+              "z": 5.99
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#FFFFFF",
+          "id": "closet",
+          "name": "Closet",
+          "polygon": [
+            {
+              "x": 4.55,
+              "z": 5.14
+            },
+            {
+              "x": 6.01,
+              "z": 5.14
+            },
+            {
+              "x": 6.01,
+              "z": 5.99
+            },
+            {
+              "x": 4.55,
+              "z": 5.99
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "measured",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#FFFFFF",
+          "id": "foyer",
+          "name": "Foyer",
+          "polygon": [
+            {
+              "x": 3.7,
+              "z": 5.99
+            },
+            {
+              "x": 6.01,
+              "z": 5.99
+            },
+            {
+              "x": 6.01,
+              "z": 7.03
+            },
+            {
+              "x": 3.7,
+              "z": 7.03
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "measured",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#FFFFFF",
+          "id": "kitchen",
+          "name": "Kitchen",
+          "polygon": [
+            {
+              "x": 0,
+              "z": 7.03
+            },
+            {
+              "x": 2.39,
+              "z": 7.03
+            },
+            {
+              "x": 2.39,
+              "z": 9.37
+            },
+            {
+              "x": 0,
+              "z": 9.37
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#FFFFFF",
+          "id": "storage",
+          "name": "Storage",
+          "polygon": [
+            {
+              "x": 2.39,
+              "z": 7.03
+            },
+            {
+              "x": 3.55,
+              "z": 7.03
+            },
+            {
+              "x": 3.55,
+              "z": 8.8
+            },
+            {
+              "x": 2.39,
+              "z": 8.8
+            }
+          ]
+        }
+      ],
+      "title": "666 O'Farrell Street #27",
+      "version": 1,
+      "walls": [
+        {
+          "a": {
+            "x": 0.65,
+            "z": 0
+          },
+          "b": {
+            "x": 3.27,
+            "z": 0
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w01",
+          "openings": [
+            {
+              "bottom": 0.9,
+              "height": 1.2,
+              "kind": "window",
+              "offset": 0.6,
+              "width": 1.9
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 3.27,
+            "z": 0
+          },
+          "b": {
+            "x": 6.01,
+            "z": 0
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w02",
+          "openings": [
+            {
+              "bottom": 0.9,
+              "height": 1.2,
+              "kind": "window",
+              "offset": 0.6,
+              "width": 1.9
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 6.01,
+            "z": 0
+          },
+          "b": {
+            "x": 6.01,
+            "z": 2.9
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w03",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 6.01,
+            "z": 2.9
+          },
+          "b": {
+            "x": 6.01,
+            "z": 3.37
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w04",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 6.01,
+            "z": 3.37
+          },
+          "b": {
+            "x": 6.01,
+            "z": 5.14
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w05",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 6.01,
+            "z": 5.14
+          },
+          "b": {
+            "x": 6.01,
+            "z": 5.99
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w06",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 6.01,
+            "z": 5.99
+          },
+          "b": {
+            "x": 6.01,
+            "z": 7.03
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w07",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 0.12,
+              "width": 0.9
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 3.7,
+            "z": 7.03
+          },
+          "b": {
+            "x": 6.01,
+            "z": 7.03
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w08",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 3.7,
+            "z": 5.99
+          },
+          "b": {
+            "x": 4.55,
+            "z": 5.99
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w09",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 0.07,
+              "width": 0.7
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 4.55,
+            "z": 5.99
+          },
+          "b": {
+            "x": 6.01,
+            "z": 5.99
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w10",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 0.25,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 4.55,
+            "z": 5.14
+          },
+          "b": {
+            "x": 4.55,
+            "z": 5.99
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w11",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 3.7,
+            "z": 5.14
+          },
+          "b": {
+            "x": 4.55,
+            "z": 5.14
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w12",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 3.7,
+            "z": 5.14
+          },
+          "b": {
+            "x": 3.7,
+            "z": 5.99
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w13",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 0.65,
+            "z": 0
+          },
+          "b": {
+            "x": 0.65,
+            "z": 4.06
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w14",
+          "openings": [
+            {
+              "bottom": 0.9,
+              "height": 1.2,
+              "kind": "window",
+              "offset": 3.15,
+              "width": 0.7
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 0.65,
+            "z": 4.06
+          },
+          "b": {
+            "x": 3.27,
+            "z": 4.06
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w15",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 3.27,
+            "z": 0
+          },
+          "b": {
+            "x": 3.27,
+            "z": 2.9
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w16",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 3.27,
+            "z": 2.9
+          },
+          "b": {
+            "x": 3.27,
+            "z": 4.06
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w17",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 0.35,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 3.27,
+            "z": 2.9
+          },
+          "b": {
+            "x": 4.8,
+            "z": 2.9
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w18",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 0.25,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 4.8,
+            "z": 2.9
+          },
+          "b": {
+            "x": 6.01,
+            "z": 2.9
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w19",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 0.15,
+              "width": 0.9
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 4.8,
+            "z": 2.9
+          },
+          "b": {
+            "x": 4.8,
+            "z": 3.37
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w20",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 4.55,
+            "z": 3.37
+          },
+          "b": {
+            "x": 4.8,
+            "z": 3.37
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w21",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 4.8,
+            "z": 3.37
+          },
+          "b": {
+            "x": 6.01,
+            "z": 3.37
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w22",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 4.55,
+            "z": 3.37
+          },
+          "b": {
+            "x": 4.55,
+            "z": 5.14
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w23",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 0.08,
+              "width": 0.75
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 4.55,
+            "z": 5.14
+          },
+          "b": {
+            "x": 6.01,
+            "z": 5.14
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w24",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 4.56
+          },
+          "b": {
+            "x": 0,
+            "z": 7.03
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w25",
+          "openings": [
+            {
+              "bottom": 0.9,
+              "height": 1.2,
+              "kind": "window",
+              "offset": 1.1,
+              "width": 1
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 4.56
+          },
+          "b": {
+            "x": 0.65,
+            "z": 4.56
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w26",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 0.65,
+            "z": 4.06
+          },
+          "b": {
+            "x": 0.65,
+            "z": 4.56
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w27",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 2.39,
+            "z": 7.03
+          },
+          "b": {
+            "x": 3.55,
+            "z": 7.03
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w28",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 0.35,
+              "width": 0.75
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 3.55,
+            "z": 7.03
+          },
+          "b": {
+            "x": 3.7,
+            "z": 7.03
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w29",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 7.03
+          },
+          "b": {
+            "x": 0,
+            "z": 9.37
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w30",
+          "openings": [
+            {
+              "bottom": 0.9,
+              "height": 1.2,
+              "kind": "window",
+              "offset": 1.2,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 9.37
+          },
+          "b": {
+            "x": 2.39,
+            "z": 9.37
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w31",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 2.39,
+            "z": 7.03
+          },
+          "b": {
+            "x": 2.39,
+            "z": 8.8
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w32",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 2.39,
+            "z": 8.8
+          },
+          "b": {
+            "x": 2.39,
+            "z": 9.37
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w33",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 3.55,
+            "z": 7.03
+          },
+          "b": {
+            "x": 3.55,
+            "z": 8.8
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w34",
+          "openings": [],
+          "thickness": 0.15
+        },
+        {
+          "a": {
+            "x": 2.39,
+            "z": 8.8
+          },
+          "b": {
+            "x": 3.55,
+            "z": 8.8
+          },
+          "color": "#FFFFFF",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.7,
+          "id": "w35",
+          "openings": [],
+          "thickness": 0.15
+        }
+      ]
+    },
+    "explanation": "Detailed finishes could not be reconstructed. The editable layout is still available."
+  },
+  "via": "fallback",
+  "validation": [],
+  "log": {
+    "agent": "muse",
+    "task": "muse.unitAppearance",
+    "inputHash": "6e1ab4f2a5abd0cc6dcbf13cd8b848e3f07d784212f6536a500b54e14a989b15",
+    "outcome": "fallback",
+    "fallbackReason": "invalid_output",
+    "cited": [],
+    "model": "muse-wonder-1.0",
+    "attempts": 3,
+    "errors": [
+      "Attempt 1: kitchen-base-south: part outside object bounds; kitchen-wall-cabinets: part outside object bounds; kitchen-peninsula: part outside object bounds; kitchen-pendants: part outside object bounds; bath-toilet: part outside object bounds; bath-tub-shower: part outside object bounds",
+      "Attempt 2: Observed fixtures obstruct doorway w09 near (4.12, 5.64). Keep the opening and approach clear; Observed fixtures obstruct doorway w19 near (5.40, 2.90). Keep the opening and approach clear",
+      "Attempt 3: Observed fixtures obstruct doorway w09 near (4.12, 5.64). Keep the opening and approach clear"
+    ],
+    "latencyMs": 181216,
+    "usage": {
+      "inputTokens": 129614,
+      "outputTokens": 34652,
+      "cacheReadTokens": 51060,
+      "cacheWriteTokens": 0
+    },
+    "costUsd": 1.221708,
+    "createdAt": 1794552536440
+  }
+}
