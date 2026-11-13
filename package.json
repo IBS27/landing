@@ -34,6 +34,7 @@
   "scripts": {
     "dev": "vite",
     "dev:convex": "convex dev",
+    "build": "vite build",
     "typecheck": "tsc -p . && tsc -p convex",
     "lint": "biome check .",
     "test": "bun test",
