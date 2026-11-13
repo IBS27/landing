@@ -22,8 +22,8 @@ export const BOUNDARY_SOURCE = {
   title: "Analysis Neighborhoods | DataSF",
   publisher: "DataSF",
   snippet:
-    "The Department of Public Health and the Mayor’s Office of Housing and Community Development, with support from the Planning Department, created these 41 neighborhoods by grouping 2010 Census tracts, using common real estate and residents’ definitions for the purpose of…",
-  fetchedAt: 1794524232507,
+    "…created these 41 neighborhoods by grouping 2010 Census tracts, using common real estate and residents’ definitions",
+  fetchedAt: 1794530052989,
 };
 
 /** Keyed by slug: the DataSF name, slugified. */

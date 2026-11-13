@@ -9,9 +9,9 @@ import type { CampusSeed, CorridorSeed, SourceSnapshot } from "../../types";
  * passes through.
  */
 
-/** Source snapshots, keyed by URL. */
+/** Source snapshots, one per quoted passage, keyed by URL + passage hash. */
 export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
-  "https://www.sf.gov/valencia-street-entertainment-zone": {
+  "https://www.sf.gov/valencia-street-entertainment-zone#47234a4d": {
     url: "https://www.sf.gov/valencia-street-entertainment-zone",
     title: "Valencia Street Entertainment Zone",
     publisher: "SF.gov (Office of Economic and Workforce Development)",
@@ -19,46 +19,53 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "The Valenica Street Entertainment Zone is on Valencia Street between 16th Street and 21st Street, and is active seven days a week from 12:00 PM – 11:59 PM.",
     fetchedAt: 1794526026000,
   },
-  "https://en.wikipedia.org/wiki/Mission_District,_San_Francisco": {
+  "https://en.wikipedia.org/wiki/Mission_District,_San_Francisco#949fbcd1": {
     url: "https://en.wikipedia.org/wiki/Mission_District,_San_Francisco",
     title: "Mission District, San Francisco",
     publisher: "Wikipedia",
     snippet:
-      "known as the Valencia corridor (Valencia St, from about 15th to 22nd) and the 24th Street corridor known as Calle 24[34][35] in the south central part of the Mission District are both very popular destinations for their restaurants, bars, galleries and street life.",
+      "…the Valencia corridor (Valencia St, from about 15th to 22nd)…very popular destinations for their restaurants, bars, galleries and street life.",
     fetchedAt: 1794526026000,
   },
-  "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco": {
+  "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#2753ab02": {
     url: "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
     title: "The Best Streets for Bar Hopping in San Francisco",
     publisher: "San Francisco Travel Association",
     snippet:
-      "Check out the artsy design of NOC NOC (557 Haight St.) or the die-hard regular crowd at Molotov's (582 Haight St.) before heading over to Nickie's (466 Haight St.) for some dancing.",
+      "For live local acts, try The Chapel (777 Valencia St.) or The Valencia Room (647 Valencia St.), which sports a cozy bar downstairs and live music above.",
     fetchedAt: 1794526026000,
   },
-  "https://en.wikipedia.org/wiki/Polk_Street": {
+  "https://en.wikipedia.org/wiki/Polk_Street#ada03fcf": {
     url: "https://en.wikipedia.org/wiki/Polk_Street",
     title: "Polk Street",
     publisher: "Wikipedia",
     snippet:
-      "Polk Gulch is the neighborhood around a section of Polk Street and its immediate vicinity, which runs through the Nob Hill and Russian Hill neighborhoods from approximately Geary Street to Union Street.",
+      "Polk Gulch is the neighborhood around a section of Polk Street…from approximately Geary Street to Union Street.",
     fetchedAt: 1794526026000,
   },
-  "https://www.sf.gov/perfect-day-along-polk-st": {
+  "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#c297b864": {
+    url: "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
+    title: "The Best Streets for Bar Hopping in San Francisco",
+    publisher: "San Francisco Travel Association",
+    snippet: "Polk Street is a full city sampler perfect for bar hopping the entire night away.",
+    fetchedAt: 1794526026000,
+  },
+  "https://www.sf.gov/perfect-day-along-polk-st#a8bc2e80": {
     url: "https://www.sf.gov/perfect-day-along-polk-st",
     title: "Perfect Day along Polk St.",
     publisher: "SF.gov (Office of Economic and Workforce Development)",
     snippet: "Polk St. is a central area full of shops, restaurants, and entertainment.",
     fetchedAt: 1794526026000,
   },
-  "https://www.sf.gov/perfect-day-soma-west": {
+  "https://www.sf.gov/perfect-day-soma-west#b846f4ec": {
     url: "https://www.sf.gov/perfect-day-soma-west",
     title: "Perfect Day in SoMa West",
     publisher: "SF.gov (Office of Economic and Workforce Development)",
     snippet:
-      "SOMA is the undisputed capital of dance clubs in San Francisco. Disco up the 11th Street corridor at DNA Lounge, Buzzworks, Butter, Bella, Audio Nightclub, Halcyon, and Eve; on the far side of the district, start at 1015 Folsom and continue on to Raven Bar, Cat Club, and F8.",
+      "…the 11th Street corridor at DNA Lounge, Buzzworks, Butter, Bella, Audio Nightclub, Halcyon, and Eve;…start at 1015 Folsom…",
     fetchedAt: 1794526026000,
   },
-  "https://www.sf.gov/folsom-street-entertainment-zone": {
+  "https://www.sf.gov/folsom-street-entertainment-zone#99401d95": {
     url: "https://www.sf.gov/folsom-street-entertainment-zone",
     title: "Folsom Street Entertainment Zone",
     publisher: "SF.gov (Office of Economic and Workforce Development)",
@@ -66,17 +73,24 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "Folsom Street between 7th Street and 8th Street, and portions of Hallam Street and Langton Street Business Spotlight Cat Club Raven Bar F8 Nightclub & Bar",
     fetchedAt: 1794526026000,
   },
-  "https://www.sf.gov/news-mayor-lurie-supervisors-announce-legislation-to-support-neighborhoods-small-businesses-with-five-new-entertainment-zones":
+  "https://www.sf.gov/news-mayor-lurie-supervisors-announce-legislation-to-support-neighborhoods-small-businesses-with-five-new-entertainment-zones#4dc21ef3":
     {
       url: "https://www.sf.gov/news-mayor-lurie-supervisors-announce-legislation-to-support-neighborhoods-small-businesses-with-five-new-entertainment-zones",
       title:
         "Mayor Lurie, Supervisors Announce Legislation to Support Neighborhoods, Small Businesses with Five New Entertainment Zones",
       publisher: "SF.gov (Office of the Mayor)",
       snippet:
-        "From the heart of downtown on Yerba Buena Lane to the nightlife corridor of Folsom Street in SoMa, we’re creating welcoming spaces that support small businesses, celebrate our culture, and bring people together.",
+        "…the nightlife corridor of Folsom Street in SoMa, we’re creating welcoming spaces that support small businesses…",
       fetchedAt: 1794526026000,
     },
-  "https://www.sf.gov/perfect-day-north-beach": {
+  "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#0c198ca1": {
+    url: "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
+    title: "The Best Streets for Bar Hopping in San Francisco",
+    publisher: "San Francisco Travel Association",
+    snippet: "This strip on the edge of SoMa is home to many incredible clubs.",
+    fetchedAt: 1794526026000,
+  },
+  "https://www.sf.gov/perfect-day-north-beach#9a035a6c": {
     url: "https://www.sf.gov/perfect-day-north-beach",
     title: "Perfect Day in North Beach",
     publisher: "SF.gov (Office of Economic and Workforce Development)",
@@ -84,40 +98,56 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "Grant Avenue is rich with one-of-a-kind shops, while Broadway is lined with music clubs, restaurants and bars.",
     fetchedAt: 1794526026000,
   },
-  "https://en.wikipedia.org/wiki/North_Beach,_San_Francisco": {
+  "https://en.wikipedia.org/wiki/North_Beach,_San_Francisco#7222dbd4": {
     url: "https://en.wikipedia.org/wiki/North_Beach,_San_Francisco",
     title: "North Beach, San Francisco",
     publisher: "Wikipedia",
     snippet:
-      "Broadway east of Columbus Avenue still serves as one of the city's main nightclub districts and offers restaurants, blues clubs, strip clubs, nightclubs, and jazz clubs.",
+      "Broadway east of Columbus Avenue still serves as one of the city's main nightclub districts and offers restaurants, blues clubs, strip clubs, nightclubs…",
     fetchedAt: 1794526026000,
   },
-  "https://www.sf.gov/perfect-day-castro": {
+  "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#4ff1258f": {
+    url: "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
+    title: "The Best Streets for Bar Hopping in San Francisco",
+    publisher: "San Francisco Travel Association",
+    snippet:
+      "…Vesuvio (255 Columbus Ave.), where the Beat poets used to gather for drinks, as well as Tosca Café (242 Columbus Ave.)",
+    fetchedAt: 1794526026000,
+  },
+  "https://www.sf.gov/perfect-day-castro#c4856f6d": {
     url: "https://www.sf.gov/perfect-day-castro",
     title: "Perfect Day in the Castro",
     publisher: "SF.gov (Office of Economic and Workforce Development)",
     snippet:
-      "Finally, there are so many ways to end your evening. Visit one of our many bars - from wine to dancing to classic history spots, the Castro Merchants have got you covered.",
+      "…Visit one of our many bars - from wine to dancing to classic history spots, the Castro Merchants have got you covered.",
     fetchedAt: 1794526026000,
   },
-  "https://www.sf.gov/news-mayor-lurie-signs-legislation-creating-five-new-entertainment-zones-across-san-francisco-launches-castro-entertainment-zone":
+  "https://www.sf.gov/news-mayor-lurie-signs-legislation-creating-five-new-entertainment-zones-across-san-francisco-launches-castro-entertainment-zone#de88925b":
     {
       url: "https://www.sf.gov/news-mayor-lurie-signs-legislation-creating-five-new-entertainment-zones-across-san-francisco-launches-castro-entertainment-zone",
       title:
         "Mayor Lurie Signs Legislation Creating Five New Entertainment Zones Across San Francisco, Launches Castro Entertainment Zone",
       publisher: "SF.gov (Office of the Mayor)",
       snippet:
-        "That’s why we advocated for such a large entertainment zone footprint—it reflects the broad scope of our neighborhood and gives dozens of bars and restaurants more opportunities to shine,",
+        "…such a large entertainment zone footprint—it reflects the broad scope of our neighborhood and gives dozens of bars and restaurants more opportunities to shine",
       fetchedAt: 1794526026000,
     },
-  "https://www.sf.gov/castro-upper-market-entertainment-zone": {
+  "https://www.sf.gov/castro-upper-market-entertainment-zone#e71227e6": {
     url: "https://www.sf.gov/castro-upper-market-entertainment-zone",
     title: "Castro Upper Market Entertainment Zone",
     publisher: "SF.gov (San Francisco Entertainment Zones)",
     snippet: "On Castro Street and various streets in the Castro neighborhood",
     fetchedAt: 1794526026000,
   },
-  "https://en.wikipedia.org/wiki/Marina_District,_San_Francisco": {
+  "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#d85d1229": {
+    url: "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
+    title: "The Best Streets for Bar Hopping in San Francisco",
+    publisher: "San Francisco Travel Association",
+    snippet:
+      "…Lookout (3600 16th St.)…The Café (2369 Market St.)…Moby Dick (4049 18th St.), a Castro landmark.",
+    fetchedAt: 1794526026000,
+  },
+  "https://en.wikipedia.org/wiki/Marina_District,_San_Francisco#e8ffbc34": {
     url: "https://en.wikipedia.org/wiki/Marina_District,_San_Francisco",
     title: "Marina District, San Francisco",
     publisher: "Wikipedia",
@@ -125,7 +155,7 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "Stretching from Fillmore Street down to Lyon Street, Chestnut is lined with a collection of stores, restaurants, bakeries, coffee shops and bars.",
     fetchedAt: 1794526026000,
   },
-  "https://www.sf.gov/perfect-day-along-chestnut-st": {
+  "https://www.sf.gov/perfect-day-along-chestnut-st#a8abad55": {
     url: "https://www.sf.gov/perfect-day-along-chestnut-st",
     title: "Perfect Day along Chestnut St.",
     publisher: "SF.gov (Office of Economic and Workforce Development)",
@@ -133,30 +163,46 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "End your night at the Horseshoe Tavern, a classic San Francisco watering hole, complete with good beer, pool, and the constant cast of regulars.",
     fetchedAt: 1794526026000,
   },
-  "https://www.sftravel.com/article/where-to-eat-drink-marina-district": {
+  "https://www.sftravel.com/article/where-to-eat-drink-marina-district#501e39e0": {
     url: "https://www.sftravel.com/article/where-to-eat-drink-marina-district",
     title: "Where to Eat and Drink in the Marina District",
     publisher: "San Francisco Travel Association",
     snippet:
-      "Union Street and Chestnut Street, running parallel to one another through the Marina, are home to neighborhood eateries and culinary superstars, hip cocktail lounges, and historic watering holes",
+      "Union Street and Chestnut Street, running parallel to one another through the Marina, are home to…hip cocktail lounges, and historic watering holes",
     fetchedAt: 1794526026000,
   },
-  "https://www.sf.gov/perfect-day-along-union-st": {
+  "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#5df85687": {
+    url: "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
+    title: "The Best Streets for Bar Hopping in San Francisco",
+    publisher: "San Francisco Travel Association",
+    snippet:
+      "This Marina District stretch has a distinctly casual collegiate vibe with its many sports bars and local watering holes.",
+    fetchedAt: 1794526026000,
+  },
+  "https://www.sf.gov/perfect-day-along-union-st#5d283082": {
     url: "https://www.sf.gov/perfect-day-along-union-st",
     title: "Perfect Day along Union St.",
     publisher: "SF.gov (Office of Economic and Workforce Development)",
     snippet:
-      "also caters to the younger generation with gyms, cycle shops, yoga and spas and an abundance of beauty, health and fitness venues, boutiques, sports bars and coffee shops.",
+      "also caters to the younger generation with gyms, cycle shops, yoga and spas…boutiques, sports bars and coffee shops.",
     fetchedAt: 1794526026000,
   },
-  "https://www.sftravel.com/article/where-to-eat-drink-san-franciscos-nopa": {
+  "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#1a4764e2": {
+    url: "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
+    title: "The Best Streets for Bar Hopping in San Francisco",
+    publisher: "San Francisco Travel Association",
+    snippet:
+      "Stretching from the Castro to the Marina, Divisadero is packed with hip bars and cocktail lounges that make for some top-notch bar hopping.",
+    fetchedAt: 1794526026000,
+  },
+  "https://www.sftravel.com/article/where-to-eat-drink-san-franciscos-nopa#c05b4f6e": {
     url: "https://www.sftravel.com/article/where-to-eat-drink-san-franciscos-nopa",
     title: "Where to Eat and Drink in San Francisco's NOPA",
     publisher: "San Francisco Travel Association",
     snippet: "Open until 1 a.m., Horsefeather is great spot for a late-night bite.",
     fetchedAt: 1794526026000,
   },
-  "https://www.sf.gov/perfect-day-haight": {
+  "https://www.sf.gov/perfect-day-haight#fbaebe5d": {
     url: "https://www.sf.gov/perfect-day-haight",
     title: "Perfect Day in the Haight",
     publisher: "SF.gov (Office of Economic and Workforce Development)",
@@ -164,23 +210,24 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "Finish your night with a cocktail at Zam Zam, The Gold Cane, Mary's on Haight and more!",
     fetchedAt: 1794526026000,
   },
-  "https://www.sfmta.com/travel-updates/haight-ashbury-street-fair-sunday-september-20-2026": {
-    url: "https://www.sfmta.com/travel-updates/haight-ashbury-street-fair-sunday-september-20-2026",
-    title: "Haight Ashbury Street Fair: Sunday, September 20, 2026",
-    publisher: "SFMTA",
-    snippet:
-      "The Haight Ashbury Street Fair is an annual event featuring arts and crafts, food vendors, three musical stages and more. The event takes place Sunday, September 20, from 11 a.m. to 5:30 p.m. on Haight Street between Masonic and Stanyan,",
-    fetchedAt: 1794526026000,
-  },
-  "https://en.wikipedia.org/wiki/Haight-Ashbury": {
+  "https://www.sfmta.com/travel-updates/haight-ashbury-street-fair-sunday-september-20-2026#c1d0a3b0":
+    {
+      url: "https://www.sfmta.com/travel-updates/haight-ashbury-street-fair-sunday-september-20-2026",
+      title: "Haight Ashbury Street Fair: Sunday, September 20, 2026",
+      publisher: "SFMTA",
+      snippet:
+        "…an annual event featuring arts and crafts, food vendors, three musical stages and more.…on Haight Street between Masonic and Stanyan",
+      fetchedAt: 1794526026000,
+    },
+  "https://en.wikipedia.org/wiki/Haight-Ashbury#8c6ec54a": {
     url: "https://en.wikipedia.org/wiki/Haight-Ashbury",
     title: "Haight-Ashbury",
     publisher: "Wikipedia",
     snippet:
-      "The Haight-Ashbury Street Fair started in 1978 and is held each year. This event attracts thousands of people, during which Haight Street is closed to vehicular traffic between Stanyan and Masonic,",
+      "The Haight-Ashbury Street Fair started in 1978 and is held each year.…Haight Street is closed to vehicular traffic between Stanyan and Masonic",
     fetchedAt: 1794526026000,
   },
-  "https://en.wikipedia.org/wiki/Lower_Haight,_San_Francisco": {
+  "https://en.wikipedia.org/wiki/Lower_Haight,_San_Francisco#1a8583e2": {
     url: "https://en.wikipedia.org/wiki/Lower_Haight,_San_Francisco",
     title: "Lower Haight, San Francisco",
     publisher: "Wikipedia",
@@ -188,7 +235,15 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "A mixture of restaurants, small nightclubs, cafes, drinking establishments, residences, galleries, and hair salons characterizes the Lower Haight.",
     fetchedAt: 1794526026000,
   },
-  "https://www.sfsu.edu/student-experience/our-san-francisco-campus": {
+  "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#e37c7cc9": {
+    url: "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
+    title: "The Best Streets for Bar Hopping in San Francisco",
+    publisher: "San Francisco Travel Association",
+    snippet:
+      "…NOC NOC (557 Haight St.)…Molotov's (582 Haight St.) before heading over to Nickie's (466 Haight St.) for some dancing.",
+    fetchedAt: 1794526026000,
+  },
+  "https://www.sfsu.edu/student-experience/our-san-francisco-campus#bfe8b57f": {
     url: "https://www.sfsu.edu/student-experience/our-san-francisco-campus",
     title: "Our San Francisco Campus",
     publisher: "San Francisco State University",
@@ -196,7 +251,7 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "Spanning 144 acres, the SFSU campus is a lush, green oasis in the city, with tree-lined pathways",
     fetchedAt: 1794526026000,
   },
-  "https://www.sfsu.edu/about/facts-and-figures": {
+  "https://www.sfsu.edu/about/facts-and-figures#a2d746ea": {
     url: "https://www.sfsu.edu/about/facts-and-figures",
     title: "Facts and Figures",
     publisher: "San Francisco State University",
@@ -204,7 +259,7 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "Over 17,000 undergraduates and 3,000 graduate students and post-baccalaureates are currently enrolled",
     fetchedAt: 1794526026000,
   },
-  "https://en.wikipedia.org/wiki/San_Francisco_State_University": {
+  "https://en.wikipedia.org/wiki/San_Francisco_State_University#25aa21a9": {
     url: "https://en.wikipedia.org/wiki/San_Francisco_State_University",
     title: "San Francisco State University - Wikipedia",
     publisher: "Wikipedia",
@@ -212,7 +267,7 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "The 144.1-acre main campus is located in the southwest part of the city, less than two miles from the Pacific coast.",
     fetchedAt: 1794526026000,
   },
-  "https://www.usfca.edu/who-we-are/our-locations/san-francisco-main-campus": {
+  "https://www.usfca.edu/who-we-are/our-locations/san-francisco-main-campus#7c7c1166": {
     url: "https://www.usfca.edu/who-we-are/our-locations/san-francisco-main-campus",
     title: "San Francisco Main Campus | University of San Francisco",
     publisher: "University of San Francisco",
@@ -220,7 +275,7 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       'The main campus of the University of San Francisco, "the Hilltop" is located on 55 acres in the Inner Richmond neighborhood.',
     fetchedAt: 1794526026000,
   },
-  "https://en.wikipedia.org/wiki/University_of_San_Francisco": {
+  "https://en.wikipedia.org/wiki/University_of_San_Francisco#7c079d47": {
     url: "https://en.wikipedia.org/wiki/University_of_San_Francisco",
     title: "University of San Francisco - Wikipedia",
     publisher: "Wikipedia",
@@ -228,15 +283,15 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "It's divided into Lone Mountain and lower campus, which are north and south of Turk Street respectively",
     fetchedAt: 1794526026000,
   },
-  "https://realestate.ucsf.edu/campus-sites/parnassus-heights-campus-site": {
+  "https://realestate.ucsf.edu/campus-sites/parnassus-heights-campus-site#a1a73201": {
     url: "https://realestate.ucsf.edu/campus-sites/parnassus-heights-campus-site",
     title: "Parnassus Heights Campus Site | UCSF Real Estate",
     publisher: "UCSF",
     snippet:
-      "Parnassus Heights is the oldest and largest campus site belonging to UC San Francisco. It comprises approximately 107 acres of land at the base of Mount Sutro, in the Inner Sunset mixed-use neighborhood.",
+      "Parnassus Heights is the oldest and largest campus site belonging to UC San Francisco. It comprises approximately 107 acres of land at the base of Mount Sutro…",
     fetchedAt: 1794526026000,
   },
-  "https://medschool.ucsf.edu/about/overview/campuses-and-directions": {
+  "https://medschool.ucsf.edu/about/overview/campuses-and-directions#e6126280": {
     url: "https://medschool.ucsf.edu/about/overview/campuses-and-directions",
     title: "Campuses and Directions | UCSF School of Medicine",
     publisher: "UCSF",
@@ -244,15 +299,32 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "The school is headquartered at the central Parnassus Heights campus on Parnassus Avenue near Fourth Avenue, adjacent to the UCSF Medical Center.",
     fetchedAt: 1794526026000,
   },
-  "https://realestate.ucsf.edu/campus-sites/mission-bay-campus-site": {
+  "https://realestate.ucsf.edu/campus-sites/mission-bay-campus-site#220795f5": {
     url: "https://realestate.ucsf.edu/campus-sites/mission-bay-campus-site",
     title: "Mission Bay Campus Site | UCSF Real Estate",
     publisher: "UCSF",
     snippet:
-      "The 57.9-acre UCSF Mission Bay campus site is within the Mission Bay South Redevelopment Area, which is part of the larger 303-acre Mission Bay Redevelopment Area in the Mission Bay neighborhood, north of the Potrero Hill and Dogpatch neighborhoods.",
+      "The 57.9-acre UCSF Mission Bay campus site is within the Mission Bay South Redevelopment Area…",
     fetchedAt: 1794526026000,
   },
-  "https://medicine.ucsf.edu/about/locations/ucsf-medical-center-parnassus-mount-zion-mission-bay":
+  "https://medicine.ucsf.edu/about/locations/ucsf-medical-center-parnassus-mount-zion-mission-bay#92e5c2a2":
+    {
+      url: "https://medicine.ucsf.edu/about/locations/ucsf-medical-center-parnassus-mount-zion-mission-bay",
+      title: "UCSF Medical Center at Parnassus, Mount Zion, Mission Bay | Department of Medicine",
+      publisher: "UCSF",
+      snippet:
+        "In 2015, UCSF Medical Center expanded to Mission Bay, bringing health care to children, women and cancer patients",
+      fetchedAt: 1794526026000,
+    },
+  "https://realestate.ucsf.edu/campus-sites/mount-zion#eaca7ca7": {
+    url: "https://realestate.ucsf.edu/campus-sites/mount-zion",
+    title: "Mount Zion | UCSF Real Estate",
+    publisher: "UCSF",
+    snippet:
+      "The UCSF Mount Zion campus site is approximately 7.5 acres on six contiguous city blocks in the Western Addition neighborhood of San Francisco.",
+    fetchedAt: 1794526026000,
+  },
+  "https://medicine.ucsf.edu/about/locations/ucsf-medical-center-parnassus-mount-zion-mission-bay#3499e55d":
     {
       url: "https://medicine.ucsf.edu/about/locations/ucsf-medical-center-parnassus-mount-zion-mission-bay",
       title: "UCSF Medical Center at Parnassus, Mount Zion, Mission Bay | Department of Medicine",
@@ -261,15 +333,7 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
         "The UCSF Medical Center is made up of three medical centers, at the Parnassus, Mount Zion and Mission Bay campuses.",
       fetchedAt: 1794526026000,
     },
-  "https://realestate.ucsf.edu/campus-sites/mount-zion": {
-    url: "https://realestate.ucsf.edu/campus-sites/mount-zion",
-    title: "Mount Zion | UCSF Real Estate",
-    publisher: "UCSF",
-    snippet:
-      "The UCSF Mount Zion campus site is approximately 7.5 acres on six contiguous city blocks in the Western Addition neighborhood of San Francisco.",
-    fetchedAt: 1794526026000,
-  },
-  "https://generalplan.sfplanning.org/Balboa_Park_Station.htm": {
+  "https://generalplan.sfplanning.org/Balboa_Park_Station.htm#07469b0d": {
     url: "https://generalplan.sfplanning.org/Balboa_Park_Station.htm",
     title: "Balboa Park Station | San Francisco General Plan",
     publisher: "SF Planning",
@@ -277,7 +341,7 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "The Ocean Avenue Campus is the historical heart of the CCSF system and continues to serve as its flagship campus, serving the majority of its students.",
     fetchedAt: 1794526026000,
   },
-  "https://en.wikipedia.org/wiki/City_College_of_San_Francisco": {
+  "https://en.wikipedia.org/wiki/City_College_of_San_Francisco#c815fe64": {
     url: "https://en.wikipedia.org/wiki/City_College_of_San_Francisco",
     title: "City College of San Francisco - Wikipedia",
     publisher: "Wikipedia",
@@ -285,7 +349,7 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "The Ocean Avenue campus, bordering the Sunnyside, Westwood Park and Ingleside neighborhoods, is the college's largest location.",
     fetchedAt: 1794526026000,
   },
-  "https://www.uclawsf.edu/map-directions/": {
+  "https://www.uclawsf.edu/map-directions/#63cedc43": {
     url: "https://www.uclawsf.edu/map-directions/",
     title: "Map & Directions - UC Law SF College of the Law, San Francisco",
     publisher: "UC Law SF",
@@ -293,77 +357,85 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "The law school’s academic and residential buildings stand astride two blocks of McAllister Street",
     fetchedAt: 1794526026000,
   },
-  "https://www.uclawsf.edu/": {
+  "https://www.uclawsf.edu/#c1072ec8": {
     url: "https://www.uclawsf.edu/",
     title: "UC Law San Francisco | (Formerly UC Hastings)",
     publisher: "UC Law SF",
-    snippet:
-      "The Civic Center is home to UC Law SF, as well as City Hall, courthouses, the Bill Graham Auditorium (where Commencement is held!), the opera, the ballet, the symphony, and the Asian Art Museum.",
+    snippet: "The Civic Center is home to UC Law SF, as well as City Hall, courthouses…",
     fetchedAt: 1794526026000,
   },
-  "https://en.wikipedia.org/wiki/University_of_California_College_of_the_Law,_San_Francisco": {
-    url: "https://en.wikipedia.org/wiki/University_of_California_College_of_the_Law,_San_Francisco",
-    title: "University of California College of the Law, San Francisco - Wikipedia",
-    publisher: "Wikipedia",
-    snippet:
-      "The University of California College of the Law, San Francisco (UC Law San Francisco or UC Law SF) is a public law school in San Francisco. It was formerly known as the University of California, Hastings College of the Law (UC Hastings).",
-    fetchedAt: 1794526026000,
-  },
-  "https://sfcm.edu/experience/facilities": {
+  "https://en.wikipedia.org/wiki/University_of_California_College_of_the_Law,_San_Francisco#4051581a":
+    {
+      url: "https://en.wikipedia.org/wiki/University_of_California_College_of_the_Law,_San_Francisco",
+      title: "University of California College of the Law, San Francisco - Wikipedia",
+      publisher: "Wikipedia",
+      snippet:
+        "…UC Law SF) is a public law school in San Francisco. It was formerly known as the University of California, Hastings College of the Law (UC Hastings).",
+      fetchedAt: 1794526026000,
+    },
+  "https://sfcm.edu/experience/facilities#41cc0479": {
     url: "https://sfcm.edu/experience/facilities",
     title: "Facilities | SFCM",
     publisher: "San Francisco Conservatory of Music",
     snippet:
-      "The Conservatory's 50 Oak Street campus, the Ann Getty Center for Education, was built out from a historical Catholic Boys Club, while the Ute and William K. Bowes Center for the Performing Arts at 200 Van Ness Avenue",
+      "The Conservatory's 50 Oak Street campus, the Ann Getty Center for Education,…the Ute and William K. Bowes Center for the Performing Arts at 200 Van Ness Avenue",
     fetchedAt: 1794526026000,
   },
-  "https://sfcm.edu/discover/campus-life/bowes-center": {
+  "https://sfcm.edu/discover/campus-life/bowes-center#bcd67ed1": {
     url: "https://sfcm.edu/discover/campus-life/bowes-center",
     title: "The Bowes Center | SFCM",
     publisher: "San Francisco Conservatory of Music",
     snippet: "Apartments for over 400 student-musicians, learn about living on campus.",
     fetchedAt: 1794526026000,
   },
-  "https://sfcm.edu/study/apply/getting-here": {
+  "https://sfcm.edu/study/apply/getting-here#b131ac16": {
     url: "https://sfcm.edu/study/apply/getting-here",
     title: "Getting To SFCM | SFCM",
     publisher: "San Francisco Conservatory of Music",
     snippet:
-      'The SFCM campus consists of two buildings: the Ann Getty Center for Education and the Ute and William K. Bowes, Jr. Center for Performing Arts, commonly referred to as "The Bowes Center."',
+      "The SFCM campus consists of two buildings: the Ann Getty Center for Education and the Ute and William K. Bowes, Jr. Center for Performing Arts…",
     fetchedAt: 1794526026000,
   },
-  "https://cca.edu/about/vanderbilt-agreement/": {
+  "https://cca.edu/about/vanderbilt-agreement/#d4c04a2a": {
     url: "https://cca.edu/about/vanderbilt-agreement/",
     title: "Vanderbilt Agreement | CCA",
     publisher: "California College of the Arts",
     snippet:
-      "Under this agreement, CCA will wind down its current operations and will close by the end of the 2026-2027 academic year. Vanderbilt will then become the owner of the campus",
+      "Under the terms of this agreement, CCA plans to continue teaching and supporting students through the 2026–27 academic year",
     fetchedAt: 1794526026000,
   },
-  "https://www.cca.edu/": {
+  "https://cca.edu/about/vanderbilt-agreement/#9342584c": {
+    url: "https://cca.edu/about/vanderbilt-agreement/",
+    title: "Vanderbilt Agreement | CCA",
+    publisher: "California College of the Arts",
+    snippet:
+      "…CCA will wind down its current operations and will close by the end of the 2026-2027 academic year. Vanderbilt will then become the owner of the campus",
+    fetchedAt: 1794526026000,
+  },
+  "https://www.cca.edu/#39c86dc5": {
     url: "https://www.cca.edu/",
     title: "CCA | California College of the Arts - Bay Area Art & Design School",
     publisher: "California College of the Arts",
     snippet: "CCA will close in June 2027. Read about the agreement with Vanderbilt University.",
     fetchedAt: 1794526026000,
   },
-  "https://en.wikipedia.org/wiki/California_College_of_the_Arts": {
+  "https://en.wikipedia.org/wiki/California_College_of_the_Arts#f8518f52": {
     url: "https://en.wikipedia.org/wiki/California_College_of_the_Arts",
     title: "California College of the Arts - Wikipedia",
     publisher: "Wikipedia",
     snippet:
-      "In January 2026, CCA president David Howse announced the college will be closing at the end of the 2026–2027 academic year, with Vanderbilt University taking over the campus.",
+      "…the college will be closing at the end of the 2026–2027 academic year, with Vanderbilt University taking over the campus.",
     fetchedAt: 1794526026000,
   },
-  "https://www.academyart.edu/facilities/": {
+  "https://www.academyart.edu/facilities/#188b8f18": {
     url: "https://www.academyart.edu/facilities/",
     title: "Facilities - Academy of Art University",
     publisher: "Academy of Art University",
     snippet:
-      "Free for all students and staff members, our shuttle service is designed to get you efficiently and safely around our urban campus in San Francisco. Shuttle stops are located near all university buildings—all you need is your ID card.",
+      "Free for all students and staff members, our shuttle service is designed to get you efficiently and safely around our urban campus in San Francisco.",
     fetchedAt: 1794526026000,
   },
-  "https://en.wikipedia.org/wiki/Academy_of_Art_University": {
+  "https://en.wikipedia.org/wiki/Academy_of_Art_University#9831c3ff": {
     url: "https://en.wikipedia.org/wiki/Academy_of_Art_University",
     title: "Academy of Art University - Wikipedia",
     publisher: "Wikipedia",
@@ -371,7 +443,17 @@ export const LANDMARK_SOURCES: Record<string, SourceSnapshot> = {
       "The school is one of the largest property owners in San Francisco, with the main campus located on New Montgomery Street in the South of Market district.",
     fetchedAt: 1794526026000,
   },
-  "https://ggu.edu/2026/06/09/golden-gate-university-expands-san-francisco-presence-across-two-campuses/":
+  "https://ggu.edu/2026/06/09/golden-gate-university-expands-san-francisco-presence-across-two-campuses/#f3b6c34c":
+    {
+      url: "https://ggu.edu/2026/06/09/golden-gate-university-expands-san-francisco-presence-across-two-campuses/",
+      title:
+        "Golden Gate University Expands San Francisco Presence Across Two Campuses | Golden Gate University",
+      publisher: "Golden Gate University",
+      snippet:
+        "Beginning this Fall semester,…GGU’s Downtown Campus, located in San Francisco’s Academic Village at UC Law SF, and GGU’s Lake Merced Campus…",
+      fetchedAt: 1794526026000,
+    },
+  "https://ggu.edu/2026/06/09/golden-gate-university-expands-san-francisco-presence-across-two-campuses/#abbddcb0":
     {
       url: "https://ggu.edu/2026/06/09/golden-gate-university-expands-san-francisco-presence-across-two-campuses/",
       title:
@@ -412,9 +494,9 @@ export const CORRIDORS: readonly CorridorSeed[] = [
       },
     ],
     sources: [
-      "https://www.sf.gov/valencia-street-entertainment-zone",
-      "https://en.wikipedia.org/wiki/Mission_District,_San_Francisco",
-      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
+      "https://www.sf.gov/valencia-street-entertainment-zone#47234a4d",
+      "https://en.wikipedia.org/wiki/Mission_District,_San_Francisco#949fbcd1",
+      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#2753ab02",
     ],
   },
   {
@@ -445,9 +527,9 @@ export const CORRIDORS: readonly CorridorSeed[] = [
       },
     ],
     sources: [
-      "https://en.wikipedia.org/wiki/Polk_Street",
-      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
-      "https://www.sf.gov/perfect-day-along-polk-st",
+      "https://en.wikipedia.org/wiki/Polk_Street#ada03fcf",
+      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#c297b864",
+      "https://www.sf.gov/perfect-day-along-polk-st#a8bc2e80",
     ],
   },
   {
@@ -478,10 +560,10 @@ export const CORRIDORS: readonly CorridorSeed[] = [
       },
     ],
     sources: [
-      "https://www.sf.gov/perfect-day-soma-west",
-      "https://www.sf.gov/folsom-street-entertainment-zone",
-      "https://www.sf.gov/news-mayor-lurie-supervisors-announce-legislation-to-support-neighborhoods-small-businesses-with-five-new-entertainment-zones",
-      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
+      "https://www.sf.gov/perfect-day-soma-west#b846f4ec",
+      "https://www.sf.gov/folsom-street-entertainment-zone#99401d95",
+      "https://www.sf.gov/news-mayor-lurie-supervisors-announce-legislation-to-support-neighborhoods-small-businesses-with-five-new-entertainment-zones#4dc21ef3",
+      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#0c198ca1",
     ],
   },
   {
@@ -508,9 +590,9 @@ export const CORRIDORS: readonly CorridorSeed[] = [
       },
     ],
     sources: [
-      "https://www.sf.gov/perfect-day-north-beach",
-      "https://en.wikipedia.org/wiki/North_Beach,_San_Francisco",
-      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
+      "https://www.sf.gov/perfect-day-north-beach#9a035a6c",
+      "https://en.wikipedia.org/wiki/North_Beach,_San_Francisco#7222dbd4",
+      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#4ff1258f",
     ],
   },
   {
@@ -537,10 +619,10 @@ export const CORRIDORS: readonly CorridorSeed[] = [
       },
     ],
     sources: [
-      "https://www.sf.gov/perfect-day-castro",
-      "https://www.sf.gov/news-mayor-lurie-signs-legislation-creating-five-new-entertainment-zones-across-san-francisco-launches-castro-entertainment-zone",
-      "https://www.sf.gov/castro-upper-market-entertainment-zone",
-      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
+      "https://www.sf.gov/perfect-day-castro#c4856f6d",
+      "https://www.sf.gov/news-mayor-lurie-signs-legislation-creating-five-new-entertainment-zones-across-san-francisco-launches-castro-entertainment-zone#de88925b",
+      "https://www.sf.gov/castro-upper-market-entertainment-zone#e71227e6",
+      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#d85d1229",
     ],
   },
   {
@@ -567,9 +649,9 @@ export const CORRIDORS: readonly CorridorSeed[] = [
       },
     ],
     sources: [
-      "https://en.wikipedia.org/wiki/Marina_District,_San_Francisco",
-      "https://www.sf.gov/perfect-day-along-chestnut-st",
-      "https://www.sftravel.com/article/where-to-eat-drink-marina-district",
+      "https://en.wikipedia.org/wiki/Marina_District,_San_Francisco#e8ffbc34",
+      "https://www.sf.gov/perfect-day-along-chestnut-st#a8abad55",
+      "https://www.sftravel.com/article/where-to-eat-drink-marina-district#501e39e0",
     ],
   },
   {
@@ -596,9 +678,9 @@ export const CORRIDORS: readonly CorridorSeed[] = [
       },
     ],
     sources: [
-      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
-      "https://www.sf.gov/perfect-day-along-union-st",
-      "https://www.sftravel.com/article/where-to-eat-drink-marina-district",
+      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#5df85687",
+      "https://www.sf.gov/perfect-day-along-union-st#5d283082",
+      "https://www.sftravel.com/article/where-to-eat-drink-marina-district#501e39e0",
     ],
   },
   {
@@ -629,8 +711,8 @@ export const CORRIDORS: readonly CorridorSeed[] = [
       },
     ],
     sources: [
-      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
-      "https://www.sftravel.com/article/where-to-eat-drink-san-franciscos-nopa",
+      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#1a4764e2",
+      "https://www.sftravel.com/article/where-to-eat-drink-san-franciscos-nopa#c05b4f6e",
     ],
   },
   {
@@ -657,9 +739,9 @@ export const CORRIDORS: readonly CorridorSeed[] = [
       },
     ],
     sources: [
-      "https://www.sf.gov/perfect-day-haight",
-      "https://www.sfmta.com/travel-updates/haight-ashbury-street-fair-sunday-september-20-2026",
-      "https://en.wikipedia.org/wiki/Haight-Ashbury",
+      "https://www.sf.gov/perfect-day-haight#fbaebe5d",
+      "https://www.sfmta.com/travel-updates/haight-ashbury-street-fair-sunday-september-20-2026#c1d0a3b0",
+      "https://en.wikipedia.org/wiki/Haight-Ashbury#8c6ec54a",
     ],
   },
   {
@@ -686,8 +768,8 @@ export const CORRIDORS: readonly CorridorSeed[] = [
       },
     ],
     sources: [
-      "https://en.wikipedia.org/wiki/Lower_Haight,_San_Francisco",
-      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco",
+      "https://en.wikipedia.org/wiki/Lower_Haight,_San_Francisco#1a8583e2",
+      "https://www.sftravel.com/article/best-streets-bar-hopping-san-francisco#e37c7cc9",
     ],
   },
 ];
@@ -704,9 +786,9 @@ export const CAMPUSES: readonly CampusSeed[] = [
       lng: -122.479996,
     },
     sources: [
-      "https://www.sfsu.edu/student-experience/our-san-francisco-campus",
-      "https://www.sfsu.edu/about/facts-and-figures",
-      "https://en.wikipedia.org/wiki/San_Francisco_State_University",
+      "https://www.sfsu.edu/student-experience/our-san-francisco-campus#bfe8b57f",
+      "https://www.sfsu.edu/about/facts-and-figures#a2d746ea",
+      "https://en.wikipedia.org/wiki/San_Francisco_State_University#25aa21a9",
     ],
   },
   {
@@ -720,8 +802,8 @@ export const CAMPUSES: readonly CampusSeed[] = [
       lng: -122.451447,
     },
     sources: [
-      "https://www.usfca.edu/who-we-are/our-locations/san-francisco-main-campus",
-      "https://en.wikipedia.org/wiki/University_of_San_Francisco",
+      "https://www.usfca.edu/who-we-are/our-locations/san-francisco-main-campus#7c7c1166",
+      "https://en.wikipedia.org/wiki/University_of_San_Francisco#7c079d47",
     ],
   },
   {
@@ -735,8 +817,8 @@ export const CAMPUSES: readonly CampusSeed[] = [
       lng: -122.459768,
     },
     sources: [
-      "https://realestate.ucsf.edu/campus-sites/parnassus-heights-campus-site",
-      "https://medschool.ucsf.edu/about/overview/campuses-and-directions",
+      "https://realestate.ucsf.edu/campus-sites/parnassus-heights-campus-site#a1a73201",
+      "https://medschool.ucsf.edu/about/overview/campuses-and-directions#e6126280",
     ],
   },
   {
@@ -750,8 +832,8 @@ export const CAMPUSES: readonly CampusSeed[] = [
       lng: -122.392219,
     },
     sources: [
-      "https://realestate.ucsf.edu/campus-sites/mission-bay-campus-site",
-      "https://medicine.ucsf.edu/about/locations/ucsf-medical-center-parnassus-mount-zion-mission-bay",
+      "https://realestate.ucsf.edu/campus-sites/mission-bay-campus-site#220795f5",
+      "https://medicine.ucsf.edu/about/locations/ucsf-medical-center-parnassus-mount-zion-mission-bay#92e5c2a2",
     ],
   },
   {
@@ -765,8 +847,8 @@ export const CAMPUSES: readonly CampusSeed[] = [
       lng: -122.4397,
     },
     sources: [
-      "https://realestate.ucsf.edu/campus-sites/mount-zion",
-      "https://medicine.ucsf.edu/about/locations/ucsf-medical-center-parnassus-mount-zion-mission-bay",
+      "https://realestate.ucsf.edu/campus-sites/mount-zion#eaca7ca7",
+      "https://medicine.ucsf.edu/about/locations/ucsf-medical-center-parnassus-mount-zion-mission-bay#3499e55d",
     ],
   },
   {
@@ -780,8 +862,8 @@ export const CAMPUSES: readonly CampusSeed[] = [
       lng: -122.451532,
     },
     sources: [
-      "https://generalplan.sfplanning.org/Balboa_Park_Station.htm",
-      "https://en.wikipedia.org/wiki/City_College_of_San_Francisco",
+      "https://generalplan.sfplanning.org/Balboa_Park_Station.htm#07469b0d",
+      "https://en.wikipedia.org/wiki/City_College_of_San_Francisco#c815fe64",
     ],
   },
   {
@@ -795,9 +877,9 @@ export const CAMPUSES: readonly CampusSeed[] = [
       lng: -122.415339,
     },
     sources: [
-      "https://www.uclawsf.edu/map-directions/",
-      "https://www.uclawsf.edu/",
-      "https://en.wikipedia.org/wiki/University_of_California_College_of_the_Law,_San_Francisco",
+      "https://www.uclawsf.edu/map-directions/#63cedc43",
+      "https://www.uclawsf.edu/#c1072ec8",
+      "https://en.wikipedia.org/wiki/University_of_California_College_of_the_Law,_San_Francisco#4051581a",
     ],
   },
   {
@@ -811,9 +893,9 @@ export const CAMPUSES: readonly CampusSeed[] = [
       lng: -122.420394,
     },
     sources: [
-      "https://sfcm.edu/experience/facilities",
-      "https://sfcm.edu/discover/campus-life/bowes-center",
-      "https://sfcm.edu/study/apply/getting-here",
+      "https://sfcm.edu/experience/facilities#41cc0479",
+      "https://sfcm.edu/discover/campus-life/bowes-center#bcd67ed1",
+      "https://sfcm.edu/study/apply/getting-here#b131ac16",
     ],
   },
   {
@@ -827,10 +909,10 @@ export const CAMPUSES: readonly CampusSeed[] = [
       lng: -122.400602,
     },
     sources: [
-      "https://cca.edu/about/vanderbilt-agreement/",
-      "https://cca.edu/about/vanderbilt-agreement/",
-      "https://www.cca.edu/",
-      "https://en.wikipedia.org/wiki/California_College_of_the_Arts",
+      "https://cca.edu/about/vanderbilt-agreement/#d4c04a2a",
+      "https://cca.edu/about/vanderbilt-agreement/#9342584c",
+      "https://www.cca.edu/#39c86dc5",
+      "https://en.wikipedia.org/wiki/California_College_of_the_Arts#f8518f52",
     ],
   },
   {
@@ -844,8 +926,8 @@ export const CAMPUSES: readonly CampusSeed[] = [
       lng: -122.400781,
     },
     sources: [
-      "https://www.academyart.edu/facilities/",
-      "https://en.wikipedia.org/wiki/Academy_of_Art_University",
+      "https://www.academyart.edu/facilities/#188b8f18",
+      "https://en.wikipedia.org/wiki/Academy_of_Art_University#9831c3ff",
     ],
   },
   {
@@ -859,8 +941,8 @@ export const CAMPUSES: readonly CampusSeed[] = [
       lng: -122.416222,
     },
     sources: [
-      "https://ggu.edu/2026/06/09/golden-gate-university-expands-san-francisco-presence-across-two-campuses/",
-      "https://ggu.edu/2026/06/09/golden-gate-university-expands-san-francisco-presence-across-two-campuses/",
+      "https://ggu.edu/2026/06/09/golden-gate-university-expands-san-francisco-presence-across-two-campuses/#f3b6c34c",
+      "https://ggu.edu/2026/06/09/golden-gate-university-expands-san-francisco-presence-across-two-campuses/#abbddcb0",
     ],
   },
 ];

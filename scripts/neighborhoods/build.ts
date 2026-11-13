@@ -22,6 +22,7 @@ import { inflateRawSync } from "node:zlib";
 import {
   bboxOf,
   decodePolyline,
+  distanceMeters,
   edgeDistanceMeters,
   encodePolyline,
   type LatLng,
@@ -112,8 +113,14 @@ async function fetchPage(url: string): Promise<Page | null> {
   return { url: res.url, title, text, meta };
 }
 
+/**
+ * Citation chips show at most this many characters (`SNIPPET_MAX` in convex/lib/citations.ts),
+ * so snippets are stored no longer, with the supporting words up front.
+ */
+const SNIPPET_MAX = 160;
+
 /** Cut to `max` characters on a word boundary, like `snippet()` in convex/lib/citations.ts. */
-function cut(text: string, max = 280): string {
+function cut(text: string, max = SNIPPET_MAX): string {
   const t = text.replace(/\s+/g, " ").trim();
   if (t.length <= max) return t;
   const head = t.slice(0, max - 1);
@@ -178,7 +185,13 @@ function parseCsvLine(line: string): string[] {
   return out;
 }
 
-type Gtfs = { url: string; files: Map<string, Uint8Array>; fetchedAt: number };
+type Gtfs = {
+  url: string;
+  files: Map<string, Uint8Array>;
+  fetchedAt: number;
+  /** Last service date in the feed's calendar ("2026-08-28"). Stop locations outlive it. */
+  serviceThrough: string;
+};
 
 function table(feed: Gtfs, name: string): { rows: Record<string, string>[]; lines: string[] } {
   const bytes = feed.files.get(name);
@@ -202,7 +215,18 @@ function table(feed: Gtfs, name: string): { rows: Record<string, string>[]; line
 
 async function loadFeed(url: string): Promise<Gtfs> {
   const fetchedAt = Date.now();
-  return { url, files: unzip(await fetchBytes(url)), fetchedAt };
+  const feed: Gtfs = { url, files: unzip(await fetchBytes(url)), fetchedAt, serviceThrough: "" };
+  const ends: string[] = [];
+  if (feed.files.has("calendar.txt")) ends.push(...table(feed, "calendar.txt").rows.map((r) => r.end_date));
+  if (feed.files.has("calendar_dates.txt")) {
+    ends.push(...table(feed, "calendar_dates.txt").rows.map((r) => r.date));
+  }
+  const last = ends.filter((d) => /^\d{8}$/.test(d)).sort().at(-1) ?? "";
+  feed.serviceThrough = last ? `${last.slice(0, 4)}-${last.slice(4, 6)}-${last.slice(6)}` : "";
+  if (feed.serviceThrough && new Date(`${feed.serviceThrough}T23:59:59Z`).getTime() < fetchedAt) {
+    console.warn(`  ! ${url}: schedule ended ${feed.serviceThrough}; stop locations still used`);
+  }
+  return feed;
 }
 
 // ── 1. Boundaries ─────────────────────────────────────────────────────────
@@ -228,7 +252,13 @@ async function buildBoundaries(): Promise<Boundary[]> {
     features: { properties: { nhood: string }; geometry: { type: string; coordinates: MultiPolygon } }[];
   }>(DATASF_GEOJSON);
   if (geo.features.length !== 41) throw new Error(`expected 41 neighborhoods, got ${geo.features.length}`);
-  const summary = meta.description.replace(/^A\.\s*SUMMARY\s*/i, "").split(/\n\s*\n|\nB\.\s/)[0];
+  // The sentence that says what the boundaries are: "...created these 41 neighborhoods by
+  // grouping 2010 Census tracts, using common real estate and residents' definitions...".
+  const description = meta.description.replace(/\s+/g, " ");
+  const from = description.indexOf("created these 41 neighborhoods");
+  if (from < 0) throw new Error("DataSF description changed; pick a new passage");
+  const upTo = description.indexOf("definitions", from);
+  const summary = `…${description.slice(from, upTo > 0 ? upTo + "definitions".length : undefined)}`;
   const source: Snapshot = {
     url: DATASF_DATASET,
     title: `${meta.name} | DataSF`,
@@ -358,7 +388,15 @@ function feedSnapshot(
   title: string,
   rowText: string,
 ): Snapshot {
-  return { url: feed.url, title, publisher, snippet: cut(rowText), fetchedAt: feed.fetchedAt };
+  // Say which schedule the row comes from, so an expired feed is visible in the citation.
+  const window = feed.serviceThrough ? `, schedule through ${feed.serviceThrough}` : "";
+  return {
+    url: feed.url,
+    title: `${title}${window}`,
+    publisher,
+    snippet: cut(rowText),
+    fetchedAt: feed.fetchedAt,
+  };
 }
 
 async function buildTransit(boundaries: Boundary[]) {
@@ -453,9 +491,41 @@ async function buildTransit(boundaries: Boundary[]) {
       if (!tripStops.has(trip)) tripStops.set(trip, []);
       tripStops.get(trip)?.push({ seq: Number(cells[iSeq]), stop: cells[iStop] });
     }
+    // Subway stations: one point per station (the average of its platforms), used both for the
+    // station fact and wherever a line stops there, so the two always agree.
+    const platforms = new Map<string, { lat: number; lng: number; rows: string[] }>();
+    for (const s of stopsTable.rows) {
+      const sub = SUBWAY.exec(s.stop_name);
+      if (!sub) continue;
+      const name = `${SUBWAY_NAMES[sub[1]] ?? sub[1]} Station`;
+      const cur = platforms.get(name) ?? { lat: 0, lng: 0, rows: [] };
+      cur.lat += Number(s.stop_lat);
+      cur.lng += Number(s.stop_lon);
+      cur.rows.push(stopRow.get(s.stop_id)?.line ?? "");
+      platforms.set(name, cur);
+    }
+    const stationPoint = new Map(
+      [...platforms].map(([name, p]) => [
+        name,
+        pt(String(p.lat / p.rows.length), String(p.lng / p.rows.length)),
+      ]),
+    );
+    const stopOf = (stopId: string) => {
+      const s = stopRow.get(stopId);
+      if (!s) return null;
+      const sub = SUBWAY.exec(s.stop_name);
+      const name = sub ? `${SUBWAY_NAMES[sub[1]] ?? sub[1]} Station` : s.stop_name;
+      return { name, point: stationPoint.get(name) ?? pt(s.stop_lat, s.stop_lon) };
+    };
+    /** Stops closer than this are the same stop (opposite platforms, renamed directions). */
+    const SAME_STOP_METERS = 60;
     const servedBy = new Map<string, Set<string>>();
     for (const r of metro) {
-      const pages = await pageSource(r.route_url, "SFMTA", (p) => p.meta["og:description"] ?? p.meta.description ?? null);
+      const pages = await pageSource(
+        r.route_url,
+        "SFMTA",
+        (p) => p.meta["og:description"] ?? p.meta.description ?? null,
+      );
       const feedKey = rowSource(
         feedSnapshot(muni, "SFMTA", "SFMTA Muni GTFS schedule feed (routes.txt)", r.line),
       );
@@ -467,19 +537,38 @@ async function buildTransit(boundaries: Boundary[]) {
         const cur = longest.get(t.direction_id);
         if (!cur || stops.length > cur.length) longest.set(t.direction_id, stops);
       }
+      // One direction is the backbone, in route order. The other direction adds only stops the
+      // backbone doesn't have, each inserted on the backbone segment it sits beside.
       const ordered: { name: string; point: LatLng }[] = [];
-      const seen = new Set<string>();
-      for (const dir of [...longest.keys()].sort()) {
+      const known = (x: { name: string; point: LatLng }) =>
+        ordered.some((o) => o.name === x.name || distanceMeters(o.point, x.point) < SAME_STOP_METERS);
+      const [first, ...others] = [...longest.keys()].sort();
+      for (const dir of [first, ...others]) {
         for (const { stop } of longest.get(dir) ?? []) {
-          const s = stopRow.get(stop);
-          if (!s) continue;
-          const sub = SUBWAY.exec(s.stop_name);
-          const name = sub ? `${SUBWAY_NAMES[sub[1]] ?? sub[1]} Station` : s.stop_name;
-          if (!servedBy.has(name)) servedBy.set(name, new Set());
-          servedBy.get(name)?.add(r.route_short_name);
-          if (seen.has(name)) continue;
-          seen.add(name);
-          ordered.push({ name, point: pt(s.stop_lat, s.stop_lon) });
+          const x = stopOf(stop);
+          if (!x) continue;
+          if (!servedBy.has(x.name)) servedBy.set(x.name, new Set());
+          servedBy.get(x.name)?.add(r.route_short_name);
+          if (known(x)) continue;
+          if (dir === first || ordered.length < 2) {
+            ordered.push(x);
+            continue;
+          }
+          // Cheapest insertion: the spot (either end included) that lengthens the path least.
+          const d = (i: number) => distanceMeters(ordered[i].point, x.point);
+          let at = 0;
+          let best = d(0);
+          for (let i = 1; i <= ordered.length; i++) {
+            const added =
+              i === ordered.length
+                ? d(i - 1)
+                : d(i - 1) + d(i) - distanceMeters(ordered[i - 1].point, ordered[i].point);
+            if (added < best) {
+              best = added;
+              at = i;
+            }
+          }
+          ordered.splice(at, 0, x);
         }
       }
       const inCity = ordered.filter((s) => inSf(s.point, boundaries));
@@ -492,23 +581,11 @@ async function buildTransit(boundaries: Boundary[]) {
         sources: pages ? [pages, feedKey] : [feedKey],
       });
     }
-    // Subway stations: average the platforms of each named station.
-    const platforms = new Map<string, { lat: number; lng: number; rows: string[] }>();
-    for (const s of stopsTable.rows) {
-      const sub = SUBWAY.exec(s.stop_name);
-      if (!sub) continue;
-      const name = `${SUBWAY_NAMES[sub[1]] ?? sub[1]} Station`;
-      const cur = platforms.get(name) ?? { lat: 0, lng: 0, rows: [] };
-      cur.lat += Number(s.stop_lat);
-      cur.lng += Number(s.stop_lon);
-      cur.rows.push(stopRow.get(s.stop_id)?.line ?? "");
-      platforms.set(name, cur);
-    }
     for (const [name, p] of [...platforms].sort((a, b) => a[0].localeCompare(b[0]))) {
       const served = [...(servedBy.get(name) ?? [])].sort();
       if (served.length === 0) continue;
-      const point = pt(String(p.lat / p.rows.length), String(p.lng / p.rows.length));
-      if (!inSf(point, boundaries)) continue;
+      const point = stationPoint.get(name);
+      if (!point || !inSf(point, boundaries)) continue;
       const feedKey = rowSource(
         feedSnapshot(muni, "SFMTA", "SFMTA Muni GTFS schedule feed (stops.txt)", p.rows[0]),
       );

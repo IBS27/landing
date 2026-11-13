@@ -10,7 +10,7 @@ export type RoommateLifestyleSeed = {
 };
 
 /**
- * Roommate lifestyle answers (#21), keyed by persona username. Chosen so
+ * Roommate lifestyle answers (#21), keyed by username. Chosen so
  * candidates (#22) and the compatibility score (#23) show every outcome, seen
  * as Maya:
  * - Tasha (her friend): same sleep and quiet hours, close on tidiness, and a cat.
@@ -18,6 +18,10 @@ export type RoommateLifestyleSeed = {
  *   smoking outside hits Tasha's "Any smoking or vaping".
  * - Sofia (her friend): sleeps during the day after night shifts, skipped the
  *   overnight guests question, so one of Maya's checks is "unknown".
+ * - Camila (a friend of friends): Tasha vouches she lived with her, so she's
+ *   "vouched for" and ranks above other friends of friends.
+ * - Luis (a friend of friends): moves the same month as Maya, also wants the
+ *   Mission, and their budgets overlap.
  * - Marcus has answers but keeps them private, so he never appears.
  * - Priya has none, so the questionnaire can be demoed from the start.
  */
@@ -103,6 +107,40 @@ export const roommateLifestyles: readonly RoommateLifestyleSeed[] = [
       smoking: "no",
       pets: [],
       dealbreakers: [],
+    },
+  },
+  {
+    username: "camila.santos",
+    shared: true,
+    answeredDaysAgo: 5,
+    answers: {
+      sleep: "late",
+      quietHours: "midnight",
+      cleanliness: "tidy",
+      noise: "some",
+      groceries: "separate",
+      guests: "monthly",
+      overnightGuests: "sometimes",
+      smoking: "no",
+      pets: ["cat"],
+      dealbreakers: ["smoking_inside"],
+    },
+  },
+  {
+    username: "luis.hernandez",
+    shared: true,
+    answeredDaysAgo: 2,
+    answers: {
+      sleep: "regular",
+      quietHours: "11pm",
+      cleanliness: "very_tidy",
+      noise: "quiet",
+      groceries: "basics",
+      guests: "monthly",
+      overnightGuests: "rarely",
+      smoking: "no",
+      pets: [],
+      dealbreakers: ["smoking_any"],
     },
   },
 ];

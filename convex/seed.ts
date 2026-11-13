@@ -18,7 +18,7 @@ import {
   type MutationCtx,
 } from "./_generated/server";
 import type { LatLng } from "./lib/geo";
-import { neighborhoodSlugAt } from "./lib/neighborhoods";
+import { locationPoint, neighborhoodSlugAt } from "./lib/neighborhoods";
 import schema from "./schema";
 import { seedCityProfiles } from "./seed/cityProfiles";
 import { DAY } from "./seed/lib/time";
@@ -942,13 +942,8 @@ export const stats = internalQuery({
       const got = id ? (slugOf.get(id) ?? "dangling") : null;
       if (want !== got) problems.push(`${w} neighborhoodId is ${got}, coordinates say ${want}`);
     };
-    for (const l of listings) {
-      const p =
-        l.location.lat !== undefined && l.location.lng !== undefined
-          ? { lat: l.location.lat, lng: l.location.lng }
-          : undefined;
-      placed(p, l.neighborhoodId, `listing ${l._id}`);
-    }
+    for (const l of listings)
+      placed(locationPoint(l.location), l.neighborhoodId, `listing ${l._id}`);
     for (const e of events) placed(e.point, e.neighborhoodId, `event ${e._id}`);
     for (const g of groups) placed(g.point, g.neighborhoodId, `group ${g.slug}`);
 

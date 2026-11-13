@@ -5,7 +5,7 @@ import { internalAction, internalMutation, internalQuery } from "./_generated/se
 import { defineTask, runAgent } from "./ai/agent";
 import { cite } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
-import { neighborhoodIdAt } from "./lib/neighborhoods";
+import { locationPoint, neighborhoodIdAt } from "./lib/neighborhoods";
 import { dropDraft, logEvent, propose } from "./lib/proposals";
 import { redactProtected } from "./lib/protectedText";
 import {
@@ -72,7 +72,7 @@ export const create = viewerMutation({
       description: a.description.trim(),
       photos,
       location,
-      neighborhoodId: await neighborhoodIdAt(ctx, location),
+      neighborhoodId: await neighborhoodIdAt(ctx, locationPoint(location)),
       status: "active",
       rental: {
         propertyType: a.propertyType,
