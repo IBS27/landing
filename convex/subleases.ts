@@ -127,7 +127,7 @@ export const updateTerms = viewerMutation({
       updatedAt: Date.now(),
     });
     if (floor <= s.minRent) return;
-    // A raised floor withdraws waiting drafts under it, and Muse drafts those replies again.
+    // A raised floor withdraws every waiting draft, and Muse drafts those replies again.
     const chats = await ctx.db
       .query("conversations")
       .withIndex("by_listing", (q) => q.eq("listingId", s.listingId))
@@ -138,8 +138,7 @@ export const updateTerms = viewerMutation({
         .withIndex("by_conversation", (q) => q.eq("conversationId", c._id))
         .unique();
       const p = row?.pendingProposalId ? await ctx.db.get(row.pendingProposalId) : null;
-      if (!row || p?.status !== "pending" || p.payload.kind !== "offer") continue;
-      if (p.payload.amount >= floor) continue;
+      if (!row || p?.status !== "pending") continue;
       await retire(ctx, row);
       await ctx.db.patch(row._id, { pendingProposalId: undefined, handledThrough: 0 });
       if ((museReplies ?? s.museReplies) === "active")
@@ -282,7 +281,11 @@ export const context = internalQuery({
         minRent: sublet.minRent,
         notes: sublet.notes ? redactProtected(sublet.notes) : null,
       },
-      yourLastPrice: lastSent?.payload.kind === "offer" ? lastSent.payload.amount : null,
+      // Within today's limits: the floor may have risen since that reply.
+      yourLastPrice:
+        lastSent?.payload.kind === "offer"
+          ? Math.min(listing.price, Math.max(sublet.minRent, lastSent.payload.amount))
+          : null,
       chat,
     };
     return {
@@ -313,6 +316,7 @@ export const draftReply = internalAction({
       subletMoveProblems(result.output, c.input).length === 0
         ? result.output
         : subletLadder(c.input);
+    if (subletMoveProblems(move, c.input).length > 0) return;
     await ctx.runMutation(internal.subleases.saveReply, {
       conversationId,
       ...move,

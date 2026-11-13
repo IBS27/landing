@@ -29,16 +29,17 @@ export type SubletMove = { move: Move; amount: number; text: string; rationale: 
 
 const round5 = (n: number) => Math.round(n / 5) * 5;
 
+/** Rents in chat text, "$1,450" or "1450", as whole numbers: "1200 sqft" is not $120. */
+const RENT = /(?<![\d,.])\$?\s?(\d{1,2},\d{3}|\d{3,5})(?![\d,]|\.\d|\s?(?:am|pm|sq|ft|square|%))/gi;
+const rents = (text: string) => [...text.matchAll(RENT)].map((m) => Number(m[1].replace(/,/g, "")));
+
 /** The last rent the renter named after your last message ("could you do 1,600?"). */
 export function renterPrice(chat: SubletInput["chat"]): number | null {
   for (let i = chat.length - 1; i >= 0; i--) {
     const m = chat[i];
     if (m.from === "you") return null;
-    // Whole numbers only: "1200 sqft" is not a rent of $120.
-    const match = m.text.match(
-      /(?<![\d,.])\$?\s?(\d{1,2},\d{3}|\d{3,5})(?![\d,]|\.\d|\s?(?:am|pm|sq|ft|square|%))/i,
-    );
-    if (match) return Number(match[1].replace(/,/g, ""));
+    const [first] = rents(m.text);
+    if (first !== undefined) return first;
   }
   return null;
 }
@@ -63,9 +64,8 @@ export function subletMoveProblems(out: SubletMove, input: SubletInput): string[
   if (out.move === "offer" && input.yourLastPrice !== null && out.amount > input.yourLastPrice)
     p.push(`a counter can't go above your last price of ${input.yourLastPrice}`);
   // Whatever the move, the text never names a rent under the floor.
-  for (const m of out.text.matchAll(/\$\s?(\d{1,3}(?:,\d{3})+|\d+)/g))
-    if (Number(m[1].replace(/,/g, "")) < minRent)
-      p.push(`text names $${m[1]}, under the lister's lowest rent of ${minRent}`);
+  for (const r of rents(out.text))
+    if (r < minRent) p.push(`text names ${r}, under the lister's lowest rent of ${minRent}`);
   // Scam-shaped asks and private details stay out of the lister's messages too.
   if (/\b(deposit|zelle|venmo|cash ?app|wire|gift ?card|bank)\b/i.test(out.text))
     p.push("text must not ask for money or payment details before a viewing and lease");
