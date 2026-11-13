@@ -3,7 +3,7 @@ import { internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import type { Citations, Poll, ProposalPayload } from "../validators";
-import { dmBlockNotice } from "./blocks";
+import { blockedSet, dmBlockNotice } from "./blocks";
 import { assertCitable, resolveCitations } from "./citations";
 import { CREW_TASKS, crewMateIds } from "./crewMembers";
 import { notify } from "./notify";
@@ -152,6 +152,8 @@ export async function targetReachable(ctx: QueryCtx, p: Doc<"proposals">): Promi
   if (pay.kind === "message" || pay.kind === "offer")
     return inConversation(ctx, pay.conversationId, p.ownerId);
   if (pay.kind === "event" && pay.groupId) return inGroup(ctx, pay.groupId, p.ownerId);
+  if (pay.kind === "event" && pay.conversationId)
+    return inConversation(ctx, pay.conversationId, p.ownerId);
   return true;
 }
 
@@ -184,8 +186,10 @@ function assertPoll(poll: Poll) {
  * Muse invites only the owner's friends, or people in their Move-in Crew (#30,
  * #31): crew members opted in to being matched, but aren't friends yet. A crew
  * Group or meetup (`crewOnly`) invites only the current crew, friends or not.
- * An Event planned in a group chat (#34) may also invite that chat's members.
- * Checked again on approval, so someone who left the crew or chat can't be invited.
+ * An Event planned in a group chat (#34) invites only that chat's members, so
+ * what it says about the chat stays with them.
+ * Checked again on approval, so someone who left the crew or chat, or is
+ * blocked, can't be invited.
  */
 async function assertInvitable(
   ctx: MutationCtx,
@@ -194,23 +198,28 @@ async function assertInvitable(
   crewOnly: boolean,
   conversationId?: Id<"conversations">,
 ) {
-  const allowed = crewOnly ? new Set<Id<"users">>() : new Set(await friendIds(ctx, ownerId));
-  if (conversationId && !crewOnly)
-    for (const r of await ctx.db
-      .query("conversationMembers")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
-      .collect())
-      allowed.add(r.userId);
-  const others = ids.filter((id) => !allowed.has(id));
+  if (conversationId && !crewOnly) {
+    const [members, blocked] = await Promise.all([
+      ctx.db
+        .query("conversationMembers")
+        .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
+        .collect(),
+      blockedSet(ctx, ownerId),
+    ]);
+    const inChat = new Set(members.map((r) => r.userId));
+    if (ids.some((id) => !inChat.has(id) || blocked.has(id)))
+      throw new ConvexError("Muse can only invite people in this chat");
+    return;
+  }
+  const friends = crewOnly ? new Set<Id<"users">>() : new Set(await friendIds(ctx, ownerId));
+  const others = ids.filter((id) => !friends.has(id));
   if (others.length === 0) return;
   const crew = await crewMateIds(ctx, ownerId);
   if (others.some((id) => !crew.has(id)))
     throw new ConvexError(
       crewOnly
         ? "Someone here isn't in your Move-in Crew anymore"
-        : conversationId
-          ? "Muse can only invite your friends, your Move-in Crew or people in this chat"
-          : "Muse can only invite your friends or your Move-in Crew",
+        : "Muse can only invite your friends or your Move-in Crew",
     );
 }
 
@@ -386,7 +395,8 @@ export async function executeProposal(
         online: false,
         venue: p.venue?.trim() || undefined,
         city: owner?.city ?? "San Francisco, CA",
-        privacy: p.groupId ? "group" : "friends",
+        // An Event planned in a chat (#34) is for the people invited from it.
+        privacy: p.groupId ? "group" : p.conversationId ? "private" : "friends",
         externalGoingCount: 0,
         externalInterestedCount: 0,
         createdAt: now,

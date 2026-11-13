@@ -25,7 +25,7 @@ import {
   timeSlots,
 } from "../convex/lib/chatPlans";
 import { pollWinner } from "../convex/lib/polls";
-import { assertPayload, assertSameTarget } from "../convex/lib/proposals";
+import { assertPayload, assertSameTarget, targetReachable } from "../convex/lib/proposals";
 import { vote } from "../convex/polls";
 import { approve, discard } from "../convex/proposals";
 import { fakeCtx, type Row } from "./fakeDb";
@@ -567,6 +567,8 @@ describe("chat plans, end to end", () => {
       eventId: string;
     };
     expect((await mine(ctx)).plans[0]?.stage).toBe("scheduled");
+    // Only the people invited from the chat see it, not all of Maya's friends.
+    expect(tables.events?.find((e) => e._id === created.eventId)?.privacy).toBe("private");
 
     // The hourly job: nothing before the morning of, then the reminder draft, once.
     expect(await call(chatPlans.tick, ctx, { now: second.startAt - DAY })).toBe(0);
@@ -633,6 +635,46 @@ describe("chat plans, end to end", () => {
       "people in this chat",
     );
     await expect(check(event(["zoe"]))).rejects.toThrow("your friends or your Move-in Crew");
+    // A friend outside the chat isn't invited to what the chat planned.
+    await ctx.db.insert("friendships", {
+      userId: "users:maya" as never,
+      friendId: "users:stranger" as never,
+      createdAt: 0,
+    });
+    await expect(check(event(["stranger"], "conversations:crew"))).rejects.toThrow(
+      "people in this chat",
+    );
+    // Nor someone who left the chat or is blocked, checked again on approval.
+    await ctx.db.delete("conversationMembers:zoe" as never);
+    await expect(check(event(["zoe"], "conversations:crew"))).rejects.toThrow(
+      "people in this chat",
+    );
+    await ctx.db.insert("blocks", {
+      userId: "users:dan" as never,
+      blockedId: "users:maya" as never,
+      createdAt: 0,
+    });
+    await expect(check(event(["dan"], "conversations:crew"))).rejects.toThrow(
+      "people in this chat",
+    );
+  });
+
+  test("a chat's Event draft leaves Inbox when the owner leaves the chat", async () => {
+    const { ctx } = world();
+    const p = {
+      ownerId: "users:maya",
+      payload: {
+        kind: "event",
+        title: "Hike",
+        description: "d",
+        startAt: Date.now() + 3 * DAY,
+        conversationId: "conversations:crew",
+        inviteIds: [],
+      },
+    } as never;
+    expect(await targetReachable(ctx, p)).toBe(true);
+    await ctx.db.delete("conversationMembers:maya" as never);
+    expect(await targetReachable(ctx, p)).toBe(false);
   });
 
   test("an edit can't change the poll's options or the Event's chat", () => {
