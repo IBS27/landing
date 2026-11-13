@@ -173,7 +173,13 @@ function scores(opts: {
     },
     scores: shared,
     interestFit: opts.fit
-      ? { state: "ok", ...opts.fit, sources: [src(`fit-${opts.slug}`), src("shared-group")] }
+      ? {
+          state: "ok",
+          ...opts.fit,
+          // Like the real Interest fit: nothing matched, nothing cited.
+          sources:
+            opts.fit.matched.length > 0 ? [src(`fit-${opts.slug}`), src("shared-group")] : [],
+        }
       : { state: "no_profile" },
     night: {
       transit: opts.noNightTransit
@@ -287,7 +293,10 @@ describe("compareAnswer", () => {
       }),
     });
     const none = compareAnswer(zero(mission()), zero(sunset()), rider);
-    expect(none.lead).toBe("Neither has much for your interests yet.");
+    expect(none.lead).toBe(
+      "We haven't found Groups, Events or places for your interests in either yet.",
+    );
+    expect(none.leadSources).toEqual([]);
     expect(line(none, "interests")?.text).toBe(
       "Groups, Events and places for your interests: neither has surfing yet.",
     );

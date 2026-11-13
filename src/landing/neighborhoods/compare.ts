@@ -258,7 +258,9 @@ export function compareAnswer(
   const fitOk = fa?.state === "ok" && fb?.state === "ok";
   if (fa?.state === "ok" && fb?.state === "ok") {
     const diff = fa.score - fb.score;
-    if (fa.score === 0 && fb.score === 0) lead = "Neither has much for your interests yet.";
+    // Nothing matched, so there's nothing to cite: say what wasn't found.
+    if (fa.score === 0 && fb.score === 0)
+      lead = "We haven't found Groups, Events or places for your interests in either yet.";
     else if (Math.abs(diff) < CLOSE)
       lead = `Both fit your interests about the same: ${one(fa.score)} and ${one(fb.score)} out of 10.`;
     else {
