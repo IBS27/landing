@@ -89,7 +89,7 @@ export function SharingCard({
           <Link to="/landing/profile" className="font-semibold text-link hover:underline">
             City Profile
           </Link>
-          : {profileList(fromProfile)} .
+          : {profileList(fromProfile)}.
         </li>
         <li>
           <span className="font-semibold text-primary">Never used:</span> age, gender, religion,
