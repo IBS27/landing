@@ -176,6 +176,7 @@ import type * as seed_world_neighborhoods_transit from "../seed/world/neighborho
 import type * as seed_world_ownedItems from "../seed/world/ownedItems.js";
 import type * as seed_world_pages from "../seed/world/pages.js";
 import type * as seed_world_people from "../seed/world/people.js";
+import type * as seed_world_posts_activity from "../seed/world/posts/activity.js";
 import type * as seed_world_posts_friends from "../seed/world/posts/friends.js";
 import type * as seed_world_posts_groups from "../seed/world/posts/groups.js";
 import type * as seed_world_posts_neighborhoods from "../seed/world/posts/neighborhoods.js";
@@ -373,6 +374,7 @@ declare const fullApi: ApiFromModules<{
   "seed/world/ownedItems": typeof seed_world_ownedItems;
   "seed/world/pages": typeof seed_world_pages;
   "seed/world/people": typeof seed_world_people;
+  "seed/world/posts/activity": typeof seed_world_posts_activity;
   "seed/world/posts/friends": typeof seed_world_posts_friends;
   "seed/world/posts/groups": typeof seed_world_posts_groups;
   "seed/world/posts/neighborhoods": typeof seed_world_posts_neighborhoods;
