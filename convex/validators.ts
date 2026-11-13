@@ -166,6 +166,10 @@ export const rentalDetails = v.object({
   laundry: v.optional(v.string()),
   parking: v.optional(v.string()),
   address: v.optional(v.string()),
+  /** What the unit looks out on (#13), as the lister states it. */
+  views: v.optional(
+    v.array(v.union(v.literal("sunrise"), v.literal("sunset"), v.literal("ocean"))),
+  ),
 });
 
 /** Vehicles for sale (Marketplace category "vehicles"). */

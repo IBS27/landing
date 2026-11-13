@@ -229,6 +229,8 @@ export type RentalSeed = {
   /** e.g. "Street parking", "Garage parking", "Off-street parking". */
   readonly parking?: string;
   readonly address?: string;
+  /** What the unit looks out on (#13). */
+  readonly views?: readonly ("sunrise" | "sunset" | "ocean")[];
 };
 
 export type ListingSeed = {

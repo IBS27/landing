@@ -26,6 +26,7 @@ export const rentals: readonly ListingSeed[] = [
     views: 812,
     groups: ["sf-apartments", "mission-neighbors"],
     rental: {
+      views: ["sunrise"],
       propertyType: "apartment",
       listingType: "rent",
       bedrooms: 1,
@@ -163,6 +164,7 @@ export const rentals: readonly ListingSeed[] = [
     views: 903,
     groups: ["sf-apartments"],
     rental: {
+      views: ["ocean", "sunset"],
       propertyType: "house",
       listingType: "rent",
       bedrooms: 3,
@@ -636,6 +638,7 @@ export const rentals: readonly ListingSeed[] = [
     views: 509,
     groups: ["sf-apartments"],
     rental: {
+      views: ["sunset"],
       propertyType: "condo",
       listingType: "rent",
       bedrooms: 1,
@@ -691,6 +694,7 @@ export const rentals: readonly ListingSeed[] = [
     views: 421,
     groups: ["sf-apartments"],
     rental: {
+      views: ["sunrise"],
       propertyType: "apartment",
       listingType: "rent",
       bedrooms: 2,

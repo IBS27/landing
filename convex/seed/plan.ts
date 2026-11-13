@@ -484,6 +484,7 @@ export function buildPlan(now: number) {
               laundry: l.rental.laundry,
               parking: l.rental.parking,
               address: l.rental.address,
+              views: l.rental.views ? [...l.rental.views] : undefined,
             }
           : undefined,
         vehicle: l.vehicle,

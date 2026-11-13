@@ -2,6 +2,7 @@ import { ConvexError, type Infer, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { isBlockedEitherWay } from "./lib/blocks";
+import { type CitedSource, type NonEmpty, resolveCitations } from "./lib/citations";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import {
   type CategoryMeta,
@@ -19,8 +20,9 @@ import {
 import { afterChatMessage } from "./lib/negotiations";
 import { locationPoint, neighborhoodIdAt } from "./lib/neighborhoods";
 import { notify } from "./lib/notify";
-import { isSaved } from "./lib/posts";
+import { isSaved, loadAudience } from "./lib/posts";
 import { badgesAfterEdit } from "./lib/trust";
+import { type NoisePlace, noiseRisk } from "./lib/unitDetails";
 import { getSummaries, getSummary, type UserSummary } from "./lib/users";
 import {
   listingCategory,
@@ -1025,5 +1027,44 @@ export const hideAd = viewerMutation({
         reason,
         createdAt: Date.now(),
       });
+  },
+});
+
+/* ───────────────────────── Unit details (#13) ───────────────────────── */
+
+/**
+ * A rental's view (as the lister states it) and its noise risk, computed from
+ * the campuses and nightlife corridors near it in #15's cited neighborhood
+ * facts. Noise is null outside San Francisco, where there are no such facts.
+ */
+export const unitDetails = viewerQuery({
+  args: { listingId: v.id("listings") },
+  handler: async (ctx, { listingId }) => {
+    const l = await ctx.db.get(listingId);
+    if (!l?.rental) return null;
+    const views = l.rental.views ?? [];
+    const { lat, lng } = l.location;
+    if (!l.neighborhoodId || lat === undefined || lng === undefined) return { views, noise: null };
+    const facts = await ctx.db.query("neighborhoodFacts").collect();
+    const places: NoisePlace[] = [];
+    const byKey = new Map<string, Doc<"neighborhoodFacts">>();
+    for (const f of facts) {
+      if (f.kind === "campus")
+        places.push({ key: f._id, kind: "campus", name: f.name, point: f.point });
+      else if (f.kind === "nightlife_corridor")
+        places.push({ key: f._id, kind: "nightlife", name: f.name, path: f.path });
+      else continue;
+      byKey.set(f._id, f);
+    }
+    const risk = noiseRisk({ lat, lng }, places);
+    const audience = await loadAudience(ctx, ctx.viewer._id);
+    const reasons: { text: string; sources: NonEmpty<CitedSource> | null }[] = [];
+    for (const r of risk.reasons) {
+      const fact = byKey.get(r.placeKey);
+      const sources =
+        fact && "citations" in fact ? await resolveCitations(ctx, fact.citations, audience) : null;
+      reasons.push({ text: r.text, sources });
+    }
+    return { views, noise: { level: risk.level, reasons } };
   },
 });
