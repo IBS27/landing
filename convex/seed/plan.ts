@@ -1281,11 +1281,16 @@ export function buildPlan(now: number) {
   }
 
   const notifications: (Note & { read: boolean; seen: boolean })[] = [];
+  // Activity in the neighborhood Groups (#15) is added on top of each persona's usual picks,
+  // already read, so those threads never push out (or change the badge for) anything else.
+  const fromNeighborhoodGroup = (n: Note) =>
+    n.group !== undefined && neighborhoodGroupSlugs.has(n.group);
   for (const persona of personas) {
     const isMain = persona === MAIN;
-    const mine = notes
+    const recent = notes
       .filter((n) => n.user === persona && n.createdAt <= latest && now - n.createdAt <= 14 * DAY)
       .sort((a, b) => b.createdAt - a.createdAt);
+    const mine = recent.filter((n) => !fromNeighborhoodGroup(n));
     const cap = isMain ? 45 : 10;
     const chosen = new Set<Note>();
     if (isMain) {
@@ -1301,6 +1306,9 @@ export function buildPlan(now: number) {
     ordered.forEach((n, i) => {
       notifications.push({ ...n, read: i >= unread, seen: i >= unread });
     });
+    for (const n of recent.filter(fromNeighborhoodGroup).slice(0, isMain ? 8 : 4)) {
+      notifications.push({ ...n, read: true, seen: true });
+    }
   }
   for (const n of notifications) {
     if (n.post) checkPost(n.post, "notification");

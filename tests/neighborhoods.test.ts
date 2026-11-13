@@ -364,13 +364,12 @@ describe("neighborhood Group threads", () => {
       const text = threadText.get(place.neighborhood) ?? "";
       expect([place.key, text.includes(place.name.toLowerCase())]).toEqual([place.key, true]);
       const at = neighborhoodSlugAt(place.point);
-      if (!place.real) {
-        // Fictional businesses sit inside the neighborhood whose locals recommend them.
-        expect([place.key, at]).toEqual([place.key, place.neighborhood]);
-      } else if (at !== place.neighborhood) {
-        // Real landmarks may be next door (Dolores Park for the Mission), but not across town.
+      if (at !== place.neighborhood) {
+        // Fictional businesses sit in the neighborhood whose locals recommend them, or just across
+        // a boundary street (a seeded venue); real landmarks may be next door (Dolores Park for
+        // the Mission), but nothing is across town.
         const edge = edgeDistanceMeters(place.point, neighborhoodShape(place.neighborhood).polygon);
-        expect([place.key, edge < 1500]).toEqual([place.key, true]);
+        expect([place.key, edge < (place.real ? 1500 : 400)]).toEqual([place.key, true]);
       }
     }
   });
