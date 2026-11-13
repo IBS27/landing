@@ -5,6 +5,7 @@ import { useM, useQ, useViewer } from "@/app/viewer";
 import {
   BACKGROUNDS,
   CreatePostModal,
+  MediaThumb,
   PostCard,
   PostDialog,
   PostSkeleton,
@@ -542,15 +543,18 @@ function PostThumb({ post, size }: { post: PostView; size?: number }) {
   if (m)
     return (
       <span className={box} style={style}>
-        {m.kind === "video" ? (
-          <video src={m.url} muted preload="metadata" className="h-full w-full object-cover" />
-        ) : (
-          <img src={m.url} alt="" loading="lazy" className="h-full w-full object-cover" />
-        )}
+        <MediaThumb media={m} />
       </span>
     );
   const shared = post.shared && post.shared !== "unavailable" ? post.shared : null;
-  const sharedImg = shared?.media[0]?.url ?? post.attachments.find((a) => a.kind === "link")?.image;
+  const sharedMedia = shared?.media[0];
+  if (sharedMedia)
+    return (
+      <span className={box} style={style}>
+        <MediaThumb media={sharedMedia} />
+      </span>
+    );
+  const sharedImg = post.attachments.find((a) => a.kind === "link")?.image;
   if (sharedImg)
     return (
       <span className={box} style={style}>

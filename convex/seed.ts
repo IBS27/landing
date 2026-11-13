@@ -20,6 +20,7 @@ import {
 import type { LatLng } from "./lib/geo";
 import { neighborhoodSlugAt } from "./lib/neighborhoods";
 import schema from "./schema";
+import { seedCityProfiles } from "./seed/cityProfiles";
 import { buildPlan } from "./seed/plan";
 import { type Citations, reactionType } from "./validators";
 
@@ -38,6 +39,12 @@ async function insertAll<N extends TableNames>(
 }
 
 // ── Mutations ────────────────────────────────────────────────────────────────
+
+/** Landing City Profiles (#3), after users, Groups and Events exist. */
+export const insertCityProfiles = internalMutation({
+  args: { now: v.number() },
+  handler: (ctx, { now }) => seedCityProfiles(ctx, now),
+});
 
 /** Deletes up to one batch of a table; returns how many were deleted. */
 export const clearTable = internalMutation({
@@ -89,6 +96,10 @@ export const insertNeighborhoods = internalMutation({
 export const insertNeighborhoodFacts = internalMutation({
   args: { rows: v.array(T.neighborhoodFacts.validator) },
   handler: (ctx, { rows }) => insertAll(ctx, "neighborhoodFacts", rows),
+});
+export const insertVouches = internalMutation({
+  args: { rows: v.array(T.vouches.validator) },
+  handler: (ctx, { rows }) => insertAll(ctx, "vouches", rows),
 });
 export const insertGroups = internalMutation({
   args: { rows: v.array(T.groups.validator) },
@@ -397,6 +408,16 @@ export const reset = internalAction({
           createdAt: q.createdAt,
         })),
       }),
+      ctx.runMutation(internal.seed.insertVouches, {
+        rows: plan.vouches.map((x) => ({
+          voucherId: uid(x.voucher),
+          subjectId: uid(x.subject),
+          relationship: x.relationship,
+          note: x.note,
+          createdAt: x.createdAt,
+          updatedAt: x.createdAt,
+        })),
+      }),
       (async () => {
         const ids: Id<"groups">[] = await ctx.runMutation(internal.seed.insertGroups, {
           rows: plan.groups.map((g) => ({
@@ -595,6 +616,17 @@ export const reset = internalAction({
       }),
     ]);
 
+    // 9. Landing City Profiles for the personas.
+    const cityProfileFacts: number = await ctx.runMutation(internal.seed.insertCityProfiles, {
+      now: Date.now(),
+    });
+
+    // Demo rentals for "Things to check" (#11).
+    await ctx.runMutation(internal.trust.seedDemo, {});
+
+    // Muse proposals for the demo inbox (#6).
+    await ctx.runMutation(internal.proposals.seedDemo, {});
+
     const reactionRows =
       plan.posts.reduce((s, p) => s + p.reactions.length + p.commentReactions.length, 0) +
       plan.conversations.reduce(
@@ -610,10 +642,12 @@ export const reset = internalAction({
         users: plan.users.length,
         friendships: plan.friendships.length * 2,
         friendRequests: plan.friendRequests.length,
+        vouches: plan.vouches.length,
         groups: plan.groups.length,
         groupMembers: plan.groupMembers.length,
         listings: plan.listings.length,
         events: plan.events.length,
+        cityProfileFacts,
         eventResponses: plan.eventResponses.length,
         posts: plan.posts.length,
         comments: plan.posts.reduce((s, p) => s + p.comments.length, 0),

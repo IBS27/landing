@@ -389,6 +389,7 @@ export const media = viewerQuery({
       index: number;
       url: string;
       kind: "image" | "video";
+      poster?: string;
       username: string;
     }[] = [];
     for (const p of shown)
@@ -399,6 +400,7 @@ export const media = viewerQuery({
           index,
           url: m.url,
           kind: m.kind,
+          poster: m.poster,
           username: authors.get(p.authorId)?.username ?? "",
         });
       });

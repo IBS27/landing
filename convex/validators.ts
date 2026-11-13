@@ -188,6 +188,8 @@ export const notificationKind = v.union(
   v.literal("birthday"),
   v.literal("memory"),
   v.literal("live"),
+  /** Landing: someone vouched for you (convex/vouches.ts). */
+  v.literal("vouch"),
 );
 
 /** Settings → Notifications categories (each maps to one or more notification kinds). */
@@ -257,7 +259,7 @@ export const aiRun = v.object({
   output: v.string(),
   /** Keys of the sources the output cites; every one was in the run's input. */
   cited: v.array(v.string()),
-  /** The model that answered (a refusal fallback can switch models). */
+  /** The model that answered. */
   model: v.optional(v.string()),
   attempts: v.number(),
   /** Why earlier attempts were rejected, or the API error. */
@@ -370,3 +372,112 @@ export const neighborhoodFact = v.union(
   }),
 );
 export type NeighborhoodFact = Infer<typeof neighborhoodFact>;
+
+/* ---------- Landing: network vouching (see convex/vouches.ts) ---------- */
+
+/** How a voucher knows the person they vouch for. Never a protected trait. */
+export const vouchRelationship = v.union(
+  v.literal("rented_from"),
+  v.literal("lived_with"),
+  v.literal("worked_with"),
+  v.literal("bought_sold"),
+  v.literal("know_personally"),
+);
+export type VouchRelationship = Infer<typeof vouchRelationship>;
+
+/* ── Scam signals (#11) ────────────────────────────────────────────────── */
+
+/** Why a chat message is worth a second look. Worded as things to check, not accusations. */
+export const chatFlagCategory = v.union(
+  v.literal("deposit_before_viewing"),
+  v.literal("away_lister"),
+  v.literal("untraceable_payment"),
+  v.literal("pressure"),
+  v.literal("off_platform"),
+);
+export type ChatFlagCategory = Infer<typeof chatFlagCategory>;
+
+export const chatFlag = v.object({
+  messageId: v.id("messages"),
+  category: chatFlagCategory,
+  /** One plain sentence on why this is worth checking. */
+  reason: v.string(),
+});
+
+/* ── Muse proposals (#6) ───────────────────────────────────────────────── */
+
+/**
+ * What Muse wants to do, by kind. Agent code only ever creates a proposal
+ * (`propose()` in convex/lib/proposals.ts); the action itself runs after the
+ * owner approves, in `executeProposal()`.
+ */
+export const proposalPayload = v.union(
+  /** A chat message. Also stored as a `pending_approval` draft in the thread. */
+  v.object({
+    kind: v.literal("message"),
+    conversationId: v.id("conversations"),
+    text: v.string(),
+  }),
+  /** A Marketplace offer or counteroffer, sent in the listing's chat. */
+  v.object({
+    kind: v.literal("offer"),
+    conversationId: v.id("conversations"),
+    listingId: v.id("listings"),
+    amount: v.number(),
+    text: v.string(),
+  }),
+  /** A new Event hosted by the owner, with friends invited. */
+  v.object({
+    kind: v.literal("event"),
+    title: v.string(),
+    description: v.string(),
+    startAt: v.number(),
+    venue: v.optional(v.string()),
+    groupId: v.optional(v.id("groups")),
+    inviteIds: v.array(v.id("users")),
+  }),
+  /** A new Group created by the owner, with people invited. */
+  v.object({
+    kind: v.literal("group"),
+    name: v.string(),
+    description: v.string(),
+    privacy: v.union(v.literal("public"), v.literal("private")),
+    inviteIds: v.array(v.id("users")),
+  }),
+);
+export type ProposalPayload = Infer<typeof proposalPayload>;
+export type ProposalKind = ProposalPayload["kind"];
+
+/** Pending until the owner decides. "edited" = approved after the owner changed it. */
+export const proposalStatus = v.union(
+  v.literal("pending"),
+  v.literal("approved"),
+  v.literal("edited"),
+  v.literal("rejected"),
+  v.literal("expired"),
+);
+export type ProposalStatus = Infer<typeof proposalStatus>;
+
+/** Which agent (and, when known, which task and model run) made a proposal. */
+export const proposalOrigin = v.object({
+  agent: aiAgent,
+  task: v.optional(v.string()),
+  runId: v.optional(v.id("aiRuns")),
+  /** "fallback" means plain code wrote it, not the model. */
+  via: v.optional(v.union(v.literal("model"), v.literal("cache"), v.literal("fallback"))),
+});
+
+/** What the executor created once a proposal was approved. */
+export const proposalResult = v.union(
+  v.object({ kind: v.literal("message"), messageId: v.id("messages") }),
+  v.object({ kind: v.literal("event"), eventId: v.id("events") }),
+  v.object({ kind: v.literal("group"), groupId: v.id("groups") }),
+);
+
+export const proposalAction = v.union(
+  v.literal("created"),
+  v.literal("edited"),
+  v.literal("approved"),
+  v.literal("rejected"),
+  v.literal("expired"),
+);

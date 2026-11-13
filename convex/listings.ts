@@ -14,10 +14,12 @@ import {
   type Near,
   sellerRating,
   toCard,
+  withinRadius,
 } from "./lib/listings";
 import { neighborhoodIdAt } from "./lib/neighborhoods";
 import { notify } from "./lib/notify";
 import { isSaved } from "./lib/posts";
+import { badgesAfterEdit } from "./lib/trust";
 import { getSummaries, getSummary, type UserSummary } from "./lib/users";
 import {
   listingCategory,
@@ -126,10 +128,7 @@ function matches(
   if (f.maxPrice !== undefined && l.price > f.maxPrice) return false;
   if (f.conditions?.length && (!l.condition || !f.conditions.includes(l.condition))) return false;
   if (f.daysSinceListed !== undefined && now - l.createdAt > f.daysSinceListed * DAY) return false;
-  if (nearBy) {
-    const d = distanceTo(l, nearBy);
-    if (d !== null && d > nearBy.radiusMi) return false;
-  }
+  if (!withinRadius(l, nearBy)) return false;
   const vf = [f.make, f.model, f.minYear, f.maxYear, f.minMileage, f.maxMileage, f.vehicleType];
   if (vf.some((x) => x !== undefined) || f.bodyStyle || f.transmission) {
     const veh = l.vehicle;
@@ -193,7 +192,7 @@ async function pageSellers(ctx: QueryCtx, rows: Doc<"listings">[]) {
   return new Set([...map.values()].filter((u) => u.kind === "page").map((u) => u._id));
 }
 
-const MAX_SCAN = 2000;
+export const MAX_SCAN = 2000;
 
 /**
  * Today's picks, category pages and search: one query with filters, sort and a
@@ -370,41 +369,53 @@ export const get = viewerQuery({
   },
 });
 
-/** "Today's picks" under a listing: same category first, then everything else. */
+/** "Today's picks" under a listing. */
 export const related = viewerQuery({
-  args: { listingId: v.id("listings"), limit: v.number() },
-  handler: async (ctx, { listingId, limit }) => {
-    const l = await ctx.db.get(listingId);
+  args: { listingId: v.id("listings"), limit: v.number(), near: v.optional(near) },
+  handler: async (ctx, { listingId, limit, near }) => {
+    const rows = await relatedListings(ctx, listingId, limit, near);
     const now = Date.now();
-    const out: Doc<"listings">[] = [];
-    const seen = new Set<Id<"listings">>([listingId]);
-    const take = (rows: Doc<"listings">[]) => {
-      for (const r of rows) {
-        if (out.length >= limit) break;
-        if (seen.has(r._id) || r.status !== "active") continue;
+    return rows.map((r) => toCard(r, now));
+  },
+});
+
+/**
+ * Active listings near the viewer (the same radius filter as `browse`): same
+ * category first, newest first, then everything else, newest first.
+ */
+export async function relatedListings(
+  ctx: QueryCtx,
+  listingId: Id<"listings">,
+  limit: number,
+  nearBy: Near | undefined,
+) {
+  const max = Math.max(1, Math.min(limit, 240));
+  const l = await ctx.db.get(listingId);
+  const out: Doc<"listings">[] = [];
+  const seen = new Set<Id<"listings">>([listingId]);
+  // One read budget across both scans; stop as soon as the page is full.
+  let budget = MAX_SCAN;
+  const fill = async (rows: AsyncIterable<Doc<"listings">>) => {
+    if (out.length >= max || budget <= 0) return;
+    for await (const r of rows) {
+      budget--;
+      if (!seen.has(r._id) && r.status === "active" && withinRadius(r, nearBy)) {
         seen.add(r._id);
         out.push(r);
       }
-    };
-    if (l)
-      take(
-        await ctx.db
-          .query("listings")
-          .withIndex("by_category", (q) => q.eq("category", l.category))
-          .order("desc")
-          .take(limit + 8),
-      );
-    if (out.length < limit)
-      take(
-        await ctx.db
-          .query("listings")
-          .withIndex("by_created")
-          .order("desc")
-          .take(limit * 2 + 8),
-      );
-    return out.map((r) => toCard(r, now));
-  },
-});
+      if (out.length >= max || budget <= 0) break;
+    }
+  };
+  if (l)
+    await fill(
+      ctx.db
+        .query("listings")
+        .withIndex("by_category", (q) => q.eq("category", l.category))
+        .order("desc"),
+    );
+  await fill(ctx.db.query("listings").withIndex("by_created").order("desc"));
+  return out;
+}
 
 /* ───────────────────────── You: selling / buying / saved ───────────────────────── */
 
@@ -778,6 +789,12 @@ export const update = viewerMutation({
       vehicle: args.vehicle,
       meetup: args.meetup,
       groupIds: args.groupIds?.length ? args.groupIds : undefined,
+      // A different unit loses the badges about the old one (#11).
+      badges: badgesAfterEdit(l, {
+        location: placeFor(args.neighborhood),
+        photos,
+        rental: args.rental,
+      }),
       updatedAt: Date.now(),
     });
     return listingId;

@@ -16,6 +16,7 @@ import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as ClimateRouteImport } from './routes/climate'
 import { Route as FeedsRouteImport } from './routes/feeds'
 import { Route as FundraisersRouteImport } from './routes/fundraisers'
+import { Route as LandingRouteRouteImport } from './routes/landing/route'
 import { Route as MeRouteImport } from './routes/me'
 import { Route as MemoriesRouteImport } from './routes/memories'
 import { Route as MetaAiRouteImport } from './routes/meta-ai'
@@ -56,6 +57,9 @@ import { Route as GroupsCreateRouteImport } from './routes/groups/create'
 import { Route as GroupsDiscoverRouteImport } from './routes/groups/discover'
 import { Route as GroupsFeedRouteImport } from './routes/groups/feed'
 import { Route as GroupsJoinsRouteImport } from './routes/groups/joins'
+import { Route as LandingIndexRouteImport } from './routes/landing/index'
+import { Route as LandingSplatRouteImport } from './routes/landing/$'
+import { Route as LandingWelcomeRouteImport } from './routes/landing/welcome'
 import { Route as LiveProducerRouteImport } from './routes/live.producer'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace/index'
 import { Route as MarketplaceGroupsRouteImport } from './routes/marketplace/groups'
@@ -83,6 +87,12 @@ import { Route as GroupsGroupIdFeaturedRouteImport } from './routes/groups/$grou
 import { Route as GroupsGroupIdFilesRouteImport } from './routes/groups/$groupId/files'
 import { Route as GroupsGroupIdMediaRouteImport } from './routes/groups/$groupId/media'
 import { Route as GroupsGroupIdMembersRouteImport } from './routes/groups/$groupId/members'
+import { Route as LandingCrewIndexRouteImport } from './routes/landing/crew/index'
+import { Route as LandingFindIndexRouteImport } from './routes/landing/find/index'
+import { Route as LandingInboxIndexRouteImport } from './routes/landing/inbox/index'
+import { Route as LandingMoveOutIndexRouteImport } from './routes/landing/move-out/index'
+import { Route as LandingPlaceIndexRouteImport } from './routes/landing/place/index'
+import { Route as LandingProfileIndexRouteImport } from './routes/landing/profile/index'
 import { Route as MarketplaceCategoryCategoryRouteImport } from './routes/marketplace/category/$category'
 import { Route as MarketplaceCreateIndexRouteImport } from './routes/marketplace/create/index'
 import { Route as MarketplaceCreateItemRouteImport } from './routes/marketplace/create/item'
@@ -94,6 +104,7 @@ import { Route as MarketplaceItemListingIdRouteImport } from './routes/marketpla
 import { Route as MarketplaceYouIndexRouteImport } from './routes/marketplace/you/index'
 import { Route as MarketplaceYouSellingRouteImport } from './routes/marketplace/you/selling'
 import { Route as MessagesTConversationIdRouteImport } from './routes/messages/t/$conversationId'
+import { Route as LandingFindListingListingIdRouteImport } from './routes/landing/find/listing/$listingId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -128,6 +139,11 @@ const FeedsRoute = FeedsRouteImport.update({
 const FundraisersRoute = FundraisersRouteImport.update({
   id: '/fundraisers',
   path: '/fundraisers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingRouteRoute = LandingRouteRouteImport.update({
+  id: '/landing',
+  path: '/landing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeRoute = MeRouteImport.update({
@@ -330,6 +346,21 @@ const GroupsJoinsRoute = GroupsJoinsRouteImport.update({
   path: '/groups/joins',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LandingIndexRoute = LandingIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
+const LandingSplatRoute = LandingSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
+const LandingWelcomeRoute = LandingWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
 const LiveProducerRoute = LiveProducerRouteImport.update({
   id: '/live/producer',
   path: '/live/producer',
@@ -466,6 +497,36 @@ const GroupsGroupIdMembersRoute = GroupsGroupIdMembersRouteImport.update({
   path: '/members',
   getParentRoute: () => GroupsGroupIdRoute,
 } as any)
+const LandingCrewIndexRoute = LandingCrewIndexRouteImport.update({
+  id: '/crew/',
+  path: '/crew/',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
+const LandingFindIndexRoute = LandingFindIndexRouteImport.update({
+  id: '/find/',
+  path: '/find/',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
+const LandingInboxIndexRoute = LandingInboxIndexRouteImport.update({
+  id: '/inbox/',
+  path: '/inbox/',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
+const LandingMoveOutIndexRoute = LandingMoveOutIndexRouteImport.update({
+  id: '/move-out/',
+  path: '/move-out/',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
+const LandingPlaceIndexRoute = LandingPlaceIndexRouteImport.update({
+  id: '/place/',
+  path: '/place/',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
+const LandingProfileIndexRoute = LandingProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
 const MarketplaceCategoryCategoryRoute =
   MarketplaceCategoryCategoryRouteImport.update({
     id: '/marketplace/category/$category',
@@ -525,10 +586,17 @@ const MessagesTConversationIdRoute = MessagesTConversationIdRouteImport.update({
   path: '/messages/t/$conversationId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LandingFindListingListingIdRoute =
+  LandingFindListingListingIdRouteImport.update({
+    id: '/find/listing/$listingId',
+    path: '/find/listing/$listingId',
+    getParentRoute: () => LandingRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$username': typeof UsernameRouteRouteWithChildren
+  '/landing': typeof LandingRouteRouteWithChildren
   '/ads-manager': typeof AdsManagerRoute
   '/bookmarks': typeof BookmarksRoute
   '/climate': typeof ClimateRoute
@@ -569,6 +637,8 @@ export interface FileRoutesByFullPath {
   '/groups/discover': typeof GroupsDiscoverRoute
   '/groups/feed': typeof GroupsFeedRoute
   '/groups/joins': typeof GroupsJoinsRoute
+  '/landing/$': typeof LandingSplatRoute
+  '/landing/welcome': typeof LandingWelcomeRoute
   '/live/producer': typeof LiveProducerRoute
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
@@ -591,6 +661,7 @@ export interface FileRoutesByFullPath {
   '/friends/': typeof FriendsIndexRoute
   '/gaming/': typeof GamingIndexRoute
   '/groups/': typeof GroupsIndexRoute
+  '/landing/': typeof LandingIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/messages/': typeof MessagesIndexRoute
   '/$username/posts/$postId': typeof UsernamePostsPostIdRoute
@@ -609,9 +680,16 @@ export interface FileRoutesByFullPath {
   '/marketplace/you/selling': typeof MarketplaceYouSellingRoute
   '/messages/t/$conversationId': typeof MessagesTConversationIdRoute
   '/groups/$groupId/': typeof GroupsGroupIdIndexRoute
+  '/landing/crew/': typeof LandingCrewIndexRoute
+  '/landing/find/': typeof LandingFindIndexRoute
+  '/landing/inbox/': typeof LandingInboxIndexRoute
+  '/landing/move-out/': typeof LandingMoveOutIndexRoute
+  '/landing/place/': typeof LandingPlaceIndexRoute
+  '/landing/profile/': typeof LandingProfileIndexRoute
   '/marketplace/create/': typeof MarketplaceCreateIndexRoute
   '/marketplace/item/': typeof MarketplaceItemIndexRoute
   '/marketplace/you/': typeof MarketplaceYouIndexRoute
+  '/landing/find/listing/$listingId': typeof LandingFindListingListingIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -654,6 +732,8 @@ export interface FileRoutesByTo {
   '/groups/discover': typeof GroupsDiscoverRoute
   '/groups/feed': typeof GroupsFeedRoute
   '/groups/joins': typeof GroupsJoinsRoute
+  '/landing/$': typeof LandingSplatRoute
+  '/landing/welcome': typeof LandingWelcomeRoute
   '/live/producer': typeof LiveProducerRoute
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
@@ -676,6 +756,7 @@ export interface FileRoutesByTo {
   '/friends': typeof FriendsIndexRoute
   '/gaming': typeof GamingIndexRoute
   '/groups': typeof GroupsIndexRoute
+  '/landing': typeof LandingIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
   '/messages': typeof MessagesIndexRoute
   '/$username/posts/$postId': typeof UsernamePostsPostIdRoute
@@ -694,14 +775,22 @@ export interface FileRoutesByTo {
   '/marketplace/you/selling': typeof MarketplaceYouSellingRoute
   '/messages/t/$conversationId': typeof MessagesTConversationIdRoute
   '/groups/$groupId': typeof GroupsGroupIdIndexRoute
+  '/landing/crew': typeof LandingCrewIndexRoute
+  '/landing/find': typeof LandingFindIndexRoute
+  '/landing/inbox': typeof LandingInboxIndexRoute
+  '/landing/move-out': typeof LandingMoveOutIndexRoute
+  '/landing/place': typeof LandingPlaceIndexRoute
+  '/landing/profile': typeof LandingProfileIndexRoute
   '/marketplace/create': typeof MarketplaceCreateIndexRoute
   '/marketplace/item': typeof MarketplaceItemIndexRoute
   '/marketplace/you': typeof MarketplaceYouIndexRoute
+  '/landing/find/listing/$listingId': typeof LandingFindListingListingIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$username': typeof UsernameRouteRouteWithChildren
+  '/landing': typeof LandingRouteRouteWithChildren
   '/ads-manager': typeof AdsManagerRoute
   '/bookmarks': typeof BookmarksRoute
   '/climate': typeof ClimateRoute
@@ -742,6 +831,8 @@ export interface FileRoutesById {
   '/groups/discover': typeof GroupsDiscoverRoute
   '/groups/feed': typeof GroupsFeedRoute
   '/groups/joins': typeof GroupsJoinsRoute
+  '/landing/$': typeof LandingSplatRoute
+  '/landing/welcome': typeof LandingWelcomeRoute
   '/live/producer': typeof LiveProducerRoute
   '/marketplace/groups': typeof MarketplaceGroupsRoute
   '/marketplace/inbox': typeof MarketplaceInboxRoute
@@ -764,6 +855,7 @@ export interface FileRoutesById {
   '/friends/': typeof FriendsIndexRoute
   '/gaming/': typeof GamingIndexRoute
   '/groups/': typeof GroupsIndexRoute
+  '/landing/': typeof LandingIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/messages/': typeof MessagesIndexRoute
   '/$username/posts/$postId': typeof UsernamePostsPostIdRoute
@@ -782,15 +874,23 @@ export interface FileRoutesById {
   '/marketplace/you/selling': typeof MarketplaceYouSellingRoute
   '/messages/t/$conversationId': typeof MessagesTConversationIdRoute
   '/groups/$groupId/': typeof GroupsGroupIdIndexRoute
+  '/landing/crew/': typeof LandingCrewIndexRoute
+  '/landing/find/': typeof LandingFindIndexRoute
+  '/landing/inbox/': typeof LandingInboxIndexRoute
+  '/landing/move-out/': typeof LandingMoveOutIndexRoute
+  '/landing/place/': typeof LandingPlaceIndexRoute
+  '/landing/profile/': typeof LandingProfileIndexRoute
   '/marketplace/create/': typeof MarketplaceCreateIndexRoute
   '/marketplace/item/': typeof MarketplaceItemIndexRoute
   '/marketplace/you/': typeof MarketplaceYouIndexRoute
+  '/landing/find/listing/$listingId': typeof LandingFindListingListingIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/$username'
+    | '/landing'
     | '/ads-manager'
     | '/bookmarks'
     | '/climate'
@@ -831,6 +931,8 @@ export interface FileRouteTypes {
     | '/groups/discover'
     | '/groups/feed'
     | '/groups/joins'
+    | '/landing/$'
+    | '/landing/welcome'
     | '/live/producer'
     | '/marketplace/groups'
     | '/marketplace/inbox'
@@ -853,6 +955,7 @@ export interface FileRouteTypes {
     | '/friends/'
     | '/gaming/'
     | '/groups/'
+    | '/landing/'
     | '/marketplace/'
     | '/messages/'
     | '/$username/posts/$postId'
@@ -871,9 +974,16 @@ export interface FileRouteTypes {
     | '/marketplace/you/selling'
     | '/messages/t/$conversationId'
     | '/groups/$groupId/'
+    | '/landing/crew/'
+    | '/landing/find/'
+    | '/landing/inbox/'
+    | '/landing/move-out/'
+    | '/landing/place/'
+    | '/landing/profile/'
     | '/marketplace/create/'
     | '/marketplace/item/'
     | '/marketplace/you/'
+    | '/landing/find/listing/$listingId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -916,6 +1026,8 @@ export interface FileRouteTypes {
     | '/groups/discover'
     | '/groups/feed'
     | '/groups/joins'
+    | '/landing/$'
+    | '/landing/welcome'
     | '/live/producer'
     | '/marketplace/groups'
     | '/marketplace/inbox'
@@ -938,6 +1050,7 @@ export interface FileRouteTypes {
     | '/friends'
     | '/gaming'
     | '/groups'
+    | '/landing'
     | '/marketplace'
     | '/messages'
     | '/$username/posts/$postId'
@@ -956,13 +1069,21 @@ export interface FileRouteTypes {
     | '/marketplace/you/selling'
     | '/messages/t/$conversationId'
     | '/groups/$groupId'
+    | '/landing/crew'
+    | '/landing/find'
+    | '/landing/inbox'
+    | '/landing/move-out'
+    | '/landing/place'
+    | '/landing/profile'
     | '/marketplace/create'
     | '/marketplace/item'
     | '/marketplace/you'
+    | '/landing/find/listing/$listingId'
   id:
     | '__root__'
     | '/'
     | '/$username'
+    | '/landing'
     | '/ads-manager'
     | '/bookmarks'
     | '/climate'
@@ -1003,6 +1124,8 @@ export interface FileRouteTypes {
     | '/groups/discover'
     | '/groups/feed'
     | '/groups/joins'
+    | '/landing/$'
+    | '/landing/welcome'
     | '/live/producer'
     | '/marketplace/groups'
     | '/marketplace/inbox'
@@ -1025,6 +1148,7 @@ export interface FileRouteTypes {
     | '/friends/'
     | '/gaming/'
     | '/groups/'
+    | '/landing/'
     | '/marketplace/'
     | '/messages/'
     | '/$username/posts/$postId'
@@ -1043,14 +1167,22 @@ export interface FileRouteTypes {
     | '/marketplace/you/selling'
     | '/messages/t/$conversationId'
     | '/groups/$groupId/'
+    | '/landing/crew/'
+    | '/landing/find/'
+    | '/landing/inbox/'
+    | '/landing/move-out/'
+    | '/landing/place/'
+    | '/landing/profile/'
     | '/marketplace/create/'
     | '/marketplace/item/'
     | '/marketplace/you/'
+    | '/landing/find/listing/$listingId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   UsernameRouteRoute: typeof UsernameRouteRouteWithChildren
+  LandingRouteRoute: typeof LandingRouteRouteWithChildren
   AdsManagerRoute: typeof AdsManagerRoute
   BookmarksRoute: typeof BookmarksRoute
   ClimateRoute: typeof ClimateRoute
@@ -1170,6 +1302,13 @@ declare module '@tanstack/react-router' {
       path: '/fundraisers'
       fullPath: '/fundraisers'
       preLoaderRoute: typeof FundraisersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing': {
+      id: '/landing'
+      path: '/landing'
+      fullPath: '/landing'
+      preLoaderRoute: typeof LandingRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/me': {
@@ -1452,6 +1591,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GroupsJoinsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/landing/': {
+      id: '/landing/'
+      path: '/'
+      fullPath: '/landing/'
+      preLoaderRoute: typeof LandingIndexRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
+    '/landing/$': {
+      id: '/landing/$'
+      path: '/$'
+      fullPath: '/landing/$'
+      preLoaderRoute: typeof LandingSplatRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
+    '/landing/welcome': {
+      id: '/landing/welcome'
+      path: '/welcome'
+      fullPath: '/landing/welcome'
+      preLoaderRoute: typeof LandingWelcomeRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
     '/live/producer': {
       id: '/live/producer'
       path: '/live/producer'
@@ -1641,6 +1801,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GroupsGroupIdMembersRouteImport
       parentRoute: typeof GroupsGroupIdRoute
     }
+    '/landing/crew/': {
+      id: '/landing/crew/'
+      path: '/crew'
+      fullPath: '/landing/crew/'
+      preLoaderRoute: typeof LandingCrewIndexRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
+    '/landing/find/': {
+      id: '/landing/find/'
+      path: '/find'
+      fullPath: '/landing/find/'
+      preLoaderRoute: typeof LandingFindIndexRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
+    '/landing/inbox/': {
+      id: '/landing/inbox/'
+      path: '/inbox'
+      fullPath: '/landing/inbox/'
+      preLoaderRoute: typeof LandingInboxIndexRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
+    '/landing/move-out/': {
+      id: '/landing/move-out/'
+      path: '/move-out'
+      fullPath: '/landing/move-out/'
+      preLoaderRoute: typeof LandingMoveOutIndexRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
+    '/landing/place/': {
+      id: '/landing/place/'
+      path: '/place'
+      fullPath: '/landing/place/'
+      preLoaderRoute: typeof LandingPlaceIndexRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
+    '/landing/profile/': {
+      id: '/landing/profile/'
+      path: '/profile'
+      fullPath: '/landing/profile/'
+      preLoaderRoute: typeof LandingProfileIndexRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
     '/marketplace/category/$category': {
       id: '/marketplace/category/$category'
       path: '/marketplace/category/$category'
@@ -1718,6 +1920,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesTConversationIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/landing/find/listing/$listingId': {
+      id: '/landing/find/listing/$listingId'
+      path: '/find/listing/$listingId'
+      fullPath: '/landing/find/listing/$listingId'
+      preLoaderRoute: typeof LandingFindListingListingIdRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
   }
 }
 
@@ -1747,6 +1956,36 @@ const UsernameRouteRouteWithChildren = UsernameRouteRoute._addFileChildren(
   UsernameRouteRouteChildren,
 )
 
+interface LandingRouteRouteChildren {
+  LandingSplatRoute: typeof LandingSplatRoute
+  LandingWelcomeRoute: typeof LandingWelcomeRoute
+  LandingIndexRoute: typeof LandingIndexRoute
+  LandingCrewIndexRoute: typeof LandingCrewIndexRoute
+  LandingFindIndexRoute: typeof LandingFindIndexRoute
+  LandingInboxIndexRoute: typeof LandingInboxIndexRoute
+  LandingMoveOutIndexRoute: typeof LandingMoveOutIndexRoute
+  LandingPlaceIndexRoute: typeof LandingPlaceIndexRoute
+  LandingProfileIndexRoute: typeof LandingProfileIndexRoute
+  LandingFindListingListingIdRoute: typeof LandingFindListingListingIdRoute
+}
+
+const LandingRouteRouteChildren: LandingRouteRouteChildren = {
+  LandingSplatRoute: LandingSplatRoute,
+  LandingWelcomeRoute: LandingWelcomeRoute,
+  LandingIndexRoute: LandingIndexRoute,
+  LandingCrewIndexRoute: LandingCrewIndexRoute,
+  LandingFindIndexRoute: LandingFindIndexRoute,
+  LandingInboxIndexRoute: LandingInboxIndexRoute,
+  LandingMoveOutIndexRoute: LandingMoveOutIndexRoute,
+  LandingPlaceIndexRoute: LandingPlaceIndexRoute,
+  LandingProfileIndexRoute: LandingProfileIndexRoute,
+  LandingFindListingListingIdRoute: LandingFindListingListingIdRoute,
+}
+
+const LandingRouteRouteWithChildren = LandingRouteRoute._addFileChildren(
+  LandingRouteRouteChildren,
+)
+
 interface GroupsGroupIdRouteChildren {
   GroupsGroupIdAboutRoute: typeof GroupsGroupIdAboutRoute
   GroupsGroupIdEventsRoute: typeof GroupsGroupIdEventsRoute
@@ -1774,6 +2013,7 @@ const GroupsGroupIdRouteWithChildren = GroupsGroupIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   UsernameRouteRoute: UsernameRouteRouteWithChildren,
+  LandingRouteRoute: LandingRouteRouteWithChildren,
   AdsManagerRoute: AdsManagerRoute,
   BookmarksRoute: BookmarksRoute,
   ClimateRoute: ClimateRoute,

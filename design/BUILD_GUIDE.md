@@ -34,16 +34,19 @@ The goal is a faithful, working clone of desktop facebook.com (1440×900, light 
   - Home: left rail 360px, center feed column 680px wide (measured on 1440px viewport: rail 0–348, feed 380–1060), right rail 360px (Contacts etc.).
   - Marketplace, Groups, Events, Friends, Watch and Gaming: 360px fixed white left sidebar with a page title and nav rows.
   - Messenger full page: no rails.
+  - Landing (`/landing/*`): the same root layout as everything else, with Landing's 360px sidebar (`AppRail`, from `src/landing/shell/LandingLayout.tsx`) and the page beside it.
 - **Copy.** Use Facebook's real UI labels and copy. Seed content is fictional and set in San Francisco; no real people's data.
 
 ## AI calls
-- **One entry point.** Call models only through `runAgent(ctx, task, { input, sources })` from `convex/ai/agent.ts`, inside a Convex action. Never import `@anthropic-ai/sdk` anywhere else. Declare each task once with `defineTask` next to the feature: its agent (`muse`, `ember` or `spark`), instructions, output validator, `cites` extractor, optional `check` rules and a non-AI `fallback`.
+- **Meta's Muse models only.** Landing uses Meta's Muse models and no others: Muse Spark for text, and Muse Image and the rest of the Muse family for media. Don't add other providers' models. When Meta ships a newer Muse model, upgrade to it. Today every agent (`muse`, `ember`, `spark`) runs on `muse-spark-1.3` through Meta's Model API ([docs](https://dev.meta.ai/docs)).
+- **One entry point.** Call models only through `runAgent(ctx, task, { input, sources, shownTo })` from `convex/ai/agent.ts`, inside a Convex action. `convex/ai/model.ts` is the only file that talks to a model API: it holds the model ID, the client, retries and prices. Declare each task once with `defineTask` next to the feature: its agent (`muse`, `ember` or `spark`), instructions, output validator, `cites` extractor, optional `check` rules and a non-AI `fallback`.
 - **Output is checked, not trusted.** The output must match the validator, every `v.id()` in it must appear in the input, every cited key must be one of the given sources, and `check` must pass. Rejected output goes back to the model for a retry. After that, the task's fallback is used.
+- **Sources are citations.** Pass `sources` as `Source` refs (the type stored in `citations`) and `shownTo`: `"everyone"` for a result cached once for every viewer, or the user it's for. `runAgent` resolves the sources for that audience and drops the rest before the model sees them, so a shared result is built only from public sources. `result.cited` is `Citations` (or `null` when nothing is cited): store it after `assertCitable(ctx, cited, ...)` with the same audience.
 - **Agents never write.** `runAgent` returns data and logs to `aiRuns`. Send anything that acts for a user through `propose()` (#6). Write scores, routes and other derived data with your feature's own computed-table mutation.
-- **Fallbacks are real features.** AI is off when `ANTHROPIC_API_KEY` is unset or `AI_ENABLED` is `false` (Convex env vars; `bunx convex env set AI_ENABLED false` is the kill switch). Every flow must still work then. `api.ai.status.get` reports whether AI is on.
+- **Fallbacks are real features.** AI is off when `MODEL_API_KEY` (the Meta Model API key) is unset or `AI_ENABLED` is `false` (Convex env vars; `bunx convex env set AI_ENABLED false` is the kill switch). Every flow must still work then. `api.ai.status.get` reports whether AI is on.
 - **Shared results are cached.** Runs with the same task, input and sources reuse the stored result for `cacheTtlMs` (default 24h), so build inputs from shared data (a neighborhood's threads), not from the viewer, when the result is the same for everyone.
 - **Long jobs** use `startJob` (from a mutation) and `runJob` (in the scheduled action) from `convex/ai/jobs.ts`. The UI subscribes to `api.ai.jobs.get` for status and progress.
-- Never send protected traits to the model, and send only the records the viewer is allowed to see.
+- Never send protected traits to the model, and put only what the result's audience may see in `input` (`sources` are filtered for you).
 
 ## References
 - `design/reference/*.png` are screenshots of real Facebook. The account has few friends or chats, so some views are empty states; populate them the way Facebook does for an active account. Some captures are 2× DPR.

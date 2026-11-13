@@ -177,9 +177,15 @@ export function milesBetween(a: { lat: number; lng: number }, b: { lat: number; 
 
 export type Near = { lat: number; lng: number; radiusMi: number };
 
-export function distanceTo(l: Doc<"listings">, near: Near | undefined) {
+export function distanceTo(l: Pick<Doc<"listings">, "location">, near: Near | undefined) {
   if (!near || l.location.lat === undefined || l.location.lng === undefined) return null;
   return milesBetween(near, { lat: l.location.lat, lng: l.location.lng });
+}
+
+/** Inside the viewer's radius (always true without one, or for listings without coordinates). */
+export function withinRadius(l: Pick<Doc<"listings">, "location">, near: Near | undefined) {
+  const d = distanceTo(l, near);
+  return d === null || d <= (near?.radiusMi ?? Number.POSITIVE_INFINITY);
 }
 
 const DAY = 24 * 60 * 60 * 1000;

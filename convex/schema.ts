@@ -1,9 +1,11 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { cityProfileFact } from "./lib/cityProfileFacts";
 import {
   aiJobStatus,
   aiRun,
   badge,
+  chatFlag,
   citations,
   friendRequestAudience,
   friendsListAudience,
@@ -21,10 +23,16 @@ import {
   notificationKind,
   postAttachment,
   privacy,
+  proposalAction,
+  proposalOrigin,
+  proposalPayload,
+  proposalResult,
+  proposalStatus,
   reactionTarget,
   reactionType,
   rentalDetails,
   vehicleDetails,
+  vouchRelationship,
 } from "./validators";
 
 export default defineSchema({
@@ -694,10 +702,66 @@ export default defineSchema({
     .index("by_user", ["userId", "lastPlayedAt"])
     .index("by_user_game", ["userId", "gameId"]),
   /**
+   * Things to check in a Marketplace chat about a rental (#11): which of the
+   * lister's messages Ember flagged, for one viewer. Refreshed when new
+   * messages arrive.
+   */
+  chatChecks: defineTable({
+    conversationId: v.id("conversations"),
+    viewerId: v.id("users"),
+    listingId: v.id("listings"),
+    flags: v.array(chatFlag),
+    /** The conversation's `lastMessageAt` when it was checked; newer means stale. */
+    checkedThrough: v.number(),
+    via: v.union(v.literal("model"), v.literal("cache"), v.literal("fallback")),
+    runId: v.optional(v.id("aiRuns")),
+    createdAt: v.number(),
+  }).index("by_conversation_viewer", ["conversationId", "viewerId"]),
+
+  /**
    * One row per model call made through `runAgent` (convex/ai/agent.ts), including
    * calls that ended in the task's non-AI fallback. Model results are reused by
    * `inputHash` while fresh, so shared outputs are generated once.
    */
+  /**
+   * Muse proposals (#6): everything Muse wants to send or create on someone's
+   * behalf. Nothing happens until the owner approves; see convex/lib/proposals.ts.
+   */
+  proposals: defineTable({
+    ownerId: v.id("users"),
+    payload: proposalPayload,
+    /** The payload as Muse first wrote it, kept when the owner edits. */
+    original: v.optional(proposalPayload),
+    /** One line on why Muse suggests this, shown with the proposal. */
+    rationale: v.string(),
+    citations: v.optional(citations),
+    origin: proposalOrigin,
+    status: proposalStatus,
+    /** Time-sensitive proposals (offers) stop being sendable at this time. */
+    expiresAt: v.optional(v.number()),
+    /** For message and offer proposals: the `pending_approval` draft in the thread. */
+    draftMessageId: v.optional(v.id("messages")),
+    result: v.optional(proposalResult),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    decidedAt: v.optional(v.number()),
+  })
+    .index("by_owner_status", ["ownerId", "status", "createdAt"])
+    .index("by_owner", ["ownerId", "createdAt"])
+    .index("by_draft", ["draftMessageId"]),
+
+  /** Audit log: one row per thing that happened to a proposal. */
+  proposalEvents: defineTable({
+    proposalId: v.id("proposals"),
+    ownerId: v.id("users"),
+    action: proposalAction,
+    /** Who did it: the owner, Muse, or the system (expiry). */
+    actor: v.union(v.literal("owner"), v.literal("agent"), v.literal("system")),
+    at: v.number(),
+  })
+    .index("by_proposal", ["proposalId", "at"])
+    .index("by_owner", ["ownerId", "at"]),
+
   aiRuns: defineTable(aiRun)
     .index("by_hash", ["inputHash", "outcome", "createdAt"])
     .index("by_task", ["task", "createdAt"]),
@@ -719,4 +783,40 @@ export default defineSchema({
     startedAt: v.optional(v.number()),
     finishedAt: v.optional(v.number()),
   }).index("by_kind_key", ["kind", "key", "createdAt"]),
+
+  /* ---------------- Landing ---------------- */
+
+  /** Landing City Profile (#3): one row per person who started the brief. Facts live in `cityProfileFacts`. */
+  cityProfiles: defineTable({
+    userId: v.id("users"),
+    /** When the onboarding brief was last submitted; unset = not onboarded yet. */
+    briefCompletedAt: v.optional(v.number()),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  /**
+   * City Profile facts (#3): one row per fact, each with its source, evidence and
+   * confidence. Read through `getProfile` (convex/lib/cityProfile.ts), never directly.
+   */
+  cityProfileFacts: defineTable(cityProfileFact)
+    .index("by_user", ["userId", "updatedAt"])
+    .index("by_user_key", ["userId", "key"]),
+
+  /**
+   * Landing network vouching: `voucherId` says they know `subjectId` (usually a
+   * lister). One row per pair; vouching again updates it. About the person, not
+   * a listing, so it carries over to all their listings (convex/lib/vouches.ts).
+   */
+  vouches: defineTable({
+    voucherId: v.id("users"),
+    subjectId: v.id("users"),
+    relationship: vouchRelationship,
+    /** Optional, at most VOUCH_NOTE_MAX characters. */
+    note: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_subject", ["subjectId", "updatedAt"])
+    .index("by_voucher", ["voucherId", "updatedAt"])
+    .index("by_pair", ["voucherId", "subjectId"]),
 });

@@ -54,6 +54,7 @@ const BADGE: Record<Kind, { bg: string; icon: keyof typeof glyph }> = {
   birthday: { bg: "#F3425F", icon: "cake" },
   memory: { bg: "#0866FF", icon: "clock" },
   live: { bg: "#F3425F", icon: "video" },
+  vouch: { bg: "#0866FF", icon: "person" },
 };
 
 /** The 28px badge overlapping a notification avatar's bottom-right corner. */
