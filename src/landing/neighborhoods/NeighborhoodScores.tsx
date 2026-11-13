@@ -402,7 +402,7 @@ function CompactScores({ neighborhoodId }: { neighborhoodId: Id<"neighborhoods">
                   </span>
                   <span className="text-secondary text-xs">/ 10</span>
                 </p>
-                <SourcesChip sources={s.sources} className="max-w-[112px] shrink-0" />
+                <SourcesChip sources={s.sources} className="shrink-0" />
               </>
             ) : (
               <p className="shrink-0 font-bold text-[20px] text-secondary leading-6">

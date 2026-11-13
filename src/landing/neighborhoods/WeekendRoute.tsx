@@ -93,7 +93,7 @@ export function WeekendRoutePeek({
       <p className="mt-0.5 text-secondary text-sm leading-[18px]">
         <RouteMeta via={route.via} generatedAt={route.generatedAt} />
       </p>
-      <ol className="mt-2 space-y-1">
+      <ol className="mt-2">
         {route.stops.slice(0, PEEK_STOPS).map((s) => (
           <li key={s.key} className="flex items-start gap-3 py-1.5">
             <span className="w-[76px] shrink-0 pt-0.5 font-semibold text-secondary text-xs uppercase tracking-wide">
@@ -110,14 +110,13 @@ export function WeekendRoutePeek({
                 )}
               </p>
               <p className="line-clamp-1 text-secondary text-sm leading-[18px]">{s.why}</p>
+              <SourcesChip sources={s.sources} className="mt-1" />
             </div>
-            <SourcesChip sources={s.sources} className="max-w-[112px] shrink-0" />
           </li>
         ))}
       </ol>
       <Link
         {...toNeighborhood(slug)}
-        hash="weekend-route"
         className="mt-1 inline-flex items-center gap-0.5 font-semibold text-[15px] text-link hover:underline"
       >
         {more > 0 ? `See all ${route.stops.length} stops on the map` : "See the route on the map"}
