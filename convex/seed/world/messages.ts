@@ -341,7 +341,7 @@ export const conversations: readonly ConversationSeed[] = [
         photo: "bouldering gym",
         gap: 2200,
       },
-      { by: "zoe.nguyen", photo: "granite cliff", gap: 1 },
+      { by: "zoe.nguyen", photo: "posts/bouldering-gym-01.jpg", gap: 1 },
       { by: "maya.chen", text: "ZOE", gap: 5 },
       {
         by: "maya.chen",

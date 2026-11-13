@@ -2758,20 +2758,6 @@
     "width": 1280,
     "height": 1080
   },
-  "posts/fall-leaves-01.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:U-Dub%27s_ROY_G_BIV_(6367284783).jpg",
-    "creator": "David  Eickhoff from Hawai\u02bbi, USA",
-    "creator_url": null,
-    "license": "CC BY 2.0",
-    "license_url": "https://creativecommons.org/licenses/by/2.0",
-    "title": "U-Dub's ROY G BIV (6367284783)",
-    "tags": [
-      "fall leaves"
-    ],
-    "provider": "wikimedia",
-    "width": 1280,
-    "height": 960
-  },
   "posts/ferry-01.jpg": {
     "source_url": "https://commons.wikimedia.org/wiki/File:MV_Sonoma_and_the_Bay_Bridge,_January_2015.jpg",
     "creator": "David Merrett from Daventry, England",
@@ -2916,20 +2902,6 @@
     "width": 1280,
     "height": 921
   },
-  "posts/foggy-hills-01.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:A_Foggy_Walk_Up_the_Purple_Trail_@_Busiek_State_Forest_-_panoramio.jpg",
-    "creator": "Semipaw",
-    "creator_url": null,
-    "license": "CC BY 3.0",
-    "license_url": "https://creativecommons.org/licenses/by/3.0",
-    "title": "A Foggy Walk Up the Purple Trail @ Busiek State Forest - panoramio",
-    "tags": [
-      "foggy hills"
-    ],
-    "provider": "wikimedia",
-    "width": 1280,
-    "height": 853
-  },
   "posts/food-bank-01.jpg": {
     "source_url": "https://commons.wikimedia.org/wiki/File:Mazie_Hirono_with_Hawaii_Food_Bank_volunteers.jpg",
     "creator": "United States Senate - The Office of Mazie Hirono",
@@ -2943,83 +2915,6 @@
     "provider": "wikimedia",
     "width": 1280,
     "height": 960
-  },
-  "posts/forest-trail-01.jpg": {
-    "source_url": "https://www.flickr.com/photos/62915351@N04/51142750330",
-    "creator": "Mike J Maguire",
-    "creator_url": "https://www.flickr.com/photos/62915351@N04",
-    "license": "CC BY 2.0",
-    "license_url": "https://creativecommons.org/licenses/by/2.0/",
-    "title": "Rock Creek Park",
-    "tags": [
-      "forest trail",
-      "hiking",
-      "adventure",
-      "batis225",
-      "rockcreekpark",
-      "trail",
-      "trees",
-      "zeissbatis25mmf20"
-    ],
-    "provider": "flickr",
-    "width": 1024,
-    "height": 683
-  },
-  "posts/forest-trail-04.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:Fort_Circle_Park_Hiker-Biker_Trail-9_(4540043849).jpg",
-    "creator": "TrailVoice",
-    "creator_url": null,
-    "license": "CC BY-SA 2.0",
-    "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
-    "title": "Fort Circle Park Hiker-Biker Trail-9 (4540043849)",
-    "tags": [
-      "forest trail"
-    ],
-    "provider": "wikimedia",
-    "width": 1050,
-    "height": 1400
-  },
-  "posts/forest-trail-05.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:Foggy_forest_trail.jpg",
-    "creator": "Mar Mkrtchyan",
-    "creator_url": null,
-    "license": "CC0",
-    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "title": "Foggy forest trail",
-    "tags": [
-      "forest trail"
-    ],
-    "provider": "wikimedia",
-    "width": 933,
-    "height": 1400
-  },
-  "posts/forest-trail-06.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:Foggy_mountain_trail_Montsoflo_Switzerland.jpg",
-    "creator": "Spinarak",
-    "creator_url": null,
-    "license": "CC BY-SA 4.0",
-    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-    "title": "Foggy mountain trail Montsoflo Switzerland",
-    "tags": [
-      "forest trail"
-    ],
-    "provider": "wikimedia",
-    "width": 1050,
-    "height": 1400
-  },
-  "posts/forest-trail-07.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:Foggy_mountain_trail_2_Montsoflo_Switzerland.jpg",
-    "creator": "Spinarak",
-    "creator_url": null,
-    "license": "CC BY-SA 4.0",
-    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-    "title": "Foggy mountain trail 2 Montsoflo Switzerland",
-    "tags": [
-      "forest trail"
-    ],
-    "provider": "wikimedia",
-    "width": 1050,
-    "height": 1400
   },
   "posts/friends-01.jpg": {
     "source_url": "https://www.flickr.com/photos/199047989@N04/55126243618",
@@ -3350,34 +3245,6 @@
     "provider": "wikimedia",
     "width": 1280,
     "height": 960
-  },
-  "posts/granite-cliff-03.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:High_cliff_in_Lyse_with_climbers_7.jpg",
-    "creator": "W.carter",
-    "creator_url": null,
-    "license": "CC0",
-    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "title": "High cliff in Lyse with climbers 7",
-    "tags": [
-      "granite cliff"
-    ],
-    "provider": "wikimedia",
-    "width": 913,
-    "height": 1400
-  },
-  "posts/granite-cliff-04.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:High_cliff_in_Lyse_with_climbers_2.jpg",
-    "creator": "W.carter",
-    "creator_url": null,
-    "license": "CC0",
-    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "title": "High cliff in Lyse with climbers 2",
-    "tags": [
-      "granite cliff"
-    ],
-    "provider": "wikimedia",
-    "width": 1016,
-    "height": 1400
   },
   "posts/grow-light-01.jpg": {
     "source_url": "https://commons.wikimedia.org/wiki/File:Potted_plants_succulents_under_grow_light_Nov_2016.jpg",
@@ -5263,20 +5130,6 @@
     "width": 1280,
     "height": 854
   },
-  "posts/ski-shop-01.jpg": {
-    "source_url": "https://commons.wikimedia.org/wiki/File:Berg%27s_Ski_Shop_%26_Snowboard_Shop_in_Eugene,_Oregon.jpg",
-    "creator": "Rick Obst",
-    "creator_url": null,
-    "license": "CC BY 2.0",
-    "license_url": "https://creativecommons.org/licenses/by/2.0",
-    "title": "Berg's Ski Shop & Snowboard Shop in Eugene, Oregon",
-    "tags": [
-      "ski shop"
-    ],
-    "provider": "wikimedia",
-    "width": 1050,
-    "height": 1400
-  },
   "posts/snowy-mountains-01.jpg": {
     "source_url": "https://commons.wikimedia.org/wiki/File:Camp_Richardson_Beach,_Lake_Tahoe.jpg",
     "creator": "Blake Everett",
@@ -5296,6 +5149,44 @@
     "provider": "wikimedia",
     "width": 1280,
     "height": 851
+  },
+  "posts/sierra-peak-01.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Castle_Peak_(California).jpg",
+    "creator": "Tim Berger",
+    "creator_url": null,
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "title": "Castle Peak (California)",
+    "tags": [
+      "castle peak",
+      "snow",
+      "winter",
+      "sierra nevada",
+      "tahoe",
+      "california"
+    ],
+    "provider": "wikimedia",
+    "width": 1280,
+    "height": 833
+  },
+  "posts/donner-pass-01.jpg": {
+    "source_url": "https://commons.wikimedia.org/wiki/File:Donner_Pass_-_panoramio_(1).jpg",
+    "creator": "On^ste82",
+    "creator_url": "https://web.archive.org/web/20161027072409/http://www.panoramio.com/user/6881465?with_photo_id=82238187",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "title": "Donner Pass - panoramio (1)",
+    "tags": [
+      "donner pass",
+      "snow",
+      "winter",
+      "sierra nevada",
+      "tahoe",
+      "california"
+    ],
+    "provider": "wikimedia",
+    "width": 1280,
+    "height": 1123
   },
   "posts/soccer-field-01.jpg": {
     "source_url": "https://commons.wikimedia.org/wiki/File:Rain_coming_in_over_soccer_training_field_in_Brastad.jpg",
