@@ -278,7 +278,7 @@ const ROOM_CUES = / (make it|make (my|our|the|this) \w+|feel|feels|look) /;
 const ITEM_MOOD = new RegExp(
   `\\b(?:vibes?|cozy|cosy|style|styled|styling)\\s+(?:(?!(?:with|and|or|plus|lots|of|some|a|an|the)\\b)[a-z-]+\\s+){0,2}(?:${ITEM_WORDS.map(
     (w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-  ).join("|")})s?\\b`,
+  ).join("|")})(?:e?s)?\\b`,
   "gi",
 );
 

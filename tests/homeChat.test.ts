@@ -1293,6 +1293,13 @@ describe("homeChatProblems", () => {
     // An explicit ask for a named thing is one on the Map tab too, whatever the rules' keywords open.
     expect(problems("find me a reading lamp", lamp, "map")).toEqual([]);
     expect(problems("add a lamp from Marketplace", lamp, "map")).toEqual([]);
+    // Selling a couch or opening the Inbox is not shopping for one.
+    expect(
+      problems("I need to sell my couch", { kind: "add_items", items: ["sofa"] })[0],
+    ).toContain("asks for open_page");
+    expect(problems("open my inbox to approve adding a lamp", lamp)[0]).toContain(
+      "asks for open_page",
+    );
     // With things in the apartment, no reply may say nothing is placed.
     expect(
       homeChatProblems(

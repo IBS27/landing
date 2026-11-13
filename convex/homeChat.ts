@@ -314,9 +314,14 @@ export function homeChatProblems(out: HomeChatOutput, input: HomeChatInput): str
     // apartment", "open my roommates page") is that request, whatever came before. What
     // they can't read at all (`none`) stays Muse's call.
     // An explicit ask for named things ("find me a reading lamp" on the Map tab) is one too,
-    // even where the rules' broader keywords would open a page.
-    const ruled = rulesOutput(input).command.kind;
-    const explicit = command.kind === "add_items" && asksForItems(input.message);
+    // but only where the rules' shopping keywords would open Find or Marketplace: selling a
+    // couch or opening the Inbox stays what it is.
+    const routed = rulesOutput(input).command;
+    const ruled = routed.kind;
+    const shopping =
+      (routed.kind === "open_page" && routed.page === "find") ||
+      (routed.kind === "show_pins" && routed.layer === "items");
+    const explicit = command.kind === "add_items" && shopping && asksForItems(input.message);
     if (ruled !== "furnish" && ruled !== "add_items" && ruled !== "none" && !explicit)
       problems.push(
         `command: this message asks for ${ruled}, not for furnishing. Earlier turns are context, never a request to repeat: answer this message, with ${ruled}`,

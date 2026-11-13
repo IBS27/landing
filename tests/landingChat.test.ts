@@ -620,6 +620,7 @@ describe("furnishRequest: a mood inside a thing's own phrase (#153)", () => {
       want: "cozy",
     });
     expect(furnishRequest("a cozy rug").type).toBe("items");
+    expect(furnishRequest("cozy couches")).toMatchObject({ type: "items", kinds: ["sofa"] });
     expect(furnishRequest("cozy reading lamp")).toMatchObject({ type: "items", kinds: ["lamp"] });
   });
   test("a comma or a joining word keeps it a look for the place", () => {
