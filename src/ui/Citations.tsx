@@ -75,8 +75,11 @@ export function SourcesChip({
 
 const ROW = "flex gap-3 rounded-lg p-2 text-left transition-colors hover:bg-hover";
 
-/** Links each source to its original: permalink, Event, listing, Group or the web page. */
-function SourceLink({
+/**
+ * Links each source to its original: permalink (a comment opens the post at the
+ * comment), Event, listing, Group or the web page.
+ */
+export function SourceLink({
   source: s,
   onNavigate,
   children,
@@ -98,10 +101,12 @@ function SourceLink({
         </Link>
       );
     case "comment":
+      // Opens the post at the comment: its replies expanded, scrolled to and highlighted.
       return (
         <Link
           to="/$username/posts/$postId"
           params={{ username: s.postAuthorUsername, postId: s.postId }}
+          search={{ comment_id: s.commentId }}
           onClick={onNavigate}
           className={ROW}
         >

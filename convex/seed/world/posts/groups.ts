@@ -1492,6 +1492,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "bay-area-hikers",
     at: daysAgo(4, "19:45"),
     text: "Castle Pass + Round Valley, Sunday. Snow from the trailhead, packed but icy on the climb to the pass, microspikes absolutely needed. Frog Lake partially frozen. Castle Peak lot was half full by 9. Anything toward the peak crosses avalanche terrain so check the Sierra Avalanche Center before you go.",
+    photos: ["posts/sierra-peak-01.jpg"],
     reactions: 33,
     comments: [
       {
@@ -1566,7 +1567,7 @@ export const groupPosts: readonly PostSeed[] = [
     in: "bay-area-hikers",
     at: daysAgo(4, "18:30"),
     text: "Cataract Falls on Saturday: muddy, then slippery, then gorgeous. Falls are finally running after the rain, the stairs near the top were slick so wear real shoes. Cell service dies right after the parking lot",
-    photos: ["posts/mount-tam-03.jpg", "foggy hills"],
+    photos: ["posts/mount-tam-03.jpg"],
     tagged: ["sofia.alvarez"],
     reactions: 26,
     mood: "love",

@@ -351,7 +351,7 @@ export const neighborhoodGroups = [
     category: "Neighborhood",
     location: "Inner Sunset, San Francisco",
     neighborhood: "inner-sunset",
-    cover: "posts/foggy hills",
+    cover: "posts/twin-peaks-02.jpg",
     rules: [
       {
         title: "Recommendations, not ads",
@@ -390,7 +390,7 @@ export const neighborhoodGroups = [
     category: "Neighborhood",
     location: "Outer Sunset, San Francisco",
     neighborhood: "sunset-parkside",
-    cover: "posts/beach",
+    cover: "posts/beach-02.jpg",
     rules: [
       {
         title: "Ocean safety first",

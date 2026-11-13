@@ -11,6 +11,7 @@ import { Avatar, Skeleton, Spinner } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { useOptimisticReaction } from "./ActionBar";
+import { type CommentPath, findComment } from "./commentPath";
 import {
   AvatarStickerOutline,
   CameraOutline,
@@ -39,11 +40,23 @@ const SORT_SUB: Record<Sort, string> = {
   all: "Show all comments, including potential spam.",
 };
 
-/** Comments list plus the "Write a comment…" composer (permalink layout). */
-export function CommentsSection({ postId, focusKey }: { postId: Id<"posts">; focusKey?: number }) {
+/**
+ * Comments list plus the "Write a comment…" composer (permalink layout).
+ * `focusCommentId` (the permalink's `?comment_id=`) opens the replies down to
+ * that comment, scrolls to it and highlights it.
+ */
+export function CommentsSection({
+  postId,
+  focusKey,
+  focusCommentId,
+}: {
+  postId: Id<"posts">;
+  focusKey?: number;
+  focusCommentId?: Id<"comments">;
+}) {
   return (
     <div className="pb-2">
-      <CommentList postId={postId} />
+      <CommentList postId={postId} focusCommentId={focusCommentId} />
       <div className="px-4 pt-1">
         <CommentComposer postId={postId} focusKey={focusKey} />
       </div>
@@ -112,9 +125,20 @@ export function GroupCommentPreview({
   );
 }
 
-export function CommentList({ postId }: { postId: Id<"posts"> }) {
+export function CommentList({
+  postId,
+  focusCommentId,
+}: {
+  postId: Id<"posts">;
+  /** A linked comment to show and highlight; ignored when the viewer can't see it. */
+  focusCommentId?: Id<"comments">;
+}) {
   const threads = useQ(api.comments.list, { postId });
   const [sort, setSort] = useState<Sort>("relevant");
+  const focus = useMemo(
+    () => (threads ? findComment(threads, focusCommentId) : null),
+    [threads, focusCommentId],
+  );
 
   const sorted = useMemo(() => {
     if (!threads) return undefined;
@@ -168,7 +192,12 @@ export function CommentList({ postId }: { postId: Id<"posts"> }) {
       )}
       <div className="pt-1">
         {sorted.map((t) => (
-          <Thread key={t._id} thread={t} postId={postId} />
+          <Thread
+            key={t._id}
+            thread={t}
+            postId={postId}
+            focus={focus?.thread === t._id ? focus : undefined}
+          />
         ))}
       </div>
     </div>
@@ -198,11 +227,20 @@ const REPLY_PAGE = 10;
 /**
  * Reveal state for one level of replies: "View N replies" shows the first
  * page, "View N more replies" the rest. Replies the viewer just added show
- * right away (with "View all N replies" for the others).
+ * right away (with "View all N replies" for the others). `revealId` (a linked
+ * comment in this level) opens the replies down to it.
  */
-function useReplyReveal<T extends { _id: Id<"comments">; author: { _id: string } }>(items: T[]) {
+function useReplyReveal<T extends { _id: Id<"comments">; author: { _id: string } }>(
+  items: T[],
+  revealId?: Id<"comments">,
+) {
   const viewer = useViewer();
-  const [shown, setShown] = useState(0);
+  const at = revealId ? items.findIndex((i) => i._id === revealId) : -1;
+  const [shown, setShown] = useState(at + 1);
+  // A link opened while the thread is already on screen still shows its reply.
+  useLayoutEffect(() => {
+    if (at >= 0) setShown((n) => Math.max(n, at + 1));
+  }, [at]);
   const [initial] = useState(() => new Set(items.map((i) => i._id)));
   const visible = items.filter(
     (item, i) => i < shown || (!initial.has(item._id) && item.author._id === viewer._id),
@@ -248,10 +286,19 @@ function tagFor(c: CommentView, viewerId: string): Tag | null {
   return c.author._id === viewerId ? null : c.author;
 }
 
-function Thread({ thread, postId }: { thread: CommentThread; postId: Id<"posts"> }) {
+function Thread({
+  thread,
+  postId,
+  focus,
+}: {
+  thread: CommentThread;
+  postId: Id<"posts">;
+  /** Set when a linked comment is in this thread. */
+  focus?: CommentPath;
+}) {
   const viewer = useViewer();
   const canReply = useCanComment(postId);
-  const reveal = useReplyReveal(thread.replies);
+  const reveal = useReplyReveal(thread.replies, focus?.reply);
   const [target, setTarget] = useState<ReplyTarget | null>(null);
   const answer = (c: CommentView) => {
     reveal.openAll();
@@ -263,10 +310,16 @@ function Thread({ thread, postId }: { thread: CommentThread; postId: Id<"posts">
       <CommentRow
         comment={thread}
         depth={1}
+        highlighted={focus?.target === thread._id}
         onReply={canReply ? () => answer(thread) : undefined}
       />
       {reveal.visible.map((r) => (
-        <ReplyBranch key={r._id} reply={r} postId={postId} />
+        <ReplyBranch
+          key={r._id}
+          reply={r}
+          postId={postId}
+          focus={focus?.reply === r._id ? focus : undefined}
+        />
       ))}
       {reveal.label && (
         <ViewReplies
@@ -295,10 +348,22 @@ function Thread({ thread, postId }: { thread: CommentThread; postId: Id<"posts">
 }
 
 /** A reply plus its own replies (third level), joined by the threading line. */
-function ReplyBranch({ reply, postId }: { reply: CommentReply; postId: Id<"posts"> }) {
+function ReplyBranch({
+  reply,
+  postId,
+  focus,
+}: {
+  reply: CommentReply;
+  postId: Id<"posts">;
+  /** Set when a linked comment is this reply or one of its replies. */
+  focus?: CommentPath;
+}) {
   const viewer = useViewer();
   const canReply = useCanComment(postId);
-  const reveal = useReplyReveal(reply.replies);
+  const reveal = useReplyReveal(
+    reply.replies,
+    focus && focus.target !== reply._id ? focus.target : undefined,
+  );
   const [target, setTarget] = useState<ReplyTarget | null>(null);
   const answer = (c: CommentView) => {
     reveal.openAll();
@@ -307,7 +372,14 @@ function ReplyBranch({ reply, postId }: { reply: CommentReply; postId: Id<"posts
 
   const nested: { key: string; node: ReactNode }[] = reveal.visible.map((r) => ({
     key: r._id,
-    node: <CommentRow comment={r} depth={3} onReply={canReply ? () => answer(r) : undefined} />,
+    node: (
+      <CommentRow
+        comment={r}
+        depth={3}
+        highlighted={focus?.target === r._id}
+        onReply={canReply ? () => answer(r) : undefined}
+      />
+    ),
   }));
   if (target)
     nested.push({
@@ -343,6 +415,7 @@ function ReplyBranch({ reply, postId }: { reply: CommentReply; postId: Id<"posts
         <CommentRow
           comment={reply}
           depth={2}
+          highlighted={focus?.target === reply._id}
           onReply={canReply ? () => answer(reply) : undefined}
         />
       </div>
@@ -378,12 +451,22 @@ function CommentRow({
   comment,
   depth,
   onReply,
+  highlighted = false,
 }: {
   comment: CommentView;
   depth: Depth;
   /** Omitted when the viewer can't comment on the post (no Reply button). */
   onReply?: () => void;
+  /** The comment a link (`?comment_id=`) points at: scrolled to and highlighted. */
+  highlighted?: boolean;
 }) {
+  const rowRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!highlighted) return;
+    // After the router's scroll restoration, which runs when the page settles.
+    const frame = requestAnimationFrame(() => rowRef.current?.scrollIntoView({ block: "center" }));
+    return () => cancelAnimationFrame(frame);
+  }, [highlighted]);
   const rx = useOptimisticReaction("comment", comment._id, comment.reactions);
   const hover = useReactionHover();
   const [downvoted, setDownvoted] = useState(comment.viewerDownvoted);
@@ -396,7 +479,13 @@ function CommentRow({
 
   return (
     <div
-      className="group/comment flex gap-[14px] pt-1 pr-4"
+      ref={rowRef}
+      data-comment-id={comment._id}
+      data-highlighted={highlighted || undefined}
+      className={cn(
+        "group/comment flex gap-[14px] pt-1 pr-4",
+        highlighted && "bg-highlight pb-1 transition-colors",
+      )}
       style={{ paddingLeft: AVATAR_X[depth] }}
     >
       <Link

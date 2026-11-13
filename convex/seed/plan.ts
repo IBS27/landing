@@ -251,10 +251,11 @@ export function buildPlan(now: number) {
   }
   for (const c of circles) {
     const ms = c.members as readonly Username[];
+    const seed = "seed" in c ? c.seed : c.name;
     for (let i = 0; i < ms.length; i++) {
       for (let j = i + 1; j < ms.length; j++) {
         if (ms[i] === MAIN || ms[j] === MAIN) continue;
-        if (rng(`circle:${c.name}:${pairKey(ms[i], ms[j])}`).chance(c.density))
+        if (rng(`circle:${seed}:${pairKey(ms[i], ms[j])}`).chance(c.density))
           addFriends(ms[i], ms[j]);
       }
     }
