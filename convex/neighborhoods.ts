@@ -40,8 +40,10 @@ export type NeighborhoodFactView = DistributiveOmit<
 const KIND_ORDER: Record<NeighborhoodFact["kind"], number> = {
   transit_station: 0,
   transit_line: 1,
-  nightlife_corridor: 2,
-  campus: 3,
+  transit_service: 2,
+  nightlife_corridor: 3,
+  campus: 4,
+  streetlight_requests: 5,
 };
 
 async function bySlug(ctx: QueryCtx, slug: string) {

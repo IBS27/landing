@@ -3,6 +3,15 @@ import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
+// Neighborhood scores (#17) count Events in the next 30 days and Groups active in the last 30,
+// so they're recomputed every day (early morning in San Francisco).
+crons.daily(
+  "neighborhood scores",
+  { hourUTC: 11, minuteUTC: 0 },
+  internal.neighborhoodScores.recompute,
+  {},
+);
+
 /**
  * Weekend Routes (#18): rebuild every neighborhood's route on Thursday morning
  * in San Francisco, so it picks up the coming weekend's Events, and check daily

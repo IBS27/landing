@@ -1,4 +1,5 @@
 import type { Id } from "../../../convex/_generated/dataModel";
+import { NeighborhoodScores } from "./NeighborhoodScores";
 import { WeekendRoute } from "./WeekendRoute";
 
 /**
@@ -9,9 +10,13 @@ import { WeekendRoute } from "./WeekendRoute";
 
 type SlotProps = { neighborhoodId: Id<"neighborhoods">; slug: string };
 
-/** #17: cited scores for things to do, food, transit and fit. Replace with `<NeighborhoodScores … />`. */
-export function ScoresSlot(_: SlotProps) {
-  return null;
+/** #17: cited scores for things to do, food, transit and fit, and "Getting around at night". */
+export function ScoresSlot({ neighborhoodId }: SlotProps) {
+  return (
+    <div className="mb-4">
+      <NeighborhoodScores neighborhoodId={neighborhoodId} />
+    </div>
+  );
 }
 
 /** #18: the cited Weekend Route on a map. */

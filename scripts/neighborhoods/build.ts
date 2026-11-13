@@ -2,7 +2,7 @@
  * Builds the neighborhood data the app and the seed use, from live public sources.
  *
  *   bun scripts/neighborhoods/build.ts            # everything
- *   bun scripts/neighborhoods/build.ts boundaries # just one step (boundaries | transit | addresses)
+ *   bun scripts/neighborhoods/build.ts boundaries # one step (boundaries | transit | addresses | service)
  *
  * 1. boundaries: DataSF "Analysis Neighborhoods" (41 polygons, public domain), simplified to
  *    ~5 m → convex/lib/neighborhoodBoundaries.ts
@@ -10,6 +10,9 @@
  *    official page as the human-readable source → convex/seed/world/neighborhoods/transit.ts
  * 3. addresses: OpenStreetMap (Overpass) intersections for the seeded rentals' cross streets, and
  *    the event venue points from scripts/maps/build.py → convex/seed/lib/geocoded.ts
+ * 4. service: per neighborhood, weekday trips an hour, Muni lines (all-night ones flagged) and last
+ *    trains from the GTFS feeds, plus 311 streetlight requests (DataSF)
+ *    → convex/seed/world/neighborhoods/service.ts
  *
  * Every external source is recorded as a snapshot (url, title, publisher, verbatim snippet,
  * fetchedAt) for the `externalSources` table (#7). Licenses: DataSF is public domain (ODC PDDL),
@@ -778,6 +781,330 @@ export const ADDRESS_POINTS: Record<string, LatLng> = ${JSON.stringify(points, n
   console.log(`addresses: ${Object.keys(points).length} points, ${missing.length} missing`);
 }
 
+// ── 4. Service: how often transit runs, and late at night ───────────────────
+
+const DAY_MS = 86_400_000;
+const DOW = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+type DayType = "weekday" | "saturday" | "sunday";
+const DAY_TYPES: Record<DayType, string> = {
+  weekday: "wednesday",
+  saturday: "saturday",
+  sunday: "sunday",
+};
+/** Stops serve both sides of a boundary street, as in the seed (`STATION_REACH_METERS`). */
+const STOP_REACH_METERS = 40;
+const ymd = (t: number) => new Date(t).toISOString().slice(0, 10).replace(/-/g, "");
+const seconds = (hms: string) => {
+  const [h, m, sec] = hms.split(":").map(Number);
+  return h * 3600 + m * 60 + (sec || 0);
+};
+
+/** Service ids running on `date` (YYYYMMDD). */
+function servicesOn(feed: Gtfs, date: string): Set<string> {
+  const day = DOW[new Date(`${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6)}T12:00:00Z`).getUTCDay()];
+  const on = new Set<string>();
+  if (feed.files.has("calendar.txt")) {
+    for (const r of table(feed, "calendar.txt").rows) {
+      if (r[day] === "1" && r.start_date <= date && date <= r.end_date) on.add(r.service_id);
+    }
+  }
+  if (feed.files.has("calendar_dates.txt")) {
+    for (const r of table(feed, "calendar_dates.txt").rows) {
+      if (r.date !== date) continue;
+      if (r.exception_type === "1") on.add(r.service_id);
+      else on.delete(r.service_id);
+    }
+  }
+  return on;
+}
+
+/**
+ * An ordinary recent date of each day type. Regular service repeats every week and special days
+ * (holidays, events, alternate schedules) don't, so of the last eight weeks up to today (or the
+ * feed's last service day, if it has ended) take the most common set of running services, and
+ * its latest date.
+ */
+function referenceDates(feed: Gtfs): Record<DayType, string> {
+  const end = feed.serviceThrough
+    ? Math.min(feed.fetchedAt, Date.parse(`${feed.serviceThrough}T12:00:00Z`))
+    : feed.fetchedAt;
+  const out = {} as Record<DayType, string>;
+  for (const [type, day] of Object.entries(DAY_TYPES) as [DayType, string][]) {
+    const seen = new Map<string, { count: number; latest: string }>();
+    for (let t = end; t > end - 56 * DAY_MS; t -= DAY_MS) {
+      if (DOW[new Date(t).getUTCDay()] !== day) continue;
+      const date = ymd(t);
+      const running = [...servicesOn(feed, date)].sort();
+      if (running.length === 0) continue;
+      const sig = running.join("|");
+      const cur = seen.get(sig);
+      seen.set(sig, { count: (cur?.count ?? 0) + 1, latest: cur?.latest ?? date });
+    }
+    const best = [...seen.values()].sort((a, b) => b.count - a.count || b.latest.localeCompare(a.latest))[0];
+    if (!best) throw new Error(`${feed.url}: no ${type} service in the last eight weeks`);
+    out[type] = best.latest;
+  }
+  return out;
+}
+
+/** `board`: riders can get on here (not a drop-off-only stop or the end of the trip). */
+type StopEvent = { stop: string; t: number; row: number; seq: number; board: boolean };
+/** Trips running on any of `services`, with their stop events (row = stop_times line index). */
+function tripsOf(feed: Gtfs, services: Set<string>) {
+  const trips = new Map<string, { route: string; service: string; events: StopEvent[] }>();
+  for (const t of table(feed, "trips.txt").rows) {
+    if (services.has(t.service_id)) trips.set(t.trip_id, { route: t.route_id, service: t.service_id, events: [] });
+  }
+  const bytes = feed.files.get("stop_times.txt");
+  if (!bytes) throw new Error(`${feed.url} has no stop_times.txt`);
+  const lines = new TextDecoder().decode(bytes).replace(/^﻿/, "").split(/\r?\n/);
+  const header = parseCsvLine(lines[0]).map((h) => h.trim());
+  const [iTrip, iStop, iDep, iArr, iSeq, iPickup] = [
+    "trip_id",
+    "stop_id",
+    "departure_time",
+    "arrival_time",
+    "stop_sequence",
+    "pickup_type",
+  ].map((h) => header.indexOf(h));
+  for (let n = 1; n < lines.length; n++) {
+    if (!lines[n]) continue;
+    const c = lines[n].includes('"') ? parseCsvLine(lines[n]) : lines[n].split(",");
+    const trip = trips.get(c[iTrip]);
+    const time = c[iDep] || c[iArr];
+    if (!trip || !time) continue;
+    trip.events.push({ stop: c[iStop], t: seconds(time), row: n, seq: Number(c[iSeq]), board: c[iPickup] !== "1" });
+  }
+  // Nobody boards at the end of a trip, whatever its pickup_type says.
+  for (const trip of trips.values()) {
+    const last = trip.events.reduce<StopEvent | null>((a, e) => (a && a.seq > e.seq ? a : e), null);
+    if (last) last.board = false;
+  }
+  return { trips, lines };
+}
+
+type RouteOut = {
+  line: string;
+  name: string;
+  mode: "bus" | "metro" | "streetcar" | "cable_car";
+  allNight: boolean;
+};
+type LastTrainOut = {
+  system: "bart" | "caltrain";
+  station: string;
+  weekday?: number;
+  saturday?: number;
+  sunday?: number;
+};
+type ServiceOut = {
+  neighborhood: string;
+  tripsPerHour: number;
+  routes: RouteOut[];
+  lastTrains: LastTrainOut[];
+  sources: string[];
+};
+
+async function buildService() {
+  const { neighborhoodsNear } = await import("../../convex/lib/neighborhoods");
+  const sources = new Map<string, Snapshot>();
+  const cite = (snap: Snapshot) => {
+    const key = `${snap.url}#${snap.snippet}`;
+    sources.set(key, snap);
+    return key;
+  };
+  const hoods = new Map<
+    string,
+    {
+      weekdayTrips: Set<string>;
+      routes: Map<string, RouteOut & { trips: number; rowKey: string }>;
+      lastTrains: Map<string, LastTrainOut & { rowKey?: string }>;
+      stopRow: Map<string, string>;
+    }
+  >();
+  const hood = (slug: string) => {
+    let h = hoods.get(slug);
+    if (!h) {
+      h = { weekdayTrips: new Set(), routes: new Map(), lastTrains: new Map(), stopRow: new Map() };
+      hoods.set(slug, h);
+    }
+    return h;
+  };
+  const DAYTIME: [number, number] = [7 * 3600, 19 * 3600];
+  // All-night service runs in the middle of the night; lines that start before dawn don't count.
+  const isNight = (t: number) => t % 86_400 >= 1.5 * 3600 && t % 86_400 < 3.5 * 3600;
+
+  const feeds = [
+    { system: "bart" as const, url: BART_GTFS, publisher: "BART", name: "BART" },
+    { system: "muni" as const, url: MUNI_GTFS, publisher: "SFMTA", name: "SFMTA Muni" },
+    { system: "caltrain" as const, url: CALTRAIN_GTFS, publisher: "Caltrain", name: "Caltrain" },
+  ];
+  for (const f of feeds) {
+    const feed = await loadFeed(f.url);
+    const dates = referenceDates(feed);
+    const byDay = Object.fromEntries(
+      (Object.keys(dates) as DayType[]).map((d) => [d, servicesOn(feed, dates[d])]),
+    ) as Record<DayType, Set<string>>;
+    console.log(`  ${f.name}: reference days ${JSON.stringify(dates)}`);
+    const { trips, lines } = tripsOf(feed, new Set(Object.values(byDay).flatMap((s) => [...s])));
+    const stopsTable = table(feed, "stops.txt");
+    const stopById = new Map(stopsTable.rows.map((s, i) => [s.stop_id, { ...s, line: stopsTable.lines[i] }]));
+    const routesTable = table(feed, "routes.txt");
+    const routeById = new Map(routesTable.rows.map((r, i) => [r.route_id, { ...r, line: routesTable.lines[i] }]));
+    // Where each stop is (a platform takes its station's point, like the station facts).
+    const where = new Map<string, string[]>();
+    const hoodsOf = (stopId: string) => {
+      let w = where.get(stopId);
+      if (!w) {
+        const s = stopById.get(stopId);
+        const at = s?.parent_station ? (stopById.get(s.parent_station) ?? s) : s;
+        w = at ? neighborhoodsNear(pt(at.stop_lat, at.stop_lon), STOP_REACH_METERS) : [];
+        where.set(stopId, w);
+      }
+      return w;
+    };
+    for (const [tripId, trip] of trips) {
+      const route = routeById.get(trip.route);
+      if (!route) continue;
+      const weekday = byDay.weekday.has(trip.service);
+      for (const e of trip.events) {
+        for (const slug of hoodsOf(e.stop)) {
+          const h = hood(slug);
+          if (weekday && e.t >= DAYTIME[0] && e.t < DAYTIME[1]) h.weekdayTrips.add(`${f.system}:${tripId}`);
+          if (f.system === "muni") {
+            const mode: RouteOut["mode"] =
+              route.route_type === "5"
+                ? "cable_car"
+                : route.route_type === "0"
+                  ? METRO_LINES.includes(route.route_short_name)
+                    ? "metro"
+                    : "streetcar"
+                  : "bus";
+            const owl = /owl/i.test(route.route_long_name);
+            const r =
+              h.routes.get(route.route_id) ??
+              ({
+                line: route.route_short_name,
+                name: owl ? titleCase(route.route_long_name) : `${route.route_short_name} ${titleCase(route.route_long_name)}`,
+                mode,
+                allNight: false,
+                trips: 0,
+                rowKey: "",
+              } satisfies RouteOut & { trips: number; rowKey: string });
+            if (isNight(e.t)) r.allNight = true;
+            if (weekday) r.trips++;
+            if (!r.rowKey) {
+              r.rowKey = cite(feedSnapshot(feed, f.publisher, `${f.name} GTFS schedule feed (routes.txt)`, route.line));
+            }
+            h.routes.set(route.route_id, r);
+            if (!h.stopRow.has(route.route_id)) h.stopRow.set(route.route_id, stopById.get(e.stop)?.line ?? "");
+          } else if (e.board) {
+            // Last departures: only stops where riders can board.
+            const platform = stopById.get(e.stop);
+            const stationId = platform?.parent_station || e.stop;
+            const station = stopById.get(stationId);
+            if (!station) continue;
+            const last =
+              h.lastTrains.get(stationId) ??
+              ({ system: f.system, station: station.stop_name } satisfies LastTrainOut & { rowKey?: string });
+            for (const d of Object.keys(byDay) as DayType[]) {
+              if (!byDay[d].has(trip.service)) continue;
+              if ((last[d] ?? -1) < e.t) {
+                last[d] = e.t;
+                if (d === "weekday") {
+                  last.rowKey = cite(
+                    feedSnapshot(feed, f.publisher, `${f.name} GTFS schedule feed (stop_times.txt)`, lines[e.row]),
+                  );
+                }
+              }
+            }
+            h.lastTrains.set(stationId, last);
+          }
+        }
+      }
+    }
+  }
+
+  const out: ServiceOut[] = [...hoods.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([slug, h]) => {
+      const routes = [...h.routes.values()].sort(
+        (a, b) => Number(b.allNight) - Number(a.allNight) || b.trips - a.trips || a.line.localeCompare(b.line),
+      );
+      const lastTrains = [...h.lastTrains.values()].sort((a, b) => a.station.localeCompare(b.station));
+      // Citations: all-night lines, last trains, then the busiest lines.
+      const keys = [
+        ...routes.filter((r) => r.allNight).map((r) => r.rowKey),
+        ...lastTrains.flatMap((l) => (l.rowKey ? [l.rowKey] : [])),
+        ...routes.filter((r) => !r.allNight).slice(0, 3).map((r) => r.rowKey),
+      ];
+      return {
+        neighborhood: slug,
+        tripsPerHour: Math.round(h.weekdayTrips.size / ((DAYTIME[1] - DAYTIME[0]) / 3600)),
+        routes: routes.map(({ line, name, mode, allNight }) => ({ line, name, mode, allNight })),
+        lastTrains: lastTrains.map(({ system, station, weekday, saturday, sunday }) => ({
+          system,
+          station,
+          weekday: weekday === undefined ? undefined : Math.round(weekday / 60),
+          saturday: saturday === undefined ? undefined : Math.round(saturday / 60),
+          sunday: sunday === undefined ? undefined : Math.round(sunday / 60),
+        })),
+        sources: [...new Set(keys)].slice(0, 8),
+      };
+    })
+    .filter((s) => s.sources.length > 0);
+
+  // 311 streetlight repair requests in the last 90 days, per neighborhood (DataSF 311 Cases).
+  const fetchedAt = Date.now();
+  const since = new Date(fetchedAt - 90 * DAY_MS).toISOString().slice(0, 10);
+  const { SF_NEIGHBORHOODS } = await import("../../convex/lib/neighborhoods");
+  const lights: { neighborhood: string; count: number; since: number; until: number; sources: string[] }[] = [];
+  for (const n of SF_NEIGHBORHOODS) {
+    const where = `service_name='Streetlights' AND requested_datetime >= '${since}T00:00:00' AND analysis_neighborhood='${n.name.replace(/'/g, "''")}'`;
+    const url = `https://data.sf.gov/resource/vw6y-z8j6.json?$select=${encodeURIComponent("analysis_neighborhood, count(*) AS requests")}&$where=${encodeURIComponent(where)}&$group=analysis_neighborhood`;
+    const res = await fetchWithRetry(url, { headers: { Accept: "application/json" } });
+    if (!res.ok) throw new Error(`311 HTTP ${res.status} for ${n.name}`);
+    const text = (await res.text()).trim();
+    const rows = JSON.parse(text) as { requests?: string }[];
+    const count = Number(rows[0]?.requests ?? 0);
+    if (count === 0) continue;
+    const key = cite({
+      url,
+      title: `311 Cases: Streetlights requests in ${n.name} since ${since} | DataSF`,
+      publisher: "DataSF",
+      snippet: cut(text),
+      fetchedAt,
+    });
+    lights.push({ neighborhood: n.slug, count, since: Date.parse(`${since}T00:00:00-08:00`), until: fetchedAt, sources: [key] });
+    await Bun.sleep(150);
+  }
+
+  const used = new Set([...out, ...lights].flatMap((x) => x.sources));
+  const snapshots = Object.fromEntries([...sources].filter(([k]) => used.has(k)));
+  write(
+    "convex/seed/world/neighborhoods/service.ts",
+    `/**
+ * Generated by scripts/neighborhoods/build.ts (service step). Do not edit by hand: rerun the script.
+ * - Transit service per neighborhood, from the BART, SFMTA (Muni, all modes) and Caltrain GTFS feeds on an
+ *   ordinary recent weekday, Saturday and Sunday: weekday trips an hour (7am-7pm) stopping there, the Muni lines
+ *   that stop there and which run all night (1:30-3:30am), and the last BART and Caltrain departures (minutes after
+ *   the service day's midnight; past 1440 is after midnight).
+ * - 311 streetlight repair requests in the last 90 days, from DataSF's 311 Cases.
+ * Stops are filed under every neighborhood within ${STOP_REACH_METERS} m, like the station facts.
+ */
+import type { ServiceSeed, SourceSnapshot, StreetlightSeed } from "../../types";
+
+export const SERVICE_SOURCES: Record<string, SourceSnapshot> = ${JSON.stringify(snapshots, null, 2)};
+
+export const NEIGHBORHOOD_SERVICE: readonly ServiceSeed[] = ${JSON.stringify(out, null, 2)};
+
+export const STREETLIGHT_REQUESTS: readonly StreetlightSeed[] = ${JSON.stringify(lights, null, 2)};
+`,
+  );
+  console.log(
+    `service: ${out.length} neighborhoods with transit, ${out.reduce((n, s) => n + s.routes.filter((r) => r.allNight).length, 0)} all-night line stops, ${lights.length} with 311 streetlight requests, ${Object.keys(snapshots).length} sources`,
+  );
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────
 
 const written: string[] = [];
@@ -791,6 +1118,7 @@ const all = steps.size === 0;
 const boundaries = all || steps.has("boundaries") ? await buildBoundaries() : await loadBoundaries();
 if (all || steps.has("transit")) await buildTransit(boundaries);
 if (all || steps.has("addresses")) await buildAddresses();
+if (all || steps.has("service")) await buildService();
 if (written.length) {
   Bun.spawnSync(["bunx", "biome", "format", "--write", ...written], { cwd: ROOT, stdout: "inherit" });
 }
