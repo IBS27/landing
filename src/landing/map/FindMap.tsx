@@ -30,11 +30,11 @@ function snap(b: Bounds): Bounds {
 }
 
 /**
- * Find's browse map: homes, Events and Groups across San Francisco, from
- * `map.inBounds` for whatever area is on screen. Neighborhood shapes join
- * this view once #15's `neighborhoods.boundaries` lands.
+ * Find's browse view: homes, Events and Groups across San Francisco from
+ * `map.inBounds` for whatever area is on screen, over the neighborhood shapes
+ * (#15). `aside` is the list beside the map (below it on narrow screens).
  */
-export function FindMap() {
+export function FindMap({ aside }: { aside?: ReactNode }) {
   const [kinds, setKinds] = useState<readonly PinKind[]>(DEFAULT_KINDS);
   const [area, setArea] = useState<Bounds | null>(null);
   const result = useQ(api.map.inBounds, area ? { bounds: area, kinds: [...kinds] } : "skip");
@@ -42,17 +42,20 @@ export function FindMap() {
   const last = useRef<PinsInBounds | undefined>(undefined);
   if (result) last.current = result;
   const pins = result ?? last.current;
+  const hoods = useQ(api.neighborhoods.boundaries, {});
 
   const layers = useMemo<MapLayer[]>(
-    () =>
-      pins
-        ? [
+    () => [
+      { kind: "neighborhoods", items: hoods ?? [] },
+      ...(pins
+        ? ([
             { kind: "listings", items: pins.listings },
             { kind: "events", items: pins.events },
             { kind: "groups", items: pins.groups },
-          ]
-        : [],
-    [pins],
+          ] as const)
+        : []),
+    ],
+    [pins, hoods],
   );
   const empty =
     result !== undefined &&
@@ -63,6 +66,7 @@ export function FindMap() {
 
   return (
     <FindMapView
+      aside={aside}
       layers={layers}
       kinds={kinds}
       onToggle={toggle}
@@ -75,14 +79,16 @@ export function FindMap() {
   );
 }
 
-/** Find's map and its layer chips, given the layers to draw. */
+/** Find's map, its layer chips and the list beside it, given the layers to draw. */
 export function FindMapView({
+  aside,
   layers,
   kinds,
   onToggle,
   empty,
   onBoundsChange,
 }: {
+  aside?: ReactNode;
   layers: readonly MapLayer[];
   kinds: readonly PinKind[];
   onToggle: (k: PinKind) => void;
@@ -90,43 +96,78 @@ export function FindMapView({
   empty: boolean;
   onBoundsChange?: (b: Bounds) => void;
 }) {
+  // Wide screens: the list in a 400px column beside a full-height map.
+  // Narrow screens: title, then the map, then the list, in one scrolling page.
   return (
-    <div className="relative h-[calc(100dvh-56px)] w-full">
-      <h1 className="sr-only">Find</h1>
-      <LandingMap
-        layers={layers}
-        focus="city"
-        // Top: the layer chips. Bottom: the app's floating New message button.
-        padding={{ top: 64, bottom: 64 }}
-        label="Map of homes, Events and Groups in San Francisco"
-        onBoundsChange={onBoundsChange}
-        className="absolute inset-0"
+    <div
+      className={cn(
+        "grid grid-cols-1",
+        aside
+          ? `min-[1200px]:h-[calc(100dvh-56px)] min-[1200px]:grid-cols-[400px_minmax(0,1fr)] min-[1200px]:grid-rows-[auto_minmax(0,1fr)]`
+          : "h-[calc(100dvh-56px)]",
+      )}
+    >
+      <header
+        className={cn(
+          "px-4 pt-5 pb-4",
+          aside ? `min-[1200px]:col-start-1 min-[1200px]:row-start-1` : "sr-only",
+        )}
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-col items-start gap-2 p-3 sm:p-4">
-          <fieldset className="pointer-events-auto -mx-3 flex min-w-0 max-w-[calc(100%+1.5rem)] gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] sm:mx-0 sm:max-w-full sm:px-0">
-            <legend className="sr-only">Show on the map</legend>
-            {KINDS.map(({ kind, label, icon }) => (
-              <Chip
-                key={kind}
-                on={kinds.includes(kind)}
-                icon={icon}
-                label={label}
-                onClick={() => onToggle(kind)}
-              />
-            ))}
-          </fieldset>
-          {empty && (
-            <p
-              role="status"
-              className="pointer-events-auto rounded-full bg-card px-3 py-1.5 text-[13px] text-secondary leading-4 shadow-[var(--lm-float)]"
-            >
-              {kinds.length
-                ? "Nothing here yet. Zoom out or show more on the map."
-                : "Choose what to show on the map."}
-            </p>
-          )}
+        <h1 className="font-bold text-[24px] text-primary leading-7">Find</h1>
+        <p className="mt-1 text-[15px] text-secondary leading-5">
+          Homes, Groups and Events across San Francisco.
+        </p>
+      </header>
+      <div
+        className={cn(
+          "relative",
+          aside
+            ? `h-[64dvh] min-h-[420px] min-[1200px]:col-start-2 min-[1200px]:row-span-2 min-[1200px]:row-start-1 min-[1200px]:h-auto min-[1200px]:min-h-0`
+            : "h-full",
+        )}
+      >
+        <LandingMap
+          layers={layers}
+          focus="city"
+          // Top: the layer chips. Bottom: the app's floating New message button.
+          padding={{ top: 64, bottom: 64 }}
+          label="Map of homes, Events and Groups in San Francisco"
+          onBoundsChange={onBoundsChange}
+          className="absolute inset-0"
+        >
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-col items-start gap-2 p-3 sm:p-4">
+            <fieldset className="pointer-events-auto -mx-3 flex min-w-0 max-w-[calc(100%+1.5rem)] gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] sm:mx-0 sm:max-w-full sm:px-0">
+              <legend className="sr-only">Show on the map</legend>
+              {KINDS.map(({ kind, label, icon }) => (
+                <Chip
+                  key={kind}
+                  on={kinds.includes(kind)}
+                  icon={icon}
+                  label={label}
+                  onClick={() => onToggle(kind)}
+                />
+              ))}
+            </fieldset>
+            {empty && (
+              <p
+                role="status"
+                className="pointer-events-auto rounded-full bg-card px-3 py-1.5 text-[13px] text-secondary leading-4 shadow-[var(--lm-float)]"
+              >
+                {kinds.length
+                  ? "Nothing here yet. Zoom out or show more on the map."
+                  : "Choose what to show on the map."}
+              </p>
+            )}
+          </div>
+        </LandingMap>
+      </div>
+      {aside && (
+        <div
+          className={`px-4 pt-4 pb-10 min-[1200px]:col-start-1 min-[1200px]:row-start-2 min-[1200px]:overflow-y-auto min-[1200px]:pt-0`}
+        >
+          {aside}
         </div>
-      </LandingMap>
+      )}
     </div>
   );
 }

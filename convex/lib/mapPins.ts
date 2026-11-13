@@ -90,29 +90,11 @@ export function approximatePoint(id: string, p: LatLng): LatLng {
   };
 }
 
-/* ───────────── Coordinates ───────────── */
-
-function isLatLng(p: unknown): p is LatLng {
-  if (typeof p !== "object" || p === null) return false;
-  const { lat, lng } = p as Record<string, unknown>;
-  return typeof lat === "number" && typeof lng === "number";
-}
-
-/**
- * An Event's or Group's coordinates. #15 (PR #74) adds an optional `point` to
- * both tables; until it merges no row has one, so this reads it defensively
- * and Events and Groups light up on the map as soon as they gain coordinates.
- */
-export function pointOf(doc: Doc<"events"> | Doc<"groups">): LatLng | null {
-  const p: unknown = "point" in doc ? doc.point : undefined;
-  return isLatLng(p) ? p : null;
-}
+/* ───────────── Query ───────────── */
 
 export function inBounds(p: LatLng, b: Bounds) {
   return p.lat >= b.south && p.lat <= b.north && p.lng >= b.west && p.lng <= b.east;
 }
-
-/* ───────────── Query ───────────── */
 
 /**
  * Privacy-filtered pins inside `bounds` for the kinds asked for:
@@ -180,7 +162,7 @@ export async function pinsInBounds(
       if (e.online || (e.endAt ?? e.startAt + 3 * HOUR) <= now) continue;
       if (audience.blocked.has(e.hostId)) continue;
       if (!eventVisible(e, audience, responded.has(e._id))) continue;
-      const point = pointOf(e);
+      const point = e.point;
       if (!point || !inBounds(point, bounds)) continue;
       out.events.push({
         _id: e._id,
@@ -198,7 +180,7 @@ export async function pinsInBounds(
     for (const g of rows) {
       if (out.groups.length >= PINS_MAX) break;
       if (!g.visible && !audience.groups.has(g._id)) continue;
-      const point = pointOf(g);
+      const point = g.point;
       if (!point || !inBounds(point, bounds)) continue;
       out.groups.push({
         _id: g._id,
