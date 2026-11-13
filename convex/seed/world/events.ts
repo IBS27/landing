@@ -1,4 +1,4 @@
-import { daysAgo, daysFromNow } from "../lib/time";
+import { daysAgo, daysFromNow, weekendDay } from "../lib/time";
 import type { EventSeed } from "../types";
 
 /**
@@ -682,7 +682,7 @@ export const events: readonly EventSeed[] = [
     description:
       "Easy city hike for anyone new to SF (or new to hills). Meet at the top of Dolores Park by the Muni stop at 8:00, then up through Liberty Hill, down the stairways and over to the top of Bernal Hill for the view. About 4 miles, 2 hours, a few steep blocks.\n\nBring water and a layer, the fog sits on Bernal until 10. Coffee after on Cortland for whoever's in.",
     category: "Outdoors",
-    start: daysFromNow(2, "08:00"),
+    start: weekendDay(0, "08:00"),
     hours: 2,
     venue: "Dolores Park (top, by the Muni stop)",
     address: "Dolores St & 19th St, Mission",
@@ -701,7 +701,7 @@ export const events: readonly EventSeed[] = [
     description:
       "Bring a sketchbook (or just your phone) and draw the murals with us. Meet out front of Moonrise at 11, walk to Clarion Alley, sketch for an hour, then compare pages over coffee. All levels, nobody grades anything.\n\nPencils and a few spare sketchbooks on hand.",
     category: "Arts",
-    start: daysFromNow(3, "11:00"),
+    start: weekendDay(1, "11:00"),
     hours: 2,
     venue: "Moonrise Coffee Co. (meet out front)",
     address: "Valencia St & 18th St, Mission",

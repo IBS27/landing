@@ -67,7 +67,9 @@ export function journeyWeek(moveIn: MoveIn, now: number): JourneyWeek | null {
   const from = moveInStart(moveIn);
   const w = weekendOf(now);
   if (w.end <= from || w.start >= from + JOURNEY_DAYS * DAY) return null;
-  const week = Math.min(JOURNEY_WEEKS, Math.max(1, Math.floor((w.start - from) / WEEK) + 1));
+  // Counted from the first weekend that ends after move-in (DST makes a week 7 days ± 1 hour).
+  const first = weekendOf(from).start;
+  const week = Math.min(JOURNEY_WEEKS, Math.round((w.start - first) / WEEK) + 1);
   return { weekOf: w.saturday, week, start: w.start, end: w.end };
 }
 
@@ -224,6 +226,42 @@ export function planWhen(startAt: number): string {
   return `on ${weekday.format(startAt)} at ${time}`;
 }
 
+const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+/**
+ * Ways a draft misstates the plan: another weekday, another clock time ("9 PM",
+ * "10:30"), or no word of the plan's title. `plan.when` is `planWhen`'s
+ * "on Saturday at 8 AM".
+ */
+export function planProblems(text: string, plan: JoinInput["plan"]): string[] {
+  const out: string[] = [];
+  const m = /^on (\w+) at (\d{1,2})(?::(\d{2}))? ([AP])M$/.exec(plan.when);
+  const others = WEEKDAYS.filter((d) => d !== m?.[1] && new RegExp(`\\b${d}\\b`, "i").test(text));
+  if (others.length) out.push(`the plan is ${plan.when}; don't mention ${others.join(" or ")}`);
+  if (m) {
+    const [h, min, ap] = [Number(m[2]), Number(m[3] ?? 0), m[4]?.toLowerCase()];
+    const times = [
+      ...text.matchAll(/\b(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\b/gi),
+      ...text.matchAll(/\b(\d{1,2}):(\d{2})\b(?!\s*[ap]\.?m)/gi),
+    ];
+    const wrong = times.filter(
+      (t) =>
+        Number(t[1]) !== h ||
+        Number(t[2] ?? 0) !== min ||
+        (t[3] !== undefined && t[3].toLowerCase() !== ap),
+    );
+    if (wrong.length) out.push(`the plan starts ${plan.when}; don't give another time`);
+  }
+  const words = plan.title
+    .toLowerCase()
+    .split(/[^a-z0-9']+/)
+    .filter((w) => w.length >= 4 && !WEEKDAYS.some((d) => d.toLowerCase() === w));
+  const lower = text.toLowerCase();
+  if (words.length && !words.some((w) => lower.includes(w)))
+    out.push(`name the plan, "${plan.title}"`);
+  return out;
+}
+
 /** The non-AI draft. */
 export function joinTemplate(i: JoinInput): string {
   return `Hi ${nameList(i.people)}! I saw you're going to ${i.plan.title} ${i.plan.when}. Mind if I join you?`;
@@ -248,6 +286,7 @@ export const museJoin = defineTask({
     if (!input.people.some((n) => text.includes(n)))
       problems.push("greet the people by their first names from input.people");
     if (/https?:|www\./i.test(text)) problems.push("no links");
+    problems.push(...planProblems(text, input.plan));
     if (!o.sources.length) problems.push("cite the Event");
     return problems;
   },

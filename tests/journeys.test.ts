@@ -11,10 +11,12 @@ import {
   journeyWeek,
   nameList,
   planJourney,
+  planProblems,
   planWhen,
   routeCandidates,
 } from "../convex/lib/journeys";
 import type { RouteEvent } from "../convex/lib/weekendRoute";
+import { Clock, weekendDay } from "../convex/seed/lib/time";
 import type { WeekendStop } from "../convex/validators";
 import { fakeCtx, type Row } from "./fakeDb";
 
@@ -80,8 +82,11 @@ describe("journeyWeek", () => {
     expect(journeyWeek({ month: "2026-11", date: "2026-11-15" }, NOW)?.week).toBe(1);
     expect(journeyWeek({ month: "2026-11", date: "2026-11-16" }, NOW)).toBeNull();
   });
-  test("only a month known: counted from the 1st", () => {
-    expect(journeyWeek({ month: "2026-11" }, NOW)?.week).toBe(2);
+  test("a Sunday move-in's next weekend is week 2", () => {
+    expect(journeyWeek({ month: "2026-11", date: "2026-11-08" }, NOW)?.week).toBe(2);
+  });
+  test("only a month known: counted from the 1st (Sunday Nov 1, so Oct 31's weekend is week 1)", () => {
+    expect(journeyWeek({ month: "2026-11" }, NOW)?.week).toBe(3);
   });
   test("none before move-in or after the first 90 days", () => {
     expect(journeyPhase({ month: "2027-02" }, NOW)).toBe("before");
@@ -109,6 +114,32 @@ describe("message copy", () => {
     ).toBe(
       "Hi Dev and Priya! I saw you're going to Run Club on Saturday at 8 AM. Mind if I join you?",
     );
+  });
+});
+
+describe("planProblems", () => {
+  const plan = { title: "Saturday Urban Hike", when: "on Saturday at 8 AM", venue: null };
+  test("accepts the plan as given, paraphrased", () => {
+    expect(
+      planProblems("Hi Zoe! Saw you're doing the Saturday Urban Hike at 8. Can I come?", plan),
+    ).toEqual([]);
+    expect(planProblems("Hi Zoe! Mind if I join the hike Saturday at 8:00 AM?", plan)).toEqual([]);
+  });
+  test("rejects another plan, day or time", () => {
+    expect(planProblems("Hi Zoe! I'm going to Run Club on Sunday at 9 PM too!", plan)).toHaveLength(
+      3,
+    );
+    expect(planProblems("Hi Zoe! Can I join the hike at 10:30?", plan)).toHaveLength(1);
+    expect(planProblems("Hi Zoe! Can I join the hike Saturday at 8 PM?", plan)).toHaveLength(1);
+  });
+});
+
+describe("seed weekendDay", () => {
+  test("lands on this weekend whatever day the seed runs", () => {
+    for (const now of [NOW, at(-5, 12), at(0, 6)]) {
+      expect(new Clock(now).at(weekendDay(0, "08:00"))).toBe(at(0, 8));
+      expect(new Clock(now).at(weekendDay(1, "11:00"))).toBe(at(1, 11));
+    }
   });
 });
 
