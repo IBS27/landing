@@ -21,6 +21,7 @@ import type * as citations from "../citations.js";
 import type * as cityProfile from "../cityProfile.js";
 import type * as comments from "../comments.js";
 import type * as conversations from "../conversations.js";
+import type * as crons from "../crons.js";
 import type * as crews from "../crews.js";
 import type * as events from "../events.js";
 import type * as feed from "../feed.js";
@@ -46,6 +47,7 @@ import type * as lib_negotiations from "../lib/negotiations.js";
 import type * as lib_neighborhoodBoundaries from "../lib/neighborhoodBoundaries.js";
 import type * as lib_neighborhoods from "../lib/neighborhoods.js";
 import type * as lib_notify from "../lib/notify.js";
+import type * as lib_places from "../lib/places.js";
 import type * as lib_posts from "../lib/posts.js";
 import type * as lib_profileFromText from "../lib/profileFromText.js";
 import type * as lib_profileSignals from "../lib/profileSignals.js";
@@ -63,6 +65,7 @@ import type * as lib_users from "../lib/users.js";
 import type * as lib_vibe from "../lib/vibe.js";
 import type * as lib_vouchNote from "../lib/vouchNote.js";
 import type * as lib_vouches from "../lib/vouches.js";
+import type * as lib_weekendRoute from "../lib/weekendRoute.js";
 import type * as listings from "../listings.js";
 import type * as live from "../live.js";
 import type * as liveReplay from "../liveReplay.js";
@@ -128,6 +131,7 @@ import type * as trust from "../trust.js";
 import type * as users from "../users.js";
 import type * as validators from "../validators.js";
 import type * as vouches from "../vouches.js";
+import type * as weekendRoutes from "../weekendRoutes.js";
 
 import type {
   ApiFromModules,
@@ -149,6 +153,7 @@ declare const fullApi: ApiFromModules<{
   cityProfile: typeof cityProfile;
   comments: typeof comments;
   conversations: typeof conversations;
+  crons: typeof crons;
   crews: typeof crews;
   events: typeof events;
   feed: typeof feed;
@@ -174,6 +179,7 @@ declare const fullApi: ApiFromModules<{
   "lib/neighborhoodBoundaries": typeof lib_neighborhoodBoundaries;
   "lib/neighborhoods": typeof lib_neighborhoods;
   "lib/notify": typeof lib_notify;
+  "lib/places": typeof lib_places;
   "lib/posts": typeof lib_posts;
   "lib/profileFromText": typeof lib_profileFromText;
   "lib/profileSignals": typeof lib_profileSignals;
@@ -191,6 +197,7 @@ declare const fullApi: ApiFromModules<{
   "lib/vibe": typeof lib_vibe;
   "lib/vouchNote": typeof lib_vouchNote;
   "lib/vouches": typeof lib_vouches;
+  "lib/weekendRoute": typeof lib_weekendRoute;
   listings: typeof listings;
   live: typeof live;
   liveReplay: typeof liveReplay;
@@ -256,6 +263,7 @@ declare const fullApi: ApiFromModules<{
   users: typeof users;
   validators: typeof validators;
   vouches: typeof vouches;
+  weekendRoutes: typeof weekendRoutes;
 }>;
 
 /**
