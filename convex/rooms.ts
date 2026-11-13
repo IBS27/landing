@@ -188,7 +188,9 @@ export const removePhoto = viewerMutation({
 /**
  * Stores the room's vibe. `typed` is the person's own; `generated` is a
  * suggestion from `suggestVibe` kept as is; `edited` is one they changed.
- * A suggestion's citations must be sources the viewer can see.
+ * A suggestion's citations must be sources the viewer can see. `keepSources`
+ * (editing a vibe Muse suggested earlier) reuses the stored citations and
+ * basis, dropping them if a source is no longer visible.
  */
 export const setVibe = viewerMutation({
   args: {
@@ -197,27 +199,49 @@ export const setVibe = viewerMutation({
     origin: vibeOrigin,
     citations: v.optional(citations),
     basis: v.optional(v.array(v.string())),
+    keepSources: v.optional(v.boolean()),
   },
-  handler: async (ctx, { roomId, vibe, origin, citations: cited, basis }) => {
-    await ownRoom(ctx, ctx.viewer._id, roomId);
+  handler: async (ctx, { roomId, vibe, origin, citations: given, basis, keepSources }) => {
+    const room = await ownRoom(ctx, ctx.viewer._id, roomId);
     const clean = cleanVibe(vibe);
     const problems = vibeProblems(clean);
     if (problems.length > 0) throw new ConvexError(problems[0]!);
     const fromMuse = origin !== "typed";
-    if (fromMuse && cited) await assertCitable(ctx, cited, await loadAudience(ctx, ctx.viewer._id));
-    const keptBasis = fromMuse
-      ? (basis ?? [])
-          .map((b) => b.trim())
-          .filter(Boolean)
-          .slice(0, VIBE_LIMITS.basisMax)
-          .map((b) => b.slice(0, VIBE_LIMITS.basisItemMax))
-      : [];
+    const audience = await loadAudience(ctx, ctx.viewer._id);
+
+    let cited: Citations | undefined;
+    let rawBasis: string[] = [];
+    if (fromMuse && given) {
+      await assertCitable(ctx, given, audience);
+      cited = given;
+      rawBasis = basis ?? [];
+    } else if (fromMuse && keepSources && room.vibe?.origin !== "typed") {
+      const old = room.vibe;
+      const stillVisible = old?.citations
+        ? await assertCitable(ctx, old.citations, audience).then(
+            () => true,
+            () => false,
+          )
+        : true;
+      if (stillVisible) {
+        cited = old?.citations;
+        rawBasis = old?.basis ?? [];
+      }
+    } else if (fromMuse) {
+      rawBasis = basis ?? [];
+    }
+    const keptBasis = rawBasis
+      .map((b) => b.trim())
+      .filter(Boolean)
+      .slice(0, VIBE_LIMITS.basisMax)
+      .map((b) => b.slice(0, VIBE_LIMITS.basisItemMax));
+
     const now = Date.now();
     await ctx.db.patch(roomId, {
       vibe: {
         ...clean,
         origin,
-        ...(fromMuse && cited ? { citations: cited } : {}),
+        ...(cited ? { citations: cited } : {}),
         ...(keptBasis.length ? { basis: keptBasis } : {}),
         updatedAt: now,
       },
