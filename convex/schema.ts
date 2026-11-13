@@ -974,6 +974,8 @@ export default defineSchema({
       }),
       v.object({ kind: v.literal("manual") }),
     ),
+    /** The Marketplace listing created to sell it at move-out (#43). */
+    saleListingId: v.optional(v.id("listings")),
     createdAt: v.number(),
   })
     .index("by_user", ["userId", "acquiredAt"])
