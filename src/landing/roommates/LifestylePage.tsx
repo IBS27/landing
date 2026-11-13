@@ -49,7 +49,7 @@ export function LifestylePage() {
           key={viewer._id}
           state={data}
           actions={actions}
-          candidates={<RoommateCandidates />}
+          candidates={(editAnswer) => <RoommateCandidates onEditAnswer={editAnswer} />}
         />
       )}
     </LandingPage>

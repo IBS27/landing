@@ -410,6 +410,8 @@ export type CampusSeed = {
 export type PlaceSeed = {
   readonly key: string;
   readonly name: string;
+  /** Short forms locals use in threads ("the Owl"), matched case-insensitively as whole words. Distinctive only: never a street, neighborhood or generic word. */
+  readonly aliases?: readonly string[];
   readonly kind: string;
   readonly real: boolean;
   /** The neighborhood whose Group threads talk about it. */

@@ -1,4 +1,10 @@
 import { moveInLabel, neighborhoodLabel } from "../../../convex/lib/cityProfileFacts";
+import {
+  type DealbreakerResult,
+  fieldTopic,
+  type MatchField,
+  type TraitComparison,
+} from "../../../convex/lib/lifestyle";
 import type { Overlap } from "../../../convex/lib/roommates";
 
 /** Wording for roommate candidates (#22). Pure, so it's unit-tested. */
@@ -40,4 +46,48 @@ export function askMessage(firstName: string, o: Overlap): string {
       ? `We both have ${hoods} on our list. `
       : "";
   return `Hi ${firstName}! I saw you on Landing's roommate matching. ${plans}Want to chat about finding a place together?`;
+}
+
+/* ---------- Compatibility (#23) ---------- */
+
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/**
+ * One difference as a topic and the two answers: "Quiet hours" and
+ * "You: 10pm · Tasha: 11pm". Budgets never show amounts: "Your budgets don't overlap".
+ */
+export function differenceLine(
+  t: TraitComparison,
+  firstName: string,
+): { topic: string; detail: string } {
+  const topic = capitalize(fieldTopic(t.field));
+  if (!t.a || !t.b) return { topic, detail: t.sentence };
+  return { topic, detail: `You: ${t.a.label} · ${firstName}: ${t.b.label}` };
+}
+
+/**
+ * `Your dealbreaker "Dogs": Leo answered "Dog" for pets`, or the candidate's
+ * dealbreaker that the viewer's answer hits.
+ */
+export function dealbreakerLine(d: DealbreakerResult, firstName: string): string {
+  const topic = fieldTopic(d.field);
+  const answer = d.answer ? `"${d.answer.label}"` : "";
+  return d.holder === "a"
+    ? `Your dealbreaker "${d.label}": ${firstName} answered ${answer} for ${topic}`
+    : `${firstName}'s dealbreaker "${d.label}": you answered ${answer} for ${topic}`;
+}
+
+/** The viewer's dealbreaker the candidate didn't answer. */
+export function uncheckedLine(d: DealbreakerResult, firstName: string): string {
+  return `Your dealbreaker "${d.label}" couldn't be checked: ${firstName} didn't answer ${fieldTopic(d.field)}.`;
+}
+
+/** "sleep schedule, quiet hours and 3 more" style list of topics. */
+export function topicsLine(fields: readonly MatchField[]): string {
+  return list(fields.map(fieldTopic));
+}
+
+/** "85% match", or "No score yet". */
+export function scoreText(score: number | null): string {
+  return score === null ? "No score yet" : `${score}% match`;
 }
