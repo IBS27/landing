@@ -5,10 +5,13 @@ import type { ActionCtx } from "../_generated/server";
 import { sourceKey, sourcesOf, tryCite } from "../lib/citations";
 import type { AiAgent, AiFallbackReason, Citations, Source } from "../validators";
 import {
+  type ContentPart,
   complete,
   type Effort,
+  type MediaInput,
   type Message,
   MODEL,
+  type Model,
   ModelError,
   type Reply,
   type Spent,
@@ -40,6 +43,7 @@ import { aiEnabled } from "./status";
 
 export type AgentTask<I extends Json, V extends GenericValidator> = {
   agent: AiAgent;
+  model?: Model;
   /** Unique across the app, e.g. "ember.weekendRoute". Logged on every run. */
   name: string;
   /** The task's system prompt. Changing it starts a fresh cache. */
@@ -121,7 +125,7 @@ function fingerprint(task: AgentTask<Json, GenericValidator>) {
   if (!fp) {
     fp = sha256(
       canonicalJson({
-        model: MODEL,
+        model: task.model ?? MODEL,
         preamble: preamble(task.agent),
         instructions: task.instructions,
         schema: toJsonSchema(task.output),
@@ -140,6 +144,8 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
   task: AgentTask<I, V>,
   args: {
     input: I;
+    /** Server-authorized private media. The caller must check ownership before supplying it. */
+    media?: MediaInput[];
     /**
      * What the model may read and cite. Sources `shownTo` can't see are dropped
      * before the model sees them (see `agentSources`).
@@ -157,6 +163,10 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
 ): Promise<AgentResult<Infer<V>>> {
   type O = Infer<V>;
   const { input, jobId } = args;
+  const media = args.media ?? [];
+  if (media.length && args.shownTo === "everyone")
+    throw new Error("Media tasks require a private audience");
+  if (media.length > 20) throw new Error("At most 20 media inputs");
   const started = Date.now();
   const deadline = args.deadline ?? started + BUDGET_MS;
   const generic = task as unknown as AgentTask<Json, GenericValidator>;
@@ -175,7 +185,13 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
   );
   const described = sources.map(describeSource);
   const inputHash = await sha256(
-    canonicalJson({ task: task.name, fp: await fingerprint(generic), input, sources: described }),
+    canonicalJson({
+      task: task.name,
+      fp: await fingerprint(generic),
+      input,
+      sources: described,
+      ...(media.length ? { media, audience: args.shownTo } : {}),
+    }),
   );
   const toCitations = (keys: string[]) => tryCite(keys.flatMap((k) => byKey.get(k) ?? []));
 
@@ -256,7 +272,18 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
   };
   const schema = toJsonSchema(task.output);
   const system = [preamble(task.agent), task.instructions];
-  const messages: Message[] = [{ role: "user", content: userPrompt(input, described) }];
+  const content: ContentPart[] = [{ type: "text", text: userPrompt(input, described) }];
+  for (const item of media) {
+    content.push({ type: "text", text: `Evidence ${item.key}` });
+    content.push(
+      item.kind === "image"
+        ? { type: "image_url", image_url: { url: item.url } }
+        : { type: "video_url", video_url: { url: item.url } },
+    );
+  }
+  const messages: Message[] = [
+    { role: "user", content: media.length ? content : userPrompt(input, described) },
+  ];
 
   const maxAttempts = task.maxAttempts ?? 3;
   while (attempts < maxAttempts) {
@@ -272,6 +299,7 @@ export async function runAgent<I extends Json, V extends GenericValidator>(
     const timer = setTimeout(() => abort.abort(), remaining);
     try {
       reply = await complete({
+        model: task.model,
         system,
         messages,
         schema,

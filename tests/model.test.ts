@@ -506,3 +506,46 @@ describe("runAgent with Muse", () => {
     expect(sent).toHaveLength(0);
   });
 });
+
+describe("private media tasks", () => {
+  test("sends real image and video content blocks to Wonder and accounts for its usage", async () => {
+    const { ctx, runs } = fakeCtx();
+    mockFetch(stream({ text: good, model: "muse-wonder-1.0" }));
+    const media = [
+      { key: "plan", kind: "image" as const, url: "https://example.org/plan.png" },
+      { key: "tour", kind: "video" as const, url: "https://example.org/tour.mp4" },
+    ];
+    await runAgent(
+      ctx,
+      { ...tips, model: "muse-wonder-1.0" },
+      {
+        ...args,
+        shownTo: "users:one" as never,
+        media,
+      },
+    );
+    expect(sent[0].body.model).toBe("muse-wonder-1.0");
+    const messages = sent[0].body.messages as { content: unknown }[];
+    expect(messages[2].content).toEqual(
+      expect.arrayContaining([
+        { type: "image_url", image_url: { url: media[0].url } },
+        { type: "video_url", video_url: { url: media[1].url } },
+      ]),
+    );
+    expect(runs[0].model).toBe("muse-wonder-1.0");
+    expect(runs[0].costUsd).toBeCloseTo((600 * 4 + 400 * 0.2 + 200 * 20) / 1e6);
+  });
+
+  test("refuses a shared audience and separates private media cache keys by owner", async () => {
+    const media = [{ key: "plan", kind: "image" as const, url: "https://example.org/plan.png" }];
+    await expect(
+      runAgent(fakeCtx().ctx, tips, { ...args, shownTo: "everyone", media }),
+    ).rejects.toThrow("private audience");
+    const first = fakeCtx(),
+      second = fakeCtx();
+    mockFetch(stream({ text: good }), stream({ text: good }));
+    await runAgent(first.ctx, tips, { ...args, shownTo: "users:one" as never, media });
+    await runAgent(second.ctx, tips, { ...args, shownTo: "users:two" as never, media });
+    expect(first.runs[0].inputHash).not.toBe(second.runs[0].inputHash);
+  });
+});

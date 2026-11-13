@@ -20,7 +20,13 @@ const MAX_RETRIES = 2;
 
 export type Effort = "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
 
-export type Message = { role: "user" | "assistant"; content: string };
+export type Model = typeof MODEL | "muse-wonder-1.0";
+export type MediaInput = { key: string; kind: "image" | "video"; url: string };
+export type ContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } }
+  | { type: "video_url"; video_url: { url: string } };
+export type Message = { role: "user" | "assistant"; content: string | ContentPart[] };
 
 export type Usage = {
   /** Input tokens not served from Meta's prompt cache. */
@@ -45,6 +51,7 @@ export type Reply = {
 };
 
 export type Request = {
+  model?: Model;
   /** Developer-level instructions, sent first in order so the prefix caches. */
   system: string[];
   messages: Message[];
@@ -80,7 +87,7 @@ export class ModelError extends Error {
 /** One completion from Meta's Chat Completions API, streamed so long reasoning can't hit a gateway timeout. */
 export async function complete(req: Request): Promise<Reply> {
   const body = JSON.stringify({
-    model: MODEL,
+    model: req.model ?? MODEL,
     messages: [...req.system.map((content) => ({ role: "developer", content })), ...req.messages],
     max_completion_tokens: MAX_COMPLETION_TOKENS,
     reasoning_effort: req.effort,
@@ -97,7 +104,7 @@ export async function complete(req: Request): Promise<Reply> {
   for (let retry = 0; ; retry++) {
     let wait: number | undefined;
     try {
-      const answer = await attempt(body, req.signal, tally);
+      const answer = await attempt(body, req.signal, tally, req.model ?? MODEL);
       // A successful attempt always streamed, so the tally has it.
       return { ...answer, ...(tally.total() as Spent) };
     } catch (error) {
@@ -166,7 +173,12 @@ class Tally {
 
 type Answer = Pick<Reply, "text" | "refusal" | "finishReason">;
 
-async function attempt(body: string, outer: AbortSignal, tally: Tally): Promise<Answer> {
+async function attempt(
+  body: string,
+  outer: AbortSignal,
+  tally: Tally,
+  model: Model,
+): Promise<Answer> {
   // A listener doesn't see an abort that already happened.
   outer.throwIfAborted();
   // Abort on the caller's signal or this request's own timeout.
@@ -191,7 +203,7 @@ async function attempt(body: string, outer: AbortSignal, tally: Tally): Promise<
       });
     } catch (error) {
       // The request was sent, so Meta may have run and billed it; the usage is unknown.
-      tally.add(MODEL, undefined);
+      tally.add(model, undefined);
       throw abort.signal.aborted ? abort.signal.reason : new Retryable(errorText(error));
     }
     if (!res.ok) {
@@ -202,7 +214,7 @@ async function attempt(body: string, outer: AbortSignal, tally: Tally): Promise<
     if (!res.body) throw new ModelError("The response had no body");
 
     const reader = res.body.getReader();
-    const seen: Seen = { model: MODEL };
+    const seen: Seen = { model };
     try {
       return await readStream(reader, seen);
     } catch (error) {

@@ -96,6 +96,7 @@ import { Route as LandingMoveOutIndexRouteImport } from './routes/landing/move-o
 import { Route as LandingPlaceIndexRouteImport } from './routes/landing/place/index'
 import { Route as LandingPlaceRoomRouteImport } from './routes/landing/place/room'
 import { Route as LandingPlaceRoommatesRouteImport } from './routes/landing/place/roommates'
+import { Route as LandingPlaceUnitRouteImport } from './routes/landing/place/unit'
 import { Route as LandingProfileIndexRouteImport } from './routes/landing/profile/index'
 import { Route as MarketplaceCategoryCategoryRouteImport } from './routes/marketplace/category/$category'
 import { Route as MarketplaceCreateIndexRouteImport } from './routes/marketplace/create/index'
@@ -549,6 +550,11 @@ const LandingPlaceRoommatesRoute = LandingPlaceRoommatesRouteImport.update({
   path: '/place/roommates',
   getParentRoute: () => LandingRouteRoute,
 } as any)
+const LandingPlaceUnitRoute = LandingPlaceUnitRouteImport.update({
+  id: '/place/unit',
+  path: '/place/unit',
+  getParentRoute: () => LandingRouteRoute,
+} as any)
 const LandingProfileIndexRoute = LandingProfileIndexRouteImport.update({
   id: '/profile/',
   path: '/profile/',
@@ -720,6 +726,7 @@ export interface FileRoutesByFullPath {
   '/landing/crew/journeys': typeof LandingCrewJourneysRoute
   '/landing/place/room': typeof LandingPlaceRoomRoute
   '/landing/place/roommates': typeof LandingPlaceRoommatesRoute
+  '/landing/place/unit': typeof LandingPlaceUnitRoute
   '/marketplace/category/$category': typeof MarketplaceCategoryCategoryRoute
   '/marketplace/create/item': typeof MarketplaceCreateItemRoute
   '/marketplace/create/rental': typeof MarketplaceCreateRentalRoute
@@ -821,6 +828,7 @@ export interface FileRoutesByTo {
   '/landing/crew/journeys': typeof LandingCrewJourneysRoute
   '/landing/place/room': typeof LandingPlaceRoomRoute
   '/landing/place/roommates': typeof LandingPlaceRoommatesRoute
+  '/landing/place/unit': typeof LandingPlaceUnitRoute
   '/marketplace/category/$category': typeof MarketplaceCategoryCategoryRoute
   '/marketplace/create/item': typeof MarketplaceCreateItemRoute
   '/marketplace/create/rental': typeof MarketplaceCreateRentalRoute
@@ -927,6 +935,7 @@ export interface FileRoutesById {
   '/landing/crew/journeys': typeof LandingCrewJourneysRoute
   '/landing/place/room': typeof LandingPlaceRoomRoute
   '/landing/place/roommates': typeof LandingPlaceRoommatesRoute
+  '/landing/place/unit': typeof LandingPlaceUnitRoute
   '/marketplace/category/$category': typeof MarketplaceCategoryCategoryRoute
   '/marketplace/create/item': typeof MarketplaceCreateItemRoute
   '/marketplace/create/rental': typeof MarketplaceCreateRentalRoute
@@ -1034,6 +1043,7 @@ export interface FileRouteTypes {
     | '/landing/crew/journeys'
     | '/landing/place/room'
     | '/landing/place/roommates'
+    | '/landing/place/unit'
     | '/marketplace/category/$category'
     | '/marketplace/create/item'
     | '/marketplace/create/rental'
@@ -1135,6 +1145,7 @@ export interface FileRouteTypes {
     | '/landing/crew/journeys'
     | '/landing/place/room'
     | '/landing/place/roommates'
+    | '/landing/place/unit'
     | '/marketplace/category/$category'
     | '/marketplace/create/item'
     | '/marketplace/create/rental'
@@ -1240,6 +1251,7 @@ export interface FileRouteTypes {
     | '/landing/crew/journeys'
     | '/landing/place/room'
     | '/landing/place/roommates'
+    | '/landing/place/unit'
     | '/marketplace/category/$category'
     | '/marketplace/create/item'
     | '/marketplace/create/rental'
@@ -1949,6 +1961,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LandingPlaceRoommatesRouteImport
       parentRoute: typeof LandingRouteRoute
     }
+    '/landing/place/unit': {
+      id: '/landing/place/unit'
+      path: '/place/unit'
+      fullPath: '/landing/place/unit'
+      preLoaderRoute: typeof LandingPlaceUnitRouteImport
+      parentRoute: typeof LandingRouteRoute
+    }
     '/landing/profile/': {
       id: '/landing/profile/'
       path: '/profile'
@@ -2110,6 +2129,7 @@ interface LandingRouteRouteChildren {
   LandingIndexRoute: typeof LandingIndexRoute
   LandingPlaceRoomRoute: typeof LandingPlaceRoomRoute
   LandingPlaceRoommatesRoute: typeof LandingPlaceRoommatesRoute
+  LandingPlaceUnitRoute: typeof LandingPlaceUnitRoute
   LandingFindIndexRoute: typeof LandingFindIndexRoute
   LandingInboxIndexRoute: typeof LandingInboxIndexRoute
   LandingMoveOutIndexRoute: typeof LandingMoveOutIndexRoute
@@ -2128,6 +2148,7 @@ const LandingRouteRouteChildren: LandingRouteRouteChildren = {
   LandingIndexRoute: LandingIndexRoute,
   LandingPlaceRoomRoute: LandingPlaceRoomRoute,
   LandingPlaceRoommatesRoute: LandingPlaceRoommatesRoute,
+  LandingPlaceUnitRoute: LandingPlaceUnitRoute,
   LandingFindIndexRoute: LandingFindIndexRoute,
   LandingInboxIndexRoute: LandingInboxIndexRoute,
   LandingMoveOutIndexRoute: LandingMoveOutIndexRoute,

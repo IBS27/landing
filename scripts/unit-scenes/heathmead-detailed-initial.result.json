@@ -1,0 +1,4264 @@
+{
+  "listingUrl": "https://www.holroydhomes.co.uk/property/great-heathmead-haywards-heath-rh16/143312-000227/1",
+  "generatedAt": "2026-11-13T05:21:52.057Z",
+  "output": {
+    "scene": {
+      "notes": [
+        "No metric dimensions are printed on the floor plan in the input description; every length, wall thickness and ceiling height below is estimated and must not be treated as measured.",
+        "Floor plan determines the rectangular topology, the Bedroom 2 south-east notch into Bedroom 1, the central Entrance Hall, the south-east storage cupboard and the small cupboard east of the Bathroom.",
+        "Photos 5-6 and video c.1:36-2:11 show the Lounge/Dining Room has full-height sliding doors in addition to two windows; this conflicts with the simple window symbol on the west wall of the plan, so a sliding door is modelled on the west wall and windows are retained on the north wall.",
+        "Kitchen external door and adjacent window are shown on the plan west wall and in photo-2/video c.1:10-1:33; the small partitioned lobby/cupboards at the north-west of the Kitchen on the plan are not clearly readable and are included within the Kitchen polygon, noted as uncertain.",
+        "The light-blue compartment east of the Bathroom on the plan is modelled as Storage; its access door position is uncertain from photos/video. The south-east compartment north of the front-door lobby is modelled as Storage from the plan door swing.",
+        "Exterior photos 1, 4, 11 and 12 are not used for interior geometry or outdoor views. No furniture is modelled."
+      ],
+      "rooms": [
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "photo-5",
+              "photo-6",
+              "video-tour"
+            ]
+          },
+          "floorColor": "#D2D2CE",
+          "id": "lounge",
+          "name": "Lounge/Dining Room",
+          "polygon": [
+            {
+              "x": 0,
+              "z": 0
+            },
+            {
+              "x": 5,
+              "z": 0
+            },
+            {
+              "x": 5,
+              "z": 4.2
+            },
+            {
+              "x": 0,
+              "z": 4.2
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "photo-10",
+              "video-tour"
+            ]
+          },
+          "floorColor": "#C9C9C9",
+          "id": "bed2",
+          "name": "Bedroom 2",
+          "polygon": [
+            {
+              "x": 5,
+              "z": 0
+            },
+            {
+              "x": 7.1,
+              "z": 0
+            },
+            {
+              "x": 7.1,
+              "z": 3.2
+            },
+            {
+              "x": 6.6,
+              "z": 3.2
+            },
+            {
+              "x": 6.6,
+              "z": 4.2
+            },
+            {
+              "x": 5,
+              "z": 4.2
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "photo-8",
+              "photo-9",
+              "video-tour"
+            ]
+          },
+          "floorColor": "#C9C9C9",
+          "id": "bed1",
+          "name": "Bedroom 1",
+          "polygon": [
+            {
+              "x": 7.1,
+              "z": 0
+            },
+            {
+              "x": 11,
+              "z": 0
+            },
+            {
+              "x": 11,
+              "z": 5.5
+            },
+            {
+              "x": 8.5,
+              "z": 5.5
+            },
+            {
+              "x": 8.5,
+              "z": 4.2
+            },
+            {
+              "x": 6.6,
+              "z": 4.2
+            },
+            {
+              "x": 6.6,
+              "z": 3.2
+            },
+            {
+              "x": 7.1,
+              "z": 3.2
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "photo-2",
+              "photo-3",
+              "video-tour"
+            ]
+          },
+          "floorColor": "#C4B8A8",
+          "id": "kitchen",
+          "name": "Kitchen",
+          "polygon": [
+            {
+              "x": 0,
+              "z": 4.2
+            },
+            {
+              "x": 4,
+              "z": 4.2
+            },
+            {
+              "x": 4,
+              "z": 7.2
+            },
+            {
+              "x": 0,
+              "z": 7.2
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "video-tour"
+            ]
+          },
+          "floorColor": "#C9C4B8",
+          "id": "hall",
+          "name": "Entrance Hall",
+          "polygon": [
+            {
+              "x": 4,
+              "z": 4.2
+            },
+            {
+              "x": 8.5,
+              "z": 4.2
+            },
+            {
+              "x": 8.5,
+              "z": 6.05
+            },
+            {
+              "x": 11,
+              "z": 6.05
+            },
+            {
+              "x": 11,
+              "z": 7.2
+            },
+            {
+              "x": 7.2,
+              "z": 7.2
+            },
+            {
+              "x": 7.2,
+              "z": 5.5
+            },
+            {
+              "x": 4,
+              "z": 5.5
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "photo-7",
+              "video-tour"
+            ]
+          },
+          "floorColor": "#8FA6B5",
+          "id": "bathroom",
+          "name": "Bathroom",
+          "polygon": [
+            {
+              "x": 4,
+              "z": 5.5
+            },
+            {
+              "x": 6.5,
+              "z": 5.5
+            },
+            {
+              "x": 6.5,
+              "z": 7.2
+            },
+            {
+              "x": 4,
+              "z": 7.2
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "floorColor": "#B8CBD6",
+          "id": "bath-store",
+          "name": "Storage",
+          "polygon": [
+            {
+              "x": 6.5,
+              "z": 5.5
+            },
+            {
+              "x": 7.2,
+              "z": 5.5
+            },
+            {
+              "x": 7.2,
+              "z": 7.2
+            },
+            {
+              "x": 6.5,
+              "z": 7.2
+            }
+          ]
+        },
+        {
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "video-tour"
+            ]
+          },
+          "floorColor": "#D8CFC0",
+          "id": "store-se",
+          "name": "Storage",
+          "polygon": [
+            {
+              "x": 8.5,
+              "z": 5.5
+            },
+            {
+              "x": 11,
+              "z": 5.5
+            },
+            {
+              "x": 11,
+              "z": 6.05
+            },
+            {
+              "x": 8.5,
+              "z": 6.05
+            }
+          ]
+        }
+      ],
+      "title": "Great Heathmead, Haywards Heath - estimated ground floor reconstruction",
+      "version": 1,
+      "walls": [
+        {
+          "a": {
+            "x": 0,
+            "z": 0
+          },
+          "b": {
+            "x": 5,
+            "z": 0
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-n-lounge",
+          "openings": [
+            {
+              "bottom": 0.9,
+              "height": 1.2,
+              "kind": "window",
+              "offset": 0.8,
+              "width": 1.6
+            },
+            {
+              "bottom": 0.9,
+              "height": 1.2,
+              "kind": "window",
+              "offset": 3.6,
+              "width": 0.9
+            }
+          ],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 5,
+            "z": 0
+          },
+          "b": {
+            "x": 7.1,
+            "z": 0
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "photo-10"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-n-bed2",
+          "openings": [
+            {
+              "bottom": 0.9,
+              "height": 1.2,
+              "kind": "window",
+              "offset": 0.6,
+              "width": 1.2
+            }
+          ],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 7.1,
+            "z": 0
+          },
+          "b": {
+            "x": 11,
+            "z": 0
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "photo-9"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-n-bed1",
+          "openings": [
+            {
+              "bottom": 0.85,
+              "height": 1.25,
+              "kind": "window",
+              "offset": 1.9,
+              "width": 1.4
+            }
+          ],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 11,
+            "z": 0
+          },
+          "b": {
+            "x": 11,
+            "z": 5.5
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-e-bed1",
+          "openings": [],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 11,
+            "z": 5.5
+          },
+          "b": {
+            "x": 11,
+            "z": 6.05
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-e-store",
+          "openings": [],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 11,
+            "z": 6.05
+          },
+          "b": {
+            "x": 11,
+            "z": 7.2
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "video-tour"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-e-hall",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 0.25,
+              "width": 0.9
+            }
+          ],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 7.2
+          },
+          "b": {
+            "x": 4,
+            "z": 7.2
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "photo-2"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-s-kitchen",
+          "openings": [
+            {
+              "bottom": 0.95,
+              "height": 1.1,
+              "kind": "window",
+              "offset": 1,
+              "width": 1.1
+            }
+          ],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 4,
+            "z": 7.2
+          },
+          "b": {
+            "x": 7.2,
+            "z": 7.2
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-s-bath",
+          "openings": [],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 7.2,
+            "z": 7.2
+          },
+          "b": {
+            "x": 11,
+            "z": 7.2
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-s-hall",
+          "openings": [],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 0
+          },
+          "b": {
+            "x": 0,
+            "z": 4.2
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "photo-5",
+              "photo-6",
+              "video-tour"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-w-lounge",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2.1,
+              "kind": "door",
+              "offset": 1,
+              "width": 1.8
+            }
+          ],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 4.2
+          },
+          "b": {
+            "x": 0,
+            "z": 7.2
+          },
+          "color": "#D9D9D9",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "photo-2",
+              "video-tour"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-w-kitchen",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 1.2,
+              "width": 0.85
+            },
+            {
+              "bottom": 0.9,
+              "height": 1.1,
+              "kind": "window",
+              "offset": 2.35,
+              "width": 0.55
+            }
+          ],
+          "thickness": 0.25
+        },
+        {
+          "a": {
+            "x": 5,
+            "z": 0
+          },
+          "b": {
+            "x": 5,
+            "z": 4.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-lounge-bed2",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 7.1,
+            "z": 0
+          },
+          "b": {
+            "x": 7.1,
+            "z": 3.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bed2-bed1-n",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 6.6,
+            "z": 3.2
+          },
+          "b": {
+            "x": 7.1,
+            "z": 3.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bed-notch-h",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 6.6,
+            "z": 3.2
+          },
+          "b": {
+            "x": 6.6,
+            "z": 4.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bed-notch-v",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 0,
+            "z": 4.2
+          },
+          "b": {
+            "x": 4,
+            "z": 4.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-lounge-kitchen",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 4,
+            "z": 4.2
+          },
+          "b": {
+            "x": 5,
+            "z": 4.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "video-tour"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-lounge-hall",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 0.1,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 5,
+            "z": 4.2
+          },
+          "b": {
+            "x": 6.6,
+            "z": 4.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "video-tour"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bed2-hall",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 0.7,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 6.6,
+            "z": 4.2
+          },
+          "b": {
+            "x": 8.5,
+            "z": 4.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "video-tour"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bed1-hall",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 0.9,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 4,
+            "z": 4.2
+          },
+          "b": {
+            "x": 4,
+            "z": 5.5
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "photo-3",
+              "video-tour"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-kitchen-hall",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 0.25,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 4,
+            "z": 5.5
+          },
+          "b": {
+            "x": 4,
+            "z": 7.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-kitchen-bath",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 4,
+            "z": 5.5
+          },
+          "b": {
+            "x": 6.5,
+            "z": 5.5
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "video-tour"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-hall-bath",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 1.4,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 6.5,
+            "z": 5.5
+          },
+          "b": {
+            "x": 7.2,
+            "z": 5.5
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-hall-bathstore",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 6.5,
+            "z": 5.5
+          },
+          "b": {
+            "x": 6.5,
+            "z": 7.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bath-store",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 0.9,
+              "width": 0.7
+            }
+          ],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 7.2,
+            "z": 5.5
+          },
+          "b": {
+            "x": 7.2,
+            "z": 7.2
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-store-hall-e",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 8.5,
+            "z": 4.2
+          },
+          "b": {
+            "x": 8.5,
+            "z": 5.5
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bed1-hall-w",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 8.5,
+            "z": 5.5
+          },
+          "b": {
+            "x": 11,
+            "z": 5.5
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-bed1-store",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 8.5,
+            "z": 5.5
+          },
+          "b": {
+            "x": 8.5,
+            "z": 6.05
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-store-hall-w",
+          "openings": [],
+          "thickness": 0.1
+        },
+        {
+          "a": {
+            "x": 8.5,
+            "z": 6.05
+          },
+          "b": {
+            "x": 11,
+            "z": 6.05
+          },
+          "color": "#E6E6E6",
+          "evidence": {
+            "basis": "estimated",
+            "sources": [
+              "floorplan",
+              "video-tour"
+            ]
+          },
+          "height": 2.4,
+          "id": "w-store-hall-s",
+          "openings": [
+            {
+              "bottom": 0,
+              "height": 2,
+              "kind": "door",
+              "offset": 0.6,
+              "width": 0.8
+            }
+          ],
+          "thickness": 0.1
+        }
+      ],
+      "appearance": {
+        "materials": [
+          {
+            "color": "#D3D3CF",
+            "id": "mat-carpet-lounge",
+            "pattern": "carpet",
+            "repeat": 0.3,
+            "roughness": 0.95
+          },
+          {
+            "color": "#C7C7C4",
+            "id": "mat-carpet-bed",
+            "pattern": "carpet",
+            "repeat": 0.3,
+            "roughness": 0.95
+          },
+          {
+            "color": "#C9BBA6",
+            "id": "mat-kitchen-floor",
+            "pattern": "wood",
+            "repeat": 1.2,
+            "roughness": 0.7
+          },
+          {
+            "color": "#87A3B8",
+            "id": "mat-bath-floor",
+            "pattern": "tile",
+            "repeat": 0.4,
+            "roughness": 0.5
+          },
+          {
+            "color": "#E4D5B7",
+            "id": "mat-bath-tile",
+            "pattern": "tile",
+            "repeat": 0.35,
+            "roughness": 0.45
+          },
+          {
+            "color": "#DDD9D2",
+            "id": "mat-wall-greige",
+            "pattern": "plaster",
+            "repeat": 0.5,
+            "roughness": 0.9
+          },
+          {
+            "color": "#E7E7E3",
+            "id": "mat-wall-kitchen",
+            "pattern": "plaster",
+            "repeat": 0.5,
+            "roughness": 0.9
+          },
+          {
+            "color": "#F4F4F0",
+            "id": "mat-white-shaker",
+            "pattern": "plain",
+            "repeat": 0.4,
+            "roughness": 0.6
+          },
+          {
+            "color": "#8E8E8A",
+            "id": "mat-worktop",
+            "pattern": "stone",
+            "repeat": 0.8,
+            "roughness": 0.45
+          },
+          {
+            "color": "#C9C9C9",
+            "id": "mat-steel",
+            "pattern": "metal",
+            "repeat": 0.3,
+            "roughness": 0.35
+          },
+          {
+            "color": "#2B2B2E",
+            "id": "mat-black-glass",
+            "pattern": "glass",
+            "repeat": 0.3,
+            "roughness": 0.25
+          },
+          {
+            "color": "#FFFFFF",
+            "id": "mat-white-ceramic",
+            "pattern": "plain",
+            "repeat": 0.3,
+            "roughness": 0.3
+          },
+          {
+            "color": "#F7F7F7",
+            "id": "mat-radiator",
+            "pattern": "metal",
+            "repeat": 0.3,
+            "roughness": 0.5
+          },
+          {
+            "color": "#9A9A96",
+            "id": "mat-curtain-grey",
+            "pattern": "fabric",
+            "repeat": 0.25,
+            "roughness": 0.95
+          },
+          {
+            "color": "#9B8E96",
+            "id": "mat-curtain-mauve",
+            "pattern": "fabric",
+            "repeat": 0.25,
+            "roughness": 0.95
+          },
+          {
+            "color": "#D8D8D8",
+            "id": "mat-shade-fabric",
+            "pattern": "fabric",
+            "repeat": 0.2,
+            "roughness": 0.9
+          }
+        ],
+        "notes": [
+          "Estimated visual reconstruction from photos and video; dimensions, exact positions and orientations are not measured.",
+          "Kitchen run orientation inferred from photo-2 looking towards the external door and photo-3 reverse view; hidden carcasses, pipework and rear faces omitted.",
+          "Bathroom bath position follows the floor plan; photo-7 is a close cropped view and does not show the full bath and shower screen, which are supplemented by video-tour.",
+          "Lounge has two radiators and grey curtains at the west sliding doors visible in photo-5 and photo-6; exact radiator-to-window alignment is approximate.",
+          "No freestanding furniture was visible; unfitted furniture, small accessories, sockets and wall lights are omitted.",
+          "Bathroom floor is a blue, cream and grey patterned tile in photo-7, represented here by a single averaged tile material colour as patterns are limited to the supplied pattern list."
+        ],
+        "objects": [
+          {
+            "id": "kitchen-base-south",
+            "label": "Fitted kitchen base units, worktop, sink, hob and oven along south wall",
+            "parts": [
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 0,
+                  "y": 0.43,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 3.6,
+                  "y": 0.86,
+                  "z": 0.58
+                }
+              },
+              {
+                "materialId": "mat-worktop",
+                "position": {
+                  "x": 0,
+                  "y": 0.9,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 3.7,
+                  "y": 0.04,
+                  "z": 0.64
+                }
+              },
+              {
+                "materialId": "mat-worktop",
+                "position": {
+                  "x": 0,
+                  "y": 0.78,
+                  "z": 0.3
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 3.7,
+                  "y": 0.22,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 0,
+                  "y": 0.06,
+                  "z": -0.28
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 3.5,
+                  "y": 0.12,
+                  "z": 0.04
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -1.35,
+                  "y": 0.45,
+                  "z": -0.3
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.75,
+                  "y": 0.72,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -0.5,
+                  "y": 0.45,
+                  "z": -0.3
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.75,
+                  "y": 0.72,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 0.35,
+                  "y": 0.45,
+                  "z": -0.3
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.75,
+                  "y": 0.72,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 1.35,
+                  "y": 0.45,
+                  "z": -0.3
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.75,
+                  "y": 0.72,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -1.35,
+                  "y": 0.5,
+                  "z": -0.33
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.22,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.5,
+                  "y": 0.5,
+                  "z": -0.33
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.22,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.35,
+                  "y": 0.5,
+                  "z": -0.33
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.22,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -1.25,
+                  "y": 0.9,
+                  "z": -0.05
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.85,
+                  "y": 0.03,
+                  "z": 0.45
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -1.35,
+                  "y": 0.88,
+                  "z": -0.05
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.55,
+                  "y": 0.05,
+                  "z": 0.35
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -1.25,
+                  "y": 1.05,
+                  "z": 0.18
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.28,
+                  "z": 0.04
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -1.25,
+                  "y": 1.18,
+                  "z": 0.05
+                },
+                "rotation": {
+                  "x": 1.35,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.28,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-black-glass",
+                "position": {
+                  "x": 0.95,
+                  "y": 0.92,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.58,
+                  "y": 0.02,
+                  "z": 0.52
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.75,
+                  "y": 0.94,
+                  "z": -0.12
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.16,
+                  "y": 0.02,
+                  "z": 0.16
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 1.15,
+                  "y": 0.94,
+                  "z": 0.12
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.14,
+                  "y": 0.02,
+                  "z": 0.14
+                }
+              },
+              {
+                "materialId": "mat-black-glass",
+                "position": {
+                  "x": 0.95,
+                  "y": 0.42,
+                  "z": -0.31
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.58,
+                  "y": 0.55,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.95,
+                  "y": 0.78,
+                  "z": -0.32
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.58,
+                  "y": 0.12,
+                  "z": 0.04
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.95,
+                  "y": 0.68,
+                  "z": -0.34
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.45,
+                  "y": 0.04,
+                  "z": 0.03
+                }
+              }
+            ],
+            "position": {
+              "x": 2.05,
+              "y": 0,
+              "z": 6.82
+            },
+            "roomId": "kitchen",
+            "rotation": 0,
+            "size": {
+              "x": 3.8,
+              "y": 1.22,
+              "z": 0.76
+            },
+            "sources": [
+              "photo-2",
+              "photo-3",
+              "floorplan"
+            ]
+          },
+          {
+            "id": "kitchen-wall-south",
+            "label": "White Shaker wall units and extractor over south kitchen run",
+            "parts": [
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -1.2,
+                  "y": 0.42,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1,
+                  "y": 0.84,
+                  "z": 0.34
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -0.1,
+                  "y": 0.42,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1.1,
+                  "y": 0.84,
+                  "z": 0.34
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 1.05,
+                  "y": 0.42,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1.1,
+                  "y": 0.84,
+                  "z": 0.34
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -1.2,
+                  "y": 0.42,
+                  "z": -0.18
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.92,
+                  "y": 0.72,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -0.35,
+                  "y": 0.42,
+                  "z": -0.18
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.48,
+                  "y": 0.72,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 0.15,
+                  "y": 0.42,
+                  "z": -0.18
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.48,
+                  "y": 0.72,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 0.8,
+                  "y": 0.42,
+                  "z": -0.18
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.48,
+                  "y": 0.72,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 1.3,
+                  "y": 0.42,
+                  "z": -0.18
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.48,
+                  "y": 0.72,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.62,
+                  "y": 0.42,
+                  "z": -0.2
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.22,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.22,
+                  "y": 0.42,
+                  "z": -0.2
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.22,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.55,
+                  "y": 0.42,
+                  "z": -0.2
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.22,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 1.05,
+                  "y": 0.42,
+                  "z": -0.2
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.22,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -1.4,
+                  "y": 0.55,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.5,
+                  "y": 0.55,
+                  "z": 0.34
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -1.4,
+                  "y": 0.22,
+                  "z": -0.05
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.5,
+                  "y": 0.06,
+                  "z": 0.34
+                }
+              }
+            ],
+            "position": {
+              "x": 2.45,
+              "y": 1.42,
+              "z": 6.98
+            },
+            "roomId": "kitchen",
+            "rotation": 0,
+            "size": {
+              "x": 3.4,
+              "y": 0.9,
+              "z": 0.44
+            },
+            "sources": [
+              "photo-2",
+              "photo-3"
+            ]
+          },
+          {
+            "id": "kitchen-tall-north",
+            "label": "Full-height white kitchen cupboards on north side",
+            "parts": [
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 0,
+                  "y": 1.05,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1.8,
+                  "y": 2.1,
+                  "z": 0.58
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -0.68,
+                  "y": 1.45,
+                  "z": -0.3
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.42,
+                  "y": 1.05,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -0.23,
+                  "y": 1.45,
+                  "z": -0.3
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.42,
+                  "y": 1.05,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 0.23,
+                  "y": 1.45,
+                  "z": -0.3
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.42,
+                  "y": 1.05,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 0.68,
+                  "y": 1.45,
+                  "z": -0.3
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.42,
+                  "y": 1.05,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -0.68,
+                  "y": 0.48,
+                  "z": -0.3
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.42,
+                  "y": 0.85,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -0.23,
+                  "y": 0.48,
+                  "z": -0.3
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.42,
+                  "y": 0.85,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 0.23,
+                  "y": 0.48,
+                  "z": -0.3
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.42,
+                  "y": 0.85,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 0.68,
+                  "y": 0.48,
+                  "z": -0.3
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.42,
+                  "y": 0.85,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.45,
+                  "y": 1.45,
+                  "z": -0.33
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.24,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0,
+                  "y": 1.45,
+                  "z": -0.33
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.24,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.45,
+                  "y": 1.45,
+                  "z": -0.33
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.24,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.45,
+                  "y": 0.55,
+                  "z": -0.33
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.24,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.45,
+                  "y": 0.55,
+                  "z": -0.33
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.24,
+                  "z": 0.03
+                }
+              }
+            ],
+            "position": {
+              "x": 3,
+              "y": 0,
+              "z": 4.55
+            },
+            "roomId": "kitchen",
+            "rotation": 3.14159,
+            "size": {
+              "x": 1.9,
+              "y": 2.1,
+              "z": 0.7
+            },
+            "sources": [
+              "photo-2",
+              "photo-3",
+              "video-tour"
+            ]
+          },
+          {
+            "id": "kitchen-drawers-east",
+            "label": "White drawer and cupboard unit on kitchen return",
+            "parts": [
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 0,
+                  "y": 0.43,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1.3,
+                  "y": 0.86,
+                  "z": 0.56
+                }
+              },
+              {
+                "materialId": "mat-worktop",
+                "position": {
+                  "x": 0,
+                  "y": 0.9,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1.36,
+                  "y": 0.04,
+                  "z": 0.62
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -0.33,
+                  "y": 0.72,
+                  "z": -0.29
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.58,
+                  "y": 0.18,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -0.33,
+                  "y": 0.52,
+                  "z": -0.29
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.58,
+                  "y": 0.18,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -0.33,
+                  "y": 0.32,
+                  "z": -0.29
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.58,
+                  "y": 0.18,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": -0.33,
+                  "y": 0.13,
+                  "z": -0.29
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.58,
+                  "y": 0.16,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-white-shaker",
+                "position": {
+                  "x": 0.35,
+                  "y": 0.45,
+                  "z": -0.29
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.58,
+                  "y": 0.72,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.33,
+                  "y": 0.72,
+                  "z": -0.32
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.3,
+                  "y": 0.03,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.33,
+                  "y": 0.52,
+                  "z": -0.32
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.3,
+                  "y": 0.03,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.33,
+                  "y": 0.32,
+                  "z": -0.32
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.3,
+                  "y": 0.03,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.33,
+                  "y": 0.13,
+                  "z": -0.32
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.3,
+                  "y": 0.03,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.08,
+                  "y": 0.5,
+                  "z": -0.32
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.22,
+                  "z": 0.03
+                }
+              }
+            ],
+            "position": {
+              "x": 3.68,
+              "y": 0,
+              "z": 5.45
+            },
+            "roomId": "kitchen",
+            "rotation": -1.5708,
+            "size": {
+              "x": 1.4,
+              "y": 0.92,
+              "z": 0.68
+            },
+            "sources": [
+              "photo-3",
+              "video-tour"
+            ]
+          },
+          {
+            "id": "kitchen-washing-machine",
+            "label": "White front-load washing machine at end of kitchen run",
+            "parts": [
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": 0,
+                  "y": 0.43,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.6,
+                  "y": 0.86,
+                  "z": 0.58
+                }
+              },
+              {
+                "materialId": "mat-black-glass",
+                "position": {
+                  "x": 0,
+                  "y": 0.45,
+                  "z": -0.3
+                },
+                "rotation": {
+                  "x": 1.5708,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.42,
+                  "y": 0.03,
+                  "z": 0.42
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0,
+                  "y": 0.45,
+                  "z": -0.31
+                },
+                "rotation": {
+                  "x": 1.5708,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.48,
+                  "y": 0.02,
+                  "z": 0.48
+                }
+              },
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": 0,
+                  "y": 0.78,
+                  "z": -0.3
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.55,
+                  "y": 0.12,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.18,
+                  "y": 0.78,
+                  "z": -0.3
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.06,
+                  "y": 0.03,
+                  "z": 0.06
+                }
+              }
+            ],
+            "position": {
+              "x": 0.42,
+              "y": 0,
+              "z": 6.86
+            },
+            "roomId": "kitchen",
+            "rotation": 0,
+            "size": {
+              "x": 0.62,
+              "y": 0.88,
+              "z": 0.68
+            },
+            "sources": [
+              "photo-2",
+              "video-tour"
+            ]
+          },
+          {
+            "id": "bath",
+            "label": "White bath with panel and glass shower screen",
+            "parts": [
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": 0,
+                  "y": 0.28,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.68,
+                  "y": 0.56,
+                  "z": 1.68
+                }
+              },
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": 0,
+                  "y": 0.56,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.7,
+                  "y": 0.05,
+                  "z": 1.7
+                }
+              },
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": 0.36,
+                  "y": 0.27,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.5,
+                  "z": 1.6
+                }
+              },
+              {
+                "materialId": "mat-black-glass",
+                "position": {
+                  "x": 0.32,
+                  "y": 1.05,
+                  "z": -0.35
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.02,
+                  "y": 0.95,
+                  "z": 0.85
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.32,
+                  "y": 1.05,
+                  "z": 0.08
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.03,
+                  "y": 1,
+                  "z": 0.04
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.18,
+                  "y": 0.68,
+                  "z": -0.75
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.05,
+                  "y": 0.12,
+                  "z": 0.05
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.1,
+                  "y": 1.25,
+                  "z": -0.78
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.7,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.1,
+                  "y": 1.62,
+                  "z": -0.78
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.14,
+                  "y": 0.05,
+                  "z": 0.14
+                }
+              }
+            ],
+            "position": {
+              "x": 4.4,
+              "y": 0,
+              "z": 6.35
+            },
+            "roomId": "bathroom",
+            "rotation": 0,
+            "size": {
+              "x": 0.78,
+              "y": 1.7,
+              "z": 1.7
+            },
+            "sources": [
+              "photo-7",
+              "video-tour",
+              "floorplan"
+            ]
+          },
+          {
+            "id": "wc",
+            "label": "White close-coupled toilet",
+            "parts": [
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": 0,
+                  "y": 0.2,
+                  "z": 0.05
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.32,
+                  "y": 0.4,
+                  "z": 0.32
+                }
+              },
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": 0,
+                  "y": 0.42,
+                  "z": -0.02
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "sphere",
+                "size": {
+                  "x": 0.4,
+                  "y": 0.28,
+                  "z": 0.5
+                }
+              },
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": 0,
+                  "y": 0.56,
+                  "z": -0.02
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.42,
+                  "y": 0.05,
+                  "z": 0.52
+                }
+              },
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": 0,
+                  "y": 0.72,
+                  "z": 0.22
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.44,
+                  "y": 0.38,
+                  "z": 0.16
+                }
+              },
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": 0,
+                  "y": 0.93,
+                  "z": 0.22
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.46,
+                  "y": 0.04,
+                  "z": 0.18
+                }
+              }
+            ],
+            "position": {
+              "x": 5.05,
+              "y": 0,
+              "z": 6.82
+            },
+            "roomId": "bathroom",
+            "rotation": 0,
+            "size": {
+              "x": 0.46,
+              "y": 0.95,
+              "z": 0.62
+            },
+            "sources": [
+              "photo-7",
+              "video-tour",
+              "floorplan"
+            ]
+          },
+          {
+            "id": "basin",
+            "label": "White pedestal wash basin with chrome lever tap and glass shelf above",
+            "parts": [
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": 0,
+                  "y": 0.4,
+                  "z": 0.05
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.22,
+                  "y": 0.8,
+                  "z": 0.22
+                }
+              },
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": 0,
+                  "y": 0.84,
+                  "z": -0.02
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "sphere",
+                "size": {
+                  "x": 0.56,
+                  "y": 0.18,
+                  "z": 0.46
+                }
+              },
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": 0,
+                  "y": 0.88,
+                  "z": -0.02
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.56,
+                  "y": 0.05,
+                  "z": 0.46
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0,
+                  "y": 0.98,
+                  "z": 0.16
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.16,
+                  "z": 0.04
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.06,
+                  "y": 1.06,
+                  "z": 0.16
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 1.1
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.025,
+                  "y": 0.14,
+                  "z": 0.025
+                }
+              },
+              {
+                "materialId": "mat-black-glass",
+                "position": {
+                  "x": 0,
+                  "y": 1.55,
+                  "z": 0.2
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.55,
+                  "y": 0.02,
+                  "z": 0.12
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.24,
+                  "y": 1.52,
+                  "z": 0.2
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.06,
+                  "z": 0.04
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.24,
+                  "y": 1.52,
+                  "z": 0.2
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.04,
+                  "y": 0.06,
+                  "z": 0.04
+                }
+              }
+            ],
+            "position": {
+              "x": 5.75,
+              "y": 0,
+              "z": 6.86
+            },
+            "roomId": "bathroom",
+            "rotation": 0,
+            "size": {
+              "x": 0.58,
+              "y": 1.6,
+              "z": 0.54
+            },
+            "sources": [
+              "photo-7",
+              "video-tour",
+              "floorplan"
+            ]
+          },
+          {
+            "id": "towel-rail-bath",
+            "label": "Chrome ladder towel rail beside bath",
+            "parts": [
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.22,
+                  "y": 0.65,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.035,
+                  "y": 1.3,
+                  "z": 0.035
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.22,
+                  "y": 0.65,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.035,
+                  "y": 1.3,
+                  "z": 0.035
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0,
+                  "y": 1.2,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 1.5708
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.44,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0,
+                  "y": 0.95,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 1.5708
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.44,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0,
+                  "y": 0.7,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 1.5708
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.44,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0,
+                  "y": 0.45,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 1.5708
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.44,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0,
+                  "y": 0.2,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 1.5708
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.44,
+                  "z": 0.03
+                }
+              }
+            ],
+            "position": {
+              "x": 4.85,
+              "y": 0.25,
+              "z": 5.62
+            },
+            "roomId": "bathroom",
+            "rotation": 0,
+            "size": {
+              "x": 0.5,
+              "y": 1.35,
+              "z": 0.08
+            },
+            "sources": [
+              "video-tour"
+            ]
+          },
+          {
+            "id": "radiator-lounge-north",
+            "label": "White panel radiator under lounge north window",
+            "parts": [
+              {
+                "materialId": "mat-radiator",
+                "position": {
+                  "x": 0,
+                  "y": 0.35,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1.35,
+                  "y": 0.55,
+                  "z": 0.09
+                }
+              },
+              {
+                "materialId": "mat-radiator",
+                "position": {
+                  "x": 0,
+                  "y": 0.64,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1.38,
+                  "y": 0.04,
+                  "z": 0.11
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.62,
+                  "y": 0.08,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.16,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.62,
+                  "y": 0.08,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.16,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": 0.68,
+                  "y": 0.18,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.05,
+                  "y": 0.08,
+                  "z": 0.05
+                }
+              }
+            ],
+            "position": {
+              "x": 1.6,
+              "y": 0.12,
+              "z": 0.16
+            },
+            "roomId": "lounge",
+            "rotation": 0,
+            "size": {
+              "x": 1.45,
+              "y": 0.68,
+              "z": 0.12
+            },
+            "sources": [
+              "photo-6",
+              "video-tour"
+            ]
+          },
+          {
+            "id": "radiator-lounge-east",
+            "label": "White panel radiator on lounge east wall",
+            "parts": [
+              {
+                "materialId": "mat-radiator",
+                "position": {
+                  "x": 0,
+                  "y": 0.35,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1.45,
+                  "y": 0.55,
+                  "z": 0.09
+                }
+              },
+              {
+                "materialId": "mat-radiator",
+                "position": {
+                  "x": 0,
+                  "y": 0.64,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1.48,
+                  "y": 0.04,
+                  "z": 0.11
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.66,
+                  "y": 0.08,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.16,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.66,
+                  "y": 0.08,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.16,
+                  "z": 0.03
+                }
+              }
+            ],
+            "position": {
+              "x": 4.86,
+              "y": 0.12,
+              "z": 2.4
+            },
+            "roomId": "lounge",
+            "rotation": 1.5708,
+            "size": {
+              "x": 1.55,
+              "y": 0.68,
+              "z": 0.12
+            },
+            "sources": [
+              "photo-5",
+              "video-tour"
+            ]
+          },
+          {
+            "id": "radiator-bed1",
+            "label": "White panel radiator under Bedroom 1 window",
+            "parts": [
+              {
+                "materialId": "mat-radiator",
+                "position": {
+                  "x": 0,
+                  "y": 0.35,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1.35,
+                  "y": 0.55,
+                  "z": 0.09
+                }
+              },
+              {
+                "materialId": "mat-radiator",
+                "position": {
+                  "x": 0,
+                  "y": 0.64,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1.38,
+                  "y": 0.04,
+                  "z": 0.11
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.62,
+                  "y": 0.08,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.16,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.62,
+                  "y": 0.08,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.16,
+                  "z": 0.03
+                }
+              }
+            ],
+            "position": {
+              "x": 9.55,
+              "y": 0.12,
+              "z": 0.16
+            },
+            "roomId": "bed1",
+            "rotation": 0,
+            "size": {
+              "x": 1.45,
+              "y": 0.68,
+              "z": 0.12
+            },
+            "sources": [
+              "photo-9",
+              "video-tour"
+            ]
+          },
+          {
+            "id": "radiator-bed2",
+            "label": "White panel radiator under Bedroom 2 window",
+            "parts": [
+              {
+                "materialId": "mat-radiator",
+                "position": {
+                  "x": 0,
+                  "y": 0.35,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1.05,
+                  "y": 0.55,
+                  "z": 0.09
+                }
+              },
+              {
+                "materialId": "mat-radiator",
+                "position": {
+                  "x": 0,
+                  "y": 0.64,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 1.08,
+                  "y": 0.04,
+                  "z": 0.11
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.48,
+                  "y": 0.08,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.16,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0.48,
+                  "y": 0.08,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.16,
+                  "z": 0.03
+                }
+              }
+            ],
+            "position": {
+              "x": 6.2,
+              "y": 0.12,
+              "z": 0.16
+            },
+            "roomId": "bed2",
+            "rotation": 0,
+            "size": {
+              "x": 1.15,
+              "y": 0.68,
+              "z": 0.12
+            },
+            "sources": [
+              "photo-10",
+              "video-tour"
+            ]
+          },
+          {
+            "id": "radiator-kitchen",
+            "label": "White panel radiator in kitchen",
+            "parts": [
+              {
+                "materialId": "mat-radiator",
+                "position": {
+                  "x": 0,
+                  "y": 0.35,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.75,
+                  "y": 0.55,
+                  "z": 0.09
+                }
+              },
+              {
+                "materialId": "mat-radiator",
+                "position": {
+                  "x": 0,
+                  "y": 0.64,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.78,
+                  "y": 0.04,
+                  "z": 0.11
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": -0.33,
+                  "y": 0.08,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 0.16,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": -0.38,
+                  "y": 0.2,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.05,
+                  "y": 0.08,
+                  "z": 0.05
+                }
+              }
+            ],
+            "position": {
+              "x": 0.16,
+              "y": 0.12,
+              "z": 5.2
+            },
+            "roomId": "kitchen",
+            "rotation": 1.5708,
+            "size": {
+              "x": 0.85,
+              "y": 0.68,
+              "z": 0.12
+            },
+            "sources": [
+              "photo-3",
+              "video-tour"
+            ]
+          },
+          {
+            "id": "curtains-lounge-west",
+            "label": "Grey full-length curtains at lounge sliding doors",
+            "parts": [
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0,
+                  "y": 2.18,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 1.5708,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 2.2,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-curtain-grey",
+                "position": {
+                  "x": 0,
+                  "y": 1.05,
+                  "z": -0.95
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.14,
+                  "y": 2.1,
+                  "z": 0.34
+                }
+              },
+              {
+                "materialId": "mat-curtain-grey",
+                "position": {
+                  "x": 0.04,
+                  "y": 1.02,
+                  "z": -0.88
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0.2,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.1,
+                  "y": 2.05,
+                  "z": 0.18
+                }
+              },
+              {
+                "materialId": "mat-curtain-grey",
+                "position": {
+                  "x": 0,
+                  "y": 1.05,
+                  "z": 0.95
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.14,
+                  "y": 2.1,
+                  "z": 0.34
+                }
+              },
+              {
+                "materialId": "mat-curtain-grey",
+                "position": {
+                  "x": 0.04,
+                  "y": 1.02,
+                  "z": 0.88
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": -0.2,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.1,
+                  "y": 2.05,
+                  "z": 0.18
+                }
+              }
+            ],
+            "position": {
+              "x": 0.18,
+              "y": 0,
+              "z": 1.9
+            },
+            "roomId": "lounge",
+            "rotation": 0,
+            "size": {
+              "x": 0.2,
+              "y": 2.25,
+              "z": 2.3
+            },
+            "sources": [
+              "photo-5",
+              "photo-6",
+              "video-tour"
+            ]
+          },
+          {
+            "id": "curtains-bed1",
+            "label": "Mauve-grey tied curtains at Bedroom 1 window",
+            "parts": [
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0,
+                  "y": 1.62,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 1.5708
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.03,
+                  "y": 2,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-curtain-mauve",
+                "position": {
+                  "x": -0.82,
+                  "y": 0.78,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.28,
+                  "y": 1.55,
+                  "z": 0.12
+                }
+              },
+              {
+                "materialId": "mat-curtain-mauve",
+                "position": {
+                  "x": 0.82,
+                  "y": 0.78,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.28,
+                  "y": 1.55,
+                  "z": 0.12
+                }
+              },
+              {
+                "materialId": "mat-black-glass",
+                "position": {
+                  "x": -0.82,
+                  "y": 0.62,
+                  "z": -0.07
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.3,
+                  "y": 0.05,
+                  "z": 0.03
+                }
+              },
+              {
+                "materialId": "mat-black-glass",
+                "position": {
+                  "x": 0.82,
+                  "y": 0.62,
+                  "z": -0.07
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "box",
+                "size": {
+                  "x": 0.3,
+                  "y": 0.05,
+                  "z": 0.03
+                }
+              }
+            ],
+            "position": {
+              "x": 9.55,
+              "y": 0.55,
+              "z": 0.18
+            },
+            "roomId": "bed1",
+            "rotation": 0,
+            "size": {
+              "x": 2,
+              "y": 1.7,
+              "z": 0.18
+            },
+            "sources": [
+              "photo-9",
+              "video-tour"
+            ]
+          },
+          {
+            "id": "pendant-lounge",
+            "label": "Grey fabric drum pendant light in lounge",
+            "parts": [
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0,
+                  "y": 0.32,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.02,
+                  "y": 0.18,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-shade-fabric",
+                "position": {
+                  "x": 0,
+                  "y": 0.14,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.42,
+                  "y": 0.28,
+                  "z": 0.42
+                }
+              },
+              {
+                "materialId": "mat-white-ceramic",
+                "position": {
+                  "x": 0,
+                  "y": 0.01,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.38,
+                  "y": 0.02,
+                  "z": 0.38
+                }
+              }
+            ],
+            "position": {
+              "x": 2.5,
+              "y": 2.02,
+              "z": 2.1
+            },
+            "roomId": "lounge",
+            "rotation": 0,
+            "size": {
+              "x": 0.45,
+              "y": 0.44,
+              "z": 0.45
+            },
+            "sources": [
+              "photo-5",
+              "photo-6"
+            ]
+          },
+          {
+            "id": "pendant-bed1",
+            "label": "Crystal-effect drum pendant light in Bedroom 1",
+            "parts": [
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0,
+                  "y": 0.32,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.02,
+                  "y": 0.18,
+                  "z": 0.02
+                }
+              },
+              {
+                "materialId": "mat-black-glass",
+                "position": {
+                  "x": 0,
+                  "y": 0.14,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.3,
+                  "y": 0.28,
+                  "z": 0.3
+                }
+              },
+              {
+                "materialId": "mat-steel",
+                "position": {
+                  "x": 0,
+                  "y": 0.29,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "shape": "cylinder",
+                "size": {
+                  "x": 0.32,
+                  "y": 0.03,
+                  "z": 0.32
+                }
+              }
+            ],
+            "position": {
+              "x": 9.2,
+              "y": 2.02,
+              "z": 2.4
+            },
+            "roomId": "bed1",
+            "rotation": 0,
+            "size": {
+              "x": 0.34,
+              "y": 0.44,
+              "z": 0.34
+            },
+            "sources": [
+              "photo-9"
+            ]
+          }
+        ],
+        "surfaces": [
+          {
+            "materialId": "mat-carpet-lounge",
+            "sources": [
+              "photo-5",
+              "photo-6"
+            ],
+            "targetId": "lounge"
+          },
+          {
+            "materialId": "mat-carpet-bed",
+            "sources": [
+              "photo-10"
+            ],
+            "targetId": "bed2"
+          },
+          {
+            "materialId": "mat-carpet-bed",
+            "sources": [
+              "photo-8",
+              "photo-9"
+            ],
+            "targetId": "bed1"
+          },
+          {
+            "materialId": "mat-kitchen-floor",
+            "sources": [
+              "photo-2",
+              "photo-3"
+            ],
+            "targetId": "kitchen"
+          },
+          {
+            "materialId": "mat-carpet-bed",
+            "sources": [
+              "video-tour"
+            ],
+            "targetId": "hall"
+          },
+          {
+            "materialId": "mat-bath-floor",
+            "sources": [
+              "photo-7"
+            ],
+            "targetId": "bathroom"
+          },
+          {
+            "materialId": "mat-wall-greige",
+            "sources": [
+              "photo-5",
+              "photo-6"
+            ],
+            "targetId": "w-n-lounge"
+          },
+          {
+            "materialId": "mat-wall-greige",
+            "sources": [
+              "photo-5",
+              "photo-6"
+            ],
+            "targetId": "w-w-lounge"
+          },
+          {
+            "materialId": "mat-wall-greige",
+            "sources": [
+              "photo-6"
+            ],
+            "targetId": "w-lounge-bed2"
+          },
+          {
+            "materialId": "mat-wall-greige",
+            "sources": [
+              "photo-10"
+            ],
+            "targetId": "w-n-bed2"
+          },
+          {
+            "materialId": "mat-wall-greige",
+            "sources": [
+              "photo-9"
+            ],
+            "targetId": "w-n-bed1"
+          },
+          {
+            "materialId": "mat-wall-greige",
+            "sources": [
+              "photo-8",
+              "photo-9"
+            ],
+            "targetId": "w-e-bed1"
+          },
+          {
+            "materialId": "mat-wall-greige",
+            "sources": [
+              "photo-8"
+            ],
+            "targetId": "w-bed2-bed1-n"
+          },
+          {
+            "materialId": "mat-wall-kitchen",
+            "sources": [
+              "photo-2",
+              "photo-3"
+            ],
+            "targetId": "w-s-kitchen"
+          },
+          {
+            "materialId": "mat-wall-kitchen",
+            "sources": [
+              "photo-2"
+            ],
+            "targetId": "w-w-kitchen"
+          },
+          {
+            "materialId": "mat-wall-kitchen",
+            "sources": [
+              "photo-3"
+            ],
+            "targetId": "w-lounge-kitchen"
+          },
+          {
+            "materialId": "mat-bath-tile",
+            "sources": [
+              "photo-7",
+              "video-tour"
+            ],
+            "targetId": "w-s-bath"
+          },
+          {
+            "materialId": "mat-bath-tile",
+            "sources": [
+              "photo-7",
+              "video-tour"
+            ],
+            "targetId": "w-hall-bath"
+          },
+          {
+            "materialId": "mat-bath-tile",
+            "sources": [
+              "video-tour"
+            ],
+            "targetId": "w-kitchen-bath"
+          },
+          {
+            "materialId": "mat-bath-tile",
+            "sources": [
+              "video-tour"
+            ],
+            "targetId": "w-bath-store"
+          },
+          {
+            "materialId": "mat-wall-greige",
+            "sources": [
+              "video-tour"
+            ],
+            "targetId": "w-e-hall"
+          },
+          {
+            "materialId": "mat-wall-greige",
+            "sources": [
+              "video-tour"
+            ],
+            "targetId": "w-s-hall"
+          }
+        ]
+      }
+    },
+    "explanation": "Appearance reconstructed only from the supplied listing photos, floor plan and walkthrough video. The property is shown unfurnished except for fitted kitchen and bathroom fixtures, radiators, curtains and pendant shades, so no freestanding furniture has been added. Colours are averaged from the photographs: pale greige plaster and light grey carpet in living and bedrooms, light wood-effect kitchen flooring, white Shaker kitchen cabinetry with grey worktops, and beige wall tiles with blue patterned floor tiles in the bathroom. Object positions align to the fixed room polygons and wall openings, with kitchen units on the south run and tall units opposite as seen in photos 2-3, and bathroom fixtures following the plan bath position supplemented by photo 7 and the video. All object bounds have been enlarged or parts repositioned so every part lies within its declared object bounding box, including the kitchen tap, hob, handles and extractor."
+  },
+  "via": "model",
+  "validation": [],
+  "log": {
+    "agent": "muse",
+    "task": "muse.unitAppearance",
+    "inputHash": "44090f7958ad34e115c02bbbf61acc399169e0988f7fea9d709b54017163d1fd",
+    "outcome": "model",
+    "cited": [],
+    "model": "muse-wonder-1.0",
+    "attempts": 2,
+    "errors": [
+      "Attempt 1: kitchen-base-south: part outside object bounds"
+    ],
+    "latencyMs": 170949,
+    "usage": {
+      "inputTokens": 117811,
+      "outputTokens": 38411,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "costUsd": 1.239464,
+    "createdAt": 1794547312057
+  }
+}
