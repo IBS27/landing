@@ -1,9 +1,15 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import type { Doc } from "../convex/_generated/dataModel";
+import { moveItem, removeItem } from "../convex/apartment";
 import { retainValidAppearance } from "../convex/lib/unitAppearancePartial";
 import { isStarterScene, refreshedSources } from "../convex/lib/unitGeneration";
-import { manualScene, sceneProblems, type UnitScene } from "../convex/lib/unitScene";
-import { saveCandidate } from "../convex/unitScenes";
+import {
+  manualScene,
+  type Placement,
+  sceneProblems,
+  type UnitScene,
+} from "../convex/lib/unitScene";
+import { addSource, saveCandidate } from "../convex/unitScenes";
 import invalidDetails from "../scripts/unit-scenes/heathmead-detailed-initial.result.json";
 import {
   generationAppearance,
@@ -29,6 +35,19 @@ afterEach(() => {
   if (oldEnabled === undefined) delete process.env.AI_ENABLED;
   else process.env.AI_ENABLED = oldEnabled;
 });
+const item: Placement = {
+  id: "item",
+  label: "Sofa",
+  kind: "sofa",
+  x: 2,
+  z: 2,
+  rotation: 0,
+  width: 2,
+  depth: 0.8,
+  height: 0.9,
+  color: "#8899aa",
+  measured: false,
+};
 const layoutReply = () =>
   modelCompletion({ scene: generationLayout, explanation: "Layout from evidence" });
 const detailReply = () =>
@@ -290,6 +309,122 @@ describe("progressive generation", () => {
         h.scene().sources.map((s) => s.key),
       ),
     ).toEqual([]);
+  });
+  test("moving or removing an item during a build keeps the build (#150)", async () => {
+    const h = generationHarness();
+    const sofa = { ...item, id: "sofa" },
+      lamp = { ...item, id: "lamp", x: 3 };
+    await h.ctx.db.patch("unit" as never, { placements: [sofa, lamp] });
+    const stage = () => {
+      let finish!: (r: Response) => void, started!: () => void;
+      const reached = new Promise<void>((r) => {
+        started = r;
+      });
+      const reply = new Promise<Response>((r) => {
+        finish = r;
+      });
+      return { reached, reply, started, finish };
+    };
+    const layout = stage(),
+      details = stage();
+    let n = 0;
+    fetchModel = async () => {
+      const s = ++n === 1 ? layout : details;
+      s.started();
+      return s.reply;
+    };
+    const jobId = await h.request();
+    const run = h.generate();
+    // While Muse reads the floor plan, the person drags the sofa.
+    await layout.reached;
+    await invoke(moveItem, h.ctx, {
+      viewerId: "viewer",
+      unitId: "unit",
+      itemId: "sofa",
+      x: 1,
+      z: 1.5,
+      rotation: 1,
+    });
+    expect(h.scene().revision).toBe(1);
+    layout.finish(layoutReply());
+    await details.reached;
+    // The layout was applied all the same, on top of the move.
+    expect(h.scene().scene.rooms.length).toBe(8);
+    expect(h.scene().generation).toEqual({ status: "details", revision: 2, autoApply: true });
+    await invoke(removeItem, h.ctx, { viewerId: "viewer", unitId: "unit", itemId: "lamp" });
+    expect(h.scene().generation?.revision).toBe(2);
+    details.finish(detailReply());
+    await run;
+    expect(h.scene().scene.appearance?.objects.length).toBeGreaterThan(0);
+    expect(h.scene().generation).toEqual({ status: "ready", revision: 4, autoApply: true });
+    expect(h.scene().revision).toBe(4);
+    expect(h.scene().jobId).toBe(jobId as never);
+    expect(h.scene().placements).toEqual([{ ...sofa, x: 1, z: 1.5, rotation: 1 }]);
+    expect(h.tables.aiJobs[0].status).toBe("succeeded");
+    // Finishes can still be retried on their own after an item moves.
+    await invoke(moveItem, h.ctx, {
+      viewerId: "viewer",
+      unitId: "unit",
+      itemId: "sofa",
+      x: 2,
+      z: 2,
+      rotation: 0,
+    });
+    await h.ctx.db.patch(jobId as never, { status: "failed" });
+    await h.request(true);
+    expect(h.scheduled[0].detailsOnly).toBe(true);
+  });
+  test("a scene edit or a new source during a build still discards its result", async () => {
+    for (const edit of ["save", "source"] as const) {
+      const h = generationHarness();
+      await h.ctx.db.patch("unit" as never, { placements: [{ ...item, id: "sofa" }] });
+      let finish!: (r: Response) => void, started!: () => void;
+      const detailsStarted = new Promise<void>((r) => {
+        started = r;
+      });
+      let n = 0;
+      fetchModel = async () =>
+        ++n === 1
+          ? layoutReply()
+          : new Promise<Response>((r) => {
+              finish = r;
+              started();
+            });
+      await h.request();
+      const run = h.generate();
+      await detailsStarted;
+      // A stored document is a copy; the in-memory DB would otherwise share the action's object.
+      await h.ctx.db.patch("unit" as never, { scene: structuredClone(h.scene().scene) });
+      // An item move alone would keep the build; the edit after it does not.
+      await invoke(moveItem, h.ctx, {
+        viewerId: "viewer",
+        unitId: "unit",
+        itemId: "sofa",
+        x: 1,
+        z: 1,
+        rotation: 0,
+      });
+      if (edit === "save") await h.save();
+      else
+        await invoke(addSource, h.ctx, {
+          viewerId: "viewer",
+          id: "unit",
+          revision: h.scene().revision,
+          source: {
+            key: "source-new",
+            label: "New photo",
+            kind: "photo",
+            url: "https://example.com/new.jpg",
+          },
+        });
+      const edited = structuredClone(h.scene());
+      expect(edited.generation).toBeUndefined();
+      expect(edited.jobId).toBeUndefined();
+      finish(detailReply());
+      await run;
+      expect(h.scene()).toEqual(edited);
+      expect(h.scene().scene.appearance).toBeUndefined();
+    }
   });
   test("a superseded job cannot publish or clear the current job", async () => {
     const h = generationHarness();

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/format";
 import { moveInLabel, todayInSF } from "../../../convex/lib/cityProfileFacts";
+import { placeProblem } from "../../../convex/lib/placeRules";
 
 /** "December 1, 2026" from "2026-12-01". */
 export function dateLabel(date: string): string {
@@ -8,6 +9,28 @@ export function dateLabel(date: string): string {
 }
 
 export { todayInSF };
+
+/**
+ * The move-in date a "make this my place" form starts on. The day the person
+ * said they're moving (their City Profile; the 1st when they only gave a
+ * month) when the rental is available by then; otherwise the later of the day
+ * it's available and today. Dates are "YYYY-MM-DD", which sort as dates.
+ */
+export function defaultMoveIn(o: {
+  today: string;
+  /** When the rental is available; now when absent. */
+  available?: string | null;
+  /** The City Profile's move-in. */
+  stated?: { month: string; date?: string } | null;
+}): string {
+  const earliest = [o.available ?? o.today, o.today].sort()[1];
+  const wanted = o.stated ? (o.stated.date ?? `${o.stated.month}-01`) : null;
+  return wanted &&
+    wanted >= earliest &&
+    placeProblem({ status: "moving_in", moveIn: wanted }, o.today) === null
+    ? wanted
+    : earliest;
+}
 
 /** The message a Convex error carries, or a plain fallback. */
 export function errorText(e: unknown): string {

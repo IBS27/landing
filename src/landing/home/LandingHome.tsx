@@ -1,265 +1,194 @@
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useAction, useConvex } from "convex/react";
-import { ArrowUp, History, X } from "lucide-react";
-import type { Map as MlMap } from "maplibre-gl";
-import {
-  type FormEvent,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { House } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useM, useQ, useViewer } from "@/app/viewer";
-import { toRentalCheck } from "@/landing/links";
+import { ApartmentStage } from "@/landing/apartment/ApartmentStage";
+import { toCompare, toHome, toLandingPage, toNeighborhood, toRentalCheck } from "@/landing/links";
 import { LandingMap } from "@/landing/map/LandingMap";
 import { MapMarker } from "@/landing/map/MapMarker";
-import type { Bounds, MapFocus, MapLayer, PinKind, RouteStop } from "@/landing/map/types";
+import { todayInSF } from "@/landing/place/placeParts";
 import { cn } from "@/lib/format";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import {
+  CHAT_CARDS_MAX,
   CHAT_MESSAGE_MAX,
   CHAT_RECENT_MAX,
   type ChatCommand,
   type ChatContext,
   type ChatNeighborhood,
   type ChatRental,
+  type ChatRentalCard,
   type ChatReply,
   ruleReply,
 } from "../../../convex/lib/homeChatRules";
-import { pointsBounds, shapeBounds, unionBounds } from "./places";
+import type { RentalActions } from "./ChatCards";
+import { ChatDock, type Pending } from "./ChatDock";
+import {
+  Breadcrumb,
+  ChatHistory,
+  ChatsButton,
+  ExploreMenu,
+  HomeTabs,
+  type HomeView,
+  LayerChips,
+  PANEL_ID,
+} from "./HomeChrome";
+import { suggestions } from "./suggestions";
 import { type ChatSession, useChatLog } from "./useChatLog";
+import { isMapCommand, useHomeMap } from "./useHomeMap";
 import "./home.css";
 
-const GLOBE = { center: { lat: 33, lng: -108 }, zoom: 0.95 } satisfies MapFocus;
-const SF: Bounds = { west: -122.515, south: 37.706, east: -122.356, north: 37.812 };
-const GREETING = "Ask me anything about your move, and the map will follow.";
+const GREETING = "Tell me your budget and when you're moving, and I'll find places that fit.";
 
-/** Where a chip goes: a chat message, or something the page does itself. */
-type Chip = { label: string; run?: () => void };
+/** `/landing`'s search: which tab the stage shows. Map when absent. */
+export type HomeSearch = { view?: "apartment" };
+export type { HomeView };
 
 /**
- * Landing Home (`/landing`): one map you travel into, driven by a chat with
- * Muse. Every answer moves the map (globe → Bay Area → a neighborhood) and
- * shows real data: rentals ranked for the viewer (#10), neighborhood shapes
- * (#15), Events and Groups (#56), Weekend Routes (#18), comparisons (#19),
- * the Move-in Crew at neighborhood level (#30). Questions about other parts
- * of Landing open their pages. Muse answers on the server (`api.homeChat.reply`);
- * it only routes and explains, and creates and sends nothing. With AI off,
- * Landing's rules answer instead, here in the browser if the server can't.
+ * Landing Home (`/landing`): one chat with Muse over two views of the move.
+ *
+ * - **Map**: one map you travel into (globe → Bay Area → a neighborhood, in
+ *   3D up close). Every answer moves it and shows real data: rentals ranked
+ *   for the viewer (#10), neighborhood shapes (#15), Events and Groups (#56),
+ *   Weekend Routes (#18), comparisons (#19), the Move-in Crew at neighborhood
+ *   level (#30).
+ * - **Apartment** (#150): the place they chose from a rental card, as a 3D
+ *   model Muse furnishes from Marketplace for a vibe and a budget.
+ *
+ * Questions about other parts of Landing open their pages; "Explore" lists
+ * them all. Muse answers on the server (`api.homeChat.reply`); it only routes
+ * and explains. The person chooses a place and reviews what's placed; nothing
+ * is sent or bought. With AI off, Landing's rules answer instead, here in the
+ * browser if the server can't.
  */
-export function LandingHome() {
+export function LandingHome({ view = "map" }: { view?: HomeView }) {
   const viewer = useViewer();
   const navigate = useNavigate();
   const router = useRouter();
+  const convex = useConvex();
   const profile = useQ(api.cityProfile.get, {});
-  const hoods = useQ(api.neighborhoods.boundaries, {});
-  const crew = useQ(api.crews.myCrew, {});
+  const apartment = useQ(api.apartment.get, {});
   const chat = useChatLog(viewer._id, GREETING);
   const ask = useAction(api.homeChat.reply);
-  const convex = useConvex();
-  const [pending, setPending] = useState(false);
+  const furnish = useAction(api.apartment.furnish);
+  const takeListing = useM(api.myPlace.takeListing);
+  const buildApartment = useM(api.apartment.build);
+  const m = useHomeMap();
 
-  const [map, setMap] = useState<MlMap | null>(null);
-  const [focus, setFocus] = useState<MapFocus>(GLOBE);
-  const [zoom, setZoom] = useState(GLOBE.zoom);
-  const [area, setArea] = useState<Bounds | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
-  const [compare, setCompare] = useState<[string, string] | null>(null);
-  const [rentalMax, setRentalMax] = useState<number | null | undefined>(undefined); // undefined = hidden
-  const [pinKinds, setPinKinds] = useState<PinKind[]>([]);
-  const [routeSlug, setRouteSlug] = useState<string | null>(null);
-  const [showCrew, setShowCrew] = useState(false);
+  const [pending, setPending] = useState<Pending>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [focusItem, setFocusItem] = useState<string | null>(null);
+  const [focusRequest, setFocusRequest] = useState(0);
 
-  const hoodBySlug = useMemo(() => new Map((hoods ?? []).map((h) => [h.slug, h])), [hoods]);
+  const viewNow = useRef(view);
+  viewNow.current = view;
+  const setView = useCallback(
+    (v: HomeView) => {
+      if (v !== viewNow.current)
+        void navigate({ ...toHome(v === "apartment" ? { view: v } : {}), replace: true });
+    },
+    [navigate],
+  );
+
   const chatHoods = useMemo<ChatNeighborhood[]>(
-    () => (hoods ?? []).map((h) => ({ slug: h.slug, name: h.label })),
-    [hoods],
+    () => (m.hoods ?? []).map((h) => ({ slug: h.slug, name: h.label })),
+    [m.hoods],
   );
+  const place = apartment?.place ?? null;
+  const unit = apartment?.unit ?? null;
 
-  /* ── Data for what's on the map ── */
-  const rentals = useQ(
-    api.rentals.search,
-    rentalMax === undefined ? "skip" : { filters: rentalMax ? { maxPrice: rentalMax } : {} },
-  );
-  const pins = useQ(
-    api.map.inBounds,
-    area && pinKinds.length ? { bounds: snap(area), kinds: pinKinds } : "skip",
-  );
-  const routeHood = routeSlug ? hoodBySlug.get(routeSlug) : undefined;
-  const route = useQ(
-    api.weekendRoutes.get,
-    routeHood ? { neighborhoodId: routeHood._id as Id<"neighborhoods"> } : "skip",
-  );
-  // No route yet (or a stale one): start a build, as the neighborhood page does (#18).
-  const requestRoute = useM(api.weekendRoutes.request);
-  const routeId = routeHood?._id as Id<"neighborhoods"> | undefined;
-  useEffect(() => {
-    if (routeId && route && !route.route && !route.building && !route.failed)
-      void requestRoute({ neighborhoodId: routeId }).catch(() => undefined);
-  }, [routeId, route, requestRoute]);
-  // Pinned stops only, as on the neighborhood page (#18).
-  const stops = useMemo<RouteStop[] | undefined>(
-    () =>
-      route?.route?.stops.flatMap((s) =>
-        s.point
-          ? [
-              {
-                key: s.key,
-                name: s.name,
-                point: s.point,
-                note: s.why,
-                sources: s.sources,
-                ...(s.eventId && { link: { kind: "event" as const, _id: s.eventId } }),
-              },
-            ]
-          : [],
-      ),
-    [route],
-  );
-
-  const layers = useMemo<MapLayer[]>(() => {
-    const all = hoods ?? [];
-    const shown = compare ? all.filter((h) => compare.includes(h.slug)) : zoom > 8 ? all : [];
-    const out: MapLayer[] = [
-      {
-        kind: "neighborhoods",
-        items: shown,
-        selected: compare ?? selected ?? undefined,
-        onSelect: (n) => setSelected(n.slug),
-      },
-    ];
-    const homes = rentals?.results.flatMap((r) => (r.pin ? [r.pin] : [])) ?? [];
-    if (homes.length) out.push({ kind: "listings", items: homes });
-    if (pins) {
-      out.push({ kind: "events", items: pins.events }, { kind: "groups", items: pins.groups });
-      if (pinKinds.includes("homes") || pinKinds.includes("items"))
-        out.push({ kind: "listings", items: pins.listings });
-    }
-    if (stops?.length) out.push({ kind: "route", stops });
-    return out;
-  }, [hoods, compare, zoom, selected, rentals, pins, pinKinds, stops]);
-
-  // When a Weekend Route arrives, frame it.
-  useEffect(() => {
-    if (!stops?.length) return;
-    const b = pointsBounds(
-      stops.map((s) => s.point),
-      0.004,
-    );
-    if (b) setFocus({ bounds: b });
-  }, [stops]);
-
-  const onMapReady = useCallback((m: MlMap) => {
-    // A softer, label-free globe; normal detail once zoomed in.
-    for (const l of m.getStyle().layers ?? []) {
+  /* ── Furnishing: Muse picks, the apartment gets the pieces, the chat shows them ── */
+  const furnishNow = useCallback(
+    async (cmd: Extract<ChatCommand, { kind: "furnish" }>, sessionId: string) => {
+      setPending("furnish");
       try {
-        if (l.type === "symbol")
-          m.setPaintProperty(l.id, "text-opacity", [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            5,
-            0,
-            7,
-            1,
-          ]);
+        const r = await furnish({
+          viewerId: viewer._id,
+          vibe: cmd.vibe,
+          ...(cmd.budget === undefined ? {} : { budget: cmd.budget }),
+        });
+        chat.add(
+          {
+            who: "muse",
+            text: r.text,
+            sources: r.sources,
+            via: r.via,
+            ...(r.items.length
+              ? { items: r.items, tally: { total: r.total, spent: r.spent, budget: r.budget } }
+              : {}),
+          },
+          sessionId,
+        );
       } catch {
-        // A layer without text.
+        chat.add(
+          {
+            who: "muse",
+            via: "landing",
+            text: "I couldn't pick pieces just now, and nothing in your apartment changed. Ask again in a moment.",
+          },
+          sessionId,
+        );
+      } finally {
+        setPending(null);
       }
-    }
-    // Switching to the globe can reset the camera; start over the Americas.
-    if (m.getZoom() < 3)
-      m.jumpTo({
-        center: [GLOBE.center.lng, GLOBE.center.lat],
-        zoom: GLOBE.zoom,
-        // Keep the globe above the chat.
-        padding: { top: 40, bottom: 170, left: 0, right: 0 },
-      });
-    setMap(m);
-  }, []);
+    },
+    [chat.add, furnish, viewer._id],
+  );
 
   /* ── Running a command from the chat ── */
-  const fitHood = useCallback(
-    (slug: string) => {
-      const h = hoodBySlug.get(slug);
-      if (!h) return;
-      setSelected(slug);
-      setFocus({ bounds: shapeBounds(h) });
-    },
-    [hoodBySlug],
-  );
-
   const run = useCallback(
-    (cmd: ChatCommand) => {
+    (cmd: ChatCommand, o: { sessionId: string; replay?: boolean }) => {
+      if (isMapCommand(cmd)) {
+        setView("map");
+        m.apply(cmd);
+        return;
+      }
+      // Opening a past chat shows where it left off: it never navigates away or furnishes again.
       switch (cmd.kind) {
-        case "show_move":
-          setCompare(null);
-          setSelected(null);
-          setFocus({ bounds: SF });
-          return;
-        case "fly_neighborhood":
-          setCompare(null);
-          return fitHood(cmd.slug);
-        case "compare": {
-          const a = hoodBySlug.get(cmd.a);
-          const b = hoodBySlug.get(cmd.b);
-          if (!a || !b) return;
-          setCompare([cmd.a, cmd.b]);
-          setSelected(cmd.a);
-          setFocus({ bounds: unionBounds([shapeBounds(a), shapeBounds(b)]) ?? SF });
-          return;
-        }
-        case "weekend_route":
-          setCompare(null);
-          setSelected(cmd.slug);
-          setRouteSlug(cmd.slug);
-          return fitHood(cmd.slug);
-        case "show_rentals":
-          setRentalMax(cmd.maxPrice ?? null);
-          setFocus({ bounds: SF });
+        case "show_apartment":
+          return setView("apartment");
+        case "furnish":
+          setView("apartment");
+          if (!o.replay) void furnishNow(cmd, o.sessionId);
           return;
         case "open_listing":
-          navigate(toRentalCheck(cmd.listingId as Id<"listings">));
-          return;
-        case "show_pins":
-          setRentalMax(undefined);
-          setPinKinds([cmd.layer]);
-          if (cmd.slug) fitHood(cmd.slug);
-          else if (zoom < 11) setFocus({ bounds: SF });
-          return;
-        case "show_crew":
-          setShowCrew(true);
-          setFocus({ bounds: SF });
+          if (!o.replay) void navigate(toRentalCheck(cmd.listingId as Id<"listings">));
           return;
         case "open_page":
-          navigate({ to: PAGE_PATHS[cmd.page] });
+          if (!o.replay) void navigate(toLandingPage(cmd.page));
           return;
         case "open_neighborhood_page":
-          navigate({ to: "/landing/find/neighborhoods/$slug", params: { slug: cmd.slug } });
-          return;
-        case "none":
+          if (!o.replay) void navigate(toNeighborhood(cmd.slug));
           return;
       }
     },
-    [fitHood, hoodBySlug, navigate, zoom],
+    [furnishNow, m.apply, navigate, setView],
   );
-
-  const stage: ChatContext["stage"] = zoom < 5 ? "globe" : zoom < 12.5 ? "city" : "hood";
 
   /** Landing's rules in the browser, for when the server can't answer. */
   const localReply = useCallback(
     async (message: string, context: ChatContext): Promise<ChatReply> => {
       let rentals: ChatRental[] | undefined;
+      let cards: ChatRentalCard[] | undefined;
       try {
         const ranked = await convex.query(api.rentals.search, {
           viewerId: viewer._id,
           filters: {},
         });
         rentals = ranked.results.map((r) => ({ id: r._id, title: r.title, price: r.price }));
+        // The reasons' sources need the server to resolve; a card here links to the rental's own page, which cites them.
+        cards = ranked.results.slice(0, CHAT_CARDS_MAX * 2).map((r) => ({
+          id: r._id,
+          title: r.title,
+          price: r.price,
+          photo: r.photo,
+          neighborhood: r.area?.label ?? null,
+          reasons: [],
+          availableFrom:
+            r.availableFrom && r.availableFrom > Date.now() ? todayInSF(r.availableFrom) : null,
+        }));
       } catch {
         // Offline too: the rules still answer, without naming rentals.
       }
@@ -267,9 +196,13 @@ export function LandingHome() {
         neighborhoods: chatHoods,
         budgetMax: profile?.budget?.value.max ?? null,
         rentals,
+        cards,
+        today: todayInSF(),
+        // Not loaded yet: the rules leave it to the Apartment tab.
+        ...(apartment && { apartment: apartment.place ? { hasModel: !!apartment.unit } : null }),
       });
     },
-    [convex, viewer._id, chatHoods, profile],
+    [convex, viewer._id, chatHoods, profile, apartment],
   );
 
   const send = useCallback(
@@ -279,10 +212,14 @@ export function LandingHome() {
       const sessionId = chat.current.id;
       const recent = chat.current.messages
         .slice(-CHAT_RECENT_MAX)
-        .map((m) => ({ who: m.who, text: m.text }));
+        .map((t) => ({ who: t.who, text: t.text }));
       chat.add({ who: "me", text: message });
-      const context: ChatContext = { stage, ...(selected ? { neighborhood: selected } : {}) };
-      setPending(true);
+      const context: ChatContext = {
+        stage: m.stage,
+        view,
+        ...(m.selected ? { neighborhood: m.selected } : {}),
+      };
+      setPending("answer");
       let reply: ChatReply;
       try {
         reply = await ask({ viewerId: viewer._id, message, context, recent });
@@ -290,179 +227,253 @@ export function LandingHome() {
         // The chat never dead-ends: answer with the rules here.
         reply = await localReply(message, context);
       } finally {
-        setPending(false);
+        setPending(null);
       }
+      // "In my budget" means the City Profile's budget when no price was given.
+      const budgetMax = profile?.budget?.value.max;
+      const command: ChatCommand =
+        reply.command.kind === "show_rentals" &&
+        reply.command.maxPrice === undefined &&
+        budgetMax &&
+        /budget/i.test(message)
+          ? { ...reply.command, maxPrice: budgetMax }
+          : reply.command;
       chat.add(
         {
           who: "muse",
           text: reply.text,
           sources: reply.sources,
           via: reply.via,
-          command: reply.command,
+          command,
+          saved: reply.saved,
+          rentals: reply.rentals,
         },
         sessionId,
       );
-      // The person opened another chat meanwhile: file the answer there, but leave the map alone.
-      if (!chat.isCurrent(sessionId)) return;
-      // "In my budget" means the City Profile's budget when no price was given.
-      const budgetMax = profile?.budget?.value.max;
-      if (
-        reply.command.kind === "show_rentals" &&
-        reply.command.maxPrice === undefined &&
-        budgetMax &&
-        /budget/i.test(message)
-      )
-        run({ ...reply.command, maxPrice: budgetMax });
-      else run(reply.command);
+      // The person opened another chat meanwhile: file the answer there, but leave the stage alone.
+      if (chat.isCurrent(sessionId)) run(command, { sessionId });
     },
-    [ask, chat, localReply, pending, profile, run, selected, stage, viewer._id],
+    [ask, chat, localReply, pending, profile, run, m.selected, m.stage, view, viewer._id],
   );
+
+  /** Where a chat left off on the stage: its last command that shows something here. */
+  const stageCommand = (s: ChatSession) =>
+    s.messages.findLast(
+      (x) =>
+        x.command &&
+        (isMapCommand(x.command) ||
+          x.command.kind === "show_apartment" ||
+          x.command.kind === "furnish"),
+    )?.command;
 
   const openSession = (s: ChatSession) => {
     chat.open(s);
     setHistoryOpen(false);
-    const last = [...s.messages].reverse().find((m) => m.command && m.command.kind !== "none");
-    if (last?.command) run(last.command);
+    const last = stageCommand(s);
+    if (last) run(last, { sessionId: s.id, replay: true });
   };
 
-  /* ── Suggestions follow the last answer ── */
-  const lastCommand = [...chat.current.messages].reverse().find((m) => m.who === "muse")?.command;
-  const chips = useMemo<Chip[]>(() => {
-    const name = (slug: string) => hoodBySlug.get(slug)?.label ?? slug;
-    switch (lastCommand?.kind) {
-      case "fly_neighborhood":
-        return [
-          { label: `Weekend route in ${name(lastCommand.slug)}` },
-          { label: `Events in ${name(lastCommand.slug)}` },
-          {
-            label: `Open ${name(lastCommand.slug)}`,
-            run: () => run({ kind: "open_neighborhood_page", slug: lastCommand.slug }),
-          },
-        ];
-      case "compare":
-        return [
-          {
-            label: "Open the full comparison",
-            run: () =>
-              navigate({
-                to: "/landing/find/neighborhoods/compare",
-                search: { a: lastCommand.a, b: lastCommand.b } as never,
-              }),
-          },
-        ];
-      case "show_rentals":
-        return [
-          { label: "Open Find", run: () => run({ kind: "open_page", page: "find" }) },
-          { label: "Who's in my crew?" },
-        ];
-      case "show_move":
-        return [{ label: "Rooms in my budget" }, { label: "Events this week" }];
-      default:
-        if (profile && !profile.briefCompletedAt)
-          return [
-            { label: "Set up my City Profile", run: () => navigate({ to: "/landing/welcome" }) },
-            { label: "Show me the move" },
-          ];
-        return [
-          { label: "Show me the move" },
-          { label: "Rooms in my budget" },
-          { label: "What's waiting for approval?" },
-        ];
-    }
-  }, [lastCommand, hoodBySlug, navigate, run, profile]);
+  // After a reload the open chat comes back: put the map where it left off (the tab is in the URL).
+  const restored = useRef(false);
+  useEffect(() => {
+    if (restored.current || !chat.resumed || !m.hoods) return;
+    restored.current = true;
+    const last = chat.current.messages.findLast((x) => x.command && isMapCommand(x.command));
+    if (last?.command && isMapCommand(last.command)) m.apply(last.command);
+  }, [chat.resumed, chat.current, m.hoods, m.apply]);
 
-  /* ── Crew faces, at neighborhood level only ── */
-  const crewSpots = useMemo(() => {
-    if (!showCrew || !crew) return [];
-    const bySlug = new Map<string, { avatars: string[]; names: string[] }>();
-    for (const m of crew.members) {
-      const anchor = m.anchors.find((a) => a.kind === "neighborhood");
-      const slug = anchor?.kind === "neighborhood" ? anchor.slugs[0] : undefined;
-      if (!slug || !hoodBySlug.has(slug)) continue;
-      const spot = bySlug.get(slug) ?? { avatars: [], names: [] };
-      if (m.user.avatar) spot.avatars.push(m.user.avatar);
-      spot.names.push(m.user.firstName ?? m.user.name);
-      bySlug.set(slug, spot);
-    }
-    return [...bySlug].map(([slug, s]) => ({ slug, ...s, center: hoodBySlug.get(slug)?.center }));
-  }, [showCrew, crew, hoodBySlug]);
+  /* ── Choosing a place from a rental card ── */
+  const choosePlace = useCallback(
+    async (card: ChatRentalCard, moveIn: string) => {
+      await takeListing({ listingId: card.id as Id<"listings">, moveIn });
+      let building = false;
+      try {
+        await buildApartment({});
+        const now = await convex.query(api.apartment.get, { viewerId: viewer._id });
+        building = now.unit?.state === "building";
+      } catch {
+        // The place is theirs either way; the Apartment tab sets up its model.
+      }
+      // Written here, not by Muse: it says so.
+      chat.add({
+        who: "muse",
+        via: "landing",
+        text: building
+          ? "That's your place. I'm building its 3D model on the Apartment tab."
+          : "That's your place. It's on the Apartment tab as a starter room, ready to furnish.",
+        command: { kind: "show_apartment" },
+        sources: [{ label: "Your place", href: "/landing/place" }],
+      });
+      setView("apartment");
+    },
+    [buildApartment, chat.add, convex, setView, takeListing, viewer._id],
+  );
+
+  const rentalActions = useMemo<RentalActions>(
+    () => ({
+      currentListingId: place?.listingId ?? null,
+      replaces: place?.title ?? null,
+      statedMoveIn: profile?.moveIn?.value ?? null,
+      onChoose: choosePlace,
+      onHover: m.setHighlight,
+      locate: (id) => {
+        const pin = m.rentalPins.get(id);
+        return pin
+          ? () => {
+              setView("map");
+              m.flyTo(pin.point);
+            }
+          : null;
+      },
+      onOpenApartment: () => setView("apartment"),
+    }),
+    [place, profile, choosePlace, m.setHighlight, m.rentalPins, m.flyTo, setView],
+  );
+
+  /* ── Suggestions follow the view, the person's place and the last answer ── */
+  const point = place?.point;
+  const chips = suggestions({
+    view,
+    apartment: apartment && {
+      place: !!place,
+      model: !!unit && unit.state !== "building",
+      items: apartment.items.length,
+    },
+    last: chat.current.messages.findLast((x) => x.who === "muse")?.command,
+    needsBrief: !!profile && !profile.briefCompletedAt,
+    name: (slug) => m.hoodBySlug.get(slug)?.label ?? slug,
+    go: {
+      apartment: () => setView("apartment"),
+      // What's on around their place: the social layer, leaning in on its approximate area.
+      nearPlace: point
+        ? () => {
+            setView("map");
+            m.showSocial();
+            m.flyTo(point);
+          }
+        : undefined,
+      neighborhood: (slug) => void navigate(toNeighborhood(slug)),
+      compare: (a, b) => void navigate(toCompare(a, b)),
+      find: () => void navigate(toLandingPage("find")),
+      brief: () => void navigate(toLandingPage("welcome")),
+    },
+  });
 
   const crumbs = [
-    { label: "World", run: () => setFocus(GLOBE) },
-    ...(zoom >= 5 ? [{ label: "Bay Area", run: () => run({ kind: "show_move" }) }] : []),
-    ...(zoom >= 12.5 && selected
-      ? [{ label: hoodBySlug.get(selected)?.label ?? "", run: () => fitHood(selected) }]
+    { label: "World", run: m.showWorld },
+    ...(m.zoom >= 5 ? [{ label: "Bay Area", run: () => m.apply({ kind: "show_move" }) }] : []),
+    ...(m.zoom >= 12.5 && m.selected
+      ? [
+          {
+            label: m.hoodBySlug.get(m.selected)?.label ?? "",
+            run: () => m.selected && m.fitHood(m.selected),
+          },
+        ]
       : []),
   ];
 
+  const onMap = view === "map";
+  const { map } = m;
+  // A reply with cards stands taller over the map: keep what it shows above them.
+  const lastMessage = chat.current.messages[chat.current.messages.length - 1];
+  const tallDock = !!(lastMessage?.rentals?.length || lastMessage?.items?.length);
+
   return (
-    <div className={cn("lh-stage", zoom < 5 && "lh-globe", historyOpen && "lh-history-open")}>
-      <LandingMap
-        world
-        layers={layers}
-        focus={focus}
-        onMapReady={onMapReady}
-        onBoundsChange={(b, z) => {
-          setArea(b);
-          setZoom(z);
-        }}
-        padding={{ top: 56, bottom: 220, right: historyOpen ? 352 : 0 }}
-        label="Your move on a map"
-        className="absolute inset-0"
+    <div
+      className={cn(
+        "lh-stage",
+        onMap && m.zoom < 5 && "lh-globe",
+        historyOpen && "lh-history-open",
+      )}
+    >
+      {/* Hidden, not unmounted, behind the Apartment tab: the camera and layers survive the switch. */}
+      <div
+        id={PANEL_ID.map}
+        role="tabpanel"
+        aria-label="Map"
+        inert={!onMap}
+        className={cn("absolute inset-0", !onMap && "invisible")}
       >
-        {map &&
-          crewSpots.map((s) =>
-            s.center ? (
-              <MapMarker key={s.slug} map={map} lng={s.center.lng} lat={s.center.lat} z={2}>
-                <span className="lh-glass flex items-center gap-2 rounded-full py-1 pr-2.5 pl-1 shadow-base">
+        <LandingMap
+          world
+          {...m.mapProps}
+          padding={{
+            // The layer chips sit under the top row once the map is on the city.
+            top: m.inCity ? 100 : 56,
+            bottom: tallDock ? 400 : 220,
+            right: historyOpen ? 352 : 0,
+          }}
+          label="Your move on a map"
+          className="absolute inset-0"
+        >
+          {map &&
+            m.crewSpots.map((s) => (
+              <MapMarker key={s.slug} map={map} lng={s.center.lng} lat={s.center.lat} z={6}>
+                <Link
+                  {...toLandingPage("crew")}
+                  aria-label={`${s.names.length} from your Move-in Crew in ${s.label}`}
+                  className="lh-glass lh-focus flex items-center gap-2 rounded-full py-1 pr-2.5 pl-1 shadow-base"
+                >
                   <span className="flex">
                     {s.avatars.slice(0, 3).map((a) => (
                       <img
                         key={a}
                         src={a}
                         alt=""
-                        className="-ml-2 h-7 w-7 rounded-full border-2 border-white object-cover first:ml-0"
+                        className="-ml-2 h-7 w-7 rounded-full border-2 border-card object-cover first:ml-0"
                       />
                     ))}
                   </span>
                   <span className="font-semibold text-[12px] text-primary">
                     {s.names.length} from your crew
                   </span>
-                </span>
+                </Link>
               </MapMarker>
-            ) : null,
+            ))}
+          {map && m.inCity && place?.point && (
+            <MapMarker map={map} lng={place.point.lng} lat={place.point.lat} z={7}>
+              <button
+                type="button"
+                onClick={() => setView("apartment")}
+                title="Your place (approximate area). Open it in 3D"
+                className="lh-place lh-focus"
+              >
+                <span className="lh-place-dot">
+                  <House size={14} strokeWidth={2.5} aria-hidden />
+                </span>
+                Your place
+              </button>
+            </MapMarker>
           )}
-      </LandingMap>
+        </LandingMap>
+      </div>
 
-      {/* Breadcrumb and past chats */}
-      <nav className="lh-glass absolute top-3 left-3 z-[5] flex items-center gap-1 rounded-full px-2 py-1 text-[13px]">
-        {crumbs.map((c, i) => (
-          <button
-            key={c.label}
-            type="button"
-            onClick={c.run}
-            className={cn(
-              "px-1",
-              i === crumbs.length - 1 ? "font-semibold text-primary" : "text-secondary",
-            )}
-          >
-            {i > 0 && <span className="mr-1.5 text-disabled">/</span>}
-            {c.label}
-          </button>
-        ))}
-      </nav>
-      <button
-        type="button"
-        onClick={() => setHistoryOpen((o) => !o)}
-        className={cn(
-          "absolute top-3 right-3 z-[8] flex items-center gap-1.5 rounded-full px-3 py-1.5 font-semibold text-[13px] shadow-base",
-          historyOpen ? "bg-primary-button text-white" : "lh-glass text-primary",
-        )}
+      <div
+        id={PANEL_ID.apartment}
+        role="tabpanel"
+        aria-label="Apartment"
+        inert={onMap}
+        className={cn("absolute inset-0", onMap && "invisible")}
       >
-        <History size={16} /> Chats
-      </button>
+        <ApartmentStage
+          active={!onMap}
+          focusItemId={focusItem}
+          focusRequest={focusRequest}
+          onAsk={(t) => void send(t)}
+        />
+      </div>
 
-      {/* Hero over the globe */}
+      {/* Along the top: where the map is, the two tabs, the rest of Landing and past chats */}
+      <div className="lh-top">
+        {onMap && <Breadcrumb crumbs={crumbs} />}
+        <HomeTabs view={view} onChange={setView} building={unit?.state === "building"} />
+        <div className="lh-top-right">
+          <ExploreMenu />
+          <ChatsButton open={historyOpen} onToggle={() => setHistoryOpen((o) => !o)} />
+        </div>
+      </div>
+      {onMap && m.inCity && <LayerChips kinds={m.kinds} onToggle={m.toggleKind} crew={m.crew} />}
+
       <ChatDock
         messages={chat.current.messages}
         chips={chips}
@@ -472,217 +483,26 @@ export function LandingHome() {
           // Code builds every source link; still, only ever follow one inside the app.
           if (href.startsWith("/") && !href.startsWith("//")) router.history.push(href);
         }}
+        rentals={rentalActions}
+        focusedItem={focusItem}
+        onFocusItem={(id) => {
+          setFocusItem(id);
+          setFocusRequest((n) => n + 1);
+          setView("apartment");
+        }}
       />
 
-      <aside className="lh-history lh-glass flex flex-col gap-2.5 p-3.5" aria-hidden={!historyOpen}>
-        <div className="flex items-center gap-2">
-          <b className="flex-1 text-[18px] text-primary">Chats</b>
-          <button
-            type="button"
-            onClick={() => {
-              chat.reset();
-              setHistoryOpen(false);
-            }}
-            className="rounded-full bg-btn px-3 py-1.5 font-semibold text-[13px] text-btn-text"
-          >
-            New chat
-          </button>
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={() => setHistoryOpen(false)}
-            className="rounded-full bg-btn p-1.5"
-          >
-            <X size={16} />
-          </button>
-        </div>
-        <div className="-mx-1.5 flex-1 overflow-y-auto">
-          {chat.sessions.length === 0 && (
-            <p className="px-2 text-[13px] text-secondary">
-              Your chats show up here once you ask something.
-            </p>
-          )}
-          {chat.sessions.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => openSession(s)}
-              className={cn(
-                "block w-full rounded-xl px-2 py-2 text-left hover:bg-hover",
-                s.id === chat.current.id && "bg-highlight",
-              )}
-            >
-              <span className="block truncate font-semibold text-[14px] text-primary">
-                {s.title}
-              </span>
-              <span className="block text-[12px] text-secondary">
-                {new Date(s.updatedAt).toLocaleString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}
-                {" · "}
-                {s.messages.length} messages
-              </span>
-            </button>
-          ))}
-        </div>
-      </aside>
-    </div>
-  );
-}
-
-const PAGE_PATHS = {
-  find: "/landing/find",
-  place: "/landing/place",
-  crew: "/landing/crew",
-  journeys: "/landing/crew/journeys",
-  moveout: "/landing/move-out",
-  profile: "/landing/profile",
-  inbox: "/landing/inbox",
-} as const;
-
-/** Map queries snap outward to a grid, so small pans reuse the last result. */
-function snap(b: Bounds): Bounds {
-  const g = 0.02;
-  const r = (v: number) => Math.round(v * 1000) / 1000;
-  return {
-    west: r(Math.floor(b.west / g) * g),
-    south: r(Math.floor(b.south / g) * g),
-    east: r(Math.ceil(b.east / g) * g),
-    north: r(Math.ceil(b.north / g) * g),
-  };
-}
-
-/**
- * The chat dock: the last two messages as glass bubbles over the map (scroll
- * over them for older ones; the map never scrolls from here), suggestions and
- * the "Ask Muse" input.
- */
-function ChatDock({
-  messages,
-  chips,
-  pending,
-  onSend,
-  onSource,
-}: {
-  messages: {
-    id: string;
-    who: "me" | "muse";
-    text: string;
-    sources?: { label: string; href?: string }[];
-    via?: "muse" | "rules";
-  }[];
-  chips: Chip[];
-  pending: boolean;
-  onSend: (text: string) => void;
-  onSource: (href: string) => void;
-}) {
-  const log = useRef<HTMLDivElement>(null);
-  const [text, setText] = useState("");
-  const [more, setMore] = useState(false);
-
-  // The log is exactly as tall as its last two items, scrolled to the newest.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: re-measure when messages or the pending bubble change.
-  useLayoutEffect(() => {
-    const el = log.current;
-    if (!el) return;
-    const items = [...el.children].slice(-2) as HTMLElement[];
-    const h = items.reduce((sum, c) => sum + c.offsetHeight, 0) + (items.length > 1 ? 8 : 0) + 8;
-    el.style.maxHeight = `${h}px`;
-    el.scrollTop = el.scrollHeight;
-    setMore(el.scrollTop > 2);
-  }, [messages, pending]);
-
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    if (pending || !text.trim()) return;
-    onSend(text);
-    setText("");
-  };
-
-  return (
-    <div className="lh-dock">
-      <div
-        ref={log}
-        className={cn("lh-log", more && "lh-more")}
-        onScroll={(e) => setMore(e.currentTarget.scrollTop > 2)}
-        onWheel={(e) => e.stopPropagation()}
-      >
-        {messages.map((m) => (
-          <div
-            key={m.id}
-            className={cn("lh-msg", m.who === "me" ? "lh-me" : "lh-muse lh-glass text-primary")}
-          >
-            {m.text}
-            {m.who === "muse" && (m.sources?.length || m.via) ? (
-              <div className="mt-1.5 flex flex-wrap gap-x-1.5 text-[11px] text-secondary">
-                {m.sources?.map((s) =>
-                  s.href ? (
-                    <button
-                      key={s.label}
-                      type="button"
-                      className="hover:underline"
-                      onClick={() => onSource(s.href as string)}
-                    >
-                      {s.label}
-                    </button>
-                  ) : (
-                    <span key={s.label}>{s.label}</span>
-                  ),
-                )}
-                {m.via === "muse" && <span>· Answered by Muse</span>}
-                {m.via === "rules" && <span>· Answered by Landing's rules (AI off)</span>}
-              </div>
-            ) : null}
-          </div>
-        ))}
-        {pending && (
-          <div className="lh-msg lh-muse lh-glass text-secondary" role="status" aria-live="polite">
-            <span className="lh-typing" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </span>
-            <span className="sr-only">Muse is answering</span>
-          </div>
-        )}
-      </div>
-      <div className="flex flex-wrap justify-center gap-1.5">
-        {chips.map((c) => (
-          <button
-            key={c.label}
-            type="button"
-            disabled={pending && !c.run}
-            onClick={() => (c.run ? c.run() : onSend(c.label))}
-            className="lh-glass rounded-full px-3 py-1.5 text-[13px] text-primary shadow-base hover:brightness-95 disabled:opacity-50"
-          >
-            {c.label}
-          </button>
-        ))}
-      </div>
-      <form onSubmit={submit} className="lh-input lh-glass bg-card">
-        <span className="bg-gradient-to-r from-[#0866ff] via-[#8b3dff] to-[#ff4f8b] bg-clip-text text-[16px] text-transparent">
-          ✦
-        </span>
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          maxLength={CHAT_MESSAGE_MAX}
-          placeholder="Ask Muse"
-          aria-label="Ask Muse"
-          className="min-w-0 flex-1 bg-transparent px-1.5 text-[16px] text-primary outline-none placeholder:text-secondary"
-        />
-        <button
-          type="submit"
-          aria-label="Send"
-          disabled={!text.trim() || pending}
-          className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-[#0b0c0f] text-white disabled:opacity-40 dark:bg-white dark:text-black"
-        >
-          <ArrowUp size={16} strokeWidth={2.4} />
-        </button>
-      </form>
+      <ChatHistory
+        open={historyOpen}
+        sessions={chat.sessions}
+        currentId={chat.current.id}
+        onOpen={openSession}
+        onNew={() => {
+          chat.reset();
+          setHistoryOpen(false);
+        }}
+        onClose={() => setHistoryOpen(false)}
+      />
     </div>
   );
 }

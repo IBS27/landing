@@ -57,15 +57,24 @@ export type MapLayer =
   | { kind: "groups"; items: readonly GroupPin[] }
   | { kind: "route"; stops: readonly RouteStop[] };
 
+/** How a `world` map tilts and turns when it moves to a focus. Flat and north-up when absent. */
+type Tilt = {
+  pitch?: number;
+  bearing?: number;
+  /** Any number: change it to move to the same view again (the person has panned away since). */
+  at?: number;
+};
+
 /**
  * Where the camera starts: all of San Francisco, everything in the layers, a
- * box, or a point. The map moves again only when `focus` changes.
+ * box, or a point. The map moves again only when `focus` changes. A box may
+ * ask to come at least as close as `minZoom` (so a tilted view shows buildings).
  */
 export type MapFocus =
   | "city"
   | "layers"
-  | { bounds: Bounds }
-  | { center: LatLng; zoom: number; pitch?: number; bearing?: number };
+  | ({ bounds: Bounds; minZoom?: number } & Tilt)
+  | ({ center: LatLng; zoom: number } & Tilt);
 
 export type LandingMapProps = {
   layers: readonly MapLayer[];
@@ -84,4 +93,6 @@ export type LandingMapProps = {
   world?: boolean;
   /** The MapLibre map once loaded, for a feature's own extra drawing (Landing Home's move line). */
   onMapReady?: (map: import("maplibre-gl").Map) => void;
+  /** A listing to draw attention to on the map (its chat card is hovered); its pin lifts when it's shown. */
+  highlightListing?: string | null;
 };

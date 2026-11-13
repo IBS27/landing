@@ -8,7 +8,7 @@ import { Button, Card } from "@/ui/primitives";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { placeProblem } from "../../../convex/lib/placeRules";
-import { dateLabel, errorText, Field, fieldCls, todayInSF } from "./placeParts";
+import { dateLabel, defaultMoveIn, errorText, Field, fieldCls, todayInSF } from "./placeParts";
 
 /**
  * "I'm taking this place" on a rental (#132): makes it the viewer's place on
@@ -83,8 +83,7 @@ function TakeForm({
   const mine = useQ(api.myPlace.mine, {});
   const today = todayInSF();
   const available = availableFrom ? todayInSF(availableFrom) : today;
-  // The later of the day it's available and today. "YYYY-MM-DD" sorts as dates.
-  const [moveIn, setMoveIn] = useState([available, today].sort()[1]);
+  const [moveIn, setMoveIn] = useState(() => defaultMoveIn({ today, available }));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const problem = placeProblem({ status: "moving_in", moveIn }, today);

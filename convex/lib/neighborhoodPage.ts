@@ -158,6 +158,8 @@ export function becauseOf(f: Fact<"interest">): string {
       return "you added it";
     case "place":
       return "from your place";
+    case "chat":
+      return "you told Muse";
     case "activity": {
       const s = f.evidence.summary.trim();
       if (!s || /^from your/i.test(s)) return "from your activity";

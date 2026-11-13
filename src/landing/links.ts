@@ -115,3 +115,34 @@ export function toUnit(
 ) {
   return linkOptions({ to: "/landing/place/unit", search: unit });
 }
+
+/**
+ * Landing Home: the map and the chat, or with `view: "apartment"` the
+ * Apartment tab, the person's place in 3D (#150).
+ */
+export function toHome({ view }: { view?: "apartment" } = {}) {
+  return linkOptions({ to: "/landing", search: view ? { view } : {} });
+}
+
+/** Landing's own pages, by the names Home's chat and its "Explore" menu use for them. */
+const LANDING_PAGES = {
+  find: "/landing/find",
+  place: "/landing/place",
+  crew: "/landing/crew",
+  journeys: "/landing/crew/journeys",
+  moveout: "/landing/move-out",
+  profile: "/landing/profile",
+  inbox: "/landing/inbox",
+  roommates: "/landing/place/roommates",
+  house: "/landing/place/house",
+  room: "/landing/place/room",
+  unit: "/landing/place/unit",
+  neighborhoods: "/landing/find/neighborhoods",
+  welcome: "/landing/welcome",
+} as const;
+export type LandingPageName = keyof typeof LANDING_PAGES;
+
+/** One of Landing's pages: Find, My Place, the Crew, the City Profile and the rest. */
+export function toLandingPage(page: LandingPageName) {
+  return linkOptions({ to: LANDING_PAGES[page] });
+}

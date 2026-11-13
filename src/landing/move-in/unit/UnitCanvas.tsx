@@ -1,7 +1,17 @@
 import { Environment, Lightformer, OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Component, type ReactNode, useEffect, useMemo, useRef } from "react";
-import { DoubleSide, type Material, PerspectiveCamera, Shape, Vector2, Vector3 } from "three";
+import { Component, type ReactNode, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import {
+  DoubleSide,
+  type Group,
+  type Material,
+  PerspectiveCamera,
+  Shape,
+  Vector2,
+  Vector3,
+} from "three";
+import type { ItemModel } from "../../../../convex/lib/itemModel";
+import type { UnitAppearance } from "../../../../convex/lib/unitAppearance";
 import {
   along,
   canWalk,
@@ -10,15 +20,18 @@ import {
   type Placement,
   roomCenter,
   type UnitScene,
+  type Wall,
   wallParts,
 } from "../../../../convex/lib/unitScene";
-
-import { ObservedFixture, Solid, WallTrim } from "./UnitDetails";
+import { ItemMesh } from "./ItemMesh";
+import { ObservedFixture, OpeningTrim, Solid, WallTrim } from "./UnitDetails";
 import { UnitEffects } from "./UnitEffects";
 import { useUnitMaterials } from "./UnitMaterials";
 
 export type ViewMode = "dollhouse" | "walk" | "plan";
 export type WalkInput = { forward: number; turn: number };
+/** What is known about a placed item beyond its placement: Muse's model and the listing's photo. */
+export type ItemAssets = { model?: ItemModel | null; photo?: string | null };
 export function UnitCanvas({
   scene,
   placements,
@@ -30,8 +43,11 @@ export function UnitCanvas({
   details = true,
   cutaway = true,
   jobId,
+  items,
 }: {
   jobId?: string;
+  /** Models and photos by placement id; without them every item is its kind's stand-in shape. */
+  items?: ReadonlyMap<string, ItemAssets>;
   details?: boolean;
   cutaway?: boolean;
   scene: UnitScene;
@@ -48,8 +64,6 @@ export function UnitCanvas({
     [scene, details],
   );
   const materials = useUnitMaterials(appearance);
-  const surfaceMaterial = (id: string) =>
-    materials.get(appearance?.surfaces.find((s) => s.targetId === id)?.materialId ?? "");
   const points = scene.rooms.flatMap((r) => r.polygon);
   const x = (Math.min(...points.map((p) => p.x)) + Math.max(...points.map((p) => p.x))) / 2;
   const z = (Math.min(...points.map((p) => p.z)) + Math.max(...points.map((p) => p.z))) / 2;
@@ -58,6 +72,7 @@ export function UnitCanvas({
     <CanvasError jobId={jobId}>
       <Canvas
         shadows
+        gl={{ stencil: true }}
         frameloop={mode === "walk" ? "always" : "demand"}
         dpr={[1, 1.5]}
         camera={{
@@ -99,67 +114,19 @@ export function UnitCanvas({
           shadow-camera-top={size}
           shadow-camera-bottom={-size}
         />
-        {scene.rooms.map((room) => (
-          <group key={room.id}>
-            <Floor room={room} material={surfaceMaterial(room.id)} />
-            {mode === "walk" && (
-              <Floor room={room} ceiling={Math.max(...scene.walls.map((w) => w.height), 2.4)} />
-            )}
-          </group>
-        ))}
-        {scene.walls.map((w) => {
-          const theta = -Math.atan2(w.b.z - w.a.z, w.b.x - w.a.x);
-          const cap = mode === "dollhouse" && cutaway ? 0.8 : w.height;
-          return (
-            <group key={w.id}>
-              {appearance && <WallTrim wall={w} cutaway={cap < w.height} />}
-              {wallParts(w).map((part, i) => {
-                const top = Math.min(part.top, cap);
-                if (part.bottom >= top) return null;
-                const center = along(w, (part.start + part.end) / 2);
-                return (
-                  <Solid
-                    key={i}
-                    size={[part.end - part.start, top - part.bottom, w.thickness]}
-                    position={[center.x, (part.bottom + top) / 2, center.z]}
-                    rotation={[0, theta, 0]}
-                    color={w.color}
-                    material={surfaceMaterial(w.id)}
-                    rounded={0}
-                  />
-                );
-              })}
-              {w.openings
-                .filter((o) => o.kind === "window" && cap === w.height)
-                .map((o, i) => {
-                  const p = along(w, o.offset + o.width / 2);
-                  return (
-                    <mesh
-                      key={i}
-                      position={[p.x, o.bottom + o.height / 2, p.z]}
-                      rotation={[0, theta, 0]}
-                    >
-                      <boxGeometry args={[o.width, o.height, 0.025]} />
-                      <meshStandardMaterial
-                        color="#9dc7d6"
-                        transparent
-                        opacity={0.38}
-                        roughness={0.15}
-                      />
-                    </mesh>
-                  );
-                })}
-            </group>
-          );
-        })}
-        {appearance?.objects.map((object) => (
-          <ObservedFixture key={object.id} object={object} materials={materials} />
-        ))}
+        <UnitModel
+          scene={scene}
+          appearance={appearance}
+          materials={materials}
+          ceiling={mode === "walk"}
+          lowered={mode === "dollhouse" && cutaway ? "all" : undefined}
+        />
         {appearance && <UnitEffects />}
         {placements.map((p) => (
           <Furniture
             key={p.id}
             item={p}
+            assets={items?.get(p.id)}
             selected={selected === p.id}
             onSelect={() => onSelect(p.id)}
           />
@@ -180,6 +147,180 @@ export function UnitCanvas({
         )}
       </Canvas>
     </CanvasError>
+  );
+}
+/** Materials for floors and walls the scene's appearance doesn't cover, by their colour. */
+export type SurfaceDefaults = {
+  floor: (color: string) => Material | undefined;
+  wall: (color: string) => Material | undefined;
+};
+/**
+ * The unit itself, shared by the editor's canvas and Landing Home's Apartment
+ * tab (#150): floors, walls with their openings, windows, trim and the
+ * fixtures seen in the media. `lowered` walls are cut down to `cap` so the
+ * rooms behind them show.
+ */
+export function UnitModel({
+  scene,
+  appearance,
+  materials,
+  defaults,
+  ceiling = false,
+  lowered,
+  cap = 0.8,
+  animate = false,
+  trim = !!appearance,
+  corners = false,
+}: {
+  scene: UnitScene;
+  /** The finishes and fixtures to draw; left out, the plain layout. */
+  appearance?: UnitAppearance;
+  /** `useUnitMaterials(appearance)`. */
+  materials: Map<string, Material>;
+  defaults?: SurfaceDefaults;
+  ceiling?: boolean;
+  /** The walls to cut down: all of them, or these ids. */
+  lowered?: "all" | ReadonlySet<string>;
+  /** Height in metres a lowered wall is cut to. */
+  cap?: number;
+  /** Walls sink and rise smoothly as `lowered` changes, instead of being rebuilt. */
+  animate?: boolean;
+  /** Baseboards and window and door frames. */
+  trim?: boolean;
+  /** Walls run on by half their thickness at each end, so outside corners are closed. */
+  corners?: boolean;
+}) {
+  const surface = (id: string) =>
+    materials.get(appearance?.surfaces.find((s) => s.targetId === id)?.materialId ?? "");
+  const top = Math.max(...scene.walls.map((w) => w.height), 2.4);
+  return (
+    <>
+      {scene.rooms.map((room) => (
+        <group key={room.id}>
+          <Floor room={room} material={surface(room.id) ?? defaults?.floor(room.floorColor)} />
+          {ceiling && <Floor room={room} ceiling={top} />}
+        </group>
+      ))}
+      {scene.walls.map((w) => (
+        <WallMesh
+          key={w.id}
+          wall={w}
+          material={surface(w.id) ?? defaults?.wall(w.color)}
+          lowered={lowered === "all" || !!lowered?.has(w.id)}
+          cap={cap}
+          animate={animate}
+          trim={trim}
+          corners={corners}
+        />
+      ))}
+      {appearance?.objects.map((object) => (
+        <ObservedFixture key={object.id} object={object} materials={materials} />
+      ))}
+    </>
+  );
+}
+function WallMesh({
+  wall: w,
+  material,
+  lowered,
+  cap,
+  animate,
+  trim,
+  corners,
+}: {
+  wall: Wall;
+  material?: Material;
+  lowered: boolean;
+  cap: number;
+  animate: boolean;
+  trim: boolean;
+  corners: boolean;
+}) {
+  const theta = -Math.atan2(w.b.z - w.a.z, w.b.x - w.a.x);
+  const length = distance(w.a, w.b);
+  const cut = Math.min(cap, w.height);
+  const parts = wallParts(w);
+  const run = corners ? w.thickness / 2 : 0;
+  const solid = (part: (typeof parts)[number], bottom: number, top: number, key: number) => {
+    if (bottom >= top) return null;
+    const start = part.start <= 0.001 ? -run : part.start,
+      end = part.end >= length - 0.001 ? length + run : part.end;
+    const center = along(w, (start + end) / 2);
+    return (
+      <Solid
+        key={key}
+        size={[end - start, top - bottom, w.thickness]}
+        position={[center.x, (bottom + top) / 2, center.z]}
+        rotation={[0, theta, 0]}
+        color={w.color}
+        material={material}
+        rounded={0}
+      />
+    );
+  };
+  const windows = w.openings
+    .filter((o) => o.kind === "window")
+    .map((o, i) => {
+      const p = along(w, o.offset + o.width / 2);
+      return (
+        <mesh key={i} position={[p.x, o.bottom + o.height / 2, p.z]} rotation={[0, theta, 0]}>
+          <boxGeometry args={[o.width, o.height, 0.025]} />
+          <meshStandardMaterial color="#9dc7d6" transparent opacity={0.38} roughness={0.15} />
+        </mesh>
+      );
+    });
+  if (!animate) {
+    const top = lowered ? cut : w.height;
+    return (
+      <group>
+        {trim && <WallTrim wall={w} cutaway={top < w.height} />}
+        {parts.map((part, i) => solid(part, part.bottom, Math.min(part.top, top), i))}
+        {top === w.height && windows}
+      </group>
+    );
+  }
+  return (
+    <group>
+      {trim && <WallTrim wall={w} cutaway />}
+      {parts.map((part, i) => solid(part, part.bottom, Math.min(part.top, cut), i))}
+      {cut < w.height && (
+        <Sinking down={lowered} y={cut}>
+          {parts.map((part, i) => solid(part, Math.max(part.bottom, cut), part.top, i))}
+          {trim && <OpeningTrim wall={w} />}
+          {windows}
+        </Sinking>
+      )}
+    </group>
+  );
+}
+/** The part of a wall above the cut: it sinks into the cut when `down` and rises back. */
+function Sinking({ down, y, children }: { down: boolean; y: number; children: ReactNode }) {
+  const ref = useRef<Group>(null);
+  const level = useRef(down ? 0 : 1);
+  const invalidate = useThree((s) => s.invalidate);
+  const apply = () => {
+    const g = ref.current;
+    if (!g) return;
+    g.scale.y = Math.max(level.current, 0.0001);
+    g.visible = level.current > 0.001;
+  };
+  useLayoutEffect(apply);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a change of `down` needs a frame to start moving.
+  useEffect(() => invalidate(), [down, invalidate]);
+  useFrame((_, dt) => {
+    const target = down ? 0 : 1;
+    if (level.current === target) return;
+    const still = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    level.current +=
+      (target - level.current) * (still ? 1 : 1 - Math.exp(-Math.min(dt, 0.05) * 12));
+    if (Math.abs(target - level.current) < 0.004) level.current = target;
+    apply();
+    invalidate();
+  });
+  return (
+    <group ref={ref} position={[0, y, 0]}>
+      <group position={[0, -y, 0]}>{children}</group>
+    </group>
   );
 }
 function Overview({ x, z, size }: { x: number; z: number; size: number }) {
@@ -227,56 +368,30 @@ function Floor({
   );
 }
 function Furniture({
-  item: p,
+  item,
+  assets,
   selected,
   onSelect,
 }: {
   item: Placement;
+  assets?: ItemAssets;
   selected: boolean;
   onSelect: () => void;
 }) {
-  const cushion = p.kind === "sofa" || p.kind === "bed";
   return (
-    <group
-      position={[p.x, 0, p.z]}
-      rotation={[0, p.rotation, 0]}
+    <ItemMesh
+      item={item}
+      model={assets?.model}
+      photo={assets?.photo}
+      look={selected ? "selected" : "idle"}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
       }}
-    >
-      <mesh position={[0, p.height * (cushion ? 0.3 : 0.5), 0]} castShadow receiveShadow>
-        <boxGeometry args={[p.width, p.height * (cushion ? 0.6 : 1), p.depth]} />
-        <meshStandardMaterial
-          color={p.color}
-          roughness={0.85}
-          emissive={selected ? "#0866ff" : "#000000"}
-          emissiveIntensity={0.18}
-        />
-      </mesh>
-      {cushion && (
-        <mesh position={[0, p.height * 0.8, -p.depth * 0.42]} castShadow>
-          <boxGeometry args={[p.width, p.height * 0.4, p.depth * 0.16]} />
-          <meshStandardMaterial color={p.color} />
-        </mesh>
-      )}
-      {p.kind === "sofa" &&
-        [-1, 1].map((side) => (
-          <mesh key={side} position={[side * p.width * 0.45, p.height * 0.5, 0]} castShadow>
-            <boxGeometry args={[p.width * 0.1, p.height * 0.4, p.depth]} />
-            <meshStandardMaterial color={p.color} />
-          </mesh>
-        ))}
-      {selected && (
-        <mesh position={[0, 0.012, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[p.width + 0.12, p.depth + 0.12]} />
-          <meshBasicMaterial color="#0866ff" side={DoubleSide} />
-        </mesh>
-      )}
-    </group>
+    />
   );
 }
-function WalkCamera({
+export function WalkCamera({
   scene,
   placements,
   roomId,

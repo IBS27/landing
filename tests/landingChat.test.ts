@@ -1,11 +1,19 @@
 import { describe, expect, test } from "bun:test";
+import { furnishAsk, numbersIn, spendIn, vibeProblem, vibeWords } from "../convex/lib/chatText";
 import { SF_NEIGHBORHOODS } from "../convex/lib/cityProfileFacts";
 import {
+  CHAT_HELP,
+  CHAT_PAGES,
   type ChatContext,
   type ChatNeighborhood,
   type ChatRental,
+  type ChatRentalCard,
+  cleanVibe,
+  commandSources,
   findNeighborhoods,
+  pageHref,
   priceIn,
+  replyCards,
   ruleReply,
   validCommand,
 } from "../convex/lib/homeChatRules";
@@ -16,7 +24,9 @@ const neighborhoods: ChatNeighborhood[] = SF_NEIGHBORHOODS.map((n) => ({
   ...("short" in n ? { aliases: [n.short] } : {}),
 }));
 const city: ChatContext = { stage: "city" };
-const data = { neighborhoods };
+const apartmentTab: ChatContext = { stage: "city", view: "apartment" };
+const data = { neighborhoods, today: "2026-11-13" };
+const built = { ...data, apartment: { hasModel: true } };
 const rentals: ChatRental[] = [
   { id: "l1", title: "Sunny room near Dolores", price: 1850, slug: "mission" },
   { id: "l2", title: "Studio by the N Judah", price: 2300, slug: "inner-sunset" },
@@ -155,9 +165,131 @@ describe("ruleReply", () => {
     expect(cmd("my profile")).toEqual({ kind: "open_page", page: "profile" });
     expect(cmd("sell my stuff")).toEqual({ kind: "open_page", page: "moveout" });
     expect(cmd("I want to sublet my room")).toEqual({ kind: "open_page", page: "moveout" });
-    expect(cmd("find a roommate")).toEqual({ kind: "open_page", page: "place" });
     expect(cmd("will my furniture fit")).toEqual({ kind: "open_page", page: "place" });
     expect(cmd("my check-ins")).toEqual({ kind: "open_page", page: "journeys" });
+  });
+  test("the pages inside My Place, Find and the brief (#150)", () => {
+    const page = (m: string) => {
+      const c = cmd(m);
+      return c.kind === "open_page" ? c.page : c.kind;
+    };
+    expect(page("find a roommate")).toBe("roommates");
+    expect(page("who are my housemates")).toBe("roommates");
+    expect(page("whose turn for chores")).toBe("house");
+    expect(page("split the bills")).toBe("house");
+    expect(page("groceries")).toBe("house");
+    expect(page("scan my room")).toBe("room");
+    expect(page("add room photos")).toBe("room");
+    expect(page("edit layout")).toBe("unit");
+    expect(page("open the floor plan")).toBe("unit");
+    expect(page("unit editor")).toBe("unit");
+    expect(page("all neighborhoods")).toBe("neighborhoods");
+    expect(page("show the neighborhoods list")).toBe("neighborhoods");
+    expect(page("set up my profile")).toBe("welcome");
+    expect(page("redo my brief")).toBe("welcome");
+    expect(page("onboarding")).toBe("welcome");
+    for (const p of CHAT_PAGES) {
+      expect(pageHref(p)).toMatch(/^\/landing(\/|$)/);
+      expect(validCommand({ kind: "open_page", page: p }, data)).toBe(true);
+      expect(commandSources({ kind: "open_page", page: p }, data)[0]?.href).toBe(pageHref(p));
+    }
+  });
+  test("a stated move plan is answered with rentals in the budget (#150)", () => {
+    expect(cmd("I'm moving to SF in January with a $2,400 budget")).toEqual({
+      kind: "show_rentals",
+      maxPrice: 2400,
+    });
+    expect(cmd("my budget is 2400 for an apartment", city, { ...data, budgetMax: 2000 })).toEqual({
+      kind: "show_rentals",
+      maxPrice: 2400,
+    });
+    expect(cmd("looking in Noe Valley or Bernal")).toEqual({ kind: "show_rentals" });
+    expect(cmd("I want to live in the Mission")).toEqual({ kind: "show_rentals" });
+    const r = ruleReply("my budget is $1,900", city, { ...data, rentals });
+    expect(r.command).toEqual({ kind: "show_rentals", maxPrice: 1900 });
+    expect(r.text).toContain("2 rentals under $1,900");
+    // Something else asked for wins; the plan is still the server's to save.
+    expect(cmd("I want to live in the Mission, what events are on?")).toEqual({
+      kind: "show_pins",
+      layer: "events",
+      slug: "mission",
+    });
+    // Without a plan, "moving to SF" still shows the move.
+    expect(cmd("I'm moving to SF")).toEqual({ kind: "show_move" });
+  });
+  test("furnishing needs the apartment's 3D model (#150)", () => {
+    expect(cmd("make it cozy and warm, under $800", apartmentTab, built)).toEqual({
+      kind: "furnish",
+      vibe: "cozy and warm",
+      budget: 800,
+    });
+    expect(cmd("furnish my place, mid-century with plants", city, built)).toEqual({
+      kind: "furnish",
+      vibe: "mid-century with plants",
+    });
+    expect(cmd("a couch and a rug for my living room", city, built).kind).toBe("furnish");
+    // On the Apartment tab a piece of furniture is enough; on the map it isn't.
+    expect(cmd("a lamp and a rug", apartmentTab, built).kind).toBe("furnish");
+    expect(cmd("a lamp and a rug", city, built).kind).toBe("none");
+    // No place yet: rentals to choose from. A place without a model: wait for it.
+    const none = ruleReply("decorate it boho", city, { ...data, apartment: null });
+    expect(none.command).toEqual({ kind: "show_rentals" });
+    expect(none.text).toContain("Choose a place first");
+    const building = ruleReply("decorate it boho", city, {
+      ...data,
+      apartment: { hasModel: false },
+    });
+    expect(building.command).toEqual({ kind: "show_apartment" });
+    expect(building.text).toContain("still being built");
+    // Not known (the browser, offline): never furnish blind.
+    expect(cmd("decorate it boho").kind).toBe("show_rentals");
+    // The reply says the picks are for review, never that anything was bought or placed.
+    const r = ruleReply("make it cozy for $800", apartmentTab, built);
+    expect(r.text).toContain("for you to review");
+    expect(r.text).not.toMatch(/bought|ordered|placed/i);
+    expect(r.sources).toEqual([]);
+  });
+  test("a furnish vibe never carries protected traits or links (#150)", () => {
+    const c = cmd("cozy decor for a Muslim woman, under $500", apartmentTab, built);
+    expect(c.kind).toBe("furnish");
+    if (c.kind !== "furnish") return;
+    expect(c.vibe).not.toMatch(/muslim|woman|removed/i);
+    expect(c.vibe).toContain("cozy decor");
+    expect(c.budget).toBe(500);
+    expect(validCommand(c, data)).toBe(true);
+    const link = ruleReply("decorate like www.scam-decor.com", apartmentTab, built);
+    expect(link.command).toEqual({ kind: "none" });
+    expect(link.text).toContain("Describe the vibe");
+  });
+  test("searches and neighborhood questions are not furnish requests (#150)", () => {
+    expect(cmd("what's the vibe in the Mission", city, built)).toEqual({
+      kind: "fly_neighborhood",
+      slug: "mission",
+    });
+    expect(cmd("cozy studios under $2,000", city, built)).toEqual({
+      kind: "show_rentals",
+      maxPrice: 2000,
+    });
+    expect(cmd("furnished apartments", city, built)).toEqual({ kind: "show_rentals" });
+    expect(cmd("will my furniture fit", apartmentTab, built)).toEqual({
+      kind: "open_page",
+      page: "place",
+    });
+  });
+  test("show my apartment switches to the Apartment tab (#150)", () => {
+    for (const m of ["show my apartment", "my place in 3D", "show me the model", "show my place"])
+      expect(cmd(m, city, built)).toEqual({ kind: "show_apartment" });
+    expect(ruleReply("show my apartment", city, built).sources).toEqual([
+      { label: "Your place", href: "/landing/place" },
+    ]);
+    const none = ruleReply("show my apartment", city, { ...data, apartment: null });
+    expect(none.command).toEqual({ kind: "show_rentals" });
+    expect(none.text).toContain("haven't chosen a place");
+    // "My place" alone still opens the page.
+    expect(cmd("my place", city, built)).toEqual({ kind: "open_page", page: "place" });
+  });
+  test("the help line mentions furnishing", () => {
+    expect(CHAT_HELP).toMatch(/furnish/);
   });
   test("unknown asks get the help line", () => {
     const r = ruleReply("hello there", city, data);
@@ -190,8 +322,90 @@ describe("ruleReply", () => {
       "my crew",
       "inbox",
       "hello",
+      "find a roommate",
+      "show my apartment",
+      "my budget is $2,400",
     ])
       expect(validCommand(cmd(m), { neighborhoods })).toBe(true);
+    expect(validCommand(cmd("make it cozy for $800", apartmentTab, built), data)).toBe(true);
+  });
+  test("the browser's reply carries no saved facts, and cards only when given the ranked ones", () => {
+    const r = ruleReply("rooms under $2,000", city, { neighborhoods, rentals });
+    expect(r.saved).toEqual([]);
+    expect(r.rentals).toEqual([]);
+    const cards = rentals.map((x) => card(x.id, x.price));
+    const withCards = ruleReply("rooms under $2,000", city, { neighborhoods, rentals, cards });
+    // The cheapest (cited) first, then ranked order within the price.
+    expect(withCards.rentals.map((c) => c.id)).toEqual(["l3", "l1"]);
+  });
+});
+
+const card = (id: string, price: number): ChatRentalCard => ({
+  id,
+  title: `Rental ${id}`,
+  price,
+  photo: null,
+  neighborhood: null,
+  reasons: [],
+});
+
+describe("replyCards", () => {
+  const cards = [1800, 2600, 1500, 1900, 2000, 1700].map((p, i) => card(`c${i}`, p));
+  test("cited rentals first, then the top ranked within the price, at most four", () => {
+    expect(
+      replyCards({ kind: "show_rentals", maxPrice: 2000 }, ["c4"], cards).map((c) => c.id),
+    ).toEqual(["c4", "c0", "c2", "c3"]);
+    expect(replyCards({ kind: "show_rentals" }, [], cards).map((c) => c.id)).toEqual([
+      "c0",
+      "c1",
+      "c2",
+      "c3",
+    ]);
+  });
+  test("other commands show only what the reply cites, and only cards it was given", () => {
+    expect(replyCards({ kind: "open_listing", listingId: "c1" }, ["c1", "c1"], cards)).toEqual([
+      cards[1],
+    ]);
+    expect(replyCards({ kind: "show_move" }, [], cards)).toEqual([]);
+    expect(replyCards({ kind: "show_rentals" }, ["made-up"], [])).toEqual([]);
+    expect(replyCards({ kind: "none" }, ["made-up", "c9"], cards)).toEqual([]);
+  });
+});
+
+describe("furnish text helpers", () => {
+  test("cleanVibe and vibeProblem", () => {
+    expect(cleanVibe("  warm   and\ncozy  ")).toBe("warm and cozy");
+    expect(cleanVibe("x".repeat(400))).toHaveLength(200);
+    expect(cleanVibe("")).toBeNull();
+    expect(cleanVibe("email me at a@b.co")).toBeNull();
+    expect(cleanVibe("call 415-555-1212")).toBeNull();
+    expect(vibeProblem("warm and cozy")).toBeNull();
+    expect(vibeProblem("  ")).not.toBeNull();
+    expect(vibeProblem("x".repeat(201))).not.toBeNull();
+    expect(vibeProblem("see www.example.com")).not.toBeNull();
+    expect(vibeProblem("a room for a Christian family")).not.toBeNull();
+  });
+  test("spendIn reads a furniture budget as written", () => {
+    expect(spendIn("cozy, under $800")).toBe(800);
+    expect(spendIn("a $50 lamp")).toBe(50);
+    expect(spendIn("budget of 1.5k")).toBe(1500);
+    expect(spendIn("around 600 dollars")).toBe(600);
+    expect(spendIn("two chairs")).toBeUndefined();
+    expect(spendIn("under $250,000")).toBeUndefined();
+  });
+  test("numbersIn normalises how an amount is written", () => {
+    expect(numbersIn("2.5k")).toContain(2500);
+    expect(numbersIn("$2,500")).toContain(2500);
+    expect(numbersIn("2500 dollars")).toContain(2500);
+    expect(numbersIn("about 2.5")).toContain(2500);
+    expect(numbersIn("no amount")).toEqual([]);
+  });
+  test("furnishAsk", () => {
+    expect(furnishAsk("furnish it")).toBe(true);
+    expect(furnishAsk("make it cozy")).toBe(true);
+    expect(furnishAsk("a desk", { view: "apartment" })).toBe(true);
+    expect(furnishAsk("a desk")).toBe(false);
+    expect(furnishAsk("furnished rooms")).toBe(false);
   });
 });
 
@@ -212,5 +426,32 @@ describe("validCommand", () => {
   test("prices must be sane", () => {
     expect(validCommand({ kind: "show_rentals", maxPrice: -5 }, d)).toBe(false);
     expect(validCommand({ kind: "show_rentals", maxPrice: 2400 }, d)).toBe(true);
+  });
+  test("furnish needs a clean vibe and a whole-dollar budget (#150)", () => {
+    const furnish = (vibe: string, budget?: number) =>
+      validCommand({ kind: "furnish", vibe, ...(budget === undefined ? {} : { budget }) }, d);
+    expect(furnish("warm and cozy")).toBe(true);
+    expect(furnish("warm and cozy", 800)).toBe(true);
+    expect(furnish("warm and cozy", 100_000)).toBe(true);
+    expect(furnish("")).toBe(false);
+    expect(furnish("x".repeat(201))).toBe(false);
+    expect(furnish("decor for Muslim women")).toBe(false);
+    expect(furnish("see scam.example.com")).toBe(false);
+    expect(furnish("warm", 0)).toBe(false);
+    expect(furnish("warm", 100_001)).toBe(false);
+    expect(furnish("warm", 99.5)).toBe(false);
+    expect(validCommand({ kind: "show_apartment" }, d)).toBe(true);
+  });
+});
+
+describe("vibeWords (#150)", () => {
+  test("keeps the look and drops the ask and the price", () => {
+    expect(vibeWords("make it cozy and warm, $1,500")).toBe("cozy and warm");
+    expect(vibeWords("Make it cozy and warm under $1,500")).toBe("cozy and warm");
+    expect(vibeWords("furnish my place mid-century modern with a $2k budget")).toBe(
+      "mid-century modern",
+    );
+    expect(vibeWords("I'd like something bright and minimal")).toBe("something bright and minimal");
+    expect(vibeWords("add a reading lamp")).toBe("add a reading lamp");
   });
 });

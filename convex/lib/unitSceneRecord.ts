@@ -30,6 +30,8 @@ export const unitSceneFields = {
   candidate: v.optional(unitScene),
   explanation: v.optional(v.string()),
   runId: v.optional(v.id("aiRuns")),
+  /** The last vibe and total furniture budget (whole dollars) given in Landing Home's chat (#150). */
+  furnishing: v.optional(v.object({ vibe: v.string(), budget: v.optional(v.number()) })),
   createdAt: v.number(),
   updatedAt: v.number(),
 };

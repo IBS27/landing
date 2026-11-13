@@ -73,6 +73,7 @@ export default function MapCanvas({
   padding,
   world = false,
   onMapReady,
+  highlightListing,
 }: LandingMapProps) {
   const container = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<MlMap | null>(null);
@@ -147,10 +148,10 @@ export default function MapCanvas({
             m.setProjection({ type: "globe" });
             m.setSky({ "atmosphere-blend": 0 });
           }
-          addOverlays(m, latest.current.data, latest.current.dark);
+          addOverlays(m, latest.current.data, latest.current.dark, { buildings: world });
           latest.current.onMapReady?.(m);
-          // Narrow maps start with the credits folded behind the "i", clear of the app's floating buttons.
-          if (el.clientWidth < COMPACT)
+          // Narrow maps, and Landing Home (the chat sits over them), start with the credits folded behind the "i".
+          if (world || el.clientWidth < COMPACT)
             el.querySelector(".maplibregl-ctrl-attrib")?.classList.remove(
               "maplibregl-compact-show",
             );
@@ -173,14 +174,16 @@ export default function MapCanvas({
     loadBasemap(dark ? "dark" : "light")
       .then((style) => {
         if (!live) return;
-        map.once("style.load", () => addOverlays(map, latest.current.data, latest.current.dark));
+        map.once("style.load", () =>
+          addOverlays(map, latest.current.data, latest.current.dark, { buildings: world }),
+        );
         map.setStyle(style, { diff: false });
       })
       .catch(() => undefined);
     return () => {
       live = false;
     };
-  }, [map, dark]);
+  }, [map, dark, world]);
 
   /* ── Data ── */
   useEffect(() => {
@@ -258,14 +261,42 @@ export default function MapCanvas({
         zoom: focus.zoom,
         ...(focus.pitch !== undefined ? { pitch: focus.pitch } : {}),
         ...(focus.bearing !== undefined ? { bearing: focus.bearing } : {}),
-        ...(el ? { padding: fitPadding(insets, el) } : {}),
       };
-      if (world && !reduced) map.flyTo({ ...to, duration: 2600, curve: 1.5, essential: true });
-      else map.easeTo({ ...to, ...motion(reduced) });
-    } else {
-      const b = focusBounds(focus, latest.current.data) ?? toLngLat(SF_BOUNDS);
-      if (el) map.fitBounds(b, { padding: fitPadding(insets, el), ...motion(reduced) });
+      const pad = el ? fitPadding(insets, el) : null;
+      if (!world) map.easeTo({ ...to, ...(pad && { padding: pad }), ...motion(reduced) });
+      // Landing Home keeps no camera padding (its chat changes height): the point lands in the middle of the clear area.
+      else
+        map.flyTo({
+          ...to,
+          pitch: to.pitch ?? 0,
+          bearing: to.bearing ?? 0,
+          ...(pad && { offset: clearCenter(pad) }),
+          ...flight(map, to.zoom, reduced),
+        });
+      return;
     }
+    const b = focusBounds(focus, latest.current.data) ?? toLngLat(SF_BOUNDS);
+    if (!el) return;
+    if (!world) {
+      map.fitBounds(b, { padding: fitPadding(insets, el), ...motion(reduced) });
+      return;
+    }
+    // Landing Home's chat can stand tall over the map: leave up to 45% a side clear of it.
+    const padding = fitPadding(insets, el, 24, 0.45);
+    // Landing Home flies, and tilts when asked: flat and north-up otherwise.
+    const tilt: { pitch?: number; bearing?: number; minZoom?: number } =
+      typeof focus === "object" ? focus : {};
+    const bearing = tilt.bearing ?? 0;
+    const cam = map.cameraForBounds(b, { padding, bearing });
+    if (!cam?.center) return;
+    const zoom = Math.max(cam.zoom ?? map.getZoom(), tilt.minZoom ?? 0);
+    map.flyTo({
+      center: cam.center,
+      zoom,
+      pitch: tilt.pitch ?? 0,
+      bearing,
+      ...flight(map, zoom, reduced),
+    });
   }, [map, focusKey]);
 
   /* ── Neighborhoods: hover highlight, click to zoom in ── */
@@ -294,11 +325,13 @@ export default function MapCanvas({
       const f = map.queryRenderedFeatures(e.point, { layers: [HOOD_FILL] })[0];
       const hood = latest.current.data.hoods.find((n) => n.slug === f?.properties.slug);
       if (!hood || !container.current) return;
-      map.fitBounds(polygonBounds(hood.polygon), {
-        padding: fitPadding(latest.current.insets, container.current, 48),
-        maxZoom: 15,
-        ...motion(reduced),
-      });
+      // Landing Home moves the camera itself (`onSelect` sets its focus, with a tilt).
+      if (!world)
+        map.fitBounds(polygonBounds(hood.polygon), {
+          padding: fitPadding(latest.current.insets, container.current, 48),
+          maxZoom: 15,
+          ...motion(reduced),
+        });
       onHoodSelect.current?.(hood);
     };
     map.on("mousemove", HOOD_FILL, onMove);
@@ -309,7 +342,7 @@ export default function MapCanvas({
       map.off("mouseleave", HOOD_FILL, onLeave);
       map.off("click", onClick);
     };
-  }, [map, reduced]);
+  }, [map, reduced, world]);
 
   /* ── Selection ── */
   // Focus moves into an opened card and back to its pin when the card closes,
@@ -441,6 +474,7 @@ export default function MapCanvas({
             }
             const p = v.pin;
             const isSel = selectedKey === p.key;
+            const isHot = p.kind === "listing" && p.pin._id === highlightListing;
             const common = {
               ...unreachable(!isSel && offscreen(p.pin.point.lng, p.pin.point.lat)),
               selected: isSel,
@@ -454,12 +488,13 @@ export default function MapCanvas({
                 map={map}
                 lng={p.pin.point.lng}
                 lat={p.pin.point.lat}
-                z={isSel ? Z.card - 1 : hovered === p.key ? Z.hover : Z[p.kind]}
+                z={isSel ? Z.card - 1 : isHot || hovered === p.key ? Z.hover : Z[p.kind]}
               >
                 {p.kind === "listing" ? (
                   <PricePill
                     pin={p.pin}
                     aria-label={`${pillPrice(p.pin.price)}, ${p.pin.title}, ${p.pin.area}`}
+                    className={cn(isHot && !isSel && "scale-[1.14] bg-fb! text-white!")}
                     {...common}
                   />
                 ) : p.kind === "event" ? (
@@ -529,6 +564,8 @@ export default function MapCanvas({
             // Phones pinch to zoom; the buttons would crowd the chips.
             compact ? "hidden" : "flex",
           )}
+          // Landing Home has its own controls along the top and a panel on the right: sit clear of both.
+          style={world ? { top: insets.top + 8, right: insets.right + 12 } : undefined}
         >
           <ZoomButton label="Zoom in" onClick={() => zoomBy(1)}>
             <Plus size={18} strokeWidth={2.25} />
@@ -584,17 +621,33 @@ function motion(reduced: boolean) {
   return reduced ? { duration: 0 } : { duration: 420, essential: false };
 }
 
-function fitPadding(p: Insets, el: HTMLElement, extra = 24) {
+/**
+ * Landing Home's flights: longer the further the camera has to zoom (the globe
+ * to a street takes a couple of seconds, one neighborhood to the next under
+ * one). A jump when the viewer prefers reduced motion.
+ */
+function flight(map: MlMap, zoom: number, reduced: boolean) {
+  if (reduced) return { duration: 0 };
+  const ms = 500 + Math.abs(zoom - map.getZoom()) * 380;
+  return { duration: Math.max(700, Math.min(ms, 2600)), curve: 1.5, essential: true };
+}
+
+function fitPadding(p: Insets, el: HTMLElement, extra = 24, most = 0.3) {
   // Never let padding swallow the map on small screens.
   const w = el.clientWidth;
   const h = el.clientHeight;
-  const clamp = (v: number, size: number) => Math.max(0, Math.min(v + extra, size * 0.3));
+  const clamp = (v: number, size: number) => Math.max(0, Math.min(v + extra, size * most));
   return {
     top: clamp(p.top, h),
     bottom: clamp(p.bottom, h),
     left: clamp(p.left, w),
     right: clamp(p.right, w),
   };
+}
+
+/** Where the middle of the area clear of `p` sits, from the map's own middle, in pixels. */
+function clearCenter(p: Insets): [number, number] {
+  return [(p.left - p.right) / 2, (p.top - p.bottom) / 2];
 }
 
 function toLngLat(b: Bounds): LngLatBoundsLike {
