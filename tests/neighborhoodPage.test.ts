@@ -6,6 +6,7 @@ import type { InterestId } from "../convex/lib/interests";
 import {
   becauseOf,
   type CrewLike,
+  diverse,
   EVENT_WINDOW_MS,
   type ForYouItem,
   interestsForPlace,
@@ -458,6 +459,23 @@ describe("helpers", () => {
     expect(m?.score).toBe(1.5);
     expect(m?.reason).toMatchObject({ interest: "coffee", label: "Coffee", also: ["Climbing"] });
     expect(matchInterests(["surfing"], weights, facts)).toBeNull();
+  });
+
+  test("diverse gives each interest a slot before any gets a second", () => {
+    const xs = [
+      { id: "a", score: 1, i: "coffee" },
+      { id: "b", score: 1, i: "coffee" },
+      { id: "c", score: 1, i: "coffee" },
+      { id: "d", score: 0.6, i: "live_music" },
+    ];
+    expect(
+      diverse(
+        xs,
+        3,
+        (x) => x.score,
+        (x) => x.i,
+      ).map((x) => x.id),
+    ).toEqual(["a", "b", "d"]);
   });
 
   test("place interests and mentions", () => {
