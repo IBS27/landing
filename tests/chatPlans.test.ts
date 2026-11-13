@@ -9,6 +9,7 @@ import {
   clockLabel,
   excerptAbout,
   type PlaceOption,
+  placeOptions,
   planStage,
   planTalkActivity,
   planTemplate,
@@ -615,6 +616,33 @@ describe("chat plans, end to end", () => {
         optionIds: [poll.options[0]?.id],
       }),
     ).rejects.toThrow("This poll is closed");
+  });
+
+  test("places come only from posts anyone can see", async () => {
+    const { ctx } = world();
+    const groupId = await ctx.db.insert("groups", {
+      name: "Bay Area Hikers",
+      category: "Outdoors",
+      privacy: "public",
+      visible: true,
+      lastActivityAt: Date.now(),
+    } as never);
+    const post = (privacy: string) =>
+      ctx.db.insert("posts", {
+        authorId: "users:host",
+        groupId,
+        privacy,
+        text: "hike Lands End, then coffee",
+        attachments: [],
+        reactionCount: 0,
+        createdAt: Date.now() - DAY,
+      } as never);
+    const open = await post("public");
+    await post("only_me");
+    const { options } = await placeOptions(ctx, "users:maya" as never, "hiking", Date.now());
+    expect(options.filter((o) => o.kind === "post").map((o) => o.source)).toEqual([
+      `post:${open}`,
+    ]);
   });
 
   test("an Event planned in a chat may invite that chat's members, and no one else", async () => {

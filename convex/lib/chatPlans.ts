@@ -5,6 +5,7 @@ import { defineTask } from "../ai/agent";
 import { NEIGHBORHOOD_PLACES } from "../seed/world/neighborhoods/places";
 import type { Source } from "../validators";
 import { blockedSet } from "./blocks";
+import { isPublicSource } from "./citations";
 import {
   getInterest,
   type InterestId,
@@ -387,13 +388,18 @@ export async function placeOptions(
       .order("desc")
       .take(25);
     for (const p of rows) {
-      if (!p.text?.trim() || blocked.has(p.authorId)) continue;
+      if (!p.text?.trim() || p.privacy !== "public" || blocked.has(p.authorId)) continue;
       const named = interestsInText(p.text).includes(activity);
       if (named || about) posts.push({ p, g, named });
     }
   }
   posts.sort((a, b) => Number(b.named) - Number(a.named) || b.p.reactionCount - a.p.reactionCount);
-  for (const { p, g } of posts.slice(0, POST_OPTIONS)) {
+  let postCount = 0;
+  for (const { p, g } of posts) {
+    if (postCount >= POST_OPTIONS) break;
+    // The plan goes to the chat, so only posts anyone can see.
+    if (!(await isPublicSource(ctx, { kind: "post", postId: p._id }))) continue;
+    postCount++;
     options.push({
       source: `post:${p._id}`,
       kind: "post",
