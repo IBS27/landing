@@ -80,6 +80,7 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
   const [pending, setPending] = useState<Pending>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [focusItem, setFocusItem] = useState<string | null>(null);
+  const [focusRequest, setFocusRequest] = useState(0);
 
   const viewNow = useRef(view);
   viewNow.current = view;
@@ -454,7 +455,12 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
         inert={onMap}
         className={cn("absolute inset-0", onMap && "invisible")}
       >
-        <ApartmentStage active={!onMap} focusItemId={focusItem} onAsk={(t) => void send(t)} />
+        <ApartmentStage
+          active={!onMap}
+          focusItemId={focusItem}
+          focusRequest={focusRequest}
+          onAsk={(t) => void send(t)}
+        />
       </div>
 
       {/* Along the top: where the map is, the two tabs, the rest of Landing and past chats */}
@@ -481,6 +487,7 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
         focusedItem={focusItem}
         onFocusItem={(id) => {
           setFocusItem(id);
+          setFocusRequest((n) => n + 1);
           setView("apartment");
         }}
       />

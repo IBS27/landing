@@ -59,6 +59,8 @@ export type ApartmentStageProps = {
   active: boolean;
   /** A placed item to select and frame (a chat card was clicked). */
   focusItemId?: string | null;
+  /** Changes each time the chat asks, so asking for the same item again frames it again. */
+  focusRequest?: number;
   /** Sends a message to the chat, as if the person typed it. */
   onAsk: (text: string) => void;
 };
@@ -76,15 +78,22 @@ const SUGGESTIONS = [
   "Just the basics under $800",
 ];
 
-export function ApartmentStage({ active, focusItemId = null, onAsk }: ApartmentStageProps) {
+export function ApartmentStage({
+  active,
+  focusItemId = null,
+  focusRequest = 0,
+  onAsk,
+}: ApartmentStageProps) {
   // Nothing loads until the tab is first opened; after that it keeps its state while hidden.
   const [opened, setOpened] = useState(active);
   if (active && !opened) setOpened(true);
   if (!opened) return null;
-  return <Stage active={active} focusItemId={focusItemId} onAsk={onAsk} />;
+  return (
+    <Stage active={active} focusItemId={focusItemId} focusRequest={focusRequest} onAsk={onAsk} />
+  );
 }
 
-function Stage({ active, focusItemId, onAsk }: Required<ApartmentStageProps>) {
+function Stage({ active, focusItemId, focusRequest, onAsk }: Required<ApartmentStageProps>) {
   const viewer = useViewer();
   const data = useQ(api.apartment.get, {});
   const root = useRef<HTMLDivElement>(null);
@@ -144,6 +153,7 @@ function Stage({ active, focusItemId, onAsk }: Required<ApartmentStageProps>) {
           onBuild={startBuild}
           dock={dock}
           focusItemId={focusItemId}
+          focusRequest={focusRequest}
           onAsk={onAsk}
         />
       ) : (
@@ -192,6 +202,7 @@ function Apartment({
   onBuild,
   dock,
   focusItemId,
+  focusRequest,
   onAsk,
 }: {
   active: boolean;
@@ -204,6 +215,7 @@ function Apartment({
   onBuild: () => void;
   dock: Dock;
   focusItemId: string | null;
+  focusRequest: number;
   onAsk: (text: string) => void;
 }) {
   // A reply with cards makes the dock taller: keep the whole model in view above it.
@@ -517,12 +529,13 @@ function Apartment({
   const asked = useRef<string | null>(null);
   const askedHere = !!focusItemId && placements.some((p) => p.id === focusItemId);
   useEffect(() => {
+    const ask = `${focusItemId}:${focusRequest}`;
     if (!focusItemId) asked.current = null;
-    else if (askedHere && asked.current !== focusItemId) {
-      asked.current = focusItemId;
+    else if (askedHere && asked.current !== ask) {
+      asked.current = ask;
       frame(focusItemId);
     }
-  }, [focusItemId, askedHere, frame]);
+  }, [focusItemId, focusRequest, askedHere, frame]);
 
   const setMode = (next: StageView) => {
     walk.current = { forward: 0, turn: 0 };
