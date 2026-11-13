@@ -857,7 +857,8 @@ export default defineSchema({
    */
   aiRuns: defineTable(aiRun)
     .index("by_hash", ["inputHash", "outcome", "createdAt"])
-    .index("by_task", ["task", "createdAt"]),
+    .index("by_task", ["task", "createdAt"])
+    .index("by_user", ["userId", "createdAt"]),
 
   /**
    * Long AI jobs run on the scheduler (convex/ai/jobs.ts). The UI subscribes to
@@ -900,7 +901,8 @@ export default defineSchema({
   /**
    * Learn from activity (#4): what someone RSVP'd to, joined, liked, saved or
    * skipped, as the interests and neighborhood each maps to. Private to its
-   * owner. Undoing an action sets `undoneAt`; rows are never deleted. Written
+   * owner. Undoing an action sets `undoneAt`; only the owner's "Clear my
+   * activity" (#5, `convex/lib/museKnows.ts`) deletes rows. Otherwise written
    * and read only through `convex/lib/activity.ts`.
    */
   profileSignals: defineTable(profileSignal)

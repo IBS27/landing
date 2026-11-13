@@ -45,7 +45,7 @@ export function Chip({
 export function sourceText(source: FactSource, evidence: FactEvidence): string {
   if (source === "inferred") return "Inferred";
   if (evidence.kind === "free_text") return "From your words";
-  if (evidence.kind === "edit") return "You edited";
+  if (evidence.kind === "edit") return "You confirmed";
   return "You said";
 }
 
