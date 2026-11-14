@@ -778,7 +778,7 @@ export const seedDemo = internalMutation({
   handler: async (ctx) => {
     const maya = await ctx.db
       .query("users")
-      .withIndex("by_username", (q) => q.eq("username", "maya.chen"))
+      .withIndex("by_username", (q) => q.eq("username", "jordan.kim.later"))
       .unique();
     if (!maya) return;
     const now = Date.now();

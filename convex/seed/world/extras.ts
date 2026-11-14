@@ -37,7 +37,7 @@ export const groupInvites = [
   { from: "chloe.wright", to: "maya.chen", group: "sf-foodies", at: daysAgo(9, "19:30") },
   { from: "marcus.bell", to: "leo.novak", group: "free-stuff-sf", at: hoursAgo(20) },
   {
-    from: "jordan.kim",
+    from: "adrian.kim",
     to: "derek.holloway",
     group: "mission-neighbors",
     at: daysAgo(12, "09:00"),

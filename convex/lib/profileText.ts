@@ -68,7 +68,7 @@ const BOUND =
   /^\s+(?:(?:more|less|later|earlier|sooner|higher|lower|over|above|below|under|exceeding|beyond)\b|(?:\w+\s+)?(?:until|till)\b)/i;
 /** Where a negation stops: a contrast, a new clause about the person, or punctuation. */
 const NEGATION_END =
-  /\b(?:but|though|although|however|except|yet|whereas|while|instead|so|because)\b|[;:—–]|(?:,|\band)\s+(?=(?:i|we)\b)/i;
+  /\b(?:but|though|although|however|except|yet|whereas|while|instead|so|because|since)\b|[;:—–]|(?:,|\band)\s+(?=(?:i|we)\b)/i;
 
 const NOUN_NEGATION_END = new RegExp(`${NEGATION_END.source}|,|\\band\\b`, "i");
 
@@ -741,21 +741,73 @@ function scheduleFrom(parts: Part[]): ProposedFact | null {
   return { entry, quote: spanQuote(spans), label: factLabel(entry) };
 }
 
-const EMPLOYER_RE =
-  /\b(?:work(?:s|ing)? (?:at|for)|job at|joining|starting at|engineer at|designer at|nurse at|intern(?:ing)? at)\s+((?:[A-Z][\w&'.-]*)(?:\s+(?:(?:of|for|the|and|de|&)\s+)?[A-Z][\w&'.-]*){0,4})/;
+/** Job titles that name an employer after "at" ("a PM at Meta", "nurse at UCSF"). */
+const JOB_TITLES =
+  "engineer|developer|designer|manager|pm|swe|nurse|doctor|physician|teacher|professor|researcher|scientist|analyst|consultant|lawyer|attorney|accountant|student|postdoc|recruiter|founder|intern";
+
+/**
+ * Words saying where they work or are about to: "work at", "joining", "a job
+ * with", "an offer from", "hired by", "starting a new role at", "a PM at".
+ * Any case ("Joining Meta"); the name after it must be capitalized.
+ */
+const EMPLOYER_TRIGGER = new RegExp(
+  `\\b(?:work(?:s|ing)?\\s+(?:at|for)|(?:job|role|position|offer|gig|internship)\\s+(?:at|with|from)|hired\\s+(?:by|at)|joining|start(?:s|ing)?\\s+(?:(?:a|my)\\s+)?(?:new\\s+)?(?:\\w+\\s+)?at|interning\\s+at|(?:${JOB_TITLES})s?\\s+at)\\s+`,
+  "gi",
+);
+
+/** A capitalized word of a name: not "I" ("…at Meta and I'm moving") or a month or day. */
+const NAME_WORD =
+  "(?!(?:I|January|February|March|April|May|June|July|August|September|October|November|December|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\\b)[A-Z][\\w&'’.-]*";
+/** An employer's name: up to five capitalized words, joined by "of", "the", "&" ("Bank of America"). */
+const EMPLOYER_NAME = new RegExp(
+  `${NAME_WORD}(?:\\s+(?:(?:of|for|the|and|de|&)\\s+)?${NAME_WORD}){0,4}`,
+  "y",
+);
+/** Words after "Meta's" that aren't what it owns ("Trader Joe's in SoMa"). */
+const NOT_OWNED =
+  /^\s+(?:in|at|on|near|by|and|or|but|so|for|from|to|with|since|because|as|while|when|until|starting|this|next|soon|now)\b/;
+
+/** A name said as working at or joining, after `EMPLOYER_TRIGGER`. */
+type EmployerMention = {
+  hit: Hit;
+  /** The name as it reads ("Meta" from "Meta's SF office"). */
+  name: string;
+  nameStart: number;
+  /** Where the whole capitalized run ends, possessive and all. */
+  runEnd: number;
+  /** The run as written, lowercased for comparisons ("meta's sf"). */
+  run: string;
+};
+
+/** Every current mention of where they work or are joining, in reading order. */
+function employerMentions(parts: Part[], negatable = true): EmployerMention[] {
+  const out: EmployerMention[] = [];
+  for (const hit of hits(parts, EMPLOYER_TRIGGER, negatable)) {
+    const text = hit.part.text;
+    EMPLOYER_NAME.lastIndex = hit.end;
+    const m = EMPLOYER_NAME.exec(text);
+    if (!m) continue;
+    const run = m[0].replace(/[.,]+$/, "");
+    // "Meta's SF office" and "Meta's office" are Meta; "Trader Joe's in SoMa" keeps its name.
+    const owner = /^(.*?\S)['’]s(?=\s|$)/.exec(run);
+    const after = text.slice(hit.end + run.length);
+    const owns =
+      owner !== null &&
+      (owner[0].length < run.length || (/^\s+[a-z]/.test(after) && !NOT_OWNED.test(after)));
+    const name = (owns ? owner[1] : run).trim();
+    if (name.length < 2 || name.length > 60) continue;
+    out.push({ hit, name, nameStart: hit.end, runEnd: hit.end + m[0].length, run: same(run) });
+  }
+  return out;
+}
 
 function employerFrom(parts: Part[]): ProposedFact | null {
-  for (const hit of hits(parts, EMPLOYER_RE)) {
+  for (const { hit, name, nameStart } of employerMentions(parts)) {
     if (isPast(hit)) continue;
-    const m = hit.part.text.slice(hit.start).match(EMPLOYER_RE);
-    if (!m) continue;
-    const name = m[1].replace(/[.,]$/, "").trim();
-    if (name.length < 2 || name.length > 60) continue;
-    const start = hit.start + m[0].indexOf(m[1]);
     const entry: FactEntry = { key: "employer", value: { name } };
     return {
       entry,
-      quote: spanQuote([{ part: hit.part, start, end: start + name.length }]),
+      quote: spanQuote([{ part: hit.part, start: nameStart, end: nameStart + name.length }]),
       label: factLabel(entry),
     };
   }
@@ -782,7 +834,7 @@ function hasProfileWords(part: Part): boolean {
     WORK_HOURS_PATTERNS.some((p) => p.re.test(t)) ||
     WORKPLACE_PATTERNS.some((p) => p.re.test(t)) ||
     new RegExp(WORKS_WEEKENDS.source, "i").test(t) ||
-    EMPLOYER_RE.test(t) ||
+    employerMentions(one, false).length > 0 ||
     GOAL_PATTERNS.some((p) => p.re.test(t)) ||
     [...INTEREST_RES.values()].some((res) => res.some((re) => hits(one, re, false).length > 0))
   );
@@ -1079,14 +1131,14 @@ export function employerProblem(
   value: { name: string; workArea?: string },
 ): string | null {
   const name = same(value.name.trim());
-  for (const hit of hits(clauses(redactProtected(text)), EMPLOYER_RE)) {
+  for (const { hit, run, runEnd } of employerMentions(clauses(redactProtected(text)))) {
     if (isPast(hit)) continue;
-    const m = hit.part.text.slice(hit.start).match(EMPLOYER_RE);
-    if (!m || !same(m[1]).startsWith(name)) continue;
+    // The whole name or its first words, not part of one: "Meta" in "Meta's SF office", not "Met".
+    if (!name || !run.startsWith(name) || /\w/.test(run[name.length] ?? "")) continue;
     if (value.workArea === undefined) return null;
     // The area must describe the workplace: "at Figma in SoMa", not "… and want to live in Noe Valley".
     const area = value.workArea.trim();
-    const after = hit.part.text.slice(hit.start + m[0].length);
+    const after = hit.part.text.slice(runEnd);
     const where = new RegExp(
       `^\\s*,?\\s*(?:in|at|near|by|on|out of|based in|downtown)\\s+(?:the\\s+)?${area.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
       "i",

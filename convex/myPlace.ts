@@ -337,7 +337,7 @@ export const seedDemo = internalMutation({
   handler: async (ctx, { listingId }) => {
     const maya = await ctx.db
       .query("users")
-      .withIndex("by_username", (q) => q.eq("username", "maya.chen"))
+      .withIndex("by_username", (q) => q.eq("username", "jordan.kim.later"))
       .unique();
     const listing = await ctx.db.get(listingId);
     if (!maya || !listing?.neighborhoodId) return;
@@ -348,7 +348,7 @@ export const seedDemo = internalMutation({
       listingId,
       neighborhoodId: listing.neighborhoodId,
       moveIn: brief ? (brief.date ?? `${brief.month}-01`) : todayInSF(now),
-      status: "moving_in",
+      status: "living",
       createdAt: now,
       updatedAt: now,
     });

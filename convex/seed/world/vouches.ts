@@ -21,7 +21,21 @@ export type VouchSeed = {
  */
 export const vouches: readonly VouchSeed[] = [
   {
-    voucher: "jordan.kim",
+    voucher: "dev.shah",
+    subject: "derek.holloway",
+    relationship: "rented_from",
+    note: "Clear lease and quick repairs.",
+    at: daysAgo(12),
+  },
+  {
+    voucher: "priya.nair",
+    subject: "derek.holloway",
+    relationship: "rented_from",
+    note: "Returned my deposit promptly.",
+    at: daysAgo(8),
+  },
+  {
+    voucher: "adrian.kim",
     subject: "derek.holloway",
     relationship: "rented_from",
     note: "Rented from Derek for two years in the Haight. Repairs were fast and he returned my full deposit.",

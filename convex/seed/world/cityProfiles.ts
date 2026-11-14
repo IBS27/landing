@@ -9,7 +9,7 @@ import type { InterestId } from "../../lib/interests";
 /**
  * Landing City Profiles for the seeded personas (#3), keyed by username. Each
  * reads clearly differently so personalization shows in demos. Personas left
- * out (priya.raman, jordan.kim, derek.holloway) have no profile yet, so the
+ * out (priya.raman, adrian.kim, derek.holloway) have no profile yet, so the
  * onboarding brief can be demoed from scratch.
  *
  * Inferred interests aren't authored here: the seed derives them from each
@@ -42,8 +42,7 @@ export const cityProfileSeeds: CityProfileSeed[] = [
     // Mission climber without a car.
     username: "maya.chen",
     budget: { min: 1800, max: 2400 },
-    moveInMonthsFromNow: 0,
-    moveInDaysAgo: 16,
+    moveInMonthsFromNow: 2,
     neighborhoods: ["mission", "bernal-heights"],
     transport: ["walk", "bike", "muni", "bart"],
     schedule: { workHours: "day", workplace: "hybrid", weekendsFree: true },
@@ -159,5 +158,42 @@ export const cityProfileSeeds: CityProfileSeed[] = [
     interests: ["tech_meetups", "board_games", "coffee", "video_games", "hackathons"],
     goals: ["meet_people", "find_roommates"],
     briefDaysAgo: 2,
+  },
+  {
+    username: "dev.shah",
+    budget: { min: 1800, max: 2400 },
+    moveInMonthsFromNow: 2,
+    neighborhoods: ["mission"],
+    transport: ["bike", "muni"],
+    schedule: { workHours: "day", workplace: "office", weekendsFree: true },
+    employerFromWork: true,
+    interests: ["climbing", "running", "hiking"],
+    goals: ["meet_people", "explore_city"],
+    briefDaysAgo: 25,
+  },
+  {
+    username: "priya.nair",
+    budget: { min: 1800, max: 2400 },
+    moveInMonthsFromNow: 2,
+    neighborhoods: ["mission"],
+    transport: ["bike", "muni"],
+    schedule: { workHours: "day", workplace: "office", weekendsFree: true },
+    employerFromWork: true,
+    interests: ["climbing", "running", "hiking"],
+    goals: ["meet_people", "explore_city"],
+    briefDaysAgo: 25,
+  },
+  {
+    username: "jordan.kim.later",
+    budget: { min: 1800, max: 2400 },
+    moveInMonthsFromNow: 2,
+    moveInDaysAgo: 21,
+    neighborhoods: ["mission"],
+    transport: ["bike", "muni"],
+    schedule: { workHours: "day", workplace: "office", weekendsFree: true },
+    employerFromWork: true,
+    interests: ["climbing", "running", "hiking"],
+    goals: ["meet_people", "explore_city"],
+    briefDaysAgo: 25,
   },
 ];

@@ -7,7 +7,14 @@ import { checkPoint, neighborhoodIdAt } from "./lib/neighborhoods";
 import { notify } from "./lib/notify";
 import { canSeeEvent, enrichPosts, eventVisible, isSaved, loadAudience } from "./lib/posts";
 import { detailAudiences } from "./lib/settings";
-import { friendIds, getSummaries, getSummary, type UserSummary, userSummary } from "./lib/users";
+import {
+  friendIds,
+  getSummaries,
+  getSummary,
+  listable,
+  type UserSummary,
+  userSummary,
+} from "./lib/users";
 import { latLng } from "./validators";
 
 /* ---------------- Categories ---------------- */
@@ -413,9 +420,15 @@ export const guests = viewerQuery({
     if (!canSee(e, c)) return [];
     if (status === "invited" && e.hostId !== c.viewerId) return [];
     const rows = await responses(ctx, eventId, status);
-    const users = await getSummaries(
-      ctx,
-      rows.map((r) => r.userId),
+    // Guests other than the viewer aren't listed (`hiddenFrom`).
+    const users = new Map(
+      (
+        await listable(
+          ctx,
+          rows.map((r) => r.userId),
+          c.viewerId,
+        )
+      ).map((u) => [u._id, userSummary(u)]),
     );
     return rows
       .map((r) => ({ user: users.get(r.userId), friend: c.friends.has(r.userId) }))

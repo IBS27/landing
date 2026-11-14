@@ -16,7 +16,7 @@ import {
 } from "./interests";
 import type { LatLng } from "./mapPins";
 import { type Audience, canSeeEvent, loadAudience } from "./posts";
-import { getSummaries, type UserSummary } from "./users";
+import { getSummaries, listable, type UserSummary } from "./users";
 
 /**
  * Neighborhood pages (#16): one neighborhood's Groups, Events, people and the
@@ -617,14 +617,28 @@ async function people(
       crewHere.set(m.user._id, m.user);
   }
 
+  // Guests (`hiddenFrom`) never show to anyone else, so they're dropped before
+  // they can take a stranger-scan slot or count as a mutual friend.
+  const [friendsHere, strangers] = await Promise.all([
+    listable(
+      ctx,
+      [...via.keys()].filter((u) => a.friends.has(u) && !crewHere.has(u)),
+      a.viewerId,
+    ),
+    listable(
+      ctx,
+      [...via.keys()]
+        .filter((u) => !a.friends.has(u) && !crewHere.has(u))
+        .sort((x, y) => (via.get(y)?.length ?? 0) - (via.get(x)?.length ?? 0)),
+      a.viewerId,
+      STRANGER_SCAN,
+    ),
+  ]);
+
   // Friends of friends: people here who share at least one friend with the viewer.
-  const mutualOf = new Map<Id<"users">, Id<"users">[]>();
-  const strangers = [...via.keys()]
-    .filter((u) => !a.friends.has(u) && !crewHere.has(u))
-    .sort((x, y) => (via.get(y)?.length ?? 0) - (via.get(x)?.length ?? 0))
-    .slice(0, STRANGER_SCAN);
+  const mutualRaw = new Map<Id<"users">, Id<"users">[]>();
   await Promise.all(
-    strangers.map(async (u) => {
+    strangers.map(async ({ _id: u }) => {
       const rows = await ctx.db
         .query("friendships")
         .withIndex("by_user", (q) => q.eq("userId", u))
@@ -632,13 +646,22 @@ async function people(
       const mutual = rows
         .map((r) => r.friendId)
         .filter((f) => a.friends.has(f) && !a.blocked.has(f));
-      if (mutual.length > 0) mutualOf.set(u, mutual);
+      if (mutual.length > 0) mutualRaw.set(u, mutual);
     }),
   );
+  const shownFriends = new Set(
+    (await listable(ctx, [...mutualRaw.values()].flat(), a.viewerId)).map((u) => u._id),
+  );
+  const mutualOf = new Map<Id<"users">, Id<"users">[]>();
+  for (const [u, mutual] of mutualRaw) {
+    const shown = mutual.filter((f) => shownFriends.has(f));
+    if (shown.length > 0) mutualOf.set(u, shown);
+  }
 
   const ids = [
     ...crewHere.keys(),
-    ...[...via.keys()].filter((u) => !crewHere.has(u) && (a.friends.has(u) || mutualOf.has(u))),
+    ...friendsHere.map((u) => u._id),
+    ...strangers.map((u) => u._id).filter((u) => mutualOf.has(u)),
   ];
   const tieRank = { crew: 0, friend: 1, friend_of_friend: 2 } as const;
   const candidates = ids

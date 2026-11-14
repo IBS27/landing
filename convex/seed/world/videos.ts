@@ -499,7 +499,7 @@ const threads: Partial<Record<VideoClip, readonly CommentSeed[]>> = {
     ]),
     c("noah.williams", "we needed this rain tbh"),
     c("lena.fischer", "this is my favorite weather tbh", [r("tara.singh", "same, no crowds")]),
-    c("jordan.kim", "forecast: fog until june, rain until march"),
+    c("adrian.kim", "forecast: fog until june, rain until march"),
     c("chloe.wright", "I moved here for the sunshine and got this. no regrets"),
     c("ryan.oconnor", "the drip off the trees 🌧️"),
     c("amara.diallo", "rain in wine country hits different"),
@@ -570,7 +570,7 @@ const threads: Partial<Record<VideoClip, readonly CommentSeed[]>> = {
       r("andre.silva", "we need a drummer"),
       r("ryan.oconnor", "I have a cajon and no shame"),
     ]),
-    c("jordan.kim", "goosebumps"),
+    c("adrian.kim", "goosebumps"),
     c("daniel.reyes", "so good man"),
   ],
   "kayak-surf-tall": [

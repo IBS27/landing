@@ -11,7 +11,15 @@ export const personas = query({
       .query("users")
       .withIndex("by_persona", (q) => q.eq("isPersona", true))
       .collect();
-    return rows.map(userSummary);
+    return rows.map((row) => ({
+      ...userSummary(row),
+      name:
+        row.username === "jordan.kim.later"
+          ? "Jordan Kim · 3 weeks after moving in"
+          : row.username === "jordan.kim"
+            ? "Jordan Kim · Before the move"
+            : row.name,
+    }));
   },
 });
 

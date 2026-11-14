@@ -11,8 +11,12 @@ import {
   interestsForEvent,
   interestsForGroup,
 } from "../convex/lib/interests";
-import { type ProfileTextInput, profileFromText } from "../convex/lib/profileFromText";
-import { extractFacts } from "../convex/lib/profileText";
+import {
+  groundedFacts,
+  type ProfileTextInput,
+  profileFromText,
+} from "../convex/lib/profileFromText";
+import { employerProblem, extractFacts } from "../convex/lib/profileText";
 import { fakeCtx, type Row } from "./fakeDb";
 
 const NOW = Date.UTC(2026, 10, 12);
@@ -176,7 +180,40 @@ describe("muse.profileFromText on runAgent", () => {
     replies.push(JSON.stringify(invented), JSON.stringify(goodAnswer));
     const result = await run(ctx);
     expect(result.via).toBe("model");
-    expect(JSON.stringify(requests[1]?.messages)).toContain("isn't named in the text");
+    expect(JSON.stringify(requests[1]?.messages)).toContain(
+      "doesn't contain the words for this fact (the employer itself); fix it or drop it",
+    );
+  });
+
+  test("one ungrounded fact is dropped on its own, not the whole answer", async () => {
+    const { ctx } = actionCtx();
+    const google = {
+      entry: { key: "employer", value: { name: "Google" } },
+      quote: "Figma",
+    } as const;
+    const mixed = {
+      facts: [google, ...goodAnswer.facts.filter((f) => f.entry.key !== "employer")],
+    };
+    replies.push(JSON.stringify(mixed));
+    const result = await run(ctx);
+    expect(result.via).toBe("model");
+    expect(requests).toHaveLength(1);
+    const kept = groundedFacts(result.output.facts, input).map((f) => factSlot(f.entry));
+    expect(kept).not.toContain("employer");
+    expect(kept).toContain("budget");
+    expect(kept).toHaveLength(goodAnswer.facts.length - 1);
+  });
+
+  test("an answer with no grounded facts is sent back", () => {
+    const check = (facts: unknown[]) =>
+      profileFromText.check?.({ facts } as never, input, []) ?? [];
+    expect(check([])).toEqual([]);
+    expect(check(goodAnswer.facts)).toEqual([]);
+    expect(
+      check([{ entry: { key: "employer", value: { name: "Google" } }, quote: "Figma" }]),
+    ).toEqual([
+      'facts[0]: the quote "Figma" doesn\'t contain the words for this fact (the employer itself); fix it or drop it',
+    ]);
   });
 
   test("two bad answers fall back to the rules", async () => {
@@ -195,5 +232,59 @@ describe("muse.profileFromText on runAgent", () => {
     expect(result.via).toBe("fallback");
     expect(result.fallbackReason).toBe("disabled");
     expect(requests).toHaveLength(0);
+  });
+});
+
+/* ---------- Employers: the ways people say where they work (prod regression) ---------- */
+
+describe("employer phrasings", () => {
+  const employer = (text: string) =>
+    extractFacts(text, TODAY).find((f) => f.entry.key === "employer") ?? null;
+
+  test("each phrasing names the employer, for the rules and for Muse's check", () => {
+    for (const text of [
+      "Joining Meta in February.",
+      "Working at Meta from February.",
+      "Moving for a role at Meta.",
+      "New job with Meta.",
+      "Got an offer from Meta.",
+      "I'm a PM at Meta.",
+      "I was hired by Meta.",
+      "Moving to start at Meta in March.",
+      "Starting a new job at Meta in March.",
+      "No car since I'm joining Meta.",
+    ]) {
+      expect([text, employer(text)?.entry]).toEqual([
+        text,
+        { key: "employer", value: { name: "Meta" } },
+      ]);
+      expect([text, employer(text)?.quote]).toEqual([text, "Meta"]);
+      expect([text, employerProblem(text, { name: "Meta" })]).toEqual([text, null]);
+    }
+  });
+
+  test("the name stops before a new clause and drops a possessive", () => {
+    const meta = { key: "employer", value: { name: "Meta" } };
+    expect(employer("Got a job at Meta and I'm moving in March.")?.entry).toEqual(meta);
+    expect(employer("Starting a job at Meta's SF office.")?.entry).toEqual(meta);
+    expect(employer("I work at Meta's office in SoMa.")?.entry).toEqual(meta);
+    expect(employerProblem("Starting a job at Meta's SF office.", { name: "Meta" })).toBeNull();
+    // A name that ends in 's keeps it.
+    expect(employer("Working at Trader Joe's in SoMa.")?.entry.value).toEqual({
+      name: "Trader Joe's",
+    });
+    expect(employer("I work at Bank of America.")?.entry.value).toEqual({
+      name: "Bank of America",
+    });
+  });
+
+  test("negated, past or partial names don't count", () => {
+    expect(employer("I'm not joining Meta.")).toBeNull();
+    expect(employerProblem("I'm not joining Meta.", { name: "Meta" })).not.toBeNull();
+    expect(employer("I used to work at Google but am joining Figma.")?.entry.value).toEqual({
+      name: "Figma",
+    });
+    expect(employerProblem("Joining Meta in February.", { name: "Met" })).not.toBeNull();
+    expect(employerProblem("I love hiking near Meta.", { name: "Meta" })).not.toBeNull();
   });
 });

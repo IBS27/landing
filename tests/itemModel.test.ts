@@ -29,7 +29,7 @@ const shapes = (m: ItemModel) => new Set(m.parts.map((p) => p.shape));
 describe("placement kinds", () => {
   test("the editor keeps its four shapes; every kind has a default size a placement accepts", () => {
     expect(ITEM_KINDS).toEqual(["sofa", "bed", "table", "storage"]);
-    expect(ALL_ITEM_KINDS.length).toBe(11);
+    expect(ALL_ITEM_KINDS.length).toBe(12);
     expect(itemSize("rug")).toEqual({ width: 1.6, depth: 2.3, height: 0.02 });
     expect(itemSize("art")).toEqual({ width: 0.6, depth: 0.03, height: 0.8 });
     const scene = manualScene(6, 6);
@@ -69,7 +69,7 @@ describe("stand-in models", () => {
             expect(model.size).toEqual({ x: width, y: height, z: depth });
             checked++;
           }
-    expect(checked).toBe(11 * 216);
+    expect(checked).toBe(12 * 216);
   });
   test("each kind matches the stored shape and looks like the thing", () => {
     for (const kind of ALL_ITEM_KINDS) {

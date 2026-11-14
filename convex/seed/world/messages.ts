@@ -7,6 +7,17 @@ import type { ConversationSeed } from "../types";
  * Messages are laid out backwards from `last` using each message's `gap`.
  */
 export const conversations: readonly ConversationSeed[] = [
+  {
+    key: "jordan-later-crew",
+    kind: "group",
+    title: "Jordan’s move-in crew",
+    members: ["jordan.kim.later", "maya.chen", "dev.shah", "priya.nair"],
+    last: hoursAgo(1),
+    messages: [
+      { by: "dev.shah", text: "we should hike sometime" },
+      { by: "priya.nair", text: "yes, weekends work for me", gap: 2 },
+    ],
+  },
   // ── Maya: DMs ──────────────────────────────────────────────────────────────
   {
     key: "maya-ethan",
@@ -380,7 +391,7 @@ export const conversations: readonly ConversationSeed[] = [
   {
     key: "maya-jordan",
     kind: "dm",
-    members: ["maya.chen", "jordan.kim"],
+    members: ["maya.chen", "adrian.kim"],
     last: daysAgo(1, "12:30"),
     messages: [
       {
@@ -388,57 +399,57 @@ export const conversations: readonly ConversationSeed[] = [
         text: "hey! random but have you seen this person? they want a $500 'hold deposit' before showing me a 1br in the mission",
       },
       { by: "maya.chen", photo: "phone screen", gap: 1 },
-      { by: "jordan.kim", text: "oh no. yeah that's the same script", gap: 25 },
+      { by: "adrian.kim", text: "oh no. yeah that's the same script", gap: 25 },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "do NOT send anything. they copy real listings and ask for zelle",
         gap: 1,
       },
-      { by: "jordan.kim", post: "jordan-scam-warning", gap: 1 },
+      { by: "adrian.kim", post: "jordan-scam-warning", gap: 1 },
       { by: "maya.chen", text: "omg it's literally word for word", gap: 4 },
       { by: "maya.chen", text: "thank you, i was like 80% about to venmo them", gap: 1 },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "the 'i'm out of the country for missionary work' line is always the tell",
         gap: 3,
         reactions: [["maya.chen", "haha"]],
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "report them to marketplace and i'll ban them from the group",
         gap: 1,
       },
-      { by: "maya.chen", text: "done", gap: 5, reactions: [["jordan.kim", "like"]] },
+      { by: "maya.chen", text: "done", gap: 5, reactions: [["adrian.kim", "like"]] },
       {
         by: "maya.chen",
         text: "ok other housing q. is $3250 for a 1br off guerrero reasonable or am i getting played",
         gap: 2500,
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "with in-unit laundry? honestly that's pretty standard rn",
         gap: 40,
       },
-      { by: "jordan.kim", text: "the ledger posted a breakdown this morning actually", gap: 1 },
-      { by: "jordan.kim", post: "ledger-rent-report", gap: 1 },
+      { by: "adrian.kim", text: "the ledger posted a breakdown this morning actually", gap: 1 },
+      { by: "adrian.kim", post: "ledger-rent-report", gap: 1 },
       { by: "maya.chen", text: "the median one bedroom chart made me sad", replyTo: 13, gap: 10 },
-      { by: "jordan.kim", text: "it makes everyone sad lol", gap: 2 },
+      { by: "adrian.kim", text: "it makes everyone sad lol", gap: 2 },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "ask about the utility fee, a lot of buildings tack on $80-150 for water/sewer/trash",
         gap: 1,
       },
       { by: "maya.chen", text: "ooh good call", gap: 3 },
       { by: "maya.chen", text: "and when do people usually sign for a june move in?", gap: 1 },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "for small landlords like 30-45 days out. big buildings will let you lock earlier but you pay for it",
         gap: 6,
       },
       { by: "maya.chen", text: "ok so i'm looking way too early", gap: 2 },
-      { by: "jordan.kim", text: "you're looking at a normal amount of early", gap: 3 },
+      { by: "adrian.kim", text: "you're looking at a normal amount of early", gap: 3 },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "it's good to know the market. just don't sign anything in november",
         gap: 1,
         reactions: [["maya.chen", "like"]],
@@ -1817,7 +1828,7 @@ export const conversations: readonly ConversationSeed[] = [
   {
     key: "derek-jordan",
     kind: "dm",
-    members: ["derek.holloway", "jordan.kim"],
+    members: ["derek.holloway", "adrian.kim"],
     last: daysAgo(6, "10:15"),
     messages: [
       {
@@ -1825,7 +1836,7 @@ export const conversations: readonly ConversationSeed[] = [
         text: "Morning Jordan. Want to post the Haight 2BR in the housing group. Still ok to give a rent range or do you need exact?",
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "exact please! we started enforcing that after people kept posting 'DM for price'",
         gap: 40,
       },
@@ -1834,29 +1845,29 @@ export const conversations: readonly ConversationSeed[] = [
         text: "Makes sense. $4,300, available the first week of January.",
         gap: 5,
       },
-      { by: "jordan.kim", text: "perfect, i'll approve it when it comes through", gap: 3 },
+      { by: "adrian.kim", text: "perfect, i'll approve it when it comes through", gap: 3 },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "also heads up, someone's been copying your listing photos and reposting them with a fake number",
         gap: 1,
       },
       { by: "derek.holloway", text: "Again?? That's the third time this year.", gap: 4 },
-      { by: "jordan.kim", text: "i banned the account. posted a warning too", gap: 2 },
-      { by: "jordan.kim", post: "jordan-scam-warning", gap: 1 },
+      { by: "adrian.kim", text: "i banned the account. posted a warning too", gap: 2 },
+      { by: "adrian.kim", post: "jordan-scam-warning", gap: 1 },
       {
         by: "derek.holloway",
         text: "Appreciate you. I'll start watermarking the photos.",
         gap: 6,
-        reactions: [["jordan.kim", "like"]],
+        reactions: [["adrian.kim", "like"]],
       },
       {
         by: "derek.holloway",
         text: "If anyone asks whether a listing is mine, I only post from my own profile and the Holloway Rentals page.",
         gap: 1,
       },
-      { by: "jordan.kim", text: "noted, i'll add that to the pinned post", gap: 3 },
+      { by: "adrian.kim", text: "noted, i'll add that to the pinned post", gap: 3 },
       { by: "derek.holloway", text: "Coffee's on me next time you're in Elmwood", gap: 2 },
-      { by: "jordan.kim", sticker: "☕", gap: 1 },
+      { by: "adrian.kim", sticker: "☕", gap: 1 },
     ],
   },
   {
@@ -2008,29 +2019,29 @@ export const conversations: readonly ConversationSeed[] = [
   {
     key: "jordan-amara",
     kind: "dm",
-    members: ["jordan.kim", "amara.diallo"],
+    members: ["adrian.kim", "amara.diallo"],
     last: daysAgo(3, "21:30"),
     messages: [
       {
         by: "amara.diallo",
         text: "hey jordan, are you seeing the 'concert ticket' accounts in your group too?",
       },
-      { by: "jordan.kim", text: "yes!! 6 this week", gap: 20 },
-      { by: "jordan.kim", text: "same profile pic, different names", gap: 1 },
+      { by: "adrian.kim", text: "yes!! 6 this week", gap: 20 },
+      { by: "adrian.kim", text: "same profile pic, different names", gap: 1 },
       {
         by: "amara.diallo",
         text: "they're hitting the class of 2027 group hard. someone fell for one and lost $200",
         gap: 3,
       },
-      { by: "jordan.kim", text: "ugh", gap: 1 },
+      { by: "adrian.kim", text: "ugh", gap: 1 },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "i turned on post approval for new members in the housing group, it helped a lot",
         gap: 1,
       },
       { by: "amara.diallo", text: "doesn't that mean like 50 posts a day to approve", gap: 4 },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "more like 30. i do it on the bus",
         gap: 2,
         reactions: [["amara.diallo", "haha"]],
@@ -2042,13 +2053,13 @@ export const conversations: readonly ConversationSeed[] = [
         gap: 5,
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "please do. the 'what's your berkeley.edu email' one catches most of them",
         gap: 2,
       },
       { by: "amara.diallo", text: "you're a lifesaver", gap: 2 },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "we should do a joint scam warning post before spring semester housing season",
         gap: 15,
       },
@@ -2056,7 +2067,7 @@ export const conversations: readonly ConversationSeed[] = [
         by: "amara.diallo",
         text: "yes. i'll draft it this weekend 📝",
         gap: 4,
-        reactions: [["jordan.kim", "like"]],
+        reactions: [["adrian.kim", "like"]],
       },
     ],
   },

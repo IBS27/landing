@@ -17,7 +17,14 @@ import { checkPoint, neighborhoodIdAt } from "./lib/neighborhoods";
 import { notify } from "./lib/notify";
 import { canView, enrichPosts, eventVisible, loadAudience } from "./lib/posts";
 import { visibleDetails } from "./lib/settings";
-import { friendIds, getSummaries, type UserSummary, userSummary } from "./lib/users";
+import {
+  friendIds,
+  getSummaries,
+  hiddenFrom,
+  listable,
+  type UserSummary,
+  userSummary,
+} from "./lib/users";
 import { latLng } from "./validators";
 
 /**
@@ -367,17 +374,30 @@ export const get = viewerQuery({
       .sort((a, b) => (a.role === b.role ? a.joinedAt - b.joinedAt : a.role === "admin" ? -1 : 1));
     const friendMembers = members.filter((m) => friends.has(m.userId));
     // Avatar stack: friends first, then the most recently joined members.
-    const preview = [
-      ...friendMembers,
-      ...members.filter((m) => !friends.has(m.userId)).sort((a, b) => b.joinedAt - a.joinedAt),
-    ].slice(0, 12);
+    const weekAgo = Date.now() - 7 * DAY;
+    // Guests other than the viewer (`hiddenFrom`) aren't shown or counted.
+    const [preview, newThisWeek] = await Promise.all([
+      listable(
+        ctx,
+        [
+          ...friendMembers,
+          ...members.filter((m) => !friends.has(m.userId)).sort((a, b) => b.joinedAt - a.joinedAt),
+        ].map((m) => m.userId),
+        viewerId,
+        12,
+      ),
+      listable(
+        ctx,
+        members.filter((m) => m.joinedAt >= weekAgo).map((m) => m.userId),
+        viewerId,
+      ),
+    ]);
     const summaries = await getSummaries(ctx, [
-      ...preview.map((m) => m.userId),
+      ...preview.map((u) => u._id),
       ...staff.map((m) => m.userId),
       ...friendMembers.slice(0, 3).map((m) => m.userId),
       ...invites.flatMap((n) => (n.actorId ? [n.actorId] : [])),
     ]);
-    const weekAgo = Date.now() - 7 * DAY;
     const invite = invites[0];
     const inviter = invite?.actorId ? (summaries.get(invite.actorId) ?? null) : null;
 
@@ -400,7 +420,7 @@ export const get = viewerQuery({
       canSeePosts,
       /** Whether "Join group" works for the viewer: public, or invited to a private group. */
       canJoin: me === null && joinable,
-      memberPreview: preview.flatMap((m) => summaries.get(m.userId) ?? []),
+      memberPreview: preview.map(userSummary),
       friendCount: friendMembers.length,
       friendNames: friendMembers
         .slice(0, 3)
@@ -413,7 +433,7 @@ export const get = viewerQuery({
       stats: {
         postsToday: stats.postsToday,
         postsLastMonth: stats.postsLastMonth,
-        newMembersWeek: members.filter((m) => m.joinedAt >= weekAgo).length,
+        newMembersWeek: newThisWeek.length,
         activity: activityLabel(stats.perDay),
         lastActiveAt: stats.lastActiveAt,
       },
@@ -491,18 +511,17 @@ export const members = viewerQuery({
     const viewerId = ctx.viewer._id;
     // Who's in a hidden group (a House Group, #38, too) is for its members and invitees.
     if (!(await canSeeGroup(ctx, g, viewerId))) throw new ConvexError("Group not found");
-    const rows = await groupMembers(ctx, groupId);
-    const isMember = rows.some((m) => m.userId === viewerId);
+    const memberRows = await groupMembers(ctx, groupId);
+    const isMember = memberRows.some((m) => m.userId === viewerId);
     const friends = new Set(await friendIds(ctx, viewerId));
-    const summaries = await getSummaries(
-      ctx,
-      rows.map((m) => m.userId),
-    );
     const docs = new Map(
-      (await Promise.all(rows.map((m) => ctx.db.get(m.userId))))
-        .filter((u): u is Doc<"users"> => u !== null)
+      (await Promise.all(memberRows.map((m) => ctx.db.get(m.userId))))
+        .filter((u): u is Doc<"users"> => u !== null && !hiddenFrom(u, viewerId))
         .map((u) => [u._id, u]),
     );
+    // Guests other than the viewer aren't listed (`hiddenFrom`).
+    const rows = memberRows.filter((m) => docs.has(m.userId));
+    const summaries = new Map([...docs].map(([id, u]) => [id, userSummary(u)]));
     const term = q?.trim().toLowerCase() ?? "";
     const voices = await topVoices(
       ctx,
@@ -737,7 +756,8 @@ export const join = viewerMutation({
       role: "member",
       joinedAt: now,
     });
-    await ctx.db.patch(groupId, { memberCount: g.memberCount + 1 });
+    // A guest's membership is private to them (`hiddenFrom`), so it isn't counted.
+    if (!ctx.viewer.isDemo) await ctx.db.patch(groupId, { memberCount: g.memberCount + 1 });
     await clearInvites(ctx, viewerId, groupId);
     await recordSignal(ctx, viewerId, "join", "group", groupId);
   },
@@ -750,7 +770,8 @@ export const leave = viewerMutation({
     const row = await membership(ctx, groupId, ctx.viewer._id);
     if (!row) return;
     await ctx.db.delete(row._id);
-    await ctx.db.patch(groupId, { memberCount: Math.max(0, g.memberCount - 1) });
+    if (!ctx.viewer.isDemo)
+      await ctx.db.patch(groupId, { memberCount: Math.max(0, g.memberCount - 1) });
     await undoSignal(ctx, ctx.viewer._id, ["join"], groupId);
   },
 });

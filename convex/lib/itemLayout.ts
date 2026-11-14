@@ -65,6 +65,8 @@ const PHASE: Record<PlacementKind, number> = {
   sofa: 0,
   storage: 1,
   desk: 1,
+  // After the sofa, so it can face it.
+  tv: 1,
   rug: 2,
   table: 3,
   chair: 4,
@@ -84,6 +86,7 @@ const ROOM_NAMES: Record<PlacementKind, RegExp[]> = {
   plant: LIVING,
   art: LIVING,
   decor: LIVING,
+  tv: LIVING,
   chair: LIVING,
   desk: [/office|study/i, /bed/i],
   storage: [/bed/i, /hall|entry|entrance/i],
@@ -410,6 +413,22 @@ class Layout {
       }
       case "art":
         return this.wallSpots(room, base, "centre", undefined, rest);
+      case "tv": {
+        const spots = this.wallSpots(room, base, "centre");
+        if (!sofa) return spots;
+        // Against the wall the sofa faces: the TV's front toward the sofa, at a viewing distance.
+        return spots.map((s) => {
+          const to = { x: sofa.x - s.p.x, z: sofa.z - s.p.z };
+          const far = Math.hypot(to.x, to.z) || 1;
+          const f = front(s.p.rotation);
+          const facing = (f.x * to.x + f.z * to.z) / far;
+          const sofaFaces = -(front(sofa.rotation).x * to.x + front(sofa.rotation).z * to.z) / far;
+          return {
+            p: s.p,
+            score: s.score + 4 * facing + 4 * sofaFaces - 0.3 * Math.abs(far - 2.5),
+          };
+        });
+      }
     }
   }
 

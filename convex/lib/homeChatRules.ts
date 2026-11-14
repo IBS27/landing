@@ -81,6 +81,11 @@ export type ChatCommand =
    * the most this request may spend, whole dollars. Never the whole apartment.
    */
   | { kind: "add_items"; items: PlacementKind[]; want?: string; budget?: number }
+  /**
+   * Place these exact Marketplace listings, ones Muse read or showed ("add the
+   * TV you found"), in the apartment: one to `FURNISH_LIMITS.placeMax` ids.
+   */
+  | { kind: "place_items"; listingIds: string[] }
   | { kind: "none" };
 export type ChatSource = { label: string; href?: string };
 /** A ranked rental as a card in the reply. Code builds every field; Muse writes none of it. */
@@ -292,7 +297,7 @@ function money(n: number): string {
  */
 export function validCommand(
   cmd: ChatCommand,
-  data: { neighborhoods: ChatNeighborhood[]; listingIds?: string[] },
+  data: { neighborhoods: ChatNeighborhood[]; listingIds?: string[]; itemIds?: string[] },
 ): boolean {
   const slugs = new Set(data.neighborhoods.map((n) => n.slug));
   switch (cmd.kind) {
@@ -331,6 +336,14 @@ export function validCommand(
       return (
         addItemsProblems(cmd).length === 0 &&
         (cmd.budget === undefined || validFurnishBudget(cmd.budget))
+      );
+    case "place_items":
+      // Only Marketplace items read for this reply.
+      return (
+        cmd.listingIds.length >= 1 &&
+        cmd.listingIds.length <= FURNISH_LIMITS.placeMax &&
+        new Set(cmd.listingIds).size === cmd.listingIds.length &&
+        cmd.listingIds.every((id) => data.itemIds?.includes(id) ?? false)
       );
     default:
       return false;

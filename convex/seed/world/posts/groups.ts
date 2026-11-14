@@ -9,7 +9,7 @@ export const groupPosts: readonly PostSeed[] = [
   // ── Cal Housing, Sublets & Roommates ───────────────────────────────────────
   {
     key: "jordan-scam-warning",
-    by: "jordan.kim",
+    by: "adrian.kim",
     in: "cal-housing",
     at: daysAgo(7, "09:40"),
     text: "PSA because I've removed 6 of these this week: the 'furnished 2BR on Durant Ave for $1,400, owner is out of the country, just wire the deposit and they'll mail you the keys' listing is a SCAM. Same photos have been posted in LA and San Diego groups.\n\nRules of thumb:\n- if you can't see the place in person or on a live video call, walk away\n- nobody legit asks for Zelle, wire, or gift cards before you sign anything\n- reverse image search the photos\n- look up the address on the Alameda County assessor map and see who actually owns it\n- if it's way under market for Southside, it's fake. sorry.\n\nIf you already sent money, report it to Berkeley PD and call your bank today, not tomorrow. DM me or Amara if you're unsure about a listing. We'll look, no judgment.",
@@ -29,7 +29,7 @@ export const groupPosts: readonly PostSeed[] = [
         likes: 7,
         replies: [
           {
-            by: "jordan.kim",
+            by: "adrian.kim",
             text: "classic. the Lisbon loft has been making the rounds for 2 years lol",
             after: 9,
           },
@@ -54,7 +54,7 @@ export const groupPosts: readonly PostSeed[] = [
         after: 48,
         replies: [
           {
-            by: "jordan.kim",
+            by: "adrian.kim",
             text: "yes. don't send anything. screenshot the convo and send it to me",
             after: 3,
           },
@@ -126,7 +126,7 @@ export const groupPosts: readonly PostSeed[] = [
       },
       { by: "theo.grant", text: "interested, sent you a message", after: 160 },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "verified Fatima is a real human I have met in person lol, this one's legit",
         after: 220,
         likes: 9,
@@ -176,7 +176,7 @@ export const groupPosts: readonly PostSeed[] = [
     reactions: 7,
     comments: [
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "you're fine! with no car and a Haight job: the Haight, Cole Valley, the Inner Sunset, or the Inner Richmond if you bike. the 33 and the 43 get you there from most of those",
         after: 20,
         likes: 6,
@@ -252,7 +252,7 @@ export const groupPosts: readonly PostSeed[] = [
         after: 60,
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "reminder: get the takeover approval in writing from the landlord, not just from Samir 🙂",
         after: 110,
         likes: 5,
@@ -268,7 +268,7 @@ export const groupPosts: readonly PostSeed[] = [
     mood: "haha",
     comments: [
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "apply for the RPP permit on the city's site with your lease + registration showing the address. it's like $65 a year",
         after: 30,
       },
@@ -294,7 +294,7 @@ export const groupPosts: readonly PostSeed[] = [
     reactions: 5,
     comments: [
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "In CA they need to give 24 hours written notice to enter unless it's an emergency. A smoke detector check is not an emergency.",
         after: 15,
         likes: 8,
@@ -316,7 +316,7 @@ export const groupPosts: readonly PostSeed[] = [
     comments: [
       { by: "fatima.hassan", text: "ours went up 9% and I thought that was bad", after: 12 },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "if the building is 15+ years old the state cap is 5% + inflation, max 10%, so 14% is probably illegal. and if it's pre-1980 Berkeley rent control is way stricter. call the Rent Board",
         after: 30,
         likes: 11,
@@ -366,7 +366,7 @@ export const groupPosts: readonly PostSeed[] = [
     mood: "haha",
     comments: [
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "scam. 100%. please read the pinned post 🙏 reporting it",
         after: 12,
         likes: 10,
@@ -398,7 +398,7 @@ export const groupPosts: readonly PostSeed[] = [
     reactions: 6,
     comments: [
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "serious June listings show up March/April. but if a building has a waitlist, get on it now",
         after: 20,
       },
@@ -455,7 +455,7 @@ export const groupPosts: readonly PostSeed[] = [
     bg: "berry",
     reactions: 12,
     comments: [
-      { by: "jordan.kim", text: "and no, 'DM for price' is not a price", after: 10, likes: 7 },
+      { by: "adrian.kim", text: "and no, 'DM for price' is not a price", after: 10, likes: 7 },
       { by: "ethan.park", text: "what if the price is a vibe", after: 35, likes: 4 },
     ],
   },
@@ -530,7 +530,7 @@ export const groupPosts: readonly PostSeed[] = [
         likes: 5,
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "June is a great month to look, lots of turnover. just don't sign anything before you see it in person",
         after: 110,
       },
@@ -628,7 +628,7 @@ export const groupPosts: readonly PostSeed[] = [
     reactions: 4,
     comments: [
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "lots of older buildings bill back water/garbage. PG&E is separate and that's the one that gets you",
         after: 25,
       },
@@ -710,7 +710,7 @@ export const groupPosts: readonly PostSeed[] = [
     comments: [
       { by: "marcus.bell", text: "that's a 14% jump, insane", after: 15 },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "if your building is pre-1979 that's way over the rent control limit. take the notice to the SF Rent Board, seriously",
         after: 40,
         likes: 9,
@@ -890,7 +890,7 @@ export const groupPosts: readonly PostSeed[] = [
     mood: "haha",
     comments: [
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "construction noise is allowed 7am-8pm in SF. sorry",
         after: 20,
       },
@@ -952,7 +952,7 @@ export const groupPosts: readonly PostSeed[] = [
       },
       { by: "jasmine.ortiz", text: "never try to park on Valencia on a Friday night", after: 25 },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "it's sunny here when the rest of the city is socked in. microclimates are real, Dolores Park is your backyard",
         after: 40,
         likes: 5,
@@ -996,7 +996,7 @@ export const groupPosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "jordan.kim",
+    by: "adrian.kim",
     in: "mission-neighbors",
     at: daysAgo(6, "17:50"),
     text: "The streetlight at Florida & 20th has been out for 3 weeks and reported 4 times. If you walk there at night, please also report it on SF311. Squeaky wheel etc.",
@@ -1091,7 +1091,7 @@ export const groupPosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "jordan.kim",
+    by: "adrian.kim",
     in: "free-stuff-sf",
     at: daysAgo(4, "14:20"),
     text: "ISO moving boxes! moving across the Mission Dec 1, will happily take any size",
@@ -1179,7 +1179,7 @@ export const groupPosts: readonly PostSeed[] = [
     reactions: 15,
     mood: "haha",
     comments: [
-      { by: "jordan.kim", text: "lmaooo", after: 40 },
+      { by: "adrian.kim", text: "lmaooo", after: 40 },
       {
         by: "maya.chen",
         text: "my roommate Ana Torres would take these, she's a barista who's 'cutting back'",
@@ -1255,7 +1255,7 @@ export const groupPosts: readonly PostSeed[] = [
         after: 20,
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "I'll take anything urban planning adjacent lol",
         after: 55,
         replies: [

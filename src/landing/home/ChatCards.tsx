@@ -521,6 +521,7 @@ const KIND_LABEL: Record<string, string> = {
   art: "Art",
   plant: "Plant",
   decor: "Decor",
+  tv: "TV",
 };
 
 /* ───────────── What Muse found, and what it suggests doing (#154) ───────────── */

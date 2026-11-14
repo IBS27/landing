@@ -15,12 +15,12 @@ export const friendPosts: readonly PostSeed[] = [
     reactions: 34,
     comments: [
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         after: 6,
         text: "post in Cal Housing, Sublets & Roommates! a lot of july leases show up there around march. and read the pinned scam post before you send anyone a deposit 🙃",
         replies: [
           { by: "maya.chen", text: "already joined lol, i read the rules i promise" },
-          { by: "jordan.kim", text: "a model member" },
+          { by: "adrian.kim", text: "a model member" },
         ],
       },
       {
@@ -87,7 +87,7 @@ export const friendPosts: readonly PostSeed[] = [
         likes: 6,
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         after: 120,
         text: "Fatima Hassan didn't you find yours through a friend of a friend?",
         replies: [{ by: "fatima.hassan", text: "yes but that guy moved to sacramento 😔" }],
@@ -347,7 +347,7 @@ export const friendPosts: readonly PostSeed[] = [
     comments: [
       { by: "fatima.hassan", after: 12, text: "'efficient layout' = the bed is in the kitchen" },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         after: 20,
         text: "'charming' = no dishwasher. 'vintage' = the wiring scares me",
         replies: [{ by: "maya.chen", text: "you should put this glossary in the group" }],
@@ -802,7 +802,7 @@ export const friendPosts: readonly PostSeed[] = [
 
   // ── Jordan ──────────────────────────────────────────────────────────────
   {
-    by: "jordan.kim",
+    by: "adrian.kim",
     at: daysAgo(2, "23:10"),
     text: "grading 61 midterms on zoning. three of them cite SimCity as a source. one of them honestly makes a good argument",
     feeling: "feeling exhausted",
@@ -816,12 +816,12 @@ export const friendPosts: readonly PostSeed[] = [
         by: "maya.chen",
         after: 35,
         text: "was it SimCity 4 though because that's a credible source",
-        replies: [{ by: "jordan.kim", text: "it was cities skylines. even worse" }],
+        replies: [{ by: "adrian.kim", text: "it was cities skylines. even worse" }],
       },
     ],
   },
   {
-    by: "jordan.kim",
+    by: "adrian.kim",
     at: daysAgo(6, "10:00"),
     text: "reposting here bc 4 different people DMed me about this exact listing this week. if it's $1,400 for a 2br near campus it is not real. never send money before you see the place in person",
     share: "jordan-scam-warning",
@@ -831,13 +831,13 @@ export const friendPosts: readonly PostSeed[] = [
         by: "harper.quinn",
         after: 20,
         text: "the photos were from a hotel in vegas lmao",
-        replies: [{ by: "jordan.kim", text: "you could see the minibar in the 'kitchen' photo" }],
+        replies: [{ by: "adrian.kim", text: "you could see the minibar in the 'kitchen' photo" }],
       },
       {
         by: "maya.chen",
         after: 28,
         text: "i saw this one!! the 'landlord' wanted a gift card deposit",
-        replies: [{ by: "jordan.kim", text: "a gift card. in 2026. people are creative" }],
+        replies: [{ by: "adrian.kim", text: "a gift card. in 2026. people are creative" }],
       },
       {
         by: "derek.holloway",
@@ -853,7 +853,7 @@ export const friendPosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "jordan.kim",
+    by: "adrian.kim",
     at: daysAgo(15, "12:30"),
     text: "good piece, though I'd push back on the last section about parking minimums",
     link: {
@@ -871,12 +871,12 @@ export const friendPosts: readonly PostSeed[] = [
         by: "derek.holloway",
         after: 120,
         text: "The permit timeline part is painfully accurate",
-        replies: [{ by: "jordan.kim", text: "how long was your last one?" }],
+        replies: [{ by: "adrian.kim", text: "how long was your last one?" }],
       },
     ],
   },
   {
-    by: "jordan.kim",
+    by: "adrian.kim",
     at: daysAgo(20, "08:15"),
     text: "BART at 8am is a contact sport",
     bg: "ocean",
@@ -887,7 +887,7 @@ export const friendPosts: readonly PostSeed[] = [
         by: "fatima.hassan",
         after: 15,
         text: "someone's backpack has been in my face since downtown berkeley",
-        replies: [{ by: "jordan.kim", text: "the red line is a social experiment" }],
+        replies: [{ by: "adrian.kim", text: "the red line is a social experiment" }],
       },
       {
         by: "maya.chen",
@@ -897,7 +897,7 @@ export const friendPosts: readonly PostSeed[] = [
     ],
   },
   {
-    by: "jordan.kim",
+    by: "adrian.kim",
     at: daysAgo(22, "19:00"),
     privacy: "friends",
     text: "5 years married to someone who still lets me talk about bus lanes at dinner. love you",
@@ -1266,7 +1266,7 @@ export const friendPosts: readonly PostSeed[] = [
         replies: [{ by: "derek.holloway", text: "You were right. I owe you a beer" }],
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         after: 60,
         text: "send me the listing when it's up, I'll pin it in the group",
       },
@@ -1328,7 +1328,7 @@ export const friendPosts: readonly PostSeed[] = [
     reactions: 12,
     comments: [
       { by: "will.foster", after: 30, text: "I'm booked through sunday on gutters alone lol" },
-      { by: "jordan.kim", after: 75, text: "how do you know" },
+      { by: "adrian.kim", after: 75, text: "how do you know" },
       { by: "derek.holloway", after: 90, text: "A basement in the Haight. That's all I'll say" },
     ],
   },
@@ -1404,7 +1404,7 @@ export const friendPosts: readonly PostSeed[] = [
       { by: "maya.chen", after: 9, text: "PRIYA!!! so happy for you" },
       { by: "ana.torres", after: 14, text: "we're visiting. this is not a question" },
       { by: "sophie.dubois", after: 60, text: "Europe will be lucky to have you" },
-      { by: "jordan.kim", after: 200, text: "Congrats! Go ride all the bike lanes for me" },
+      { by: "adrian.kim", after: 200, text: "Congrats! Go ride all the bike lanes for me" },
     ],
   },
   {
@@ -1771,7 +1771,7 @@ export const friendPosts: readonly PostSeed[] = [
     text: "seniors looking for next year housing, please read this before you sign anything",
     share: "jordan-scam-warning",
     reactions: 10,
-    comments: [{ by: "jordan.kim", after: 30, text: "thank you 🙏" }],
+    comments: [{ by: "adrian.kim", after: 30, text: "thank you 🙏" }],
   },
   {
     by: "ryan.oconnor",
@@ -1856,7 +1856,7 @@ export const friendPosts: readonly PostSeed[] = [
     mood: "haha",
     comments: [
       { by: "samir.khan", after: 20, text: "don't touch it. never touch it again" },
-      { by: "jordan.kim", after: 60, text: "this is every dissertation" },
+      { by: "adrian.kim", after: 60, text: "this is every dissertation" },
     ],
   },
   {
@@ -2090,7 +2090,7 @@ export const friendPosts: readonly PostSeed[] = [
     mood: "haha",
     comments: [
       { by: "jasmine.ortiz", after: 15, text: "biscuit is an artist too" },
-      { by: "jordan.kim", after: 60, text: "she's a critic" },
+      { by: "adrian.kim", after: 60, text: "she's a critic" },
     ],
   },
   {
@@ -2148,7 +2148,7 @@ export const friendPosts: readonly PostSeed[] = [
     reactions: 30,
     comments: [
       { by: "priya.raman", after: 25, text: "ORCAS?? jealous" },
-      { by: "jordan.kim", after: 60, text: "how much is a sensor" },
+      { by: "adrian.kim", after: 60, text: "how much is a sensor" },
       { by: "sophie.dubois", after: 70, text: "Don't ask. Please don't ask" },
     ],
   },

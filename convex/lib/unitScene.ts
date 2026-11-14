@@ -56,6 +56,7 @@ export const placementKind = v.union(
   v.literal("art"),
   v.literal("plant"),
   v.literal("decor"),
+  v.literal("tv"),
 );
 export const placement = v.object({
   id: v.string(),
@@ -101,6 +102,7 @@ export const ALL_ITEM_KINDS: readonly ItemKind[] = [
   "art",
   "plant",
   "decor",
+  "tv",
 ];
 const ITEM_SIZES: Record<ItemKind, { width: number; depth: number; height: number }> = {
   sofa: { width: 2, depth: 0.8, height: 0.9 },
@@ -115,6 +117,8 @@ const ITEM_SIZES: Record<ItemKind, { width: number; depth: number; height: numbe
   art: { width: 0.6, depth: 0.03, height: 0.8 },
   plant: { width: 0.5, depth: 0.5, height: 1.1 },
   decor: { width: 0.3, depth: 0.3, height: 0.3 },
+  // A 55" TV on its own stand.
+  tv: { width: 1.23, depth: 0.25, height: 0.78 },
 };
 /** Placeholder proxy size in meters for an item without entered dimensions. */
 export function itemSize(kind: ItemKind) {

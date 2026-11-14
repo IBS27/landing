@@ -41,4 +41,19 @@ export const crewOptInSeeds: { username: string; matchBy: MatchBy; daysAgo: numb
     matchBy: { month: true, neighborhood: true, employer: true },
     daysAgo: 1,
   },
+  {
+    username: "dev.shah",
+    matchBy: { month: true, neighborhood: true, employer: true },
+    daysAgo: 3,
+  },
+  {
+    username: "jordan.kim.later",
+    matchBy: { month: true, neighborhood: true, employer: true },
+    daysAgo: 20,
+  },
+  {
+    username: "priya.nair",
+    matchBy: { month: true, neighborhood: true, employer: true },
+    daysAgo: 3,
+  },
 ];

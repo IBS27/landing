@@ -418,6 +418,20 @@ function itemId() {
   ).join("");
 }
 
+/**
+ * Why the unit can't take furniture yet, or null. The starter room is furnished
+ * only when no build is running or still to come (AI off, no media Muse can
+ * read, or a build that failed): the flow works without AI.
+ */
+async function notReady(ctx: QueryCtx, unit: Doc<"unitScenes">): Promise<string | null> {
+  if (!isStarterScene(unit.scene)) return null;
+  if (await liveJob(ctx, unit))
+    return "Your apartment model is still being built. Ask again once it's ready.";
+  if (!unit.generation && unit.manuallyEdited !== true && (await canBuild(ctx, unit)))
+    return "Your apartment model isn't ready yet. Open the Apartment tab to build it, then ask again.";
+  return null;
+}
+
 /** A Marketplace listing that can furnish a home: active, not a rental, vehicle or pet. */
 const placeable = (l: Doc<"listings">) =>
   l.status === "active" && !l.rental && !NOT_DECOR.has(l.category);
@@ -649,6 +663,114 @@ export const furnishReply = v.object({
 });
 export type FurnishReply = Infer<typeof furnishReply>;
 
+/** "a", "a and b", "a, b and c". */
+const listOf = (xs: readonly string[]) =>
+  xs.length < 2 ? (xs[0] ?? "") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`;
+
+/**
+ * Places the exact Marketplace listings the person means from what Muse showed
+ * ("add the TV you found": the chat's `place_items`), each where the layout
+ * finds room, as the kind its title says and at a typical size. Nothing is
+ * picked for them, so the furniture budget is reported, never applied. The
+ * reply says what was placed and why anything wasn't; nothing is bought or sent.
+ */
+export const placeChosen = viewerMutation({
+  args: { listingIds: v.array(v.id("listings")) },
+  returns: furnishReply,
+  handler: async (ctx, { listingIds }): Promise<FurnishReply> => {
+    const viewerId = ctx.viewer._id;
+    if (
+      listingIds.length < 1 ||
+      listingIds.length > FURNISH_LIMITS.placeMax ||
+      new Set(listingIds).size !== listingIds.length
+    )
+      throw new ConvexError(`Name one to ${FURNISH_LIMITS.placeMax} different listings to add`);
+    const { place, unit } = await viewerUnit(ctx, viewerId);
+    const before = unit ? await placedItems(ctx, viewerId, unit.placements) : { spent: 0 };
+    const budget = unit?.furnishing?.budget ?? null;
+    const reply = (text: string, items: FurnishReply["items"] = []): FurnishReply => {
+      const total = items.reduce((sum, i) => sum + i.price, 0);
+      return {
+        text,
+        via: "muse",
+        items,
+        total,
+        spent: before.spent + total,
+        budget,
+        asked: [],
+        sources: items.map((i) => ({
+          label: `${i.title.slice(0, 120)} · ${dollars(i.price)}`,
+          href: `/marketplace/item/${i.listingId}`,
+        })),
+      };
+    };
+    if (!place) return reply("Choose your place first, and I can add things to it.");
+    if (!unit)
+      return reply(
+        "Your apartment model isn't ready yet. Open the Apartment tab to build it, then ask again.",
+      );
+    const building = await notReady(ctx, unit);
+    if (building) return reply(building);
+
+    const visible = await visibleListings(ctx, viewerId, listingIds);
+    const here = new Set(unit.placements.map((p) => p.listingId));
+    const picks: ListingPick[] = [];
+    const already: string[] = [];
+    let unavailable = 0;
+    let full = 0;
+    for (const id of listingIds) {
+      const listing = visible.get(id);
+      if (!listing || !placeable(listing) || listing.sellerId === viewerId) unavailable++;
+      else if (here.has(id)) already.push(listing.title);
+      else if (unit.placements.length + picks.length >= MAX_ITEMS) full++;
+      else {
+        const kind = kindOf(listing) ?? "decor";
+        picks.push({ listing, kind, ...sizeOf(kind, listing) });
+      }
+    }
+    const placed = await placeListings(ctx, unit, picks);
+    const idOf = new Map(placed.map((p) => [p.listingId, p.id]));
+    const items: FurnishReply["items"] = picks.flatMap((p) => {
+      const itemId = idOf.get(p.listing._id);
+      return itemId === undefined
+        ? []
+        : [
+            {
+              itemId,
+              listingId: p.listing._id,
+              title: p.listing.title,
+              price: p.listing.price,
+              photo: p.listing.photos[0] ?? null,
+              kind: p.kind,
+              reason: "The one you asked for",
+            },
+          ];
+    });
+    const noRoom = picks.filter((p) => !idOf.has(p.listing._id)).map((p) => p.listing.title);
+    const said: string[] = [];
+    if (items.length)
+      said.push(
+        `Added ${listOf(items.map((i) => `${i.title} (${dollars(i.price)})`))} to your apartment to review. Nothing is bought or sent.`,
+      );
+    if (already.length)
+      said.push(
+        `${listOf(already)} ${already.length === 1 ? "is" : "are"} already in your apartment.`,
+      );
+    if (noRoom.length)
+      said.push(
+        `There's no free spot for ${listOf(noRoom)}. Move or remove something to make room.`,
+      );
+    if (full) said.push(`Your apartment holds at most ${MAX_ITEMS} things.`);
+    if (unavailable)
+      said.push(
+        unavailable === 1 && listingIds.length === 1
+          ? "That listing isn't available anymore."
+          : `${unavailable} of them ${unavailable === 1 ? "isn't" : "aren't"} available anymore.`,
+      );
+    return reply(said.join(" "), items);
+  },
+});
+
 const cap = (text: string, max: number) => redactProtected(text.trim().slice(0, max));
 
 const contextArgs = {
@@ -705,22 +827,8 @@ export async function furnishContext(
   const { items, spent } = await placedItems(ctx, viewerId, unit.placements);
   /** The apartment's furniture budget as it stands: what every reply reports until one changes it. */
   const stored = unit.furnishing?.budget ?? null;
-  // The starter room is furnished only when no build is running or still to come
-  // (AI off, no media Muse can read, or a build that failed): the flow works without AI.
-  if (isStarterScene(unit.scene)) {
-    if (await liveJob(ctx, unit))
-      return wait(
-        "Your apartment model is still being built. Ask again once it's ready.",
-        spent,
-        stored,
-      );
-    if (!unit.generation && unit.manuallyEdited !== true && (await canBuild(ctx, unit)))
-      return wait(
-        "Your apartment model isn't ready yet. Open the Apartment tab to build it, then ask again.",
-        spent,
-        stored,
-      );
-  }
+  const building = await notReady(ctx, unit);
+  if (building) return wait(building, spent, stored);
 
   // Two requests (#153): the things the person named ("add a reading lamp"), or a look for
   // the whole apartment. A list of things sent as a vibe (by Muse, or an older client) is

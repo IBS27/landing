@@ -87,7 +87,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
         ],
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "planning nerd note: Dolores Park is technically castro/upper market on the city's neighborhood map, the line runs down dolores st. we claim it anyway 🙂",
         after: 63,
         likes: 17,
@@ -221,7 +221,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
         ],
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "Comal y Luna on 24th & harrison: 3 pupusas + curtido for about $14. they close at 9 so it's a walk-fast-off-the-shuttle situation 🙂",
         after: 41,
         likes: 9,
@@ -305,7 +305,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
     reactions: 26,
     comments: [
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "love this. my notes:\n- noise: Valencia between 16th and 24th has bar bass and karaoke til ~2 on fri/sat. one block off (guerrero, lexington, san carlos) is a different world\n- light: Mission St and 24th St are bright and busy late, lots of open storefronts. some side streets east of folsom have long gaps between streetlights, and the florida & 20th one is STILL out (reported 4x, please 311 it)\n- BART runs til about midnight. the late-night pilot (2am fri/sat, every 20 min after midnight) doesn't start until dec 5, so nobody's actually tried it yet\n- the 14 runs all night on mission st if you miss the last train",
         after: 14,
         likes: 22,
@@ -373,7 +373,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
         likes: 12,
         replies: [
           {
-            by: "jordan.kim",
+            by: "adrian.kim",
             text: "agree on the back unit. and maya, ask if the building is pre-1979, that's what makes it rent controlled 🙂",
             after: 12,
             likes: 8,
@@ -407,7 +407,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
             likes: 5,
           },
           {
-            by: "jordan.kim",
+            by: "adrian.kim",
             text: "seconding Doble Sol, I carry it home in a backpack every sunday",
             after: 15,
             likes: 4,
@@ -441,7 +441,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
         likes: 5,
         replies: [
           {
-            by: "jordan.kim",
+            by: "adrian.kim",
             text: "he's legally correct, the residential nighttime noise limits kick in at 10pm",
             after: 6,
             likes: 7,
@@ -587,7 +587,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
         likes: 5,
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "PSA for the storm: folsom around 17th floods in big storms (it used to be a lagoon, the water remembers). don't park in the dips, and if you're out late it's still regular BART hours, the late-night pilot doesn't start til dec 5",
         after: 170,
         likes: 9,
@@ -603,7 +603,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
     reactions: 29,
     comments: [
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "Dolores Park, upper southwest corner by the J Church tracks (near 20th & church). you face downtown and watch the skyline go pink while the sun drops behind the hills. about a 20 min walk from 16th St BART, uphill at the end",
         after: 10,
         likes: 16,
@@ -1215,7 +1215,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
         likes: 6,
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "pushback on Corona Heights at 11: on a clear saturday the top is crowded and windy. do Kite Hill at 11 and Corona at golden hour. same view energy, half the people",
         after: 65,
         likes: 9,
@@ -1249,7 +1249,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
         ],
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "transit note: the F from Castro Station is the historic streetcars. slow and lovely and it will not get you anywhere fast. that's the point 🙂",
         after: 100,
         likes: 7,
@@ -1291,7 +1291,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
         likes: 9,
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "Fogbow Bakery on church & 18th for pastries and coffee in the morning, it's right at the park's corner. and bring layers, once the fog comes over twin peaks in the late afternoon it gets cold fast",
         after: 30,
         likes: 8,
@@ -1345,7 +1345,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
         likes: 8,
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "avoid the Dolores Park paths on weekends, skaters bomb the hill on the 20th st side. and avoid Dolores St itself in July (the hill bomb), you know the one",
         after: 20,
         likes: 10,
@@ -1389,7 +1389,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
         likes: 13,
         replies: [
           {
-            by: "jordan.kim",
+            by: "adrian.kim",
             text: "owen 🙂",
             after: 20,
             likes: 8,
@@ -1435,7 +1435,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
         likes: 9,
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "planning nerd note: Noe Valley Town Square used to be a parking lot. neighbors pushed and fundraised, the city bought the lot, it opened in 2016. best parking-lot-to-plaza glow up in the city 🙂",
         after: 45,
         likes: 14,
@@ -1497,7 +1497,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
         likes: 6,
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "+1 Bramble Stoop, but it changed since they took out the bar seating. it's grab-and-go now. take it to Noe Valley Town Square and sit on the benches",
         after: 40,
         likes: 5,
@@ -1575,7 +1575,7 @@ export const neighborhoodPosts: readonly PostSeed[] = [
         ],
       },
       {
-        by: "jordan.kim",
+        by: "adrian.kim",
         text: "Upper Douglass before 7 is actually calm, it's the 8-10am crowd. and the 22nd St hill is a great short loop, nobody walks it because it's 31%",
         after: 35,
         likes: 6,

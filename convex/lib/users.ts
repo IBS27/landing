@@ -28,6 +28,38 @@ export function isOnline(u: Doc<"users">) {
   return Boolean(u.alwaysOnline) || Date.now() - u.lastActiveAt < ONLINE_WINDOW_MS;
 }
 
+/**
+ * Guests (`demo.start` makes one per browser, `users.isDemo`) are private to
+ * themselves: other viewers never see them listed among a Group's members, an
+ * Event's guests or a neighborhood's people. Seeded personas never set
+ * `isDemo`, so they stay visible.
+ */
+export function hiddenFrom(u: Doc<"users">, viewerId: Id<"users">) {
+  return u.isDemo === true && u._id !== viewerId;
+}
+
+const LISTABLE_BATCH = 100;
+
+/**
+ * The users among `ids` the viewer may see listed (`hiddenFrom`), in order,
+ * missing ones dropped. Stops reading once `limit` are found, so guests ahead
+ * in the order don't use up a caller's budget.
+ */
+export async function listable(
+  ctx: QueryCtx,
+  ids: readonly Id<"users">[],
+  viewerId: Id<"users">,
+  limit = Number.POSITIVE_INFINITY,
+): Promise<Doc<"users">[]> {
+  const unique = [...new Set(ids)];
+  const out: Doc<"users">[] = [];
+  for (let i = 0; i < unique.length && out.length < limit; i += LISTABLE_BATCH) {
+    const docs = await Promise.all(unique.slice(i, i + LISTABLE_BATCH).map((id) => ctx.db.get(id)));
+    for (const d of docs) if (d && !hiddenFrom(d, viewerId) && out.length < limit) out.push(d);
+  }
+  return out;
+}
+
 export async function getSummaries(ctx: QueryCtx, ids: Id<"users">[]) {
   const unique = [...new Set(ids)];
   const docs = await Promise.all(unique.map((id) => ctx.db.get(id)));

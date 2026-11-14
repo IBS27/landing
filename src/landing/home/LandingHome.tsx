@@ -81,9 +81,11 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
   const profile = useQ(api.cityProfile.get, {});
   const apartment = useQ(api.apartment.get, {});
   const waiting = useQ(api.proposals.pendingCount, {});
-  const chat = useChatLog(viewer._id, GREETING);
+  const demoChat = useQ(api.homeChat.demoChat, viewer.username === "jordan.kim" ? {} : "skip");
+  const chat = useChatLog(viewer._id, GREETING, demoChat);
   const ask = useAction(api.homeChat.reply);
   const furnish = useAction(api.apartment.furnish);
+  const placeChosen = useM(api.apartment.placeChosen);
   const takeListing = useM(api.myPlace.takeListing);
   const buildApartment = useM(api.apartment.build);
   const m = useHomeMap();
@@ -112,17 +114,24 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
 
   /* ── Furnishing: Muse picks, the apartment gets the pieces, the chat shows them ── */
   const furnishNow = useCallback(
-    async (cmd: Extract<ChatCommand, { kind: "furnish" | "add_items" }>, sessionId: string) => {
+    async (
+      cmd: Extract<ChatCommand, { kind: "furnish" | "add_items" | "place_items" }>,
+      sessionId: string,
+    ) => {
       setPending("furnish");
       try {
-        const r = await furnish({
-          viewerId: viewer._id,
-          // Named things (#153): only those kinds, and what the person said about them.
-          ...(cmd.kind === "add_items"
-            ? { vibe: cmd.want ?? "", only: cmd.items }
-            : { vibe: cmd.vibe }),
-          ...(cmd.budget === undefined ? {} : { budget: cmd.budget }),
-        });
+        const r =
+          cmd.kind === "place_items"
+            ? // The exact listings Muse showed ("add the TV you found"): nothing to pick.
+              await placeChosen({ listingIds: cmd.listingIds as Id<"listings">[] })
+            : await furnish({
+                viewerId: viewer._id,
+                // Named things (#153): only those kinds, and what the person said about them.
+                ...(cmd.kind === "add_items"
+                  ? { vibe: cmd.want ?? "", only: cmd.items }
+                  : { vibe: cmd.vibe }),
+                ...(cmd.budget === undefined ? {} : { budget: cmd.budget }),
+              });
         chat.add(
           {
             who: "muse",
@@ -149,7 +158,7 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
         setPending(null);
       }
     },
-    [chat.add, furnish, viewer._id],
+    [chat.add, furnish, placeChosen, viewer._id],
   );
 
   /* ── Running a command from the chat ── */
@@ -166,6 +175,7 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
           return setView("apartment");
         case "furnish":
         case "add_items":
+        case "place_items":
           setView("apartment");
           if (!o.replay) void furnishNow(cmd, o.sessionId);
           return;
@@ -292,7 +302,8 @@ export function LandingHome({ view = "map" }: { view?: HomeView }) {
         (isMapCommand(x.command) ||
           x.command.kind === "show_apartment" ||
           x.command.kind === "furnish" ||
-          x.command.kind === "add_items"),
+          x.command.kind === "add_items" ||
+          x.command.kind === "place_items"),
     )?.command;
 
   const openSession = (s: ChatSession) => {

@@ -88,6 +88,11 @@ describe("what a listing is", () => {
       ["Framed concert poster", "art"],
       ["Brass desk lamp", "lamp"],
       ["Ceramic vase", "decor"],
+      ['LG 55" OLED TV (C1)', "tv"],
+      ["Samsung 65 inch smart television", "tv"],
+      ["Walnut TV stand", "storage"],
+      ["Roku Streaming Stick 4K", "decor"],
+      ["Big Joe bean bag chair", "chair"],
       ["Galanz mini fridge w/ freezer, 3.1 cu ft", null],
       ["Brother HL-L2350DW laser printer", null],
       ["Dyson V8 cordless vacuum", null],
@@ -128,6 +133,14 @@ describe("what a listing is", () => {
     expect(sizeOf("bed", furniture("Queen wood bed frame")).width).toBe(1.55);
     expect(sizeOf("bed", furniture("Twin bed")).width).toBe(1);
     expect(sizeOf("lamp", furniture("IKEA Hektar floor lamp")).height).toBe(1.6);
+    // A TV from its diagonal: a 55" panel is about 1.22 m wide.
+    expect(sizeOf("tv", furniture('LG 55" OLED TV (C1)'))).toEqual({
+      width: 1.22,
+      depth: 0.25,
+      height: 0.78,
+    });
+    expect(sizeOf("tv", furniture("Samsung 65 inch TV")).width).toBe(1.44);
+    expect(sizeOf("tv", furniture("Old TV"))).toEqual(itemSize("tv"));
     // A kind the title doesn't name gets that kind's default.
     expect(sizeOf("rug", furniture("Mid century coffee table"))).toEqual(itemSize("rug"));
     for (const kind of ALL_ITEM_KINDS) expect(sizeProblem(kind, itemSize(kind))).toBeNull();

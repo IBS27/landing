@@ -442,6 +442,20 @@ export const seedImages: Record<ImageFolder, readonly SeedImage[]> = {
       h: 128,
       w: 128,
     },
+    {
+      path: "/seed/avatars/w-31.jpg",
+      topic: "w",
+      tags: ["avatar", "portrait", "woman", "random user portrait (women 65)"],
+      h: 128,
+      w: 128,
+    },
+    {
+      path: "/seed/avatars/w-32.jpg",
+      topic: "w",
+      tags: ["avatar", "portrait", "woman", "random user portrait (women 72)"],
+      h: 128,
+      w: 128,
+    },
   ],
   posts: [
     {
