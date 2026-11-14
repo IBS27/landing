@@ -15,7 +15,7 @@ const plan = buildPlan(Date.UTC(2026, 10, 13));
 describe("same-unit rental evidence", () => {
   test("every rental uses its own complete gallery, plan, room counts and exact source point", () => {
     expect(rentals).toHaveLength(30);
-    expect(rentals.filter((r) => r.rental?.propertyType === "room")).toHaveLength(13);
+    expect(rentals.filter((r) => r.rental?.propertyType === "room")).toHaveLength(14);
     expect(rentals.some((r) => r.rental?.listingType === "sublet")).toBe(true);
     expect(new Set(rentals.map((r) => r.rentalMedia?.sourceUrl)).size).toBe(30);
     const images = new Set<string>();

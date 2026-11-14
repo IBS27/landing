@@ -667,3 +667,17 @@ describe("interest fit cites what it counts", () => {
     expect(fit.sources?.length).toBeGreaterThan(0);
   });
 });
+
+test("Mission public climbing series beats Inner Sunset for Jordan", async () => {
+  const { events } = await import("../convex/seed/world/events");
+  const items = events
+    .filter((e) => e.privacy === "public" && e.title.includes("Mission Cliffs"))
+    .map((e) => ({
+      interests: interestsForLocalEvent({ category: e.category, title: e.title }),
+      source: post(e.key),
+    }));
+  const weights = new Map<InterestId, number>([["climbing", 1]]);
+  expect(
+    (interestFit(weights, items)?.score ?? 0) - (interestFit(weights, [])?.score ?? 0),
+  ).toBeGreaterThanOrEqual(0.5);
+});

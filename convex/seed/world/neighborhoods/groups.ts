@@ -35,7 +35,7 @@ export const neighborhoodGroups = [
     externalMembers: 13900,
     createdYearsAgo: 5,
     admins: ["jasmine.ortiz"],
-    moderators: ["jordan.kim"],
+    moderators: ["adrian.kim"],
     members: [
       "nina.petrova",
       "maya.chen",
@@ -99,7 +99,7 @@ export const neighborhoodGroups = [
       "marcus.bell",
       "erin.mcallister",
       "tasha.okafor",
-      "jordan.kim",
+      "adrian.kim",
       "diego.morales",
     ],
   },
@@ -135,7 +135,7 @@ export const neighborhoodGroups = [
     members: [
       "harper.quinn",
       "owen.murphy",
-      "jordan.kim",
+      "adrian.kim",
       "kai.nakamura",
       "maya.chen",
       "nora.kowalski",
@@ -171,7 +171,7 @@ export const neighborhoodGroups = [
     moderators: ["andre.silva"],
     members: [
       "luis.hernandez",
-      "jordan.kim",
+      "adrian.kim",
       "maya.chen",
       "nina.petrova",
       "derek.holloway",

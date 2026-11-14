@@ -71,6 +71,8 @@ Machine-readable data lives in `manifest.json`.
 - `avatars/w-28.jpg`: ["Random User portrait (women 85)"](https://randomuser.me/api/portraits/women/85.jpg) by randomuser.me, [randomuser.me (free to use)](https://randomuser.me/)
 - `avatars/w-29.jpg`: ["Random User portrait (women 90)"](https://randomuser.me/api/portraits/women/90.jpg) by randomuser.me, [randomuser.me (free to use)](https://randomuser.me/)
 - `avatars/w-30.jpg`: ["Random User portrait (women 92)"](https://randomuser.me/api/portraits/women/92.jpg) by randomuser.me, [randomuser.me (free to use)](https://randomuser.me/)
+- `avatars/w-31.jpg`: ["Random User portrait (women 65)"](https://randomuser.me/api/portraits/women/65.jpg) by randomuser.me, [randomuser.me (free to use)](https://randomuser.me/)
+- `avatars/w-32.jpg`: ["Random User portrait (women 72)"](https://randomuser.me/api/portraits/women/72.jpg) by randomuser.me, [randomuser.me (free to use)](https://randomuser.me/)
 
 ## posts (305)
 

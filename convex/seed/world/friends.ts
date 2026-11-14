@@ -23,7 +23,7 @@ export const mayaFriends = [
   "theo.grant",
   "rohan.iyer",
   "priya.raman",
-  "jordan.kim",
+  "adrian.kim",
   // hometown & family
   "jessica.huang",
   "kevin.tran",
@@ -88,7 +88,7 @@ export const circles = [
       "priya.raman",
       "lily.anderson",
       "jiho.choi",
-      "jordan.kim",
+      "adrian.kim",
     ],
   },
   {
@@ -202,7 +202,7 @@ export const circles = [
   {
     name: "grad",
     density: 0.7,
-    members: ["jordan.kim", "samir.khan", "fatima.hassan", "sophie.dubois"],
+    members: ["adrian.kim", "samir.khan", "fatima.hassan", "sophie.dubois"],
   },
 ] as const satisfies readonly {
   name: string;
@@ -213,18 +213,22 @@ export const circles = [
 
 /** Friendships that don't fall out of a circle. */
 export const extraFriendships = [
-  ["derek.holloway", "jordan.kim"],
+  ["derek.holloway", "adrian.kim"],
   ["marcus.bell", "leo.novak"],
   ["marcus.bell", "camila.santos"],
   ["priya.raman", "sophie.dubois"],
   ["emily.chen", "lily.anderson"],
   ["emily.chen", "yuki.sato"],
   ["sofia.alvarez", "tasha.okafor"],
-  ["jordan.kim", "harper.quinn"],
+  ["adrian.kim", "harper.quinn"],
   ["jessica.huang", "chloe.wright"],
   ["malik.johnson", "zoe.nguyen"],
   ["luis.hernandez", "jamal.wilson"],
   ["tara.singh", "maddie.collins"],
+  ["jordan.kim", "dev.shah"],
+  ["jordan.kim", "priya.nair"],
+  ["jordan.kim.later", "dev.shah"],
+  ["jordan.kim.later", "priya.nair"],
 ] as const satisfies readonly (readonly [Username, Username])[];
 
 /** Pending friend requests. Six incoming to Maya, two outgoing, a few between others. */
@@ -242,5 +246,5 @@ export const friendRequests = [
   { from: "marcus.bell", to: "malik.johnson", at: daysAgo(3, "11:30") },
   { from: "yuki.sato", to: "priya.raman", at: daysAgo(5, "15:00") },
   { from: "erin.mcallister", to: "sofia.alvarez", at: daysAgo(2, "08:45") },
-  { from: "nora.kowalski", to: "jordan.kim", at: daysAgo(7, "10:10") },
+  { from: "nora.kowalski", to: "adrian.kim", at: daysAgo(7, "10:10") },
 ] as const satisfies readonly { from: Username; to: Username; at: TimeSpec }[];

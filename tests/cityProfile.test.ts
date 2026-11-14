@@ -19,7 +19,12 @@ import {
   upcomingMoveInProblem,
   valueKey,
 } from "../convex/lib/cityProfileFacts";
-import { profileFromText, profileInput, tidyProposals } from "../convex/lib/profileFromText";
+import {
+  factProblem,
+  profileFromText,
+  profileInput,
+  tidyProposals,
+} from "../convex/lib/profileFromText";
 import { extractFacts, narrowQuote } from "../convex/lib/profileText";
 import {
   employerHasProtected,
@@ -46,10 +51,10 @@ const labels = (text: string) => facts(text).map((p) => `${p.entry.key}:${p.labe
 const entries = (text: string) => facts(text).map((p) => p.entry);
 const factSlotOf = (e: FactEntry) => factSlot(e);
 
-/** Muse's checks on a model answer for `text` (as the model would see it). */
+/** Why Muse's facts for `text` (as the model would see it) would be dropped; [] when all hold up. */
 function modelProblems(text: string, proposals: { entry: FactEntry; quote: string }[]) {
   const input = { text: redactProtected(text), today: TODAY };
-  return profileFromText.check?.({ facts: proposals }, input) ?? [];
+  return proposals.flatMap((p) => factProblem(p, input) ?? []);
 }
 
 /* ---------------- 1. Protected traits ---------------- */

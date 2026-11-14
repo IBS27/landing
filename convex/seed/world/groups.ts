@@ -7,6 +7,21 @@ import type { neighborhoodGroups } from "./neighborhoods/groups";
  */
 export const groups = [
   {
+    slug: "jordan-move-in-crew",
+    name: "Jordan’s move-in crew",
+    privacy: "private",
+    description: "Meta newcomers exploring San Francisco together.",
+    category: "Community",
+    cover: "sf skyline",
+    rules: [],
+    tags: ["climbing"],
+    externalMembers: 0,
+    createdYearsAgo: 0,
+    admins: ["jordan.kim.later"],
+    members: ["maya.chen", "dev.shah", "priya.nair"],
+    neighborhood: "mission",
+  },
+  {
     slug: "cal-housing",
     name: "Cal Housing, Sublets & Roommates",
     privacy: "private",
@@ -37,7 +52,7 @@ export const groups = [
     tags: ["Housing", "Sublets", "Roommates", "UC Berkeley"],
     externalMembers: 18400,
     createdYearsAgo: 9,
-    admins: ["jordan.kim"],
+    admins: ["adrian.kim"],
     moderators: ["amara.diallo"],
     members: [
       "maya.chen",
@@ -90,7 +105,7 @@ export const groups = [
       "maya.chen",
       "marcus.bell",
       "leo.novak",
-      "jordan.kim",
+      "adrian.kim",
       "nora.kowalski",
       "kevin.tran",
       "yuki.sato",
@@ -122,7 +137,7 @@ export const groups = [
     externalMembers: 12800,
     createdYearsAgo: 8,
     admins: ["harper.quinn"],
-    moderators: ["jordan.kim"],
+    moderators: ["adrian.kim"],
     members: [
       "maya.chen",
       "marcus.bell",
@@ -162,7 +177,7 @@ export const groups = [
       "maya.chen",
       "priya.raman",
       "marcus.bell",
-      "jordan.kim",
+      "adrian.kim",
       "hannah.lee",
       "emily.chen",
       "sam.rivera",

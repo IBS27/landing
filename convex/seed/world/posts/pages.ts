@@ -19,7 +19,7 @@ export const pagePosts: readonly PostSeed[] = [
     },
     reactions: 55,
     mood: "sad",
-    likedBy: ["maya.chen", "jordan.kim"],
+    likedBy: ["maya.chen", "adrian.kim"],
     comments: [
       {
         by: "maya.chen",
@@ -35,13 +35,13 @@ export const pagePosts: readonly PostSeed[] = [
         likes: 6,
         replies: [
           {
-            by: "jordan.kim",
+            by: "adrian.kim",
             text: "Both things are true. Costs are up for small landlords AND the supply problem is the real driver. We zoned most of the west side for single family homes and then acted surprised.",
             likes: 9,
           },
           {
             by: "derek.holloway",
-            text: "Jordan Kim no argument from me on the zoning part. Let me build a backyard cottage without 14 months of permits and I will",
+            text: "Adrian Kim no argument from me on the zoning part. Let me build a backyard cottage without 14 months of permits and I will",
           },
         ],
       },

@@ -485,13 +485,30 @@ function load(key: string, greeting: string): Log {
  * browser per viewer. A chat is saved once the viewer has said something, and
  * the open one comes back after a reload.
  */
-export function useChatLog(viewerId: string | undefined, greeting: string) {
+export function useChatLog(
+  viewerId: string | undefined,
+  greeting: string,
+  seed?: ChatSession | null,
+) {
   const key = `landing:chats:${viewerId ?? "anon"}`;
   const [log, setLog] = useState<Log>(() => load(key, greeting));
   // Another persona: their chats, not the last person's open one.
   if (log.key !== key) setLog(load(key, greeting));
   const currentId = useRef(log.current.id);
   currentId.current = log.current.id;
+
+  useEffect(() => {
+    if (!seed) return;
+    setLog((prev) => {
+      if (prev.key !== key || prev.sessions.some((s) => s.id === seed.id)) return prev;
+      const open = !prev.current.messages.some((m) => m.who === "me");
+      return {
+        ...prev,
+        sessions: [seed, ...prev.sessions],
+        ...(open && { current: seed, resumed: false }),
+      };
+    });
+  }, [key, seed]);
 
   const isSaved = log.sessions.some((s) => s.id === log.current.id);
   useEffect(() => {

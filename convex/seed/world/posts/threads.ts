@@ -110,7 +110,7 @@ const THREADS: readonly { by: Handle; text: string; comments: readonly CommentSe
         text: "in my defense my coworkers wanted to leave early anyway",
         replies: [
           {
-            by: "jordan.kim",
+            by: "adrian.kim",
             text: "how did 3 people and a loveseat fit in an SUV",
             replies: [
               { by: "marcus.bell", text: "physics is a suggestion" },

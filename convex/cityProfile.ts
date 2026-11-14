@@ -18,9 +18,10 @@ import {
 } from "./lib/cityProfileFacts";
 import { viewerMutation, viewerQuery } from "./lib/functions";
 import { interestId } from "./lib/interests";
-import { profileFromText, profileInput, tidyProposals } from "./lib/profileFromText";
+import { groundedFacts, profileFromText, profileInput, tidyProposals } from "./lib/profileFromText";
 import { MAX_TEXT_LENGTH, proposalLabel } from "./lib/profileText";
 import { EMPLOYER_PERSONAL, employerHasProtected } from "./lib/protectedText";
+import { aiFallbackReason } from "./validators";
 
 /**
  * Landing City Profile (#3). Other features read profiles with `getProfile`
@@ -143,6 +144,8 @@ export const suggestFromText = action({
   args: { viewerId: v.id("users"), text: v.string() },
   returns: v.object({
     via: v.union(v.literal("model"), v.literal("cache"), v.literal("fallback")),
+    /** Why the rules answered: "disabled" when AI is off, otherwise the model's answer didn't hold up. */
+    fallbackReason: v.optional(aiFallbackReason),
     proposals: v.array(proposal),
   }),
   handler: async (ctx, { viewerId, text }) => {
@@ -161,9 +164,13 @@ export const suggestFromText = action({
       sources: [],
       shownTo: viewerId,
     });
+    // The rules only propose what they found; Muse's facts each need to hold up on their own.
+    const facts =
+      result.via === "fallback" ? result.output.facts : groundedFacts(result.output.facts, input);
     return {
       via: result.via,
-      proposals: tidyProposals(result.output.facts).map((f) => ({
+      ...(result.fallbackReason ? { fallbackReason: result.fallbackReason } : {}),
+      proposals: tidyProposals(facts).map((f) => ({
         entry: f.entry,
         quote: f.quote,
         label: proposalLabel(f.entry, f.carFree),

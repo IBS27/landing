@@ -623,6 +623,34 @@ export function proxyModel(kind: PlacementKind, size: ItemSize, color: string): 
           ["cylinder", "accent", 0, h * 0.98, 0, w * 0.42, h * 0.04, d * 0.42],
         ],
       );
+    case "tv": {
+      // A thin panel on a low stand; the screen faces +z.
+      const stand = Math.min(0.1, h * 0.15),
+        panel = Math.min(0.06, d * 0.4),
+        bezel = Math.min(0.015, w * 0.02, (h - stand) * 0.04);
+      return assemble(
+        size,
+        [
+          material("body", METAL_DARK, "metal", 0.4, 0.5),
+          material("screen", "#0c0d10", "glass", 0.1, 1),
+        ],
+        [
+          ["box", "body", 0, stand * 0.15, 0, w * 0.4, stand * 0.3, d],
+          ["box", "body", 0, stand / 2, -d / 2 + panel / 2, w * 0.12, stand, panel],
+          ["box", "body", 0, stand + (h - stand) / 2, -d / 2 + panel / 2, w, h - stand, panel],
+          [
+            "box",
+            "screen",
+            0,
+            stand + (h - stand) / 2,
+            -d / 2 + panel + 0.002,
+            w - bezel * 2,
+            h - stand - bezel * 2,
+            0.004,
+          ],
+        ],
+      );
+    }
   }
 }
 

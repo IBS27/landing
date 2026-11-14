@@ -494,6 +494,13 @@ describe("furnish text helpers", () => {
     expect(furnishAsk("add a used bookcase to my room")).toBe(true);
     expect(furnishAsk("find me an armchair")).toBe(false);
     expect(furnishAsk("will a bookcase fit", { view: "apartment" })).toBe(false);
+    // A style with things, or with the whole place, is a look for it anywhere.
+    expect(furnishAsk("warm mid-century, lots of plants")).toBe(true);
+    expect(furnishAsk("boho with plants")).toBe(true);
+    expect(furnishAsk("Make it warm mid-century under $1,500")).toBe(true);
+    // A style that only describes a thing, or with neither, is not.
+    expect(furnishAsk("find me a black armchair")).toBe(false);
+    expect(furnishAsk("vintage shops near me")).toBe(false);
   });
   test("furnishRequest tells named things to add from a look for the whole place (#153)", () => {
     const items = (kinds: string[], want = "") => ({ type: "items", kinds, want });
@@ -510,6 +517,15 @@ describe("furnish text helpers", () => {
       ["a rug under $200", items(["rug"])],
       ["desk and a lamp", items(["desk", "lamp"])],
       ["a boho rug", items(["rug"], "boho")],
+      ["add a plant", items(["plant"])],
+      ["a plant", items(["plant"])],
+      ["add lots of plants", items(["plant"])],
+      // A style or colour right before a thing describes the thing.
+      ["a mid-century armchair under $300", items(["chair"], "mid century")],
+      ["mid-century walnut desk", items(["desk"], "mid century walnut")],
+      ["warm mid-century walnut desk", items(["desk"], "warm mid century walnut")],
+      ["a warm lamp", items(["lamp"], "warm")],
+      ["find me a black armchair", items(["chair"], "black")],
       // Names things, but plainly about the whole place.
       ["cozy, lots of plants", { type: "room", vibe: "cozy, lots of plants" }],
       ["make it cozy with a big rug", { type: "room", vibe: "cozy with a big rug" }],
@@ -518,10 +534,26 @@ describe("furnish text helpers", () => {
         { type: "room", vibe: "mid-century with plants" },
       ],
       ["a calm look with posters", { type: "room", vibe: "a calm look with posters" }],
+      // A style or colour word, or "lots of", is a look, whatever things it names.
+      [
+        "warm mid-century, lots of plants",
+        { type: "room", vibe: "warm mid-century, lots of plants" },
+      ],
+      [
+        "Furnish my room: warm mid-century, lots of plants, under $1,500",
+        { type: "room", vibe: "warm mid-century, lots of plants" },
+      ],
+      ["boho with plants", { type: "room", vibe: "boho with plants" }],
+      [
+        "scandinavian, plants everywhere",
+        { type: "room", vibe: "scandinavian, plants everywhere" },
+      ],
+      ["lots of plants", { type: "room", vibe: "lots of plants" }],
       // Names nothing.
       ["make it cozy and warm", { type: "room", vibe: "cozy and warm" }],
       ["make it cozy and warm, $1,500", { type: "room", vibe: "cozy and warm" }],
       ["mid-century, under $800", { type: "room", vibe: "mid-century" }],
+      ["Make it warm mid-century under $1,500", { type: "room", vibe: "warm mid-century" }],
       ["something to read by", { type: "room", vibe: "to read by" }],
       ["", { type: "room", vibe: "" }],
     ];

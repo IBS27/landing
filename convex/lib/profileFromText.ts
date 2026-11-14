@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { type Infer, v } from "convex/values";
 import { defineTask } from "../ai/agent";
 import {
   briefFactEntry,
@@ -33,9 +33,11 @@ import { hasProtected, REDACTED } from "./protectedText";
  * by words naming the activity, so who someone is can't stand in for it.
  *
  * Grounding: every quote must be copied from the text and an employer must be
- * named in it (`check`). Values are limited to the profile's own vocabularies
- * by the output schema. With AI off, or when the model can't give a valid
- * answer, the rules in `./profileText.ts` answer instead.
+ * named in it (`factProblem`). A fact that isn't is dropped on its own
+ * (`groundedFacts`); the answer is sent back only when none hold up. Values are
+ * limited to the profile's own vocabularies by the output schema. With AI off,
+ * or when the model can't give a valid answer, the rules in `./profileText.ts`
+ * answer instead.
  */
 
 export type ProfileTextInput = {
@@ -104,6 +106,68 @@ function loose(s: string) {
     .trim();
 }
 
+type Fact = Infer<typeof output>["facts"][number];
+
+/**
+ * Why one proposed fact isn't grounded in `input.text`, or null: its quote
+ * must be copied from the text without anything about who they are, and say
+ * this fact in context (`quoteProblem`); its value must be in range; an
+ * employer must be named as where they work or are joining (`employerProblem`).
+ */
+export function factProblem(f: Fact, input: ProfileTextInput): string | null {
+  const quote = loose(f.quote);
+  if (!quote) return "the quote is empty";
+  if (hasProtected(f.quote))
+    return "the quote includes something about who they are; quote only the words for this fact";
+  if (!loose(input.text).includes(quote))
+    return `the quote "${f.quote}" isn't copied exactly from the text`;
+  const problem = quoteProblem(input.text, f.entry, f.quote, f.carFree, input.today);
+  if (problem) return problem;
+  if (f.carFree !== undefined && f.entry.key !== "transport")
+    return "carFree only goes on the transport fact";
+  const e = f.entry;
+  switch (e.key) {
+    case "budget":
+      if (e.value.max < 300 || e.value.max > 20000)
+        return "budget max should be monthly rent in dollars (300–20000)";
+      if (e.value.min !== undefined && (e.value.min < 0 || e.value.min > e.value.max))
+        return "budget min should be between 0 and max";
+      return null;
+    case "moveIn": {
+      const problem = upcomingMoveInProblem(e.value, input.today);
+      return problem
+        ? `${problem} (month "YYYY-MM", date a real "YYYY-MM-DD" in it, not before ${input.today})`
+        : null;
+    }
+    case "transport":
+      if (e.value.modes.length === 0 && !f.carFree) return "transport needs at least one mode";
+      if (f.carFree && e.value.modes.includes("car")) return "carFree but modes include car";
+      return null;
+    case "employer":
+      if (hasProtected(e.value.name) || hasProtected(e.value.workArea ?? ""))
+        return "the employer says something about who they are";
+      return employerProblem(input.text, e.value);
+    default:
+      return null;
+  }
+}
+
+/**
+ * The facts the text supports, the first for each slot. One that isn't
+ * grounded (`factProblem`) is dropped on its own, so a single bad fact never
+ * costs the person the rest of Muse's answer; every fact kept still has its
+ * quote as evidence.
+ */
+export function groundedFacts<T extends Fact>(facts: T[], input: ProfileTextInput): T[] {
+  const seen = new Set<string>();
+  return facts.filter((f) => {
+    const slot = factSlot(f.entry);
+    if (seen.has(slot) || factProblem(f, input)) return false;
+    seen.add(slot);
+    return true;
+  });
+}
+
 /**
  * Muse's (or the rules') proposals as the person sees and saves them: each
  * quote cut down to the fact's own words (`narrowQuote`), so nothing else
@@ -126,63 +190,15 @@ export const profileFromText = defineTask({
   output,
   // The person's own words are the evidence (each fact's quote), not shared sources.
   cites: () => [],
+  // Ungrounded facts are dropped one by one (`groundedFacts`), not the whole answer.
+  // An answer is sent back only when it's too long or none of its facts hold up.
   check: (out, input: ProfileTextInput) => {
-    const problems: string[] = [];
-    const text = loose(input.text);
-    const seen = new Set<string>();
-    if (out.facts.length > MAX_FACTS) problems.push(`Propose at most ${MAX_FACTS} facts`);
-    out.facts.forEach((f, i) => {
-      const at = `facts[${i}]`;
-      const quote = loose(f.quote);
-      if (!quote) problems.push(`${at}.quote is empty`);
-      else if (hasProtected(f.quote))
-        problems.push(
-          `${at}.quote includes something about who they are; quote only the words for this fact`,
-        );
-      else if (!text.includes(quote))
-        problems.push(`${at}.quote "${f.quote}" isn't copied exactly from the text`);
-      else {
-        const problem = quoteProblem(input.text, f.entry, f.quote, f.carFree, input.today);
-        if (problem) problems.push(`${at}: ${problem}; drop it`);
-      }
-      const slot = factSlot(f.entry);
-      if (seen.has(slot)) problems.push(`${at}: more than one fact for ${slot}`);
-      seen.add(slot);
-      if (f.carFree !== undefined && f.entry.key !== "transport")
-        problems.push(`${at}: carFree only goes on the transport fact`);
-      const e = f.entry;
-      switch (e.key) {
-        case "budget":
-          if (e.value.max < 300 || e.value.max > 20000)
-            problems.push(`${at}: budget max should be monthly rent in dollars (300–20000)`);
-          if (e.value.min !== undefined && (e.value.min < 0 || e.value.min > e.value.max))
-            problems.push(`${at}: budget min should be between 0 and max`);
-          break;
-        case "moveIn": {
-          const problem = upcomingMoveInProblem(e.value, input.today);
-          if (problem)
-            problems.push(
-              `${at}: ${problem} (month "YYYY-MM", date a real "YYYY-MM-DD" in it, not before ${input.today})`,
-            );
-          break;
-        }
-        case "transport":
-          if (e.value.modes.length === 0 && !f.carFree)
-            problems.push(`${at}: transport needs at least one mode`);
-          if (f.carFree && e.value.modes.includes("car"))
-            problems.push(`${at}: carFree but modes include car`);
-          break;
-        case "employer": {
-          const problem = employerProblem(input.text, e.value);
-          if (problem || hasProtected(e.value.name) || hasProtected(e.value.workArea ?? ""))
-            problems.push(`${at}: ${problem ?? "the employer says something about who they are"}`);
-          break;
-        }
-        default:
-          break;
-      }
+    if (out.facts.length > MAX_FACTS) return [`Propose at most ${MAX_FACTS} facts`];
+    if (groundedFacts(out.facts, input).length > 0 || out.facts.length === 0) return [];
+    return out.facts.flatMap((f, i) => {
+      const problem = factProblem(f, input);
+      return problem ? [`facts[${i}]: ${problem}; fix it or drop it`] : [];
     });
-    return problems;
   },
   fallback: (input) => ({
     facts: extractFacts(input.text, input.today).map((p) => ({
@@ -196,5 +212,6 @@ export const profileFromText = defineTask({
   maxAttempts: 2,
   // 3: quotes must contain the fact's own words, which are all that's kept as evidence.
   // 4: only sentences with profile vocabulary reach the model; origin places, numeric dates (#77).
-  version: 4,
+  // 5: ungrounded facts are dropped one by one; wider employer phrasings ("Joining Meta").
+  version: 5,
 });

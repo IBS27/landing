@@ -2197,6 +2197,52 @@ describe("homeChatProblems", () => {
       "never that nothing is placed",
     );
   });
+  test("place_items places exact Marketplace items it read, each cited, never rentals", () => {
+    const model = { hasModel: true, ready: true, items: 2 };
+    const you = (apartment: HomeChatInput["you"]["apartment"]) => ({ ...input().you, apartment });
+    const place = (
+      listingIds: string[],
+      over: Partial<HomeChatInput> = {},
+      more: Partial<HomeChatOutput> = {},
+    ) =>
+      homeChatProblems(
+        {
+          ...ok,
+          text: "Adding the Walnut desk to your 3D model to review. Nothing is bought or sent.",
+          command: { kind: "place_items", listingIds: listingIds as never },
+          sourceIds: [ITEM.key],
+          ...more,
+        },
+        input({
+          message: "add the desk you found to my apartment",
+          map: { stage: "city", neighborhood: null, view: "apartment" },
+          you: you(model),
+          earlier: [ITEM],
+          recent: [{ who: "muse", text: "Here's a desk.", shown: [ITEM.key] }],
+          ...over,
+        }),
+      );
+    expect(place(["i1"])).toEqual([]);
+    expect(place(["i1"], { you: you(null) })[0]).toContain("no place to furnish");
+    expect(place(["i1"], { you: you({ ...model, hasModel: false }) })[0]).toContain(
+      "3D model isn't built yet",
+    );
+    expect(place([])[0]).toContain("command.listingIds");
+    expect(place(["i1", "i1"])[0]).toContain("command.listingIds");
+    // A rental is never furniture, and an id it didn't read is never placed.
+    expect(place(["l1"], {}, { sourceIds: [RENTAL.key] })[0]).toContain("command.listingIds");
+    expect(place(["nope"], {}, { sourceIds: [] })[0]).toContain("command.listingIds");
+    expect(place(["i1"], {}, { sourceIds: [] })).toContain(
+      "sourceIds: cite listing:i1, which the command places",
+    );
+    // Naming the item with "put the … in my apartment" is placing, not navigation.
+    expect(place(["i1"], { message: "Put the TV you found in my apartment" })).toEqual([]);
+    // Navigation is still navigation.
+    expect(place(["i1"], { message: "show my apartment" })[0]).toContain("asks for show_apartment");
+    expect(
+      place(["i1"], {}, { text: "Adding the Walnut desk. Nothing is bought or placed." })[0],
+    ).toContain("never that nothing is placed");
+  });
   test("B2: furnishing is rejected when the rules read the message as something else (#153)", () => {
     const you = { ...input().you, apartment: { hasModel: true, ready: true, items: 8 } };
     const problems = (message: string, command: HomeChatOutput["command"], view = "apartment") =>

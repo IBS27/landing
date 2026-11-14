@@ -123,7 +123,7 @@ test("adding Group plans preserves existing video post keys and random streams",
   const firstVideo = plan.posts.find((p) => p.key === "post-276");
   expect(firstVideo?.author).toBe("fogcityledger");
   expect(firstVideo?.row.media[0]?.url).toBe("/seed/videos/bay-bridge-wide.mp4");
-  expect(firstVideo?.reactions[0]?.user).toBe("nina.petrova");
+  expect(firstVideo?.reactions[0]?.user).toBe("mei.tanaka");
   expect(plan.posts.find((p) => p.key === "post-320")?.share).toBe("video-noodles-tall");
   expect(plan.posts.slice(-45).map((p) => p.key)).toEqual(activityPosts.map((p) => p.key!));
 });

@@ -42,7 +42,9 @@ import {
   neighborhoodLabel,
   todayInSF,
 } from "./lib/cityProfileFacts";
+import { viewerQuery } from "./lib/functions";
 import { FURNISH_LIMITS } from "./lib/furnish";
+import { distanceMeters } from "./lib/geo";
 import {
   addBillAction,
   addChoreAction,
@@ -215,6 +217,7 @@ function commandValidator<
       want: v.optional(v.string()),
       budget: v.optional(v.number()),
     }),
+    v.object({ kind: v.literal("place_items"), listingIds: v.array(listingId) }),
     v.object({ kind: v.literal("none") }),
   );
 }
@@ -639,7 +642,11 @@ export function homeChatProblems(
   const { command } = out;
   const cited = new Set([...out.sourceIds, ...out.show]);
   const listingIds = [...known.values()].filter(isRental).map((r) => r.id);
-  if (command.kind === "furnish" || command.kind === "add_items") {
+  if (
+    command.kind === "furnish" ||
+    command.kind === "add_items" ||
+    command.kind === "place_items"
+  ) {
     if (!input.you.apartment?.hasModel)
       problems.push(
         input.you.apartment
@@ -657,53 +664,67 @@ export function homeChatProblems(
     const shopping =
       (routed.kind === "open_page" && routed.page === "find") ||
       (routed.kind === "show_pins" && routed.layer === "items");
-    const explicit = command.kind === "add_items" && shopping && asksForItems(input.message);
+    const explicit = command.kind !== "furnish" && shopping && asksForItems(input.message);
     if (ruled !== "furnish" && ruled !== "add_items" && ruled !== "none" && !explicit)
       problems.push(
         `command: this message asks for ${ruled}, not for furnishing. Earlier turns are context, never a request to repeat: answer this message, with ${ruled}`,
       );
-    // A message that names things asks for those things, never for the whole room.
-    const request = furnishRequest(input.message);
-    if (request.type === "items") {
-      const named = request.kinds;
-      if (command.kind === "furnish")
+    if (command.kind === "place_items") {
+      // Exact Marketplace items it read for this reply ("add the TV you found"), each cited.
+      const itemIds = [...known.values()]
+        .filter((f) => f.kind === "listing" && f.type === "item")
+        .map((f) => (f as FactsOf<"listing">).id);
+      if (!validCommand(command, { neighborhoods: [], itemIds }))
         problems.push(
-          `command: the message names things to add (${named.join(", ")}): use add_items with those, never furnish`,
+          `command.listingIds: one to ${FURNISH_LIMITS.placeMax} different ids of Marketplace items you read (not rentals)`,
         );
-      else if (command.items.some((k) => !named.includes(k)))
-        problems.push(
-          `command.items: the message asks only for ${named.join(", ")}; add nothing else`,
-        );
-    }
-    if (command.kind === "furnish") {
-      const vibe = vibeProblem(command.vibe);
-      if (vibe) problems.push(`command.vibe: ${vibe}`);
-    } else problems.push(...addItemsProblems(command));
-    // Furnishing runs without another click, so the look is theirs alone: no word of it
-    // may come from a listing or anything else Muse read (#154).
-    const theirs = new Set(
-      plain(
-        [input.message, ...input.recent.filter((t) => t.who === "you").map((t) => t.text)].join(
-          " ",
-        ),
-      ).split(" "),
-    );
-    const look = command.kind === "furnish" ? command.vibe : (command.want ?? "");
-    if (
-      plain(look)
-        .split(" ")
-        .some((w) => w.length >= 3 && !GLUE.has(w) && !theirs.has(w))
-    )
-      problems.push(
-        `command.${command.kind === "furnish" ? "vibe" : "want"}: only words the person used`,
+      for (const id of command.listingIds)
+        if (!cited.has(`listing:${id}`))
+          problems.push(`sourceIds: cite listing:${id}, which the command places`);
+    } else {
+      // A message that names things asks for those things, never for the whole room.
+      const request = furnishRequest(input.message);
+      if (request.type === "items") {
+        const named = request.kinds;
+        if (command.kind === "furnish")
+          problems.push(
+            `command: the message names things to add (${named.join(", ")}): use add_items with those, never furnish`,
+          );
+        else if (command.items.some((k) => !named.includes(k)))
+          problems.push(
+            `command.items: the message asks only for ${named.join(", ")}; add nothing else`,
+          );
+      }
+      if (command.kind === "furnish") {
+        const vibe = vibeProblem(command.vibe);
+        if (vibe) problems.push(`command.vibe: ${vibe}`);
+      } else problems.push(...addItemsProblems(command));
+      // Furnishing runs without another click, so the look is theirs alone: no word of it
+      // may come from a listing or anything else Muse read (#154).
+      const theirs = new Set(
+        plain(
+          [input.message, ...input.recent.filter((t) => t.who === "you").map((t) => t.text)].join(
+            " ",
+          ),
+        ).split(" "),
       );
-    if (command.budget !== undefined) {
-      if (!validFurnishBudget(command.budget))
-        problems.push(`command.budget: whole dollars, 1 to ${FURNISH_BUDGET_MAX}`);
-      else if (!numbersIn(input.message).includes(command.budget))
+      const look = command.kind === "furnish" ? command.vibe : (command.want ?? "");
+      if (
+        plain(look)
+          .split(" ")
+          .some((w) => w.length >= 3 && !GLUE.has(w) && !theirs.has(w))
+      )
         problems.push(
-          "command.budget: only an amount the person wrote in this message, or leave it out",
+          `command.${command.kind === "furnish" ? "vibe" : "want"}: only words the person used`,
         );
+      if (command.budget !== undefined) {
+        if (!validFurnishBudget(command.budget))
+          problems.push(`command.budget: whole dollars, 1 to ${FURNISH_BUDGET_MAX}`);
+        else if (!numbersIn(input.message).includes(command.budget))
+          problems.push(
+            "command.budget: only an amount the person wrote in this message, or leave it out",
+          );
+      }
     }
     if (out.plan.budgetMax !== null)
       problems.push("plan.budgetMax: a furniture budget is not the rent budget; use null");
@@ -715,6 +736,7 @@ export function homeChatProblems(
   if (
     (command.kind === "furnish" ||
       command.kind === "add_items" ||
+      command.kind === "place_items" ||
       (input.you.apartment?.items ?? 0) > 0) &&
     deniesPlacing(text)
   )
@@ -898,6 +920,7 @@ command: one thing the page does now.
 - show_apartment: switch to the Apartment tab, for "show my apartment", "open my apartment", "see my place" or "my place in 3D". Only when you.apartment is not null.
 - furnish {vibe, budget?}: style or furnish the whole apartment with Marketplace items ("make it cozy and warm", "furnish it mid-century under $1,500"). vibe is the look they describe, using only words they wrote (under ${VIBE_MAX} characters). budget is what this message says they'd spend on furniture for the whole apartment, in whole dollars, only if this message gives an amount. Only when you.apartment.hasModel is true.
 - add_items {items, want?, budget?}: add the specific things the person names to the apartment, and nothing else ("add a reading lamp", "I need a desk and a chair", "a rug under $200"; "could use something to read by" is a lamp). items is one to ${FURNISH_LIMITS.onlyMax} different kinds from: ${ALL_ITEM_KINDS.join(", ")}. want is how they describe those things, using only words they wrote and without the thing itself ("reading", "mid-century walnut", under ${VIBE_MAX} characters); leave it out when they don't say. budget is the most this message says they'd spend on these things, in whole dollars, only if this message gives an amount. Only when you.apartment.hasModel is true.
+- place_items {listingIds}: put these exact Marketplace items in the apartment, for "add the TV you found", "put the second one in my place" or "add the sofa and table you showed". listingIds are the ids of one to ${FURNISH_LIMITS.placeMax} Marketplace items (not rentals) you read: an earlier reply's shown keys say which ones "the one you found" means. Cite each. Only when you.apartment.hasModel is true.
 - none: the reply and its cards are the answer. Things you show that have a location appear on the map by themselves.
 Use only slugs from input.neighborhoods. input.map says where the map is now; "here" means map.neighborhood. Prefer none over opening a page when you can answer here.
 
@@ -913,7 +936,7 @@ actions: things you line up for the person, at most ${CHAT_ACTIONS_MAX}. Each be
 - ask_roommate {key, text}: an intro to one of their roommate matches, in your words: one to three friendly sentences from what you read about what they share. No contact details.
 For anything else that needs a message, a post or a form (subletting, selling what they own, mover quotes, joining the crew, the City Profile brief), open the page where they do it. You never send, post, book, buy or change anything yourself.
 
-The move goes in steps: the person tells you their plan, you show rentals, they choose one, its 3D model is built, and then you furnish it. Furnishing is one of two requests, never both. Use furnish when they describe a look for their place or ask to furnish, decorate or style it. Use add_items when they name things to add to their place. A look that mentions things in passing ("cozy, lots of plants") is furnish; a thing with adjectives ("a cozy armchair") is add_items. When they want to browse, compare or pick things to buy themselves, use search_marketplace and show the items instead. If you.apartment is null they have no place yet: say they need to choose one first and use show_rentals. If you.apartment.hasModel is false the model is still being built: say so and use show_apartment. Never furnish or add items in either case. With furnish and add_items, Landing picks Marketplace items next and places them in the person's private 3D model for them to review: say that, and that nothing is bought or sent. Never say nothing is placed, and never that anything was bought, ordered or sent.
+The move goes in steps: the person tells you their plan, you show rentals, they choose one, its 3D model is built, and then you furnish it. Furnishing is one of two requests, never both. Use furnish when they describe a look for their place or ask to furnish, decorate or style it. Use add_items when they name things to add to their place, and place_items when they mean particular Marketplace items you read or showed, never add_items for those. A look that mentions things in passing ("cozy, lots of plants") is furnish; a thing with adjectives ("a cozy armchair") is add_items. When they want to browse, compare or pick things to buy themselves, use search_marketplace and show the items instead. If you.apartment is null they have no place yet: say they need to choose one first and use show_rentals. If you.apartment.hasModel is false the model is still being built: say so and use show_apartment. Never furnish or add items in either case. With furnish and add_items, Landing picks Marketplace items next and places them; with place_items, Landing places the ones you named. Either way they go in the person's private 3D model for them to review: say that, and that nothing is bought or sent. Never say nothing is placed, and never that anything was bought, ordered or sent.
 
 Answer this message, and only this message. Earlier turns are context for what "it", "there" or "the second one" means, never a request to repeat: never furnish or add items again because an earlier turn did. The Apartment tab showing (map.view is "apartment") doesn't make a message a furnishing request: "show my apartment", "open my apartment" and "see my place" are show_apartment, opening a page is open_page, and a question is none.
 
@@ -1487,3 +1510,109 @@ export async function answer(ctx: ActionCtx, a: ObjectType<typeof replyArgs>): P
   if (!ok) return rules("unsure");
   return finish(r.output, "muse");
 }
+
+/** A demo conversation resolved from current seed rows, imported once into browser chat history. */
+export const demoChat = viewerQuery({
+  args: {},
+  returns: v.union(
+    v.null(),
+    v.object({
+      id: v.string(),
+      title: v.string(),
+      updatedAt: v.number(),
+      messages: v.array(
+        v.object({
+          id: v.string(),
+          who: v.union(v.literal("me"), v.literal("muse")),
+          text: v.string(),
+          sources: v.optional(v.array(chatSource)),
+          rentals: v.optional(chatReply.fields.rentals),
+          via: v.optional(v.literal("landing")),
+        }),
+      ),
+    }),
+  ),
+  handler: async (ctx) => {
+    if (ctx.viewer.username !== "jordan.kim" || !ctx.viewer.isPersona) return null;
+    const listings = await ctx.db
+      .query("listings")
+      .withIndex("by_category", (q) => q.eq("category", "propertyrentals"))
+      .order("desc")
+      .take(200);
+    const available = listings.filter(
+      (l) =>
+        l.status === "active" &&
+        !l.hideFromFriends &&
+        l.price <= 2400 &&
+        l.rentalMedia &&
+        l.rental &&
+        l.location.lat !== undefined &&
+        l.location.lng !== undefined,
+    );
+    const best = available.find((l) => l.rental?.address === "1454 South Van Ness Avenue #1");
+    const events = await ctx.db
+      .query("events")
+      .withIndex("by_start", (q) => q.gte("startAt", Date.now()))
+      .take(200);
+    const climb = events.find(
+      (e) => e.title === "Mission Cliffs climbing partners" && e.privacy === "public",
+    );
+    if (!best || !climb?.point) return null;
+    const others = available
+      .filter((l) => l._id !== best._id && l.location.neighborhood === "Mission")
+      .slice(0, 2);
+    const options = [best, ...others];
+    const eventSource = { label: `${climb.title} · ${climb.venue}`, href: `/events/${climb._id}` };
+    const sourceFor = (l: Doc<"listings">) => ({
+      label: `${l.title} · $${l.price.toLocaleString("en-US")}/month`,
+      href: `/landing/find/listing/${l._id}`,
+    });
+    const cards = options.map((l, i) => {
+      const source = sourceFor(l);
+      const km = (
+        distanceMeters({ lat: l.location.lat!, lng: l.location.lng! }, climb.point!) / 1000
+      ).toFixed(1);
+      return {
+        id: l._id,
+        title: l.title,
+        price: l.price,
+        photo: l.photos[0] ?? null,
+        neighborhood: l.location.neighborhood ?? null,
+        availableFrom: l.rental?.availableFrom ? todayInSF(l.rental.availableFrom) : null,
+        reasons: [
+          {
+            text:
+              i === 0
+                ? `Best fit: $${2400 - l.price}/month below your $2,400 limit.`
+                : `Alternative: $${2400 - l.price}/month below your limit.`,
+            sources: [source],
+          },
+          {
+            text: `${km} km straight-line to the public climbing meetup at Mission Cliffs, where you can meet other climbers. Street routes will be longer.`,
+            sources: [source, eventSource],
+          },
+        ],
+      };
+    });
+    return {
+      id: `seed-jordan-rentals-${best._id}`,
+      title: "Find my SF place",
+      updatedAt: best.updatedAt,
+      messages: [
+        {
+          id: "jordan-request",
+          who: "me" as const,
+          text: "Help me find a place in SF. My rent budget is $2,400/month. I'm starting at Meta, love climbing, and want to meet people. I have no car, so I'll bike and take Muni.",
+        },
+        {
+          id: "jordan-options",
+          who: "muse" as const,
+          via: "landing" as const,
+          text: `My recommendation is ${best.title} at $${best.price.toLocaleString("en-US")}/month: it leaves $${2400 - best.price} of your rent budget and puts you near the public Mission Cliffs climbing meetup. The cards compare the real listing coordinates with the meetup location; distances are straight-line, not walking or cycling routes. Your Meta office isn't specified, so I haven't verified a Muni or bike commute. Choose the recommended place to review your move-in date and make it yours.`,
+          sources: [...options.map(sourceFor), eventSource],
+          rentals: cards,
+        },
+      ],
+    };
+  },
+});

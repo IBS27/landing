@@ -230,6 +230,12 @@ function world(
       invoke<number>(apartment.removeItem, ctx, { viewerId, unitId, itemId }),
     add: (listingId: string, unitId = "unit") =>
       invoke<string>(apartment.addItem, ctx, { viewerId, unitId, listingId }),
+    /** The exact listings a chat's `place_items` names. */
+    placeChosen: async (listingIds: string[]) => {
+      const r = await invoke<FurnishReply>(apartment.placeChosen, ctx, { viewerId, listingIds });
+      validate(apartment.furnishReply, r, { throw: true });
+      return r;
+    },
     /** `only`: the kinds an "add a lamp" request names (#153). */
     furnish: async (vibe: string, budget?: number, only?: PlacementKind[]) => {
       const r = await invoke<FurnishReply>(apartment.furnish, action, {
@@ -774,6 +780,14 @@ describe("furnish: what Muse reads", () => {
     });
     expect(c).toMatchObject({ unitId: "unit", limited: false, budget: null, spent: 0 });
   });
+  test("a look that names plants furnishes the whole apartment, not only plants", async () => {
+    const w = world();
+    // "Plants" here is part of the look: every kind is a candidate, and the look is kept.
+    const c = ready(await w.me.context("warm mid-century, lots of plants", 1500));
+    expect(c.input).toMatchObject({ vibe: "warm mid-century, lots of plants", asked: [] });
+    expect(ids(c.input)).toEqual(["sofa", "plant", "bed", "table", "rug", "lamp"]);
+    expect(c).toMatchObject({ vibe: "warm mid-century, lots of plants", cap: null });
+  });
   test("drops what is already placed and what the remaining budget can't buy", async () => {
     const w = world();
     w.placeRow({ id: "a", listingId: "sofa" as never, kind: "sofa", label: "Teak sofa" });
@@ -1123,6 +1137,42 @@ describe("apartment.furnish", () => {
     });
     expect(w.unit().placements.length).toBe(3);
     expect(w.unit()).toMatchObject({ revision: 1, furnishing: { vibe: "boho" } });
+  });
+});
+
+describe("apartment.placeChosen: the exact items the chat showed", () => {
+  const tv = listing("tv", 'LG 55" OLED TV (C1)', 500, { category: "electronics" });
+  test("places a TV as a TV, sized from its title, facing into the room", async () => {
+    const w = world({ more: { listings: [tv] } });
+    const r = await w.me.placeChosen(["tv"]);
+    expect(r.items).toMatchObject([{ listingId: "tv", kind: "tv", price: 500 }]);
+    expect(r.text).toBe(
+      'Added LG 55" OLED TV (C1) ($500) to your apartment to review. Nothing is bought or sent.',
+    );
+    expect(r).toMatchObject({ total: 500, spent: 500, budget: null, via: "muse" });
+    const placed = w.unit().placements[0];
+    expect(placed).toMatchObject({ kind: "tv", listingId: "tv", width: 1.22, height: 0.78 });
+    expect(placementProblems(READY, placed)).toEqual([]);
+  });
+  test("says what is already there or can't be placed, and places the rest", async () => {
+    const w = world({ more: { listings: [tv] } });
+    await w.me.placeChosen(["tv"]);
+    const r = await w.me.placeChosen(["tv", "sofa", "sold", "mine"]);
+    expect(r.items.map((i) => i.listingId)).toEqual(["sofa"]);
+    expect(r.text).toBe(
+      "Added Mid-century teak sofa ($400) to your apartment to review. Nothing is bought or sent. " +
+        "LG 55\" OLED TV (C1) is already in your apartment. 2 of them aren't available anymore.",
+    );
+    expect(w.unit().placements).toHaveLength(2);
+  });
+  test("needs a place and a built model, and one to four different listings", async () => {
+    expect((await world().as("u2").placeChosen(["sofa"])).text).toContain("Choose your place");
+    expect((await world({ scene: "none" }).me.placeChosen(["sofa"])).text).toContain(
+      "isn't ready yet",
+    );
+    const w = world();
+    await expect(w.me.placeChosen([])).rejects.toThrow("one to 4");
+    await expect(w.me.placeChosen(["sofa", "sofa"])).rejects.toThrow("one to 4");
   });
 });
 

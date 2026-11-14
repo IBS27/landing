@@ -2,6 +2,7 @@ import type { AiFallbackReason } from "../validators";
 import { FURNISH_LIMITS, ITEM_WORDS, kindsNamed } from "./furnish";
 import { hasProtected, REDACTED, redactProtected } from "./protectedText";
 import type { PlacementKind } from "./unitScene";
+import { COLORS, STYLES } from "./vibe";
 
 /**
  * What a Landing Home chat message says: the neighborhoods it names, the
@@ -233,17 +234,19 @@ const FURNISH_VERBS =
   / (furnish|furnishing|furnishings|decorate|decorating|redecorate|decor|aesthetic|interior design) /;
 const FURNISH_MOODS = / (vibe|vibes|cozy|cosy|style|styled|styling) /;
 const FURNISH_ITEMS =
-  / (furniture|couch|sofa|bed|bed frame|mattress|lamps?|rugs?|posters?|desk|chairs?|table|bookshelf|shelves|dresser|nightstand|curtains|mirror|plants?) /;
+  / (furniture|couch|sofa|bed|bed frame|mattress|lamps?|rugs?|posters?|desk|chairs?|table|bookshelf|shelves|dresser|nightstand|curtains|mirror|plants?|tvs?|television) /;
 const MY_PLACE =
   / (my|our|the) (place|apartment|apt|room|bedroom|living room|studio|unit|home|flat) /;
 /** Words that ask for a thing: "add a lamp", "I need a desk", "could use a rug". */
 const ADD_CUES =
-  / (add|adding|another|get me|i need|need (a|an|some)|want (a|an|some)|find me|buy|put (a|an|in|some)|place (a|an|some)|looking for|could use|missing) /;
+  / (add|adding|another|get me|i need|need (a|an|some)|want (a|an|some)|find me|buy|put (a|an|in|some|the|that|this)|place (a|an|some|the|that|this)|looking for|could use|missing) /;
 
 /**
  * Whether a message asks to furnish or style the person's apartment. "Furnish"
- * and "decorate" always do. A mood ("cozy", "vibe", "style") does unless the
- * message is a rental search or about a neighborhood. A piece of furniture,
+ * and "decorate" always do. A mood ("cozy", "vibe", "style"), or a style or
+ * colour with things or the whole place ("boho with plants", "make it warm
+ * mid-century"), does unless the message is a rental search or about a
+ * neighborhood. A piece of furniture,
  * or asking for any kind of thing by name, does only for their own place, or
  * on the Apartment tab.
  */
@@ -254,7 +257,12 @@ export function furnishAsk(
   const t = words(message);
   if (FURNISH_VERBS.test(t)) return true;
   const mine = about.view === "apartment" || MY_PLACE.test(t);
-  if (FURNISH_MOODS.test(t))
+  // A look for the place: a mood alone ("cozy"), or a style or colour with things
+  // or the whole place ("boho with plants", "make it warm mid-century").
+  if (
+    FURNISH_MOODS.test(t) ||
+    (saysPlaceLook(message) && (FURNISH_ITEMS.test(t) || PLACE_CUES.test(t)))
+  )
     return (
       mine ||
       (!RENTAL_WORDS.test(t) && findNeighborhoods(message, about.neighborhoods ?? []).length === 0)
@@ -267,20 +275,52 @@ export function furnishAsk(
 
 /* ── A look for the whole place, or named things to add (#153) ── */
 
-/** Words about the whole place, beyond `FURNISH_VERBS` and `FURNISH_MOODS`. */
-const ROOM_CUES = / (make it|make (my|our|the|this) \w+|feel|feels|look) /;
+/** Words that ask for a whole place ("make it", "lots of plants"), not a thing to add. */
+const PLACE_CUES =
+  / (make it|make (my|our|the|this) \w+|lots of|plenty of|full of|filled with|tons of|loads of|everywhere|all over|throughout) /;
+
+/** Words about the whole place, beyond `FURNISH_VERBS` and a look: also "feel" and "look". */
+const ROOM_CUES = new RegExp(`${PLACE_CUES.source}| (feel|feels|look) `);
+
+const escapeRe = (w: string) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /**
- * A mood word inside a named thing's own phrase ("a cozy armchair", "cozy
- * reading lamp") describes the thing, not the place. A comma or a joining word
- * breaks the phrase: "cozy, lots of plants" and "cozy with plants" are a look.
+ * Words for a look: moods plus every style and colour in `vibe.ts`
+ * ("mid-century", "boho", "walnut", "warm"), normalized like `words`, longest
+ * first. A word that names a thing (plant, bookshelf, futon) is a thing.
  */
-const ITEM_MOOD = new RegExp(
-  `\\b(?:vibes?|cozy|cosy|style|styled|styling)\\s+(?:(?!(?:with|and|or|plus|lots|of|some|a|an|the)\\b)[a-z-]+\\s+){0,2}(?:${ITEM_WORDS.map(
-    (w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-  ).join("|")})(?:e?s)?\\b`,
-  "gi",
+const LOOK_WORDS = [
+  ...new Set(
+    [
+      ...["vibe", "vibes", "cozy", "cosy", "style", "styled", "styling"],
+      ...["warm", "calm", "bright", "airy"],
+      ...STYLES.flatMap((s) => [s.label, ...s.words]),
+      ...COLORS.map((c) => c.label),
+    ]
+      .map((w) => words(w).trim())
+      .filter((w) => w && kindsNamed(w).kinds.length === 0),
+  ),
+]
+  .sort((a, b) => b.length - a.length)
+  .map(escapeRe);
+const LOOK = new RegExp(` (${LOOK_WORDS.join("|")}) `);
+
+/**
+ * A look word inside a named thing's own phrase ("a cozy armchair", "warm
+ * mid-century walnut desk") describes the thing, not the place. A comma or a
+ * joining word breaks the phrase: "cozy, lots of plants" and "boho with
+ * plants" are a look. Matched on lowercase text with hyphens as spaces.
+ */
+const ITEM_LOOK = new RegExp(
+  `\\b(?:${LOOK_WORDS.join("|")})\\s+(?:(?!(?:with|and|or|plus|lots|of|some|a|an|the|in|for)\\b)[a-z]+\\s+){0,3}(?:${ITEM_WORDS.map(escapeRe).join("|")})(?:e?s)?\\b`,
+  "g",
 );
+
+/** Whether text describes a look for the place, outside any named thing's own phrase. */
+function saysPlaceLook(text: string): boolean {
+  const flat = text.toLowerCase().replace(/[’']/g, "").replace(/-/g, " ");
+  return LOOK.test(words(flat.replace(ITEM_LOOK, " ")));
+}
 
 /** Whether a message asks, with an add cue, for things it names ("find me a reading lamp"). */
 export function asksForItems(text: string): boolean {
@@ -297,18 +337,17 @@ export type FurnishRequest =
  * What a furnishing message asks for. Naming things ("add a reading lamp", "a
  * rug under $200") asks for those things, at most `FURNISH_LIMITS.onlyMax`
  * kinds, unless the message is plainly about the whole place and has no add
- * cue ("cozy, lots of plants", "make it cozy with a big rug"). An adjective
- * never turns a list of things into a look: "add a cozy armchair" is a chair.
+ * cue ("warm mid-century, lots of plants", "boho with plants", "make it cozy
+ * with a big rug"). A look word in a thing's own phrase describes the thing
+ * ("a mid-century armchair"), and an add cue always wins: "add a cozy
+ * armchair" is a chair, "add lots of plants" is plants.
  */
 export function furnishRequest(text: string): FurnishRequest {
   const { kinds, want } = kindsNamed(text);
   const t = words(text);
   const room =
     !kinds.length ||
-    (!ADD_CUES.test(t) &&
-      (FURNISH_VERBS.test(t) ||
-        ROOM_CUES.test(t) ||
-        FURNISH_MOODS.test(words(text.replace(ITEM_MOOD, " ")))));
+    (!ADD_CUES.test(t) && (FURNISH_VERBS.test(t) || ROOM_CUES.test(t) || saysPlaceLook(text)));
   return room
     ? { type: "room", vibe: vibeWords(text) }
     : { type: "items", kinds: kinds.slice(0, FURNISH_LIMITS.onlyMax), want };

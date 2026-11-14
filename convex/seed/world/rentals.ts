@@ -14,7 +14,7 @@ const identities = [
     seller: "derek.holloway",
     unit: "1454-south-van-ness-avenue-1-1",
     listingType: "rent",
-    privateRoom: false,
+    privateRoom: true,
   },
   {
     key: "derek-elmwood-studio",
@@ -446,7 +446,7 @@ export const rentals: readonly ListingSeed[] = identities.map((identity, i) => {
   return {
     key: identity.key,
     seller: identity.seller as Username,
-    title: `${identity.privateRoom ? `Private room in a ${name} apartment` : name} · ${unit.address}`,
+    title: `${identity.key === "derek-mission-1br" ? "Private bedroom" : identity.privateRoom ? `Private room in a ${name} apartment` : name} · ${unit.address}`,
     price,
     category: identity.listingType === "sale" ? "homesales" : "propertyrentals",
     description: `${identity.privateRoom ? "Demo private-room offer. The photos and plan cover the whole apartment; confirm which bedroom is offered before arranging a tour. " : ""}Demo listing using a real San Francisco unit at ${unit.address}. The room photos and published floor plan all describe this unit. ${unit.bedrooms ? `${unit.bedrooms} bedrooms` : "Studio"}, ${unit.bathrooms} bathroom${unit.bathrooms === 1 ? "" : "s"}, approximately ${unit.sqft} sq ft.

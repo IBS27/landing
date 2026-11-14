@@ -170,6 +170,16 @@ describe("a studio", () => {
     expect(Math.hypot(chair.x - desk.x, chair.z - desk.z)).toBeLessThan(1);
     expect(Math.cos(chair.rotation - desk.rotation)).toBeCloseTo(-1);
   });
+  test("the TV backs onto a wall, facing the sofa", () => {
+    const sofa = kind(out, "sofa"),
+      tv = kind(out, "tv");
+    const to = { x: sofa.x - tv.x, z: sofa.z - tv.z };
+    const far = Math.hypot(to.x, to.z);
+    const f = front(tv),
+      s = front(sofa);
+    expect((f.x * to.x + f.z * to.z) / far).toBeGreaterThan(0.9);
+    expect(-(s.x * to.x + s.z * to.z) / far).toBeGreaterThan(0.9);
+  });
   test("lamps and plants go to corners", () => {
     for (const k of ["lamp", "plant"] as const) {
       const p = kind(out, k);

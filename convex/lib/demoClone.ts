@@ -23,7 +23,9 @@ import { roommateLifestyles } from "../seed/world/roommateLifestyles";
  * - Her friends, as one-way friendships from the clone to the seeded people
  *   Sofia is friends with: the clone sees them, they never see the clone.
  * - Plain membership of the Groups she belongs to in the seed (never her
- *   moderator role).
+ *   moderator role). Like everything a guest does, it's private to them:
+ *   it isn't counted in `memberCount`, and nobody else sees the guest listed
+ *   (`hiddenFrom` in `lib/users.ts`).
  *
  * Never copied: chats, drafts, negotiations, proposals, places, rooms, unit
  * scenes, owned items, saved items, RSVPs, posts, activity signals or vouches.
@@ -137,7 +139,6 @@ export async function cloneTemplate(ctx: MutationCtx, now: number): Promise<Id<"
       role: "member",
       joinedAt: now,
     });
-    await ctx.db.patch(group._id, { memberCount: group.memberCount + 1 });
   }
   return userId;
 }

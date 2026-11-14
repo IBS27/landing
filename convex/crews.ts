@@ -101,6 +101,7 @@ export const optIn = viewerMutation({
         updatedAt: now,
         ...(ctx.viewer.isDemo && { demo: true }),
       });
+    await proposeCrewGroupFromTemplate(ctx, ctx.viewer._id);
   },
 });
 
@@ -192,6 +193,35 @@ export const seedDemo = internalMutation({
       .withIndex("by_username", (q) => q.eq("username", "maya.chen"))
       .unique();
     if (maya) await proposeCrewGroupFromTemplate(ctx, maya._id);
+    // Later Jordan already approved his crew Group (seeded in `world/groups.ts`).
+    const jordan = await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) => q.eq("username", "jordan.kim.later"))
+      .unique();
+    const group = await ctx.db
+      .query("groups")
+      .withIndex("by_slug", (q) => q.eq("slug", "jordan-move-in-crew"))
+      .unique();
+    if (jordan && group) {
+      const at = now - 18 * 86_400_000;
+      await ctx.db.insert("proposals", {
+        ownerId: jordan._id,
+        payload: {
+          kind: "group",
+          name: group.name,
+          description: group.description ?? "",
+          privacy: "private",
+          inviteIds: [],
+        },
+        rationale: "Dev and Priya are new to the Mission like you, and all three of you climb.",
+        origin: { agent: "muse", task: GROUP_TASK, via: "fallback" },
+        status: "approved",
+        result: { kind: "group", groupId: group._id },
+        createdAt: at,
+        updatedAt: at,
+        decidedAt: at,
+      });
+    }
   },
 });
 
@@ -436,6 +466,9 @@ export const proposeMeetup = action({
 
 /** The crew Group proposal the templates write (AI off): used by the seed. */
 async function proposeCrewGroupFromTemplate(ctx: MutationCtx, ownerId: Id<"users">) {
+  const state = await crewGroupState(ctx, ownerId);
+  if (state.group || (state.groupProposal && OPEN.includes(state.groupProposal.status))) return;
+  if ((await crewGroupsFromCrew(ctx, ownerId)).length > 0) return;
   const c = await crewContext(ctx, ownerId, { eventsOnly: false });
   const pick = c ? pickMeetup(c.input.meetupOptions) : null;
   const source = pick && c?.sources.find((s) => sourceKey(s) === pick.source);

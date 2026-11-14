@@ -16,6 +16,8 @@ export const FURNISH_LIMITS = {
   picksMax: 8,
   /** Kinds one "add a lamp and a rug" request may name (#153). */
   onlyMax: 4,
+  /** Exact Marketplace listings one "add the TV you found" request may place. */
+  placeMax: 4,
   textMax: 400,
   reasonMax: 160,
   candidatesMax: 40,
@@ -124,6 +126,7 @@ const KIND_RULES: readonly { words: string[]; kind: PlacementKind; size?: Size }
     size: size(0.5, 0.45, 0.55),
   },
   { words: ["dining table", "kitchen table"], kind: "table", size: size(1.5, 0.9, 0.75) },
+  { words: ["bean bag", "beanbag"], kind: "chair", size: size(0.9, 0.9, 0.7) },
   {
     words: ["armchair", "arm chair", "accent chair", "lounge chair", "recliner", "peacock chair"],
     kind: "chair",
@@ -136,6 +139,13 @@ const KIND_RULES: readonly { words: string[]; kind: PlacementKind; size?: Size }
     kind: "storage",
     size: size(1.6, 0.45, 0.65),
   },
+  // Streaming boxes and sticks are small things, not TVs.
+  {
+    words: ["apple tv", "fire tv", "tv stick", "roku", "chromecast"],
+    kind: "decor",
+    size: size(0.1, 0.1, 0.04),
+  },
+  { words: ["television", "tv"], kind: "tv" },
   {
     words: ["bookcase", "bookshelf", "bookshelves", "shelf", "shelves", "shelving"],
     kind: "storage",
@@ -204,6 +214,15 @@ export function sizeOf(kind: PlacementKind, l: { title: string; category: string
           ? 1
           : 1.4;
     return size(width, 2.05, 0.9);
+  }
+  if (kind === "tv") {
+    // A 16:9 panel from the title's diagonal ('55"', "65 in"), standing on its own stand.
+    const inches = Number(/\b(\d{2,3})\s*(?:"|''|-?\s*in\b|-?\s*inch)/i.exec(l.title)?.[1]);
+    if (inches >= 19 && inches <= 100) {
+      const diagonal = inches * 0.0254;
+      const round = (n: number) => Math.round(n * 100) / 100;
+      return size(round(diagonal * 0.872), 0.25, round(diagonal * 0.49 + 0.1));
+    }
   }
   return rule?.kind === kind && rule.size ? { ...rule.size } : itemSize(kind);
 }
@@ -294,6 +313,11 @@ const KIND_RANGE: Record<PlacementKind, readonly [number, number][]> = {
     [0.05, 1.2],
     [0.05, 1.8],
   ],
+  tv: [
+    [0.4, 2.5],
+    [0.03, 0.5],
+    [0.25, 1.6],
+  ],
 };
 
 /** Why these dimensions can't be this kind of item, or null. */
@@ -364,6 +388,7 @@ const KIND_NOUN: Record<PlacementKind, string> = {
   art: "art",
   plant: "a plant",
   decor: "decor",
+  tv: "a TV",
 };
 
 /** "a desk, a chair and a lamp" (or "desk, chair or lamp" with `or`). */

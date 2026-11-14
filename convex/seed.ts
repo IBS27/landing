@@ -904,9 +904,12 @@ export const stats = internalQuery({
         "reaction",
       );
     }
+    // Guests (`lib/demoClone.ts`) have one-way friendships and uncounted Group memberships.
+    const guests = new Set<string>(users.filter((u) => u.isDemo).map((u) => u._id));
     const pairs = new Set(friendships.map((f) => `${f.userId}|${f.friendId}`));
     for (const f of friendships) {
-      if (!pairs.has(`${f.friendId}|${f.userId}`)) problems.push(`one-way friendship ${f._id}`);
+      if (!guests.has(f.userId) && !pairs.has(`${f.friendId}|${f.userId}`))
+        problems.push(`one-way friendship ${f._id}`);
       ref("users", f.userId, "friendship");
       ref("users", f.friendId, "friendship");
     }
@@ -915,9 +918,12 @@ export const stats = internalQuery({
       ref("users", q.toId, "friendRequest");
       if (pairs.has(`${q.fromId}|${q.toId}`)) problems.push(`request between friends ${q._id}`);
     }
-    const membersByGroup = tally(groupMembers.map((m) => m.groupId));
+    const membersByGroup = tally(
+      groupMembers.filter((m) => !guests.has(m.userId)).map((m) => m.groupId),
+    );
     for (const g of groups) {
       ref("users", g.createdBy, `group ${g.slug}`);
+      if (guests.has(g.createdBy)) continue;
       if (g.memberCount !== g.externalMemberCount + (membersByGroup.get(g._id) ?? 0)) {
         problems.push(`group ${g.slug} memberCount`);
       }
@@ -970,7 +976,8 @@ export const stats = internalQuery({
       ref("listings", c.listingId, w);
       for (const u of c.memberIds) ref("users", u, w);
       const ms = (messagesByConv.get(c._id) ?? []).sort((a, b) => a.createdAt - b.createdAt);
-      const last = ms[ms.length - 1];
+      // Approval drafts are stored messages but deliberately do not bump Messenger.
+      const last = ms.filter((m) => m.status === "sent").at(-1);
       if (!last || c.lastMessageId !== last._id || c.lastMessageAt !== last.createdAt) {
         problems.push(`${w} lastMessage mismatch`);
       }

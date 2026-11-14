@@ -23,7 +23,7 @@ export function TellUsBox({ onAdd }: { onAdd: (picked: Proposal[]) => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [proposals, setProposals] = useState<Proposal[] | null>(null);
-  const [via, setVia] = useState<Suggestions["via"] | null>(null);
+  const [source, setSource] = useState<Pick<Suggestions, "via" | "fallbackReason"> | null>(null);
   const [picked, setPicked] = useState<Set<string>>(new Set());
 
   async function run() {
@@ -33,7 +33,7 @@ export function TellUsBox({ onAdd }: { onAdd: (picked: Proposal[]) => void }) {
       if (!viewerId) return;
       const res = await suggest({ viewerId, text });
       setProposals(res.proposals);
-      setVia(res.via);
+      setSource({ via: res.via, fallbackReason: res.fallbackReason });
       setPicked(new Set(res.proposals.map((p) => factSlot(p.entry))));
     } catch (e) {
       setError(errorText(e));
@@ -91,9 +91,11 @@ export function TellUsBox({ onAdd }: { onAdd: (picked: Proposal[]) => void }) {
                 Here's what Muse picked up. Untick anything that's wrong.
               </p>
               <p className="mt-0.5 mb-2 text-[13px] text-secondary leading-4">
-                {via === "fallback"
-                  ? "Muse's AI is off right now, so these come from simple keyword matching."
-                  : "Each one shows the words it came from."}
+                {source?.via !== "fallback"
+                  ? "Each one shows the words it came from."
+                  : source.fallbackReason === "disabled"
+                    ? "Muse's AI is off right now, so these come from simple keyword matching."
+                    : "Muse couldn't confirm its suggestions this time, so these come from keyword matching."}
               </p>
               <ul className="flex flex-col gap-1">
                 {proposals.map((p) => {
